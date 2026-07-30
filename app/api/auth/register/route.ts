@@ -7,11 +7,20 @@ import { apiError, handleApiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, registerBodySchema } from '@/lib/api-schemas';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { USER_ROLE, users } from '@/lib/db/schema';
+import { attachPlatformHeaders } from '@/lib/platform-contract';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 
 const SALT_ROUNDS = 10;
+const ADMIN_EMAIL = process.env.PLEXON_ADMIN_EMAIL?.trim().toLowerCase();
+
+function pgErrorParts(e: unknown): { code: string | null; detail: string } {
+  const err = e as { code?: string; message?: string; cause?: { code?: string; message?: string } };
+  const code = err.cause?.code ?? err.code ?? null;
+  const detail = (err.cause?.message ?? err.message ?? String(e)).slice(0, 400);
+  return { code, detail };
+}
 
 export async function POST(request: Request) {
   if (!process.env.DATABASE_URL) {
@@ -24,6 +33,8 @@ export async function POST(request: Request) {
     const email = parsed.email.trim().toLowerCase();
     const password = parsed.password;
     const name = parsed.name?.trim() ?? null;
+    const role =
+      ADMIN_EMAIL && email === ADMIN_EMAIL ? USER_ROLE.ADMIN : USER_ROLE.USER;
 
     const db = getDb();
     const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
@@ -38,18 +49,32 @@ export async function POST(request: Request) {
       email,
       passwordHash,
       name: name || null,
+      role,
     });
 
-    return NextResponse.json({ success: true, userId: id });
+    return attachPlatformHeaders(NextResponse.json({ success: true, userId: id }));
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    if (/relation .* does not exist/i.test(msg) || /42P01/.test(msg)) {
-      console.error('[PLEXON] Register failed: schema missing — run drizzle-kit push', e);
-      return apiError(
-        'Database schema not ready (users table missing). Redeploy after drizzle-kit push succeeds.',
-        API_STATUS.UNAVAILABLE,
+    const { code, detail } = pgErrorParts(e);
+    console.error('[PLEXON] Register failed', { code, detail });
+    if (/relation .* does not exist/i.test(detail) || code === '42P01') {
+      return attachPlatformHeaders(
+        NextResponse.json(
+          {
+            error:
+              'Database schema not ready (users table missing). Redeploy after drizzle-kit push succeeds.',
+            code,
+            detail,
+          },
+          { status: API_STATUS.UNAVAILABLE },
+        ),
       );
     }
-    return handleApiError(e, { context: 'Register failed', publicMessage: 'Registration failed.' });
+    // Surface PG code/detail so Coolify staging can be diagnosed without log access.
+    return attachPlatformHeaders(
+      NextResponse.json(
+        { error: 'Registration failed.', code, detail },
+        { status: API_STATUS.INTERNAL_ERROR },
+      ),
+    );
   }
 }
