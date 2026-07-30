@@ -4,7 +4,10 @@
 **Domain:** `https://plexon-v3.projects-a.plygrnd.tech`  
 **Companion:** `https://audion-v3.projects-a.plygrnd.tech`  
 **Full runbook:** `knowledge/coolify-v3-staging-runbook.md`  
-**Prod:** nicht anfassen — nur Project `msqdx-ecosystem-v3` / Env `staging`
+**Prod:** nicht anfassen — nur Project `msqdx-ecosystem-v3` / Env `staging`  
+**GitHub (v3):** `https://github.com/chbrdk/plexon-v3` — Coolify Source **nicht** `PLEXON`  
+**Switch-Checkliste:** `knowledge/coolify-switch-to-plexon-v3-repo.md`  
+**Smoke A6/A10:** `knowledge/federation-smoke-a6-a10.md`
 
 ---
 
@@ -13,8 +16,8 @@
 | Feld | Wert |
 |------|------|
 | Name | `plexon-v3` |
-| Repo | `PLEXON` |
-| Branch | `main` (oder euer v3-Track) |
+| Repo | **`plexon-v3`** (`chbrdk/plexon-v3`) — nicht Prod-`PLEXON` |
+| Branch | `main` |
 | Build Pack | **Dockerfile** |
 | Dockerfile location | `/Dockerfile` |
 | Port | `3000` |

@@ -65,7 +65,7 @@ Wenn Coolify bereits „ein Project mit zwei Environments“ bevorzugt: **nur da
 |------|----------|--------------|-------|
 | A1 | Coolify Project `msqdx-ecosystem-v3` + Env `staging` | — | ☐ |
 | A2 | PostgreSQL `plexon-v3-postgres` (eigene DB, eigener Volume) | A1 | ☐ |
-| A3 | Application `plexon-v3` (Dockerfile aus PLEXON-Repo) | A2 | ☐ |
+| A3 | Application `plexon-v3` (Dockerfile aus **`chbrdk/plexon-v3`**) | A2 | ☐ |
 | A4 | Domain + TLS → `URL_PLEXON_V3` | A3 | ☐ |
 | A5 | Env-Matrix plexon-v3 setzen + Redeploy | A3–A4 | ☐ |
 | A6 | Smoke plexon-v3 (`/api/health`, Login, Register) | A5 | ☐ |
@@ -129,7 +129,7 @@ Quelle: `PLEXON/.env.example` + `knowledge/coolify-env-variablen.md` (nur v3-rel
 
 ### 4.4 Build (Dockerfile)
 
-- Repo: `REPO_PLEXON`, Dockerfile root `Dockerfile`
+- Repo: `REPO_PLEXON_V3` = `chbrdk/plexon-v3` (Prod bleibt `chbrdk/PLEXON`), Dockerfile root `Dockerfile`
 - Port: **3000**
 - Build-Args bei Bedarf: `DESIGN_SYSTEM_REPO`, `DESIGN_SYSTEM_BRANCH` (wie Prod, aber unabhängig deployen)
 - Health: `GET {URL_PLEXON_V3}/api/health`

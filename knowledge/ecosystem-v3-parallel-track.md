@@ -17,7 +17,7 @@ v3 ist **eine Plattform-Generation**, nicht „nur eine App“.
 
 | Produkt | v2 / Prod (nicht anfassen) | v3-Spur | Stand 2026-07-30 |
 |---------|----------------------------|---------|------------------|
-| **PLEXON** | Coolify Prod Control Plane | `plexon-v3` (Staging zuerst) | Contract v3 + Registry-Einträge für v3-Surfaces |
+| **PLEXON** | Coolify Prod Control Plane (`chbrdk/PLEXON`) | Repo **`chbrdk/plexon-v3`** → Coolify App `plexon-v3` (Staging) | Contract v3 + eigene Domains/DB/Secrets |
 | **AUDION** | `AUDION-v2` Coolify | `audion-v3` Repo | Wave 1 Federation + Magazine UI |
 | **CHECKION** | `CHECKION` Coolify | `checkion-v3` (Repo oder Branch-Track) | noch Prod-v2; Federation heute v2-Contract |
 | **ECHON** | `msqdx-echon/v2` | `msqdx-echon/v3` | Codepfad existiert; Coolify-v3 separat |
@@ -62,7 +62,7 @@ Beide dürfen parallel existieren. Ein Product spricht **eine** Version gegen **
 
 ### Wave A — Insel stehen (Ops)
 1. Coolify Environment `msqdx-v3-staging` anlegen  
-2. `plexon-v3` deployen (eigene DB, eigene Domain)  
+2. `plexon-v3` deployen aus Repo **`chbrdk/plexon-v3`** (eigene DB, eigene Domain) — nicht aus Prod-`PLEXON`  
 3. `audion-v3` daran hängen (bereits Wave-1-fähig)  
 4. Smoke: Login, Profile, Project Origin, Usage-Event  
 
@@ -86,6 +86,9 @@ Beide dürfen parallel existieren. Ein Product spricht **eine** Version gegen **
 
 - **Coolify Runbook (Ops):** `knowledge/coolify-v3-staging-runbook.md` — Env-Matrix, Deploy-Order, Domains  
 - **plexon-v3 Env Cheat-Sheet:** `knowledge/coolify-plexon-v3-env-cheatsheet.md` — Copy-Paste für Coolify  
+- **Coolify Repo-Switch:** `knowledge/coolify-switch-to-plexon-v3-repo.md`  
+- **Smoke A6/A10:** `knowledge/federation-smoke-a6-a10.md`  
+- **Repo origin:** `knowledge/repo-origin.md`  
 - AUDION Trennung: `audion-v3/knowledge/v2-v3-runtime-separation.md`  
 - AUDION Federation: `audion-v3/knowledge/plexon-federation.md`  
 - AUDION Deploy URLs: `audion-v3/knowledge/deploy-urls.md`  
