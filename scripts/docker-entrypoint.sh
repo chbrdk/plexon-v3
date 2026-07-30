@@ -1,7 +1,15 @@
 #!/bin/sh
 set -e
 
+if [ -z "$AUTH_SECRET" ] || [ "${#AUTH_SECRET}" -lt 32 ]; then
+  echo "[PLEXON] AUTH_SECRET is missing or shorter than 32 chars (Runtime env). Refusing to start."
+  exit 1
+fi
+
 if [ -n "$DATABASE_URL" ]; then
+  echo "[PLEXON] Checking DATABASE_URL..."
+  node ./scripts/check-database-url.mjs
+
   echo "[PLEXON] Running drizzle-kit push..."
   if npx drizzle-kit push; then
     echo "[PLEXON] Schema up to date."

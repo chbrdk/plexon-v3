@@ -73,8 +73,9 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/drizzle.config.ts ./
 COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+COPY --from=builder /app/scripts/check-database-url.mjs ./scripts/check-database-url.mjs
 COPY --from=builder /app/scripts/migrate-checkion-users-to-plexon.mjs ./scripts/migrate-checkion-users-to-plexon.mjs
 COPY --from=builder /app/scripts/migrate-product-projects-to-msqdx-company.mjs ./scripts/migrate-product-projects-to-msqdx-company.mjs
-RUN chmod +x ./scripts/docker-entrypoint.sh
+RUN chmod +x ./scripts/docker-entrypoint.sh ./scripts/check-database-url.mjs
 
 CMD ["./scripts/docker-entrypoint.sh"]
