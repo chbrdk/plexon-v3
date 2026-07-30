@@ -3,7 +3,7 @@
 /* ------------------------------------------------------------------ */
 
 import { NextResponse } from 'next/server';
-import { apiError, handleApiError, API_STATUS } from '@/lib/api-error-handler';
+import { apiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, registerBodySchema } from '@/lib/api-schemas';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
