@@ -5,7 +5,7 @@ import type {
   PlatformProductId,
   PlatformRole,
 } from '@/lib/platform-entitlements';
-import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
+import { PLATFORM_ENTITLEMENT_STATUS } from './platform-entitlements';
 
 export const PLATFORM_PROVISIONING_DESIRED_STATE = {
   GRANTED: 'granted',

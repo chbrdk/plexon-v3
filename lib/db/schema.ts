@@ -7,17 +7,17 @@ import {
   PLATFORM_ENTITLEMENT_STATUS,
   PLATFORM_ROLE,
   type PlatformLaunchContext,
-} from '@/lib/platform-entitlements';
+} from '../platform-entitlements'
 import {
   COMPANY_USER_ROLE,
   PLATFORM_PROJECT_BINDING_SYNC_STATUS,
   PLATFORM_PROJECT_STATUS,
-} from '@/lib/platform-companies';
+} from '../platform-companies'
 import {
   PLATFORM_PROVISIONING_DESIRED_STATE,
   PLATFORM_PROJECT_ASSIGNMENT_ROLE,
   PLATFORM_PROVISIONING_SYNC_STATUS,
-} from '@/lib/platform-provisioning';
+} from '../platform-provisioning';
 
 /** Role: 'user' (default) or 'admin'. Admins can see all users' usage and manage roles. */
 export const USER_ROLE = { USER: 'user', ADMIN: 'admin' } as const;

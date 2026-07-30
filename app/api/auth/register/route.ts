@@ -42,6 +42,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, userId: id });
   } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/relation .* does not exist/i.test(msg) || /42P01/.test(msg)) {
+      console.error('[PLEXON] Register failed: schema missing — run drizzle-kit push', e);
+      return apiError(
+        'Database schema not ready (users table missing). Redeploy after drizzle-kit push succeeds.',
+        API_STATUS.UNAVAILABLE,
+      );
+    }
     return handleApiError(e, { context: 'Register failed', publicMessage: 'Registration failed.' });
   }
 }

@@ -6,7 +6,8 @@ if [ -n "$DATABASE_URL" ]; then
   if npx drizzle-kit push; then
     echo "[PLEXON] Schema up to date."
   else
-    echo "[PLEXON] drizzle-kit push failed (DB unreachable or schema error). App will start anyway."
+    echo "[PLEXON] drizzle-kit push failed (DB unreachable or schema error). Refusing to start."
+    exit 1
   fi
 else
   echo "[PLEXON] DATABASE_URL not set, skipping schema push."
