@@ -1,0 +1,363 @@
+/* MSQDX Design Token CSS variables – align with CHECKION/AUDION */
+:root {
+  --msqdx-radius-xs: 4px;
+  --msqdx-radius-sm: 8px;
+  --msqdx-radius-md: 20px;
+  --msqdx-radius-3xl: 24px;
+  --msqdx-radius-lg: 40px;
+  --msqdx-spacing-xxs: 4px;
+  --msqdx-spacing-xs: 8px;
+  --msqdx-spacing-sm: 12px;
+  --msqdx-spacing-md: 16px;
+  --msqdx-spacing-lg: 18px;
+  --msqdx-spacing-xl: 24px;
+  --msqdx-spacing-xxl: 32px;
+  --msqdx-font-size-sm: 0.875rem;
+  --msqdx-font-size-base: 1rem;
+  --msqdx-font-size-lg: 1.125rem;
+  --msqdx-transition: 0.3s ease;
+  --msqdx-transition-fast: 0.2s ease;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  --plexon-app-bg: #0f172a;
+  --color-primary-white: #fff;
+  --color-secondary-dx-yellow: #fef14d;
+  --color-secondary-dx-yellow-tint: #f3f0c8;
+  --color-secondary-dx-pink: #f256b6;
+  --color-secondary-dx-pink-tint: #f3d9e3;
+  --color-secondary-dx-pink-on-light: #d5108a;
+  --color-secondary-dx-orange: #ff6a3b;
+  --color-secondary-dx-orange-tint: #f8d5cb;
+  --color-secondary-dx-purple: #b638ff;
+  --color-secondary-dx-purple-tint: #eed9f9;
+  --color-secondary-dx-blue: #3b82f6;
+  --color-secondary-dx-blue-tint: #dbeafe;
+  --color-secondary-dx-green: #00ca55;
+  --color-secondary-dx-green-tint: #dff1e1;
+  --color-secondary-dx-grey-light: #d4d2d2;
+  --color-secondary-dx-grey-light-tint: rgba(212, 210, 210, 0.5);
+  --color-neutral: #0f0f0f;
+  --color-theme-accent: #b638ff;
+  --color-theme-accent-tint: rgba(182, 56, 255, 0.2);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #94a3b8;
+  --color-card-bg: var(--color-primary-white);
+  --color-bg-subtle: #f8f6f0;
+  --color-text-on-light: #0f172a;
+  --color-text-muted-on-light: #475569;
+  --font-ui-sans: 'Noto Sans JP', 'Noto Sans JP Fallback', system-ui, sans-serif;
+  --font-ui-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* AUDION v2 admin header (PlexonAppHeaderV2) */
+  --msqdx-admin-header-logo-inset: 230px;
+  --msqdx-admin-header-v2-card-min-height: 54px;
+  --msqdx-admin-header-v2-back-button-size: 55px;
+  --msqdx-admin-header-v2-card-action-size: 40px;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-neutral: #f8f6f0;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  background: var(--plexon-app-bg) !important;
+  background-color: var(--plexon-app-bg);
+  transition: background-color var(--msqdx-transition);
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  min-height: calc(100vh - 20px);
+  max-width: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  background-color: var(--plexon-app-bg) !important;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--msqdx-transition), color var(--msqdx-transition);
+}
+
+/* Prevent any layout wrapper from causing horizontal scroll */
+body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+main {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Content area (cards, inputs, tabs) */
+[data-plexon-content] .MuiOutlinedInput-root {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-on-light) !important;
+  border: 1px solid var(--color-secondary-dx-grey-light-tint) !important;
+}
+[data-plexon-content] .MuiOutlinedInput-root:hover {
+  border-color: var(--color-text-muted-on-light) !important;
+}
+[data-plexon-content] .MuiOutlinedInput-root.Mui-focused {
+  border-color: var(--color-theme-accent) !important;
+}
+[data-plexon-content] .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-secondary-dx-grey-light-tint) !important;
+}
+[data-plexon-content] .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-text-muted-on-light) !important;
+}
+[data-plexon-content] .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-theme-accent) !important;
+}
+[data-plexon-content] .MuiInputBase-input {
+  color: var(--color-text-on-light) !important;
+}
+[data-plexon-content] .MuiInputLabel-root,
+[data-plexon-content] .MuiFormLabel-root {
+  color: var(--color-input-label, var(--color-theme-accent)) !important;
+}
+[data-plexon-content] .MuiInputLabel-root.Mui-focused,
+[data-plexon-content] .MuiFormLabel-root.Mui-focused {
+  color: var(--color-theme-accent) !important;
+}
+[data-plexon-content] .MuiButton-root.MuiButton-contained:not(.MuiButton-colorError):not(.MuiButton-colorWarning) {
+  background-color: var(--color-theme-accent) !important;
+  color: var(--color-theme-accent-contrast, #000000) !important;
+}
+[data-plexon-content] .MuiButton-root.MuiButton-contained:not(.MuiButton-colorError):not(.MuiButton-colorWarning):hover {
+  filter: brightness(1.05);
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiButton-outlined:not(.MuiButton-colorError):not(.MuiButton-colorWarning),
+[data-plexon-event-quick-check] .MuiButton-outlined:not(.MuiButton-colorError):not(.MuiButton-colorWarning) {
+  border-color: var(--color-theme-accent) !important;
+  color: var(--color-theme-accent) !important;
+  background-color: var(--color-card-bg) !important;
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiButton-outlined:not(.MuiButton-colorError):not(.MuiButton-colorWarning):hover,
+[data-plexon-event-quick-check] .MuiButton-outlined:not(.MuiButton-colorError):not(.MuiButton-colorWarning):hover {
+  border-color: var(--color-theme-accent) !important;
+  background-color: var(--color-theme-accent-tint) !important;
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiButton-text:not(.MuiButton-colorError):not(.MuiButton-colorWarning),
+[data-plexon-event-quick-check] .MuiButton-text:not(.MuiButton-colorError):not(.MuiButton-colorWarning) {
+  color: var(--color-theme-accent) !important;
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiButton-text:not(.MuiButton-colorError):not(.MuiButton-colorWarning):hover,
+[data-plexon-event-quick-check] .MuiButton-text:not(.MuiButton-colorError):not(.MuiButton-colorWarning):hover {
+  background-color: var(--color-theme-accent-tint) !important;
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiChip-outlined,
+[data-plexon-event-quick-check] .MuiChip-outlined {
+  border-color: var(--color-secondary-dx-grey-light-tint) !important;
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-event-quick-check-dashboard] .MuiChip-label,
+[data-plexon-event-quick-check] .MuiChip-label {
+  color: var(--color-text-on-light) !important;
+}
+
+/* MsqdxCard / GlassCard: dark MUI theme must not paint surfaces black inside content */
+[data-plexon-content] [data-msqdx-surface='light'],
+[data-plexon-assistant-chat] [data-msqdx-surface='light'] {
+  background-color: var(--color-bg-subtle) !important;
+  color: var(--color-text-on-light);
+}
+
+[data-plexon-content] [data-msqdx-surface='light']:hover,
+[data-plexon-assistant-chat] [data-msqdx-surface='light']:hover {
+  background-color: var(--color-bg-subtle) !important;
+}
+
+[data-plexon-assistant-chat] {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-on-light);
+}
+
+[data-plexon-assistant-chat] .msqdx-corner-tab-card__body {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-on-light);
+}
+
+[data-plexon-assistant-chat] .MuiOutlinedInput-root {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-assistant-chat] .MuiSelect-select {
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-assistant-chat] .msqdx-input-wrapper {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-plexon-assistant-chat] .MuiChip-root {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-assistant-chat] .MuiChip-outlined {
+  border-color: var(--color-theme-accent) !important;
+}
+
+[data-plexon-assistant-chat] .MuiChip-label {
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-assistant-prompts] .MuiButton-outlined,
+[data-plexon-assistant-chat] .MuiButton-outlined.MuiButton-sizeSmall {
+  border-color: var(--color-theme-accent) !important;
+  color: var(--color-text-on-light) !important;
+  background-color: var(--color-card-bg) !important;
+}
+
+[data-plexon-assistant-prompts] .MuiButton-outlined:hover,
+[data-plexon-assistant-chat] .MuiButton-outlined.MuiButton-sizeSmall:hover {
+  border-color: var(--color-theme-accent) !important;
+  background-color: var(--color-theme-accent-tint) !important;
+}
+
+[data-plexon-assistant-ui] .MuiIconButton-root,
+[data-plexon-assistant-chat] .MuiIconButton-root {
+  color: var(--color-theme-accent) !important;
+}
+
+[data-plexon-assistant-ui] .msqdx-material-symbol,
+[data-plexon-assistant-ui] .material-symbols-outlined,
+[data-plexon-assistant-chat] .msqdx-material-symbol,
+[data-plexon-assistant-chat] .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20 !important;
+  -webkit-font-feature-settings: 'liga' !important;
+  font-feature-settings: 'liga' !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+[data-plexon-assistant-ui] .MuiIconButton-root .msqdx-material-symbol,
+[data-plexon-assistant-ui] .MuiIconButton-root .material-symbols-outlined,
+[data-plexon-assistant-chat] .MuiIconButton-root .msqdx-material-symbol,
+[data-plexon-assistant-chat] .MuiIconButton-root .material-symbols-outlined {
+  margin-top: -1px;
+}
+
+[data-plexon-assistant-ui] .MuiDrawer-paper {
+  background-color: var(--color-bg-subtle) !important;
+  background-image: none !important;
+  color: var(--color-text-on-light);
+}
+
+[data-plexon-assistant-ui] .MuiBackdrop-root {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Generative UI: Noto Sans + mono, no blur/glass */
+[data-plexon-assistant-ui],
+[data-plexon-assistant-ui] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Workflow stepper: active label must stay black on off-white (overrides DS dark-theme stepper) */
+[data-plexon-assistant-ui] .MuiStepLabel-label.Mui-active,
+[data-plexon-assistant-chat] .MuiStepLabel-label.Mui-active {
+  color: var(--color-text-on-light) !important;
+}
+
+[data-plexon-assistant-ui] .MuiStepLabel-label.Mui-completed,
+[data-plexon-assistant-chat] .MuiStepLabel-label.Mui-completed {
+  color: var(--color-text-on-light) !important;
+}
+
+/* Board: React Flow – Pane und Nodes overflow visible, damit Toolbar/Ports nicht abgeschnitten werden */
+.react-flow__pane {
+  overflow: visible !important;
+}
+.react-flow__node {
+  overflow: visible !important;
+}
+.react-flow__node > div {
+  overflow: visible !important;
+}
+/* Force 32px on card: MUI theme uses shape.borderRadius 12, numbers become 12× (e.g. 12→144). Override all. */
+.react-flow__node.react-flow__node-promptCard,
+.react-flow__node.react-flow__node-promptCard > div,
+.react-flow__node.react-flow__node-promptCard .board-card-wrap,
+.react-flow__node.react-flow__node-promptCard .board-card-inner {
+  border-radius: 32px !important;
+}
+/* Inner content area only: flat corners so card’s 32px radius is not doubled (do not target .MuiBox-root – would affect toolbar) */
+.react-flow__node.react-flow__node-promptCard .board-card-content {
+  border-radius: 0 !important;
+}
+/* Radial toolbar buttons (Archive, Delete, etc.) must stay round */
+.react-flow__node [data-prismion-radial-button] {
+  border-radius: 50% !important;
+}
+/* Toolbar trigger wrapper: overflow visible so radial menu is not clipped */
+.react-flow__node [data-open="true"],
+.react-flow__node [data-open="false"] {
+  overflow: visible !important;
+}
+.react-flow__handle {
+  z-index: 10;
+  min-width: 24px;
+  min-height: 24px;
+  opacity: 1;
+}
+.react-flow__handle:hover {
+  opacity: 0.9;
+}

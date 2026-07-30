@@ -1,0 +1,58 @@
+{
+  "name": "plexon",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack --port 3334",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint .",
+    "db:push": "drizzle-kit push",
+    "migrate:checkion-users": "tsx scripts/migrate-checkion-users-to-plexon.ts",
+    "migrate:msqdx-projects": "node scripts/migrate-product-projects-to-msqdx-company.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate:exyte-discovery-pdf": "node scripts/generate-exyte-seo-discovery-pdf.mjs",
+    "generate:ecosystem-pptx": "node scripts/generate-plexon-ecosystem-pptx.mjs"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@msqdx/react": "file:../MSQDX-DS/msqdx-design-system/packages/react",
+    "@msqdx/tokens": "file:../MSQDX-DS/msqdx-design-system/packages/tokens",
+    "@mui/material": "^7.3.5",
+    "@react-pdf/renderer": "^4.5.1",
+    "@xyflow/react": "^12.10.1",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.1",
+    "isomorphic-dompurify": "^2.36.0",
+    "lucide-react": "^0.460.0",
+    "next": "16.1.6",
+    "next-auth": "^5.0.0-beta.30",
+    "nodemailer": "^7.0.13",
+    "pg": "^8.18.0",
+    "pptxgenjs": "^4.0.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.7.0",
+    "zod": "^3.24.0"
+  },
+  "overrides": {
+    "nodemailer": "^7.0.13"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.9",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "pdf-lib": "^1.17.1",
+    "tsx": "^4.19.2",
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
