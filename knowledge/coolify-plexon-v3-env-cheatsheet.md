@@ -56,7 +56,8 @@ Optional als Coolify **Environment Shared Variables** (`staging`):
 
 In Coolify → Application `plexon-v3` → Environment Variables (**Runtime**, nicht nur Build).
 
-`DATABASE_URL` aus der Coolify-Postgres-Resource übernehmen (Internal URL).
+`DATABASE_URL` aus der Coolify-Postgres-Resource übernehmen (**Internal URL**, Runtime).
+Host darf **nicht** `base` / `localhost` sein — siehe `knowledge/register-enotfound-base-2026-07-30.md`.
 
 ```bash
 # --- Pflicht ---
