@@ -10,7 +10,7 @@
 | Wave | Surface | Status |
 |------|---------|--------|
 | 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors` until waves clear shim gaps |
-| 1 | Dashboard `/` | pending — see `ui-migrate-dashboard.md` |
+| 1 | Dashboard `/` | done — `SectionChrome` + `@msqdx/ui` adapters; no `@mui`/`@msqdx/react` imports |
 | 2 | Settings `/settings` | pending — see `ui-migrate-settings.md` |
 | 3 | Products + Platform projects | catalog done; project detail pending |
 | 4 | Admin console | layout/subnav done; pages pending |

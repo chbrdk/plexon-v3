@@ -1,6 +1,6 @@
 # UI migrate — Dashboard
 
-**Status:** Draft — Wave 1  
+**Status:** Accepted — Wave 1 done — 2026-07-31  
 **Route:** `/`  
 **Implements:** `app/page.tsx` (+ any dashboard-only children extracted during cutover)  
 **Pattern:** magazine page like Products — `SectionChrome` + `Text` + `Panel` + `Button`/`Chip`/`StatLede`

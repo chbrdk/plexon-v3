@@ -1,13 +1,22 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Box, Stack } from '@mui/material';
+import type {
+  CSSProperties,
+  ReactNode,
+  ChangeEventHandler,
+  ButtonHTMLAttributes,
+  HTMLAttributes,
+} from 'react';
+import { Box, Stack } from '@/components/ui/layout';
 import {
-  MsqdxTypography,
-  MsqdxButton,
-  MsqdxCard,
-  MsqdxFormField,
-} from '@msqdx/react';
+  Button,
+  Field,
+  Input,
+  Panel,
+  SectionChrome,
+  Text,
+} from '@msqdx/ui';
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -57,6 +66,160 @@ const ENTITLEMENT_PROJECT_SELECT_STYLE = {
   background: 'var(--color-card-bg)',
   color: 'var(--color-text-on-light)',
 } as const;
+
+
+/** Temporary prop adapters for Wave 1 dashboard cutover — prefer plain Text/Button/Panel going forward. */
+function flattenSx(sx?: Record<string, unknown> | Array<unknown> | null): CSSProperties {
+  if (!sx) return {};
+  const parts = Array.isArray(sx) ? sx : [sx];
+  const out: Record<string, unknown> = {};
+  for (const part of parts) {
+    if (!part || typeof part !== 'object') continue;
+    for (const [k, v] of Object.entries(part as Record<string, unknown>)) {
+      if (v == null || k.startsWith('&') || k.startsWith('@')) continue;
+      if (typeof v === 'object' && !Array.isArray(v)) {
+        const r = v as Record<string, unknown>;
+        out[k] = r.sm ?? r.md ?? r.xs ?? r.lg ?? v;
+        continue;
+      }
+      out[k] = v;
+    }
+  }
+  return out as CSSProperties;
+}
+
+function DashText({
+  variant = 'body1',
+  weight,
+  color,
+  sx,
+  style,
+  children,
+  ...rest
+}: {
+  variant?: string
+  weight?: string
+  color?: string
+  sx?: Record<string, unknown>
+  style?: CSSProperties
+  children?: ReactNode
+} & Record<string, unknown>) {
+  const role =
+    variant === 'h4' || variant === 'h5' || variant === 'h6' || variant === 'subtitle1' || variant === 'subtitle2'
+      ? 'title'
+      : variant === 'caption' || variant === 'body2'
+        ? 'meta'
+        : 'body';
+  const muted = color === 'text.secondary' || color === 'text.muted';
+  return (
+    <Text
+      role={role as 'title' | 'meta' | 'body'}
+      className={[weight === 'semibold' ? 'plexon-text-semibold' : '', muted ? 'plexon-text-muted' : '']
+        .filter(Boolean)
+        .join(' ') || undefined}
+      style={{ ...flattenSx(sx), ...style, ...(muted && !sx?.color ? { color: 'var(--color-text-muted-on-light)' } : {}) }}
+      {...rest}
+    >
+      {children}
+    </Text>
+  );
+}
+
+function DashButton({
+  variant = 'contained',
+  size,
+  color,
+  brandColor: _brandColor,
+  component: _component,
+  sx,
+  style,
+  children,
+  ...rest
+}: {
+  variant?: string
+  size?: string
+  color?: string
+  brandColor?: string
+  component?: string
+  sx?: Record<string, unknown>
+  style?: CSSProperties
+  children?: ReactNode
+} & ButtonHTMLAttributes<HTMLButtonElement>) {
+  const mapped =
+    color === 'error'
+      ? 'danger'
+      : variant === 'outlined'
+        ? 'ghost'
+        : variant === 'text'
+          ? 'link'
+          : 'primary';
+  return (
+    <Button
+      variant={mapped as 'primary' | 'ghost' | 'link' | 'danger'}
+      size={size === 'large' ? 'lg' : size === 'medium' ? 'md' : 'sm'}
+      style={{ ...flattenSx(sx), ...style }}
+      {...rest}
+    >
+      {children}
+    </Button>
+  );
+}
+
+function DashPanel({
+  sx,
+  style,
+  children,
+  variant: _v,
+  borderRadius: _b,
+  ...rest
+}: {
+  sx?: Record<string, unknown>
+  style?: CSSProperties
+  children?: ReactNode
+  variant?: string
+  borderRadius?: string
+} & HTMLAttributes<HTMLElement>) {
+  return (
+    <Panel style={{ ...flattenSx(sx), ...style }} {...rest}>
+      {children}
+    </Panel>
+  );
+}
+
+function DashField({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  fullWidth,
+  required,
+  sx,
+  ...rest
+}: {
+  label?: string
+  value?: string
+  onChange?: (e: { target: HTMLInputElement }) => void
+  type?: string
+  fullWidth?: boolean
+  required?: boolean
+  sx?: Record<string, unknown>
+} & Record<string, unknown>) {
+  return (
+    <div style={flattenSx(sx)}>
+      <Field label={label} size="md">
+        <Input
+          type={type}
+          value={value}
+          onChange={onChange as ChangeEventHandler<HTMLInputElement>}
+          required={required}
+          block={fullWidth}
+          {...rest}
+        />
+      </Field>
+    </div>
+  );
+}
+
 
 type CentralUser = {
   id: string;
@@ -722,52 +885,48 @@ export default function DashboardPage() {
   const notConfigured = error && (error.includes('not configured') || error.includes('nicht konfiguriert') || error.includes('Database not configured'));
 
   return (
-    <Box className="plexon-magazine" sx={{ maxWidth: 1400, mx: 'auto' }}>
-      <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }}>
-        <MsqdxTypography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-          {t('dashboard.title')}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mt: 1 }}>
-          {t('dashboard.subtitle')}
-        </MsqdxTypography>
-      </Box>
+    <div className="plexon-magazine" style={{ maxWidth: 1400, marginInline: 'auto' }}>
+      <SectionChrome
+        title={t('dashboard.title')}
+        meta={<Text role="meta">{t('dashboard.subtitle')}</Text>}
+      />
 
       {sessionStatus === 'authenticated' && (
         <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }} data-section="product-teasers">
-          <MsqdxTypography variant="h6" weight="semibold" sx={{ mb: 1.5 }}>
+          <DashText variant="h6" weight="semibold" sx={{ mb: 1.5 }}>
             {t('dashboard.productsTitle')}
-          </MsqdxTypography>
+          </DashText>
           <ProductCatalog variant="dashboard" dataSection="product-teasers-grid" />
         </Box>
       )}
 
       {sessionStatus === 'authenticated' && (
         <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }} data-section="platform-project-insights">
-          <MsqdxTypography variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
+          <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
             {t('dashboard.platformInsightsTitle')}
-          </MsqdxTypography>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mb: 2 }}>
+          </DashText>
+          <DashText variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mb: 2 }}>
             {t('dashboard.platformInsightsSubtitle')}
-          </MsqdxTypography>
+          </DashText>
           {projectInsightsLoading && (
-            <MsqdxTypography variant="body2" color="text.secondary">
+            <DashText variant="body2" color="text.secondary">
               {t('common.loading')}
-            </MsqdxTypography>
+            </DashText>
           )}
           {!projectInsightsLoading && projectInsightsError && (
-            <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+            <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
               {projectInsightsError}
-            </MsqdxTypography>
+            </DashText>
           )}
           {!projectInsightsLoading && !projectInsightsError && projectInsights.length === 0 && (
-            <MsqdxTypography variant="body2" color="text.secondary">
+            <DashText variant="body2" color="text.secondary">
               {t('dashboard.platformInsightsEmpty')}
-            </MsqdxTypography>
+            </DashText>
           )}
           {!projectInsightsLoading && !projectInsightsError && projectInsights.length > 0 && (
             <>
               {projectInsightsMeta?.truncated && (
-                <MsqdxTypography
+                <DashText
                   variant="caption"
                   sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 2 }}
                 >
@@ -775,7 +934,7 @@ export default function DashboardPage() {
                     shown: projectInsightsMeta.shown,
                     total: projectInsightsMeta.totalAccessible,
                   })}
-                </MsqdxTypography>
+                </DashText>
               )}
               <Box
                 sx={{
@@ -789,7 +948,7 @@ export default function DashboardPage() {
                   if (!pid) return null;
                   const canOpenPlatform = row.openPlatformProject !== false;
                   return (
-                    <MsqdxCard
+                    <DashPanel
                       key={pid}
                       variant="flat"
                       borderRadius="button"
@@ -800,37 +959,37 @@ export default function DashboardPage() {
                         color: 'var(--color-text-on-light)',
                       }}
                     >
-                      <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 0.25 }}>
+                      <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.25 }}>
                         {row.platformProject.name ?? pid}
-                      </MsqdxTypography>
+                      </DashText>
                       {row.platformProject.domain ? (
-                        <MsqdxTypography
+                        <DashText
                           variant="caption"
                           sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 1.5 }}
                         >
                           {row.platformProject.domain}
-                        </MsqdxTypography>
+                        </DashText>
                       ) : (
                         <Box sx={{ mb: 1.5 }} />
                       )}
                       <Stack spacing={1} sx={{ mb: 2 }}>
-                        <MsqdxTypography variant="body2">
+                        <DashText variant="body2">
                           {row.checkion != null
                             ? `${t('dashboard.platformInsightsScans')}: ${row.checkion.scanCount}`
                             : `${t('dashboard.platformInsightsScans')}: — (${t('dashboard.platformInsightsNoProduct')})`}
-                        </MsqdxTypography>
-                        <MsqdxTypography variant="body2">
+                        </DashText>
+                        <DashText variant="body2">
                           {row.audion != null
                             ? `${t('dashboard.platformInsightsPersonas')}: ${row.audion.personaCount}`
                             : `${t('dashboard.platformInsightsPersonas')}: — (${t('dashboard.platformInsightsNoProduct')})`}
-                        </MsqdxTypography>
+                        </DashText>
                       </Stack>
                       <Stack direction="row" flexWrap="wrap" gap={1}>
                         {canOpenPlatform ? (
                           <Link href={pathPlatformProjectDashboard(pid)} style={{ textDecoration: 'none' }}>
-                            <MsqdxButton variant="outlined" size="small" brandColor="green">
+                            <DashButton variant="outlined" size="small" brandColor="green">
                               {t('dashboard.platformInsightsOpenProject')}
-                            </MsqdxButton>
+                            </DashButton>
                           </Link>
                         ) : null}
                         <a
@@ -839,9 +998,9 @@ export default function DashboardPage() {
                           rel="noopener noreferrer"
                           style={{ textDecoration: 'none', display: 'inline-flex' }}
                         >
-                          <MsqdxButton variant="text" size="small" component="span">
+                          <DashButton variant="text" size="small" component="span">
                             {t('dashboard.platformInsightsOpenCheckion')}
-                          </MsqdxButton>
+                          </DashButton>
                         </a>
                         <a
                           href={row.links.audionProject}
@@ -849,12 +1008,12 @@ export default function DashboardPage() {
                           rel="noopener noreferrer"
                           style={{ textDecoration: 'none', display: 'inline-flex' }}
                         >
-                          <MsqdxButton variant="text" size="small" component="span">
+                          <DashButton variant="text" size="small" component="span">
                             {t('dashboard.platformInsightsOpenAudion')}
-                          </MsqdxButton>
+                          </DashButton>
                         </a>
                       </Stack>
-                    </MsqdxCard>
+                    </DashPanel>
                   );
                 })}
               </Box>
@@ -865,7 +1024,7 @@ export default function DashboardPage() {
 
       {/* Zentrale Nutzer – nur für Admins sichtbar */}
       {isAdmin && (
-      <MsqdxCard
+      <DashPanel
         variant="flat"
         borderRadius="button"
         sx={{
@@ -876,12 +1035,12 @@ export default function DashboardPage() {
         }}
         data-section="checkion-users"
       >
-        <MsqdxTypography variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
+        <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
           {t('dashboard.centralUsers') ?? 'Zentrale Nutzer'}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
+        </DashText>
+        <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
           {t('dashboard.centralUsersSubtitle') ?? 'Ein Konto für alle Dienste (CHECKION, AUDION, VIDEON). Registrierung nur hier; Anmeldung dort mit denselben Zugangsdaten.'}
-        </MsqdxTypography>
+        </DashText>
 
         {notConfigured && (
           <Box
@@ -892,26 +1051,26 @@ export default function DashboardPage() {
               color: 'var(--color-text-secondary)',
             }}
           >
-            <MsqdxTypography variant="body2">
+            <DashText variant="body2">
               {error?.includes('Database not configured') ? t('dashboard.centralNotConfigured') : error}
-            </MsqdxTypography>
+            </DashText>
           </Box>
         )}
 
         {!notConfigured && error && (
           <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'error.light', color: 'error.contrastText', mb: 2 }}>
-            <MsqdxTypography variant="body2">{error}</MsqdxTypography>
+            <DashText variant="body2">{error}</DashText>
           </Box>
         )}
 
         {!notConfigured && loading && (
-          <MsqdxTypography variant="body2" color="text.secondary">{t('common.loading')}</MsqdxTypography>
+          <DashText variant="body2" color="text.secondary">{t('common.loading')}</DashText>
         )}
 
         {!notConfigured && !loading && users.length === 0 && !error && (
-          <MsqdxTypography variant="body2" color="text.secondary">
+          <DashText variant="body2" color="text.secondary">
             {t('dashboard.noUsers')}
-          </MsqdxTypography>
+          </DashText>
         )}
 
         {!notConfigured && !loading && users.length > 0 && (
@@ -960,12 +1119,12 @@ export default function DashboardPage() {
                       {u.createdAt ? new Date(u.createdAt).toLocaleString() : '—'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                      <MsqdxButton variant="text" size="small" onClick={() => openEdit(u)}>
+                      <DashButton variant="text" size="small" onClick={() => openEdit(u)}>
                         {t('dashboard.edit')}
-                      </MsqdxButton>
-                      <MsqdxButton variant="text" size="small" color="error" onClick={() => handleDelete(u.id)} sx={{ ml: 0.5 }}>
+                      </DashButton>
+                      <DashButton variant="text" size="small" color="error" onClick={() => handleDelete(u.id)} sx={{ ml: 0.5 }}>
                         {t('dashboard.delete')}
-                      </MsqdxButton>
+                      </DashButton>
                     </td>
                   </tr>
                 ))}
@@ -973,12 +1132,12 @@ export default function DashboardPage() {
             </table>
           </Box>
         )}
-      </MsqdxCard>
+      </DashPanel>
       )}
 
       {/* Nutzung (Tokens pro Dienst/Periode) */}
       {!notConfigured && (
-        <MsqdxCard
+        <DashPanel
           variant="flat"
           borderRadius="button"
           sx={{
@@ -990,19 +1149,19 @@ export default function DashboardPage() {
           }}
           data-section="usage"
         >
-          <MsqdxTypography variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
+          <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
             {t('dashboard.usage') ?? 'Nutzung'}
-          </MsqdxTypography>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
+          </DashText>
+          <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
             {isAdmin ? (t('dashboard.usageSubtitleAdmin') ?? 'Token-Verbrauch aller Nutzer pro Dienst und Monat.') : (t('dashboard.usageSubtitle') ?? 'Dein Token-Verbrauch pro Dienst und Monat.')}
-          </MsqdxTypography>
+          </DashText>
           {usageLoading && (
-            <MsqdxTypography variant="body2" color="text.secondary">{t('common.loading')}</MsqdxTypography>
+            <DashText variant="body2" color="text.secondary">{t('common.loading')}</DashText>
           )}
           {!usageLoading && usageSummary.length === 0 && (
-            <MsqdxTypography variant="body2" color="text.secondary">
+            <DashText variant="body2" color="text.secondary">
               {t('dashboard.usageNoData')}
-            </MsqdxTypography>
+            </DashText>
           )}
           {!usageLoading && usageSummary.length > 0 && (
             <Box sx={{ overflowX: 'auto' }}>
@@ -1052,16 +1211,16 @@ export default function DashboardPage() {
           {/* Admin: alle Nutzer – letzte Roh-Events */}
           {isAdmin && !usageLoading && (
             <Box sx={{ mt: 3 }}>
-              <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
+              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
                 {t('dashboard.usageAdminEventsTitle')}
-              </MsqdxTypography>
-              <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 1.5 }}>
+              </DashText>
+              <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 1.5 }}>
                 {t('dashboard.usageAdminEventsSubtitle')}
-              </MsqdxTypography>
+              </DashText>
               {adminUsageEvents.length === 0 ? (
-                <MsqdxTypography variant="body2" color="text.secondary">
+                <DashText variant="body2" color="text.secondary">
                   {t('dashboard.usageAdminEventsEmpty')}
-                </MsqdxTypography>
+                </DashText>
               ) : (
                 <>
                   <Box sx={{ overflowX: 'auto', maxHeight: 360, overflowY: 'auto' }}>
@@ -1181,14 +1340,14 @@ export default function DashboardPage() {
                   </Box>
                   {adminUsageEventsHasMore && (
                     <Box sx={{ mt: 1.5 }}>
-                      <MsqdxButton
+                      <DashButton
                         variant="outlined"
                         size="small"
                         onClick={() => void loadMoreAdminUsageEvents()}
                         disabled={adminUsageEventsLoading}
                       >
                         {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
-                      </MsqdxButton>
+                      </DashButton>
                     </Box>
                   )}
                 </>
@@ -1199,9 +1358,9 @@ export default function DashboardPage() {
           {/* Verlauf: letzte Nutzungen (eigene Events) */}
           {!usageLoading && usageRecentEvents.length > 0 && (
             <Box sx={{ mt: 3 }}>
-              <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
+              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
                 {t('dashboard.usageHistory')}
-              </MsqdxTypography>
+              </DashText>
               <Box sx={{ overflowX: 'auto', maxHeight: 280, overflowY: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                   <thead>
@@ -1255,19 +1414,19 @@ export default function DashboardPage() {
           {/* Diagramm: Verbrauch nach Tag / Monat / Jahr */}
           {!usageLoading && (usageByDay.length > 0 || usageOwnSummary.length > 0) && (
             <Box sx={{ mt: 3 }}>
-              <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
+              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
                 {t('dashboard.usageChart')}
-              </MsqdxTypography>
+              </DashText>
               <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
                 {(['day', 'month', 'year'] as const).map((range) => (
-                  <MsqdxButton
+                  <DashButton
                     key={range}
                     variant={usageChartRange === range ? 'contained' : 'outlined'}
                     size="small"
                     onClick={() => setUsageChartRange(range)}
                   >
                     {range === 'day' ? t('dashboard.usageChartDay') : range === 'month' ? t('dashboard.usageChartMonth') : t('dashboard.usageChartYear')}
-                  </MsqdxButton>
+                  </DashButton>
                 ))}
               </Stack>
               {(() => {
@@ -1295,14 +1454,14 @@ export default function DashboardPage() {
                     </ResponsiveContainer>
                   </Box>
                 ) : (
-                  <MsqdxTypography variant="body2" color="text.secondary">
+                  <DashText variant="body2" color="text.secondary">
                     {t('dashboard.usageNoData')}
-                  </MsqdxTypography>
+                  </DashText>
                 );
               })()}
             </Box>
           )}
-        </MsqdxCard>
+        </DashPanel>
       )}
 
       {editId && (
@@ -1328,7 +1487,7 @@ export default function DashboardPage() {
           aria-modal="true"
           aria-labelledby="edit-user-title"
         >
-          <MsqdxCard
+          <DashPanel
             variant="flat"
             borderRadius="button"
             sx={{
@@ -1342,25 +1501,25 @@ export default function DashboardPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <MsqdxTypography id="edit-user-title" variant="h6" weight="semibold" sx={{ mb: 2 }}>
+            <DashText id="edit-user-title" variant="h6" weight="semibold" sx={{ mb: 2 }}>
               {t('dashboard.editUser')}
-            </MsqdxTypography>
+            </DashText>
             <Stack spacing={2}>
-              <MsqdxFormField
+              <DashField
                 label={t('dashboard.email')}
                 value={editEmail}
                 onChange={(e) => setEditEmail((e.target as HTMLInputElement).value)}
                 fullWidth
                 sx={FORM_FIELD_ACCENT_SX}
               />
-              <MsqdxFormField
+              <DashField
                 label={t('dashboard.name')}
                 value={editName}
                 onChange={(e) => setEditName((e.target as HTMLInputElement).value)}
                 fullWidth
                 sx={FORM_FIELD_ACCENT_SX}
               />
-              <MsqdxFormField
+              <DashField
                 label={t('dashboard.company')}
                 value={editCompany}
                 onChange={(e) => setEditCompany((e.target as HTMLInputElement).value)}
@@ -1368,22 +1527,22 @@ export default function DashboardPage() {
                 sx={FORM_FIELD_ACCENT_SX}
               />
               {isAdmin && (
-                <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
                   {t('dashboard.companyProfileHint')}
-                </MsqdxTypography>
+                </DashText>
               )}
               {isAdmin && (
                 <Box sx={{ pt: 0.5 }}>
-                  <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
+                  <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
                     {t('dashboard.organizationsTitle')}
-                  </MsqdxTypography>
-                  <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 1.5 }}>
+                  </DashText>
+                  <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 1.5 }}>
                     {t('dashboard.organizationsSubtitle')}
-                  </MsqdxTypography>
+                  </DashText>
                   {editCompanyMembershipsLoading ? (
-                    <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                    <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
                       {t('common.loading')}
-                    </MsqdxTypography>
+                    </DashText>
                   ) : (
                     <Stack spacing={1.5}>
                       {editCompanyMemberships.map((row, idx) => {
@@ -1401,9 +1560,9 @@ export default function DashboardPage() {
                             alignItems={{ sm: 'flex-end' }}
                           >
                             <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                              <DashText variant="body2" sx={{ mb: 0.5 }}>
                                 {t('dashboard.organizationSelect')}
-                              </MsqdxTypography>
+                              </DashText>
                               <select
                                 value={row.companyId}
                                 onChange={(e) => {
@@ -1435,9 +1594,9 @@ export default function DashboardPage() {
                               </select>
                             </Box>
                             <Box sx={{ minWidth: { sm: 160 } }}>
-                              <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                              <DashText variant="body2" sx={{ mb: 0.5 }}>
                                 {t('admin.memberRole')}
-                              </MsqdxTypography>
+                              </DashText>
                               <select
                                 value={row.role}
                                 onChange={(e) => {
@@ -1460,7 +1619,7 @@ export default function DashboardPage() {
                                 <option value={COMPANY_USER_ROLE.MEMBER}>{t('admin.roleCompanyMember')}</option>
                               </select>
                             </Box>
-                            <MsqdxButton
+                            <DashButton
                               variant="text"
                               color="error"
                               size="small"
@@ -1470,11 +1629,11 @@ export default function DashboardPage() {
                               sx={{ flexShrink: 0 }}
                             >
                               {t('dashboard.delete')}
-                            </MsqdxButton>
+                            </DashButton>
                           </Stack>
                         );
                       })}
-                      <MsqdxButton
+                      <DashButton
                         variant="outlined"
                         size="small"
                         onClick={() =>
@@ -1485,13 +1644,13 @@ export default function DashboardPage() {
                         }
                       >
                         {t('dashboard.addOrganizationRow')}
-                      </MsqdxButton>
+                      </DashButton>
                     </Stack>
                   )}
                 </Box>
               )}
               <Box>
-                <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>{t('dashboard.locale')}</MsqdxTypography>
+                <DashText variant="body2" sx={{ mb: 0.5 }}>{t('dashboard.locale')}</DashText>
                 <select
                   value={editLocale}
                   onChange={(e) => setEditLocale(e.target.value)}
@@ -1510,7 +1669,7 @@ export default function DashboardPage() {
               </Box>
               {isAdmin && (
                 <Box>
-                  <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>{t('dashboard.role')}</MsqdxTypography>
+                  <DashText variant="body2" sx={{ mb: 0.5 }}>{t('dashboard.role')}</DashText>
                   <select
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value)}
@@ -1530,16 +1689,16 @@ export default function DashboardPage() {
               )}
               {isAdmin && (
                 <Box sx={{ pt: 1 }}>
-                  <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
+                  <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
                     {t('dashboard.entitlementsTitle')}
-                  </MsqdxTypography>
-                  <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
+                  </DashText>
+                  <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
                     {t('dashboard.entitlementsSubtitle')}
-                  </MsqdxTypography>
+                  </DashText>
                   {editEntitlementsLoading ? (
-                    <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                    <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
                       {t('common.loading')}
-                    </MsqdxTypography>
+                    </DashText>
                   ) : (
                     <Stack spacing={1.5}>
                       {editEntitlements.map((entitlement) => (
@@ -1558,16 +1717,16 @@ export default function DashboardPage() {
                             sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, mb: 1.5 }}
                           >
                             <Box>
-                              <MsqdxTypography variant="subtitle2" weight="semibold">
+                              <DashText variant="subtitle2" weight="semibold">
                                 {entitlement.name}
-                              </MsqdxTypography>
-                              <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
+                              </DashText>
+                              <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
                                 {entitlement.source === 'explicit'
                                   ? t('dashboard.entitlementExplicit')
                                   : entitlement.defaultAccess === 'granted'
                                     ? t('dashboard.entitlementDefaultGranted')
                                     : t('dashboard.entitlementDefaultHidden')}
-                              </MsqdxTypography>
+                              </DashText>
                             </Box>
                             <Box
                               sx={{
@@ -1586,9 +1745,9 @@ export default function DashboardPage() {
                           <Stack spacing={1.5}>
                             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
                               <Box sx={{ flex: 1 }}>
-                                <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                                <DashText variant="body2" sx={{ mb: 0.5 }}>
                                   {t('dashboard.entitlementStatus')}
-                                </MsqdxTypography>
+                                </DashText>
                                 <select
                                   value={entitlement.status}
                                   onChange={(e) =>
@@ -1611,9 +1770,9 @@ export default function DashboardPage() {
                                 </select>
                               </Box>
                               <Box sx={{ flex: 1 }}>
-                                <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                                <DashText variant="body2" sx={{ mb: 0.5 }}>
                                   {t('dashboard.entitlementPlatformRole')}
-                                </MsqdxTypography>
+                                </DashText>
                                 <select
                                   value={entitlement.platformRole}
                                   onChange={(e) =>
@@ -1639,9 +1798,9 @@ export default function DashboardPage() {
                             </Stack>
 
                             <Box>
-                              <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                              <DashText variant="body2" sx={{ mb: 0.5 }}>
                                 {t('dashboard.entitlementEntryPoint')}
-                              </MsqdxTypography>
+                              </DashText>
                               <select
                                 value={entitlement.defaultContext?.entryPointId ?? ''}
                                 onChange={(e) =>
@@ -1674,9 +1833,9 @@ export default function DashboardPage() {
                             <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5}>
                               {entitlement.productId === 'checkion' || entitlement.productId === 'audion' ? (
                                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                                  <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                                  <DashText variant="body2" sx={{ mb: 0.5 }}>
                                     {t('dashboard.entitlementProjectId')}
-                                  </MsqdxTypography>
+                                  </DashText>
                                   <select
                                     value={entitlement.defaultContext?.projectId ?? ''}
                                     onChange={(e) =>
@@ -1703,22 +1862,22 @@ export default function DashboardPage() {
                                   </select>
                                   {!productProjectOptionsLoading &&
                                     (productProjectOptions[entitlement.productId]?.length ?? 0) === 0 && (
-                                      <MsqdxTypography
+                                      <DashText
                                         variant="caption"
                                         sx={{ color: 'var(--color-text-secondary)', mt: 0.5, display: 'block' }}
                                       >
                                         {t('dashboard.productProjectPickerEmptyBound')}
-                                      </MsqdxTypography>
+                                      </DashText>
                                     )}
-                                  <MsqdxTypography
+                                  <DashText
                                     variant="caption"
                                     sx={{ color: 'var(--color-text-secondary)', mt: 0.75, display: 'block' }}
                                   >
                                     {t('dashboard.productProjectPickerConcept')}
-                                  </MsqdxTypography>
+                                  </DashText>
                                 </Box>
                               ) : (
-                                <MsqdxFormField
+                                <DashField
                                   label={t('dashboard.entitlementProjectId')}
                                   value={entitlement.defaultContext?.projectId ?? ''}
                                   onChange={(e) =>
@@ -1734,7 +1893,7 @@ export default function DashboardPage() {
                                   sx={FORM_FIELD_ACCENT_SX}
                                 />
                               )}
-                              <MsqdxFormField
+                              <DashField
                                 label={t('dashboard.entitlementDeepLink')}
                                 value={entitlement.defaultContext?.deepLink ?? ''}
                                 onChange={(e) =>
@@ -1763,36 +1922,36 @@ export default function DashboardPage() {
                                   sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, mb: 1 }}
                                 >
                                   <Box>
-                                    <MsqdxTypography variant="body2" weight="semibold">
+                                    <DashText variant="body2" weight="semibold">
                                       {t('dashboard.projectAssignmentsTitle')}
-                                    </MsqdxTypography>
-                                    <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                    </DashText>
+                                    <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                       {t('dashboard.projectAssignmentsSubtitle', { product: entitlement.name })}
-                                    </MsqdxTypography>
-                                    <MsqdxTypography
+                                    </DashText>
+                                    <DashText
                                       variant="caption"
                                       sx={{ color: 'var(--color-text-secondary)', display: 'block', mt: 0.5 }}
                                     >
                                       {t('dashboard.productProjectPickerConcept')}
-                                    </MsqdxTypography>
+                                    </DashText>
                                   </Box>
-                                  <MsqdxButton
+                                  <DashButton
                                     variant="outlined"
                                     onClick={() => addProjectAssignment(entitlement.productId)}
                                     disabled={saving || Boolean(provisioningAction)}
                                   >
                                     {t('dashboard.projectAssignmentsAdd')}
-                                  </MsqdxButton>
+                                  </DashButton>
                                 </Stack>
                                 {!productProjectOptionsLoading &&
                                   (productProjectOptions[entitlement.productId as 'checkion' | 'audion']?.length ??
                                     0) === 0 && (
-                                    <MsqdxTypography
+                                    <DashText
                                       variant="caption"
                                       sx={{ color: 'var(--color-text-secondary)', display: 'block', mb: 1 }}
                                     >
                                       {t('dashboard.productProjectPickerEmptyBound')}
-                                    </MsqdxTypography>
+                                    </DashText>
                                   )}
                                 <Stack spacing={1}>
                                   {(entitlement.projectAssignments ?? []).map((assignment, assignmentIndex) => (
@@ -1803,9 +1962,9 @@ export default function DashboardPage() {
                                       sx={{ alignItems: { xs: 'stretch', md: 'center' } }}
                                     >
                                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                                        <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                                        <DashText variant="body2" sx={{ mb: 0.5 }}>
                                           {t('dashboard.projectAssignmentsProjectId')}
-                                        </MsqdxTypography>
+                                        </DashText>
                                         <select
                                           value={assignment.projectId}
                                           onChange={(e) =>
@@ -1833,9 +1992,9 @@ export default function DashboardPage() {
                                         </select>
                                       </Box>
                                       <Box sx={{ minWidth: { md: 180 } }}>
-                                        <MsqdxTypography variant="body2" sx={{ mb: 0.5 }}>
+                                        <DashText variant="body2" sx={{ mb: 0.5 }}>
                                           {t('dashboard.projectAssignmentsRole')}
-                                        </MsqdxTypography>
+                                        </DashText>
                                         <select
                                           value={assignment.role}
                                           onChange={(e) =>
@@ -1861,19 +2020,19 @@ export default function DashboardPage() {
                                           <option value="admin">{t('dashboard.projectAssignmentRoleAdmin')}</option>
                                         </select>
                                       </Box>
-                                      <MsqdxButton
+                                      <DashButton
                                         variant="outlined"
                                         onClick={() => removeProjectAssignment(entitlement.productId, assignmentIndex)}
                                         disabled={saving || Boolean(provisioningAction)}
                                       >
                                         {t('dashboard.projectAssignmentsRemove')}
-                                      </MsqdxButton>
+                                      </DashButton>
                                     </Stack>
                                   ))}
                                   {(entitlement.projectAssignments ?? []).length === 0 ? (
-                                    <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                    <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                       {t('dashboard.projectAssignmentsEmpty')}
-                                    </MsqdxTypography>
+                                    </DashText>
                                   ) : null}
                                 </Stack>
                               </Box>
@@ -1889,9 +2048,9 @@ export default function DashboardPage() {
                                 spacing={1}
                                 sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' } }}
                               >
-                                <MsqdxTypography variant="body2" weight="semibold">
+                                <DashText variant="body2" weight="semibold">
                                   {t('dashboard.provisioningTitle')}
-                                </MsqdxTypography>
+                                </DashText>
                                 <Box
                                   sx={{
                                     px: 1,
@@ -1906,7 +2065,7 @@ export default function DashboardPage() {
                                 </Box>
                               </Stack>
                               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                                <MsqdxButton
+                                <DashButton
                                   variant="outlined"
                                   onClick={() => void runProvisioningAction(entitlement.productId, 'retry')}
                                   disabled={Boolean(provisioningAction) || saving || editEntitlementsLoading}
@@ -1915,8 +2074,8 @@ export default function DashboardPage() {
                                   provisioningAction.mode === 'retry'
                                     ? t('dashboard.provisioningRetrying')
                                     : t('dashboard.provisioningRetry')}
-                                </MsqdxButton>
-                                <MsqdxButton
+                                </DashButton>
+                                <DashButton
                                   variant="outlined"
                                   onClick={() => void runProvisioningAction(entitlement.productId, 'resync')}
                                   disabled={Boolean(provisioningAction) || saving || editEntitlementsLoading}
@@ -1925,31 +2084,31 @@ export default function DashboardPage() {
                                   provisioningAction.mode === 'resync'
                                     ? t('dashboard.provisioningResyncing')
                                     : t('dashboard.provisioningResync')}
-                                </MsqdxButton>
+                                </DashButton>
                               </Stack>
                               {entitlement.provisioning?.syncMessage ? (
-                                <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mt: 0.75 }}>
+                                <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mt: 0.75 }}>
                                   {entitlement.provisioning.syncMessage}
-                                </MsqdxTypography>
+                                </DashText>
                               ) : null}
                               <Stack spacing={0.5} sx={{ mt: 1 }}>
-                                <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                   {t('dashboard.provisioningDesiredState')}: {t(`dashboard.provisioningDesired.${entitlement.provisioning?.desiredState ?? 'granted'}`)}
-                                </MsqdxTypography>
+                                </DashText>
                                 {entitlement.provisioning?.externalUserRef ? (
-                                  <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                  <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                     {t('dashboard.provisioningExternalUserRef')}: {entitlement.provisioning.externalUserRef}
-                                  </MsqdxTypography>
+                                  </DashText>
                                 ) : null}
                                 {formatProvisioningTimestamp(entitlement.provisioning?.lastAttemptAt) ? (
-                                  <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                  <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                     {t('dashboard.provisioningLastAttempt')}: {formatProvisioningTimestamp(entitlement.provisioning?.lastAttemptAt)}
-                                  </MsqdxTypography>
+                                  </DashText>
                                 ) : null}
                                 {formatProvisioningTimestamp(entitlement.provisioning?.lastSucceededAt) ? (
-                                  <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
+                                  <DashText variant="caption" sx={{ color: 'var(--color-text-secondary)' }}>
                                     {t('dashboard.provisioningLastSuccess')}: {formatProvisioningTimestamp(entitlement.provisioning?.lastSucceededAt)}
-                                  </MsqdxTypography>
+                                  </DashText>
                                 ) : null}
                               </Stack>
                             </Box>
@@ -1962,19 +2121,19 @@ export default function DashboardPage() {
               )}
               <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
                 {isAdmin ? (
-                  <MsqdxButton
+                  <DashButton
                     variant="text"
                     color="error"
                     onClick={() => editId && void handleDelete(editId)}
                     disabled={saving || !editId || Boolean(provisioningAction)}
                   >
                     {t('dashboard.delete')}
-                  </MsqdxButton>
+                  </DashButton>
                 ) : (
                   <span />
                 )}
                 <Stack direction="row" spacing={1}>
-                  <MsqdxButton
+                  <DashButton
                     variant="outlined"
                     onClick={() => {
                       setEditId(null);
@@ -1984,20 +2143,20 @@ export default function DashboardPage() {
                     disabled={saving || Boolean(provisioningAction)}
                   >
                     {t('common.cancel')}
-                  </MsqdxButton>
-                  <MsqdxButton
+                  </DashButton>
+                  <DashButton
                     variant="contained"
                     onClick={handleSaveEdit}
                     disabled={saving || editEntitlementsLoading || editCompanyMembershipsLoading || Boolean(provisioningAction)}
                   >
                     {saving ? t('dashboard.saving') : t('common.save')}
-                  </MsqdxButton>
+                  </DashButton>
                 </Stack>
               </Stack>
             </Stack>
-          </MsqdxCard>
+          </DashPanel>
         </Box>
       )}
-    </Box>
+    </div>
   );
 }

@@ -30,6 +30,14 @@
   text-decoration: none;
 }
 
+.plexon-text-semibold {
+  font-weight: 600;
+}
+
+.plexon-text-muted {
+  color: var(--color-text-muted-on-light, var(--muted));
+}
+
 .ds-page-title.page-title.plexon-page-title--context {
   font-size: clamp(1rem, 1.8vw, 1.25rem);
   font-weight: var(--weight-light);
