@@ -23,6 +23,8 @@ export type PlatformProjectUpsertPayload = {
 export type PlatformProjectUpsertResponse = {
   status: string;
   externalProjectId?: string | null;
+  /** AUDION v3 historically returned `projectId` — accept as alias. */
+  projectId?: string | null;
   details?: string | null;
 };
 
@@ -86,7 +88,16 @@ export async function pushPlatformProjectUpsert(
         error: data?.details || response.statusText,
       };
     }
-    return { supported: true, ok: true, status: response.status, data };
+    const externalProjectId =
+      data?.externalProjectId?.trim() || data?.projectId?.trim() || null;
+    return {
+      supported: true,
+      ok: true,
+      status: response.status,
+      data: data
+        ? { ...data, externalProjectId: externalProjectId ?? data.externalProjectId }
+        : { status: 'ok', externalProjectId },
+    };
   } catch (error) {
     return {
       supported: true,
