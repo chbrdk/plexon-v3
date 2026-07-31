@@ -1,51 +1,60 @@
-# UI migrate — `@msqdx/ui` cutover
+# UI rebuild — `@msqdx/ui` (challenge + reuse)
 
 **Status:** Accepted — 2026-07-31  
-**Knowledge:** `knowledge/ui-rebuild-msqdx-ui.md`  
+**Knowledge:** `knowledge/ui-rebuild-msqdx-ui.md` · `knowledge/ui-rebuild-reuse.md`  
 **Target DS:** `@msqdx/ui` + `@msqdx/ui-tokens` (sibling `msqdx-ui`)  
-**Not:** real MUI · not `@msqdx/react` for finished surfaces
+**Reference product:** `audion-v3` (composition patterns, chat workspace)  
+**Not:** real MUI · not `@msqdx/react` · not “skin the old screen”
 
 ## Goal
 
-Migrate every Plexon magazine / workstation surface onto `@msqdx/ui`, then delete the temporary bridges.
+Rebuild each Plexon surface cleanly on `@msqdx/ui`, keep required **capability**, and drop or redesign anything that is outdated — then delete temporary bridges.
+
+This is **not** a 1:1 visual migration of legacy JSX.
+
+## Principles (non-negotiable)
+
+1. **Challenge first.** Before coding a wave: list current capabilities → keep / reshape / drop. Prefer modern UX and tech (federation v3, DS chat chrome, Field system, etc.) over porting old patterns.
+2. **Reuse before invent.** Prefer `@msqdx/ui` primitives and **Audion composition patterns** (chat panel/workspace, settings bands, SectionChrome magazines). Do not invent a second chat UI, second settings chrome, or app-local DS clones.
+3. **Capability ≠ chrome.** Backend contracts (NextAuth, Drizzle, federation APIs, assistant orchestrator, EQC workflows) stay unless a wave explicitly redesigns them. UI chrome can be rewritten.
+4. **Specs first.** Update the wave spec with keep/reshape/drop + reuse map before implementation.
+5. **No bridge expansion.** Do not grow `mui-shim` / `@msqdx/react` bridge for new work.
 
 ## Wave order
 
-| Wave | Spec | Route(s) |
-|------|------|----------|
-| 0 | `app-shell.md` + auth pages | shell · `/login` · `/register` · password |
-| 1 | `ui-migrate-dashboard.md` | `/` |
-| 2 | `ui-migrate-settings.md` | `/settings` |
-| 3 | `ui-migrate-products.md` | `/products` · `/projects/[id]` |
-| 4 | `ui-migrate-admin.md` | `/admin*` |
-| 5 | `ui-migrate-assistant.md` | `/assistant*` |
-| 6 | `ui-migrate-event-quick-check.md` | `/event-quick-check*` |
-| 7 | `ui-migrate-board.md` | `/board*` · bridge removal |
+| Wave | Spec | Route(s) | Rebuild posture |
+|------|------|----------|-----------------|
+| 0 | `app-shell.md` + auth | shell · auth | Done — magazine shell + auth on `@msqdx/ui` |
+| 1 | `ui-migrate-dashboard.md` | `/` | Partial — adapters; **revisit** for challenge pass |
+| 2 | `ui-migrate-settings.md` | `/settings` | Rebuild like Audion settings (Field / ToggleGroup) |
+| 3 | `ui-migrate-products.md` | `/products` · `/projects/[id]` | Catalog done; detail rebuild |
+| 4 | `ui-migrate-admin.md` | `/admin*` | Rebuild admin tables/forms on DS |
+| 5 | `ui-migrate-assistant.md` | `/assistant*` | **Compose Audion chat chrome** — do not redesign chat |
+| 6 | `ui-migrate-event-quick-check.md` | `/event-quick-check*` | Rebuild workflow UI; keep scan/report contracts |
+| 7 | `ui-migrate-board.md` | `/board*` | Board chrome on DS; isolate Prismion; remove bridges |
 
-## Global rules (every wave)
+## Reuse map (default)
 
-1. Spec first — update the wave spec before code.
-2. Import UI only from `@msqdx/ui` (barrels `lib/msqdx-ui.ts` / `lib/msqdx-ui-shell.ts`).
-3. No new `@mui/material` or `@msqdx/react` imports on migrated files.
-4. No hardcoded routes — `lib/shell-paths.ts` / `lib/constants.ts` / `knowledge/paths.md`.
-5. Backend, NextAuth, Drizzle, federation APIs unchanged.
-6. Definition of done: no legacy imports in the wave file set · smoke test · `npm run build` still green for that slice.
+| Need | Source |
+|------|--------|
+| Primitives, shell, SectionChrome, Field, Flyout, icons | `@msqdx/ui` |
+| Chat CSS chrome (`.chat-panel`, `.chat-composer`, …) | `@msqdx/ui/styles.css` (`chat.css`) |
+| Chat composition | Mirror `audion-v3` `AudionChatPanel` / `AudionChatWorkspace` |
+| Settings bands | Mirror `audion-v3` settings page (SectionChrome + Field + ToggleGroup) |
+| Magazine bands | `SectionChrome` + Audion magazine layout patterns |
 
 ## Temporary bridges (delete in Wave 7)
 
 | Alias | File | Purpose |
 |-------|------|---------|
-| `@msqdx/react` | `lib/msqdx-react-bridge/` | Legacy magazine + Prismion until cutover |
-| `@mui/material` | `lib/mui-shim.tsx` | Stub only — **not** real MUI |
-| `@msqdx/tokens` | legacy DS tokens path | Board Prismion only |
-
-Do **not** expand bridges for new work. Prefer migrating the importing file.
+| `@msqdx/react` | `lib/msqdx-react-bridge/` | Legacy until cutover |
+| `@mui/material` | `lib/mui-shim.tsx` | Stub only |
+| `@msqdx/tokens` | legacy tokens | Board Prismion only |
 
 ## Agent checklist per wave
 
-1. Read the wave spec.
-2. List files still importing `@msqdx/react` / `@mui/material`.
-3. Replace primitives with `@msqdx/ui` equivalents (`Text`, `Button`, `Field`, `Input`, `Panel`, `SectionChrome`, …).
-4. Keep behavior/API contracts identical.
-5. Add/adjust `__tests__` smoke.
-6. Update progress table in `knowledge/ui-rebuild-msqdx-ui.md`.
+1. Read this index + the wave spec.
+2. Write/update **keep / reshape / drop** and **reuse map** in the wave spec.
+3. Implement on `@msqdx/ui` (+ Audion patterns). No new MUI/`@msqdx/react`.
+4. Preserve required APIs unless the wave explicitly changes them.
+5. Smoke tests + update `knowledge/ui-rebuild-msqdx-ui.md`.

@@ -1,23 +1,26 @@
-# UI migrate — Settings
+# UI rebuild — Settings
 
-**Status:** Draft — Wave 2  
+**Status:** Draft — Wave 2 (challenge + reuse)  
 **Route:** `/settings`  
-**Implements:** `app/settings/page.tsx` · `components/settings/*`  
-**DS:** `Field`, `Input`, `Select`, `Switch`, `ToggleGroup`, `Text`, `Panel`, `Button`, `Avatar`
+**Reference:** `audion-v3` settings · `knowledge/ui-rebuild-reuse.md`  
+**DS:** `SectionChrome`, `Field`, `Input`, `Select`, `Switch`, `ToggleGroup`, `Text`, `Panel`, `Button`, `Avatar`
 
-## Current state
+## Challenge — keep / reshape / drop
 
-- Settings still on `@msqdx/react` / MUI via bridge.
-- Brand color and account prefs must keep working.
+| Capability | Decision | Notes |
+|------------|----------|-------|
+| Profile name / avatar | **keep** | Field + Avatar like Audion |
+| Locale | **reshape** | `ToggleGroup` (en/de), not legacy select chrome |
+| Brand / accent color | **keep** | Rebuild selector on `@msqdx/ui` (auth selector pattern) |
+| Theme | **reshape** | Align with Audion `data-theme` + ToggleGroup if present; drop MUI theme leftovers |
+| Password / security | **keep** if API exists | Panel + Button; challenge copy/UX |
+| API tokens | **keep** if present | List + create/revoke on Field/Dialog — mirror Audion tokens band if any |
+| Legacy Msqdx/MUI form chrome | **drop** | No bridge imports |
 
-## Target composition
+## Reuse map
 
-| Band | Treatment |
-|------|-----------|
-| Profile | `Avatar` + `Field`/`Input` |
-| Appearance / theme | `ToggleGroup` or `Switch` → existing theme persistence |
-| Brand color | rebuild `BrandColorSelector` on `@msqdx/ui` (no MUI) — mirror auth selector pattern |
-| Account / security | `Panel` + `Button` / links via `shell-paths` |
+- Audion `settings-page` composition: SectionChrome bands, Field stack, ToggleGroup.
+- Plexon auth `AuthBrandColorSelector` pattern for brand (already `@msqdx/ui`).
 
 ## File set
 
@@ -26,8 +29,8 @@
 
 ## Acceptance
 
-1. No legacy DS imports in file set.
-2. Prefs / brand color persist as today.
-3. Rail footer → settings still active.
-4. Smoke test covers settings heading + one field interaction if cheap.
-5. Progress table Wave 2 → done.
+1. Keep/reshape/drop table above reflected in UI.
+2. Zero `@mui` / `@msqdx/react` in file set.
+3. Prefs persist as today where kept.
+4. Smoke: settings heading + one field.
+5. Progress Wave 2 → done.
