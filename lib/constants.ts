@@ -124,6 +124,29 @@ export const getAudionAdminUrl = (): string => {
   return (process.env.NEXT_PUBLIC_AUDION_ADMIN_URL?.trim() || 'https://audion.projects-a.plygrnd.tech/admin/');
 };
 
+/** AUDION Next.js origin (strips trailing `/admin`). Used for federation routes. */
+export const getAudionWebOrigin = (): string => {
+  const trimmed = getAudionAdminUrl().replace(/\/+$/, '');
+  return trimmed.endsWith('/admin')
+    ? trimmed.slice(0, -'/admin'.length) || trimmed
+    : trimmed;
+};
+
+/**
+ * Base for AUDION Next.js `/api/platform/...` federation (not FastAPI).
+ * Prefer `AUDION_PLATFORM_API_URL`, else `{NEXT_PUBLIC_AUDION_ADMIN_URL origin}/api`.
+ * Do not use `AUDION_API_URL` here — that is often `http://audion-api:8000` (FastAPI).
+ */
+export const getAudionPlatformApiBase = (): string => {
+  const explicit =
+    typeof process !== 'undefined' ? process.env.AUDION_PLATFORM_API_URL?.trim() : '';
+  if (explicit) {
+    const t = explicit.replace(/\/+$/, '');
+    return t.endsWith('/api') ? t : `${t}/api`;
+  }
+  return `${getAudionWebOrigin().replace(/\/+$/, '')}/api`;
+};
+
 export const getCheckionUrl = (): string => {
   if (typeof process === 'undefined') return 'https://checkion.projects-a.plygrnd.tech/';
   return (process.env.NEXT_PUBLIC_CHECKION_URL?.trim() || 'https://checkion.projects-a.plygrnd.tech/');
@@ -149,16 +172,8 @@ export const getAudionServiceApiUrl = (): string => {
     typeof process !== 'undefined' ? process.env.AUDION_API_URL?.trim() : '';
   if (explicit) return explicit;
 
-  const adminUrl =
-    typeof process === 'undefined'
-      ? 'https://audion.projects-a.plygrnd.tech/admin/'
-      : getAudionAdminUrl();
-  const trimmed = adminUrl.replace(/\/+$/, '');
-  const webOrigin = trimmed.endsWith('/admin')
-    ? trimmed.slice(0, -'/admin'.length) || trimmed
-    : trimmed;
   // Production: FastAPI is proxied under /api on the same host as the AUDION web app.
-  return `${webOrigin.replace(/\/+$/, '')}/api`;
+  return `${getAudionWebOrigin().replace(/\/+$/, '')}/api`;
 };
 
 /** sessionStorage: admin subnav “last visited” hint (`{ currentPath, currentAt }`). */

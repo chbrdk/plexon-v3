@@ -71,9 +71,13 @@ PORT=3000
 # --- Empfohlen Staging ---
 PLEXON_ADMIN_EMAIL=<deine-admin@firma.tld>
 
-# Deep Links auf v3-AUDION (Dashboard-Teaser) — erst setzen wenn audion-v3 Domain live
+# Deep Links + Collection-Sync Ziel (Federation nutzt diese Origin, nicht AUDION_API_URL)
 NEXT_PUBLIC_AUDION_ADMIN_URL=https://audion-v3.projects-a.plygrnd.tech/
 ```
+
+**Collection-Sync (AUDION):** `PLEXON_SERVICE_SECRET` muss **identisch** zu Audion-v3 sein. Sync ruft
+`{NEXT_PUBLIC_AUDION_ADMIN_URL-Origin}/api/platform/provisioning/projects/{id}` auf.
+`AUDION_API_URL` (FastAPI) wird dafür **nicht** verwendet — absichtlich nicht setzen (siehe §4).
 
 Wenn Coolify Shared Variables nicht nutzt: Secrets **direkt** einfügen (nicht `{{environment.…}}`).
 

@@ -5,7 +5,7 @@ import {
   PLEXON_SERVICE_SECRET_HEADER,
 } from '@/lib/platform-contract';
 import {
-  getAudionServiceApiUrl,
+  getAudionPlatformApiBase,
   getCheckionServiceApiUrl,
 } from '@/lib/constants';
 
@@ -26,6 +26,7 @@ export type PlatformProjectUpsertResponse = {
   /** AUDION v3 historically returned `projectId` — accept as alias. */
   projectId?: string | null;
   details?: string | null;
+  error?: string | null;
 };
 
 function projectUpsertUrl(productId: PlatformProductId, platformProjectId: string): string | null {
@@ -36,11 +37,40 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }
   if (productId === 'audion') {
-    const base = getAudionServiceApiUrl();
+    const base = getAudionPlatformApiBase();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/platform/provisioning/projects/${encoded}`;
   }
   return null;
+}
+
+function summarizeUpsertFailure(
+  url: string,
+  status: number,
+  data: PlatformProjectUpsertResponse | undefined,
+  text: string,
+  redirected: boolean
+): string {
+  const host = (() => {
+    try {
+      return new URL(url).host;
+    } catch {
+      return url.slice(0, 64);
+    }
+  })();
+  const detail =
+    data?.details?.trim() ||
+    data?.error?.trim() ||
+    (text && !text.trimStart().startsWith('<') && !text.trimStart().startsWith('{')
+      ? text.trim().slice(0, 120)
+      : '');
+  const parts = [`HTTP ${status}`, host];
+  if (redirected) parts.push('redirected (check AUDION URL — missing /api?)');
+  if (detail) parts.push(detail);
+  else if (text.trimStart().startsWith('<')) parts.push('HTML response (wrong host/path)');
+  else if (!data) parts.push('non-JSON body');
+  else if (!data.externalProjectId && !data.projectId) parts.push('missing externalProjectId');
+  return parts.join(' · ');
 }
 
 export async function pushPlatformProjectUpsert(
@@ -65,6 +95,7 @@ export async function pushPlatformProjectUpsert(
   try {
     const response = await fetch(url, {
       method: 'PUT',
+      redirect: 'manual',
       headers: {
         'Content-Type': 'application/json',
         [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
@@ -72,6 +103,15 @@ export async function pushPlatformProjectUpsert(
       },
       body: JSON.stringify(payload),
     });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location') || '';
+      return {
+        supported: true,
+        ok: false,
+        status: response.status,
+        error: summarizeUpsertFailure(url, response.status, undefined, location, true),
+      };
+    }
     const text = await response.text();
     let data: PlatformProjectUpsertResponse | undefined;
     try {
@@ -85,17 +125,26 @@ export async function pushPlatformProjectUpsert(
         ok: false,
         status: response.status,
         data,
-        error: data?.details || response.statusText,
+        error: summarizeUpsertFailure(url, response.status, data, text, response.redirected),
       };
     }
     const externalProjectId =
       data?.externalProjectId?.trim() || data?.projectId?.trim() || null;
+    if (!externalProjectId) {
+      return {
+        supported: true,
+        ok: false,
+        status: response.status,
+        data,
+        error: summarizeUpsertFailure(url, response.status, data, text, response.redirected),
+      };
+    }
     return {
       supported: true,
       ok: true,
       status: response.status,
       data: data
-        ? { ...data, externalProjectId: externalProjectId ?? data.externalProjectId }
+        ? { ...data, externalProjectId }
         : { status: 'ok', externalProjectId },
     };
   } catch (error) {

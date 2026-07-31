@@ -1,5 +1,5 @@
 import {
-  getAudionServiceApiUrl,
+  getAudionPlatformApiBase,
   getCheckionServiceApiUrl,
 } from '@/lib/constants';
 import {
@@ -21,21 +21,20 @@ type ProvisioningClientResult = {
   error?: string;
 };
 
-function getProvisioningBaseUrl(productId: PlatformProductId): string | null {
-  switch (productId) {
-    case 'checkion':
-      return getCheckionServiceApiUrl();
-    case 'audion':
-      return getAudionServiceApiUrl();
-    default:
-      return null;
-  }
-}
-
 function buildProvisioningUrl(productId: PlatformProductId, userId: string): string | null {
-  const base = getProvisioningBaseUrl(productId);
-  if (!base) return null;
-  return `${base.replace(/\/+$/, '')}/api/platform/provisioning/users/${encodeURIComponent(userId)}`;
+  const encoded = encodeURIComponent(userId);
+  if (productId === 'checkion') {
+    const base = getCheckionServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/users/${encoded}`;
+  }
+  if (productId === 'audion') {
+    const base = getAudionPlatformApiBase();
+    if (!base) return null;
+    // Platform API base already ends with `/api`.
+    return `${base.replace(/\/+$/, '')}/platform/provisioning/users/${encoded}`;
+  }
+  return null;
 }
 
 export function isPlatformProvisioningSupported(productId: PlatformProductId): boolean {
