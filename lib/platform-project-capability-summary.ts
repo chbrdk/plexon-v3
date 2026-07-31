@@ -40,7 +40,11 @@ export function resolveAudionCapability(
     externalProjectId: id,
     personaCount: 0,
     targetGroupCount: 0,
+    journeyCount: 0,
+    studyCount: 0,
     targetGroups: [],
     personas: [],
+    journeys: [],
+    studies: [],
   };
 }

@@ -6,7 +6,9 @@ import { Alert, Button, Chip, Panel, SectionChrome, Spinner, StatLede, StatLedeG
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   buildAudionChatUrl,
+  buildAudionJourneyUrl,
   buildAudionPersonaUrl,
+  buildAudionStudyUrl,
   buildAudionTargetGroupUrl,
 } from '@/lib/audion-admin-launch-url'
 import { apiPlatformProjectDashboard, getAudionWebOrigin, pathAssistantWithProject } from '@/lib/constants'
@@ -66,7 +68,9 @@ function audionStripLabel(
 ): string {
   const tg = audion.targetGroupCount ?? 0
   const personas = audion.personaCount ?? 0
-  return ` · ${tg} ${t('projects.detail.targetGroups')} · ${personas} ${t('projects.detail.personas')}`
+  const journeys = audion.journeyCount ?? 0
+  const studies = audion.studyCount ?? 0
+  return ` · ${tg} ${t('projects.detail.targetGroups')} · ${personas} ${t('projects.detail.personas')} · ${journeys} ${t('projects.detail.journeys')} · ${studies} ${t('projects.detail.studies')}`
 }
 
 export function PlatformProjectDashboard({ platformProjectId }: { platformProjectId: string }) {
@@ -116,8 +120,14 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
   const audionOrigin = getAudionWebOrigin()
   const targetGroups = data?.audion?.targetGroups ?? []
   const personas = data?.audion?.personas ?? []
+  const journeys = data?.audion?.journeys ?? []
+  const studies = data?.audion?.studies ?? []
   const catalogEmpty =
-    Boolean(data?.audion) && targetGroups.length === 0 && personas.length === 0
+    Boolean(data?.audion) &&
+    targetGroups.length === 0 &&
+    personas.length === 0 &&
+    journeys.length === 0 &&
+    studies.length === 0
   const domainScans = data?.checkion?.domainScans ?? []
   const standaloneScans = data?.checkion?.standaloneScans ?? []
   const checkionCatalogEmpty =
@@ -234,6 +244,16 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                     <StatLede
                       value={data.audion.personaCount}
                       label={t('projects.detail.personas')}
+                      kind="number"
+                    />
+                    <StatLede
+                      value={data.audion.journeyCount ?? 0}
+                      label={t('projects.detail.journeys')}
+                      kind="number"
+                    />
+                    <StatLede
+                      value={data.audion.studyCount ?? 0}
+                      label={t('projects.detail.studies')}
                       kind="number"
                     />
                   </StatLedeGroup>
@@ -426,6 +446,85 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                                 {t('projects.detail.startChat')}
                               </Button>
                             </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.journeys')}
+                    </Text>
+                    {journeys.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.audionCatalogEmptyJourneys')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {journeys.map((journey) => (
+                          <li key={journey.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {journey.name}
+                              </Text>
+                              <Text role="meta">
+                                {[
+                                  journey.status,
+                                  journey.journeyType,
+                                  `${journey.phaseCount} ${t('projects.detail.phases')}`,
+                                  journey.targetGroupName,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </Text>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                openExternal(buildAudionJourneyUrl(audionOrigin, journey.id))
+                              }
+                            >
+                              {t('projects.detail.openInAudion')}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.studies')}
+                    </Text>
+                    {studies.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.audionCatalogEmptyStudies')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {studies.map((study) => (
+                          <li key={study.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {study.name}
+                              </Text>
+                              <Text role="meta">
+                                {[
+                                  study.status,
+                                  `${study.waveCount} ${t('projects.detail.waves')}`,
+                                  study.targetUrlKey,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </Text>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                openExternal(buildAudionStudyUrl(audionOrigin, study.id))
+                              }
+                            >
+                              {t('projects.detail.openInAudion')}
+                            </Button>
                           </li>
                         ))}
                       </ul>

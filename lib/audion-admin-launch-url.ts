@@ -64,3 +64,11 @@ export function buildAudionChatUrl(
     projectId: opts.projectId,
   });
 }
+
+export function buildAudionJourneyUrl(webOrigin: string, journeyId: string): string {
+  return buildAudionAppUrl(webOrigin, `/journeys/${encodeURIComponent(journeyId)}`);
+}
+
+export function buildAudionStudyUrl(webOrigin: string, studyId: string): string {
+  return buildAudionAppUrl(webOrigin, `/studies/${encodeURIComponent(studyId)}`);
+}

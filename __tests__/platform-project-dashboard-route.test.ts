@@ -99,12 +99,25 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
       externalProjectId: 'aud-1',
       personaCount: 2,
       targetGroupCount: 1,
+      journeyCount: 1,
+      studyCount: 1,
       targetGroups: [
         { id: 'tg-1', name: 'Buyers', segment: 'B2B', personaCount: 2, status: 'active' },
       ],
       personas: [
         { id: 'p-1', name: 'Alex', role: 'Buyer', status: 'ready', targetGroupId: 'tg-1' },
       ],
+      journeys: [
+        {
+          id: 'j-1',
+          name: 'Onboarding',
+          status: 'active',
+          journeyType: 'standard',
+          phaseCount: 3,
+          targetGroupName: 'Buyers',
+        },
+      ],
+      studies: [{ id: 's-1', name: 'Checkout study', status: 'active', waveCount: 2, targetUrlKey: null }],
     });
 
     const { GET } = await import('@/app/api/platform/projects/[platformProjectId]/dashboard/route');
@@ -119,8 +132,12 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.checkion?.standaloneScans[0]?.url).toBe('https://acme.test/');
     expect(body.audion?.personaCount).toBe(2);
     expect(body.audion?.targetGroupCount).toBe(1);
+    expect(body.audion?.journeyCount).toBe(1);
+    expect(body.audion?.studyCount).toBe(1);
     expect(body.audion?.targetGroups).toHaveLength(1);
     expect(body.audion?.personas[0]?.name).toBe('Alex');
+    expect(body.audion?.journeys[0]?.name).toBe('Onboarding');
+    expect(body.audion?.studies[0]?.name).toBe('Checkout study');
     expect(body.links.audionProject).toContain('platformCompanyId=c1');
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
   });
@@ -174,8 +191,12 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
       externalProjectId: 'proj-test3-ms8ysh2m',
       personaCount: 0,
       targetGroupCount: 0,
+      journeyCount: 0,
+      studyCount: 0,
       targetGroups: [],
       personas: [],
+      journeys: [],
+      studies: [],
     });
     expect(body.checkion).toBeNull();
     expect(body.links.audionProject).toContain('platformProjectHint=p1');

@@ -11,8 +11,12 @@ describe('platform-project-capability-summary', () => {
         externalProjectId: 'live-1',
         personaCount: 4,
         targetGroupCount: 1,
+        journeyCount: 0,
+        studyCount: 0,
         targetGroups: [],
         personas: [],
+        journeys: [],
+        studies: [],
       },
       [{ productId: 'audion', externalProjectId: 'bind-1', syncStatus: 'in_sync' }]
     );
@@ -20,8 +24,12 @@ describe('platform-project-capability-summary', () => {
       externalProjectId: 'live-1',
       personaCount: 4,
       targetGroupCount: 1,
+      journeyCount: 0,
+      studyCount: 0,
       targetGroups: [],
       personas: [],
+      journeys: [],
+      studies: [],
     });
   });
 
@@ -33,8 +41,12 @@ describe('platform-project-capability-summary', () => {
       externalProjectId: 'proj-test3',
       personaCount: 0,
       targetGroupCount: 0,
+      journeyCount: 0,
+      studyCount: 0,
       targetGroups: [],
       personas: [],
+      journeys: [],
+      studies: [],
     });
 
     const checkionEmpty = resolveCheckionCapability(null, [

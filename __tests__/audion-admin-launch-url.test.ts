@@ -5,7 +5,9 @@ import {
   buildAudionAdminLaunchUrl,
   buildAudionAppUrl,
   buildAudionChatUrl,
+  buildAudionJourneyUrl,
   buildAudionPersonaUrl,
+  buildAudionStudyUrl,
   buildAudionTargetGroupUrl,
 } from '@/lib/audion-admin-launch-url';
 
@@ -31,12 +33,14 @@ describe('buildAudionAdminLaunchUrl', () => {
 describe('buildAudionAppUrl helpers', () => {
   const origin = 'https://audion.example';
 
-  it('builds target group, persona, and chat deep-links', () => {
+  it('builds target group, persona, chat, journey, and study deep-links', () => {
     expect(buildAudionTargetGroupUrl(origin, 'tg-1')).toBe('https://audion.example/target-groups/tg-1');
     expect(buildAudionPersonaUrl(origin, 'p-1')).toBe('https://audion.example/personas/p-1');
     expect(buildAudionChatUrl(origin, { personaId: 'p-1', projectId: 'proj-1' })).toBe(
       'https://audion.example/chat?personaId=p-1&projectId=proj-1'
     );
+    expect(buildAudionJourneyUrl(origin, 'j-1')).toBe('https://audion.example/journeys/j-1');
+    expect(buildAudionStudyUrl(origin, 's-1')).toBe('https://audion.example/studies/s-1');
   });
 
   it('omits empty query values', () => {

@@ -67,22 +67,49 @@ export type AudionCatalogPersona = {
   targetGroupId?: string | null;
 };
 
+export type AudionCatalogJourney = {
+  id: string;
+  name: string;
+  status: string;
+  journeyType: string;
+  phaseCount: number;
+  targetGroupName?: string | null;
+};
+
+export type AudionCatalogStudy = {
+  id: string;
+  name: string;
+  status: string;
+  waveCount: number;
+  targetUrlKey?: string | null;
+};
+
 export type AudionProjectSummary = {
   externalProjectId: string;
   personaCount: number;
   targetGroupCount: number;
+  journeyCount: number;
+  studyCount: number;
   targetGroups: AudionCatalogTargetGroup[];
   personas: AudionCatalogPersona[];
+  journeys: AudionCatalogJourney[];
+  studies: AudionCatalogStudy[];
 };
 
 function normalizeAudionSummary(data: AudionProjectSummary): AudionProjectSummary | null {
   if (!data?.externalProjectId) return null;
+  const journeys = Array.isArray(data.journeys) ? data.journeys : [];
+  const studies = Array.isArray(data.studies) ? data.studies : [];
   return {
     externalProjectId: data.externalProjectId,
     personaCount: Number(data.personaCount) || 0,
     targetGroupCount: Number(data.targetGroupCount) || 0,
+    journeyCount: Number(data.journeyCount) || journeys.length,
+    studyCount: Number(data.studyCount) || studies.length,
     targetGroups: Array.isArray(data.targetGroups) ? data.targetGroups : [],
     personas: Array.isArray(data.personas) ? data.personas : [],
+    journeys,
+    studies,
   };
 }
 

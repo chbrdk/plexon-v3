@@ -73,8 +73,12 @@ describe('GET /api/platform/me/project-insights', () => {
       externalProjectId: `aud-${id}`,
       personaCount: 2,
       targetGroupCount: 1,
+      journeyCount: 0,
+      studyCount: 0,
       targetGroups: [],
       personas: [],
+      journeys: [],
+      studies: [],
     }));
 
     const { GET } = await import('@/app/api/platform/me/project-insights/route');
