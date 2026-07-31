@@ -595,7 +595,7 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
               ...(report.appendix.scanId ? [{ label: 'Scan-ID', value: report.appendix.scanId }] : []),
               ...(report.appendix.geoJobId ? [{ label: 'GEO Job-ID', value: report.appendix.geoJobId }] : []),
               ...(report.appendix.platformProjectId
-                ? [{ label: 'Plattform-Projekt', value: report.appendix.platformProjectId }]
+                ? [{ label: 'Projekt', value: report.appendix.platformProjectId }]
                 : []),
             ]}
           />
