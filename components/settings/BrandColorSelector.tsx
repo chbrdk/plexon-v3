@@ -3,31 +3,21 @@
 import { useEffect, useState } from 'react'
 import {
   BRAND_COLOR_DEFAULT,
+  BRAND_COLOR_OPTIONS,
   BRAND_COLOR_STORAGE_KEY,
   applyBrandColorVars,
 } from '@/lib/brand-color-utils'
 import { useI18n } from '@/components/i18n/I18nProvider'
 
-const OPTIONS = [
-  { varName: '--color-secondary-dx-purple', preview: '#b638ff', labelKey: 'purple' },
-  { varName: '--color-secondary-dx-blue', preview: '#3b82f6', labelKey: 'blue' },
-  { varName: '--color-secondary-dx-pink', preview: '#f256b6', labelKey: 'pink' },
-  { varName: '--color-secondary-dx-orange', preview: '#ff6a3b', labelKey: 'orange' },
-  { varName: '--color-secondary-dx-green', preview: '#00ca55', labelKey: 'green' },
-  { varName: '--color-secondary-dx-yellow', preview: '#fef14d', labelKey: 'yellow' },
-  { varName: '--color-secondary-dx-grey-light', preview: '#d4d2d2', labelKey: 'grey' },
-  { varName: '--audion-light-border-color', preview: '#0f172a', labelKey: 'default' },
-] as const
-
-const LABELS: Record<(typeof OPTIONS)[number]['labelKey'], { de: string; en: string }> = {
-  purple: { de: 'Lila', en: 'Purple' },
-  blue: { de: 'Blau', en: 'Blue' },
-  pink: { de: 'Pink', en: 'Pink' },
-  orange: { de: 'Orange', en: 'Orange' },
-  green: { de: 'Grün', en: 'Green' },
-  yellow: { de: 'Gelb', en: 'Yellow' },
-  grey: { de: 'Grau', en: 'Grey' },
-  default: { de: 'Standard', en: 'Default' },
+const LABELS: Record<string, { de: string; en: string }> = {
+  '--color-secondary-dx-purple': { de: 'Lila', en: 'Purple' },
+  '--color-secondary-dx-blue': { de: 'Blau', en: 'Blue' },
+  '--color-secondary-dx-pink': { de: 'Pink', en: 'Pink' },
+  '--color-secondary-dx-orange': { de: 'Orange', en: 'Orange' },
+  '--color-secondary-dx-green': { de: 'Grün', en: 'Green' },
+  '--color-secondary-dx-yellow': { de: 'Gelb', en: 'Yellow' },
+  '--color-secondary-dx-grey-light': { de: 'Grau', en: 'Grey' },
+  '--audion-light-border-color': { de: 'Standard', en: 'Default' },
 }
 
 export function BrandColorSelector() {
@@ -54,9 +44,9 @@ export function BrandColorSelector() {
 
   return (
     <div className="plexon-brand-swatches" role="group" aria-label={t('settings.appearance.title')}>
-      {OPTIONS.map((option) => {
+      {BRAND_COLOR_OPTIONS.map((option) => {
         const isSelected = selectedColor === option.varName
-        const label = LABELS[option.labelKey][lang]
+        const label = LABELS[option.varName]?.[lang] ?? option.varName
         return (
           <button
             key={option.varName}
@@ -66,7 +56,10 @@ export function BrandColorSelector() {
             className="plexon-brand-swatch"
             data-selected={isSelected ? 'true' : undefined}
             onClick={() => handleColorSelect(option.varName)}
-            style={{ backgroundColor: option.preview }}
+            style={{
+              backgroundColor: option.preview,
+              color: option.textColor,
+            }}
           >
             <span className="plexon-brand-swatch__label">{label}</span>
             <span className="plexon-brand-swatch__hex">{option.preview}</span>

@@ -301,6 +301,31 @@
     "title": "Product catalog",
     "subtitle": "Federated products, entry points, and platform capabilities in one place."
   },
+  "projects": {
+    "detail": {
+      "title": "Platform project",
+      "subtitle": "Federated product links and sync status.",
+      "missingId": "Missing project id.",
+      "loadError": "Failed to load project.",
+      "domain": "Domain",
+      "productsTitle": "Linked products",
+      "productsSubtitle": "Open CHECKION or AUDION for this platform project.",
+      "bindingsTitle": "Product bindings",
+      "bindingsSubtitle": "Sync state per federated product.",
+      "bindingsEmpty": "No product bindings yet.",
+      "linked": "Linked",
+      "notLinked": "Not linked",
+      "scans": "Scans",
+      "personas": "Personas",
+      "localId": "Local id",
+      "externalId": "External id",
+      "noExternalId": "No external project id",
+      "checkionEmpty": "No summary yet — sync the product or configure CHECKION API URL / secret.",
+      "audionEmpty": "No summary yet — sync the product or configure AUDION API URL / secret.",
+      "openCheckion": "Open CHECKION",
+      "openAudion": "Open AUDION"
+    }
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Profile, appearance, security and API access.",

@@ -301,6 +301,31 @@
     "title": "Produktkatalog",
     "subtitle": "Föderierte Produkte, Einstiegspunkte und Plattform-Fähigkeiten an einem Ort."
   },
+  "projects": {
+    "detail": {
+      "title": "Plattformprojekt",
+      "subtitle": "Föderierte Produktlinks und Sync-Status.",
+      "missingId": "Projekt-ID fehlt.",
+      "loadError": "Projekt konnte nicht geladen werden.",
+      "domain": "Domain",
+      "productsTitle": "Verknüpfte Produkte",
+      "productsSubtitle": "CHECKION oder AUDION für dieses Plattformprojekt öffnen.",
+      "bindingsTitle": "Produkt-Bindings",
+      "bindingsSubtitle": "Sync-Status je föderiertem Produkt.",
+      "bindingsEmpty": "Noch keine Produkt-Bindings.",
+      "linked": "Verknüpft",
+      "notLinked": "Nicht verknüpft",
+      "scans": "Scans",
+      "personas": "Personas",
+      "localId": "Lokale ID",
+      "externalId": "Externe ID",
+      "noExternalId": "Keine externe Projekt-ID",
+      "checkionEmpty": "Noch keine Zusammenfassung — Produkt syncen oder CHECKION API URL / Secret setzen.",
+      "audionEmpty": "Noch keine Zusammenfassung — Produkt syncen oder AUDION API URL / Secret setzen.",
+      "openCheckion": "CHECKION öffnen",
+      "openAudion": "AUDION öffnen"
+    }
+  },
   "settings": {
     "title": "Einstellungen",
     "subtitle": "Profil, Erscheinungsbild, Sicherheit und API-Zugang.",

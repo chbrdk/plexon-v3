@@ -27,7 +27,7 @@ This is **not** a 1:1 visual migration of legacy JSX.
 | 0 | `app-shell.md` + auth | shell · auth | Done — magazine shell + auth on `@msqdx/ui` |
 | 1 | `ui-migrate-dashboard.md` | `/` | Partial — adapters; **revisit** for challenge pass |
 | 2 | `ui-migrate-settings.md` | `/settings` | Rebuild like Audion settings (Field / ToggleGroup) |
-| 3 | `ui-migrate-products.md` | `/products` · `/projects/[id]` | Catalog done; detail rebuild |
+| 3 | `ui-migrate-products.md` | `/products` · `/projects/[id]` | Done — catalog + project detail |
 | 4 | `ui-migrate-admin.md` | `/admin*` | Rebuild admin tables/forms on DS |
 | 5 | `ui-migrate-assistant.md` | `/assistant*` | **Compose Audion chat chrome** — do not redesign chat |
 | 6 | `ui-migrate-event-quick-check.md` | `/event-quick-check*` | Rebuild workflow UI; keep scan/report contracts |

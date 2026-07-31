@@ -156,6 +156,24 @@
   text-shadow: 0 1px 2px color-mix(in srgb, #000 35%, transparent);
 }
 
+/* Primary DS buttons follow brand accent + contrast from BrandColorSelector */
+.ds-btn--primary {
+  background: var(--accent, var(--color-theme-accent, #00ca55));
+  color: var(--color-theme-accent-contrast, #1a150c);
+}
+
+.ds-btn--link {
+  color: var(--accent, var(--color-theme-accent, #00ca55));
+}
+
+.ds-chip[data-selected='true'],
+.ds-toggle-group .ds-chip[aria-pressed='true'],
+.locale-toggle .ds-chip.ds-chip--selected {
+  background: var(--accent, var(--color-theme-accent, #00ca55));
+  color: var(--color-theme-accent-contrast, #1a150c);
+  border-color: transparent;
+}
+
 .ds-page-title.page-title.plexon-page-title--context {
   font-size: clamp(1rem, 1.8vw, 1.25rem);
   font-weight: var(--weight-light);
@@ -238,6 +256,55 @@
 
 .plexon-magazine-card:hover {
   border-color: var(--accent);
+}
+
+.plexon-project-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-3, 0.85rem);
+}
+
+.plexon-project-product-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.plexon-project-bindings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+}
+
+.plexon-project-binding {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--space-3, 0.85rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel, 12px);
+}
+
+.plexon-project-binding__main {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.plexon-sync-chip--success {
+  border-color: color-mix(in srgb, #00ca55 45%, var(--line));
+}
+
+.plexon-sync-chip--warning {
+  border-color: color-mix(in srgb, #fef14d 55%, var(--line));
+}
+
+.plexon-sync-chip--danger {
+  border-color: color-mix(in srgb, #ff4d4f 45%, var(--line));
 }
 
 .plexon-chat-bubble {
