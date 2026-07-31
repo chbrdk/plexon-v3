@@ -3,7 +3,8 @@
 **Status:** Accepted — Wave 3 done — 2026-07-31 (challenge + reuse)  
 **Routes:** `/products` · `/projects/[platformProjectId]`  
 **Implements:** `app/products/page.tsx` · `components/products/**` · `app/projects/[platformProjectId]/page.tsx`  
-**DS:** `SectionChrome`, `Panel`, `Text`, `Button`, `Chip`, `Spinner`, `Alert`, `StatLede`
+**DS:** `SectionChrome`, `Panel`, `Text`, `Button`, `Chip`, `Spinner`, `Alert`, `StatLede`  
+**Product model:** `specs/domain/collection-projects.md` — `/projects/[id]` is Collection home; CHECKION/AUDION are capabilities.
 
 ## Challenge — keep / reshape / drop
 
@@ -12,8 +13,8 @@
 | Product catalog grid + launch | **keep** | Already `@msqdx/ui` (`ProductCatalog`) |
 | Runtime / access chips | **keep** | Chip status tones |
 | Federated entry-point open | **keep** | Same `buildFederatedLaunchHref` / paths |
-| Platform project name / status / domain | **reshape** | SectionChrome + Chip + Text (no MUI h4) |
-| CHECKION / AUDION summaries | **reshape** | Panel bands + StatLede; external open via Button |
+| Collection name / status / domain | **reshape** | SectionChrome + Chip + Text (no MUI h4); copy = Projekt not “platform project type” |
+| CHECKION / AUDION summaries | **reshape** | Panel bands + StatLede as **capabilities**; external open via Button |
 | Product bindings list | **keep** | Compact list + sync Chip |
 | Loading / error | **reshape** | Spinner + Alert |
 | Boxed MUI cards / Typography / Link | **drop** | No `@mui` / `@msqdx/react` |

@@ -3,7 +3,8 @@
 **Status:** Draft — Wave 5 (challenge + reuse)  
 **Route:** `/assistant*`  
 **Layout:** full-height workstation  
-**Reference:** `audion-v3` chat workspace/panel · `@msqdx/ui` chat CSS · `knowledge/ui-rebuild-reuse.md`
+**Reference:** `audion-v3` chat workspace/panel · `@msqdx/ui` chat CSS · `knowledge/ui-rebuild-reuse.md`  
+**Product model:** `specs/domain/collection-projects.md` — assistant scopes Collections (`platformProjectId`), not product-only project types.
 
 ## Challenge — keep / reshape / drop
 
@@ -13,6 +14,7 @@
 | Chat chrome (turns, composer, send) | **reshape** | **Compose Audion chat chrome** — do not invent Plexon-only chat UI |
 | History / share flyouts | **reshape** | `Flyout` + Audion flyout pattern |
 | Generative UI blocks / reports | **keep** (capability) | Rebuild block chrome on Panel/Text; challenge redundant organisms |
+| Project create / scope | **reshape** | Speak Collections; Phase 1 drops `audion`/`checkion`-only create targets |
 | Legacy glass bubbles / MsqdxTypography chat | **drop** | Replace with `.chat-*` DS classes |
 | Duplicate “capabilities overview” tables if obsolete | **challenge** | Drop or move to docs if unused |
 

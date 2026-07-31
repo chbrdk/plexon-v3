@@ -959,9 +959,34 @@ export default function DashboardPage() {
                         color: 'var(--color-text-on-light)',
                       }}
                     >
-                      <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.25 }}>
-                        {row.platformProject.name ?? pid}
-                      </DashText>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="flex-start"
+                        justifyContent="space-between"
+                        sx={{ mb: 0.25 }}
+                      >
+                        <DashText variant="subtitle1" weight="semibold">
+                          {row.platformProject.name ?? pid}
+                        </DashText>
+                        {!canOpenPlatform ? (
+                          <span
+                            title={t('dashboard.platformInsightsLegacyHint')}
+                            style={{
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              padding: '0.15rem 0.45rem',
+                              borderRadius: 999,
+                              border: '1px solid var(--color-secondary-dx-grey-light-tint)',
+                              color: 'var(--color-text-secondary)',
+                              flexShrink: 0,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {t('dashboard.platformInsightsLegacyBadge')}
+                          </span>
+                        ) : null}
+                      </Stack>
                       {row.platformProject.domain ? (
                         <DashText
                           variant="caption"
@@ -972,6 +997,14 @@ export default function DashboardPage() {
                       ) : (
                         <Box sx={{ mb: 1.5 }} />
                       )}
+                      {!canOpenPlatform ? (
+                        <DashText
+                          variant="caption"
+                          sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 1 }}
+                        >
+                          {t('dashboard.platformInsightsLegacyHint')}
+                        </DashText>
+                      ) : null}
                       <Stack spacing={1} sx={{ mb: 2 }}>
                         <DashText variant="body2">
                           {row.checkion != null

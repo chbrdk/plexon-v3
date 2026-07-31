@@ -28,8 +28,9 @@ function trimUrl(base: string): string {
 }
 
 /**
- * Product-only insight cards: CHECKION/AUDION rows from product DBs that are not already represented
- * by an accessible platform project (same `platform_project_id`).
+ * Product-only insight cards (legacy, 2C): CHECKION/AUDION rows from product DBs that are not
+ * already represented by an accessible Collection (`platform_projects`). Shown as “not linked yet”
+ * — not a second project type. See `specs/domain/collection-projects.md`.
  */
 export function buildStandaloneProductInsightRows(input: {
   checkionBase: string;

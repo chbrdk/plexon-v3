@@ -4,6 +4,7 @@
 **Knowledge:** `knowledge/ui-rebuild-msqdx-ui.md` · `knowledge/ui-rebuild-reuse.md`  
 **Target DS:** `@msqdx/ui` + `@msqdx/ui-tokens` (sibling `msqdx-ui`)  
 **Reference product:** `audion-v3` (composition patterns, chat workspace)  
+**Product model:** `specs/domain/collection-projects.md` (Collection = one project; capabilities = CHECKION/AUDION)  
 **Not:** real MUI · not `@msqdx/react` · not “skin the old screen”
 
 ## Goal
@@ -29,7 +30,7 @@ This is **not** a 1:1 visual migration of legacy JSX.
 | 2 | `ui-migrate-settings.md` | `/settings` | Rebuild like Audion settings (Field / ToggleGroup) |
 | 3 | `ui-migrate-products.md` | `/products` · `/projects/[id]` | Done — catalog + project detail |
 | 4 | `ui-migrate-admin.md` | `/admin*` | Done — tables/forms on DS |
-| 5 | `ui-migrate-assistant.md` | `/assistant*` | **Compose Audion chat chrome** — do not redesign chat |
+| 5 | `ui-migrate-assistant.md` | `/assistant*` | **Compose Audion chat chrome** — Collection project language |
 | 6 | `ui-migrate-event-quick-check.md` | `/event-quick-check*` | Rebuild workflow UI; keep scan/report contracts |
 | 7 | `ui-migrate-board.md` | `/board*` | Board chrome on DS; isolate Prismion; remove bridges |
 

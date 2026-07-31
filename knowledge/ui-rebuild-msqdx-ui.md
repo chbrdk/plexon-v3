@@ -16,18 +16,29 @@ Challenge keep/reshape/drop every wave. Reuse Audion chat/settings patterns and 
 Index: `specs/domain/ui-migrate.md`  
 Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-products.md` · `ui-migrate-admin.md` · `ui-migrate-assistant.md` · `ui-migrate-event-quick-check.md` · `ui-migrate-board.md`
 
+**Product model (parallel to UI waves):** `specs/domain/collection-projects.md` — user sees one **Collection** project; CHECKION/AUDION are capabilities. Phase 0 = spec + copy; create enforcement / migration deferred (Phases 1–3 in that spec).
+
 ## Progress
 
 | Wave | Surface | Status |
 |------|---------|--------|
 | 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors` until waves clear shim gaps |
-| 1 | Dashboard `/` | adapter pass done; **challenge revisit** open (admin-on-home, Dash* adapters) |
+| 1 | Dashboard `/` | adapter pass done; **challenge revisit** open (admin-on-home, Dash* adapters); insights copy = Collections |
 | 2 | Settings `/settings` | done — Audion-like SectionChrome/Field/ToggleGroup; theme + brand; APIs kept |
-| 3 | Products + Platform projects | done — catalog + project detail on SectionChrome/Panel/StatLede |
+| 3 | Products + Platform projects | done — catalog + project detail on SectionChrome/Panel/StatLede; Collection wording |
 | 4 | Admin console | done — overview/users/companies/detail on SectionChrome/Field/table |
-| 5 | Assistant | pending — **compose Audion chat chrome** |
+| 5 | Assistant | pending — **compose Audion chat chrome** + Collection project language |
 | 6 | Event Quick Check | pending — rebuild workflow UI |
 | 7 | Board + legacy DS removal | pending — bridge removal |
+
+### Collection projects (domain)
+
+| Phase | Status |
+|-------|--------|
+| 0 Spec + UX language | done — 2026-07-31 |
+| 1 Create always both | deferred |
+| 2 Canonical project home UX | deferred |
+| 3 Legacy backfill | deferred (2C) |
 
 ## Compatibility (temporary)
 

@@ -1,9 +1,14 @@
-# Zentrale Plattform-Projekte (PLEXON)
+# Collection projects (PLEXON) — central creation
 
-- **Quelle der Wahrheit:** `platform_projects` in PLEXON, scoped unter einer **Company**.
-- **Spiegel:** CHECKION und AUDION erhalten lokale `projects`-Zeilen mit `platform_project_id` und werden per **Service-Provisioning** (`PUT .../platform/provisioning/projects/{id}`) angelegt/aktualisiert.
-- **AUDION-first:** Legt AUDION ein Projekt an und soll CHECKION spiegeln, ruft die AUDION-API PLEXON per Service-Secret auf: `POST /api/platform/provisioning/audion-project-origin` (Body: `audionProjectId`, `name`, `domain?`, `ownerPlexonUserId`, `platformCompanyId`). PLEXON legt `platform_projects` an, setzt das **AUDION**-Binding auf die bestehende AUDION-UUID und synchronisiert nur **CHECKION** (`onlyProducts: ['checkion']`). AUDION-Umgebung: `PLEXON_API_BASE_URL` (oder `PLEXON_AUTH_URL`), `PLEXON_SERVICE_SECRET`; Request-Feld `platform_company_id` ist Pflicht, wenn Nutzer `plexon_user_id` hat und die PLEXON-URL + Secret gesetzt sind.
-- **Zugriff:** `user_platform_project_assignments` (PLEXON) wird bei User-Provisioning in produkt-lokale `projectAssignments` expandiert, sobald **Bindings** (`platform_project_product_bindings`) je Produkt gesetzt sind. **Dashboard „Deine Plattform-Projekte“** listet zusätzlich Plattform-Projekte auf, die sich aus **Entitlements-Projektzuweisungen** (`user_product_project_assignments`) per Binding auflösen lassen (gleiche CHECKION-/AUDION-IDs wie in den Entitlements).
-- **Dashboard:** PLEXON `GET /api/platform/projects/{id}/dashboard` (Session) aggregiert lesend CHECKION/AUDION über dieselben Service-Header inkl. `X-Plexon-User-Id`.
-- **Open-AUDION-Links:** Dashboard und `GET /api/platform/me/project-insights` setzen die AUDION-Admin-URL mit `platformProjectHint` (wenn ein AUDION-Summary existiert) und immer mit **`platformCompanyId`** (= `platform_projects.company_id`), damit die AUDION-Web-App `platform_company_id` für neue Projekte übernehmen kann. Builder: `lib/audion-admin-launch-url.ts`.
-- **Federation-Contract:** `2026-05-plexon-federation-v3` (Projekt-Upsert + Summary-GET).
+**Product model:** `specs/domain/collection-projects.md` (Accepted — Collection = sole user-facing project).
+
+- **Source of truth:** `platform_projects` in PLEXON, scoped under a **Company**. User language: **Projekt / Collection** — not “platform vs product project types.”
+- **Mirrors (capabilities):** CHECKION and AUDION keep local `projects` rows with `platform_project_id`, created/updated via **service provisioning** (`PUT .../platform/provisioning/projects/{id}`).
+- **Create invariant (1A):** Every **new** Collection always gets binding placeholders for **checkion** and **audion**, then syncs **both**. A failed product sync is `pending`/`failed` on that capability — not a finished product-only project.
+- **AUDION-first origin:** AUDION may create locally, then call `POST /api/platform/provisioning/audion-project-origin` (Body: `audionProjectId`, `name`, `domain?`, `ownerPlexonUserId`, `platformCompanyId`). PLEXON creates `platform_projects`, binds the existing **AUDION** UUID, and must bring **CHECKION** into the same Collection (sync checkion; end state = both capabilities). AUDION env: `PLEXON_API_BASE_URL` (or `PLEXON_AUTH_URL`), `PLEXON_SERVICE_SECRET`; `platform_company_id` required when the user has `plexon_user_id` and PLEXON URL + secret are set.
+  - *Legacy note:* older flows used `onlyProducts: ['checkion']` after origin. Target remains Collection + both; Phase 1 hardens enforcement.
+- **Access:** `user_platform_project_assignments` (PLEXON) expands into product-local `projectAssignments` when bindings have `external_project_id`. Dashboard **“Your projects”** also resolves Collections from entitlement project mappings via bindings.
+- **Legacy (2C):** Product-only rows may still appear in insights as **not linked yet** (`openPlatformProject: false`, synthetic ids). No backfill in Phase 0; see migrate doc for later.
+- **Dashboard API:** `GET /api/platform/projects/{id}/dashboard` (session) aggregates CHECKION/AUDION with service headers incl. `X-Plexon-User-Id`.
+- **Open-AUDION links:** Dashboard and `GET /api/platform/me/project-insights` set AUDION admin URL with `platformProjectHint` (when AUDION summary exists) and always **`platformCompanyId`** (`platform_projects.company_id`). Builder: `lib/audion-admin-launch-url.ts`.
+- **Federation contract:** `2026-05-plexon-federation-v3` (project upsert + summary GET).
