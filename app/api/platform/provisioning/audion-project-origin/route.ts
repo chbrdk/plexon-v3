@@ -79,6 +79,8 @@ export async function POST(request: Request) {
     if (!existingProject) {
       return apiError('Inconsistent platform project binding', API_STATUS.INTERNAL_ERROR);
     }
+    // Phase 1: Collection must have both capabilities — repair missing CHECKION mirror.
+    await ensureBindingPlaceholders(existingPlatformId);
     let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
     if (!checkionId) {
       try {
@@ -123,6 +125,7 @@ export async function POST(request: Request) {
       lastSyncAt: new Date(),
     });
 
+    // AUDION already bound; sync CHECKION so Collection end-state has both capabilities.
     const results = await syncPlatformProjectToProducts(platformProjectId, {
       source: 'plexon-audion-project-origin',
       onlyProducts: ['checkion'],

@@ -7,4 +7,4 @@
 5. Tests with every change: UI smoke, contract checks, and build validation.
 6. Prod control plane is `chbrdk/PLEXON` — do not deploy Coolify prod from this repo. This island targets federation contract `2026-05-plexon-federation-v3`.
 7. No MUI and no `@msqdx/react` for new or rebuilt surfaces. Do not expand `lib/mui-shim.tsx` / the react bridge — rebuild the importing surface instead.
-8. **Do not invent product-only projects in new UX.** New creates target Collections with both product mirrors (Phase 1 enforcement pending; see collection-projects spec).
+8. **Do not invent product-only projects in new UX.** Creates are Collections with both product mirrors (`specs/domain/collection-projects.md` Phase 1).

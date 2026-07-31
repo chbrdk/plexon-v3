@@ -5,13 +5,19 @@ import path from 'node:path'
 const root = path.resolve(__dirname, '..')
 
 describe('collection projects domain (phase 0)', () => {
-  it('spec documents 1A create-both and deferred enforcement', () => {
+  it('spec documents 1A create-both and Phase 1 done', () => {
     const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
     expect(spec).toContain('1A')
     expect(spec).toContain('2C')
     expect(spec).toContain('ensureBindingPlaceholders')
-    expect(spec).toContain('Phase 1')
-    expect(spec).toContain('Out of scope Phase 0')
+    expect(spec).toContain('Phase 1 (done')
+  })
+
+  it('create-project-scope always returns platform', () => {
+    const scope = readFileSync(path.join(root, 'lib/assistant/create-project-scope.ts'), 'utf8')
+    expect(scope).toContain("export type CreateProjectTarget = 'platform'")
+    expect(scope).toContain("return 'platform'")
+    expect(scope).not.toContain("return 'audion'")
   })
 
   it('central-creation knowledge matches Collection always-both target', () => {

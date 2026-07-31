@@ -9,6 +9,7 @@ import {
 } from '@/lib/db/platform-projects';
 import { ensureBindingPlaceholders } from '@/lib/db/platform-project-bindings';
 import { isPlatformProjectStatus } from '@/lib/platform-companies';
+import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service';
 
 async function authorizeCompanyManage(request: Request, companyId: string) {
   const admin = await requireAdmin(request);
@@ -69,7 +70,9 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     createdByUserId: user.id,
   });
   await ensureBindingPlaceholders(id);
+  // Phase 1: Collection create always provisions CHECKION + AUDION (failures stay on bindings).
+  const syncResults = await syncPlatformProjectToProducts(id, { source: 'plexon-admin-create' });
   const { getPlatformProjectById } = await import('@/lib/db/platform-projects');
   const row = await getPlatformProjectById(id);
-  return Response.json(row, { status: 201 });
+  return Response.json({ ...row, syncResults }, { status: 201 });
 }

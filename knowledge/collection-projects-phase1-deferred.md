@@ -1,14 +1,17 @@
-# Collection projects — Phase 1 deferred
+# Collection projects — Phase 1 done
 
-Phase 0 (spec + UX language) is done. **Do not** start create-path enforcement until product explicitly accepts Phase 1.
+Phase 1 create enforcement shipped 2026-07-31.
 
-## When Phase 1 starts
+## What changed
 
-Enforce Collection + both product mirrors on create:
+- Assistant: all project-create intents → Collection (`create_project`); product-only targets removed from `detectCreateProjectTarget`.
+- Legacy audion/checkion create handlers redirect to Collection workflow.
+- Admin + `/api/platform/companies/.../platform-projects` POST sync CHECKION **and** AUDION after placeholders.
+- AUDION-origin end state remains Collection with both capabilities (CHECKION sync after AUDION bind; idempotent repair).
 
-- `lib/assistant/create-project-scope.ts` — drop `audion` / `checkion` create targets (or map to Collection + both)
-- Admin company project create + sync — always both products
-- `audion-project-origin` — end state Collection with AUDION bound and CHECKION synced
-- Insights — new cards require real `platformProjectId`
+## Next
 
-See `specs/domain/collection-projects.md` Deferred table.
+- Phase 2: canonical project-home UX.
+- Phase 3: legacy backfill (2C).
+
+See `specs/domain/collection-projects.md`.

@@ -10,6 +10,7 @@ import { upsertUserPlatformProjectAssignment } from '@/lib/db/user-platform-proj
 import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning';
 import { isPlatformProjectStatus } from '@/lib/platform-companies';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
+import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service';
 
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id: companyId } = await ctx.params;
@@ -59,9 +60,13 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   });
   await ensureBindingPlaceholders(id);
   await upsertUserPlatformProjectAssignment(user.id, id, PLATFORM_PROJECT_ASSIGNMENT_ROLE.ADMIN);
+  // Phase 1: Collection create always provisions CHECKION + AUDION.
+  const syncResults = await syncPlatformProjectToProducts(id, {
+    source: 'plexon-platform-create',
+  });
 
   const row = await getPlatformProjectById(id);
-  return Response.json(row, { status: 201 });
+  return Response.json({ ...row, syncResults }, { status: 201 });
 }
 
 export async function GET(request: Request, ctx: { params: Promise<{ id: string }> }) {

@@ -1,4 +1,5 @@
-export type CreateProjectTarget = 'platform' | 'audion' | 'checkion';
+/** Collection create target — Phase 1: always PLEXON Collection (both product mirrors). */
+export type CreateProjectTarget = 'platform';
 
 const AUDIENCE_ENTITY_PATTERN = /\b(zielgruppe|zielgruppen|target\s*groups?|personas?)\b/i;
 
@@ -42,22 +43,11 @@ function cleanProjectNameCandidate(raw: string): string | undefined {
 }
 
 /**
- * Detects whether the user wants a PLEXON platform project or a product-local project.
- * "in audion anlegen" / "nur audion" → audion (no PLEXON-first workflow).
+ * Create target is always a Collection (`platform`).
+ * Product mentions ("in audion", "nur checkion") no longer select a product-only project type —
+ * see `specs/domain/collection-projects.md` Phase 1.
  */
-export function detectCreateProjectTarget(text: string): CreateProjectTarget {
-  const hasAudion = /\baudion\b/i.test(text);
-  const hasCheckion = /\bcheckion\b/i.test(text);
-  const hasPlatform = /\b(plexon|plattform|platform)\b/i.test(text);
-  const audionOnly = /\b(nur|only|ausschließlich)\s+(in\s+)?audion\b/i.test(text);
-  const checkionOnly = /\b(nur|only|ausschließlich)\s+(in\s+)?checkion\b/i.test(text);
-
-  if (audionOnly) return 'audion';
-  if (checkionOnly) return 'checkion';
-  if (hasPlatform) return 'platform';
-  if (hasAudion && !hasCheckion) return 'audion';
-  if (hasCheckion && !hasAudion) return 'checkion';
-  if (hasAudion && hasCheckion) return 'platform';
+export function detectCreateProjectTarget(_text: string): CreateProjectTarget {
   return 'platform';
 }
 
@@ -90,7 +80,7 @@ function isExplicitProjectCreateIntent(text: string): boolean {
 
 /**
  * Cross-product workflows (e.g. CHECKION project → AUDION target groups) must not
- * hit the deterministic create_platform_project / create_audion_project handlers.
+ * hit the deterministic create_platform_project handlers.
  */
 export function isAudienceWorkflowIntent(text: string): boolean {
   if (!AUDIENCE_ENTITY_PATTERN.test(text)) return false;
@@ -112,7 +102,7 @@ export function isAudienceWorkflowIntent(text: string): boolean {
   return false;
 }
 
-/** True when the prompt should run a deterministic PLEXON/AUDION/CHECKION project-create workflow. */
+/** True when the prompt should run a deterministic Collection project-create workflow. */
 export function matchesCreateProjectIntent(text: string, patterns: RegExp[]): boolean {
   if (isAudienceWorkflowIntent(text)) return false;
 
@@ -131,7 +121,8 @@ export function matchesCreateProjectIntent(text: string, patterns: RegExp[]): bo
     /\b(lege|erstelle)\b.*\b(in\s+)?audion\b/i.test(text) ||
     /\b(lege|erstelle)\b.*\b(in\s+)?checkion\b/i.test(text);
 
-  if (looseProductCreate && !isExplicitProjectCreateIntent(text)) {
+  // Phase 1: product-worded creates still match when explicit "projekt … anlegen" — routed to Collection.
+  if (looseProductCreate && !isExplicitProjectCreateIntent(text) && !/\bprojekt\b/i.test(text)) {
     return false;
   }
 

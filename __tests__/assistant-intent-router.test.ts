@@ -24,9 +24,9 @@ describe('intent-router', () => {
     }
   });
 
-  it('routes audion-only create away from platform workflow', () => {
+  it('routes audion-worded create to Collection create_project', () => {
     const intent = routeAssistantIntent('Neues Projekt rheinland in audion anlegen');
-    expect(intent.type).toBe('create_audion_project');
+    expect(intent.type).toBe('create_project');
   });
 
   it('detects ssl check intent', () => {

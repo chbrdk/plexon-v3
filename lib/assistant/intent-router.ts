@@ -1,5 +1,4 @@
 import {
-  detectCreateProjectTarget,
   extractScopedProjectName,
   matchesCreateProjectIntent,
 } from '@/lib/assistant/create-project-scope';
@@ -210,22 +209,9 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
   }
 
   if (matchesCreateProjectIntent(trimmed, CREATE_PATTERNS)) {
-    const target = detectCreateProjectTarget(trimmed);
     const name = extractProjectName(trimmed);
     const startResearch = RESEARCH_PATTERNS.some((p) => p.test(trimmed));
-
-    if (target === 'audion') {
-      return { type: 'create_audion_project', name, startResearch };
-    }
-    if (target === 'checkion') {
-      return {
-        type: 'create_checkion_project',
-        name,
-        domain: extractDomain(trimmed),
-        startResearch,
-      };
-    }
-
+    // Phase 1: always Collection create (CHECKION + AUDION mirrors) — never product-only.
     return {
       type: 'create_project',
       name,

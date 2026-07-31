@@ -46,18 +46,24 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 - Partial failure is visible as capability status, not as a different project kind.
 - Admin sync / retry remains the repair path.
 
-## Phase 0 (this change)
+## Phase 0 (done)
 
 - Spec + knowledge language.
 - UX copy: Insights / project detail / related strings → Collection wording; legacy cards labeled, **not** migrated.
 
-**Out of scope Phase 0:** Create-path code enforcement, schema changes, backfill.
+## Phase 1 (done — 2026-07-31)
+
+- Assistant create intents always `create_project` (Collection); `detectCreateProjectTarget` → `platform` only.
+- Legacy `create_audion_project` / `create_checkion_project` handlers redirect to Collection workflow.
+- Admin + platform company project POST: `ensureBindingPlaceholders` + sync **both** products.
+- AUDION-origin: Collection + AUDION bound + CHECKION sync; idempotent repair ensures placeholders + CHECKION.
+
+**Still deferred:** Schema changes, backfill (Phase 3).
 
 ## Deferred
 
 | Phase | Work |
 |-------|------|
-| **1** | Enforce create always both (`create-project-scope`, admin create, audion-origin, no product-only create). |
 | **2** | `/projects/[id]` as canonical project home; insights = one “Your projects” list; assistant always `platformProjectId`. |
 | **3** | Backfill / retire standalone insights (`knowledge/migrate-msqdx-platform-projects.md`); contract bump only if federation behavior changes. |
 
