@@ -2,7 +2,12 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { getAudionAdminUrl, getCheckionUrl } from '@/lib/constants';
+import { getBindingsForPlatformProject } from '@/lib/db/platform-project-bindings';
 import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
+import {
+  resolveAudionCapability,
+  resolveCheckionCapability,
+} from '@/lib/platform-project-capability-summary';
 import {
   fetchAudionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
@@ -68,10 +73,13 @@ export async function GET(request: Request) {
     const batch = await Promise.all(
       chunk.map(async (platformProject) => {
         const platformProjectId = platformProject.id;
-        const [checkion, audion] = await Promise.all([
+        const [checkionLive, audionLive, bindings] = await Promise.all([
           fetchCheckionPlatformProjectSummary(platformProjectId, user.id),
           fetchAudionPlatformProjectSummary(platformProjectId, user.id),
+          getBindingsForPlatformProject(platformProjectId),
         ]);
+        const checkion = resolveCheckionCapability(checkionLive, bindings);
+        const audion = resolveAudionCapability(audionLive, bindings);
         return {
           platformProject: {
             id: platformProject.id,

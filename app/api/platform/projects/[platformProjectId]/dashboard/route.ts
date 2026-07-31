@@ -6,6 +6,10 @@ import {
   fetchAudionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
+import {
+  resolveAudionCapability,
+  resolveCheckionCapability,
+} from '@/lib/platform-project-capability-summary';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { getAudionAdminUrl, getCheckionUrl } from '@/lib/constants';
@@ -35,10 +39,12 @@ export async function GET(
 
   const bindings = await getBindingsForPlatformProject(platformProjectId.trim());
 
-  const [checkion, audion] = await Promise.all([
+  const [checkionLive, audionLive] = await Promise.all([
     fetchCheckionPlatformProjectSummary(platformProjectId.trim(), user.id),
     fetchAudionPlatformProjectSummary(platformProjectId.trim(), user.id),
   ]);
+  const checkion = resolveCheckionCapability(checkionLive, bindings);
+  const audion = resolveAudionCapability(audionLive, bindings);
 
   const checkionBase = getCheckionUrl().replace(/\/+$/, '');
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');

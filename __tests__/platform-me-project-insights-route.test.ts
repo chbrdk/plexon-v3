@@ -20,6 +20,10 @@ vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
   fetchAudionPlatformProjectSummary: vi.fn(),
 }));
 
+vi.mock('@/lib/db/platform-project-bindings', () => ({
+  getBindingsForPlatformProject: vi.fn().mockResolvedValue([]),
+}));
+
 describe('GET /api/platform/me/project-insights', () => {
   beforeEach(() => {
     vi.resetAllMocks();
