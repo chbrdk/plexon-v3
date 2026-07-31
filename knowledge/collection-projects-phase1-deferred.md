@@ -11,7 +11,8 @@ Phase 1 create enforcement shipped 2026-07-31.
 
 ## Next
 
-- Phase 2: canonical project-home UX.
 - Phase 3: legacy backfill (2C).
+
+Phase 2 shipped: Collection home + insights capability chips + assistant Collection picker.
 
 See `specs/domain/collection-projects.md`.

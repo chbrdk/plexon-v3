@@ -152,8 +152,10 @@
     "platformInsightsEmpty": "No projects yet — join an organization or get assigned to a project. New projects are always Collections linked to CHECKION and AUDION.",
     "platformInsightsTruncated": "Showing the first {shown} of {total} projects.",
     "platformInsightsOpenProject": "Open project",
-    "platformInsightsScans": "Scans (CHECKION)",
-    "platformInsightsPersonas": "Personas (AUDION)",
+    "platformInsightsScans": "Scans",
+    "platformInsightsPersonas": "Personas",
+    "platformInsightsCapabilityCheckion": "CHECKION",
+    "platformInsightsCapabilityAudion": "AUDION",
     "platformInsightsNoProduct": "Not linked yet",
     "platformInsightsOpenCheckion": "CHECKION",
     "platformInsightsOpenAudion": "AUDION",
@@ -307,6 +309,7 @@
     "detail": {
       "title": "Project",
       "subtitle": "Collection with CHECKION and AUDION capabilities.",
+      "collectionLabel": "Collection",
       "missingId": "Missing project id.",
       "loadError": "Failed to load project.",
       "domain": "Domain",
@@ -325,7 +328,8 @@
       "checkionEmpty": "CHECKION not linked yet — sync or configure CHECKION API URL / secret.",
       "audionEmpty": "AUDION not linked yet — sync or configure AUDION API URL / secret.",
       "openCheckion": "Open CHECKION",
-      "openAudion": "Open AUDION"
+      "openAudion": "Open AUDION",
+      "openAssistant": "Ask assistant"
     }
   },
   "settings": {
@@ -462,8 +466,8 @@
     "confirmAction": "Confirm action",
     "confirmYes": "Confirm",
     "confirmNo": "Cancel",
-    "projectContext": "Project context",
-    "noProjects": "No projects",
+    "projectContext": "Project",
+    "noProjects": "No project selected",
     "suggestProjectKnowledge": "What do you know about this project?",
     "plannerTitle": "Agent plan",
     "plannerDetails": "Details",

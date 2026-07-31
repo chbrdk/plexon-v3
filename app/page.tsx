@@ -1005,22 +1005,38 @@ export default function DashboardPage() {
                           {t('dashboard.platformInsightsLegacyHint')}
                         </DashText>
                       ) : null}
-                      <Stack spacing={1} sx={{ mb: 2 }}>
-                        <DashText variant="body2">
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 0.75,
+                          mb: 2,
+                        }}
+                        aria-label={t('dashboard.platformInsightsSubtitle')}
+                      >
+                        <span
+                          className="plexon-capability-chip"
+                          data-state={row.checkion != null ? 'on' : 'off'}
+                        >
+                          {t('dashboard.platformInsightsCapabilityCheckion')}
                           {row.checkion != null
-                            ? `${t('dashboard.platformInsightsScans')}: ${row.checkion.scanCount}`
-                            : `${t('dashboard.platformInsightsScans')}: — (${t('dashboard.platformInsightsNoProduct')})`}
-                        </DashText>
-                        <DashText variant="body2">
+                            ? ` · ${row.checkion.scanCount} ${t('dashboard.platformInsightsScans')}`
+                            : ` · ${t('dashboard.platformInsightsNoProduct')}`}
+                        </span>
+                        <span
+                          className="plexon-capability-chip"
+                          data-state={row.audion != null ? 'on' : 'off'}
+                        >
+                          {t('dashboard.platformInsightsCapabilityAudion')}
                           {row.audion != null
-                            ? `${t('dashboard.platformInsightsPersonas')}: ${row.audion.personaCount}`
-                            : `${t('dashboard.platformInsightsPersonas')}: — (${t('dashboard.platformInsightsNoProduct')})`}
-                        </DashText>
-                      </Stack>
+                            ? ` · ${row.audion.personaCount} ${t('dashboard.platformInsightsPersonas')}`
+                            : ` · ${t('dashboard.platformInsightsNoProduct')}`}
+                        </span>
+                      </Box>
                       <Stack direction="row" flexWrap="wrap" gap={1}>
                         {canOpenPlatform ? (
                           <Link href={pathPlatformProjectDashboard(pid)} style={{ textDecoration: 'none' }}>
-                            <DashButton variant="outlined" size="small" brandColor="green">
+                            <DashButton variant="contained" size="small" brandColor="green">
                               {t('dashboard.platformInsightsOpenProject')}
                             </DashButton>
                           </Link>

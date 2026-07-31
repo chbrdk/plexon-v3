@@ -258,10 +258,37 @@
   border-color: var(--accent);
 }
 
-.plexon-project-product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  gap: var(--space-3, 0.85rem);
+.plexon-project-capability-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plexon-capability-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: transparent;
+}
+
+.plexon-capability-chip[data-state='on'] {
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 45%, var(--line));
+  color: var(--fg);
+  background: color-mix(in srgb, var(--accent, #00ca55) 12%, transparent);
+}
+
+.plexon-assistant-project-context {
+  min-width: 0;
+}
+
+.plexon-assistant-project-context .ds-field {
+  width: 100%;
 }
 
 .plexon-project-product-head {

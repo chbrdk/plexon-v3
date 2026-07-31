@@ -58,13 +58,18 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 - Admin + platform company project POST: `ensureBindingPlaceholders` + sync **both** products.
 - AUDION-origin: Collection + AUDION bound + CHECKION sync; idempotent repair ensures placeholders + CHECKION.
 
+## Phase 2 (done — 2026-07-31)
+
+- `/projects/[id]` is Collection home: capability strip, product capability panels, Assistant deep-link (`?project=`).
+- Dashboard insights: one project list with capability chips; primary CTA opens Collection home.
+- Assistant project picker: Collections only (`openPlatformProject`); DS `Select`; URL `project` param pins context.
+
 **Still deferred:** Schema changes, backfill (Phase 3).
 
 ## Deferred
 
 | Phase | Work |
 |-------|------|
-| **2** | `/projects/[id]` as canonical project home; insights = one “Your projects” list; assistant always `platformProjectId`. |
 | **3** | Backfill / retire standalone insights (`knowledge/migrate-msqdx-platform-projects.md`); contract bump only if federation behavior changes. |
 
 ## UI rebuild note

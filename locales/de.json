@@ -152,8 +152,10 @@
     "platformInsightsEmpty": "Noch keine Projekte — Organisation beitreten oder Projektzuweisung erhalten. Neue Projekte sind immer Collections mit CHECKION und AUDION.",
     "platformInsightsTruncated": "Es werden nur die ersten {shown} von {total} Projekten geladen.",
     "platformInsightsOpenProject": "Projekt öffnen",
-    "platformInsightsScans": "Scans (CHECKION)",
-    "platformInsightsPersonas": "Personas (AUDION)",
+    "platformInsightsScans": "Scans",
+    "platformInsightsPersonas": "Personas",
+    "platformInsightsCapabilityCheckion": "CHECKION",
+    "platformInsightsCapabilityAudion": "AUDION",
     "platformInsightsNoProduct": "Noch nicht verknüpft",
     "platformInsightsOpenCheckion": "CHECKION",
     "platformInsightsOpenAudion": "AUDION",
@@ -307,6 +309,7 @@
     "detail": {
       "title": "Projekt",
       "subtitle": "Collection mit CHECKION- und AUDION-Fähigkeiten.",
+      "collectionLabel": "Collection",
       "missingId": "Projekt-ID fehlt.",
       "loadError": "Projekt konnte nicht geladen werden.",
       "domain": "Domain",
@@ -325,7 +328,8 @@
       "checkionEmpty": "CHECKION noch nicht verknüpft — syncen oder CHECKION API URL / Secret setzen.",
       "audionEmpty": "AUDION noch nicht verknüpft — syncen oder AUDION API URL / Secret setzen.",
       "openCheckion": "CHECKION öffnen",
-      "openAudion": "AUDION öffnen"
+      "openAudion": "AUDION öffnen",
+      "openAssistant": "Assistant fragen"
     }
   },
   "settings": {
@@ -462,8 +466,8 @@
     "confirmAction": "Aktion bestätigen",
     "confirmYes": "Bestätigen",
     "confirmNo": "Abbrechen",
-    "projectContext": "Projektkontext",
-    "noProjects": "Keine Projekte",
+    "projectContext": "Projekt",
+    "noProjects": "Kein Projekt gewählt",
     "suggestProjectKnowledge": "Was weißt du über dieses Projekt?",
     "plannerTitle": "Agent-Plan",
     "plannerDetails": "Details",

@@ -32,9 +32,17 @@ export {
 } from '@/lib/paths/event-quick-check-page';
 /** Query param on `PATH_ASSISTANT` to restore a saved conversation. */
 export const ASSISTANT_CONVERSATION_QUERY_PARAM = 'c';
+/** Query param on `PATH_ASSISTANT` to pin Collection context (`platform_projects.id`). */
+export const ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM = 'project';
 export const pathAssistantChat = (conversationId?: string | null): string => {
   if (!conversationId) return PATH_ASSISTANT;
   return `${PATH_ASSISTANT}?${ASSISTANT_CONVERSATION_QUERY_PARAM}=${encodeURIComponent(conversationId)}`;
+};
+/** Open assistant with a Collection project already selected. */
+export const pathAssistantWithProject = (platformProjectId: string): string => {
+  const id = platformProjectId.trim();
+  if (!id) return PATH_ASSISTANT;
+  return `${PATH_ASSISTANT}?${ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM}=${encodeURIComponent(id)}`;
 };
 /** Public shared assistant report (no login required). */
 export const PATH_SHARE_REPORTS = '/share/reports';

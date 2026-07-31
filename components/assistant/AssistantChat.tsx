@@ -9,12 +9,14 @@ import {
   API_ASSISTANT_CONVERSATIONS,
   API_PLATFORM_ME_PROJECT_INSIGHTS,
   ASSISTANT_CONVERSATION_QUERY_PARAM,
+  ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM,
   PATH_ASSISTANT,
   apiAssistantConversation,
   apiAssistantConversationMessages,
   apiAssistantConversationReportPins,
   pathAssistantChat,
 } from '@/lib/constants';
+import { isSyntheticInsightPlatformProjectId } from '@/lib/platform-me-project-insights-standalone';
 import type { AssistantConversationSummary } from '@/lib/assistant/conversation-history';
 import { postAssistantCompleteStream } from '@/lib/assistant/assistant-stream-client';
 import { subscribeAssistantWorkflowStream } from '@/lib/assistant/workflow-stream-client';
@@ -127,19 +129,34 @@ export function AssistantChat() {
         const res = await fetch(API_PLATFORM_ME_PROJECT_INSIGHTS, { credentials: 'same-origin' });
         if (!res.ok) return;
         const data = (await res.json()) as {
-          projects?: Array<{ platformProject: { id: string; name: string; domain?: string | null } }>;
+          projects?: Array<{
+            platformProject: { id: string; name: string; domain?: string | null };
+            openPlatformProject?: boolean;
+          }>;
         };
-        const items = (data.projects ?? []).map((p) => ({
-          platformProjectId: p.platformProject.id,
-          name: p.platformProject.name,
-          domain: p.platformProject.domain ?? null,
-        }));
+        // Phase 2: assistant context is Collections only (never synthetic product-only cards).
+        const items = (data.projects ?? [])
+          .filter(
+            (p) =>
+              p.openPlatformProject !== false &&
+              !isSyntheticInsightPlatformProjectId(p.platformProject.id)
+          )
+          .map((p) => ({
+            platformProjectId: p.platformProject.id,
+            name: p.platformProject.name,
+            domain: p.platformProject.domain ?? null,
+          }));
         setProjects(items);
       } catch {
         /* ignore */
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const fromUrl = searchParams.get(ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM)?.trim();
+    if (fromUrl) setPlatformProjectId(fromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     void refreshConversations();

@@ -37,8 +37,29 @@ describe('collection projects domain (phase 0)', () => {
     expect(en).toContain('"platformInsightsTitle": "Your projects"')
     expect(en).toContain('platformInsightsLegacyBadge')
     expect(en).toContain('"productsTitle": "Capabilities"')
+    expect(en).toContain('openAssistant')
     expect(de).toContain('"platformInsightsTitle": "Deine Projekte"')
     expect(de).toContain('platformInsightsLegacyBadge')
     expect(de).toContain('"productsTitle": "Fähigkeiten"')
+  })
+
+  it('phase 2 wires Collection home and assistant project param', () => {
+    const home = readFileSync(
+      path.join(root, 'components/products/PlatformProjectDashboard.tsx'),
+      'utf8',
+    )
+    const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8')
+    const chip = readFileSync(
+      path.join(root, 'components/assistant/ProjectContextChip.tsx'),
+      'utf8',
+    )
+    const chat = readFileSync(path.join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(home).toContain('collection-project-home')
+    expect(home).toContain('pathAssistantWithProject')
+    expect(constants).toContain('ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM')
+    expect(chip).toContain("from '@msqdx/ui'")
+    expect(chip).not.toContain("from '@mui/material'")
+    expect(chat).toContain('isSyntheticInsightPlatformProjectId')
+    expect(chat).toContain('ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM')
   })
 })

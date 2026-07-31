@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import NextLink from 'next/link'
 import { Alert, Button, Chip, Panel, SectionChrome, Spinner, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
-import { apiPlatformProjectDashboard } from '@/lib/constants'
+import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
 
 type DashboardPayload = {
   platformProject: {
@@ -31,10 +32,16 @@ function openExternal(href: string) {
 
 function syncTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
   const s = status.toLowerCase()
-  if (s === 'synced' || s === 'ok' || s === 'healthy') return 'success'
+  if (s === 'synced' || s === 'ok' || s === 'healthy' || s === 'in_sync') return 'success'
   if (s === 'pending' || s === 'syncing') return 'warning'
   if (s === 'error' || s === 'failed') return 'danger'
   return 'neutral'
+}
+
+function productLabel(productId: string): string {
+  if (productId === 'checkion') return 'CHECKION'
+  if (productId === 'audion') return 'AUDION'
+  return productId
 }
 
 export function PlatformProjectDashboard({ platformProjectId }: { platformProjectId: string }) {
@@ -71,15 +78,18 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
 
   const meta = data
     ? [
+        t('projects.detail.collectionLabel'),
         data.platformProject.status,
-        data.platformProject.domain ? `${t('projects.detail.domain')}: ${data.platformProject.domain}` : null,
+        data.platformProject.domain
+          ? `${t('projects.detail.domain')}: ${data.platformProject.domain}`
+          : null,
       ]
         .filter(Boolean)
         .join(' · ')
     : null
 
   return (
-    <div className="plexon-magazine plexon-project-detail">
+    <div className="plexon-magazine plexon-project-detail" data-section="collection-project-home">
       <SectionChrome
         title={data?.platformProject.name ?? t('projects.detail.title')}
         meta={
@@ -89,7 +99,33 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             <Text role="meta">{t('projects.detail.subtitle')}</Text>
           )
         }
+        action={
+          data ? (
+            <NextLink
+              href={pathAssistantWithProject(data.platformProject.id)}
+              className="ds-btn ds-btn--ghost ds-btn--sm"
+            >
+              {t('projects.detail.openAssistant')}
+            </NextLink>
+          ) : null
+        }
       />
+
+      {data && !loading ? (
+        <div className="plexon-project-capability-strip" aria-label={t('projects.detail.productsTitle')}>
+          <span
+            className="plexon-capability-chip"
+            data-state={data.checkion ? 'on' : 'off'}
+          >
+            CHECKION
+            {data.checkion ? ` · ${data.checkion.scanCount} ${t('projects.detail.scans')}` : ''}
+          </span>
+          <span className="plexon-capability-chip" data-state={data.audion ? 'on' : 'off'}>
+            AUDION
+            {data.audion ? ` · ${data.audion.personaCount} ${t('projects.detail.personas')}` : ''}
+          </span>
+        </div>
+      ) : null}
 
       {loading ? (
         <Text role="meta">
@@ -105,6 +141,8 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             <SectionChrome
               title={t('projects.detail.productsTitle')}
               meta={<Text role="meta">{t('projects.detail.productsSubtitle')}</Text>}
+              as="h3"
+              quiet
             />
             <div className="plexon-project-product-grid">
               <Panel className="plexon-magazine-card">
@@ -112,7 +150,9 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                   <Text role="title" as="h3">
                     CHECKION
                   </Text>
-                  <Chip static>{data.checkion ? t('projects.detail.linked') : t('projects.detail.notLinked')}</Chip>
+                  <Chip static>
+                    {data.checkion ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+                  </Chip>
                 </div>
                 {data.checkion ? (
                   <StatLedeGroup aria-label="CHECKION" columns={1}>
@@ -140,7 +180,9 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                   <Text role="title" as="h3">
                     AUDION
                   </Text>
-                  <Chip static>{data.audion ? t('projects.detail.linked') : t('projects.detail.notLinked')}</Chip>
+                  <Chip static>
+                    {data.audion ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+                  </Chip>
                 </div>
                 {data.audion ? (
                   <StatLedeGroup aria-label="AUDION" columns={1}>
@@ -169,6 +211,8 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             <SectionChrome
               title={t('projects.detail.bindingsTitle')}
               meta={<Text role="meta">{t('projects.detail.bindingsSubtitle')}</Text>}
+              as="h3"
+              quiet
             />
             {data.bindings.length === 0 ? (
               <Text role="meta">{t('projects.detail.bindingsEmpty')}</Text>
@@ -178,7 +222,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                   <li key={binding.productId} className="plexon-project-binding">
                     <div className="plexon-project-binding__main">
                       <Text role="title" as="h3">
-                        {binding.productId}
+                        {productLabel(binding.productId)}
                       </Text>
                       <Text role="meta">
                         {binding.externalProjectId
@@ -187,7 +231,10 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                         {binding.syncMessage ? ` · ${binding.syncMessage}` : ''}
                       </Text>
                     </div>
-                    <Chip static className={`plexon-sync-chip plexon-sync-chip--${syncTone(binding.syncStatus)}`}>
+                    <Chip
+                      static
+                      className={`plexon-sync-chip plexon-sync-chip--${syncTone(binding.syncStatus)}`}
+                    >
                       {binding.syncStatus}
                     </Chip>
                   </li>

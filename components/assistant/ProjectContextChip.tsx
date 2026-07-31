@@ -1,46 +1,43 @@
-'use client';
+'use client'
 
-import { Box, MenuItem, Select } from '@mui/material';
-import { MsqdxTypography } from '@msqdx/react';
-import { useI18n } from '@/components/i18n/I18nProvider';
-import { plexonLightInputSx } from '@/lib/plexon-surface-styles';
+import { Field, Select } from '@msqdx/ui'
+import { useI18n } from '@/components/i18n/I18nProvider'
 
 export type ProjectInsightOption = {
-  platformProjectId: string;
-  name: string;
-  domain?: string | null;
-};
+  platformProjectId: string
+  name: string
+  domain?: string | null
+}
 
 type ProjectContextChipProps = {
-  projects: ProjectInsightOption[];
-  value: string | null;
-  onChange: (platformProjectId: string | null) => void;
-};
+  projects: ProjectInsightOption[]
+  value: string | null
+  onChange: (platformProjectId: string | null) => void
+}
 
+/** Collection picker for assistant — always `platform_projects.id`, never product-local ids. */
 export function ProjectContextChip({ projects, value, onChange }: ProjectContextChipProps) {
-  const { t } = useI18n();
+  const { t } = useI18n()
+
+  const options = [
+    { value: '', label: t('assistant.noProjects') },
+    ...projects.map((p) => ({
+      value: p.platformProjectId,
+      label: p.domain ? `${p.name} · ${p.domain}` : p.name,
+    })),
+  ]
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-      <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-muted-on-light)' }}>
-        {t('assistant.projectContext')}
-      </MsqdxTypography>
-      <Select
-        size="small"
-        value={value ?? ''}
-        displayEmpty
-        onChange={(e) => onChange(e.target.value ? String(e.target.value) : null)}
-        sx={{ minWidth: 200, ...plexonLightInputSx }}
-      >
-        <MenuItem value="">
-          <em>{t('assistant.noProjects')}</em>
-        </MenuItem>
-        {projects.map((p) => (
-          <MenuItem key={p.platformProjectId} value={p.platformProjectId}>
-            {p.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </Box>
-  );
+    <div className="plexon-assistant-project-context">
+      <Field label={t('assistant.projectContext')} layout="inline" size="sm">
+        <Select
+          options={options}
+          value={value ?? ''}
+          onChange={(next) => onChange(next.trim() ? next : null)}
+          aria-label={t('assistant.projectContext')}
+          placeholder={t('assistant.noProjects')}
+        />
+      </Field>
+    </div>
+  )
 }
