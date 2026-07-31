@@ -34,6 +34,7 @@ RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/ms
 FROM base AS builder
 ENV NODE_ENV=development
 COPY --from=ds /workspace/msqdx-ui /workspace/msqdx-ui
+COPY --from=ds /workspace/msqdx-design-system /workspace/msqdx-design-system
 COPY . /workspace/plexon-v3
 WORKDIR /workspace/plexon-v3
 
@@ -45,6 +46,7 @@ RUN test -d /workspace/msqdx-ui/packages/ui/src \
     && test -f /workspace/msqdx-design-system/packages/react/src/index.ts
 
 ENV MSQDX_UI_BASE=../msqdx-ui
+ENV DS_BASE=../msqdx-design-system
 ENV NODE_ENV=production
 ENV NODE_OPTIONS=--max-old-space-size=6144
 RUN npm run build
