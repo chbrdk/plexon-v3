@@ -22,7 +22,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 |------|---------|--------|
 | 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors` until waves clear shim gaps |
 | 1 | Dashboard `/` | adapter pass done; **challenge revisit** open (admin-on-home, Dash* adapters) |
-| 2 | Settings `/settings` | pending — Audion-like Field/ToggleGroup rebuild |
+| 2 | Settings `/settings` | done — Audion-like SectionChrome/Field/ToggleGroup; theme + brand; APIs kept |
 | 3 | Products + Platform projects | catalog done; project detail pending |
 | 4 | Admin console | layout/subnav done; pages pending |
 | 5 | Assistant | pending — **compose Audion chat chrome** |

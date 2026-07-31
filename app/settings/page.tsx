@@ -1,120 +1,139 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { signOut } from 'next-auth/react';
-import { useSession } from 'next-auth/react';
-import { Box, Stack } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import {
-  MsqdxTypography,
-  MsqdxButton,
-  MsqdxCard,
-  MsqdxDivider,
-  MsqdxAvatar,
-  MsqdxFormField,
-  MsqdxSelect,
-} from '@msqdx/react';
-import { InfoTooltip } from '@/components/InfoTooltip';
-import { MSQDX_SPACING } from '@msqdx/tokens';
-import type { SelectChangeEvent } from '@mui/material';
-import { BrandColorSelector } from '@/components/settings/BrandColorSelector';
-import { FORM_FIELD_ACCENT_SX } from '@/lib/theme-accent';
-import { useI18n } from '@/components/i18n/I18nProvider';
+  Alert,
+  Avatar,
+  Button,
+  Field,
+  Hint,
+  Input,
+  SectionChrome,
+  Spinner,
+  Text,
+  ToggleGroup,
+} from '@msqdx/ui'
+import { BrandColorSelector } from '@/components/settings/BrandColorSelector'
+import { useI18n } from '@/components/i18n/I18nProvider'
 import {
-  API_AUTH_PROFILE,
   API_AUTH_CHANGE_PASSWORD,
+  API_AUTH_PROFILE,
   API_AUTH_TOKENS,
   apiAuthTokenRevoke,
   PATH_LOGIN,
-} from '@/lib/constants';
+} from '@/lib/constants'
+import { shellPaths } from '@/lib/shell-paths'
 
 type ProfileUser = {
-  id: string;
-  email?: string;
-  name?: string;
-  company?: string;
-  avatar_url?: string;
-  locale?: string;
-};
+  id: string
+  email?: string
+  name?: string
+  company?: string
+  avatar_url?: string
+  locale?: string
+}
+
+type ApiTokenRow = { id: string; name?: string; createdAt: string }
+
+const THEME_STORAGE_KEY = 'plexon.v3.theme'
+const THEME_LABELS: Record<(typeof shellPaths.themeChoices)[number], string> = {
+  msqdx: 'Light',
+  'msqdx-dark': 'Dark',
+  'msqdx-v2': 'V2 light',
+  'msqdx-v2-dark': 'V2 dark',
+}
+
+function readStoredTheme(): (typeof shellPaths.themeChoices)[number] {
+  if (typeof window === 'undefined') return shellPaths.defaultTheme
+  const raw = window.localStorage.getItem(THEME_STORAGE_KEY)
+  if (raw && (shellPaths.themeChoices as readonly string[]).includes(raw)) {
+    return raw as (typeof shellPaths.themeChoices)[number]
+  }
+  return shellPaths.defaultTheme
+}
 
 export default function SettingsPage() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
-  const { t, setLocale: setUiLocale } = useI18n();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const router = useRouter()
+  const { data: session, status } = useSession()
+  const { t, setLocale: setUiLocale } = useI18n()
+  const [mounted, setMounted] = useState(false)
 
-  const [profile, setProfile] = useState<ProfileUser | null>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [company, setCompany] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const [locale, setLocale] = useState('de');
+  const [profile, setProfile] = useState<ProfileUser | null>(null)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [company, setCompany] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [locale, setLocale] = useState('de')
+  const [theme, setTheme] = useState<(typeof shellPaths.themeChoices)[number]>(shellPaths.defaultTheme)
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [savingPassword, setSavingPassword] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
-  type ApiTokenRow = { id: string; name?: string; createdAt: string };
-  const [apiTokens, setApiTokens] = useState<ApiTokenRow[]>([]);
-  const [loadingTokens, setLoadingTokens] = useState(false);
-  const [creatingToken, setCreatingToken] = useState(false);
-  const [tokenName, setTokenName] = useState('');
-  const [newToken, setNewToken] = useState<string | null>(null);
+  const [apiTokens, setApiTokens] = useState<ApiTokenRow[]>([])
+  const [loadingTokens, setLoadingTokens] = useState(false)
+  const [creatingToken, setCreatingToken] = useState(false)
+  const [tokenName, setTokenName] = useState('')
+  const [newToken, setNewToken] = useState<string | null>(null)
 
-  const languageOptions = [
-    { value: 'de', label: t('language.de') },
-    { value: 'en', label: t('language.en') },
-  ];
+  useEffect(() => {
+    setMounted(true)
+    const next = readStoredTheme()
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+  }, [])
 
-  const fetchApiTokens = () => {
-    setLoadingTokens(true);
+  const fetchApiTokens = useCallback(() => {
+    setLoadingTokens(true)
     fetch(API_AUTH_TOKENS)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data?.data)) setApiTokens(data.data);
+        if (Array.isArray(data?.data)) setApiTokens(data.data)
       })
       .catch(() => setApiTokens([]))
-      .finally(() => setLoadingTokens(false));
-  };
+      .finally(() => setLoadingTokens(false))
+  }, [])
 
   useEffect(() => {
-    if (status !== 'authenticated' || !session?.user?.id) return;
+    if (status !== 'authenticated' || !session?.user?.id) return
     fetch(API_AUTH_PROFILE)
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          setProfile(data.user);
-          setName(data.user.name ?? '');
-          setEmail(data.user.email ?? '');
-          setCompany(data.user.company ?? '');
-          setAvatarUrl(data.user.avatar_url ?? '');
-          setLocale(data.user.locale ?? 'de');
+          setProfile(data.user)
+          setName(data.user.name ?? '')
+          setEmail(data.user.email ?? '')
+          setCompany(data.user.company ?? '')
+          setAvatarUrl(data.user.avatar_url ?? '')
+          setLocale(data.user.locale ?? 'de')
         }
       })
-      .catch(() => setProfile(null));
-    fetchApiTokens();
-  }, [status, session?.user?.id]);
+      .catch(() => setProfile(null))
+    fetchApiTokens()
+  }, [status, session?.user?.id, fetchApiTokens])
 
-  const initials = (() => {
-    const base = (name || profile?.email || session?.user?.email || 'A').trim();
-    return base
-      .split(/\s+/)
-      .map((part) => part[0]?.toUpperCase())
-      .filter(Boolean)
-      .slice(0, 2)
-      .join('');
-  })();
+  const avatarName = (name || profile?.email || session?.user?.email || 'P').trim()
 
-  const handleSaveProfile = async () => {
-    setError(null);
-    setSuccess(null);
-    setSavingProfile(true);
+  function applyTheme(next: string) {
+    if (!(shellPaths.themeChoices as readonly string[]).includes(next)) return
+    const themeId = next as (typeof shellPaths.themeChoices)[number]
+    setTheme(themeId)
+    document.documentElement.setAttribute('data-theme', themeId)
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeId)
+  }
+
+  async function handleSaveProfile() {
+    setError(null)
+    setSuccess(null)
+    setSavingProfile(true)
     try {
       const res = await fetch(API_AUTH_PROFILE, {
         method: 'PATCH',
@@ -126,443 +145,308 @@ export default function SettingsPage() {
           avatar_url: avatarUrl.trim() || null,
           locale: locale || undefined,
         }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileSaveFailed'));
-      setProfile(data.user);
-      setSuccess(t('settings.messages.profileUpdated'));
-      setUiLocale(locale);
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileSaveFailed'))
+      setProfile(data.user)
+      setSuccess(t('settings.messages.profileUpdated'))
+      setUiLocale(locale)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('settings.messages.profileError'));
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
     } finally {
-      setSavingProfile(false);
+      setSavingProfile(false)
     }
-  };
+  }
 
-  const handlePasswordUpdate = async () => {
-    setError(null);
-    setSuccess(null);
+  async function handlePasswordUpdate() {
+    setError(null)
+    setSuccess(null)
     if (!currentPassword || !newPassword) {
-      setError(t('settings.messages.passwordMissing'));
-      return;
+      setError(t('settings.messages.passwordMissing'))
+      return
     }
     if (newPassword !== confirmPassword) {
-      setError(t('settings.messages.passwordMismatch'));
-      return;
+      setError(t('settings.messages.passwordMismatch'))
+      return
     }
-    setSavingPassword(true);
+    setSavingPassword(true)
     try {
       const res = await fetch(API_AUTH_CHANGE_PASSWORD, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? t('settings.messages.passwordError'));
-      setSuccess(t('settings.messages.passwordUpdated'));
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error ?? t('settings.messages.passwordError'))
+      setSuccess(t('settings.messages.passwordUpdated'))
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('settings.messages.passwordError'));
+      setError(err instanceof Error ? err.message : t('settings.messages.passwordError'))
     } finally {
-      setSavingPassword(false);
+      setSavingPassword(false)
     }
-  };
+  }
 
-  const handleCreateToken = async () => {
-    setError(null);
-    setCreatingToken(true);
+  async function handleCreateToken() {
+    setError(null)
+    setCreatingToken(true)
     try {
       const res = await fetch(API_AUTH_TOKENS, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: tokenName.trim() || undefined }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileError'));
-      setNewToken(data.token);
-      setTokenName('');
-      fetchApiTokens();
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileError'))
+      setNewToken(data.token)
+      setTokenName('')
+      fetchApiTokens()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('settings.messages.profileError'));
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
     } finally {
-      setCreatingToken(false);
+      setCreatingToken(false)
     }
-  };
+  }
 
-  const handleRevokeToken = async (id: string) => {
-    if (!window.confirm(t('settings.apiTokens.revokeConfirm'))) return;
-    setError(null);
+  async function handleRevokeToken(id: string) {
+    if (!window.confirm(t('settings.apiTokens.revokeConfirm'))) return
+    setError(null)
     try {
-      const res = await fetch(apiAuthTokenRevoke(id), { method: 'DELETE' });
+      const res = await fetch(apiAuthTokenRevoke(id), { method: 'DELETE' })
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? 'Failed');
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? 'Failed')
       }
-      setApiTokens((prev) => prev.filter((tok) => tok.id !== id));
-      if (newToken) setNewToken(null);
+      setApiTokens((prev) => prev.filter((tok) => tok.id !== id))
+      if (newToken) setNewToken(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('settings.messages.profileError'));
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
     }
-  };
+  }
 
-  const handleCopyToken = () => {
-    if (!newToken) return;
-    void navigator.clipboard.writeText(newToken).then(() => setSuccess(t('settings.apiTokens.newTokenCopied')));
-  };
+  function handleCopyToken() {
+    if (!newToken) return
+    void navigator.clipboard.writeText(newToken).then(() => setSuccess(t('settings.apiTokens.newTokenCopied')))
+  }
 
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.replace(PATH_LOGIN);
-    router.refresh();
-  };
+  async function handleLogout() {
+    setLoggingOut(true)
+    try {
+      await signOut({ redirect: false })
+      router.replace(PATH_LOGIN)
+      router.refresh()
+    } finally {
+      setLoggingOut(false)
+    }
+  }
 
   if (!mounted || status === 'loading') {
     return (
-      <Box sx={{ p: 'var(--msqdx-spacing-md)', maxWidth: 1600, mx: 'auto' }} suppressHydrationWarning>
-        <MsqdxTypography>{t('common.loading')}</MsqdxTypography>
-      </Box>
-    );
+      <div className="plexon-magazine plexon-settings">
+        <Spinner />
+        <Text role="meta">{t('common.loading')}</Text>
+      </div>
+    )
   }
 
   return (
-    <Box sx={{ p: 'var(--msqdx-spacing-md)', maxWidth: 1600, mx: 'auto' }}>
-      <Box sx={{ mb: MSQDX_SPACING.scale.md }}>
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: MSQDX_SPACING.scale.xs }}>
-          <MsqdxTypography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-            {t('settings.title')}
-          </MsqdxTypography>
-          <InfoTooltip title={t('info.settings')} ariaLabel={t('common.info')} />
-        </Box>
-        <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-muted-on-light)' }}>
-          {t('settings.subtitle')}
-        </MsqdxTypography>
-      </Box>
+    <div className="plexon-magazine plexon-settings">
+      <SectionChrome
+        title={t('settings.title')}
+        meta={<Text role="meta">{t('settings.subtitle')}</Text>}
+      />
 
-      {(error ?? success) && (
-        <Box
-          sx={{
-            mb: 'var(--msqdx-spacing-md)',
-            p: 'var(--msqdx-spacing-sm)',
-            borderRadius: 'var(--msqdx-radius-sm)',
-            bgcolor: error ? 'error.light' : 'success.light',
-            color: error ? 'error.contrastText' : 'success.contrastText',
-          }}
-        >
-          <MsqdxTypography variant="body2">{error ?? success}</MsqdxTypography>
-        </Box>
-      )}
+      <Hint panel>{t('settings.subtitle')}</Hint>
 
-      <Stack sx={{ gap: 'var(--msqdx-spacing-lg)' }}>
-        {/* Profil */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-        >
-          <Stack direction={{ xs: 'column', md: 'row' }} sx={{ gap: 'var(--msqdx-spacing-lg)', alignItems: 'center' }}>
-            <MsqdxAvatar
-              src={avatarUrl || undefined}
-              size="xl"
-              sx={{
-                width: 72,
-                height: 72,
-                bgcolor: 'var(--color-secondary-dx-pink-tint)',
-                color: 'var(--color-text-primary)',
-              }}
-            >
-              {initials}
-            </MsqdxAvatar>
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-xs)' }}>
-                <MsqdxTypography variant="h6" weight="semibold">
-                  {t('settings.profile.title')}
-                </MsqdxTypography>
-                <InfoTooltip title={t('info.profile')} ariaLabel={t('common.info')} />
-              </Box>
-              <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
-                {t('settings.profile.subtitle')}
-              </MsqdxTypography>
-            </Box>
-          </Stack>
-          <MsqdxDivider spacing="lg" />
-          <Stack spacing={2}>
-            <MsqdxFormField
-              label={t('settings.profile.name')}
-              value={name}
-              onChange={(e) => setName((e.target as HTMLInputElement).value)}
-              placeholder={t('settings.profile.namePlaceholder')}
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
-            />
-            <MsqdxFormField
-              label={t('settings.profile.email')}
-              value={email}
-              onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-              placeholder={t('settings.profile.emailPlaceholder')}
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
-            />
-            <MsqdxFormField
-              label={t('settings.profile.company')}
-              value={company}
-              onChange={(e) => setCompany((e.target as HTMLInputElement).value)}
-              placeholder={t('settings.profile.companyPlaceholder')}
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
-            />
-            <MsqdxFormField
-              label={t('settings.profile.avatarUrl')}
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl((e.target as HTMLInputElement).value)}
-              placeholder={t('settings.profile.avatarUrlPlaceholder')}
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
-            />
-            <MsqdxSelect
-              label={t('settings.profile.language')}
-              value={locale}
-              onChange={(e: SelectChangeEvent<unknown>) => setLocale(e.target.value as string)}
-              options={languageOptions}
-              size="small"
-              sx={FORM_FIELD_ACCENT_SX}
-            />
-            <MsqdxButton variant="contained" onClick={handleSaveProfile} disabled={savingProfile} sx={{ alignSelf: 'flex-start' }}>
+      {error ? (
+        <Alert tone="error">{error}</Alert>
+      ) : null}
+      {success ? (
+        <Alert tone="ok">{success}</Alert>
+      ) : null}
+
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.profile.title')} as="h2" />
+        <Text role="meta">{t('settings.profile.subtitle')}</Text>
+        <div className="plexon-settings-profile-row">
+          <Avatar name={avatarName} src={avatarUrl || undefined} size="lg" />
+          <div className="plexon-settings-fields">
+            <Field label={t('settings.profile.name')} size="md">
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('settings.profile.namePlaceholder')}
+                block
+              />
+            </Field>
+            <Field label={t('settings.profile.email')} size="md">
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t('settings.profile.emailPlaceholder')}
+                block
+              />
+            </Field>
+            <Field label={t('settings.profile.company')} size="md">
+              <Input
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder={t('settings.profile.companyPlaceholder')}
+                block
+              />
+            </Field>
+            <Field label={t('settings.profile.avatarUrl')} size="md">
+              <Input
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder={t('settings.profile.avatarUrlPlaceholder')}
+                block
+              />
+            </Field>
+            <Button type="button" variant="primary" onClick={handleSaveProfile} disabled={savingProfile}>
               {savingProfile ? t('settings.profile.saving') : t('settings.profile.save')}
-            </MsqdxButton>
-          </Stack>
-        </MsqdxCard>
+            </Button>
+          </div>
+        </div>
+      </section>
 
-        {/* Erscheinungsbild */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.profile.language')} as="h2" />
+        <ToggleGroup
+          aria-label={t('settings.profile.language')}
+          value={locale}
+          onChange={(next) => {
+            setLocale(next)
+            setUiLocale(next)
           }}
-        >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-xs)' }}>
-            <MsqdxTypography variant="h6" weight="semibold">
-              {t('settings.appearance.title')}
-            </MsqdxTypography>
-            <InfoTooltip title={t('info.appearance')} ariaLabel={t('common.info')} />
-          </Box>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 'var(--msqdx-spacing-md)' }}>
-            {t('settings.appearance.subtitle')}
-          </MsqdxTypography>
+          options={[
+            { value: 'de', label: t('language.de') },
+            { value: 'en', label: t('language.en') },
+          ]}
+        />
+      </section>
+
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.appearance.title')} as="h2" />
+        <Text role="meta">{t('settings.appearance.subtitle')}</Text>
+        <ToggleGroup
+          className="theme-toggle"
+          aria-label="Theme"
+          value={theme}
+          onChange={applyTheme}
+          options={shellPaths.themeChoices.map((id) => ({
+            value: id,
+            label: THEME_LABELS[id],
+          }))}
+        />
+        <div className="plexon-settings-brand">
           <BrandColorSelector />
-        </MsqdxCard>
+        </div>
+      </section>
 
-        {/* Passwort ändern */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-        >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-sm)' }}>
-            <MsqdxTypography variant="h6" weight="semibold">
-              {t('settings.password.title')}
-            </MsqdxTypography>
-            <InfoTooltip title={t('info.password')} ariaLabel={t('common.info')} />
-          </Box>
-          <Stack sx={{ gap: 'var(--msqdx-spacing-md)' }}>
-            <MsqdxFormField
-              label={t('settings.password.current')}
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.password.title')} as="h2" />
+        <div className="plexon-settings-fields">
+          <Field label={t('settings.password.current')} size="md">
+            <Input
+              type="password"
               value={currentPassword}
-              onChange={(e) => setCurrentPassword((e.target as HTMLInputElement).value)}
-              type="password"
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              block
             />
-            <Box>
-              <MsqdxFormField
-                label={t('settings.password.new')}
-                value={newPassword}
-                onChange={(e) => setNewPassword((e.target as HTMLInputElement).value)}
-                type="password"
-                fullWidth
-                sx={FORM_FIELD_ACCENT_SX}
-              />
-              <MsqdxTypography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'var(--color-text-muted-on-light)' }}>
-                {t('settings.password.newRequirements')}
-              </MsqdxTypography>
-            </Box>
-            <MsqdxFormField
-              label={t('settings.password.confirm')}
+          </Field>
+          <Field label={t('settings.password.new')} hint={t('settings.password.newRequirements')} size="md">
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              block
+            />
+          </Field>
+          <Field label={t('settings.password.confirm')} size="md">
+            <Input
+              type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword((e.target as HTMLInputElement).value)}
-              type="password"
-              fullWidth
-              sx={FORM_FIELD_ACCENT_SX}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              block
             />
-            <MsqdxButton variant="outlined" onClick={handlePasswordUpdate} disabled={savingPassword} sx={{ alignSelf: 'flex-start' }}>
-              {savingPassword ? t('settings.password.ctaSaving') : t('settings.password.cta')}
-            </MsqdxButton>
-          </Stack>
-        </MsqdxCard>
+          </Field>
+          <Button type="button" variant="ghost" onClick={handlePasswordUpdate} disabled={savingPassword}>
+            {savingPassword ? t('settings.password.ctaSaving') : t('settings.password.cta')}
+          </Button>
+        </div>
+      </section>
 
-        {/* API-Tokens */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-        >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-xs)' }}>
-            <MsqdxTypography variant="h6" weight="semibold">
-              {t('settings.apiTokens.title')}
-            </MsqdxTypography>
-            <InfoTooltip title={t('settings.apiTokens.subtitle')} ariaLabel={t('common.info')} />
-          </Box>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 'var(--msqdx-spacing-md)' }}>
-            {t('settings.apiTokens.subtitle')}
-          </MsqdxTypography>
-          {newToken ? (
-            <Stack spacing={1} sx={{ mb: 'var(--msqdx-spacing-md)' }}>
-              <MsqdxTypography variant="subtitle2" weight="semibold">
-                {t('settings.apiTokens.newTokenTitle')}
-              </MsqdxTypography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Box
-                  component="code"
-                  sx={{
-                    flex: 1,
-                    minWidth: 200,
-                    p: 1,
-                    borderRadius: 1,
-                    bgcolor: 'var(--color-bg-subtle)',
-                    fontSize: '0.85rem',
-                    wordBreak: 'break-all',
-                  }}
-                >
-                  {newToken}
-                </Box>
-                <MsqdxButton variant="outlined" size="small" onClick={handleCopyToken}>
-                  {t('settings.apiTokens.newTokenCopy')}
-                </MsqdxButton>
-              </Box>
-              <MsqdxTypography variant="caption" sx={{ color: 'var(--color-text-muted-on-light)' }}>
-                {t('settings.apiTokens.newTokenWarning')}
-              </MsqdxTypography>
-              <MsqdxButton variant="text" size="small" onClick={() => setNewToken(null)}>
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.apiTokens.title')} as="h2" />
+        <Text role="meta">{t('settings.apiTokens.subtitle')}</Text>
+
+        {newToken ? (
+          <div className="plexon-settings-token-reveal">
+            <Text role="title">{t('settings.apiTokens.newTokenTitle')}</Text>
+            <code className="plexon-settings-token-code">{newToken}</code>
+            <Text role="hint">{t('settings.apiTokens.newTokenWarning')}</Text>
+            <div className="plexon-settings-actions">
+              <Button type="button" variant="ghost" size="sm" onClick={handleCopyToken}>
+                {t('settings.apiTokens.newTokenCopy')}
+              </Button>
+              <Button type="button" variant="link" size="sm" onClick={() => setNewToken(null)}>
                 {t('common.close')}
-              </MsqdxButton>
-            </Stack>
-          ) : (
-            <Stack direction="row" spacing={1} sx={{ mb: 'var(--msqdx-spacing-md)' }} alignItems="center" flexWrap="wrap">
-              <MsqdxFormField
-                label={t('settings.apiTokens.nameLabel')}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="plexon-settings-token-create">
+            <Field label={t('settings.apiTokens.nameLabel')} size="sm">
+              <Input
                 value={tokenName}
-                onChange={(e) => setTokenName((e.target as HTMLInputElement).value)}
+                onChange={(e) => setTokenName(e.target.value)}
                 placeholder={t('settings.apiTokens.namePlaceholder')}
-                size="small"
-                sx={{ minWidth: 200, ...FORM_FIELD_ACCENT_SX }}
+                block
               />
-              <MsqdxButton variant="contained" onClick={handleCreateToken} disabled={creatingToken} sx={{ mt: 1 }}>
-                {creatingToken ? t('settings.apiTokens.creating') : t('settings.apiTokens.create')}
-              </MsqdxButton>
-            </Stack>
-          )}
-          <MsqdxTypography variant="subtitle2" weight="semibold" sx={{ mb: 1 }}>
-            {t('settings.apiTokens.listTitle')}
-          </MsqdxTypography>
-          {loadingTokens ? (
-            <MsqdxTypography variant="body2" color="text.secondary">{t('common.loading')}</MsqdxTypography>
-          ) : apiTokens.length === 0 ? (
-            <MsqdxTypography variant="body2" color="text.secondary">{t('settings.apiTokens.empty')}</MsqdxTypography>
-          ) : (
-            <Stack spacing={0.5}>
-              {apiTokens.map((token) => (
-                <Box
-                  key={token.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    py: 0.5,
-                    borderBottom: '1px solid var(--color-border-subtle)',
-                  }}
-                >
-                  <Box>
-                    <MsqdxTypography variant="body2">{token.name || token.id.slice(0, 8)}</MsqdxTypography>
-                    <MsqdxTypography variant="caption" color="text.secondary">
-                      {new Date(token.createdAt).toLocaleString()}
-                    </MsqdxTypography>
-                  </Box>
-                  <MsqdxButton variant="text" size="small" color="error" onClick={() => handleRevokeToken(token.id)}>
-                    {t('settings.apiTokens.revoke')}
-                  </MsqdxButton>
-                </Box>
-              ))}
-            </Stack>
-          )}
-        </MsqdxCard>
+            </Field>
+            <Button type="button" variant="primary" onClick={handleCreateToken} disabled={creatingToken}>
+              {creatingToken ? t('settings.apiTokens.creating') : t('settings.apiTokens.create')}
+            </Button>
+          </div>
+        )}
 
-        {/* Session – Abmelden */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-        >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-xs)' }}>
-            <MsqdxTypography variant="h6" weight="semibold">
-              {t('settings.session.title')}
-            </MsqdxTypography>
-            <InfoTooltip title={t('info.session')} ariaLabel={t('common.info')} />
-          </Box>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 'var(--msqdx-spacing-md)' }}>
-            {t('settings.session.subtitle')}
-          </MsqdxTypography>
-          <MsqdxButton variant="text" onClick={handleLogout}>
-            {t('settings.session.logout')}
-          </MsqdxButton>
-        </MsqdxCard>
+        <Text role="label">{t('settings.apiTokens.listTitle')}</Text>
+        {loadingTokens ? (
+          <Text role="meta">{t('common.loading')}</Text>
+        ) : apiTokens.length === 0 ? (
+          <Text role="meta">{t('settings.apiTokens.empty')}</Text>
+        ) : (
+          <ul className="plexon-settings-token-list">
+            {apiTokens.map((token) => (
+              <li key={token.id} className="plexon-settings-token-row">
+                <div>
+                  <Text role="body">{token.name || token.id.slice(0, 8)}</Text>
+                  <Text role="meta">{new Date(token.createdAt).toLocaleString()}</Text>
+                </div>
+                <Button type="button" variant="danger" size="sm" onClick={() => handleRevokeToken(token.id)}>
+                  {t('settings.apiTokens.revoke')}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-        {/* Über PLEXON */}
-        <MsqdxCard
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-        >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--msqdx-spacing-xs)', mb: 'var(--msqdx-spacing-xs)' }}>
-            <MsqdxTypography variant="h6" weight="semibold">
-              {t('settings.about.title')}
-            </MsqdxTypography>
-            <InfoTooltip title={t('info.about')} ariaLabel={t('common.info')} />
-          </Box>
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', lineHeight: 1.7 }}>
-            {t('settings.about.body')}
-          </MsqdxTypography>
-        </MsqdxCard>
-      </Stack>
-    </Box>
-  );
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.session.title')} as="h2" />
+        <Text role="meta">{t('settings.session.subtitle')}</Text>
+        <Button type="button" variant="subtle" onClick={handleLogout} disabled={loggingOut}>
+          {loggingOut ? t('common.loading') : t('settings.session.logout')}
+        </Button>
+      </section>
+
+      <section className="plexon-settings-section">
+        <SectionChrome quiet title={t('settings.about.title')} as="h2" />
+        <Text role="body">{t('settings.about.body')}</Text>
+      </section>
+    </div>
+  )
 }

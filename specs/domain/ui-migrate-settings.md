@@ -1,6 +1,6 @@
 # UI rebuild — Settings
 
-**Status:** Draft — Wave 2 (challenge + reuse)  
+**Status:** Accepted — Wave 2 done — 2026-07-31 (challenge + reuse)  
 **Route:** `/settings`  
 **Reference:** `audion-v3` settings · `knowledge/ui-rebuild-reuse.md`  
 **DS:** `SectionChrome`, `Field`, `Input`, `Select`, `Switch`, `ToggleGroup`, `Text`, `Panel`, `Button`, `Avatar`
