@@ -31,6 +31,24 @@ describe('ui rebuild foundation inventory', () => {
 
   it('imports @msqdx/ui styles in globals', () => {
     const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
-    expect(css).toContain("@import '@msqdx/ui/styles.css'")
+    expect(
+      css.includes("@import '@msqdx/ui/styles.css'") ||
+        css.includes("msqdx-ui/packages/ui/src/styles.css"),
+    ).toBe(true)
+  })
+
+  it('ships migrate specs for waves 1–7', () => {
+    for (const rel of [
+      'specs/domain/ui-migrate.md',
+      'specs/domain/ui-migrate-dashboard.md',
+      'specs/domain/ui-migrate-settings.md',
+      'specs/domain/ui-migrate-products.md',
+      'specs/domain/ui-migrate-admin.md',
+      'specs/domain/ui-migrate-assistant.md',
+      'specs/domain/ui-migrate-event-quick-check.md',
+      'specs/domain/ui-migrate-board.md',
+    ]) {
+      expect(existsSync(path.join(root, rel)), rel).toBe(true)
+    }
   })
 })

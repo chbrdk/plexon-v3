@@ -1,5 +1,6 @@
 'use client';
 
+import type { KeyboardEvent } from 'react';
 import { Box } from '@mui/material';
 import { MsqdxIcon, MsqdxTypography } from '@msqdx/react';
 import { MSQDX_SPACING, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
@@ -46,7 +47,7 @@ export function PlexonEntityCard({
       onClick={onClick}
       onKeyDown={
         interactive
-          ? (e) => {
+          ? (e: KeyboardEvent<HTMLDivElement>) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 onClick?.();

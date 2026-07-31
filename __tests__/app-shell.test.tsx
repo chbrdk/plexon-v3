@@ -1,11 +1,15 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../components/AppShell'
-import { PATH_ASSISTANT, PATH_HOME, PATH_PRODUCTS, PATH_SETTINGS } from '../lib/constants'
+import { PATH_ASSISTANT, PATH_HOME, PATH_LOGIN, PATH_PRODUCTS, PATH_SETTINGS } from '../lib/constants'
+
+const { pathnameRef } = vi.hoisted(() => ({
+  pathnameRef: { current: '/' as string },
+}))
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => PATH_HOME,
+  usePathname: () => pathnameRef.current,
 }))
 
 vi.mock('next-auth/react', () => ({
@@ -39,16 +43,37 @@ vi.mock('@/components/settings/BrandColorInitializer', () => ({
   BrandColorInitializer: () => null,
 }))
 
+vi.mock('@msqdx/ui', () => ({
+  Avatar: ({ name }: { name?: string }) => <span data-testid="avatar">{name}</span>,
+}))
+
 vi.mock('@/lib/msqdx-ui-shell', () => ({
-  AppFrame: ({ children, rail, topbar }: { children: React.ReactNode; rail: React.ReactNode; topbar: React.ReactNode }) => (
+  AppFrame: ({
+    children,
+    rail,
+    topbar,
+    brandCorner,
+  }: {
+    children: React.ReactNode
+    rail: React.ReactNode
+    topbar: React.ReactNode
+    brandCorner?: React.ReactNode
+  }) => (
     <div>
       <nav data-testid="nav-rail">{rail}</nav>
+      {brandCorner}
       <header>{topbar}</header>
       {children}
     </div>
   ),
   BrandCorner: ({ label }: { label: string }) => <div>{label}</div>,
-  NavRail: ({ items, footerItems }: { items: Array<{ label: string; href: string; active?: boolean }>; footerItems?: Array<{ label: string; href: string }> }) => (
+  NavRail: ({
+    items,
+    footerItems,
+  }: {
+    items: Array<{ label: string; href: string; active?: boolean }>
+    footerItems?: Array<{ label: string; href: string }>
+  }) => (
     <div className="nav-rail nav-rail--static-dock" data-orientation="vertical">
       {items.map((item) => (
         <a key={item.href} className={item.active ? 'active rail-link' : 'rail-link'} href={item.href} aria-label={item.label}>
@@ -68,7 +93,12 @@ vi.mock('@/lib/msqdx-ui-shell', () => ({
 }))
 
 describe('app shell', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   beforeEach(() => {
+    pathnameRef.current = PATH_HOME
     document.documentElement.setAttribute('data-theme', 'msqdx-dark')
   })
 
@@ -86,19 +116,15 @@ describe('app shell', () => {
     expect(screen.getByRole('link', { name: /Assistant/i })).toHaveAttribute('href', PATH_ASSISTANT)
     expect(screen.getByRole('link', { name: /Products/i })).toHaveAttribute('href', PATH_PRODUCTS)
     expect(screen.getByRole('link', { name: /Settings/i })).toHaveAttribute('href', PATH_SETTINGS)
-    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
   })
 
-  it('skips shell chrome on auth routes', async () => {
-    vi.resetModules()
-    vi.doMock('next/navigation', () => ({
-      usePathname: () => '/login',
-    }))
-    const { AppShell: AuthShell } = await import('../components/AppShell')
+  it('skips shell chrome on auth routes', () => {
+    pathnameRef.current = PATH_LOGIN
     render(
-      <AuthShell>
+      <AppShell>
         <div>Login only</div>
-      </AuthShell>,
+      </AppShell>,
     )
     expect(document.querySelector('.nav-rail')).toBeNull()
     expect(screen.getByText('Login only')).toBeInTheDocument()

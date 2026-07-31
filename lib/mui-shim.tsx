@@ -26,7 +26,7 @@ import { Box, Stack } from '@/components/ui/layout'
 
 export { Box, Stack }
 
-export type SxProps = Record<string, unknown>
+export type SxProps<T = unknown> = Record<string, unknown> & { __theme?: T }
 export type BoxProps = HTMLAttributes<HTMLDivElement> & {
   component?: keyof JSX.IntrinsicElements
   sx?: SxProps
@@ -246,9 +246,30 @@ export function Alert({
   )
 }
 
-export function Chip({ label, sx, style, children, ...rest }: DivProps & { label?: string }) {
+export function Chip({
+  label,
+  sx,
+  style,
+  children,
+  size: _size,
+  variant: _variant,
+  disabled: _disabled,
+  onClick,
+  ...rest
+}: DivProps & {
+  label?: string
+  size?: string
+  variant?: string
+  disabled?: boolean
+  onClick?: () => void
+}) {
   return (
-    <span className="ds-chip" style={mergeSx(sx, style)} {...rest}>
+    <span
+      className="ds-chip"
+      style={mergeSx(sx, style)}
+      onClick={_disabled ? undefined : onClick}
+      {...rest}
+    >
       {label ?? children}
     </span>
   )
@@ -258,8 +279,9 @@ export function IconButton({
   sx,
   style,
   children,
+  size: _size,
   ...rest
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { sx?: SxProps }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { sx?: SxProps; size?: string }) {
   return (
     <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" style={mergeSx(sx, style)} {...rest}>
       {children}
@@ -278,6 +300,12 @@ export function Popover({
   children?: ReactNode
   anchorEl?: unknown
   onClose?: () => void
+  anchorOrigin?: unknown
+  transformOrigin?: unknown
+  slotProps?: unknown
+  disableAutoFocus?: boolean
+  disableEnforceFocus?: boolean
+  disableRestoreFocus?: boolean
 }) {
   if (!open) return null
   return (
@@ -292,7 +320,17 @@ export function Collapse({ in: show, children }: { in?: boolean; children?: Reac
   return <>{children}</>
 }
 
-export function LinearProgress({ sx, style }: { sx?: SxProps; style?: CSSProperties }) {
+export function LinearProgress({
+  sx,
+  style,
+  value: _value,
+  variant: _variant,
+}: {
+  sx?: SxProps
+  style?: CSSProperties
+  value?: number
+  variant?: string
+}) {
   return <div className="plexon-linear-progress" style={mergeSx(sx, style)} role="progressbar" />
 }
 
@@ -308,7 +346,20 @@ export function CircularProgress({ sx, style, size }: { sx?: SxProps; style?: CS
   )
 }
 
-export function Dialog({ open, onClose, children }: { open?: boolean; onClose?: () => void; children?: ReactNode }) {
+export function Dialog({
+  open,
+  onClose,
+  children,
+  ..._rest
+}: {
+  open?: boolean
+  onClose?: () => void
+  children?: ReactNode
+  maxWidth?: string
+  fullWidth?: boolean
+  'aria-labelledby'?: string
+  slotProps?: unknown
+}) {
   if (!open) return null
   return (
     <div className="plexon-dialog-backdrop" role="presentation" onClick={onClose}>
@@ -381,10 +432,11 @@ export function Tooltip({ title, children }: { title?: ReactNode; children: Reac
   )
 }
 
-export function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string; sx?: SxProps }) {
-  const { sx, style, children, ...rest } = props
+export function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string; size?: string; sx?: SxProps }) {
+  const { sx, style, children, size, ...rest } = props
+  const sizeClass = size === 'small' ? 'ds-btn--sm' : size === 'large' ? 'ds-btn--lg' : undefined
   return (
-    <button type="button" className="ds-btn ds-btn--primary ds-btn--sm" style={mergeSx(sx, style)} {...rest}>
+    <button type="button" className={['ds-btn', 'ds-btn--primary', sizeClass].filter(Boolean).join(' ')} style={mergeSx(sx, style)} {...rest}>
       {children}
     </button>
   )
@@ -525,8 +577,16 @@ export function MuiLink({ href, children, sx, style, ...rest }: React.AnchorHTML
 
 export { MuiLink as Link }
 
-export function Table(props: React.TableHTMLAttributes<HTMLTableElement>) {
-  return <table className="plexon-table" {...props} />
+export function Table({
+  size: _size,
+  children,
+  ...props
+}: React.TableHTMLAttributes<HTMLTableElement> & { size?: string }) {
+  return (
+    <table className="plexon-table" {...props}>
+      {children}
+    </table>
+  )
 }
 
 export function TableHead(props: React.HTMLAttributes<HTMLTableSectionElement>) {
@@ -537,12 +597,31 @@ export function TableBody(props: React.HTMLAttributes<HTMLTableSectionElement>) 
   return <tbody {...props} />
 }
 
-export function TableRow(props: React.HTMLAttributes<HTMLTableRowElement>) {
-  return <tr {...props} />
+export function TableRow({
+  sx,
+  style,
+  children,
+  hover: _hover,
+  ...props
+}: React.HTMLAttributes<HTMLTableRowElement> & { sx?: SxProps; hover?: boolean }) {
+  return (
+    <tr style={mergeSx(sx, style)} {...props}>
+      {children}
+    </tr>
+  )
 }
 
-export function TableCell(props: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td {...props} />
+export function TableCell({
+  sx,
+  style,
+  children,
+  ...props
+}: React.TdHTMLAttributes<HTMLTableCellElement> & { sx?: SxProps }) {
+  return (
+    <td style={mergeSx(sx, style)} {...props}>
+      {children}
+    </td>
+  )
 }
 
 export function Paper({ children, sx, style, ...rest }: DivProps) {
@@ -675,7 +754,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
-export function useTheme() {
+export function useTheme(): {
+  breakpoints: { down: () => boolean; up: () => boolean }
+  palette: { mode: 'dark' | 'light'; text?: { primary?: string } }
+} {
   return {
     breakpoints: {
       down: () => false,

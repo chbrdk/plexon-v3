@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Box, Stack } from '@/components/ui/layout'
 import { MsqdxIcon } from '@msqdx/react'
 import {
@@ -25,7 +25,7 @@ export function AssistantChatBubble({
   children,
   status,
 }: AssistantChatBubbleProps) {
-  const bubbleStyles = getGlassChatBubbleSx(role, { palette: { mode: 'dark' } })
+  const bubbleStyles = getGlassChatBubbleSx(role, { palette: { mode: 'dark', text: { primary: '#ffffff' } } })
   const align = getGlassChatBubbleAlign(role)
   const maxWidth = getGlassChatBubbleMaxWidth(role)
 
@@ -43,12 +43,12 @@ export function AssistantChatBubble({
         data-msqdx-surface="light"
         className="plexon-chat-bubble"
         style={{
-          ...bubbleStyles,
+          ...(bubbleStyles as CSSProperties),
           paddingLeft: '32px',
           paddingRight: '32px',
           paddingTop: '28px',
           paddingBottom: '32px',
-          maxWidth,
+          maxWidth: maxWidth.md,
           minWidth: 0,
         }}
       >

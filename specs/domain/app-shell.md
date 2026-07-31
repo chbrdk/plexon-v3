@@ -1,8 +1,9 @@
 # App Shell
 
 **Status:** Accepted — 2026-07-31  
-**Implements:** `components/AppShell.tsx` · `lib/paths.ts`  
-**DS:** `AppFrame`, `NavRail`, `BrandCorner`, `PageTitle` from `@msqdx/ui`
+**Implements:** `components/AppShell.tsx` · `lib/shell-paths.ts`  
+**DS:** `AppFrame`, `NavRail`, `BrandCorner`, `PageTitle` from `@msqdx/ui`  
+**Index:** `specs/domain/ui-migrate.md`
 
 ## Rules
 

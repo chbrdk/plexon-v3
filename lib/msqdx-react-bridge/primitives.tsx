@@ -11,13 +11,15 @@ import {
   Text,
 } from '@msqdx/ui'
 
-type LegacySx = CSSProperties & Record<string, unknown>
+type LegacySx = CSSProperties | Record<string, unknown> | Array<CSSProperties | Record<string, unknown> | boolean | null | undefined>
 
 function sxStyle(sx?: LegacySx, style?: CSSProperties): CSSProperties | undefined {
   if (!sx && !style) return undefined
   const out: Record<string, unknown> = { ...style }
-  if (sx) {
-    for (const [k, v] of Object.entries(sx)) {
+  const parts = Array.isArray(sx) ? sx : sx ? [sx] : []
+  for (const part of parts) {
+    if (!part || typeof part !== 'object') continue
+    for (const [k, v] of Object.entries(part)) {
       if (v == null || k.startsWith('&') || k.startsWith('@')) continue
       out[k] = v
     }
@@ -65,6 +67,8 @@ export function MsqdxButton({
   variant = 'contained',
   fullWidth,
   size,
+  brandColor: _brandColor,
+  component: _component,
   sx,
   style,
   children,
@@ -73,10 +77,12 @@ export function MsqdxButton({
   variant?: 'contained' | 'outlined' | 'text' | string
   fullWidth?: boolean
   size?: 'small' | 'medium' | 'large' | string
+  brandColor?: string
+  component?: string
   sx?: LegacySx
   style?: CSSProperties
   children?: ReactNode
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+} & React.ButtonHTMLAttributes<HTMLButtonElement> & Record<string, unknown>) {
   const mapped =
     variant === 'outlined' ? 'ghost' : variant === 'text' ? 'link' : variant === 'contained' ? 'primary' : 'primary'
   const sizeClass = size === 'small' ? 'ds-btn--sm' : size === 'large' ? 'ds-btn--lg' : undefined
@@ -93,16 +99,123 @@ export function MsqdxButton({
   )
 }
 
-export function MsqdxIconButton({
-  sx,
-  style,
-  children,
-  ...rest
-}: { sx?: LegacySx; style?: CSSProperties; children?: ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export type MsqdxIconButtonProps = {
+  sx?: LegacySx
+  style?: CSSProperties
+  children?: ReactNode
+  size?: string
+  title?: string
+  className?: string
+} & React.ButtonHTMLAttributes<HTMLButtonElement>
+
+export function MsqdxIconButton({ sx, style, children, size: _size, ...rest }: MsqdxIconButtonProps) {
   return (
     <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" style={sxStyle(sx, style)} {...rest}>
       {children}
     </button>
+  )
+}
+
+export function MsqdxTooltip({
+  title,
+  children,
+}: {
+  title?: ReactNode
+  children?: ReactNode
+  placement?: string
+}) {
+  return (
+    <span className="plexon-tooltip" title={typeof title === 'string' ? title : undefined}>
+      {children}
+    </span>
+  )
+}
+
+export function MarkdownContent({ content, className }: { content: string; className?: string }) {
+  return (
+    <div className={className} style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono, ui-monospace, monospace)' }}>
+      {content}
+    </div>
+  )
+}
+
+export function MsqdxPrismionToolbar({
+  onDelete,
+  onBranch,
+  onMerge,
+  onLockToggle,
+  onColorClick,
+  onArchive: _onArchive,
+}: {
+  onDelete?: () => void
+  onBranch?: () => void
+  onMerge?: () => void
+  onLockToggle?: () => void
+  onColorClick?: () => void
+  onArchive?: () => void
+}) {
+  return (
+    <div className="plexon-prismion-toolbar" role="toolbar">
+      {onColorClick ? (
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onColorClick} aria-label="Color">
+          color
+        </button>
+      ) : null}
+      {onBranch ? (
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onBranch} aria-label="Branch">
+          branch
+        </button>
+      ) : null}
+      {onMerge ? (
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onMerge} aria-label="Merge">
+          merge
+        </button>
+      ) : null}
+      {onLockToggle ? (
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onLockToggle} aria-label="Lock">
+          lock
+        </button>
+      ) : null}
+      {onDelete ? (
+        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onDelete} aria-label="Delete">
+          delete
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+export function MsqdxCornerTabSection({
+  children,
+  tab,
+  placement,
+  ..._rest
+}: {
+  children?: ReactNode
+  tab?: ReactNode
+  placement?: string
+} & Record<string, unknown>) {
+  return (
+    <div className="plexon-corner-tab-section" data-placement={placement}>
+      {tab}
+      <div className="plexon-corner-tab-section__body">{children}</div>
+    </div>
+  )
+}
+
+export function MsqdxCornerTabSectionTab({
+  heading,
+  children,
+  ..._rest
+}: {
+  heading?: ReactNode
+  children?: ReactNode
+} & Record<string, unknown>) {
+  return (
+    <div className="plexon-corner-tab-section__tab">
+      {heading}
+      {children}
+    </div>
   )
 }
 
@@ -113,6 +226,7 @@ export function MsqdxFormField({
   type = 'text',
   fullWidth,
   required,
+  size: _size,
   sx,
   ...rest
 }: {
@@ -122,6 +236,7 @@ export function MsqdxFormField({
   type?: string
   fullWidth?: boolean
   required?: boolean
+  size?: string
   sx?: LegacySx
 } & Record<string, unknown>) {
   return (
@@ -147,8 +262,20 @@ export function MsqdxCard({
   sx,
   style,
   children,
+  variant: _variant,
+  borderRadius: _borderRadius,
+  brandColor: _brandColor,
+  hoverable: _hoverable,
   ...rest
-}: { sx?: LegacySx; style?: CSSProperties; children?: ReactNode } & Record<string, unknown>) {
+}: {
+  sx?: LegacySx
+  style?: CSSProperties
+  children?: ReactNode
+  variant?: string
+  borderRadius?: string
+  brandColor?: string
+  hoverable?: boolean
+} & React.HTMLAttributes<HTMLDivElement> & Record<string, unknown>) {
   return (
     <Panel className="plexon-legacy-card" style={sxStyle(sx, style)} {...rest}>
       {children}
@@ -160,15 +287,45 @@ export function MsqdxMoleculeCard(props: Parameters<typeof MsqdxCard>[0] & { var
   return <MsqdxCard {...props} />
 }
 
-export function MsqdxDivider() {
+export function MsqdxDivider({ spacing: _spacing }: { spacing?: string } = {}) {
   return <hr className="plexon-divider" />
 }
 
-export function MsqdxAvatar({ name, sx, style }: { name?: string; sx?: LegacySx; style?: CSSProperties }) {
-  return <Avatar name={name ?? '?'} size="md" style={sxStyle(sx, style)} />
+export function MsqdxAvatar({
+  name,
+  children,
+  src: _src,
+  size: _size,
+  sx,
+  style,
+}: {
+  name?: string
+  children?: ReactNode
+  src?: string
+  size?: string
+  sx?: LegacySx
+  style?: CSSProperties
+}) {
+  const label = name ?? (typeof children === 'string' ? children : '?')
+  return <Avatar name={label} size="md" style={sxStyle(sx, style)} />
 }
 
-export function MsqdxChip({ label, children, sx, style }: { label?: string; children?: ReactNode; sx?: LegacySx; style?: CSSProperties }) {
+export function MsqdxChip({
+  label,
+  children,
+  sx,
+  style,
+  size: _size,
+  brandColor: _brandColor,
+  ..._rest
+}: {
+  label?: string
+  children?: ReactNode
+  sx?: LegacySx
+  style?: CSSProperties
+  size?: string
+  brandColor?: string
+} & Record<string, unknown>) {
   return (
     <Chip style={sxStyle(sx, style)}>
       {label ?? children}
@@ -182,13 +339,18 @@ export function MsqdxSelect({
   onChange,
   options,
   fullWidth,
+  size: _size,
+  sx: _sx,
+  ..._rest
 }: {
   label?: string
   value?: string
   onChange?: (e: { target: { value: string } }) => void
   options?: Array<{ value: string; label: string }>
   fullWidth?: boolean
-}) {
+  size?: string
+  sx?: LegacySx
+} & Record<string, unknown>) {
   return (
     <Field label={label} size="md">
       <select
@@ -217,7 +379,19 @@ export function MsqdxLogo({ width, height }: { width?: number; height?: number; 
   )
 }
 
-export function MsqdxIcon({ name, sx, style }: { name?: string; sx?: LegacySx; style?: CSSProperties }) {
+export function MsqdxIcon({
+  name,
+  sx,
+  style,
+  size: _size,
+  customSize: _customSize,
+}: {
+  name?: string
+  sx?: LegacySx
+  style?: CSSProperties
+  size?: string
+  customSize?: number
+}) {
   return (
     <span className="material-symbols-outlined" style={sxStyle(sx, style)} aria-hidden>
       {name}
@@ -241,14 +415,24 @@ export function MsqdxGlassChatPanel({ children, sx, style }: { children?: ReactN
   )
 }
 
-export function MsqdxStepper({ steps, activeStep }: { steps?: string[]; activeStep?: number }) {
+export function MsqdxStepper({
+  steps,
+  activeStep,
+  ..._rest
+}: {
+  steps?: Array<string | { label?: string; description?: string; [key: string]: unknown }>
+  activeStep?: number
+} & Record<string, unknown>) {
   return (
     <ol className="plexon-stepper">
-      {steps?.map((step, i) => (
-        <li key={step} data-active={i === activeStep}>
-          {step}
-        </li>
-      ))}
+      {steps?.map((step, i) => {
+        const label = typeof step === 'string' ? step : step.label ?? `Step ${i + 1}`
+        return (
+          <li key={`${label}-${i}`} data-active={i === activeStep}>
+            {label}
+          </li>
+        )
+      })}
     </ol>
   )
 }

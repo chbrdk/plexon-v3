@@ -2,12 +2,17 @@
  * Minimal layout helpers replacing MUI Box/Stack during @msqdx/ui cutover.
  * Prefer semantic HTML + CSS classes for new code.
  */
+import { forwardRef } from 'react'
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
 
 type BoxProps = HTMLAttributes<HTMLDivElement> & {
   component?: keyof JSX.IntrinsicElements
   sx?: Record<string, unknown>
   children?: ReactNode
+  href?: string
+  target?: string
+  rel?: string
+  type?: string
 }
 
 function flattenSx(sx?: BoxProps['sx']): CSSProperties {
@@ -26,14 +31,17 @@ function flattenSx(sx?: BoxProps['sx']): CSSProperties {
   return out as CSSProperties
 }
 
-export function Box({ component = 'div', sx, style, children, ...rest }: BoxProps) {
+export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box(
+  { component = 'div', sx, style, children, ...rest },
+  ref,
+) {
   const Comp = component as 'div'
   return (
-    <Comp style={{ ...flattenSx(sx), ...style }} {...rest}>
+    <Comp ref={ref} style={{ ...flattenSx(sx), ...style }} {...rest}>
       {children}
     </Comp>
   )
-}
+})
 
 type StackProps = BoxProps & {
   direction?: 'row' | 'column' | { xs?: 'row' | 'column'; sm?: 'row' | 'column'; md?: 'row' | 'column' }
@@ -42,6 +50,7 @@ type StackProps = BoxProps & {
   alignItems?: CSSProperties['alignItems'] | { xs?: CSSProperties['alignItems']; sm?: CSSProperties['alignItems'] }
   justifyContent?: CSSProperties['justifyContent']
   flexWrap?: CSSProperties['flexWrap']
+  useFlexGap?: boolean
 }
 
 function resolveResponsiveDirection(
@@ -58,21 +67,26 @@ function resolveResponsiveAlign(
   return align.sm ?? align.xs
 }
 
-export function Stack({
-  direction = 'column',
-  spacing,
-  gap,
-  alignItems,
-  justifyContent,
-  flexWrap,
-  sx,
-  style,
-  ...rest
-}: StackProps) {
+export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
+  {
+    direction = 'column',
+    spacing,
+    gap,
+    alignItems,
+    justifyContent,
+    flexWrap,
+    useFlexGap: _useFlexGap,
+    sx,
+    style,
+    ...rest
+  },
+  ref,
+) {
   const resolvedGap =
     gap ?? (typeof spacing === 'number' ? `${spacing * 0.5}rem` : spacing)
   return (
     <Box
+      ref={ref}
       {...rest}
       style={{
         display: 'flex',
@@ -86,4 +100,4 @@ export function Stack({
       }}
     />
   )
-}
+})

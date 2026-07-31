@@ -1,7 +1,7 @@
 /**
- * @msqdx/react bridge — magazine primitives from @msqdx/ui; board/prismion from legacy DS.
+ * Narrow @msqdx/react bridge — magazine primitives from @msqdx/ui;
+ * board types from legacy DS; no full MUI design-system re-export.
  */
-export * from '../../../msqdx-design-system/packages/react/src/index.ts'
 export type {
   Prismion,
   Board,
@@ -9,9 +9,17 @@ export type {
   Connector,
   Presence,
   BoardParticipant,
-} from '../../../msqdx-design-system/packages/react/src/types/prismion.ts'
-export type { PrismionResultItem } from '../../../msqdx-design-system/packages/react/src/components/prismion/PrismionResult/MsqdxPrismionResult.tsx'
-export type { BrandColor } from '../../../msqdx-design-system/packages/react/src/components/atoms/Card/MsqdxCard.tsx'
+} from '../../../msqdx-design-system/packages/react/src/types/prismion'
+
+export type PrismionResultItem =
+  | { type: 'markdown'; content: string; label?: string }
+  | { type: 'text'; content: string; label?: string }
+  | { type: string; content?: string; label?: string; [key: string]: unknown }
+
+export type BrandColor = 'purple' | 'yellow' | 'pink' | 'orange' | 'green' | 'black'
+
+export { wouldOverlap } from '../../../msqdx-design-system/packages/react/src/lib/board-utils'
+
 export {
   MsqdxTypography,
   MsqdxButton,
@@ -30,5 +38,11 @@ export {
   MsqdxAdminNav,
   MsqdxGlassChatPanel,
   MsqdxStepper,
+  MsqdxTooltip,
+  MsqdxPrismionToolbar,
+  MarkdownContent,
+  MsqdxCornerTabSection,
+  MsqdxCornerTabSectionTab,
   type AdminNavItem,
+  type MsqdxIconButtonProps,
 } from './primitives'

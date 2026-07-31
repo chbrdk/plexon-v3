@@ -9,14 +9,14 @@
 
 | Wave | Surface | Status |
 |------|---------|--------|
-| 0 | Foundation (wiring, AppShell/NavRail, Auth) | ~90% — shell/auth/docs/tests; build still needs token/MUI bridge polish |
-| 1 | Dashboard `/` | partial — magazine wrapper only; page still legacy bridge |
-| 2 | Settings `/settings` | pending (bridge) |
-| 3 | Products + Platform projects | products page + ProductCatalog on `@msqdx/ui`; project detail pending |
-| 4 | Admin console | layout + subnav on `@msqdx/ui`; pages still bridge |
-| 5 | Assistant | pending (bridge) |
-| 6 | Event Quick Check | pending (bridge) |
-| 7 | Board + legacy DS removal | pending — Prismion still from `msqdx-design-system` via bridge |
+| 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors` until waves clear shim gaps |
+| 1 | Dashboard `/` | pending — see `ui-migrate-dashboard.md` |
+| 2 | Settings `/settings` | pending — see `ui-migrate-settings.md` |
+| 3 | Products + Platform projects | catalog done; project detail pending |
+| 4 | Admin console | layout/subnav done; pages pending |
+| 5 | Assistant | pending — see `ui-migrate-assistant.md` |
+| 6 | Event Quick Check | pending — see `ui-migrate-event-quick-check.md` |
+| 7 | Board + legacy DS removal | pending — see `ui-migrate-board.md`; bridge narrowed (no full MUI DS re-export) |
 
 ## Compatibility (temporary)
 
@@ -28,6 +28,11 @@ Until Waves 1–7 finish, webpack aliases keep legacy imports compiling:
 - `@msqdx/tokens` → shim / legacy tokens for board DS only
 
 **Target:** every surface imports `@msqdx/ui` only; delete bridge + shim.
+
+## Specs
+
+Index: `specs/domain/ui-migrate.md`  
+Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-products.md` · `ui-migrate-admin.md` · `ui-migrate-assistant.md` · `ui-migrate-event-quick-check.md` · `ui-migrate-board.md`
 
 ## Pattern (from audion-v3)
 
