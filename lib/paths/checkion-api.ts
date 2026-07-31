@@ -19,6 +19,12 @@ export function pathCheckionScanResult(scanId: string): string {
   return `${base}/results/${encodeURIComponent(scanId)}`;
 }
 
+/** Domain scan magazine detail — `CHECKION/app/domain/[id]/…`. */
+export function pathCheckionDomainResult(domainScanId: string): string {
+  const base = getCheckionUrl().replace(/\/+$/, '');
+  return `${base}/domain/${encodeURIComponent(domainScanId)}`;
+}
+
 export function pathCheckionDomainScan(input: {
   url: string;
   scanId?: string;

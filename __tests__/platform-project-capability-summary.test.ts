@@ -37,9 +37,21 @@ describe('platform-project-capability-summary', () => {
       personas: [],
     });
 
-    const checkion = resolveCheckionCapability(null, [
+    const checkionEmpty = resolveCheckionCapability(null, [
       { productId: 'checkion', externalProjectId: null, syncStatus: 'failed' },
     ]);
-    expect(checkion).toBeNull();
+    expect(checkionEmpty).toBeNull();
+
+    const checkionBound = resolveCheckionCapability(null, [
+      { productId: 'checkion', externalProjectId: 'chk-1', syncStatus: 'in_sync' },
+    ]);
+    expect(checkionBound).toEqual({
+      externalProjectId: 'chk-1',
+      scanCount: 0,
+      domainScanCount: 0,
+      standaloneScanCount: 0,
+      domainScans: [],
+      standaloneScans: [],
+    });
   });
 });

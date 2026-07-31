@@ -18,7 +18,14 @@ export function resolveCheckionCapability(
   const binding = bindings.find((b) => b.productId === 'checkion');
   const id = binding?.externalProjectId?.trim();
   if (!id) return null;
-  return { externalProjectId: id, scanCount: 0 };
+  return {
+    externalProjectId: id,
+    scanCount: 0,
+    domainScanCount: 0,
+    standaloneScanCount: 0,
+    domainScans: [],
+    standaloneScans: [],
+  };
 }
 
 export function resolveAudionCapability(

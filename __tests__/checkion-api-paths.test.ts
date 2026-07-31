@@ -12,7 +12,9 @@ import {
   checkionApiScanDomainStatus,
   checkionApiScanSummarize,
   checkionApiToolsContrast,
+  pathCheckionDomainResult,
   pathCheckionDomainScan,
+  pathCheckionScanResult,
 } from '@/lib/paths/checkion-api';
 
 describe('checkion-api paths', () => {
@@ -33,6 +35,11 @@ describe('checkion-api paths', () => {
     expect(checkionApiScanDomainStatus('dom-1')).toMatch(/\/status$/);
     expect(checkionApiScanSummarize('scan-1')).toMatch(/\/summarize$/);
     expect(pathCheckionDomainScan({ url: 'https://a.com', scanId: 'dom-1' })).toContain('scanId=dom-1');
+  });
+
+  it('builds catalog deep-links', () => {
+    expect(pathCheckionDomainResult('dom-1')).toMatch(/\/domain\/dom-1$/);
+    expect(pathCheckionScanResult('scan-1')).toMatch(/\/results\/scan-1$/);
   });
 
   it('builds project assign endpoints', () => {

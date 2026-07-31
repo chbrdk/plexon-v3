@@ -8,10 +8,48 @@ import {
   PLEXON_SERVICE_SECRET_HEADER,
 } from '@/lib/platform-contract';
 
+export type CheckionCatalogDomainScan = {
+  id: string;
+  domain: string;
+  status: string;
+  score: number;
+  timestamp: string;
+  totalPages: number;
+};
+
+export type CheckionCatalogStandaloneScan = {
+  id: string;
+  url: string;
+  score: number;
+  timestamp: string;
+};
+
 export type CheckionProjectSummary = {
   externalProjectId: string;
   scanCount: number;
+  domainScanCount: number;
+  standaloneScanCount: number;
+  domainScans: CheckionCatalogDomainScan[];
+  standaloneScans: CheckionCatalogStandaloneScan[];
 };
+
+function normalizeCheckionSummary(data: CheckionProjectSummary): CheckionProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  const domainScans = Array.isArray(data.domainScans) ? data.domainScans : [];
+  const standaloneScans = Array.isArray(data.standaloneScans) ? data.standaloneScans : [];
+  const domainScanCount = Number(data.domainScanCount) || domainScans.length;
+  const standaloneScanCount = Number(data.standaloneScanCount) || standaloneScans.length;
+  const scanCount =
+    Number(data.scanCount) || domainScanCount + standaloneScanCount;
+  return {
+    externalProjectId: data.externalProjectId,
+    scanCount,
+    domainScanCount,
+    standaloneScanCount,
+    domainScans,
+    standaloneScans,
+  };
+}
 
 export type AudionCatalogTargetGroup = {
   id: string;
@@ -77,8 +115,7 @@ export async function fetchCheckionPlatformProjectSummary(
   });
   if (!response.ok) return null;
   const data = await readJson<CheckionProjectSummary>(response);
-  if (!data?.externalProjectId) return null;
-  return data;
+  return data ? normalizeCheckionSummary(data) : null;
 }
 
 export async function fetchAudionPlatformProjectSummary(

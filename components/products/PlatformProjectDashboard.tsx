@@ -10,7 +10,8 @@ import {
   buildAudionTargetGroupUrl,
 } from '@/lib/audion-admin-launch-url'
 import { apiPlatformProjectDashboard, getAudionWebOrigin, pathAssistantWithProject } from '@/lib/constants'
-import type { AudionProjectSummary } from '@/lib/platform-project-dashboard-fetch'
+import { pathCheckionDomainResult, pathCheckionScanResult } from '@/lib/paths/checkion-api'
+import type { AudionProjectSummary, CheckionProjectSummary } from '@/lib/platform-project-dashboard-fetch'
 
 type DashboardPayload = {
   platformProject: {
@@ -26,7 +27,7 @@ type DashboardPayload = {
     syncStatus: string
     syncMessage: string | null
   }>
-  checkion: { externalProjectId: string; scanCount: number } | null
+  checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
   links: { checkionProject: string; audionProject: string }
 }
@@ -48,6 +49,15 @@ function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
   return productId
+}
+
+function checkionStripLabel(
+  checkion: CheckionProjectSummary,
+  t: (key: string) => string
+): string {
+  const domain = checkion.domainScanCount ?? 0
+  const standalone = checkion.standaloneScanCount ?? 0
+  return ` · ${domain} ${t('projects.detail.domainScans')} · ${standalone} ${t('projects.detail.standaloneScans')}`
 }
 
 function audionStripLabel(
@@ -108,6 +118,10 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
   const personas = data?.audion?.personas ?? []
   const catalogEmpty =
     Boolean(data?.audion) && targetGroups.length === 0 && personas.length === 0
+  const domainScans = data?.checkion?.domainScans ?? []
+  const standaloneScans = data?.checkion?.standaloneScans ?? []
+  const checkionCatalogEmpty =
+    Boolean(data?.checkion) && domainScans.length === 0 && standaloneScans.length === 0
 
   return (
     <div className="plexon-magazine plexon-project-detail" data-section="collection-project-home">
@@ -139,7 +153,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             data-state={data.checkion ? 'on' : 'off'}
           >
             CHECKION
-            {data.checkion ? ` · ${data.checkion.scanCount} ${t('projects.detail.scans')}` : ''}
+            {data.checkion ? checkionStripLabel(data.checkion, t) : ''}
           </span>
           <span className="plexon-capability-chip" data-state={data.audion ? 'on' : 'off'}>
             AUDION
@@ -176,10 +190,15 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                   </Chip>
                 </div>
                 {data.checkion ? (
-                  <StatLedeGroup aria-label="CHECKION" columns={1}>
+                  <StatLedeGroup aria-label="CHECKION" columns={2}>
                     <StatLede
-                      value={data.checkion.scanCount}
-                      label={t('projects.detail.scans')}
+                      value={data.checkion.domainScanCount ?? 0}
+                      label={t('projects.detail.domainScans')}
+                      kind="number"
+                    />
+                    <StatLede
+                      value={data.checkion.standaloneScanCount ?? 0}
+                      label={t('projects.detail.standaloneScans')}
                       kind="number"
                     />
                   </StatLedeGroup>
@@ -232,6 +251,92 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
               </Panel>
             </div>
           </section>
+
+          {data.checkion ? (
+            <section className="plexon-settings-section" aria-label={t('projects.detail.checkionCatalogTitle')}>
+              <SectionChrome
+                title={t('projects.detail.checkionCatalogTitle')}
+                meta={<Text role="meta">{t('projects.detail.checkionCatalogSubtitle')}</Text>}
+                as="h3"
+                quiet
+              />
+              {checkionCatalogEmpty ? (
+                <Text role="meta">{t('projects.detail.checkionCatalogEmpty')}</Text>
+              ) : (
+                <div className="plexon-project-product-grid">
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.domainScans')}
+                    </Text>
+                    {domainScans.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.checkionCatalogEmptyDomain')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {domainScans.map((scan) => (
+                          <li key={scan.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {scan.domain}
+                              </Text>
+                              <Text role="meta">
+                                {[
+                                  scan.status,
+                                  typeof scan.score === 'number' ? `Score ${scan.score}` : null,
+                                  scan.totalPages
+                                    ? `${scan.totalPages} ${t('projects.detail.pages')}`
+                                    : null,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </Text>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openExternal(pathCheckionDomainResult(scan.id))}
+                            >
+                              {t('projects.detail.openInCheckion')}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.standaloneScans')}
+                    </Text>
+                    {standaloneScans.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.checkionCatalogEmptyStandalone')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {standaloneScans.map((scan) => (
+                          <li key={scan.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {scan.url}
+                              </Text>
+                              <Text role="meta">
+                                {typeof scan.score === 'number' ? `Score ${scan.score}` : ''}
+                              </Text>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openExternal(pathCheckionScanResult(scan.id))}
+                            >
+                              {t('projects.detail.openInCheckion')}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+                </div>
+              )}
+            </section>
+          ) : null}
 
           {data.audion ? (
             <section className="plexon-settings-section" aria-label={t('projects.detail.audionCatalogTitle')}>

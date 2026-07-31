@@ -64,6 +64,10 @@ describe('GET /api/platform/me/project-insights', () => {
     vi.mocked(fetchCheckionPlatformProjectSummary).mockImplementation(async (id) => ({
       externalProjectId: `chk-${id}`,
       scanCount: 1,
+      domainScanCount: 0,
+      standaloneScanCount: 1,
+      domainScans: [],
+      standaloneScans: [],
     }));
     vi.mocked(fetchAudionPlatformProjectSummary).mockImplementation(async (id) => ({
       externalProjectId: `aud-${id}`,

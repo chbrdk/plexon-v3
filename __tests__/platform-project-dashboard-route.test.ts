@@ -74,6 +74,26 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     vi.mocked(fetchCheckionPlatformProjectSummary).mockResolvedValue({
       externalProjectId: 'chk-1',
       scanCount: 3,
+      domainScanCount: 1,
+      standaloneScanCount: 2,
+      domainScans: [
+        {
+          id: 'dom-1',
+          domain: 'acme.test',
+          status: 'complete',
+          score: 90,
+          timestamp: '2026-07-01T00:00:00.000Z',
+          totalPages: 5,
+        },
+      ],
+      standaloneScans: [
+        {
+          id: 'scan-1',
+          url: 'https://acme.test/',
+          score: 80,
+          timestamp: '2026-07-01T00:00:00.000Z',
+        },
+      ],
     });
     vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue({
       externalProjectId: 'aud-1',
@@ -95,6 +115,8 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     const body = await res.json();
     expect(body.platformProject.name).toBe('Acme');
     expect(body.checkion?.scanCount).toBe(3);
+    expect(body.checkion?.domainScans).toHaveLength(1);
+    expect(body.checkion?.standaloneScans[0]?.url).toBe('https://acme.test/');
     expect(body.audion?.personaCount).toBe(2);
     expect(body.audion?.targetGroupCount).toBe(1);
     expect(body.audion?.targetGroups).toHaveLength(1);
