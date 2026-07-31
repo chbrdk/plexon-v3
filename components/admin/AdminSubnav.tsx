@@ -11,7 +11,6 @@ import {
   PATH_ADMIN_COMPANIES,
   PATH_ADMIN_USERS,
 } from '@/lib/constants'
-import { THEME_ACCENT_WITH_FALLBACK } from '@/lib/theme-accent'
 
 const links: { href: string; labelKey: 'admin.navOverview' | 'admin.navCompanies' | 'admin.navUsers' }[] = [
   { href: PATH_ADMIN, labelKey: 'admin.navOverview' },
@@ -54,7 +53,7 @@ export function AdminSubnav() {
   }, [pathname])
 
   return (
-    <div style={{ marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--line)' }}>
+    <div className="plexon-admin-subnav-wrap">
       <nav className="plexon-admin-subnav" aria-label={t('admin.title')}>
         {links.map(({ href, labelKey }) => {
           const active =
@@ -65,11 +64,6 @@ export function AdminSubnav() {
               href={href}
               className="plexon-admin-subnav__link"
               data-active={active ? 'true' : undefined}
-              style={{
-                backgroundColor: active ? THEME_ACCENT_WITH_FALLBACK.backgroundColor : undefined,
-                borderColor: active ? THEME_ACCENT_WITH_FALLBACK.borderColor : undefined,
-                color: active ? 'var(--color-theme-accent-contrast, #fff)' : undefined,
-              }}
             >
               {t(labelKey)}
             </NextLink>
@@ -77,14 +71,16 @@ export function AdminSubnav() {
         })}
       </nav>
       {lastVisit && lastVisit.path !== pathname ? (
-        <Text role="meta" style={{ display: 'block', marginTop: '0.75rem' }}>
+        <Text role="meta" className="plexon-admin-subnav-meta">
           {t('admin.lastVisitedPrefix')}{' '}
-          <NextLink href={lastVisit.path}>{labelForAdminPath(lastVisit.path, t)}</NextLink>
+          <NextLink href={lastVisit.path} className="plexon-admin-link">
+            {labelForAdminPath(lastVisit.path, t)}
+          </NextLink>
           {' · '}
           {new Date(lastVisit.at).toLocaleString()}
         </Text>
       ) : null}
-      <Text role="meta" style={{ display: 'block', marginTop: '0.5rem' }}>
+      <Text role="meta" className="plexon-admin-subnav-meta">
         {t('admin.subtitle')}
       </Text>
     </div>

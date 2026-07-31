@@ -24,7 +24,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 | 1 | Dashboard `/` | adapter pass done; **challenge revisit** open (admin-on-home, Dash* adapters) |
 | 2 | Settings `/settings` | done — Audion-like SectionChrome/Field/ToggleGroup; theme + brand; APIs kept |
 | 3 | Products + Platform projects | done — catalog + project detail on SectionChrome/Panel/StatLede |
-| 4 | Admin console | layout/subnav done; pages pending |
+| 4 | Admin console | done — overview/users/companies/detail on SectionChrome/Field/table |
 | 5 | Assistant | pending — **compose Audion chat chrome** |
 | 6 | Event Quick Check | pending — rebuild workflow UI |
 | 7 | Board + legacy DS removal | pending — bridge removal |

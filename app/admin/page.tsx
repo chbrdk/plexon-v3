@@ -1,105 +1,87 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import NextLink from 'next/link';
-import { Stack } from '@mui/material';
-import { MsqdxTypography, MsqdxCard, MsqdxButton } from '@msqdx/react';
-import { useI18n } from '@/components/i18n/I18nProvider';
+import { useEffect, useState } from 'react'
+import NextLink from 'next/link'
+import { SectionChrome, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
+import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_ADMIN_COMPANIES,
   API_ADMIN_USERS,
   PATH_ADMIN_COMPANIES,
   PATH_ADMIN_USERS,
   PATH_HOME,
-} from '@/lib/constants';
-import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
+} from '@/lib/constants'
+import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract'
 
 export default function AdminOverviewPage() {
-  const { t } = useI18n();
+  const { t } = useI18n()
   const [stats, setStats] = useState<{ companies: number | null; users: number | null }>({
     companies: null,
     users: null,
-  });
+  })
 
   useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     void (async () => {
       try {
         const [cRes, uRes] = await Promise.all([
           fetch(API_ADMIN_COMPANIES, { credentials: 'same-origin' }),
           fetch(API_ADMIN_USERS, { credentials: 'same-origin' }),
-        ]);
-        const cData = await cRes.json().catch(() => ({}));
-        const uData = await uRes.json().catch(() => ({}));
-        if (cancelled) return;
-        const companies = cRes.ok && Array.isArray(cData.items) ? cData.items.length : null;
-        const users = uRes.ok && Array.isArray(uData.data) ? uData.data.length : null;
-        setStats({ companies, users });
+        ])
+        const cData = await cRes.json().catch(() => ({}))
+        const uData = await uRes.json().catch(() => ({}))
+        if (cancelled) return
+        const companies = cRes.ok && Array.isArray(cData.items) ? cData.items.length : null
+        const users = uRes.ok && Array.isArray(uData.data) ? uData.data.length : null
+        setStats({ companies, users })
       } catch {
-        if (!cancelled) setStats({ companies: null, users: null });
+        if (!cancelled) setStats({ companies: null, users: null })
       }
-    })();
+    })()
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
+    }
+  }, [])
 
   return (
-    <Stack spacing={3}>
-      <MsqdxCard
-        variant="flat"
-        borderRadius="button"
-        sx={{
-          p: 'var(--msqdx-spacing-md)',
-          border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-          bgcolor: 'var(--color-card-bg)',
-        }}
-      >
-        <MsqdxTypography variant="h6" weight="semibold" sx={{ mb: 1 }}>
-          {t('admin.overviewCard')}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
-          {t('admin.overviewIntro')}
-        </MsqdxTypography>
-        <Stack direction="row" flexWrap="wrap" gap={1}>
-          <NextLink href={PATH_ADMIN_COMPANIES} style={{ textDecoration: 'none' }}>
-            <MsqdxButton variant="contained">{t('admin.goCompanies')}</MsqdxButton>
-          </NextLink>
-          <NextLink href={PATH_ADMIN_USERS} style={{ textDecoration: 'none' }}>
-            <MsqdxButton variant="outlined">{t('admin.goUsers')}</MsqdxButton>
-          </NextLink>
-          <NextLink href={PATH_HOME} style={{ textDecoration: 'none' }}>
-            <MsqdxButton variant="outlined">{t('admin.goDashboard')}</MsqdxButton>
-          </NextLink>
-        </Stack>
+    <div className="plexon-admin-stack">
+      <section className="plexon-settings-section" aria-label={t('admin.overviewCard')}>
+        <SectionChrome
+          title={t('admin.overviewCard')}
+          meta={<Text role="meta">{t('admin.overviewIntro')}</Text>}
+        />
         {(stats.companies !== null || stats.users !== null) && (
-          <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mt: 2 }}>
-            <strong>{t('admin.overviewStatsTitle')}</strong>
-            {stats.companies !== null ? ` · ${t('admin.overviewStatsCompanies', { count: stats.companies })}` : ''}
-            {stats.users !== null ? ` · ${t('admin.overviewStatsUsers', { count: stats.users })}` : ''}
-          </MsqdxTypography>
+          <StatLedeGroup aria-label={t('admin.overviewStatsTitle')} columns={2}>
+            {stats.companies !== null ? (
+              <StatLede value={stats.companies} label={t('admin.navCompanies')} kind="number" />
+            ) : null}
+            {stats.users !== null ? (
+              <StatLede value={stats.users} label={t('admin.navUsers')} kind="number" />
+            ) : null}
+          </StatLedeGroup>
         )}
-      </MsqdxCard>
+        <div className="plexon-settings-actions">
+          <NextLink href={PATH_ADMIN_COMPANIES} className="ds-btn ds-btn--primary ds-btn--sm">
+            {t('admin.goCompanies')}
+          </NextLink>
+          <NextLink href={PATH_ADMIN_USERS} className="ds-btn ds-btn--ghost ds-btn--sm">
+            {t('admin.goUsers')}
+          </NextLink>
+          <NextLink href={PATH_HOME} className="ds-btn ds-btn--ghost ds-btn--sm">
+            {t('admin.goDashboard')}
+          </NextLink>
+        </div>
+      </section>
 
-      <MsqdxCard
-        variant="flat"
-        borderRadius="button"
-        sx={{
-          p: 'var(--msqdx-spacing-md)',
-          border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-          bgcolor: 'var(--color-card-bg)',
-        }}
-      >
-        <MsqdxTypography variant="subtitle1" weight="semibold" sx={{ mb: 1 }}>
-          {t('admin.federationContract')}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ fontFamily: 'monospace' }}>
+      <section className="plexon-settings-section" aria-label={t('admin.federationContract')}>
+        <SectionChrome
+          title={t('admin.federationContract')}
+          meta={<Text role="meta">{t('admin.dashboardUserEditHint')}</Text>}
+        />
+        <Text role="meta" className="plexon-admin-mono">
           {PLEXON_FEDERATION_CONTRACT_VERSION}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ color: 'var(--color-text-secondary)', mt: 2 }}>
-          {t('admin.dashboardUserEditHint')}
-        </MsqdxTypography>
-      </MsqdxCard>
-    </Stack>
-  );
+        </Text>
+      </section>
+    </div>
+  )
 }
