@@ -5,12 +5,13 @@ import path from 'node:path'
 const root = path.resolve(__dirname, '..')
 
 describe('collection projects domain (phase 0)', () => {
-  it('spec documents 1A create-both and Phase 1 done', () => {
+  it('spec documents 1A create-both and fresh start (no backfill)', () => {
     const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
     expect(spec).toContain('1A')
-    expect(spec).toContain('2C')
+    expect(spec).toContain('Fresh start')
     expect(spec).toContain('ensureBindingPlaceholders')
-    expect(spec).toContain('Phase 1 (done')
+    expect(spec).toContain('cancelled')
+    expect(spec).toContain('Insights list Collections only')
   })
 
   it('create-project-scope always returns platform', () => {
@@ -31,15 +32,13 @@ describe('collection projects domain (phase 0)', () => {
     expect(knowledge).toContain('audion')
   })
 
-  it('user-facing copy uses Collection language and legacy labels', () => {
+  it('user-facing copy uses Collection language', () => {
     const en = readFileSync(path.join(root, 'locales/en.json'), 'utf8')
     const de = readFileSync(path.join(root, 'locales/de.json'), 'utf8')
     expect(en).toContain('"platformInsightsTitle": "Your projects"')
-    expect(en).toContain('platformInsightsLegacyBadge')
     expect(en).toContain('"productsTitle": "Capabilities"')
     expect(en).toContain('openAssistant')
     expect(de).toContain('"platformInsightsTitle": "Deine Projekte"')
-    expect(de).toContain('platformInsightsLegacyBadge')
     expect(de).toContain('"productsTitle": "Fähigkeiten"')
   })
 
@@ -59,7 +58,15 @@ describe('collection projects domain (phase 0)', () => {
     expect(constants).toContain('ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM')
     expect(chip).toContain("from '@msqdx/ui'")
     expect(chip).not.toContain("from '@mui/material'")
-    expect(chat).toContain('isSyntheticInsightPlatformProjectId')
     expect(chat).toContain('ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM')
+  })
+
+  it('insights route is Collections-only (no standalone import)', () => {
+    const route = readFileSync(
+      path.join(root, 'app/api/platform/me/project-insights/route.ts'),
+      'utf8',
+    )
+    expect(route).toContain('Collections only')
+    expect(route).not.toContain('buildStandaloneProductInsightRows')
   })
 })

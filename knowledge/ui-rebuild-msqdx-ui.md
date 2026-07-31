@@ -38,7 +38,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 | 0 Spec + UX language | done — 2026-07-31 |
 | 1 Create always both | done — 2026-07-31 |
 | 2 Canonical project home UX | done — 2026-07-31 |
-| 3 Legacy backfill | deferred (2C) |
+| 3 Legacy backfill | **cancelled** — v3 fresh DB, no migration |
 
 ## Compatibility (temporary)
 

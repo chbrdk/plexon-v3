@@ -3,17 +3,12 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { getAudionAdminUrl, getCheckionUrl } from '@/lib/constants';
 import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
-import { buildStandaloneProductInsightRows } from '@/lib/platform-me-project-insights-standalone';
 import {
   fetchAudionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
   type AudionProjectSummary,
   type CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
-import {
-  fetchAudionUserProjectsForInsights,
-  fetchCheckionUserProjectsForInsights,
-} from '@/lib/user-product-projects-for-insights';
 
 const INSIGHTS_CAP = 30;
 const BATCH_SIZE = 5;
@@ -29,10 +24,15 @@ export type PlatformMeProjectInsightRow = {
   checkion: CheckionProjectSummary | null;
   audion: AudionProjectSummary | null;
   links: { checkionProject: string; audionProject: string };
-  /** When false, `platformProject.id` is not a PLEXON `/projects/:id` route (product-only card). */
-  openPlatformProject: boolean;
+  /** Always true for v3 fresh-start insights (Collections only). */
+  openPlatformProject: true;
 };
 
+/**
+ * User-facing project list: **Collections only**.
+ * plexon-v3 ships with a new database — no product-only / legacy standalone cards
+ * (`specs/domain/collection-projects.md` — fresh start, no backfill).
+ */
 export async function GET(request: Request) {
   const user = await getRequestUser(request);
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);
@@ -41,22 +41,8 @@ export async function GET(request: Request) {
   const checkionBase = getCheckionUrl().replace(/\/+$/, '');
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
 
-  const [allPlatform, checkionDb, audionDb] = await Promise.all([
-    listAccessiblePlatformProjectsForUser(user.id),
-    fetchCheckionUserProjectsForInsights(user.id),
-    fetchAudionUserProjectsForInsights(user.id),
-  ]);
-
-  const accessibleIds = new Set(allPlatform.map((p) => p.id));
-  const standalone = buildStandaloneProductInsightRows({
-    checkionBase,
-    audionBase,
-    accessiblePlatformProjectIds: accessibleIds,
-    checkionRows: checkionDb,
-    audionRows: audionDb,
-  });
-
-  const totalAccessible = allPlatform.length + standalone.length;
+  const allPlatform = await listAccessiblePlatformProjectsForUser(user.id);
+  const totalAccessible = allPlatform.length;
   const truncated = totalAccessible > INSIGHTS_CAP;
 
   const buildLinks = (
@@ -75,7 +61,7 @@ export async function GET(request: Request) {
   });
 
   const platformSlice = allPlatform.slice(0, INSIGHTS_CAP);
-  const platformRows: PlatformMeProjectInsightRow[] = [];
+  const projects: PlatformMeProjectInsightRow[] = [];
 
   for (let i = 0; i < platformSlice.length; i += BATCH_SIZE) {
     const chunk = platformSlice.slice(i, i + BATCH_SIZE);
@@ -101,22 +87,8 @@ export async function GET(request: Request) {
         };
       })
     );
-    platformRows.push(...batch);
+    projects.push(...batch);
   }
-
-  const remaining = INSIGHTS_CAP - platformRows.length;
-  const standaloneSlice = remaining > 0 ? standalone.slice(0, remaining) : [];
-
-  const projects: PlatformMeProjectInsightRow[] = [
-    ...platformRows,
-    ...standaloneSlice.map((s) => ({
-      platformProject: s.platformProject,
-      checkion: s.checkion,
-      audion: s.audion,
-      links: s.links,
-      openPlatformProject: s.openPlatformProject,
-    })),
-  ];
 
   return Response.json({
     projects,

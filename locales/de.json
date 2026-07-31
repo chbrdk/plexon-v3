@@ -149,7 +149,7 @@
     "productsTitle": "Produkte",
     "platformInsightsTitle": "Deine Projekte",
     "platformInsightsSubtitle": "Eine Projektliste — CHECKION und AUDION als Fähigkeiten derselben Collection.",
-    "platformInsightsEmpty": "Noch keine Projekte — Organisation beitreten oder Projektzuweisung erhalten. Neue Projekte sind immer Collections mit CHECKION und AUDION.",
+    "platformInsightsEmpty": "Noch keine Projekte — Organisation beitreten oder einer Collection zugewiesen werden. Neue Projekte verknüpfen immer CHECKION und AUDION.",
     "platformInsightsTruncated": "Es werden nur die ersten {shown} von {total} Projekten geladen.",
     "platformInsightsOpenProject": "Projekt öffnen",
     "platformInsightsScans": "Scans",

@@ -149,7 +149,7 @@
     "productsTitle": "Products",
     "platformInsightsTitle": "Your projects",
     "platformInsightsSubtitle": "One project list — CHECKION and AUDION as capabilities on the same Collection.",
-    "platformInsightsEmpty": "No projects yet — join an organization or get assigned to a project. New projects are always Collections linked to CHECKION and AUDION.",
+    "platformInsightsEmpty": "No projects yet — join an organization or get assigned to a Collection. New projects always link CHECKION and AUDION.",
     "platformInsightsTruncated": "Showing the first {shown} of {total} projects.",
     "platformInsightsOpenProject": "Open project",
     "platformInsightsScans": "Scans",

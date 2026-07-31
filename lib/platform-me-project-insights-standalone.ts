@@ -1,3 +1,8 @@
+/**
+ * @deprecated plexon-v3 fresh start: insights no longer surface product-only rows.
+ * Kept for unit coverage of synthetic-id helpers / potential admin repair tooling.
+ * See `specs/domain/collection-projects.md` (no backfill).
+ */
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 
 import type { AudionUserProjectInsightRow, CheckionUserProjectInsightRow } from '@/lib/user-product-projects-for-insights';
@@ -27,11 +32,7 @@ function trimUrl(base: string): string {
   return base.replace(/\/+$/, '');
 }
 
-/**
- * Product-only insight cards (legacy, 2C): CHECKION/AUDION rows from product DBs that are not
- * already represented by an accessible Collection (`platform_projects`). Shown as “not linked yet”
- * — not a second project type. See `specs/domain/collection-projects.md`.
- */
+/** @deprecated Not used by `/api/platform/me/project-insights` in v3. */
 export function buildStandaloneProductInsightRows(input: {
   checkionBase: string;
   audionBase: string;
@@ -88,7 +89,5 @@ export function buildStandaloneProductInsightRows(input: {
     });
   }
 
-  return out.sort((a, b) =>
-    a.platformProject.name.localeCompare(b.platformProject.name, undefined, { sensitivity: 'base' })
-  );
+  return out;
 }

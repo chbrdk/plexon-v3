@@ -6,10 +6,6 @@ import {
   fetchCheckionPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
-import {
-  fetchAudionUserProjectsForInsights,
-  fetchCheckionUserProjectsForInsights,
-} from '@/lib/user-product-projects-for-insights';
 
 vi.mock('@/lib/auth-request-user', () => ({
   getRequestUser: vi.fn(),
@@ -24,17 +20,10 @@ vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
   fetchAudionPlatformProjectSummary: vi.fn(),
 }));
 
-vi.mock('@/lib/user-product-projects-for-insights', () => ({
-  fetchCheckionUserProjectsForInsights: vi.fn(),
-  fetchAudionUserProjectsForInsights: vi.fn(),
-}));
-
 describe('GET /api/platform/me/project-insights', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
-    vi.mocked(fetchCheckionUserProjectsForInsights).mockResolvedValue([]);
-    vi.mocked(fetchAudionUserProjectsForInsights).mockResolvedValue([]);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -52,7 +41,7 @@ describe('GET /api/platform/me/project-insights', () => {
     expect(res.status).toBe(503);
   });
 
-  it('aggregates summaries for accessible projects (capped)', async () => {
+  it('aggregates summaries for accessible Collections (capped)', async () => {
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.mocked(getRequestUser).mockResolvedValue({ id: 'u1', role: 'user' });
     const now = new Date();
@@ -86,36 +75,24 @@ describe('GET /api/platform/me/project-insights', () => {
     expect(body.shown).toBe(30);
     expect(body.projects).toHaveLength(30);
     expect(body.projects[0].checkion?.scanCount).toBe(1);
-    expect(body.projects[0].openPlatformProject).not.toBe(false);
+    expect(body.projects[0].openPlatformProject).toBe(true);
     expect(body.projects[0].links.checkionProject).toContain('platformProjectHint=');
     expect(body.projects[0].links.audionProject).toContain('platformCompanyId=c1');
     expect(body.projects[0].links.audionProject).toContain('platformProjectHint=p0');
   });
 
-  it('includes product-DB-only rows when no platform projects are accessible', async () => {
+  it('returns empty list when user has no Collections (no product-only fallback)', async () => {
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.mocked(getRequestUser).mockResolvedValue({ id: 'u-plexon', role: 'user' });
     vi.mocked(listAccessiblePlatformProjectsForUser).mockResolvedValue([]);
-    vi.mocked(fetchCheckionUserProjectsForInsights).mockResolvedValue([
-      {
-        id: 'chk-only',
-        name: 'Lonely Check',
-        domain: 'x.com',
-        platformProjectId: null,
-        platformCompanyId: null,
-        scanCount: 2,
-      },
-    ]);
-    vi.mocked(fetchAudionUserProjectsForInsights).mockResolvedValue([]);
 
     const { GET } = await import('@/app/api/platform/me/project-insights/route');
     const res = await GET(new Request('http://localhost/api/platform/me/project-insights'));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.totalAccessible).toBe(1);
-    expect(body.projects).toHaveLength(1);
-    expect(body.projects[0].openPlatformProject).toBe(false);
-    expect(body.projects[0].links.checkionProject).toContain('/projects/chk-only');
+    expect(body.totalAccessible).toBe(0);
+    expect(body.projects).toEqual([]);
     expect(fetchCheckionPlatformProjectSummary).not.toHaveBeenCalled();
+    expect(fetchAudionPlatformProjectSummary).not.toHaveBeenCalled();
   });
 });

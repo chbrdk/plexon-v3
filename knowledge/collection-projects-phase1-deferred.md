@@ -1,18 +1,9 @@
-# Collection projects — Phase 1 done
+# Collection projects — phases complete (v3 fresh start)
 
-Phase 1 create enforcement shipped 2026-07-31.
+Phases 0–2 shipped. **Phase 3 (legacy backfill) is cancelled** for plexon-v3:
 
-## What changed
-
-- Assistant: all project-create intents → Collection (`create_project`); product-only targets removed from `detectCreateProjectTarget`.
-- Legacy audion/checkion create handlers redirect to Collection workflow.
-- Admin + `/api/platform/companies/.../platform-projects` POST sync CHECKION **and** AUDION after placeholders.
-- AUDION-origin end state remains Collection with both capabilities (CHECKION sync after AUDION bind; idempotent repair).
-
-## Next
-
-- Phase 3: legacy backfill (2C).
-
-Phase 2 shipped: Collection home + insights capability chips + assistant Collection picker.
+- New product / platform databases
+- Insights return Collections only
+- No migration from product-only historical rows
 
 See `specs/domain/collection-projects.md`.
