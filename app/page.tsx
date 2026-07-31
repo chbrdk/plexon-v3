@@ -29,13 +29,15 @@ import {
   API_USAGE,
   API_PLATFORM_ME_PROJECT_INSIGHTS,
   PATH_HOME,
-  pathPlatformProjectDashboard,
+  PATH_PROJECTS,
   apiAdminUser,
   apiAdminUserEntitlements,
   apiAdminUserCompanies,
   apiAdminUserProvisioning,
   apiAdminUserProductProjectOptions,
 } from '@/lib/constants';
+import type { CollectionProjectInsight } from '@/lib/collection-project-insight';
+import { CollectionProjectsList } from '@/components/projects/CollectionProjectsList';
 import type { AdminProductProjectOption } from '@/lib/admin-product-project-options';
 import { COMPANY_USER_ROLE } from '@/lib/platform-companies';
 import { ProductCatalog } from '@/components/products/ProductCatalog';
@@ -267,22 +269,7 @@ type UsageByDayItem = {
   tokens: number;
 };
 
-type PlatformInsightProject = {
-  id: string;
-  name: string;
-  domain: string | null;
-  status: string;
-  companyId: string;
-};
-
-type ProjectInsightEntry = {
-  platformProject: PlatformInsightProject;
-  checkion: { externalProjectId: string; scanCount: number } | null;
-  audion: { externalProjectId: string; personaCount: number } | null;
-  links: { checkionProject: string; audionProject: string };
-  /** Omitted or true: `platformProject.id` is a real PLEXON platform project. */
-  openPlatformProject?: boolean;
-};
+type ProjectInsightEntry = CollectionProjectInsight;
 
 type EditableEntitlement = {
   productId: PlatformProductId;
@@ -905,169 +892,36 @@ export default function DashboardPage() {
           <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
             {t('dashboard.platformInsightsTitle')}
           </DashText>
-          <DashText variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mb: 2 }}>
+          <DashText variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mb: 1 }}>
             {t('dashboard.platformInsightsSubtitle')}
           </DashText>
-          {projectInsightsLoading && (
-            <DashText variant="body2" color="text.secondary">
-              {t('common.loading')}
-            </DashText>
-          )}
-          {!projectInsightsLoading && projectInsightsError && (
-            <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)' }}>
-              {projectInsightsError}
-            </DashText>
-          )}
-          {!projectInsightsLoading && !projectInsightsError && projectInsights.length === 0 && (
-            <DashText variant="body2" color="text.secondary">
-              {t('dashboard.platformInsightsEmpty')}
-            </DashText>
-          )}
-          {!projectInsightsLoading && !projectInsightsError && projectInsights.length > 0 && (
-            <>
-              {projectInsightsMeta?.truncated && (
-                <DashText
-                  variant="caption"
-                  sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 2 }}
-                >
-                  {t('dashboard.platformInsightsTruncated', {
+          <div className="plexon-collection-hub-preview-actions">
+            <Link href={PATH_PROJECTS} style={{ textDecoration: 'none' }}>
+              <Button variant="primary" size="sm">
+                {t('dashboard.platformInsightsViewAll')}
+              </Button>
+            </Link>
+            <Link href={PATH_PROJECTS} style={{ textDecoration: 'none' }}>
+              <Button variant="subtle" size="sm">
+                {t('dashboard.platformInsightsCreateCta')}
+              </Button>
+            </Link>
+          </div>
+          <CollectionProjectsList
+            projects={projectInsights}
+            loading={projectInsightsLoading}
+            error={projectInsightsError}
+            meta={
+              projectInsightsMeta?.truncated
+                ? {
+                    truncated: true,
                     shown: projectInsightsMeta.shown,
-                    total: projectInsightsMeta.totalAccessible,
-                  })}
-                </DashText>
-              )}
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: 'var(--msqdx-spacing-md)',
-                }}
-              >
-                {projectInsights.map((row) => {
-                  const pid = row.platformProject?.id ?? '';
-                  if (!pid) return null;
-                  const canOpenPlatform = row.openPlatformProject !== false;
-                  return (
-                    <DashPanel
-                      key={pid}
-                      variant="flat"
-                      borderRadius="button"
-                      sx={{
-                        p: 'var(--msqdx-spacing-md)',
-                        border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-                        bgcolor: 'var(--color-card-bg)',
-                        color: 'var(--color-text-on-light)',
-                      }}
-                    >
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="flex-start"
-                        justifyContent="space-between"
-                        sx={{ mb: 0.25 }}
-                      >
-                        <DashText variant="subtitle1" weight="semibold">
-                          {row.platformProject.name ?? pid}
-                        </DashText>
-                        {!canOpenPlatform ? (
-                          <span
-                            title={t('dashboard.platformInsightsLegacyHint')}
-                            style={{
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              padding: '0.15rem 0.45rem',
-                              borderRadius: 999,
-                              border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-                              color: 'var(--color-text-secondary)',
-                              flexShrink: 0,
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {t('dashboard.platformInsightsLegacyBadge')}
-                          </span>
-                        ) : null}
-                      </Stack>
-                      {row.platformProject.domain ? (
-                        <DashText
-                          variant="caption"
-                          sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 1.5 }}
-                        >
-                          {row.platformProject.domain}
-                        </DashText>
-                      ) : (
-                        <Box sx={{ mb: 1.5 }} />
-                      )}
-                      {!canOpenPlatform ? (
-                        <DashText
-                          variant="caption"
-                          sx={{ display: 'block', color: 'var(--color-text-secondary)', mb: 1 }}
-                        >
-                          {t('dashboard.platformInsightsLegacyHint')}
-                        </DashText>
-                      ) : null}
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 0.75,
-                          mb: 2,
-                        }}
-                        aria-label={t('dashboard.platformInsightsSubtitle')}
-                      >
-                        <span
-                          className="plexon-capability-chip"
-                          data-state={row.checkion != null ? 'on' : 'off'}
-                        >
-                          {t('dashboard.platformInsightsCapabilityCheckion')}
-                          {row.checkion != null
-                            ? ` · ${row.checkion.scanCount} ${t('dashboard.platformInsightsScans')}`
-                            : ` · ${t('dashboard.platformInsightsNoProduct')}`}
-                        </span>
-                        <span
-                          className="plexon-capability-chip"
-                          data-state={row.audion != null ? 'on' : 'off'}
-                        >
-                          {t('dashboard.platformInsightsCapabilityAudion')}
-                          {row.audion != null
-                            ? ` · ${row.audion.personaCount} ${t('dashboard.platformInsightsPersonas')}`
-                            : ` · ${t('dashboard.platformInsightsNoProduct')}`}
-                        </span>
-                      </Box>
-                      <Stack direction="row" flexWrap="wrap" gap={1}>
-                        {canOpenPlatform ? (
-                          <Link href={pathPlatformProjectDashboard(pid)} style={{ textDecoration: 'none' }}>
-                            <DashButton variant="contained" size="small" brandColor="green">
-                              {t('dashboard.platformInsightsOpenProject')}
-                            </DashButton>
-                          </Link>
-                        ) : null}
-                        <a
-                          href={row.links.checkionProject}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ textDecoration: 'none', display: 'inline-flex' }}
-                        >
-                          <DashButton variant="text" size="small" component="span">
-                            {t('dashboard.platformInsightsOpenCheckion')}
-                          </DashButton>
-                        </a>
-                        <a
-                          href={row.links.audionProject}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ textDecoration: 'none', display: 'inline-flex' }}
-                        >
-                          <DashButton variant="text" size="small" component="span">
-                            {t('dashboard.platformInsightsOpenAudion')}
-                          </DashButton>
-                        </a>
-                      </Stack>
-                    </DashPanel>
-                  );
-                })}
-              </Box>
-            </>
-          )}
+                    totalAccessible: projectInsightsMeta.totalAccessible,
+                  }
+                : null
+            }
+            limit={6}
+          />
         </Box>
       )}
 

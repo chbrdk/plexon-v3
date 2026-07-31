@@ -12,6 +12,7 @@ describe('collection projects domain (phase 0)', () => {
     expect(spec).toContain('ensureBindingPlaceholders')
     expect(spec).toContain('cancelled')
     expect(spec).toContain('Insights list Collections only')
+    expect(spec).toContain('Canonical list + create hub')
   })
 
   it('create-project-scope always returns platform', () => {

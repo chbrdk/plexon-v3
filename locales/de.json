@@ -9,6 +9,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "projects": "Projekte",
     "assistant": "Assistent",
     "eventQuickCheck": "Quick Check",
     "products": "Produkte",
@@ -151,6 +152,8 @@
     "platformInsightsSubtitle": "Eine Projektliste — CHECKION und AUDION als Fähigkeiten derselben Collection.",
     "platformInsightsEmpty": "Noch keine Projekte — Organisation beitreten oder einer Collection zugewiesen werden. Neue Projekte verknüpfen immer CHECKION und AUDION.",
     "platformInsightsTruncated": "Es werden nur die ersten {shown} von {total} Projekten geladen.",
+    "platformInsightsViewAll": "Alle Projekte",
+    "platformInsightsCreateCta": "Projekt anlegen",
     "platformInsightsOpenProject": "Projekt öffnen",
     "platformInsightsScans": "Scans",
     "platformInsightsPersonas": "Personas",
@@ -306,6 +309,23 @@
     "subtitle": "Föderierte Produkte, Einstiegspunkte und Plattform-Fähigkeiten an einem Ort."
   },
   "projects": {
+    "hub": {
+      "title": "Projekte",
+      "subtitle": "Zentrale Übersicht — Collections mit CHECKION- und AUDION-Fähigkeiten.",
+      "listTitle": "Deine Collections",
+      "createTitle": "Projekt anlegen",
+      "createHint": "Legt eine Collection an und verknüpft automatisch CHECKION und AUDION.",
+      "createSubmit": "Projekt anlegen",
+      "name": "Name",
+      "namePlaceholder": "z. B. Acme Launch",
+      "domain": "Domain (optional)",
+      "domainPlaceholder": "example.com",
+      "company": "Organisation",
+      "noCompany": "Keine Organisation — bitte einer Organisation beitreten oder vom Admin zugewiesen werden.",
+      "companiesError": "Organisationen konnten nicht geladen werden.",
+      "createError": "Projekt konnte nicht angelegt werden.",
+      "loadError": "Projekte konnten nicht geladen werden."
+    },
     "detail": {
       "title": "Projekt",
       "subtitle": "Collection mit CHECKION- und AUDION-Fähigkeiten.",

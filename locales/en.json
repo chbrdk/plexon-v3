@@ -9,6 +9,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "projects": "Projects",
     "assistant": "Assistant",
     "eventQuickCheck": "Quick Check",
     "products": "Products",
@@ -151,6 +152,8 @@
     "platformInsightsSubtitle": "One project list — CHECKION and AUDION as capabilities on the same Collection.",
     "platformInsightsEmpty": "No projects yet — join an organization or get assigned to a Collection. New projects always link CHECKION and AUDION.",
     "platformInsightsTruncated": "Showing the first {shown} of {total} projects.",
+    "platformInsightsViewAll": "All projects",
+    "platformInsightsCreateCta": "Create project",
     "platformInsightsOpenProject": "Open project",
     "platformInsightsScans": "Scans",
     "platformInsightsPersonas": "Personas",
@@ -306,6 +309,23 @@
     "subtitle": "Federated products, entry points, and platform capabilities in one place."
   },
   "projects": {
+    "hub": {
+      "title": "Projects",
+      "subtitle": "Central list — Collections with CHECKION and AUDION capabilities.",
+      "listTitle": "Your Collections",
+      "createTitle": "Create project",
+      "createHint": "Creates a Collection and automatically links CHECKION and AUDION.",
+      "createSubmit": "Create project",
+      "name": "Name",
+      "namePlaceholder": "e.g. Acme Launch",
+      "domain": "Domain (optional)",
+      "domainPlaceholder": "example.com",
+      "company": "Organization",
+      "noCompany": "No organization — join one or ask an admin for access.",
+      "companiesError": "Could not load organizations.",
+      "createError": "Could not create project.",
+      "loadError": "Could not load projects."
+    },
     "detail": {
       "title": "Project",
       "subtitle": "Collection with CHECKION and AUDION capabilities.",

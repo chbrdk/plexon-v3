@@ -1,41 +1,39 @@
-'use client';
+'use client'
 
-import { Box, Stack } from '@mui/material';
-import type { UiBlock } from '@/lib/assistant/ui-blocks/types';
-import { useI18n } from '@/components/i18n/I18nProvider';
-import { ConfirmActionCard } from '@/components/assistant/ConfirmActionCard';
-import { AssistantMessageContent } from '@/components/assistant/AssistantMessageContent';
-import { AssistantMessageBlocks } from '@/components/assistant-ui/AssistantBlockRenderer';
-import { AssistantChatBubble } from '@/components/assistant-ui/AssistantChatBubble';
-import { PlannerStepCard, type PlannerMetadata } from '@/components/assistant/PlannerStepCard';
-import { AssistantFollowUpChips } from '@/components/assistant/AssistantFollowUpChips';
-import type { ConversationRecommendation } from '@/lib/assistant/insights/follow-up-suggestions';
-import { applyConversationTargetToRecommendations } from '@/lib/assistant/project-target-url';
-import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url';
-import { resolveMessageUiLayout } from '@/lib/assistant/ui-blocks/parse-metadata';
-import { assistantChatMessagesStackSx } from '@/lib/assistant/chat-layout';
+import type { UiBlock } from '@/lib/assistant/ui-blocks/types'
+import { useI18n } from '@/components/i18n/I18nProvider'
+import { ConfirmActionCard } from '@/components/assistant/ConfirmActionCard'
+import { AssistantMessageContent } from '@/components/assistant/AssistantMessageContent'
+import { AssistantMessageBlocks } from '@/components/assistant-ui/AssistantBlockRenderer'
+import { AssistantChatBubble } from '@/components/assistant-ui/AssistantChatBubble'
+import { PlannerStepCard, type PlannerMetadata } from '@/components/assistant/PlannerStepCard'
+import { AssistantFollowUpChips } from '@/components/assistant/AssistantFollowUpChips'
+import type { ConversationRecommendation } from '@/lib/assistant/insights/follow-up-suggestions'
+import { applyConversationTargetToRecommendations } from '@/lib/assistant/project-target-url'
+import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url'
+import { resolveMessageUiLayout } from '@/lib/assistant/ui-blocks/parse-metadata'
 
 export type AssistantChatMessage = {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  metadata?: Record<string, unknown> | null;
-};
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  metadata?: Record<string, unknown> | null
+}
 
 type AssistantMessageListProps = {
-  messages: AssistantChatMessage[];
-  conversationId?: string | null;
-  pinnedKeys?: Set<string>;
-  onPinToggle?: (messageId: string, block: UiBlock) => void;
+  messages: AssistantChatMessage[]
+  conversationId?: string | null
+  pinnedKeys?: Set<string>
+  onPinToggle?: (messageId: string, block: UiBlock) => void
   onConfirmTool?: (pending: {
-    toolUseId: string;
-    toolName: string;
-    input: Record<string, unknown>;
-  }) => void;
-  onFollowUp?: (prompt: string) => void;
-  followUpDisabled?: boolean;
-  projectDomain?: string | null;
-};
+    toolUseId: string
+    toolName: string
+    input: Record<string, unknown>
+  }) => void
+  onFollowUp?: (prompt: string) => void
+  followUpDisabled?: boolean
+  projectDomain?: string | null
+}
 
 export function AssistantMessageList({
   messages,
@@ -47,18 +45,18 @@ export function AssistantMessageList({
   followUpDisabled,
   projectDomain,
 }: AssistantMessageListProps) {
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   return (
-    <Stack sx={assistantChatMessagesStackSx}>
+    <>
       {messages.map((msg, index) => {
-        const isUser = msg.role === 'user';
-        const isStreaming = Boolean((msg.metadata as { streaming?: boolean } | undefined)?.streaming);
+        const isUser = msg.role === 'user'
+        const isStreaming = Boolean((msg.metadata as { streaming?: boolean } | undefined)?.streaming)
         const pending = msg.metadata?.pendingConfirmation as
           | { toolUseId: string; toolName: string; input: Record<string, unknown> }
-          | undefined;
+          | undefined
 
-        const planner = msg.metadata?.planner as PlannerMetadata | undefined;
+        const planner = msg.metadata?.planner as PlannerMetadata | undefined
         const followUpPrompts = applyConversationTargetToRecommendations(
           (msg.metadata?.followUpPrompts as ConversationRecommendation[] | undefined) ?? [],
           resolveConversationTargetUrl({
@@ -66,30 +64,30 @@ export function AssistantMessageList({
             projectDomain,
             throughIndex: index,
           })
-        );
-        const uiLayout = resolveMessageUiLayout(msg.metadata);
-        const uiBlocks = uiLayout?.blocks ?? [];
-        const hasText = msg.content.trim().length > 0;
+        )
+        const uiLayout = resolveMessageUiLayout(msg.metadata)
+        const uiBlocks = uiLayout?.blocks ?? []
+        const hasText = msg.content.trim().length > 0
         const hasBubbleBody =
           hasText ||
           uiBlocks.length > 0 ||
           Boolean(planner?.intent) ||
-          (followUpPrompts.length > 0 && !isUser);
+          (followUpPrompts.length > 0 && !isUser)
         const senderLabel = isUser
           ? t('assistant.chat.you')
           : msg.role === 'assistant'
             ? t('assistant.chat.assistant')
-            : t('assistant.chat.system');
+            : t('assistant.chat.system')
 
         return (
-          <Box key={msg.id} sx={{ width: '100%' }}>
+          <div key={msg.id} className="plexon-assistant-turn-wrap">
             {hasBubbleBody ? (
               <AssistantChatBubble
                 role={msg.role}
                 senderLabel={senderLabel}
                 status={isStreaming && !isUser ? 'sending' : undefined}
               >
-                <Stack spacing={2}>
+                <div className="plexon-assistant-turn-body">
                   {hasText ? (
                     <AssistantMessageContent
                       role={msg.role}
@@ -118,21 +116,21 @@ export function AssistantMessageList({
                       onSelect={onFollowUp}
                     />
                   ) : null}
-                </Stack>
+                </div>
               </AssistantChatBubble>
             ) : null}
             {pending && onConfirmTool ? (
-              <Box sx={{ mt: 1.5, maxWidth: { xs: '100%', md: '80%' } }}>
+              <div className="plexon-assistant-confirm">
                 <ConfirmActionCard
                   pending={pending}
                   onConfirm={() => onConfirmTool(pending)}
                   onCancel={() => {}}
                 />
-              </Box>
+              </div>
             ) : null}
-          </Box>
-        );
+          </div>
+        )
       })}
-    </Stack>
-  );
+    </>
+  )
 }

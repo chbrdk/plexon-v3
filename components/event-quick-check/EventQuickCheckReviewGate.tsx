@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, CircularProgress, Stack } from '@mui/material';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import { Alert, Spinner } from '@msqdx/ui';
 import { EventQuickCheckCompetitorsPanel } from '@/components/event-quick-check/EventQuickCheckCompetitorsPanel';
 import { EventQuickCheckCompanyBriefPanel } from '@/components/event-quick-check/EventQuickCheckCompanyBriefPanel';
 import { EventQuickCheckGeoQuestionsPanel } from '@/components/event-quick-check/EventQuickCheckGeoQuestionsPanel';
@@ -237,14 +236,14 @@ export function EventQuickCheckReviewGate({
 
   if (loading) {
     return (
-      <Stack alignItems="center" py={MSQDX_SPACING.scale.lg}>
-        <CircularProgress size={28} />
-      </Stack>
+      <div className="plexon-eqc-center">
+        <Spinner size="sm" />
+      </div>
     );
   }
 
   if (error) {
-    return <Alert severity="error">{error}</Alert>;
+    return <Alert tone="error">{error}</Alert>;
   }
 
   if (snapshot.awaitingCompanyBrief && snapshot.companyBrief) {

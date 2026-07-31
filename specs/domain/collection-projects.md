@@ -56,6 +56,14 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 | 1 Create always both | done |
 | 2 Canonical project home UX | done |
 | 3 Legacy backfill | **cancelled** — fresh databases; no migration planned |
+| 4 Canonical list + create hub (`/projects`) | done — 2026-07-31 |
+
+## Canonical hub UX
+
+- Nav **Projekte** → `/projects`: create form + full Collection list (same card look as dashboard insights).
+- Home keeps a short preview (limit 6) with CTAs to the hub.
+- Detail stays `/projects/[id]` (`PlatformProjectDashboard`).
+- Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync both).
 
 ## UI rebuild note
 

@@ -15,6 +15,7 @@ export const PATH_REGISTER = '/register';
 export const PATH_FORGOT_PASSWORD = '/forgot-password';
 export const PATH_RESET_PASSWORD = '/reset-password';
 export const PATH_PRODUCTS = '/products';
+export const PATH_PROJECTS = '/projects';
 export const PATH_SETTINGS = '/settings';
 export const PATH_DESIGN_SYSTEM = '/design-system';
 export const PATH_BOARD = '/board';
@@ -111,6 +112,8 @@ export function getMailgunMessagesUrl(mailgunDomain: string): string {
 export const API_PLATFORM_PRODUCTS = '/api/platform/products';
 /** Aggregated CHECKION/AUDION summaries for all platform projects the user can access. */
 export const API_PLATFORM_ME_PROJECT_INSIGHTS = '/api/platform/me/project-insights';
+/** Companies the session user can create Collections under. */
+export const API_PLATFORM_ME_COMPANIES = '/api/platform/me/companies';
 
 /**
  * External product entry points.

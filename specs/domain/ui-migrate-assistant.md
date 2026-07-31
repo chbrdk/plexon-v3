@@ -1,41 +1,51 @@
 # UI rebuild — Assistant
 
-**Status:** Draft — Wave 5 (challenge + reuse)  
+**Status:** Accepted — Wave 5 shell done — 2026-07-31 (challenge + reuse)  
 **Route:** `/assistant*`  
-**Layout:** full-height workstation  
-**Reference:** `audion-v3` chat workspace/panel · `@msqdx/ui` chat CSS · `knowledge/ui-rebuild-reuse.md`  
-**Product model:** `specs/domain/collection-projects.md` — assistant scopes Collections (`platformProjectId`), not product-only project types.
+**Layout:** full-height chat workstation inside AppShell  
+**Reference:** `audion-v3` chat workspace/panel · `@msqdx/ui` `chat.css` · `knowledge/ui-rebuild-reuse.md`  
+**Product model:** `specs/domain/collection-projects.md` — Collections only (`platformProjectId`)
 
 ## Challenge — keep / reshape / drop
 
 | Capability | Decision | Notes |
 |------------|----------|-------|
 | Conversations / send / stream | **keep** | Orchestrator + APIs stay |
-| Chat chrome (turns, composer, send) | **reshape** | **Compose Audion chat chrome** — do not invent Plexon-only chat UI |
-| History / share flyouts | **reshape** | `Flyout` + Audion flyout pattern |
-| Generative UI blocks / reports | **keep** (capability) | Rebuild block chrome on Panel/Text; challenge redundant organisms |
-| Project create / scope | **reshape** | Speak Collections; Phase 1 drops `audion`/`checkion`-only create targets |
-| Legacy glass bubbles / MsqdxTypography chat | **drop** | Replace with `.chat-*` DS classes |
-| Duplicate “capabilities overview” tables if obsolete | **challenge** | Drop or move to docs if unused |
+| Chat chrome (turns, composer, send) | **reshape** | DS `.chat-panel` / `.chat-turns` / `.chat-form` / `.chat-composer` / `.chat-send` |
+| History | **reshape** | `Flyout` + `IconHistory` + `SectionChrome` (Audion pattern); drop MUI Drawer sidebar |
+| Project context picker | **keep** | Already `@msqdx/ui` Select |
+| Generative UI blocks / reports | **keep** (capability) | Progressive: block chrome still may use bridge until follow-up; shell must be clean |
+| Glass bubbles / MsqdxTypography chat | **drop** | `.chat-turn` + Text |
+| PlexonPageChrome / AppHeaderV2 on assistant | **drop** | AppShell title is enough |
+| Capabilities overview table | **challenge** | Keep if still routed; no new MUI |
 
 ## Reuse map
 
 | Piece | Source |
 |-------|--------|
-| CSS | `@msqdx/ui` `chat.css` via globals |
-| Composer | `Field` + `Textarea` + `Button`/`IconSend` + `.chat-composer` / `.chat-send` |
-| Panel structure | Mirror `AudionChatPanel` markup |
-| Workspace chrome | Mirror `AudionChatWorkspace` (topbar actions, flyouts) |
-| Specs to read | `audion-v3/specs/domain/chat-workspace.md` |
+| CSS | `@msqdx/ui` `chat.css` via `styles.css` |
+| Composer | `Field` + `Textarea` + `Button` + `IconSend` |
+| History | `Flyout` + `IconHistory` + `SectionChrome` |
+| Empty | `EmptyState` |
+| Project picker | existing `ProjectContextChip` |
 
-## Non-goals
+## File set (Wave 5 shell)
 
-- New chat visual language unique to Plexon.
-- Expanding MUI bridge to keep old bubbles.
+- `app/assistant/page.tsx`
+- `components/assistant/AssistantChat.tsx`
+- `components/assistant/AssistantChatComposer.tsx`
+- `components/assistant/AssistantMessageList.tsx`
+- `components/assistant/AssistantConversationHistory.tsx`
+- `components/assistant/AssistantFollowUpChips.tsx`
+- `components/assistant/AssistantMessageContent.tsx`
+- `components/assistant/ConfirmActionCard.tsx`
+- `components/assistant/PlannerStepCard.tsx`
+- `components/assistant/AgentActivityTrace.tsx`
+- `components/assistant-ui/AssistantChatBubble.tsx`
 
 ## Acceptance
 
-1. Assistant visually/structurally aligned with Audion chat chrome.
-2. Zero legacy DS imports in assistant file set.
-3. Send / history / report flows still work.
-4. Progress Wave 5 → done.
+1. Assistant shell uses Audion/DS chat chrome classes. ✅
+2. Zero `@mui` / `@msqdx/react` in Wave 5 shell file set above. ✅
+3. Send / history / Collection picker / stream still work.
+4. Progress Wave 5 → shell + inner chrome done; ReportCollectionBar / generative UI organisms / EQC reports still progressive.

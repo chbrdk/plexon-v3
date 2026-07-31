@@ -27,9 +27,9 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 | 2 | Settings `/settings` | done — Audion-like SectionChrome/Field/ToggleGroup; theme + brand; APIs kept |
 | 3 | Products + Platform projects | done — catalog + project detail on SectionChrome/Panel/StatLede; Collection wording |
 | 4 | Admin console | done — overview/users/companies/detail on SectionChrome/Field/table |
-| 5 | Assistant | pending — **compose Audion chat chrome** + Collection project language |
-| 6 | Event Quick Check | pending — rebuild workflow UI |
-| 7 | Board + legacy DS removal | pending — bridge removal |
+| 5 | Assistant | **shell + inner chrome done** — Audion `.chat-*`, Flyout history, follow-ups/confirm/planner/trace on DS; ReportCollectionBar + generative UI blocks still progressive |
+| 6 | Event Quick Check | **done** — workflow UI on `@msqdx/ui` + `.plexon-eqc-*`; report section organisms still progressive |
+| 7 | Board + legacy DS removal | **chrome done** — page on `@msqdx/ui`; `ReactFlowBoard` Prismion island keeps bridge until non-MUI canvas |
 
 ### Collection projects (domain)
 
@@ -39,6 +39,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 | 1 Create always both | done — 2026-07-31 |
 | 2 Canonical project home UX | done — 2026-07-31 |
 | 3 Legacy backfill | **cancelled** — v3 fresh DB, no migration |
+| 4 Canonical list + create hub | done — `/projects` Nav + create form |
 
 ## Compatibility (temporary)
 

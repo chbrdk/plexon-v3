@@ -1,9 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Box, Stack } from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import { Button } from '@msqdx/ui';
 import { EventQuickCheckDashboardPanel } from '@/components/event-quick-check/EventQuickCheckDashboardPanel';
 import {
   EventQuickCheckAppendixSection,
@@ -31,10 +29,6 @@ import {
   apiEventQuickCheckRunPptx,
 } from '@/lib/paths/event-quick-check-page';
 import { pathPlatformProjectDashboard } from '@/lib/constants';
-import {
-  THEME_ACCENT_OUTLINED_BUTTON_SX,
-  THEME_ACCENT_TEXT_BUTTON_SX,
-} from '@/lib/theme-accent';
 
 type Props = {
   report: EventQuickCheckReportModel;
@@ -45,8 +39,6 @@ type Props = {
   onOpenHistory: () => void;
   onRerunGeo?: () => void;
 };
-
-const DASHBOARD_MAX_WIDTH = 1440;
 
 export function EventQuickCheckDashboardView({
   report,
@@ -65,78 +57,52 @@ export function EventQuickCheckDashboardView({
   const geoSpan = layout.geoSpan > 0 ? layout.geoSpan : 12;
 
   return (
-    <Box
-      data-plexon-event-quick-check-dashboard
-      sx={{
-        px: { xs: 2, md: 4 },
-        py: { xs: 2, md: 3 },
-      }}
-    >
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'stretch', sm: 'center' }}
-        justifyContent="space-between"
-        spacing={2}
-        sx={{ mb: `${MSQDX_SPACING.scale.lg}px`, maxWidth: DASHBOARD_MAX_WIDTH, mx: 'auto', width: '100%' }}
-      >
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <MsqdxButton variant="outlined" sx={THEME_ACCENT_OUTLINED_BUTTON_SX} onClick={onNewCheck}>
+    <div className="plexon-eqc-dashboard" data-plexon-event-quick-check-dashboard>
+      <div className="plexon-eqc-dashboard-toolbar">
+        <div className="plexon-eqc-row">
+          <Button variant="ghost" size="sm" onClick={onNewCheck}>
             {EQC_PAGE_COPY.newCheckButton}
-          </MsqdxButton>
+          </Button>
           {canRerunGeo && onRerunGeo ? (
-            <MsqdxButton variant="outlined" sx={THEME_ACCENT_OUTLINED_BUTTON_SX} onClick={onRerunGeo}>
+            <Button variant="ghost" size="sm" onClick={onRerunGeo}>
               {EQC_PAGE_COPY.geoRerunButton}
-            </MsqdxButton>
+            </Button>
           ) : null}
-          <MsqdxButton variant="outlined" sx={THEME_ACCENT_OUTLINED_BUTTON_SX} onClick={onOpenHistory}>
+          <Button variant="ghost" size="sm" onClick={onOpenHistory}>
             {EQC_PAGE_COPY.historyOpenButton}
-          </MsqdxButton>
+          </Button>
           {platformProjectId ? (
-            <MsqdxButton
-              variant="text"
-              sx={THEME_ACCENT_TEXT_BUTTON_SX}
+            <Button
+              variant="link"
+              size="sm"
               onClick={() => router.push(pathPlatformProjectDashboard(platformProjectId))}
             >
               {EQC_PAGE_COPY.openProjectButton}
-            </MsqdxButton>
+            </Button>
           ) : null}
           {report.domainComparison?.checkionProjectHref ? (
-            <MsqdxButton
-              variant="text"
-              sx={THEME_ACCENT_TEXT_BUTTON_SX}
+            <Button
+              variant="link"
+              size="sm"
               onClick={() =>
                 window.open(report.domainComparison!.checkionProjectHref!, '_blank', 'noopener,noreferrer')
               }
             >
               {EQC_PAGE_COPY.openCheckionProjectButton}
-            </MsqdxButton>
+            </Button>
           ) : null}
-        </Stack>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <ReportPdfDownloadButton
-            pdfUrl={pdfUrl}
-            label={EQC_PAGE_COPY.exportPdf}
-            sx={THEME_ACCENT_OUTLINED_BUTTON_SX}
-          />
+        </div>
+        <div className="plexon-eqc-row">
+          <ReportPdfDownloadButton pdfUrl={pdfUrl} label={EQC_PAGE_COPY.exportPdf} />
           <ReportBinaryDownloadButton
             downloadUrl={pptxUrl}
             label={EQC_PAGE_COPY.exportPptx}
             format="pptx"
-            sx={THEME_ACCENT_OUTLINED_BUTTON_SX}
           />
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          maxWidth: DASHBOARD_MAX_WIDTH,
-          mx: 'auto',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: `${MSQDX_SPACING.scale.md}px`,
-        }}
-      >
+      <div className="plexon-eqc-dashboard-body">
         <EventQuickCheckDashboardPanel
           title={report.meta.title}
           icon="insights"
@@ -169,14 +135,7 @@ export function EventQuickCheckDashboardView({
           </EventQuickCheckDashboardPanel>
         ) : null}
 
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', lg: 'repeat(12, 1fr)' },
-            gap: `${MSQDX_SPACING.scale.md}px`,
-            alignItems: 'stretch',
-          }}
-        >
+        <div className="plexon-eqc-dashboard-grid">
           {layout.showDomain ? (
             <EventQuickCheckDashboardPanel
               title={EQC_REPORT_COPY.sectionDomain}
@@ -244,10 +203,10 @@ export function EventQuickCheckDashboardView({
               <EventQuickCheckInsightsSection report={report} />
             </EventQuickCheckDashboardPanel>
           ) : null}
-        </Box>
+        </div>
 
         <EventQuickCheckAppendixSection report={report} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

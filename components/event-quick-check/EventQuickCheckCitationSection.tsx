@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, IconButton, Stack, Typography } from '@mui/material';
-import { MsqdxIcon } from '@msqdx/react';
-import { MSQDX_SPACING, MSQDX_THEME, MSQDX_TYPOGRAPHY } from '@msqdx/tokens'
+import { Button, Chip, Text } from '@msqdx/ui';
 import { EventQuickCheckCitationCompetitorChart } from '@/components/event-quick-check/EventQuickCheckCitationCompetitorChart';
 import { EventQuickCheckGeoBarChart } from '@/components/event-quick-check/EventQuickCheckGeoBarChart';
 import { EventQuickCheckLlmAnswerDialog } from '@/components/event-quick-check/EventQuickCheckLlmAnswerDialog';
@@ -17,8 +15,7 @@ import {
   buildCitationPositionChart,
 } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain';
-import { PLEXON_META_CHIP_SX } from '@/lib/theme-accent';
-import { UI_BLOCK_ICONS, UI_FONT_SANS, uiMonoLabelSx } from '@/lib/assistant/ui-typography';
+import { UI_BLOCK_ICONS } from '@/lib/assistant/ui-typography';
 import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 
 type Props = {
@@ -105,46 +102,28 @@ export function EventQuickCheckCitationSection({
 
   if (!activeSlice || (!competitorChart && !simpleChart)) return null;
 
-  const borderColor = MSQDX_THEME.light.border.default;
-  const headerBg = `color-mix(in srgb, ${MSQDX_THEME.light.text.primary} 3%, transparent)`
-
   return (
     <>
-      <Stack spacing={`${MSQDX_SPACING.scale.sm}px`}>
+      <div className="plexon-eqc-stack-sm">
         {slices.length > 1 ? (
-          <Stack direction="row" flexWrap="wrap" gap={1} useFlexGap alignItems="center">
-            <Chip
-              size="small"
-              label={EQC_REPORT_COPY.geoModelSwitcherLabel}
-              variant="outlined"
-              sx={{ ...PLEXON_META_CHIP_SX, pointerEvents: 'none' }}
-            />
+          <div className="plexon-eqc-chip-row">
+            <Chip static size="sm">
+              {EQC_REPORT_COPY.geoModelSwitcherLabel}
+            </Chip>
             {slices.map((slice) => {
               const selected = slice.modelId === activeSlice.modelId;
               return (
                 <Chip
                   key={slice.modelId}
-                  size="small"
-                  label={slice.modelLabel}
-                  variant={selected ? 'filled' : 'outlined'}
+                  size="sm"
+                  selected={selected}
                   onClick={() => setActiveModelId(slice.modelId)}
-                  sx={{
-                    ...PLEXON_META_CHIP_SX,
-                    ...(selected
-                      ? {
-                          bgcolor: 'var(--color-theme-accent) !important',
-                          borderColor: 'var(--color-theme-accent) !important',
-                          color: 'var(--color-theme-accent-contrast, #000) !important',
-                          '& .MuiChip-label': {
-                            color: 'var(--color-theme-accent-contrast, #000) !important',
-                          },
-                        }
-                      : {}),
-                  }}
-                />
+                >
+                  {slice.modelLabel}
+                </Chip>
               );
             })}
-          </Stack>
+          </div>
         ) : null}
 
         {competitorChart ? (
@@ -154,37 +133,8 @@ export function EventQuickCheckCitationSection({
         ) : null}
 
         <UiBlockSurface title={EQC_REPORT_COPY.sectionCitations} icon={UI_BLOCK_ICONS.data_table} noPadding>
-          <Box sx={{ overflowX: 'auto', p: `${MSQDX_SPACING.scale.md}px` }}>
-            <Box
-              component="table"
-              sx={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontFamily: MSQDX_TYPOGRAPHY.fontFamily.primary,
-                fontSize: MSQDX_TYPOGRAPHY.fontSize.sm,
-                color: 'var(--color-text-on-light)',
-                '& th, & td': {
-                  border: `1px solid ${borderColor}`,
-                  px: `${MSQDX_SPACING.scale.sm}px`,
-                  py: `${MSQDX_SPACING.scale.xs}px`,
-                  textAlign: 'left',
-                },
-                '& th': {
-                  bgcolor: headerBg,
-                  ...uiMonoLabelSx,
-                  fontSize: MSQDX_TYPOGRAPHY.fontSize.xs,
-                },
-                '& td': {
-                  fontFamily: UI_FONT_SANS,
-                },
-                '& tbody tr': {
-                  cursor: 'pointer',
-                },
-                '& tbody tr:hover td': {
-                  bgcolor: `color-mix(in srgb, ${MSQDX_THEME.light.text.primary} 4%, transparent)`,
-                },
-              }}
-            >
+          <div className="plexon-eqc-citation-table-wrap">
+            <table className="plexon-eqc-citation-table">
               <thead>
                 <tr>
                   <th>{EQC_REPORT_COPY.colQuery}</th>
@@ -205,28 +155,27 @@ export function EventQuickCheckCitationSection({
                       <td>{citation.domain}</td>
                       <td>{citation.position}</td>
                       <td>
-                        <IconButton
-                          size="small"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           aria-label={EQC_REPORT_COPY.geoViewLlmAnswer}
                           onClick={(event) => {
                             event.stopPropagation();
                             if (run) setDialogRun(run);
                           }}
                         >
-                          <MsqdxIcon name="visibility" />
-                        </IconButton>
+                          ↗
+                        </Button>
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
-            </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-              {EQC_REPORT_COPY.geoViewLlmAnswer}
-            </Typography>
-          </Box>
+            </table>
+            <Text role="hint">{EQC_REPORT_COPY.geoViewLlmAnswer}</Text>
+          </div>
         </UiBlockSurface>
-      </Stack>
+      </div>
 
       <EventQuickCheckLlmAnswerDialog
         open={dialogRun != null}

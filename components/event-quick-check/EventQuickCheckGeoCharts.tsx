@@ -1,7 +1,5 @@
 'use client';
 
-import { Stack } from '@mui/material';
-import { MSQDX_SPACING } from '@msqdx/tokens';
 import { EventQuickCheckGeoBarChart } from '@/components/event-quick-check/EventQuickCheckGeoBarChart';
 import type {
   EventQuickCheckReportGeoCompetitor,
@@ -34,10 +32,10 @@ export function EventQuickCheckGeoCharts({
   if (!citationChart && !competitorChart && !eeatChart) return null;
 
   return (
-    <Stack spacing={`${MSQDX_SPACING.scale.sm}px`}>
+    <div className="plexon-eqc-stack-sm">
       {competitorChart ? <EventQuickCheckGeoBarChart model={competitorChart} /> : null}
       {citationChart ? <EventQuickCheckGeoBarChart model={citationChart} /> : null}
       {eeatChart ? <EventQuickCheckGeoBarChart model={eeatChart} /> : null}
-    </Stack>
+    </div>
   );
 }

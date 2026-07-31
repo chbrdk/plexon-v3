@@ -1,8 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { Box } from '@mui/material';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import type { ReactNode, CSSProperties } from 'react';
 import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 
 type Props = {
@@ -24,13 +22,12 @@ export function EventQuickCheckDashboardPanel({
   children,
   gridColumn,
 }: Props) {
+  const style: CSSProperties | undefined = gridColumn?.lg
+    ? { gridColumn: gridColumn.lg.startsWith('span') ? gridColumn.lg : `span ${gridColumn.lg}` }
+    : undefined;
+
   return (
-    <Box
-      sx={{
-        gridColumn: gridColumn ?? { xs: '1 / -1', lg: 'span 12' },
-        minWidth: 0,
-      }}
-    >
+    <div className="plexon-eqc-dashboard-panel" style={style}>
       <UiBlockSurface
         title={title}
         icon={icon}
@@ -39,16 +36,8 @@ export function EventQuickCheckDashboardPanel({
         infoTooltipAriaLabel={infoTooltipAriaLabel}
         sx={{ height: '100%' }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: `${MSQDX_SPACING.scale.sm}px`,
-          }}
-        >
-          {children}
-        </Box>
+        <div className="plexon-eqc-dashboard-panel-inner">{children}</div>
       </UiBlockSurface>
-    </Box>
+    </div>
   );
 }

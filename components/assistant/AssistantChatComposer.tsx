@@ -1,35 +1,25 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { Box, Chip, CircularProgress, IconButton, useTheme } from '@mui/material';
-import { MsqdxIcon, MsqdxInput } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
-import { useI18n } from '@/components/i18n/I18nProvider';
+import { useRouter } from 'next/navigation'
+import { Button, Chip, Field, IconSend, Spinner, Textarea } from '@msqdx/ui'
+import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   buildAssistantSuggestedPrompts,
   ASSISTANT_SUGGESTION_LABELS_DE,
   ASSISTANT_SUGGESTION_LABELS_EN,
-} from '@/lib/assistant/suggested-prompts';
-import {
-  assistantChatComposerBarSx,
-  assistantChatComposerInputSx,
-  assistantChatComposerPillSx,
-  assistantChatSendButtonSx,
-  assistantSuggestionChipSx,
-} from '@/lib/assistant/chat-composer-styles';
+} from '@/lib/assistant/suggested-prompts'
 
 type AssistantChatComposerProps = {
-  value: string;
-  loading: boolean;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-  onSuggestion?: (prompt: string) => void;
-  /** Resolved from conversation first, project domain as fallback. */
-  targetUrl?: string | null;
-  projectName?: string | null;
-};
+  value: string
+  loading: boolean
+  onChange: (value: string) => void
+  onSubmit: () => void
+  onSuggestion?: (prompt: string) => void
+  targetUrl?: string | null
+  projectName?: string | null
+}
 
-/** AUDION-style fused pill composer (no blur) + round green send. */
+/** DS chat composer — Audion `.chat-form` / `.chat-composer` / `.chat-send`. */
 export function AssistantChatComposer({
   value,
   loading,
@@ -39,83 +29,80 @@ export function AssistantChatComposer({
   targetUrl,
   projectName,
 }: AssistantChatComposerProps) {
-  const router = useRouter();
-  const { t, locale } = useI18n();
-  const theme = useTheme();
-  const sendDisabled = loading || !value.trim();
+  const router = useRouter()
+  const { t, locale } = useI18n()
+  const sendDisabled = loading || !value.trim()
+  const expanded = Boolean(value.trim())
 
   const labelFor = (key: string) => {
-    const map = locale === 'de' ? ASSISTANT_SUGGESTION_LABELS_DE : ASSISTANT_SUGGESTION_LABELS_EN;
-    return map[key] ?? key;
-  };
+    const map = locale === 'de' ? ASSISTANT_SUGGESTION_LABELS_DE : ASSISTANT_SUGGESTION_LABELS_EN
+    return map[key] ?? key
+  }
 
   const suggestedPrompts = buildAssistantSuggestedPrompts({
     domain: targetUrl,
     projectName,
-  });
+  })
 
   return (
-    <Box
-      component="form"
-      data-plexon-assistant-chat
+    <form
+      className={['chat-form', expanded ? 'is-expanded' : undefined].filter(Boolean).join(' ')}
+      data-plexon-assistant-composer
       onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
+        e.preventDefault()
+        onSubmit()
       }}
-      sx={assistantChatComposerBarSx}
     >
       {onSuggestion ? (
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: `${MSQDX_SPACING.gap.xs}px`,
-            mb: `${MSQDX_SPACING.scale.xs}px`,
-            width: '100%',
-          }}
-        >
+        <div className="plexon-assistant-suggestions" role="list">
           {suggestedPrompts.map((s) => (
             <Chip
               key={s.id}
-              size="small"
-              variant="outlined"
-              label={labelFor(s.labelKey)}
+              size="sm"
               disabled={loading}
               onClick={() => {
                 if (s.hrefPath) {
-                  router.push(s.hrefPath);
-                  return;
+                  router.push(s.hrefPath)
+                  return
                 }
-                onSuggestion?.(s.prompt);
+                onSuggestion?.(s.prompt)
               }}
-              sx={assistantSuggestionChipSx}
-            />
+            >
+              {labelFor(s.labelKey)}
+            </Chip>
           ))}
-        </Box>
+        </div>
       ) : null}
-      <Box sx={assistantChatComposerPillSx(theme)}>
-        <MsqdxInput
-          fullWidth
+      <Field label="Message" htmlFor="plexon-chat-composer">
+        <Textarea
+          id="plexon-chat-composer"
+          size="md"
+          block
+          rows={2}
+          className="chat-composer"
           placeholder={t('assistant.placeholder')}
           value={value}
           disabled={loading}
-          onChange={(e) => onChange((e.target as HTMLInputElement).value)}
-          size="large"
-          sx={assistantChatComposerInputSx}
+          autoComplete="off"
+          aria-label={t('assistant.placeholder')}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              if (!sendDisabled) onSubmit()
+            }
+          }}
         />
-        <IconButton
-          type="submit"
-          disabled={sendDisabled}
-          aria-label={t('assistant.send')}
-          sx={assistantChatSendButtonSx(theme, sendDisabled)}
-        >
-          {loading ? (
-            <CircularProgress size={22} color="inherit" />
-          ) : (
-            <MsqdxIcon name="send" customSize={22} />
-          )}
-        </IconButton>
-      </Box>
-    </Box>
-  );
+      </Field>
+      <Button
+        type="submit"
+        variant="ghost"
+        size="sm"
+        className="chat-send chat-send-icon"
+        disabled={sendDisabled}
+        aria-label={t('assistant.send')}
+        icon={loading ? <Spinner size="sm" /> : <IconSend />}
+      />
+    </form>
+  )
 }

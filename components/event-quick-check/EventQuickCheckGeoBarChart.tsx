@@ -1,7 +1,7 @@
 'use client';
 
-import { Box, Typography } from '@mui/material';
-import { MSQDX_COLORS, MSQDX_SPACING } from '@msqdx/tokens';
+import { Text } from '@msqdx/ui';
+import { MSQDX_COLORS } from '@msqdx/tokens';
 import {
   Bar,
   BarChart,
@@ -30,11 +30,11 @@ export function EventQuickCheckGeoBarChart({ model }: Props) {
   return (
     <UiBlockSurface title={model.title} icon={UI_BLOCK_ICONS.chart}>
       {model.subtitle ? (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+        <Text role="hint" className="plexon-eqc-chart-subtitle">
           {model.subtitle}
-        </Typography>
+        </Text>
       ) : null}
-      <Box sx={{ width: '100%', height: barHeight, mt: `${MSQDX_SPACING.scale.xs}px` }}>
+      <div className="plexon-eqc-chart" style={{ height: barHeight }}>
         <ResponsiveContainer width="100%" height="100%">
           {model.horizontal ? (
             <BarChart
@@ -79,7 +79,7 @@ export function EventQuickCheckGeoBarChart({ model }: Props) {
             </BarChart>
           )}
         </ResponsiveContainer>
-      </Box>
+      </div>
     </UiBlockSurface>
   );
 }

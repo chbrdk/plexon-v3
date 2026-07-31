@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Stack, TextField, Typography } from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import { Button, Field, Text, Textarea } from '@msqdx/ui';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 
@@ -91,81 +89,83 @@ export function EventQuickCheckGeoQuestionsPanel({
   };
 
   return (
-    <Stack spacing={MSQDX_SPACING.scale.md}>
-      <Typography variant="h6">{EQC_PAGE_COPY.geoReviewTitle}</Typography>
-      <Typography variant="body2" color="text.secondary">
-        {EQC_PAGE_COPY.geoReviewLead}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
+    <div className="plexon-eqc-stack">
+      <Text role="title" as="h2">
+        {EQC_PAGE_COPY.geoReviewTitle}
+      </Text>
+      <Text role="body">{EQC_PAGE_COPY.geoReviewLead}</Text>
+      <Text role="hint">
         {grouped ? EQC_PAGE_COPY.geoReviewMultiPersonaHint : EQC_PAGE_COPY.geoReviewPersonaHint}
-      </Typography>
+      </Text>
 
       {grouped
         ? groupItems.map((group, groupIndex) => (
-            <Stack key={group.personaId || `persona-${groupIndex}`} spacing={MSQDX_SPACING.scale.sm}>
-              <Typography variant="subtitle2">
+            <div key={group.personaId || `persona-${groupIndex}`} className="plexon-eqc-stack-sm">
+              <Text role="label" as="h3">
                 {EQC_PAGE_COPY.geoReviewPersonaGroupLabel(group.personaName, group.segment)}
-              </Typography>
+              </Text>
               {group.questions.map((question, questionIndex) => (
-                <TextField
+                <Field
                   key={`geo-g-${groupIndex}-q-${questionIndex}`}
                   label={EQC_PAGE_COPY.geoReviewQuestionLabel(questionIndex)}
-                  value={question}
-                  onChange={(e) => updateGroupQuestion(groupIndex, questionIndex, e.target.value)}
-                  fullWidth
-                  multiline
-                  minRows={2}
-                  disabled={loading}
-                />
+                >
+                  <Textarea
+                    value={question}
+                    onChange={(e) => updateGroupQuestion(groupIndex, questionIndex, e.target.value)}
+                    rows={2}
+                    block
+                    disabled={loading}
+                  />
+                </Field>
               ))}
-            </Stack>
+            </div>
           ))
         : flatItems.map((question, index) => (
-            <Stack key={`geo-q-${index}`} spacing={1}>
-              <TextField
-                label={EQC_PAGE_COPY.geoReviewQuestionLabel(index)}
-                value={question}
-                onChange={(e) => updateFlatItem(index, e.target.value)}
-                fullWidth
-                multiline
-                minRows={2}
-                disabled={loading}
-              />
-              <Box>
-                <MsqdxButton
-                  variant="text"
-                  size="small"
+            <div key={`geo-q-${index}`} className="plexon-eqc-stack-sm">
+              <Field label={EQC_PAGE_COPY.geoReviewQuestionLabel(index)}>
+                <Textarea
+                  value={question}
+                  onChange={(e) => updateFlatItem(index, e.target.value)}
+                  rows={2}
+                  block
+                  disabled={loading}
+                />
+              </Field>
+              <div>
+                <Button
+                  variant="link"
+                  size="sm"
                   onClick={() => removeFlatItem(index)}
                   disabled={loading || flatItems.length <= 1}
                 >
                   {EQC_PAGE_COPY.geoReviewRemoveQuestion}
-                </MsqdxButton>
-              </Box>
-            </Stack>
+                </Button>
+              </div>
+            </div>
           ))}
 
       {!grouped ? (
-        <Box>
-          <MsqdxButton
-            variant="outlined"
+        <div>
+          <Button
+            variant="ghost"
             onClick={addFlatItem}
             disabled={loading || flatItems.length >= maxQuestions}
           >
             {EQC_PAGE_COPY.geoReviewAddQuestion}
-          </MsqdxButton>
-        </Box>
+          </Button>
+        </div>
       ) : null}
 
-      <MsqdxButton variant="contained" onClick={handleConfirm} loading={loading} disabled={loading || totalCount < 1}>
+      <Button variant="primary" onClick={handleConfirm} disabled={loading || totalCount < 1}>
         {loading
           ? (confirmingLabel ?? EQC_PAGE_COPY.geoReviewConfirming)
           : (confirmLabel ?? EQC_PAGE_COPY.geoReviewConfirm)}
-      </MsqdxButton>
+      </Button>
       {onCancel ? (
-        <MsqdxButton variant="text" onClick={onCancel} disabled={loading}>
+        <Button variant="link" onClick={onCancel} disabled={loading}>
           {cancelLabel ?? EQC_PAGE_COPY.geoReviewCancel}
-        </MsqdxButton>
+        </Button>
       ) : null}
-    </Stack>
+    </div>
   );
 }

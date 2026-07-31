@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Box } from '@mui/material';
-import { MsqdxButton, MsqdxTypography } from '@msqdx/react';
+import { Button, EmptyState, Text } from '@msqdx/ui';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import {
   API_ASSISTANT_CONVERSATIONS,
@@ -22,7 +21,7 @@ import { postAssistantCompleteStream } from '@/lib/assistant/assistant-stream-cl
 import { subscribeAssistantWorkflowStream } from '@/lib/assistant/workflow-stream-client';
 import { applyWorkflowStepsToMessages } from '@/lib/assistant/workflow-ui-client';
 import { AssistantMessageList, type AssistantChatMessage } from '@/components/assistant/AssistantMessageList';
-import { AssistantConversationHistory, AssistantHistoryMobileButton } from '@/components/assistant/AssistantConversationHistory';
+import { AssistantConversationHistory } from '@/components/assistant/AssistantConversationHistory';
 import {
   ProjectContextChip,
   type ProjectInsightOption,
@@ -44,8 +43,6 @@ import { AssistantPanel } from '@/components/assistant-ui/AssistantPanel';
 import { AssistantChatComposer } from '@/components/assistant/AssistantChatComposer';
 import { ReportCollectionBar, type ReportPinItem } from '@/components/assistant/ReportCollectionBar';
 import { pinKey } from '@/lib/assistant/reports/block-pin-label';
-import { plexonAssistantChatShellSx } from '@/lib/plexon-surface-styles';
-import { assistantPromptOutlinedButtonSx } from '@/lib/assistant/chat-composer-styles';
 import { extractPendingProjectNameFromHistory } from '@/lib/assistant/conversation-context';
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url';
 
@@ -63,7 +60,6 @@ export function AssistantChat() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<AssistantConversationSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyMobileOpen, setHistoryMobileOpen] = useState(false);
   const [messages, setMessages] = useState<AssistantChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -670,127 +666,77 @@ export function AssistantChat() {
   }, [messages, input, selectedProject?.name]);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        flex: 1,
-        minHeight: 0,
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-        gap: { md: 1 },
-      }}
-    >
-      <AssistantConversationHistory
-        conversations={conversations}
-        activeConversationId={conversationId}
-        loading={historyLoading}
-        onSelect={(conversation) => void openConversation(conversation.id, conversation)}
-        onNewChat={startNewChat}
-        onRename={renameConversation}
-        onDelete={deleteConversation}
-        mobileOpen={historyMobileOpen}
-        onMobileClose={() => setHistoryMobileOpen(false)}
-      />
-      <Box
-        data-plexon-assistant-chat
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minHeight: 0,
-          height: '100%',
-          minWidth: 0,
-          width: '100%',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          ...plexonAssistantChatShellSx,
-        }}
-      >
-        <Box sx={{ px: 1, pt: 1, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <AssistantHistoryMobileButton
-            label={t('assistant.history.open')}
-            onClick={() => setHistoryMobileOpen(true)}
+    <div className="plexon-assistant-workspace" data-plexon-assistant-chat>
+      <section className="chat-panel chat-panel-open plexon-assistant-panel" aria-label={t('nav.assistant')}>
+        <header className="plexon-assistant-topbar">
+          <AssistantConversationHistory
+            conversations={conversations}
+            activeConversationId={conversationId}
+            loading={historyLoading}
+            onSelect={(conversation) => void openConversation(conversation.id, conversation)}
+            onNewChat={startNewChat}
+            onRename={renameConversation}
+            onDelete={deleteConversation}
           />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <div className="plexon-assistant-topbar-project">
             <ProjectContextChip
               projects={projects}
               value={platformProjectId}
               onChange={setPlatformProjectId}
             />
-          </Box>
-          <MsqdxButton
-            variant="outlined"
-            size="small"
+          </div>
+          <Button
+            variant="subtle"
+            size="sm"
+            className="plexon-assistant-new-chat"
             onClick={startNewChat}
             disabled={loading}
-            sx={[
-              assistantPromptOutlinedButtonSx,
-              { display: { xs: 'none', md: 'inline-flex' }, flexShrink: 0 },
-            ]}
           >
             {t('assistant.newConversation')}
-          </MsqdxButton>
-        </Box>
+          </Button>
+        </header>
 
-        <Box
+        <div
           ref={scrollRef}
+          className={['chat-turns', showEmpty ? 'is-empty' : undefined].filter(Boolean).join(' ')}
           onScroll={handleScroll}
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: 'auto',
-            px: { xs: 1, md: 2 },
-            py: 1,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'stretch',
-            justifyContent: showEmpty ? 'center' : 'flex-start',
-          }}
         >
           {showEmpty ? (
-            <Box sx={{ textAlign: 'center', width: '100%', maxWidth: 640, mx: 'auto' }}>
-              <MsqdxTypography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+            <EmptyState className="chat-empty plexon-assistant-empty">
+              <Text role="title" as="h2">
                 {t('assistant.emptyTitle')}
-              </MsqdxTypography>
-              <MsqdxTypography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              </Text>
+              <Text role="body" as="p">
                 {t('assistant.emptyHint')}
-              </MsqdxTypography>
-              <Box
-                data-plexon-assistant-prompts
-                sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}
-              >
+              </Text>
+              <div className="plexon-assistant-prompts" data-plexon-assistant-prompts>
                 {SUGGESTIONS.map((key) => (
-                  <MsqdxButton
+                  <Button
                     key={key}
-                    variant="outlined"
-                    size="small"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void sendMessage(t(key))}
-                    sx={assistantPromptOutlinedButtonSx}
                   >
                     {t(key)}
-                  </MsqdxButton>
+                  </Button>
                 ))}
-                {platformProjectId && (
-                  <MsqdxButton
-                    variant="outlined"
-                    size="small"
+                {platformProjectId ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void sendMessage(t('assistant.suggestProjectKnowledge'))}
-                    sx={assistantPromptOutlinedButtonSx}
                   >
                     {t('assistant.suggestProjectKnowledge')}
-                  </MsqdxButton>
-                )}
-              </Box>
-            </Box>
+                  </Button>
+                ) : null}
+              </div>
+            </EmptyState>
           ) : (
-            <Box sx={{ width: '100%', minHeight: 0, flex: 1 }}>
+            <>
               {showActivityTrace ? (
-                <Box sx={{ mb: 2, width: '100%' }}>
+                <div className="plexon-assistant-trace">
                   <AgentActivityTrace trace={agentTrace} active />
-                </Box>
+                </div>
               ) : null}
               <AssistantMessageList
                 messages={messages}
@@ -804,9 +750,9 @@ export function AssistantChat() {
                   void sendMessage('', { toolName: pending.toolName, input: pending.input })
                 }
               />
-            </Box>
+            </>
           )}
-        </Box>
+        </div>
 
         <AssistantChatComposer
           value={input}
@@ -825,7 +771,7 @@ export function AssistantChat() {
           pins={reportPins}
           onPinsChange={setReportPins}
         />
-      </Box>
+      </section>
       {livePanel?.open && livePanel.blocks.length > 0 ? (
         <AssistantPanel
           title={livePanel.title}
@@ -833,6 +779,6 @@ export function AssistantChat() {
           onClose={() => setLivePanel(null)}
         />
       ) : null}
-    </Box>
+    </div>
   );
 }

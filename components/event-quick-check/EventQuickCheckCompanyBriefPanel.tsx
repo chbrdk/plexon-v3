@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import { Alert, Button, Field, Input, Text, Textarea } from '@msqdx/ui';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 
@@ -39,58 +37,60 @@ export function EventQuickCheckCompanyBriefPanel({
   }, [brief]);
 
   return (
-    <Stack spacing={MSQDX_SPACING.scale.md}>
-      <Typography variant="h6">{EQC_PAGE_COPY.reviewTitle}</Typography>
-      <Typography variant="body2" color="text.secondary">
-        {EQC_PAGE_COPY.reviewLead}
-      </Typography>
+    <div className="plexon-eqc-stack">
+      <Text role="title" as="h2">
+        {EQC_PAGE_COPY.reviewTitle}
+      </Text>
+      <Text role="body">{EQC_PAGE_COPY.reviewLead}</Text>
       {brief.sources.fetchError ? (
-        <Alert severity="warning">{EQC_PAGE_COPY.reviewFetchWarning}</Alert>
+        <Alert tone="info">{EQC_PAGE_COPY.reviewFetchWarning}</Alert>
       ) : null}
-      <TextField
-        label={EQC_PAGE_COPY.reviewDisplayName}
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-        fullWidth
-        disabled={loading}
-      />
-      <TextField
-        label={EQC_PAGE_COPY.reviewIndustry}
-        value={industry}
-        onChange={(e) => setIndustry(e.target.value)}
-        fullWidth
-        disabled={loading}
-      />
-      <TextField
-        label={EQC_PAGE_COPY.reviewSummary}
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        fullWidth
-        multiline
-        minRows={3}
-        disabled={loading}
-      />
-      <TextField
-        label={EQC_PAGE_COPY.reviewTargetAudience}
-        value={targetAudienceHint}
-        onChange={(e) => setTargetAudienceHint(e.target.value)}
-        fullWidth
-        multiline
-        minRows={2}
-        disabled={loading}
-      />
-      <TextField
-        label={EQC_PAGE_COPY.reviewDisambiguation}
-        value={disambiguationNote}
-        onChange={(e) => setDisambiguationNote(e.target.value)}
-        fullWidth
-        multiline
-        minRows={2}
-        disabled={loading}
-      />
-      <Box>
-        <MsqdxButton
-          variant="contained"
+      <Field label={EQC_PAGE_COPY.reviewDisplayName}>
+        <Input
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          block
+          disabled={loading}
+        />
+      </Field>
+      <Field label={EQC_PAGE_COPY.reviewIndustry}>
+        <Input
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+          block
+          disabled={loading}
+        />
+      </Field>
+      <Field label={EQC_PAGE_COPY.reviewSummary}>
+        <Textarea
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          rows={3}
+          block
+          disabled={loading}
+        />
+      </Field>
+      <Field label={EQC_PAGE_COPY.reviewTargetAudience}>
+        <Textarea
+          value={targetAudienceHint}
+          onChange={(e) => setTargetAudienceHint(e.target.value)}
+          rows={2}
+          block
+          disabled={loading}
+        />
+      </Field>
+      <Field label={EQC_PAGE_COPY.reviewDisambiguation}>
+        <Textarea
+          value={disambiguationNote}
+          onChange={(e) => setDisambiguationNote(e.target.value)}
+          rows={2}
+          block
+          disabled={loading}
+        />
+      </Field>
+      <div>
+        <Button
+          variant="primary"
           disabled={loading || !summary.trim()}
           onClick={() =>
             onConfirm({
@@ -103,8 +103,8 @@ export function EventQuickCheckCompanyBriefPanel({
           }
         >
           {loading ? EQC_PAGE_COPY.reviewConfirming : EQC_PAGE_COPY.reviewConfirm}
-        </MsqdxButton>
-      </Box>
-    </Stack>
+        </Button>
+      </div>
+    </div>
   );
 }

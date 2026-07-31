@@ -1,11 +1,9 @@
 'use client';
 
-import { Alert, Box, LinearProgress, Stack, Typography } from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
+import { Button, Text } from '@msqdx/ui';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 import type { DeepScanProgress } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { pathCheckionProject } from '@/lib/paths/checkion-api';
-import { THEME_ACCENT_OUTLINED_BUTTON_SX } from '@/lib/theme-accent';
 import { useEventQuickCheckDeepScanPoll } from '@/components/event-quick-check/use-event-quick-check-deep-scan-poll';
 
 type Props = {
@@ -33,56 +31,60 @@ export function EventQuickCheckDeepScanBanner({
       ? Math.round((progress.complete / progress.total) * 100)
       : 0;
   const projectId = checkionProjectId ?? initialCheckionProjectId;
+  const detail =
+    loading && !progress
+      ? EQC_PAGE_COPY.deepScanWaitingProgressUnknown
+      : (progress?.detail ?? EQC_PAGE_COPY.deepScanWaitingProgressUnknown);
 
   return (
-    <Alert
-      severity={allComplete ? 'success' : 'info'}
-      sx={{ mb: 2 }}
-      icon={false}
+    <div
+      className={`ds-alert ds-alert--${allComplete ? 'ok' : 'info'} plexon-eqc-alert-banner`}
+      role="status"
     >
-      <Stack spacing={1.5}>
-        <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+      <div className="plexon-eqc-stack-sm">
+        <div>
+          <Text role="label" as="p">
             {allComplete
               ? EQC_PAGE_COPY.deepScanBannerCompleteTitle
               : EQC_PAGE_COPY.deepScanBannerTitle}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          </Text>
+          <Text role="body">
             {allComplete
               ? EQC_PAGE_COPY.deepScanBannerCompleteLead
               : EQC_PAGE_COPY.deepScanBannerLead}
-          </Typography>
-        </Box>
+          </Text>
+        </div>
         {!allComplete ? (
-          <Box>
-            <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-              <Typography variant="caption" color="text.secondary">
-                {loading && !progress
-                  ? EQC_PAGE_COPY.deepScanWaitingProgressUnknown
-                  : (progress?.detail ?? EQC_PAGE_COPY.deepScanWaitingProgressUnknown)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {pct}%
-              </Typography>
-            </Stack>
-            <LinearProgress variant="determinate" value={pct} />
-          </Box>
+          <div>
+            <div className="plexon-eqc-row-between">
+              <Text role="hint">{detail}</Text>
+              <Text role="hint">{pct}%</Text>
+            </div>
+            <div
+              className="plexon-eqc-progress"
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div className="plexon-eqc-progress-bar" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
         ) : null}
         {projectId ? (
-          <Box>
-            <MsqdxButton
-              variant="outlined"
-              size="small"
-              sx={THEME_ACCENT_OUTLINED_BUTTON_SX}
+          <div>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() =>
                 window.open(pathCheckionProject(projectId), '_blank', 'noopener,noreferrer')
               }
             >
               {EQC_PAGE_COPY.openCheckionProjectButton}
-            </MsqdxButton>
-          </Box>
+            </Button>
+          </div>
         ) : null}
-      </Stack>
-    </Alert>
+      </div>
+    </div>
   );
 }

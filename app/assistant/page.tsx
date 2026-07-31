@@ -1,38 +1,24 @@
-'use client';
+'use client'
 
-import { Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
-import { useI18n } from '@/components/i18n/I18nProvider';
-import { AssistantChat } from '@/components/assistant/AssistantChat';
-import { PlexonAppHeaderV2 } from '@/components/layout/PlexonAppHeaderV2';
-import { PlexonPageChrome } from '@/components/layout/PlexonPageChrome';
+import { Suspense } from 'react'
+import { EmptyState, Spinner } from '@msqdx/ui'
+import { AssistantChat } from '@/components/assistant/AssistantChat'
+import { useI18n } from '@/components/i18n/I18nProvider'
 
 export default function AssistantPage() {
-  const { t } = useI18n();
+  const { t } = useI18n()
 
   return (
-    <PlexonPageChrome header={<PlexonAppHeaderV2 title={t('assistant.title')} />}>
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          px: { xs: 0.5, md: 1 },
-          pb: { xs: 0.5, md: 1 },
-        }}
+    <div className="plexon-assistant-stage" data-section="assistant">
+      <Suspense
+        fallback={
+          <EmptyState className="chat-empty">
+            <Spinner size="sm" /> {t('common.loading')}
+          </EmptyState>
+        }
       >
-        <Suspense
-          fallback={
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-              <CircularProgress size={28} />
-            </Box>
-          }
-        >
-          <AssistantChat />
-        </Suspense>
-      </Box>
-    </PlexonPageChrome>
-  );
+        <AssistantChat />
+      </Suspense>
+    </div>
+  )
 }

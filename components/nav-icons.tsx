@@ -32,6 +32,15 @@ export function NavIconOverview() {
   )
 }
 
+/** Projects — folder. */
+export function NavIconProjects() {
+  return (
+    <NavSvg>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
+    </NavSvg>
+  )
+}
+
 /** Assistant — message bubble. */
 export function NavIconAssistant() {
   return (

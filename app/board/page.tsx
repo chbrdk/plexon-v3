@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Box, Button } from '@mui/material';
+import { Button } from '@msqdx/ui';
 import { type Prismion, type Board, type Connection } from '../../../msqdx-design-system/packages/react/src/types/prismion';
 import type { PrismionResultItem } from '@/lib/msqdx-react-bridge';
 import { ReactFlowBoard } from '@/components/board/ReactFlowBoard';
@@ -990,19 +990,10 @@ export default function BoardPage() {
   }, [promptCardsFromPorts]);
 
   return (
-    <Box
-      ref={containerRef}
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        height: 'calc(100vh - 64px)',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
-      <Box sx={{ flex: 1, minWidth: 0, position: 'relative' }}>
+    <div ref={containerRef} className="plexon-board-stage" data-plexon-board>
+      <div className="plexon-board-canvas-wrap">
         {containerSize && (
-          <Box sx={{ position: 'relative', width: '100%', height: '100%', minHeight: 400 }}>
+          <div className="plexon-board-canvas">
             <ReactFlowBoard
               prismions={prismions}
               connections={connections}
@@ -1038,21 +1029,16 @@ export default function BoardPage() {
               }}
             />
             <Button
-              variant="contained"
-              size="small"
+              variant="primary"
+              size="sm"
+              className="plexon-board-add-prompt"
               onClick={handleAddPromptCard}
-              sx={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                zIndex: 10,
-              }}
             >
               + {t('board.promptCardTitle') ?? 'Prompt'}
             </Button>
-          </Box>
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

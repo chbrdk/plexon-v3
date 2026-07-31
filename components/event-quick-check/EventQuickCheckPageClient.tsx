@@ -4,14 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Alert,
-  Box,
-  CircularProgress,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+  Button,
+  Field,
+  Input,
+  Spinner,
+  Text,
+  ToggleGroup,
+} from '@msqdx/ui';
 import { EventQuickCheckCompanyBriefPanel } from '@/components/event-quick-check/EventQuickCheckCompanyBriefPanel';
 import { EventQuickCheckCompetitorsPanel } from '@/components/event-quick-check/EventQuickCheckCompetitorsPanel';
 import { EventQuickCheckDeepScanBanner } from '@/components/event-quick-check/EventQuickCheckDeepScanBanner';
@@ -42,7 +41,6 @@ import {
   subscribeAssistantWorkflowStream,
   type WorkflowStep,
 } from '@/lib/assistant/workflow-stream-client';
-import { THEME_ACCENT_OUTLINED_BUTTON_SX } from '@/lib/theme-accent';
 
 type Phase =
   | 'idle'
@@ -714,14 +712,7 @@ export function EventQuickCheckPageClient() {
   if (phase === 'done' && report && workflowRunId) {
     return (
       <>
-        <Box
-          data-plexon-event-quick-check
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            overflow: 'auto',
-          }}
-        >
+        <div className="plexon-eqc-scroll" data-plexon-event-quick-check>
           <EventQuickCheckDashboardView
             report={report}
             workflowRunId={workflowRunId}
@@ -731,7 +722,7 @@ export function EventQuickCheckPageClient() {
             onOpenHistory={openHistory}
             onRerunGeo={() => void reopenGeoQuestions()}
           />
-        </Box>
+        </div>
         {historyDialog}
       </>
     );
@@ -739,97 +730,67 @@ export function EventQuickCheckPageClient() {
 
   return (
     <>
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflow: 'auto',
-          px: { xs: 2, md: 4 },
-          py: { xs: 3, md: 5 },
-        }}
-        data-plexon-event-quick-check
-      >
-        <Box sx={{ maxWidth: 560, mx: 'auto', width: '100%' }}>
-          <Stack
-            direction="row"
-            alignItems="flex-start"
-            justifyContent="space-between"
-            spacing={2}
-            sx={{ mb: 3 }}
-          >
-            <Box sx={{ minWidth: 0 }}>
-              <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+      <div className="plexon-eqc-scroll plexon-eqc-workspace" data-plexon-event-quick-check>
+        <div className="plexon-eqc-narrow">
+          <div className="plexon-eqc-header">
+            <div className="plexon-eqc-header-copy">
+              <Text role="headline" as="h1">
                 {EQC_PAGE_COPY.pageTitle}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {EQC_PAGE_COPY.pageLead}
-              </Typography>
-            </Box>
-            <MsqdxButton
-              variant="outlined"
-              size="small"
-              sx={THEME_ACCENT_OUTLINED_BUTTON_SX}
-              onClick={openHistory}
-            >
+              </Text>
+              <Text role="body">{EQC_PAGE_COPY.pageLead}</Text>
+            </div>
+            <Button variant="ghost" size="sm" onClick={openHistory}>
               {EQC_PAGE_COPY.historyOpenButton}
-            </MsqdxButton>
-          </Stack>
+            </Button>
+          </div>
 
           {phase === 'loading-run' ? (
-            <Stack spacing={2} alignItems="center" sx={{ py: 4 }}>
-              <CircularProgress size={32} />
-              <Typography variant="body2" color="text.secondary">
-                {EQC_PAGE_COPY.historyOpenRun}
-              </Typography>
-            </Stack>
+            <div className="plexon-eqc-center">
+              <Spinner size="sm" />
+              <Text role="body">{EQC_PAGE_COPY.historyOpenRun}</Text>
+            </div>
           ) : null}
 
           {phase === 'idle' || phase === 'error' ? (
-            <Stack spacing={2} component="form" onSubmit={(e) => { e.preventDefault(); void startAnalysis(); }}>
-              <TextField
-                label={EQC_PAGE_COPY.urlLabel}
-                placeholder={EQC_PAGE_COPY.urlPlaceholder}
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                fullWidth
-                required
-                autoFocus
-              />
-              <TextField
-                label={EQC_PAGE_COPY.projectNameLabel}
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                fullWidth
-              />
-              <Stack spacing={1}>
-                <Typography variant="subtitle2">Scan-Tiefe</Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                  <MsqdxButton
-                    type="button"
-                    variant={depth === 'quick' ? 'contained' : 'outlined'}
-                    onClick={() => setDepth('quick')}
-                    fullWidth
-                  >
-                    {EQC_PAGE_COPY.depthQuickLabel}
-                  </MsqdxButton>
-                  <MsqdxButton
-                    type="button"
-                    variant={depth === 'complete' ? 'contained' : 'outlined'}
-                    onClick={() => setDepth('complete')}
-                    fullWidth
-                  >
-                    {EQC_PAGE_COPY.depthCompleteLabel}
-                  </MsqdxButton>
-                </Stack>
-                <Typography variant="caption" color="text.secondary">
-                  {depth === 'complete' ? EQC_PAGE_COPY.depthCompleteHint : EQC_PAGE_COPY.depthQuickHint}
-                </Typography>
-              </Stack>
-              {error ? <Alert severity="error">{error}</Alert> : null}
-              <MsqdxButton type="submit" variant="contained" size="large">
+            <form
+              className="plexon-eqc-stack plexon-eqc-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void startAnalysis();
+              }}
+            >
+              <Field label={EQC_PAGE_COPY.urlLabel}>
+                <Input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder={EQC_PAGE_COPY.urlPlaceholder}
+                  required
+                  autoFocus
+                  block
+                />
+              </Field>
+              <Field label={EQC_PAGE_COPY.projectNameLabel}>
+                <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} block />
+              </Field>
+              <Field label="Scan-Tiefe">
+                <ToggleGroup
+                  value={depth}
+                  onChange={(value) => setDepth(value as EventQuickCheckDepth)}
+                  aria-label="Scan-Tiefe"
+                  options={[
+                    { value: 'quick', label: EQC_PAGE_COPY.depthQuickLabel },
+                    { value: 'complete', label: EQC_PAGE_COPY.depthCompleteLabel },
+                  ]}
+                />
+              </Field>
+              <Text role="hint" className="plexon-eqc-depth-hint">
+                {depth === 'complete' ? EQC_PAGE_COPY.depthCompleteHint : EQC_PAGE_COPY.depthQuickHint}
+              </Text>
+              {error ? <Alert tone="error">{error}</Alert> : null}
+              <Button type="submit" variant="primary" size="lg">
                 {EQC_PAGE_COPY.startButton}
-              </MsqdxButton>
-            </Stack>
+              </Button>
+            </form>
           ) : null}
 
           {phase === 'review' && companyBrief ? (
@@ -850,10 +811,8 @@ export function EventQuickCheckPageClient() {
           ) : null}
 
           {phase === 'geoReview' && geoQuestions.length > 0 ? (
-            <Stack spacing={2}>
-              {geoRerunMode ? (
-                <Alert severity="info">{EQC_PAGE_COPY.geoRerunHint}</Alert>
-              ) : null}
+            <div className="plexon-eqc-stack">
+              {geoRerunMode ? <Alert tone="info">{EQC_PAGE_COPY.geoRerunHint}</Alert> : null}
               {workflowRunId && (checkionProjectId || deepScanProgress) && !geoRerunMode ? (
                 <EventQuickCheckDeepScanBanner
                   workflowRunId={workflowRunId}
@@ -875,7 +834,7 @@ export function EventQuickCheckPageClient() {
                 onConfirm={(questions, groups) => void confirmGeoQuestions(questions, groups)}
                 onCancel={geoRerunMode ? () => void cancelGeoReopen() : undefined}
               />
-            </Stack>
+            </div>
           ) : null}
 
           {phase === 'deepScanWaiting' && workflowRunId ? (
@@ -890,21 +849,21 @@ export function EventQuickCheckPageClient() {
           ) : null}
 
           {phase === 'running' ? (
-            <Stack spacing={2} alignItems="center" sx={{ py: 2 }}>
-              <CircularProgress size={36} />
-              <Typography variant="h6">{EQC_PAGE_COPY.runningTitle}</Typography>
-              <Typography variant="body2" color="text.secondary" textAlign="center">
-                {EQC_PAGE_COPY.runningHint}
-              </Typography>
+            <div className="plexon-eqc-center">
+              <Spinner size="md" />
+              <Text role="title" as="h2">
+                {EQC_PAGE_COPY.runningTitle}
+              </Text>
+              <Text role="body">{EQC_PAGE_COPY.runningHint}</Text>
               {steps.length > 0 ? (
-                <Box sx={{ width: '100%', mt: `${MSQDX_SPACING.scale.md}px` }}>
+                <div className="plexon-eqc-stack" style={{ width: '100%' }}>
                   <UiStepList title="Fortschritt" steps={steps} />
-                </Box>
+                </div>
               ) : null}
-            </Stack>
+            </div>
           ) : null}
-        </Box>
-      </Box>
+        </div>
+      </div>
       {historyDialog}
     </>
   );

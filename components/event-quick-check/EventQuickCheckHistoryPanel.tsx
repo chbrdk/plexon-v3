@@ -1,21 +1,12 @@
 'use client';
 
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  List,
-  ListItemButton,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Chip, Spinner, Text, Alert } from '@msqdx/ui';
 import {
   eventQuickCheckHistoryStatusLabel,
   type EventQuickCheckHistoryItem,
 } from '@/lib/assistant/event-quick-check/event-quick-check-history';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 import { formatConversationUpdatedAt } from '@/lib/assistant/conversation-history';
-import { plexonLightCardSx } from '@/lib/plexon-surface-styles';
 
 type Props = {
   items: EventQuickCheckHistoryItem[];
@@ -24,17 +15,9 @@ type Props = {
   error: string | null;
   locale?: string;
   showTitle?: boolean;
+  embedded?: boolean;
   onSelect: (item: EventQuickCheckHistoryItem) => void;
 };
-
-function statusChipColor(
-  status: EventQuickCheckHistoryItem['status']
-): 'success' | 'error' | 'warning' | 'default' {
-  if (status === 'completed') return 'success';
-  if (status === 'failed') return 'error';
-  if (status === 'running') return 'warning';
-  return 'default';
-}
 
 export function EventQuickCheckHistoryPanel({
   items,
@@ -43,98 +26,72 @@ export function EventQuickCheckHistoryPanel({
   error,
   locale = 'de',
   showTitle = true,
+  embedded = false,
   onSelect,
 }: Props) {
   return (
-    <Box
+    <div
+      className="plexon-eqc-history"
       data-plexon-event-quick-check-history
-      sx={{
-        ...plexonLightCardSx,
-        p: 2,
-        minHeight: showTitle ? 280 : 0,
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: showTitle ? undefined : 'none',
-        border: showTitle ? undefined : 'none',
-        bgcolor: showTitle ? undefined : 'transparent',
-      }}
+      data-embedded={embedded ? 'true' : 'false'}
     >
       {showTitle ? (
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+        <Text role="title" as="h2">
           {EQC_PAGE_COPY.historyTitle}
-        </Typography>
+        </Text>
       ) : null}
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress size={24} />
-        </Box>
+        <div className="plexon-eqc-center">
+          <Spinner size="sm" />
+        </div>
       ) : null}
 
       {error ? (
-        <Typography variant="body2" color="error">
-          {error}
-        </Typography>
+        <Alert tone="error">{error}</Alert>
       ) : null}
 
       {!loading && !error && items.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          {EQC_PAGE_COPY.historyEmpty}
-        </Typography>
+        <Text role="body">{EQC_PAGE_COPY.historyEmpty}</Text>
       ) : null}
 
       {!loading && items.length > 0 ? (
-        <List dense disablePadding sx={{ overflow: 'auto', flex: 1 }}>
+        <ul className="plexon-eqc-history-list">
           {items.map((item) => {
             const selected = item.workflowRunId === activeRunId;
             return (
-              <ListItemButton
-                key={item.workflowRunId}
-                selected={selected}
-                onClick={() => onSelect(item)}
-                sx={{
-                  borderRadius: 1,
-                  mb: 0.5,
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: 0.5,
-                  py: 1,
-                }}
-              >
-                <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
-                  <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                    {item.domain}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={eventQuickCheckHistoryStatusLabel(item.status)}
-                    color={statusChipColor(item.status)}
-                    variant="outlined"
-                  />
-                </Stack>
-                <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: '100%' }}>
-                  {item.url}
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatConversationUpdatedAt(item.updatedAt, locale)}
-                  </Typography>
-                  {item.domainScore != null ? (
-                    <Typography variant="caption" color="text.secondary">
-                      · {EQC_PAGE_COPY.historyDomainScore} {item.domainScore}
-                    </Typography>
-                  ) : null}
-                  {!item.hasReport ? (
-                    <Typography variant="caption" color="warning.main">
-                      · {EQC_PAGE_COPY.historyNoReport}
-                    </Typography>
-                  ) : null}
-                </Stack>
-              </ListItemButton>
+              <li key={item.workflowRunId}>
+                <button
+                  type="button"
+                  className={`plexon-eqc-history-item${selected ? ' is-active' : ''}`}
+                  onClick={() => onSelect(item)}
+                >
+                  <div className="plexon-eqc-history-item-head">
+                    <span className="plexon-eqc-history-item-domain">{item.domain}</span>
+                    <Chip static size="sm">
+                      {eventQuickCheckHistoryStatusLabel(item.status)}
+                    </Chip>
+                  </div>
+                  <Text role="hint" className="plexon-eqc-history-item-url">
+                    {item.url}
+                  </Text>
+                  <div className="plexon-eqc-history-item-meta">
+                    <Text role="hint">{formatConversationUpdatedAt(item.updatedAt, locale)}</Text>
+                    {item.domainScore != null ? (
+                      <Text role="hint">
+                        · {EQC_PAGE_COPY.historyDomainScore} {item.domainScore}
+                      </Text>
+                    ) : null}
+                    {!item.hasReport ? (
+                      <Text role="hint">· {EQC_PAGE_COPY.historyNoReport}</Text>
+                    ) : null}
+                  </div>
+                </button>
+              </li>
             );
           })}
-        </List>
+        </ul>
       ) : null}
-    </Box>
+    </div>
   );
 }

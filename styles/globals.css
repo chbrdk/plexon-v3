@@ -283,12 +283,405 @@
   background: color-mix(in srgb, var(--accent, #00ca55) 12%, transparent);
 }
 
+.plexon-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--msqdx-spacing-md, 1rem);
+}
+
+.plexon-collection-card {
+  display: grid;
+  gap: 0.35rem;
+  padding: var(--space-3, 0.85rem);
+}
+
+.plexon-collection-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plexon-collection-card-title {
+  margin: 0;
+  font-size: var(--type-md, 1rem);
+}
+
+.plexon-collection-card-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.plexon-collection-card-domain {
+  margin: 0;
+}
+
+.plexon-collection-card-domain-spacer {
+  min-height: 0.25rem;
+}
+
+.plexon-collection-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.plexon-collection-card-link {
+  text-decoration: none;
+  display: inline-flex;
+}
+
+.plexon-collection-list-status,
+.plexon-collection-list-error,
+.plexon-collection-list-truncated {
+  margin: 0 0 0.75rem;
+}
+
+.plexon-collection-create {
+  max-width: 28rem;
+  gap: 0.75rem;
+}
+
+.plexon-collection-hub-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
 .plexon-assistant-project-context {
   min-width: 0;
 }
 
 .plexon-assistant-project-context .ds-field {
   width: 100%;
+}
+
+/* Wave 5 — Assistant chat workstation (Audion chat-panel composition) */
+.plexon-assistant-stage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.plexon-assistant-workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  gap: 0.75rem;
+}
+
+.plexon-assistant-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.plexon-assistant-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding: 0.35rem 0.25rem 0.5rem;
+}
+
+.plexon-assistant-topbar-project {
+  flex: 1;
+  min-width: 0;
+}
+
+.plexon-assistant-new-chat {
+  flex-shrink: 0;
+}
+
+.plexon-assistant-panel > .chat-turns {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.plexon-assistant-panel > .chat-turns.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plexon-assistant-empty {
+  max-width: 40rem;
+  text-align: center;
+}
+
+.plexon-assistant-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.plexon-assistant-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.plexon-assistant-turn-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plexon-assistant-confirm {
+  margin-top: 0.75rem;
+  max-width: min(100%, 40rem);
+}
+
+.plexon-assistant-confirm-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+}
+
+.plexon-assistant-confirm-tool {
+  margin: 0;
+}
+
+.plexon-assistant-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plexon-assistant-followups {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.plexon-assistant-followups-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.plexon-assistant-followups-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.plexon-assistant-user-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.plexon-assistant-markdown {
+  white-space: pre-wrap;
+  font-size: var(--type-sm, 0.875rem);
+  line-height: 1.5;
+}
+
+.plexon-assistant-planner {
+  padding: 0.65rem 0.85rem;
+}
+
+.plexon-assistant-planner-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plexon-assistant-planner-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 700;
+}
+
+.plexon-assistant-planner-summary {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.plexon-assistant-planner-details {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.plexon-assistant-activity {
+  max-height: 280px;
+  overflow: auto;
+  margin-bottom: 0.75rem;
+}
+
+.plexon-assistant-activity-head {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.plexon-assistant-activity-phase {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.plexon-assistant-activity-section {
+  padding: 0.5rem 0.85rem;
+}
+
+.plexon-assistant-activity-tools {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.plexon-assistant-activity-tool {
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--radius-control, 8px);
+  background: color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.plexon-assistant-activity-preview {
+  margin: 0.25rem 0 0;
+  white-space: pre-wrap;
+  color: var(--muted);
+}
+
+.plexon-assistant-activity-thinking {
+  padding: 0.65rem 0.85rem;
+  border-top: 1px dashed var(--line);
+}
+
+.plexon-assistant-activity-thinking-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.plexon-assistant-activity-thinking-body {
+  margin: 0;
+  max-height: 140px;
+  overflow: auto;
+  padding: 0.5rem;
+  border-radius: var(--radius-control, 8px);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: var(--type-xs, 0.75rem);
+  color: var(--muted);
+}
+
+.plexon-assistant-trace {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.plexon-chat-history-flyover {
+  min-width: min(22rem, 90vw);
+  max-width: min(28rem, 94vw);
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+}
+
+.plexon-chat-history-toolbar {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.plexon-chat-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.plexon-chat-history-item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius-control, 8px);
+  border: 1px solid transparent;
+}
+
+.plexon-chat-history-item.is-active {
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 40%, var(--line));
+  background: color-mix(in srgb, var(--accent, #00ca55) 10%, transparent);
+}
+
+.plexon-chat-history-item-main {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+.plexon-chat-history-item-title {
+  font-weight: 600;
+  font-size: var(--type-sm, 0.875rem);
+  line-height: 1.35;
+}
+
+.plexon-chat-history-item-meta {
+  font-size: var(--type-xs, 0.75rem);
+  color: var(--muted);
+}
+
+.plexon-chat-history-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.plexon-chat-history-empty {
+  margin: 0.75rem 0;
+}
+
+.plexon-assistant-panel .chat-form > .ds-field > .ds-field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.plexon-assistant-panel .chat-form > .ds-field {
+  position: relative;
 }
 
 .plexon-project-product-head {
@@ -559,6 +952,296 @@
   height: 4px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+/* Event Quick Check — Wave 6 */
+.plexon-eqc-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.plexon-eqc-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.plexon-eqc-workspace {
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
+}
+
+.plexon-eqc-narrow {
+  max-width: 35rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.plexon-eqc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.plexon-eqc-header-copy {
+  min-width: 0;
+}
+
+.plexon-eqc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plexon-eqc-stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plexon-eqc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.plexon-eqc-row-between {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plexon-eqc-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.plexon-eqc-form .ds-field,
+.plexon-eqc-form .ds-input,
+.plexon-eqc-form .ds-textarea {
+  width: 100%;
+}
+
+.plexon-eqc-depth-hint {
+  margin-top: 0.15rem;
+}
+
+.plexon-eqc-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 35%, var(--line));
+  overflow: hidden;
+}
+
+.plexon-eqc-progress-bar {
+  height: 100%;
+  background: var(--accent, var(--color-theme-accent, #00ca55));
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.plexon-eqc-dashboard {
+  padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 2rem);
+}
+
+.plexon-eqc-dashboard-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  max-width: 90rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.plexon-eqc-dashboard-body {
+  max-width: 90rem;
+  margin-inline: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plexon-eqc-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1200px) {
+  .plexon-eqc-dashboard-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+.plexon-eqc-dashboard-panel {
+  min-width: 0;
+}
+
+.plexon-eqc-dashboard-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.plexon-eqc-chart {
+  width: 100%;
+}
+
+.plexon-eqc-chart-subtitle {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.plexon-eqc-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.plexon-eqc-history {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1rem;
+}
+
+.plexon-eqc-history[data-embedded='true'] {
+  padding: 0;
+  min-height: 0;
+}
+
+.plexon-eqc-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  overflow: auto;
+  flex: 1;
+}
+
+.plexon-eqc-history-item {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control, 8px);
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  padding: 0.65rem 0.75rem;
+}
+
+.plexon-eqc-history-item:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.plexon-eqc-history-item.is-active {
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 40%, var(--line));
+  background: color-mix(in srgb, var(--accent, #00ca55) 10%, transparent);
+}
+
+.plexon-eqc-history-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.plexon-eqc-history-item-domain {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plexon-eqc-history-item-url {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.plexon-eqc-history-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-citation-table-wrap {
+  overflow-x: auto;
+  padding: 0.75rem;
+}
+
+.plexon-eqc-citation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-sm, 0.875rem);
+  color: var(--color-text-on-light, var(--ink));
+}
+
+.plexon-eqc-citation-table th,
+.plexon-eqc-citation-table td {
+  border: 1px solid var(--line);
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+}
+
+.plexon-eqc-citation-table th {
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+  font-size: var(--type-xs, 0.75rem);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plexon-eqc-citation-table tbody tr {
+  cursor: pointer;
+}
+
+.plexon-eqc-citation-table tbody tr:hover td {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.plexon-eqc-llm-answer-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: var(--radius-control, 8px);
+  background: var(--color-card-bg, color-mix(in srgb, var(--ink) 4%, transparent));
+  border: 1px solid var(--line);
+}
+
+.plexon-eqc-llm-citations {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.plexon-eqc-alert-banner {
+  margin-bottom: 0.75rem;
 }
 
 .plexon-spinner {
@@ -956,4 +1639,36 @@ main {
 }
 .react-flow__handle:hover {
   opacity: 0.9;
+}
+
+/* Wave 7 — Board page chrome (Prismion canvas remains island) */
+.plexon-board-stage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.plexon-board-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.plexon-board-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.plexon-board-add-prompt {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
 }

@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Chip, Stack, TextField, Typography } from '@mui/material';
-import { MsqdxButton } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
+import { Button, Chip, Field, Input, Text } from '@msqdx/ui';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 
 export type EventQuickCheckCompetitorsPanelProps = {
@@ -49,65 +47,67 @@ export function EventQuickCheckCompetitorsPanel({
   };
 
   return (
-    <Stack spacing={MSQDX_SPACING.scale.md}>
-      <Typography variant="h6">{EQC_PAGE_COPY.competitorsReviewTitle}</Typography>
-      <Typography variant="body2" color="text.secondary">
-        {EQC_PAGE_COPY.competitorsReviewLead}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        {EQC_PAGE_COPY.competitorsReviewHint(maxCompetitors)}
-      </Typography>
+    <div className="plexon-eqc-stack">
+      <Text role="title" as="h2">
+        {EQC_PAGE_COPY.competitorsReviewTitle}
+      </Text>
+      <Text role="body">{EQC_PAGE_COPY.competitorsReviewLead}</Text>
+      <Text role="hint">{EQC_PAGE_COPY.competitorsReviewHint(maxCompetitors)}</Text>
       {items.map((domain, index) => (
-        <Stack key={`competitor-${index}`} spacing={1}>
-          <TextField
-            label={EQC_PAGE_COPY.competitorsReviewLabel(index)}
-            value={domain}
-            onChange={(e) => updateItem(index, e.target.value)}
-            fullWidth
-            placeholder="wettbewerber.de"
-            disabled={loading}
-          />
-          <Box>
-            <MsqdxButton
-              variant="text"
-              size="small"
+        <div key={`competitor-${index}`} className="plexon-eqc-stack-sm">
+          <Field label={EQC_PAGE_COPY.competitorsReviewLabel(index)}>
+            <Input
+              value={domain}
+              onChange={(e) => updateItem(index, e.target.value)}
+              placeholder="wettbewerber.de"
+              block
+              disabled={loading}
+            />
+          </Field>
+          <div>
+            <Button
+              variant="link"
+              size="sm"
               onClick={() => removeItem(index)}
               disabled={loading || items.length <= 1}
             >
               {EQC_PAGE_COPY.competitorsReviewRemove}
-            </MsqdxButton>
-          </Box>
-        </Stack>
+            </Button>
+          </div>
+        </div>
       ))}
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+      <div className="plexon-eqc-chip-row">
         {items.filter(Boolean).map((domain) => (
-          <Chip key={domain} label={domain} size="small" variant="outlined" />
+          <Chip key={domain} static>
+            {domain}
+          </Chip>
         ))}
-      </Stack>
+      </div>
       {items.filter(Boolean).length < maxCompetitors ? (
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-          <TextField
-            label={EQC_PAGE_COPY.competitorsReviewAddLabel}
-            value={manual}
-            onChange={(e) => setManual(e.target.value)}
-            fullWidth
-            placeholder="domain.de"
-            disabled={loading}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                addManual();
-              }
-            }}
-          />
-          <MsqdxButton variant="outlined" onClick={addManual} disabled={loading || !manual.trim()}>
+        <div className="plexon-eqc-row">
+          <Field label={EQC_PAGE_COPY.competitorsReviewAddLabel} className="plexon-eqc-form">
+            <Input
+              value={manual}
+              onChange={(e) => setManual(e.target.value)}
+              placeholder="domain.de"
+              block
+              disabled={loading}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addManual();
+                }
+              }}
+            />
+          </Field>
+          <Button variant="ghost" onClick={addManual} disabled={loading || !manual.trim()}>
             {EQC_PAGE_COPY.competitorsReviewAdd}
-          </MsqdxButton>
-        </Stack>
+          </Button>
+        </div>
       ) : null}
-      <MsqdxButton variant="contained" onClick={handleConfirm} loading={loading} disabled={loading}>
+      <Button variant="primary" onClick={handleConfirm} disabled={loading}>
         {loading ? EQC_PAGE_COPY.competitorsReviewConfirming : EQC_PAGE_COPY.competitorsReviewConfirm}
-      </MsqdxButton>
-    </Stack>
+      </Button>
+    </div>
   );
 }

@@ -22,6 +22,7 @@ import {
   NavIconBolt,
   NavIconOverview,
   NavIconProducts,
+  NavIconProjects,
 } from '@/components/nav-icons'
 import { BrandColorInitializer } from '@/components/settings/BrandColorInitializer'
 import { shellPaths } from '@/lib/shell-paths'
@@ -34,6 +35,7 @@ import {
   PATH_HOME,
   PATH_LOGIN,
   PATH_PRODUCTS,
+  PATH_PROJECTS,
   PATH_REGISTER,
   PATH_RESET_PASSWORD,
   PATH_SETTINGS,
@@ -47,10 +49,10 @@ const TITLE_BY_PREFIX: Array<{ prefix: string; titleKey: string }> = [
   { prefix: PATH_ADMIN, titleKey: 'nav.adminConsole' },
   { prefix: PATH_ASSISTANT, titleKey: 'nav.assistant' },
   { prefix: PATH_EVENT_QUICK_CHECK, titleKey: 'nav.eventQuickCheck' },
+  { prefix: PATH_PROJECTS, titleKey: 'nav.projects' },
   { prefix: PATH_PRODUCTS, titleKey: 'nav.products' },
   { prefix: PATH_BOARD, titleKey: 'nav.board' },
   { prefix: PATH_SETTINGS, titleKey: 'nav.settings' },
-  { prefix: '/projects', titleKey: 'nav.products' },
 ]
 
 export function AppShell({
@@ -126,6 +128,12 @@ export function AppShell({
       href: PATH_HOME,
       label: t('nav.dashboard'),
       icon: <NavIconOverview />,
+    },
+    {
+      id: 'projects',
+      href: PATH_PROJECTS,
+      label: t('nav.projects'),
+      icon: <NavIconProjects />,
     },
     {
       id: 'assistant',
