@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { AUDION_LAUNCH_QUERY, buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
+import {
+  AUDION_LAUNCH_QUERY,
+  buildAudionAdminLaunchUrl,
+  buildAudionAppUrl,
+  buildAudionChatUrl,
+  buildAudionPersonaUrl,
+  buildAudionTargetGroupUrl,
+} from '@/lib/audion-admin-launch-url';
 
 describe('buildAudionAdminLaunchUrl', () => {
   it('adds project hint and company id', () => {
@@ -18,5 +25,23 @@ describe('buildAudionAdminLaunchUrl', () => {
       `https://a.test/admin/?${AUDION_LAUNCH_QUERY.PLATFORM_COMPANY_ID}=x`
     );
     expect(buildAudionAdminLaunchUrl('https://a.test/admin', {})).toBe('https://a.test/admin/');
+  });
+});
+
+describe('buildAudionAppUrl helpers', () => {
+  const origin = 'https://audion.example';
+
+  it('builds target group, persona, and chat deep-links', () => {
+    expect(buildAudionTargetGroupUrl(origin, 'tg-1')).toBe('https://audion.example/target-groups/tg-1');
+    expect(buildAudionPersonaUrl(origin, 'p-1')).toBe('https://audion.example/personas/p-1');
+    expect(buildAudionChatUrl(origin, { personaId: 'p-1', projectId: 'proj-1' })).toBe(
+      'https://audion.example/chat?personaId=p-1&projectId=proj-1'
+    );
+  });
+
+  it('omits empty query values', () => {
+    expect(buildAudionAppUrl(origin, '/chat', { personaId: 'p-1', projectId: '' })).toBe(
+      'https://audion.example/chat?personaId=p-1'
+    );
   });
 });

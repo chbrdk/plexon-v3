@@ -29,5 +29,11 @@ export function resolveAudionCapability(
   const binding = bindings.find((b) => b.productId === 'audion');
   const id = binding?.externalProjectId?.trim();
   if (!id) return null;
-  return { externalProjectId: id, personaCount: 0 };
+  return {
+    externalProjectId: id,
+    personaCount: 0,
+    targetGroupCount: 0,
+    targetGroups: [],
+    personas: [],
+  };
 }

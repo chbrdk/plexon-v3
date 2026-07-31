@@ -68,6 +68,9 @@ describe('GET /api/platform/me/project-insights', () => {
     vi.mocked(fetchAudionPlatformProjectSummary).mockImplementation(async (id) => ({
       externalProjectId: `aud-${id}`,
       personaCount: 2,
+      targetGroupCount: 1,
+      targetGroups: [],
+      personas: [],
     }));
 
     const { GET } = await import('@/app/api/platform/me/project-insights/route');

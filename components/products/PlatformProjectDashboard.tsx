@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react'
 import NextLink from 'next/link'
 import { Alert, Button, Chip, Panel, SectionChrome, Spinner, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
-import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
+import {
+  buildAudionChatUrl,
+  buildAudionPersonaUrl,
+  buildAudionTargetGroupUrl,
+} from '@/lib/audion-admin-launch-url'
+import { apiPlatformProjectDashboard, getAudionWebOrigin, pathAssistantWithProject } from '@/lib/constants'
+import type { AudionProjectSummary } from '@/lib/platform-project-dashboard-fetch'
 
 type DashboardPayload = {
   platformProject: {
@@ -21,7 +27,7 @@ type DashboardPayload = {
     syncMessage: string | null
   }>
   checkion: { externalProjectId: string; scanCount: number } | null
-  audion: { externalProjectId: string; personaCount: number } | null
+  audion: AudionProjectSummary | null
   links: { checkionProject: string; audionProject: string }
 }
 
@@ -42,6 +48,15 @@ function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
   return productId
+}
+
+function audionStripLabel(
+  audion: AudionProjectSummary,
+  t: (key: string) => string
+): string {
+  const tg = audion.targetGroupCount ?? 0
+  const personas = audion.personaCount ?? 0
+  return ` · ${tg} ${t('projects.detail.targetGroups')} · ${personas} ${t('projects.detail.personas')}`
 }
 
 export function PlatformProjectDashboard({ platformProjectId }: { platformProjectId: string }) {
@@ -88,6 +103,12 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
         .join(' · ')
     : null
 
+  const audionOrigin = getAudionWebOrigin()
+  const targetGroups = data?.audion?.targetGroups ?? []
+  const personas = data?.audion?.personas ?? []
+  const catalogEmpty =
+    Boolean(data?.audion) && targetGroups.length === 0 && personas.length === 0
+
   return (
     <div className="plexon-magazine plexon-project-detail" data-section="collection-project-home">
       <SectionChrome
@@ -122,7 +143,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
           </span>
           <span className="plexon-capability-chip" data-state={data.audion ? 'on' : 'off'}>
             AUDION
-            {data.audion ? ` · ${data.audion.personaCount} ${t('projects.detail.personas')}` : ''}
+            {data.audion ? audionStripLabel(data.audion, t) : ''}
           </span>
         </div>
       ) : null}
@@ -185,7 +206,12 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                   </Chip>
                 </div>
                 {data.audion ? (
-                  <StatLedeGroup aria-label="AUDION" columns={1}>
+                  <StatLedeGroup aria-label="AUDION" columns={2}>
+                    <StatLede
+                      value={data.audion.targetGroupCount ?? 0}
+                      label={t('projects.detail.targetGroups')}
+                      kind="number"
+                    />
                     <StatLede
                       value={data.audion.personaCount}
                       label={t('projects.detail.personas')}
@@ -206,6 +232,104 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
               </Panel>
             </div>
           </section>
+
+          {data.audion ? (
+            <section className="plexon-settings-section" aria-label={t('projects.detail.audionCatalogTitle')}>
+              <SectionChrome
+                title={t('projects.detail.audionCatalogTitle')}
+                meta={<Text role="meta">{t('projects.detail.audionCatalogSubtitle')}</Text>}
+                as="h3"
+                quiet
+              />
+              {catalogEmpty ? (
+                <Text role="meta">{t('projects.detail.audionCatalogEmpty')}</Text>
+              ) : (
+                <div className="plexon-project-product-grid">
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.targetGroups')}
+                    </Text>
+                    {targetGroups.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.audionCatalogEmptyTargetGroups')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {targetGroups.map((group) => (
+                          <li key={group.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {group.name}
+                              </Text>
+                              <Text role="meta">
+                                {[group.segment, `${group.personaCount} ${t('projects.detail.personas')}`]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </Text>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                openExternal(buildAudionTargetGroupUrl(audionOrigin, group.id))
+                              }
+                            >
+                              {t('projects.detail.openInAudion')}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+
+                  <Panel className="plexon-magazine-card">
+                    <Text role="title" as="h3">
+                      {t('projects.detail.personas')}
+                    </Text>
+                    {personas.length === 0 ? (
+                      <Text role="meta">{t('projects.detail.audionCatalogEmptyPersonas')}</Text>
+                    ) : (
+                      <ul className="plexon-project-bindings">
+                        {personas.map((persona) => (
+                          <li key={persona.id} className="plexon-project-binding">
+                            <div className="plexon-project-binding__main">
+                              <Text role="title" as="h4">
+                                {persona.name}
+                              </Text>
+                              <Text role="meta">{persona.role}</Text>
+                            </div>
+                            <div className="plexon-collection-card-actions">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  openExternal(buildAudionPersonaUrl(audionOrigin, persona.id))
+                                }
+                              >
+                                {t('projects.detail.openInAudion')}
+                              </Button>
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() =>
+                                  openExternal(
+                                    buildAudionChatUrl(audionOrigin, {
+                                      personaId: persona.id,
+                                      projectId: data.audion!.externalProjectId,
+                                    })
+                                  )
+                                }
+                              >
+                                {t('projects.detail.startChat')}
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Panel>
+                </div>
+              )}
+            </section>
+          ) : null}
 
           <section className="plexon-settings-section" aria-label={t('projects.detail.bindingsTitle')}>
             <SectionChrome

@@ -7,17 +7,35 @@ import {
 describe('platform-project-capability-summary', () => {
   it('prefers live summary over binding', () => {
     const audion = resolveAudionCapability(
-      { externalProjectId: 'live-1', personaCount: 4 },
+      {
+        externalProjectId: 'live-1',
+        personaCount: 4,
+        targetGroupCount: 1,
+        targetGroups: [],
+        personas: [],
+      },
       [{ productId: 'audion', externalProjectId: 'bind-1', syncStatus: 'in_sync' }]
     );
-    expect(audion).toEqual({ externalProjectId: 'live-1', personaCount: 4 });
+    expect(audion).toEqual({
+      externalProjectId: 'live-1',
+      personaCount: 4,
+      targetGroupCount: 1,
+      targetGroups: [],
+      personas: [],
+    });
   });
 
   it('falls back to binding when live summary is missing', () => {
     const audion = resolveAudionCapability(null, [
       { productId: 'audion', externalProjectId: 'proj-test3', syncStatus: 'in_sync' },
     ]);
-    expect(audion).toEqual({ externalProjectId: 'proj-test3', personaCount: 0 });
+    expect(audion).toEqual({
+      externalProjectId: 'proj-test3',
+      personaCount: 0,
+      targetGroupCount: 0,
+      targetGroups: [],
+      personas: [],
+    });
 
     const checkion = resolveCheckionCapability(null, [
       { productId: 'checkion', externalProjectId: null, syncStatus: 'failed' },

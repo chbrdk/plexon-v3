@@ -56,7 +56,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
         <span className="plexon-capability-chip" data-state={row.audion != null ? 'on' : 'off'}>
           {t('dashboard.platformInsightsCapabilityAudion')}
           {row.audion != null
-            ? ` · ${row.audion.personaCount} ${t('dashboard.platformInsightsPersonas')}`
+            ? ` · ${row.audion.targetGroupCount ?? 0} ${t('dashboard.platformInsightsTargetGroups')} · ${row.audion.personaCount} ${t('dashboard.platformInsightsPersonas')}`
             : ` · ${t('dashboard.platformInsightsNoProduct')}`}
         </span>
       </div>

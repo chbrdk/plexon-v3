@@ -78,6 +78,13 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue({
       externalProjectId: 'aud-1',
       personaCount: 2,
+      targetGroupCount: 1,
+      targetGroups: [
+        { id: 'tg-1', name: 'Buyers', segment: 'B2B', personaCount: 2, status: 'active' },
+      ],
+      personas: [
+        { id: 'p-1', name: 'Alex', role: 'Buyer', status: 'ready', targetGroupId: 'tg-1' },
+      ],
     });
 
     const { GET } = await import('@/app/api/platform/projects/[platformProjectId]/dashboard/route');
@@ -89,6 +96,9 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.platformProject.name).toBe('Acme');
     expect(body.checkion?.scanCount).toBe(3);
     expect(body.audion?.personaCount).toBe(2);
+    expect(body.audion?.targetGroupCount).toBe(1);
+    expect(body.audion?.targetGroups).toHaveLength(1);
+    expect(body.audion?.personas[0]?.name).toBe('Alex');
     expect(body.links.audionProject).toContain('platformCompanyId=c1');
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
   });
@@ -141,6 +151,9 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.audion).toEqual({
       externalProjectId: 'proj-test3-ms8ysh2m',
       personaCount: 0,
+      targetGroupCount: 0,
+      targetGroups: [],
+      personas: [],
     });
     expect(body.checkion).toBeNull();
     expect(body.links.audionProject).toContain('platformProjectHint=p1');

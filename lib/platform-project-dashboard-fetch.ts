@@ -13,10 +13,40 @@ export type CheckionProjectSummary = {
   scanCount: number;
 };
 
+export type AudionCatalogTargetGroup = {
+  id: string;
+  name: string;
+  segment: string;
+  personaCount: number;
+  status: string;
+};
+
+export type AudionCatalogPersona = {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  targetGroupId?: string | null;
+};
+
 export type AudionProjectSummary = {
   externalProjectId: string;
   personaCount: number;
+  targetGroupCount: number;
+  targetGroups: AudionCatalogTargetGroup[];
+  personas: AudionCatalogPersona[];
 };
+
+function normalizeAudionSummary(data: AudionProjectSummary): AudionProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  return {
+    externalProjectId: data.externalProjectId,
+    personaCount: Number(data.personaCount) || 0,
+    targetGroupCount: Number(data.targetGroupCount) || 0,
+    targetGroups: Array.isArray(data.targetGroups) ? data.targetGroups : [],
+    personas: Array.isArray(data.personas) ? data.personas : [],
+  };
+}
 
 async function readJson<T>(response: Response): Promise<T | null> {
   const text = await response.text();
@@ -71,6 +101,5 @@ export async function fetchAudionPlatformProjectSummary(
   });
   if (!response.ok) return null;
   const data = await readJson<AudionProjectSummary>(response);
-  if (!data?.externalProjectId) return null;
-  return data;
+  return data ? normalizeAudionSummary(data) : null;
 }
