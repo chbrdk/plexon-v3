@@ -27,13 +27,32 @@
       "@/*": [
         "./*"
       ],
+      "@msqdx/ui": [
+        "./lib/msqdx-ui.ts"
+      ],
+      "@msqdx/ui-shell": [
+        "./lib/msqdx-ui-shell.ts"
+      ],
       "@msqdx/react": [
-        "../msqdx-design-system/packages/react/src/index.ts",
-        "./node_modules/@msqdx/react"
+        "./lib/msqdx-react-bridge/index.ts"
       ],
       "@msqdx/tokens": [
-        "../msqdx-design-system/packages/tokens/src/index.ts",
-        "./node_modules/@msqdx/tokens"
+        "./lib/msqdx-tokens-shim.ts"
+      ],
+      "@mui/material": [
+        "./lib/mui-shim.tsx"
+      ],
+      "@mui/material/Popper": [
+        "./lib/mui-subpath-shims.ts"
+      ],
+      "@mui/material/Toolbar": [
+        "./lib/mui-subpath-shims.ts"
+      ],
+      "@mui/material/Snackbar": [
+        "./lib/mui-subpath-shims.ts"
+      ],
+      "@mui/material/Slider": [
+        "./lib/mui-subpath-shims.ts"
       ]
     }
   },

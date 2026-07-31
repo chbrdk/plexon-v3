@@ -16,11 +16,8 @@
     "generate:ecosystem-pptx": "node scripts/generate-plexon-ecosystem-pptx.mjs"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@msqdx/react": "file:../MSQDX-DS/msqdx-design-system/packages/react",
-    "@msqdx/tokens": "file:../MSQDX-DS/msqdx-design-system/packages/tokens",
-    "@mui/material": "^7.3.5",
+    "@msqdx/ui": "file:../msqdx-ui/packages/ui",
+    "@msqdx/ui-tokens": "file:../msqdx-ui/packages/ui-tokens",
     "@react-pdf/renderer": "^4.5.1",
     "@xyflow/react": "^12.10.1",
     "bcryptjs": "^3.0.3",
@@ -41,6 +38,9 @@
     "nodemailer": "^7.0.13"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
@@ -50,6 +50,7 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "jsdom": "^26.1.0",
     "pdf-lib": "^1.17.1",
     "tsx": "^4.19.2",
     "typescript": "5.9.3",

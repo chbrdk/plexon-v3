@@ -1,81 +1,78 @@
-# PLEXON – Docker image for Coolify/self-hosted deployment.
-# Build: docker build -t plexon .
-# Run:   docker run -p 3000:3000 -e AUTH_SECRET=... -e DATABASE_URL=... plexon
-# Port 3000 = Next.js default. Mit DATABASE_URL wird beim Start drizzle-kit push ausgeführt.
-# Optional: MIGRATION_MSQDX_PLATFORM_PROJECTS → Plattform-Projekte msqdx (CHECKION-User-Migration nur manuell, nicht im Entrypoint).
+# PLEXON v3 – Docker image for Coolify / self-hosted.
+# Context: repository root (plexon-v3).
+# Sibling design system: clones github.com/chbrdk/msqdx-ui so webpack aliases resolve.
+# Coolify: Dockerfile path `Dockerfile`, domain https://plexon-v3.projects-a.plygrnd.tech
 
 ARG NODE_IMAGE=node:22-bookworm-slim
 
 # ---- Base ----
 FROM ${NODE_IMAGE} AS base
-WORKDIR /app
+WORKDIR /workspace
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack enable
 
-# ---- Design system (file:../msqdx-design-system must resolve in /app) ----
-# Klont den angegebenen Branch (default: main). Wenn Prismion/Board-Komponenten auf einem anderen Branch sind:
-#   docker build --build-arg DESIGN_SYSTEM_BRANCH=develop -t plexon .
-FROM base AS deps
-ARG DESIGN_SYSTEM_REPO=https://github.com/chbrdk/msqdx-design-system.git
-ARG DESIGN_SYSTEM_BRANCH=main
-RUN git clone --depth 1 -b "${DESIGN_SYSTEM_BRANCH}" "${DESIGN_SYSTEM_REPO}" /msqdx-design-system \
-    && cd /msqdx-design-system && npm install && npm run build
+# ---- Design system (msqdx-ui + legacy prismion for board) ----
+FROM base AS ds
+ARG MSQDX_UI_REPO=https://github.com/chbrdk/msqdx-ui.git
+ARG MSQDX_UI_BRANCH=main
+ARG MSQDX_DS_REPO=https://github.com/chbrdk/msqdx-design-system.git
+ARG MSQDX_DS_BRANCH=main
+RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/msqdx-ui \
+    && cd /workspace/msqdx-ui \
+    && pnpm install --frozen-lockfile \
+    && pnpm build \
+    && git clone --depth 1 -b "${MSQDX_DS_BRANCH}" "${MSQDX_DS_REPO}" /workspace/msqdx-design-system \
+    && cd /workspace/msqdx-design-system \
+    && npm install \
+    && npm run build
 
 # ---- Builder ----
 FROM base AS builder
-# Install must include devDependencies (typescript, @types/*) for `next build` typecheck.
-# Do not rely on Next.js auto-installing TypeScript at build time — that extra `npm install` often fails
-# in CI (network, timeouts, exit 255) when NODE_ENV=production would omit devDependencies.
 ENV NODE_ENV=development
-COPY --from=deps /msqdx-design-system /msqdx-design-system
-# So file:../MSQDX-DS/msqdx-design-system resolves when we npm install in this stage
-RUN mkdir -p /MSQDX-DS && ln -snf /msqdx-design-system /MSQDX-DS/msqdx-design-system
-COPY package.json package-lock.json* ./
-COPY . .
+COPY --from=ds /workspace/msqdx-ui /workspace/msqdx-ui
+COPY . /workspace/plexon-v3
+WORKDIR /workspace/plexon-v3
 
-# Install deps in builder so node_modules is fresh (avoids stale cache from deps stage).
-# npm ci is reproducible; .npmrc relaxes optional peer conflicts; --no-audit/--no-fund reduces CI noise and edge failures.
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --ignore-scripts --no-audit --no-fund
-# Replace @msqdx symlinks with built package content so webpack resolves @msqdx/react
-RUN cd /msqdx-design-system && npm run build \
-  && mkdir -p ./node_modules/@msqdx \
-  && rm -rf ./node_modules/@msqdx/react ./node_modules/@msqdx/tokens \
-  && cp -r /msqdx-design-system/packages/react ./node_modules/@msqdx/react \
-  && cp -r /msqdx-design-system/packages/tokens ./node_modules/@msqdx/tokens \
-  && test -f ./node_modules/@msqdx/react/dist/index.d.ts \
-  && test -f ./node_modules/@msqdx/tokens/dist/index.d.ts \
-  && test -f /msqdx-design-system/packages/react/src/index.ts
-ENV DS_BASE=../MSQDX-DS/msqdx-design-system
+
+RUN test -d /workspace/msqdx-ui/packages/ui/src \
+    && test -f /workspace/msqdx-ui/packages/ui-tokens/dist/index.js \
+    && test -f /workspace/msqdx-design-system/packages/react/src/index.ts
+
+ENV MSQDX_UI_BASE=../msqdx-ui
 ENV NODE_ENV=production
-# Next "Collecting build traces" can be memory-heavy on small build workers
 ENV NODE_OPTIONS=--max-old-space-size=6144
 RUN npm run build
 
 # ---- Runner ----
 FROM ${NODE_IMAGE} AS runner
-WORKDIR /app
+WORKDIR /workspace/plexon-v3
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV MSQDX_UI_BASE=../msqdx-ui
 EXPOSE 3000
 
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-
-COPY --from=builder /app/lib ./lib
-COPY --from=builder /app/drizzle.config.ts ./
-COPY --from=builder /app/tsconfig.json ./
-COPY --from=builder /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
-COPY --from=builder /app/scripts/check-database-url.mjs ./scripts/check-database-url.mjs
-COPY --from=builder /app/scripts/migrate-checkion-users-to-plexon.mjs ./scripts/migrate-checkion-users-to-plexon.mjs
-COPY --from=builder /app/scripts/migrate-product-projects-to-msqdx-company.mjs ./scripts/migrate-product-projects-to-msqdx-company.mjs
+COPY --from=builder /workspace/plexon-v3/public ./public
+COPY --from=builder /workspace/plexon-v3/.next ./.next
+COPY --from=builder /workspace/plexon-v3/node_modules ./node_modules
+COPY --from=builder /workspace/plexon-v3/package.json ./
+COPY --from=builder /workspace/plexon-v3/lib ./lib
+COPY --from=builder /workspace/plexon-v3/drizzle.config.ts ./
+COPY --from=builder /workspace/plexon-v3/tsconfig.json ./
+COPY --from=builder /workspace/plexon-v3/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
+COPY --from=builder /workspace/plexon-v3/scripts/check-database-url.mjs ./scripts/check-database-url.mjs
+COPY --from=builder /workspace/plexon-v3/scripts/migrate-checkion-users-to-plexon.mjs ./scripts/migrate-checkion-users-to-plexon.mjs
+COPY --from=builder /workspace/plexon-v3/scripts/migrate-product-projects-to-msqdx-company.mjs ./scripts/migrate-product-projects-to-msqdx-company.mjs
+COPY --from=builder /workspace/msqdx-ui /workspace/msqdx-ui
+COPY --from=builder /workspace/msqdx-design-system /workspace/msqdx-design-system
 RUN chmod +x ./scripts/docker-entrypoint.sh ./scripts/check-database-url.mjs
 
 CMD ["./scripts/docker-entrypoint.sh"]

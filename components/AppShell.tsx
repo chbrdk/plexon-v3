@@ -1,107 +1,231 @@
-'use client';
+'use client'
 
-import type { ReactNode } from 'react';
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Box, IconButton, useMediaQuery, useTheme } from '@mui/material';
-import { MsqdxAppLayout, MsqdxIcon } from '@msqdx/react';
-import { Sidebar } from './Sidebar';
-import { BrandColorInitializer } from './settings/BrandColorInitializer';
-import { THEME_ACCENT_WITH_FALLBACK } from '@/lib/theme-accent';
-import { PATH_LOGIN, PATH_REGISTER } from '@/lib/constants';
+import React, { useMemo, useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { ReactNode } from 'react'
+import {
+  AppFrame,
+  BrandCorner,
+  MsqdxLogoMark,
+  NavRail,
+  PageTitle,
+  shellFrameStyle,
+  type RailDockEdge,
+} from '@/lib/msqdx-ui-shell'
+import { Avatar } from '@msqdx/ui'
+import {
+  NavIconAdmin,
+  NavIconAssistant,
+  NavIconBoard,
+  NavIconBolt,
+  NavIconOverview,
+  NavIconProducts,
+} from '@/components/nav-icons'
+import { BrandColorInitializer } from '@/components/settings/BrandColorInitializer'
+import { shellPaths } from '@/lib/shell-paths'
+import {
+  PATH_ADMIN,
+  PATH_ASSISTANT,
+  PATH_BOARD,
+  PATH_EVENT_QUICK_CHECK,
+  PATH_FORGOT_PASSWORD,
+  PATH_HOME,
+  PATH_LOGIN,
+  PATH_PRODUCTS,
+  PATH_REGISTER,
+  PATH_RESET_PASSWORD,
+  PATH_SETTINGS,
+} from '@/lib/constants'
+import { USER_ROLE } from '@/lib/db/schema'
+import { useI18n } from '@/components/i18n/I18nProvider'
 
-const AUTH_PATHS = [PATH_LOGIN, PATH_REGISTER];
+const AUTH_PATHS = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD]
 
-export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [mobileNavOpen, setMobileNavOpen] = useState(true);
-  const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(p + '/'));
+const TITLE_BY_PREFIX: Array<{ prefix: string; titleKey: string }> = [
+  { prefix: PATH_ADMIN, titleKey: 'nav.adminConsole' },
+  { prefix: PATH_ASSISTANT, titleKey: 'nav.assistant' },
+  { prefix: PATH_EVENT_QUICK_CHECK, titleKey: 'nav.eventQuickCheck' },
+  { prefix: PATH_PRODUCTS, titleKey: 'nav.products' },
+  { prefix: PATH_BOARD, titleKey: 'nav.board' },
+  { prefix: PATH_SETTINGS, titleKey: 'nav.settings' },
+  { prefix: '/projects', titleKey: 'nav.products' },
+]
+
+export function AppShell({
+  children,
+  title,
+  titleHref,
+  titleTone = 'default',
+  description,
+  leading,
+  actions,
+  status,
+}: {
+  children: ReactNode
+  title?: string | null
+  titleHref?: string
+  titleTone?: 'default' | 'context'
+  description?: string
+  leading?: ReactNode
+  actions?: ReactNode
+  status?: ReactNode
+}) {
+  const pathname = usePathname()
+  const { t } = useI18n()
+  const { data: session } = useSession()
+  const [railEdge, setRailEdge] = useState<RailDockEdge>(shellPaths.railDockEdge)
+
+  const viewerRole = (session?.user as { role?: string } | undefined)?.role ?? null
+  const isAdmin = viewerRole === USER_ROLE.ADMIN
+  const displayName =
+    session?.user?.name?.trim() ||
+    session?.user?.email?.trim() ||
+    shellPaths.defaultDisplayName
+
+  const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
+
+  const frameStyle = useMemo(
+    () =>
+      shellFrameStyle({
+        railInsetRem: shellPaths.railInsetRem,
+        railGapRem: shellPaths.railGapRem,
+        railWidthRem: shellPaths.railWidthRem,
+        mainGutterRem: shellPaths.mainGutterRem,
+      }),
+    [],
+  )
+
+  function isActive(href: string): boolean {
+    if (href === PATH_HOME) return pathname === href
+    return Boolean(pathname?.startsWith(href))
+  }
+
+  const resolvedTitle =
+    title ??
+    TITLE_BY_PREFIX.find((entry) =>
+      entry.prefix === PATH_HOME ? pathname === PATH_HOME : pathname?.startsWith(entry.prefix),
+    )?.titleKey ??
+    (pathname === PATH_HOME ? 'nav.dashboard' : null)
+
+  const titleLabel =
+    resolvedTitle == null
+      ? null
+      : resolvedTitle.startsWith('nav.') || resolvedTitle.includes('.')
+        ? t(resolvedTitle)
+        : resolvedTitle
 
   if (isAuthPage) {
-    return <>{children}</>;
+    return <>{children}</>
   }
+
+  const primaryNav = [
+    {
+      id: 'home',
+      href: PATH_HOME,
+      label: t('nav.dashboard'),
+      icon: <NavIconOverview />,
+    },
+    {
+      id: 'assistant',
+      href: PATH_ASSISTANT,
+      label: t('nav.assistant'),
+      icon: <NavIconAssistant />,
+    },
+    {
+      id: 'event-quick-check',
+      href: PATH_EVENT_QUICK_CHECK,
+      label: t('nav.eventQuickCheck'),
+      icon: <NavIconBolt />,
+    },
+    {
+      id: 'products',
+      href: PATH_PRODUCTS,
+      label: t('nav.products'),
+      icon: <NavIconProducts />,
+    },
+    ...(isAdmin
+      ? [
+          {
+            id: 'board',
+            href: PATH_BOARD,
+            label: t('nav.board'),
+            icon: <NavIconBoard />,
+          },
+          {
+            id: 'admin',
+            href: PATH_ADMIN,
+            label: t('nav.adminConsole'),
+            icon: <NavIconAdmin />,
+          },
+        ]
+      : []),
+  ]
+
+  const titleNode =
+    titleLabel != null && titleLabel !== '' ? (
+      titleTone === 'context' ? (
+        <PageTitle className="plexon-page-title--context">{titleLabel}</PageTitle>
+      ) : (
+        <PageTitle>{titleLabel}</PageTitle>
+      )
+    ) : null
+
+  const brandContent =
+    leading ??
+    (titleNode && titleHref ? (
+      <Link href={titleHref} className="plexon-page-title-link">
+        {titleNode}
+      </Link>
+    ) : (
+      titleNode
+    ))
 
   return (
     <>
       <BrandColorInitializer />
-      <MsqdxAppLayout
-        appName="PLEXON"
-        logo={true}
-        borderWidth="thin"
-        borderRadius="2xl"
-        innerBackground="offwhite"
-        sidebar={<Sidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />}
-        sx={{
-          '& > div:last-of-type': {
-            backgroundColor: `${THEME_ACCENT_WITH_FALLBACK.backgroundColor} !important`,
-          },
-          '& > div:last-of-type > div': {
-            borderColor: `${THEME_ACCENT_WITH_FALLBACK.borderColor} !important`,
-          },
-          '& > div:last-of-type > div > div:last-of-type': {
-            position: 'relative',
-            top: 'auto',
-            left: 'auto',
-            flex: 1,
-            minHeight: 0,
-          },
-          '& > div:last-of-type > div > div:first-of-type': {
-            position: 'absolute !important',
-            top: 0,
-            left: 0,
-            zIndex: 100000,
-            backgroundColor: 'transparent !important',
-            color: 'var(--color-theme-accent-contrast, #ffffff) !important',
-          },
-          '& > div:last-of-type > div > div:first-of-type *': {
-            color: 'inherit !important',
-          },
-          '& > div:last-of-type > div > div:first-of-type > div': {
-            backgroundColor: `${THEME_ACCENT_WITH_FALLBACK.backgroundColor} !important`,
-          },
-          '& > div:last-of-type > div > div:first-of-type svg': {
-            fill: 'currentColor',
-          },
-        }}
+      <AppFrame
+        railEdge={railEdge}
+        style={frameStyle}
+        rail={
+          <NavRail
+            dockable
+            dockStorageKey={shellPaths.railDockStorageKey}
+            defaultDockEdge={shellPaths.railDockEdge}
+            onDockEdgeChange={setRailEdge}
+            logo={<MsqdxLogoMark size={26} title="MSQ DX" />}
+            logoLabel="PLEXON home"
+            linkComponent={Link}
+            items={primaryNav.map((item) => ({ ...item, active: isActive(item.href) }))}
+            footerItems={[
+              {
+                id: 'settings',
+                label: t('nav.settings'),
+                href: PATH_SETTINGS,
+                active: isActive(PATH_SETTINGS),
+                ariaLabel: t('nav.settings'),
+                icon: <Avatar name={displayName} size="sm" className="rail-avatar" />,
+              },
+            ]}
+          />
+        }
+        brandCorner={<BrandCorner label="PLEXON" />}
+        topbar={
+          <>
+            <div className="topbar-brand">{brandContent}</div>
+            <div className="topbar-right">
+              {status}
+              {actions}
+            </div>
+          </>
+        }
       >
-        <Box
-          data-plexon-content
-          sx={{
-            position: 'relative',
-            flex: 1,
-            minHeight: 0,
-            minWidth: 0,
-            overflow: 'hidden',
-            color: 'var(--color-text-on-light)',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {children as React.ReactNode}
-        </Box>
-      </MsqdxAppLayout>
-      {isMobile && !mobileNavOpen && (
-        <IconButton
-          onClick={() => setMobileNavOpen(true)}
-          aria-label="Menü öffnen"
-          sx={{
-            position: 'fixed',
-            top: 12,
-            left: 12,
-            zIndex: 1100,
-            backgroundColor: THEME_ACCENT_WITH_FALLBACK.backgroundColor,
-            color: 'var(--color-theme-accent-contrast, #fff)',
-            '&:hover': {
-              backgroundColor: THEME_ACCENT_WITH_FALLBACK.backgroundColor,
-              filter: 'brightness(1.1)',
-            },
-          }}
-        >
-          <MsqdxIcon name="menu" customSize={24} />
-        </IconButton>
-      )}
+        {description ? <p className="plexon-page-lead">{description}</p> : null}
+        <div className="plexon-stage" data-plexon-content>
+          {children}
+        </div>
+      </AppFrame>
     </>
-  );
+  )
 }

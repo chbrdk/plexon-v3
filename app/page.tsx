@@ -722,7 +722,7 @@ export default function DashboardPage() {
   const notConfigured = error && (error.includes('not configured') || error.includes('nicht konfiguriert') || error.includes('Database not configured'));
 
   return (
-    <Box sx={{ p: 'var(--msqdx-spacing-md)', maxWidth: 1400, mx: 'auto' }}>
+    <Box className="plexon-magazine" sx={{ maxWidth: 1400, mx: 'auto' }}>
       <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }}>
         <MsqdxTypography variant="h4" sx={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
           {t('dashboard.title')}

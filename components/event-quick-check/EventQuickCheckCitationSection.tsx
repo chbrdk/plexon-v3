@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Chip, IconButton, Stack, Typography } from '@mui/material';
 import { MsqdxIcon } from '@msqdx/react';
-import { MSQDX_SPACING, MSQDX_THEME, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
-import { alpha } from '@mui/material/styles';
+import { MSQDX_SPACING, MSQDX_THEME, MSQDX_TYPOGRAPHY } from '@msqdx/tokens'
 import { EventQuickCheckCitationCompetitorChart } from '@/components/event-quick-check/EventQuickCheckCitationCompetitorChart';
 import { EventQuickCheckGeoBarChart } from '@/components/event-quick-check/EventQuickCheckGeoBarChart';
 import { EventQuickCheckLlmAnswerDialog } from '@/components/event-quick-check/EventQuickCheckLlmAnswerDialog';
@@ -107,7 +106,7 @@ export function EventQuickCheckCitationSection({
   if (!activeSlice || (!competitorChart && !simpleChart)) return null;
 
   const borderColor = MSQDX_THEME.light.border.default;
-  const headerBg = alpha(MSQDX_THEME.light.text.primary, 0.03);
+  const headerBg = `color-mix(in srgb, ${MSQDX_THEME.light.text.primary} 3%, transparent)`
 
   return (
     <>
@@ -182,7 +181,7 @@ export function EventQuickCheckCitationSection({
                   cursor: 'pointer',
                 },
                 '& tbody tr:hover td': {
-                  bgcolor: alpha(MSQDX_THEME.light.text.primary, 0.04),
+                  bgcolor: `color-mix(in srgb, ${MSQDX_THEME.light.text.primary} 4%, transparent)`,
                 },
               }}
             >

@@ -1,4 +1,228 @@
-/* MSQDX Design Token CSS variables – align with CHECKION/AUDION */
+@import '../../msqdx-ui/packages/ui/src/styles.css';
+
+/* Fill the stage next to the rail — no artificial content column cap */
+.app-main {
+  max-width: none;
+  width: 100%;
+}
+
+.plexon-stage {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.plexon-page-lead {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  font-size: var(--type-sm);
+  line-height: 1.45;
+  max-width: 42rem;
+}
+
+.plexon-page-title-link {
+  display: inline-flex;
+  max-width: min(28rem, 100%);
+  color: inherit;
+  text-decoration: none;
+}
+
+.ds-page-title.page-title.plexon-page-title--context {
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--track-tight, -0.01em);
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+/* Auth surfaces (outside AppShell) */
+.plexon-auth {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4, 1.25rem);
+  background: var(--bg0);
+  color: var(--fg);
+}
+
+.plexon-auth-panel {
+  width: min(24rem, 100%);
+  display: grid;
+  gap: var(--space-3, 0.85rem);
+}
+
+.plexon-auth-lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--type-sm);
+  line-height: 1.45;
+}
+
+.plexon-auth-error {
+  margin: 0;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--danger, #e11) 18%, transparent);
+  color: var(--fg);
+  font-size: var(--type-sm);
+}
+
+.plexon-auth-links {
+  margin: 0;
+  font-size: var(--type-sm);
+  color: var(--muted);
+}
+
+.plexon-auth-links a {
+  color: inherit;
+  font-weight: var(--weight-semibold, 600);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.plexon-magazine {
+  display: grid;
+  gap: var(--space-5, 1.5rem);
+  width: 100%;
+  max-width: none;
+}
+
+.plexon-magazine-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: var(--space-3, 0.85rem);
+}
+
+.plexon-magazine-card {
+  display: grid;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.85rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel, 12px);
+  background: color-mix(in srgb, var(--bg1, var(--bg0)) 88%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+
+.plexon-magazine-card:hover {
+  border-color: var(--accent);
+}
+
+.plexon-chat-bubble {
+  animation: plexon-chat-bubble-enter 280ms ease;
+}
+
+.plexon-chat-bubble-text {
+  animation: plexon-chat-text-fade 220ms ease;
+}
+
+.plexon-chat-bubble-label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: var(--type-xs);
+}
+
+@keyframes plexon-chat-bubble-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes plexon-chat-text-fade {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+.plexon-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg0) 55%, transparent);
+  padding: var(--space-4, 1rem);
+}
+
+.plexon-dialog {
+  width: min(32rem, 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel, 12px);
+  background: var(--bg1, var(--bg0));
+  color: var(--fg);
+  padding: var(--space-4, 1rem);
+}
+
+.plexon-dialog-title {
+  margin: 0 0 0.75rem;
+  font-size: var(--type-md);
+}
+
+.plexon-dialog-content {
+  display: grid;
+  gap: var(--space-3, 0.75rem);
+}
+
+.plexon-admin-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plexon-admin-subnav__link {
+  text-decoration: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--type-sm);
+  font-weight: var(--weight-medium, 500);
+  border: 1px solid var(--line);
+  color: var(--fg);
+}
+
+.plexon-linear-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+.plexon-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  animation: plexon-spin 0.8s linear infinite;
+}
+
+@keyframes plexon-spin {
+  to { transform: rotate(360deg); }
+}
+
+.plexon-divider {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.75rem 0;
+}
+
+.plexon-auth-brand-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.plexon-auth-brand-swatch {
+  width: 1.1rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Legacy token bridge during surface cutover (brand accent / assistant) */
 :root {
   --msqdx-radius-xs: 4px;
   --msqdx-radius-sm: 8px;
