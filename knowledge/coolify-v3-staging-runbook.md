@@ -17,7 +17,7 @@ Dieses Dokument ist die operative Anleitung für die **v3-Parallelinsel**. Platz
 | `DOMAIN_ROOT` | `projects-a.plygrnd.tech` |
 | `URL_PLEXON_V3` | `https://plexon-v3.projects-a.plygrnd.tech` |
 | `URL_AUDION_V3` | `https://audion-v3.projects-a.plygrnd.tech` |
-| `URL_CHECKION_V3` | `https://checkion-v3.projects-a.plygrnd.tech` (später) |
+| `URL_CHECKION_V3` | `https://checkion-v3.projects-a.plygrnd.tech` |
 | `URL_ECHON_V3` | `https://echon-v3.projects-a.plygrnd.tech` (später) |
 | GitHub `REPO_AUDION_V3` | `audion-v3` Repo |
 | Branch AUDION-v3 | `main` |
@@ -37,7 +37,7 @@ Team: msqdx
         ├── DB: plexon-v3-postgres
         ├── App: plexon-v3
         ├── App: audion-v3-web           ← Phase 1b
-        ├── (later) checkion-v3-…
+        ├── App: checkion-v3             ← Wave B (fixtures Staging Shell)
         └── (later) echon-v3-…
 ```
 
@@ -125,7 +125,7 @@ Quelle: `PLEXON/.env.example` + `knowledge/coolify-env-variablen.md` (nur v3-rel
 | `CHECKION_DATABASE_URL` / `AUDION_DATABASE_URL` | würden auf v2 zeigen oder fehlen — kein Cross-Env |
 | `MIGRATION_MSQDX_PLATFORM_PROJECTS` | einmalig, nie auto auf Staging-Blank |
 | `CHECKION_API_URL` / `AUDION_API_URL` + Tokens | erst wenn v3-Product-APIs existieren |
-| `NEXT_PUBLIC_AUDION_ADMIN_URL` / `NEXT_PUBLIC_CHECKION_URL` | erst auf **v3**-URLs setzen (`URL_AUDION_V3`, …) — nicht Prod |
+| `NEXT_PUBLIC_AUDION_ADMIN_URL` / `NEXT_PUBLIC_CHECKION_URL` | Wave A: nicht setzen (oder nur wenn Product-App schon da). **Wave B:** nach checkion-v3 smoke auf `URL_CHECKION_V3` (`https://checkion-v3.projects-a.plygrnd.tech`) setzen — Registry / Collection deep-links auf v3, nie Prod-CHECKION |
 
 ### 4.4 Build (Dockerfile)
 

@@ -224,6 +224,10 @@ export const API_SERVICES_AUDION_STATUS = '/api/services/audion/status';
 export const API_PLATFORM_PROVISIONING_AUDION_PROJECT_ORIGIN =
   '/api/platform/provisioning/audion-project-origin';
 
+/** Service-authenticated: CHECKION created a project first; PLEXON registers platform row + AUDION mirror. */
+export const API_PLATFORM_PROVISIONING_CHECKION_PROJECT_ORIGIN =
+  '/api/platform/provisioning/checkion-project-origin';
+
 /** Usage (tokens) for current user. */
 export const API_USAGE = '/api/usage';
 
