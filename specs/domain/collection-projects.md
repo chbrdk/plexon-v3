@@ -24,7 +24,7 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 1. Every **new** project is created as a PLEXON `platform_projects` Collection.
 2. Create always ensures bindings for **checkion** and **audion**, then syncs **both**. Missing/failing sync → `pending` / `failed`, not a product-only project.
 3. User copy never says “Audion project” / “Checkion project” as a type. Prefer “Projekt” + capability labels.
-4. Product UIs stay product-local (surface ownership unchanged); deep links always carry Collection context (`platformProjectId` / company hint) when available.
+4. Product UIs stay product-local (surface ownership unchanged); deep links always carry Collection context (`platformProjectId` / company hint) when available. Cross-product capability handoff (e.g. AUDION explore URL → CHECKION `mode: single` scan) stays product-local APIs + bindings — see audion-v3 `specs/domain/checkion-single-scan-trigger.md` / checkion-v3 `specs/domain/audion-journey-scan-trigger.md`.
 5. Access is Collection-scoped (`user_platform_project_assignments`), then expanded to product assignments via bindings.
 6. **Insights list Collections only** — no synthetic product-only cards (v3 fresh DB).
 

@@ -10,6 +10,7 @@
 - Default app port: `3334` (local) · Coolify/Docker: `3000`
 - Public staging URL: `https://plexon-v3.projects-a.plygrnd.tech`
 - Companion: `https://audion-v3.projects-a.plygrnd.tech`
+- CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - Federation contract: `2026-05-plexon-federation-v3`
 - Rail dock storage key: `plexon.v3.railDock`
 - Default theme: `msqdx-dark` (`data-theme` on `<html>`)
