@@ -21,7 +21,7 @@ import type {
   SelectHTMLAttributes,
 } from 'react'
 import type React from 'react'
-import { Alert as DsAlert } from '@msqdx/ui'
+import { Alert as DsAlert, buttonClassName } from '@msqdx/ui'
 import { Box, Stack } from '@/components/ui/layout'
 
 export { Box, Stack }
@@ -283,7 +283,12 @@ export function IconButton({
   ...rest
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { sx?: SxProps; size?: string }) {
   return (
-    <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" style={mergeSx(sx, style)} {...rest}>
+    <button
+      type="button"
+      className={buttonClassName({ variant: 'ghost', size: 'sm' })}
+      style={mergeSx(sx, style)}
+      {...rest}
+    >
       {children}
     </button>
   )
@@ -434,9 +439,14 @@ export function Tooltip({ title, children }: { title?: ReactNode; children: Reac
 
 export function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string; size?: string; sx?: SxProps }) {
   const { sx, style, children, size, ...rest } = props
-  const sizeClass = size === 'small' ? 'ds-btn--sm' : size === 'large' ? 'ds-btn--lg' : undefined
+  const sizeToken = size === 'small' ? 'sm' : size === 'large' ? 'lg' : 'md'
   return (
-    <button type="button" className={['ds-btn', 'ds-btn--primary', sizeClass].filter(Boolean).join(' ')} style={mergeSx(sx, style)} {...rest}>
+    <button
+      type="button"
+      className={buttonClassName({ variant: 'primary', size: sizeToken })}
+      style={mergeSx(sx, style)}
+      {...rest}
+    >
       {children}
     </button>
   )

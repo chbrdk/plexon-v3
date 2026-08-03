@@ -110,9 +110,9 @@ export type MsqdxIconButtonProps = {
 
 export function MsqdxIconButton({ sx, style, children, size: _size, ...rest }: MsqdxIconButtonProps) {
   return (
-    <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" style={sxStyle(sx, style)} {...rest}>
+    <Button variant="ghost" size="sm" style={sxStyle(sx, style)} {...rest}>
       {children}
-    </button>
+    </Button>
   )
 }
 
@@ -157,29 +157,29 @@ export function MsqdxPrismionToolbar({
   return (
     <div className="plexon-prismion-toolbar" role="toolbar">
       {onColorClick ? (
-        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onColorClick} aria-label="Color">
+        <Button type="button" variant="ghost" size="sm" onClick={onColorClick} aria-label="Color">
           color
-        </button>
+        </Button>
       ) : null}
       {onBranch ? (
-        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onBranch} aria-label="Branch">
+        <Button type="button" variant="ghost" size="sm" onClick={onBranch} aria-label="Branch">
           branch
-        </button>
+        </Button>
       ) : null}
       {onMerge ? (
-        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onMerge} aria-label="Merge">
+        <Button type="button" variant="ghost" size="sm" onClick={onMerge} aria-label="Merge">
           merge
-        </button>
+        </Button>
       ) : null}
       {onLockToggle ? (
-        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onLockToggle} aria-label="Lock">
+        <Button type="button" variant="ghost" size="sm" onClick={onLockToggle} aria-label="Lock">
           lock
-        </button>
+        </Button>
       ) : null}
       {onDelete ? (
-        <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm" onClick={onDelete} aria-label="Delete">
+        <Button type="button" variant="ghost" size="sm" onClick={onDelete} aria-label="Delete">
           delete
-        </button>
+        </Button>
       ) : null}
     </div>
   )

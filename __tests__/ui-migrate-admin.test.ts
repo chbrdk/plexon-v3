@@ -30,11 +30,11 @@ describe('admin ui rebuild (wave 4)', () => {
     }
   })
 
-  it('overview uses SectionChrome and StatLede', () => {
+  it('overview uses SectionChrome and Lede', () => {
     const page = readFileSync(path.join(root, 'app/admin/page.tsx'), 'utf8')
     expect(page).toContain("from '@msqdx/ui'")
     expect(page).toContain('SectionChrome')
-    expect(page).toContain('StatLede')
+    expect(page).toContain('Lede')
     expect(page).toContain('API_ADMIN_COMPANIES')
     expect(page).toContain('API_ADMIN_USERS')
   })

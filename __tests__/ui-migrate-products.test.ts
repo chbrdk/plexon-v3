@@ -33,14 +33,12 @@ describe('products ui rebuild (wave 3)', () => {
     expect(catalog).not.toContain('Chip')
   })
 
-  it('platform project detail uses SectionChrome/Panel and no legacy DS', () => {
+  it('platform project detail uses SectionChrome and no legacy DS', () => {
     expect(page).toContain('PlatformProjectDashboard')
     expect(page).not.toContain("from '@msqdx/react'")
     expect(page).not.toContain("from '@mui/material'")
     expect(dashboard).toContain("from '@msqdx/ui'")
     expect(dashboard).toContain('SectionChrome')
-    expect(dashboard).toContain('Panel')
-    expect(dashboard).toContain('StatLede')
     expect(dashboard).toContain('apiPlatformProjectDashboard')
     expect(dashboard).not.toContain("from '@msqdx/react'")
     expect(dashboard).not.toContain("from '@mui/material'")

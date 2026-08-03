@@ -480,11 +480,10 @@ export default function AdminCompanyDetailPage() {
                       >
                         {syncingId === p.id ? t('admin.syncing') : t('admin.syncProject')}
                       </Button>
-                      <NextLink
-                        href={pathPlatformProjectDashboard(p.id)}
-                        className="ds-btn ds-btn--ghost ds-btn--sm"
-                      >
-                        {t('admin.projectDashboard')}
+                      <NextLink href={pathPlatformProjectDashboard(p.id)}>
+                        <Button variant="ghost" size="sm">
+                          {t('admin.projectDashboard')}
+                        </Button>
                       </NextLink>
                       <Button variant="danger" size="sm" onClick={() => void deleteProject(p.id)}>
                         {t('admin.deleteProject')}

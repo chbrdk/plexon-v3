@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import NextLink from 'next/link'
-import { SectionChrome, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
+import { Button, SectionChrome, Lede, LedeStrip, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_ADMIN_COMPANIES,
@@ -51,24 +51,24 @@ export default function AdminOverviewPage() {
           meta={<Text role="meta">{t('admin.overviewIntro')}</Text>}
         />
         {(stats.companies !== null || stats.users !== null) && (
-          <StatLedeGroup aria-label={t('admin.overviewStatsTitle')} columns={2}>
+          <LedeStrip aria-label={t('admin.overviewStatsTitle')} columns={2}>
             {stats.companies !== null ? (
-              <StatLede value={stats.companies} label={t('admin.navCompanies')} kind="number" />
+              <Lede value={stats.companies} label={t('admin.navCompanies')} kind="number" />
             ) : null}
             {stats.users !== null ? (
-              <StatLede value={stats.users} label={t('admin.navUsers')} kind="number" />
+              <Lede value={stats.users} label={t('admin.navUsers')} kind="number" />
             ) : null}
-          </StatLedeGroup>
+          </LedeStrip>
         )}
         <div className="plexon-settings-actions">
-          <NextLink href={PATH_ADMIN_COMPANIES} className="ds-btn ds-btn--primary ds-btn--sm">
-            {t('admin.goCompanies')}
+          <NextLink href={PATH_ADMIN_COMPANIES}>
+            <Button variant="primary">{t('admin.goCompanies')}</Button>
           </NextLink>
-          <NextLink href={PATH_ADMIN_USERS} className="ds-btn ds-btn--ghost ds-btn--sm">
-            {t('admin.goUsers')}
+          <NextLink href={PATH_ADMIN_USERS}>
+            <Button variant="ghost">{t('admin.goUsers')}</Button>
           </NextLink>
-          <NextLink href={PATH_HOME} className="ds-btn ds-btn--ghost ds-btn--sm">
-            {t('admin.goDashboard')}
+          <NextLink href={PATH_HOME}>
+            <Button variant="ghost">{t('admin.goDashboard')}</Button>
           </NextLink>
         </div>
       </section>

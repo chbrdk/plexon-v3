@@ -167,11 +167,10 @@ export default function AdminUsersPage() {
                     <td className="plexon-admin-mono">{u.id}</td>
                     <td className="plexon-admin-table__actions">
                       <div className="plexon-settings-actions plexon-admin-row-actions">
-                        <NextLink
-                          href={pathAdminUserEditOnDashboard(u.id)}
-                          className="ds-btn ds-btn--primary ds-btn--sm"
-                        >
-                          {t('admin.fullEdit')}
+                        <NextLink href={pathAdminUserEditOnDashboard(u.id)}>
+                          <Button variant="primary" size="sm">
+                            {t('admin.fullEdit')}
+                          </Button>
                         </NextLink>
                         <Button
                           variant="danger"

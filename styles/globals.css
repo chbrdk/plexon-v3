@@ -520,10 +520,10 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   margin-top: 0.35rem;
 }
 
-.plexon-collection-create-actions .ds-btn {
-  border-radius: 0;
-  min-height: 2.5rem;
-  padding: 0.55rem 1rem;
+.plexon-collection-create-actions > a,
+.plexon-settings-actions > a {
+  text-decoration: none;
+  display: inline-flex;
 }
 
 .plexon-collection-create--embedded {

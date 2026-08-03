@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import NextLink from 'next/link'
-import { Alert, SectionChrome, Spinner, Text } from '@msqdx/ui'
+import { Alert, Button, SectionChrome, Spinner, Text } from '@msqdx/ui'
 import { CollectionKnowledgeBand } from '@/components/products/CollectionKnowledgeBand'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
@@ -84,11 +84,10 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
         }
         action={
           data ? (
-            <NextLink
-              href={pathAssistantWithProject(data.platformProject.id)}
-              className="ds-btn ds-btn--ghost ds-btn--sm"
-            >
-              {t('projects.detail.openAssistant')}
+            <NextLink href={pathAssistantWithProject(data.platformProject.id)}>
+              <Button variant="ghost" size="sm">
+                {t('projects.detail.openAssistant')}
+              </Button>
             </NextLink>
           ) : null
         }

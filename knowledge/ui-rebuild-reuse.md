@@ -10,7 +10,7 @@ Plexon v3 must **compose** shared chrome, not fork a second design language.
 | Need | Export |
 |------|--------|
 | Shell | `AppFrame`, `NavRail`, `BrandCorner`, `PageTitle`, `MsqdxLogoMark`, `shellFrameStyle` |
-| Magazine | `SectionChrome`, `Panel`, `Text`, `StatLede`, `RankedList` |
+| Magazine | `SectionChrome`, `Panel`, `Text`, `Lede`, `RankedList` |
 | Forms | `Field`, `Input`, `Textarea`, `Select`, `Switch`, `ToggleGroup`, `Checkbox` |
 | Actions / feedback | `Button`, `Chip`, `Alert`, `Dialog`, `Spinner`, `EmptyState`, `LoadingText` |
 | Overlays | `Flyout`, `useFlyout` |

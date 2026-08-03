@@ -315,11 +315,10 @@ export default function AdminCompaniesPage() {
                         />
                       </td>
                       <td className="plexon-admin-table__actions">
-                        <NextLink
-                          href={pathAdminCompany(c.id)}
-                          className="ds-btn ds-btn--ghost ds-btn--sm"
-                        >
-                          {t('admin.open')}
+                        <NextLink href={pathAdminCompany(c.id)}>
+                          <Button variant="ghost" size="sm">
+                            {t('admin.open')}
+                          </Button>
                         </NextLink>
                       </td>
                     </tr>
