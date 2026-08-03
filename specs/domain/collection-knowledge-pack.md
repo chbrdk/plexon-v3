@@ -232,19 +232,19 @@ Empty Collection → pack created lazily on first GET (all facets empty / `brand
 
 ## Plexon visual / IA (Collection Knowledge surface)
 
-Surface lives on Collection detail `/projects/[id]` (`PlatformProjectDashboard`), magazine composition — dash-band shell, TOC, one facet tile at a time, structured `plexon-edit-dialog` editors. **Not** a separate purple “AI knowledge hub” landing.
+Surface lives on Collection detail `/projects/[id]` (`PlatformProjectDashboard`), magazine composition — dash-band shell, **unified TOC** (shared knowledge facets + CHECKION / AUDION / Links), one active tile at a time, structured `plexon-edit-dialog` editors. **Not** a separate purple “AI knowledge hub” landing.
 
 ### Composition (structure first)
 
-1. **Masthead** — Collection name (Identity), domain chip, capability sync chips (existing).
-2. **Knowledge band** — Display title e.g. “Collection knowledge” + revision meta; deck clarifies **Platform source of truth**.
-3. **Header AI** — “Fill project with AI” drafts all suggestable facets (preview → merge apply).
-4. **TOC** — facet jump links (uppercase hairline).
-5. **Active facet tile** — kicker Shared, title, dek, read body, actions: AI suggest / Edit / product deep-links.
+1. **Masthead** — Collection name (Identity), domain chip (existing SectionChrome).
+2. **Unified magazine band** — shared knowledge + capability catalogs in one TOC (`magazineTitle`).
+3. **Header AI** — “Fill project with AI” drafts all suggestable facets (preview → merge apply); shown when a knowledge facet is active.
+4. **TOC** — knowledge facets | CHECKION | AUDION | Links (uppercase hairline).
+5. **Active tile** — either Shared facet body or Capability-local catalog; product deep-links.
 6. **Edit** — structured Field/Input dialog (not raw JSON). `sources` editable; `brand` reserved EmptyState.
-7. **SoT vs local labels** — Pack facets badge **Shared**; deep links to Audion/Checkion remain capability-local.
+7. **SoT vs local labels** — Pack facets badge **Shared**; CHECKION/AUDION tiles badge **Capability**.
 8. **Empty states** — quiet magazine empty + AI suggest / manual edit CTAs. No fake Brandion copy.
-9. **Growth** — TOC is primary nav; one active facet tile (not Accordion card chrome).
+9. **Growth** — TOC is primary nav; one active tile (not Accordion card chrome).
 
 ### Permissions sketch
 

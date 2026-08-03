@@ -32,6 +32,16 @@ import {
   type SourcesData,
 } from '@/lib/collection-knowledge-pack'
 import type { KnowledgePackDrafts } from '@/lib/assistant/knowledge-pack/research-knowledge-pack'
+import type {
+  AudionProjectSummary,
+  CheckionProjectSummary,
+} from '@/lib/platform-project-dashboard-fetch'
+import {
+  AudionCapabilityView,
+  BindingsCapabilityView,
+  CheckionCapabilityView,
+  type CollectionBinding,
+} from '@/components/products/CollectionCapabilityViews'
 
 const EDITABLE_FACETS: KnowledgeFacetId[] = [
   'profile',
@@ -41,10 +51,22 @@ const EDITABLE_FACETS: KnowledgeFacetId[] = [
   'sources',
 ]
 
+type CapabilityNavId = 'checkion' | 'audion' | 'bindings'
+type MagazineNavId = KnowledgeFacetId | CapabilityNavId
+
+const CAPABILITY_NAV_IDS: CapabilityNavId[] = ['checkion', 'audion', 'bindings']
+
+function isKnowledgeFacetId(id: MagazineNavId): id is KnowledgeFacetId {
+  return (KNOWLEDGE_FACET_IDS as readonly string[]).includes(id)
+}
+
 type Props = {
   platformProjectId: string
   audionHref?: string | null
   checkionHref?: string | null
+  checkion?: CheckionProjectSummary | null
+  audion?: AudionProjectSummary | null
+  bindings?: CollectionBinding[]
 }
 
 type SuggestResponse = {
@@ -282,16 +304,30 @@ function formToProfile(f: ProfileForm, prev: ProfileData): ProfileData {
   }
 }
 
+function capabilityLabelKey(id: CapabilityNavId): string {
+  switch (id) {
+    case 'checkion':
+      return 'projects.detail.navCheckion'
+    case 'audion':
+      return 'projects.detail.navAudion'
+    case 'bindings':
+      return 'projects.detail.navBindings'
+  }
+}
+
 export function CollectionKnowledgeBand({
   platformProjectId,
   audionHref,
   checkionHref,
+  checkion = null,
+  audion = null,
+  bindings = [],
 }: Props) {
   const { t } = useI18n()
   const [pack, setPack] = useState<KnowledgePackResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [openFacet, setOpenFacet] = useState<KnowledgeFacetId | null>('profile')
+  const [openNav, setOpenNav] = useState<MagazineNavId>('profile')
   const [canEdit, setCanEdit] = useState(true)
 
   const [editing, setEditing] = useState<KnowledgeFacetId | null>(null)
@@ -335,11 +371,6 @@ export function CollectionKnowledgeBand({
       }
       const json = (await res.json()) as KnowledgePackResponse
       setPack(json)
-      const first =
-        KNOWLEDGE_FACET_IDS.find(
-          (id) => id !== 'brand' && !isFacetContentEmpty(id, json.facets[id].data)
-        ) ?? 'profile'
-      setOpenFacet((prev) => prev ?? first)
     } catch (e) {
       setError(e instanceof Error ? e.message : t('projects.detail.knowledgeLoadError'))
     } finally {
@@ -569,10 +600,26 @@ export function CollectionKnowledgeBand({
   const toc = useMemo(() => {
     if (!pack) return []
     return KNOWLEDGE_FACET_IDS.map((id) => ({
-      id,
+      id: id as MagazineNavId,
       empty: id === 'brand' ? false : isFacetContentEmpty(id, pack.facets[id].data),
+      group: 'knowledge' as const,
     }))
   }, [pack])
+
+  const capabilityToc = useMemo(
+    () =>
+      CAPABILITY_NAV_IDS.map((id) => ({
+        id: id as MagazineNavId,
+        empty:
+          id === 'checkion'
+            ? !checkion
+            : id === 'audion'
+              ? !audion
+              : bindings.length === 0,
+        group: 'capability' as const,
+      })),
+    [audion, bindings.length, checkion],
+  )
 
   const renderFacetBody = (id: KnowledgeFacetId): ReactNode => {
     if (!pack) return null
@@ -618,20 +665,20 @@ export function CollectionKnowledgeBand({
   return (
     <section
       className="plexon-dash-band plexon-knowledge-band"
-      aria-label={t('projects.detail.knowledgeTitle')}
-      data-section="collection-knowledge"
+      aria-label={t('projects.detail.magazineTitle')}
+      data-section="collection-magazine"
     >
       <header className="plexon-dash-band-head plexon-knowledge-band-head">
         <div>
           <Text role="title" as="h2" className="plexon-dash-band-title">
-            {t('projects.detail.knowledgeTitle')}
+            {t('projects.detail.magazineTitle')}
           </Text>
           <Text role="meta" as="p" className="plexon-dash-band-deck">
-            {t('projects.detail.knowledgeSubtitle')}
+            {t('projects.detail.magazineSubtitle')}
             {pack ? ` · ${t('projects.detail.knowledgeRev', { n: pack.revision })}` : ''}
           </Text>
         </div>
-        {canEdit && pack && !loading ? (
+        {canEdit && pack && !loading && isKnowledgeFacetId(openNav) ? (
           <div className="plexon-knowledge-band-actions">
             <Button
               variant="primary"
@@ -655,95 +702,140 @@ export function CollectionKnowledgeBand({
       {error ? <Alert tone="error">{error}</Alert> : null}
       {suggestError ? <Alert tone="error">{suggestError}</Alert> : null}
 
-      {pack && !loading ? (
+      {!loading ? (
         <>
-          <nav className="plexon-knowledge-toc" aria-label={t('projects.detail.knowledgeTitle')}>
-            {toc.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="plexon-knowledge-toc-link"
-                data-active={openFacet === item.id ? 'true' : 'false'}
-                data-empty={item.empty ? 'true' : 'false'}
-                onClick={() => setOpenFacet(item.id)}
-              >
-                {t(facetLabelKey(item.id))}
-              </button>
-            ))}
+          <nav className="plexon-knowledge-toc" aria-label={t('projects.detail.magazineTitle')}>
+            <div className="plexon-knowledge-toc-group" data-group="knowledge">
+              {(pack ? toc : []).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="plexon-knowledge-toc-link"
+                  data-active={openNav === item.id ? 'true' : 'false'}
+                  data-empty={item.empty ? 'true' : 'false'}
+                  onClick={() => setOpenNav(item.id)}
+                >
+                  {t(facetLabelKey(item.id as KnowledgeFacetId))}
+                </button>
+              ))}
+            </div>
+            <span className="plexon-knowledge-toc-sep" aria-hidden="true" />
+            <div className="plexon-knowledge-toc-group" data-group="capability">
+              {capabilityToc.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="plexon-knowledge-toc-link"
+                  data-active={openNav === item.id ? 'true' : 'false'}
+                  data-empty={item.empty ? 'true' : 'false'}
+                  onClick={() => setOpenNav(item.id)}
+                >
+                  {t(capabilityLabelKey(item.id as CapabilityNavId))}
+                </button>
+              ))}
+            </div>
           </nav>
 
           <div className="plexon-knowledge-facet-grid">
-            {KNOWLEDGE_FACET_IDS.map((id) => {
-              const facet = pack.facets[id]
-              const empty =
-                id !== 'brand' && isFacetContentEmpty(id, facet.data)
-              const active = openFacet === id
-              return (
-                <article
-                  key={id}
-                  className="plexon-knowledge-facet-tile"
-                  data-active={active ? 'true' : 'false'}
-                  data-empty={empty ? 'true' : 'false'}
-                  hidden={!active}
-                >
-                  <header className="plexon-knowledge-facet-tile-head">
-                    <div>
-                      <Text role="meta" as="p" className="plexon-collection-card-kicker">
-                        {t('projects.detail.knowledgeSharedBadge')}
-                        {id === 'brand' ? ' · reserved' : ''}
-                      </Text>
-                      <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
-                        {t(facetLabelKey(id))}
-                      </Text>
-                      <Text role="meta" as="p">
-                        {t(facetDekKey(id))}
-                      </Text>
-                    </div>
-                    <Chip static size="sm">
-                      {facetPreview(id, facet.data) || (empty ? '—' : '·')}
-                    </Chip>
-                  </header>
+            {pack
+              ? KNOWLEDGE_FACET_IDS.map((id) => {
+                  const facet = pack.facets[id]
+                  const empty = id !== 'brand' && isFacetContentEmpty(id, facet.data)
+                  const active = openNav === id
+                  return (
+                    <article
+                      key={id}
+                      className="plexon-knowledge-facet-tile"
+                      data-active={active ? 'true' : 'false'}
+                      data-empty={empty ? 'true' : 'false'}
+                      hidden={!active}
+                    >
+                      <header className="plexon-knowledge-facet-tile-head">
+                        <div>
+                          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+                            {t('projects.detail.knowledgeSharedBadge')}
+                            {id === 'brand' ? ' · reserved' : ''}
+                          </Text>
+                          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+                            {t(facetLabelKey(id))}
+                          </Text>
+                          <Text role="meta" as="p">
+                            {t(facetDekKey(id))}
+                          </Text>
+                        </div>
+                        <Chip static size="sm">
+                          {facetPreview(id, facet.data) || (empty ? '—' : '·')}
+                        </Chip>
+                      </header>
 
-                  <div className="plexon-knowledge-facet-tile-body">{renderFacetBody(id)}</div>
+                      <div className="plexon-knowledge-facet-tile-body">{renderFacetBody(id)}</div>
 
-                  <div className="plexon-knowledge-facet-tile-actions">
-                    {canEdit && EDITABLE_FACETS.includes(id) ? (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="md"
-                          disabled={suggesting}
-                          onClick={() => void runSuggest(id)}
-                        >
-                          {t('projects.detail.knowledgeSuggestFacet')}
-                        </Button>
-                        <Button variant="ghost" size="md" onClick={() => startEdit(id)}>
-                          {t('projects.detail.knowledgeEdit')}
-                        </Button>
-                      </>
-                    ) : null}
-                    {id === 'research_brief' && audionHref ? (
-                      <Button
-                        variant="ghost"
-                        size="md"
-                        onClick={() => window.open(audionHref, '_blank')}
-                      >
-                        {t('projects.detail.knowledgeOpenAudionResearch')}
-                      </Button>
-                    ) : null}
-                    {id === 'geo_context' && checkionHref ? (
-                      <Button
-                        variant="ghost"
-                        size="md"
-                        onClick={() => window.open(checkionHref, '_blank')}
-                      >
-                        {t('projects.detail.knowledgeOpenCheckionGeo')}
-                      </Button>
-                    ) : null}
-                  </div>
-                </article>
-              )
-            })}
+                      <div className="plexon-knowledge-facet-tile-actions">
+                        {canEdit && EDITABLE_FACETS.includes(id) ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              disabled={suggesting}
+                              onClick={() => void runSuggest(id)}
+                            >
+                              {t('projects.detail.knowledgeSuggestFacet')}
+                            </Button>
+                            <Button variant="ghost" size="md" onClick={() => startEdit(id)}>
+                              {t('projects.detail.knowledgeEdit')}
+                            </Button>
+                          </>
+                        ) : null}
+                        {id === 'research_brief' && audionHref ? (
+                          <Button
+                            variant="ghost"
+                            size="md"
+                            onClick={() => window.open(audionHref, '_blank')}
+                          >
+                            {t('projects.detail.knowledgeOpenAudionResearch')}
+                          </Button>
+                        ) : null}
+                        {id === 'geo_context' && checkionHref ? (
+                          <Button
+                            variant="ghost"
+                            size="md"
+                            onClick={() => window.open(checkionHref, '_blank')}
+                          >
+                            {t('projects.detail.knowledgeOpenCheckionGeo')}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </article>
+                  )
+                })
+              : null}
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'checkion' ? 'true' : 'false'}
+              data-empty={!checkion ? 'true' : 'false'}
+              hidden={openNav !== 'checkion'}
+            >
+              <CheckionCapabilityView checkion={checkion} href={checkionHref ?? ''} />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'audion' ? 'true' : 'false'}
+              data-empty={!audion ? 'true' : 'false'}
+              hidden={openNav !== 'audion'}
+            >
+              <AudionCapabilityView audion={audion} href={audionHref ?? ''} />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'bindings' ? 'true' : 'false'}
+              data-empty={bindings.length === 0 ? 'true' : 'false'}
+              hidden={openNav !== 'bindings'}
+            >
+              <BindingsCapabilityView bindings={bindings} />
+            </article>
           </div>
         </>
       ) : null}
