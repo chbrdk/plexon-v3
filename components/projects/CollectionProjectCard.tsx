@@ -1,13 +1,41 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, Chip, Text } from '@msqdx/ui'
+import type { ReactNode } from 'react'
+import { Button, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
+import {
+  MetricIconPersonas,
+  MetricIconScans,
+  MetricIconTargetGroups,
+} from '@/components/nav-icons'
 import { pathPlatformProjectDashboard } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
 
 type CollectionProjectCardProps = {
   row: CollectionProjectInsight
+}
+
+function Metric({
+  icon,
+  value,
+  label,
+  linked,
+}: {
+  icon: ReactNode
+  value: string
+  label: string
+  linked: boolean
+}) {
+  return (
+    <div className="plexon-collection-metric" data-linked={linked ? 'true' : 'false'}>
+      <span className="plexon-collection-metric-icon" aria-hidden>
+        {icon}
+      </span>
+      <span className="plexon-collection-metric-value">{value}</span>
+      <span className="plexon-collection-metric-label">{label}</span>
+    </div>
+  )
 }
 
 /** Magazine tile for one Collection project — theme tokens only, no forced light surface. */
@@ -19,16 +47,8 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
   const canOpenPlatform = row.openPlatformProject !== false
   const name = row.platformProject.name ?? pid
   const domain = row.platformProject.domain?.trim() || null
-
-  const checkionLabel =
-    row.checkion != null
-      ? `${t('dashboard.platformInsightsCapabilityCheckion')} · ${row.checkion.scanCount} ${t('dashboard.platformInsightsScans')}`
-      : `${t('dashboard.platformInsightsCapabilityCheckion')} · ${t('dashboard.platformInsightsNoProduct')}`
-
-  const audionLabel =
-    row.audion != null
-      ? `${t('dashboard.platformInsightsCapabilityAudion')} · ${row.audion.targetGroupCount ?? 0} ${t('dashboard.platformInsightsTargetGroups')} · ${row.audion.personaCount} ${t('dashboard.platformInsightsPersonas')}`
-      : `${t('dashboard.platformInsightsCapabilityAudion')} · ${t('dashboard.platformInsightsNoProduct')}`
+  const checkionLinked = row.checkion != null
+  const audionLinked = row.audion != null
 
   return (
     <article className="plexon-collection-card">
@@ -53,23 +73,31 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
         </Text>
       ) : null}
 
-      <ul className="plexon-collection-card-meta" aria-label={t('dashboard.platformInsightsSubtitle')}>
-        <li>
-          <Chip static size="sm" selected={row.checkion != null}>
-            {checkionLabel}
-          </Chip>
-        </li>
-        <li>
-          <Chip static size="sm" selected={row.audion != null}>
-            {audionLabel}
-          </Chip>
-        </li>
-      </ul>
+      <div className="plexon-collection-card-stats" aria-label={t('dashboard.platformInsightsSubtitle')}>
+        <Metric
+          icon={<MetricIconScans />}
+          value={checkionLinked ? String(row.checkion!.scanCount) : '—'}
+          label={t('dashboard.platformInsightsScans')}
+          linked={checkionLinked}
+        />
+        <Metric
+          icon={<MetricIconTargetGroups />}
+          value={audionLinked ? String(row.audion!.targetGroupCount ?? 0) : '—'}
+          label={t('dashboard.platformInsightsTargetGroups')}
+          linked={audionLinked}
+        />
+        <Metric
+          icon={<MetricIconPersonas />}
+          value={audionLinked ? String(row.audion!.personaCount) : '—'}
+          label={t('dashboard.platformInsightsPersonas')}
+          linked={audionLinked}
+        />
+      </div>
 
       <div className="plexon-collection-card-actions">
         {canOpenPlatform ? (
           <Link href={pathPlatformProjectDashboard(pid)} className="plexon-collection-card-link">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="md">
               {t('dashboard.platformInsightsOpenProject')}
             </Button>
           </Link>
@@ -80,7 +108,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
           rel="noopener noreferrer"
           className="plexon-collection-card-link"
         >
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="md">
             {t('dashboard.platformInsightsOpenCheckion')}
           </Button>
         </a>
@@ -90,7 +118,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
           rel="noopener noreferrer"
           className="plexon-collection-card-link"
         >
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="md">
             {t('dashboard.platformInsightsOpenAudion')}
           </Button>
         </a>
