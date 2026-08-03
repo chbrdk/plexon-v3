@@ -15,7 +15,7 @@ Wave 1 removed legacy imports via adapters (`DashText`/`DashButton`/…). That i
 |------------|----------|-------|
 | Product teasers / ProductCatalog | **reshape** | Same collection magazine tiles as projects (`plexon-collection-card`) |
 | Platform project insights | **keep** | Reshape cards to Panel/RankedList |
-| Usage summary / chart | **reshape** | Keep data; simplify chrome; challenge admin+user mix on one page |
+| Usage summary / chart | **reshape** | Magazine `plexon-dash-band` (no Panel wash); keep tables/chart; challenge admin+user mix on one page |
 | Admin user CRUD on home | **challenge** | Prefer deep-link to `/admin/users` — home may only show entry CTA |
 | Edit-user mega modal on `/` | **reshape** | Move to admin surface if kept |
 | Local Dash* adapters | **drop** when sections rewritten | Use Text/Button/Panel directly |
@@ -23,7 +23,8 @@ Wave 1 removed legacy imports via adapters (`DashText`/`DashButton`/…). That i
 ## Current state
 
 - No `@mui` / `@msqdx/react` imports.
-- Still adapter-heavy; revisit before calling Wave 1 “done” for product quality.
+- Usage (`data-section="usage"`) and central users (`data-section="checkion-users"`) use `plexon-dash-band` + `plexon-dash-table` (magazine index, no Panel card chrome).
+- Still adapter-heavy on product teasers / edit-user modal; revisit before calling Wave 1 “done” for product quality.
 
 ## Acceptance (adapter pass — done)
 

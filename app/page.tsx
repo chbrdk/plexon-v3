@@ -1008,168 +1008,85 @@ export default function DashboardPage() {
       </section>
       )}
 
-      {/* Nutzung (Tokens pro Dienst/Periode) */}
+      {/* Nutzung (Tokens pro Dienst/Periode) — magazine band, no Panel wash */}
       {!notConfigured && (
-        <DashPanel
-          variant="flat"
-          borderRadius="button"
-          sx={{
-            mt: 'var(--msqdx-spacing-lg)',
-            p: 'var(--msqdx-spacing-md)',
-            border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-            bgcolor: 'var(--color-card-bg)',
-            color: 'var(--color-text-on-light)',
-          }}
-          data-section="usage"
-        >
-          <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
-            {t('dashboard.usage') ?? 'Nutzung'}
-          </DashText>
-          <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
-            {isAdmin ? (t('dashboard.usageSubtitleAdmin') ?? 'Token-Verbrauch aller Nutzer pro Dienst und Monat.') : (t('dashboard.usageSubtitle') ?? 'Dein Token-Verbrauch pro Dienst und Monat.')}
-          </DashText>
+        <section className="plexon-dash-band" data-section="usage">
+          <header className="plexon-dash-band-head">
+            <Text role="title" as="h2" className="plexon-dash-band-title">
+              {t('dashboard.usage') ?? 'Nutzung'}
+            </Text>
+            <Text role="meta" as="p" className="plexon-dash-band-deck">
+              {isAdmin
+                ? (t('dashboard.usageSubtitleAdmin') ?? 'Token-Verbrauch aller Nutzer pro Dienst und Monat.')
+                : (t('dashboard.usageSubtitle') ?? 'Dein Token-Verbrauch pro Dienst und Monat.')}
+            </Text>
+          </header>
+
           {usageLoading && (
-            <DashText variant="body2" color="text.secondary">{t('common.loading')}</DashText>
+            <Text role="meta" as="p" className="plexon-dash-band-status">
+              {t('common.loading')}
+            </Text>
           )}
           {!usageLoading && usageSummary.length === 0 && (
-            <DashText variant="body2" color="text.secondary">
+            <Text role="meta" as="p" className="plexon-dash-band-status">
               {t('dashboard.usageNoData')}
-            </DashText>
+            </Text>
           )}
           {!usageLoading && usageSummary.length > 0 && (
-            <Box sx={{ overflowX: 'auto' }}>
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  fontSize: '0.875rem',
-                }}
-              >
+            <div className="plexon-dash-table-wrap">
+              <table className="plexon-dash-table is-compact">
                 <thead>
                   <tr>
-                    {isAdmin && (
-                      <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                        {t('dashboard.usageUser')}
-                      </th>
-                    )}
-                    <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                      {t('dashboard.usageService')}
-                    </th>
-                    <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                      {t('dashboard.usagePeriod')}
-                    </th>
-                    <th style={{ textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
+                    {isAdmin && <th scope="col">{t('dashboard.usageUser')}</th>}
+                    <th scope="col">{t('dashboard.usageService')}</th>
+                    <th scope="col">{t('dashboard.usagePeriod')}</th>
+                    <th scope="col" className="plexon-dash-table-num is-end">
                       {t('dashboard.usageTokens')}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {usageSummary.map((row, i) => (
-                    <tr key={`${row.userId ?? ''}-${row.service}-${row.period}-${i}`} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                    <tr key={`${row.userId ?? ''}-${row.service}-${row.period}-${i}`}>
                       {isAdmin && (
-                        <td style={{ padding: '8px 12px' }}>
+                        <td>
                           {row.userId ? (users.find((u) => u.id === row.userId)?.email ?? row.userId) : '—'}
                         </td>
                       )}
-                      <td style={{ padding: '8px 12px' }}>{row.service}</td>
-                      <td style={{ padding: '8px 12px' }}>{row.period}</td>
-                      <td style={{ padding: '8px 12px', textAlign: 'right' }}>{row.tokensTotal.toLocaleString()}</td>
+                      <td>{row.service}</td>
+                      <td>{row.period}</td>
+                      <td className="plexon-dash-table-num is-end">{row.tokensTotal.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </Box>
+            </div>
           )}
 
-          {/* Admin: alle Nutzer – letzte Roh-Events */}
           {isAdmin && !usageLoading && (
-            <Box sx={{ mt: 3 }}>
-              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 0.5 }}>
+            <div className="plexon-dash-subband" data-section="usage-admin-events">
+              <Text role="title" as="h3" className="plexon-dash-subband-title">
                 {t('dashboard.usageAdminEventsTitle')}
-              </DashText>
-              <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 1.5 }}>
+              </Text>
+              <Text role="meta" as="p" className="plexon-dash-subband-deck">
                 {t('dashboard.usageAdminEventsSubtitle')}
-              </DashText>
+              </Text>
               {adminUsageEvents.length === 0 ? (
-                <DashText variant="body2" color="text.secondary">
+                <Text role="meta" as="p" className="plexon-dash-band-status">
                   {t('dashboard.usageAdminEventsEmpty')}
-                </DashText>
+                </Text>
               ) : (
                 <>
-                  <Box sx={{ overflowX: 'auto', maxHeight: 360, overflowY: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <div className="plexon-dash-table-wrap is-scroll">
+                    <table className="plexon-dash-table">
                       <thead>
                         <tr>
-                          <th
-                            style={{
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
-                            {t('dashboard.usageHistoryTime')}
-                          </th>
-                          <th
-                            style={{
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
-                            {t('dashboard.usageUser')}
-                          </th>
-                          <th
-                            style={{
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
-                            {t('dashboard.usageService')}
-                          </th>
-                          <th
-                            style={{
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
-                            {t('dashboard.usageHistoryEvent')}
-                          </th>
-                          <th
-                            style={{
-                              textAlign: 'left',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
-                            {t('dashboard.usageHistoryDetail')}
-                          </th>
-                          <th
-                            style={{
-                              textAlign: 'right',
-                              padding: '8px 12px',
-                              borderBottom: '1px solid var(--color-border-subtle)',
-                              position: 'sticky',
-                              top: 0,
-                              background: 'var(--color-card-bg)',
-                            }}
-                          >
+                          <th scope="col">{t('dashboard.usageHistoryTime')}</th>
+                          <th scope="col">{t('dashboard.usageUser')}</th>
+                          <th scope="col">{t('dashboard.usageService')}</th>
+                          <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
+                          <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
+                          <th scope="col" className="plexon-dash-table-num is-end">
                             {t('dashboard.usageTokens')}
                           </th>
                         </tr>
@@ -1178,163 +1095,147 @@ export default function DashboardPage() {
                         {adminUsageEvents.map((ev) => {
                           const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
                           return (
-                            <tr key={ev.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                              <td style={{ padding: '8px 12px' }}>
+                            <tr key={ev.id}>
+                              <td className="plexon-dash-table-num">
                                 {new Date(ev.createdAt).toLocaleString(undefined, {
                                   dateStyle: 'short',
                                   timeStyle: 'short',
                                 })}
                               </td>
-                              <td style={{ padding: '8px 12px', maxWidth: 200, wordBreak: 'break-word' }}>
+                              <td style={{ maxWidth: 200, wordBreak: 'break-word' }}>
                                 {ev.userEmail || ev.userId}
                               </td>
-                              <td style={{ padding: '8px 12px' }}>{ev.service}</td>
-                              <td style={{ padding: '8px 12px' }}>{ev.eventType}</td>
-                              <td
-                                style={{
-                                  padding: '8px 12px',
-                                  maxWidth: 320,
-                                  color: 'var(--color-text-secondary, rgba(0,0,0,0.6))',
-                                  fontSize: '0.8125rem',
-                                  wordBreak: 'break-word',
-                                }}
-                                title={detail || undefined}
-                              >
+                              <td>{ev.service}</td>
+                              <td>{ev.eventType}</td>
+                              <td className="plexon-dash-table-detail" title={detail || undefined}>
                                 {detail || '—'}
                               </td>
-                              <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                                {ev.tokens.toLocaleString()}
-                              </td>
+                              <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
                             </tr>
                           );
                         })}
                       </tbody>
                     </table>
-                  </Box>
+                  </div>
                   {adminUsageEventsHasMore && (
-                    <Box sx={{ mt: 1.5 }}>
-                      <DashButton
-                        variant="outlined"
-                        size="small"
+                    <div>
+                      <Button
+                        variant="subtle"
+                        size="md"
                         onClick={() => void loadMoreAdminUsageEvents()}
                         disabled={adminUsageEventsLoading}
                       >
                         {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
-                      </DashButton>
-                    </Box>
+                      </Button>
+                    </div>
                   )}
                 </>
               )}
-            </Box>
+            </div>
           )}
 
-          {/* Verlauf: letzte Nutzungen (eigene Events) */}
           {!usageLoading && usageRecentEvents.length > 0 && (
-            <Box sx={{ mt: 3 }}>
-              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
+            <div className="plexon-dash-subband" data-section="usage-history">
+              <Text role="title" as="h3" className="plexon-dash-subband-title">
                 {t('dashboard.usageHistory')}
-              </DashText>
-              <Box sx={{ overflowX: 'auto', maxHeight: 280, overflowY: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+              </Text>
+              <div className="plexon-dash-table-wrap is-scroll">
+                <table className="plexon-dash-table">
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)', position: 'sticky', top: 0, background: 'var(--color-card-bg)' }}>
-                        {t('dashboard.usageHistoryTime')}
-                      </th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)', position: 'sticky', top: 0, background: 'var(--color-card-bg)' }}>
-                        {t('dashboard.usageService')}
-                      </th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)', position: 'sticky', top: 0, background: 'var(--color-card-bg)' }}>
-                        {t('dashboard.usageHistoryEvent')}
-                      </th>
-                      <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)', position: 'sticky', top: 0, background: 'var(--color-card-bg)' }}>
-                        {t('dashboard.usageHistoryDetail')}
-                      </th>
-                      <th style={{ textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)', position: 'sticky', top: 0, background: 'var(--color-card-bg)' }}>
+                      <th scope="col">{t('dashboard.usageHistoryTime')}</th>
+                      <th scope="col">{t('dashboard.usageService')}</th>
+                      <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
+                      <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
+                      <th scope="col" className="plexon-dash-table-num is-end">
                         {t('dashboard.usageTokens')}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {usageRecentEvents.map((ev) => (
-                      <tr key={ev.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                        <td style={{ padding: '8px 12px' }}>
-                          {new Date(ev.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
-                        </td>
-                        <td style={{ padding: '8px 12px' }}>{ev.service}</td>
-                        <td style={{ padding: '8px 12px' }}>{ev.eventType}</td>
-                        <td
-                          style={{
-                            padding: '8px 12px',
-                            maxWidth: 360,
-                            color: 'var(--color-text-secondary, rgba(0,0,0,0.6))',
-                            fontSize: '0.8125rem',
-                            wordBreak: 'break-word',
-                          }}
-                          title={formatUsageEventDetail(ev.eventType, ev.rawUnits) || undefined}
-                        >
-                          {formatUsageEventDetail(ev.eventType, ev.rawUnits) || '—'}
-                        </td>
-                        <td style={{ padding: '8px 12px', textAlign: 'right' }}>{ev.tokens.toLocaleString()}</td>
-                      </tr>
-                    ))}
+                    {usageRecentEvents.map((ev) => {
+                      const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
+                      return (
+                        <tr key={ev.id}>
+                          <td className="plexon-dash-table-num">
+                            {new Date(ev.createdAt).toLocaleString(undefined, {
+                              dateStyle: 'short',
+                              timeStyle: 'short',
+                            })}
+                          </td>
+                          <td>{ev.service}</td>
+                          <td>{ev.eventType}</td>
+                          <td className="plexon-dash-table-detail" title={detail || undefined}>
+                            {detail || '—'}
+                          </td>
+                          <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              </Box>
-            </Box>
+              </div>
+            </div>
           )}
 
-          {/* Diagramm: Verbrauch nach Tag / Monat / Jahr */}
           {!usageLoading && (usageByDay.length > 0 || usageOwnSummary.length > 0) && (
-            <Box sx={{ mt: 3 }}>
-              <DashText variant="subtitle1" weight="semibold" sx={{ mb: 1.5 }}>
+            <div className="plexon-dash-subband" data-section="usage-chart">
+              <Text role="title" as="h3" className="plexon-dash-subband-title">
                 {t('dashboard.usageChart')}
-              </DashText>
-              <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+              </Text>
+              <div className="plexon-dash-range">
                 {(['day', 'month', 'year'] as const).map((range) => (
-                  <DashButton
+                  <Button
                     key={range}
-                    variant={usageChartRange === range ? 'contained' : 'outlined'}
-                    size="small"
+                    variant={usageChartRange === range ? 'primary' : 'subtle'}
+                    size="sm"
                     onClick={() => setUsageChartRange(range)}
                   >
-                    {range === 'day' ? t('dashboard.usageChartDay') : range === 'month' ? t('dashboard.usageChartMonth') : t('dashboard.usageChartYear')}
-                  </DashButton>
+                    {range === 'day'
+                      ? t('dashboard.usageChartDay')
+                      : range === 'month'
+                        ? t('dashboard.usageChartMonth')
+                        : t('dashboard.usageChartYear')}
+                  </Button>
                 ))}
-              </Stack>
+              </div>
               {(() => {
-                const chartData = usageChartRange === 'day'
-                  ? usageByDay.map((d) => ({ label: d.date.slice(5) || d.date, tokens: d.tokens }))
-                  : usageChartRange === 'month'
-                    ? usageByMonth.map((d) => ({ label: d.period, tokens: d.tokens }))
-                    : usageByYear.map((d) => ({ label: d.year, tokens: d.tokens }));
+                const chartData =
+                  usageChartRange === 'day'
+                    ? usageByDay.map((d) => ({ label: d.date.slice(5) || d.date, tokens: d.tokens }))
+                    : usageChartRange === 'month'
+                      ? usageByMonth.map((d) => ({ label: d.period, tokens: d.tokens }))
+                      : usageByYear.map((d) => ({ label: d.year, tokens: d.tokens }));
                 const hasData = chartData.length > 0 && chartData.some((d) => d.tokens > 0);
                 return hasData ? (
-                  <Box sx={{ width: '100%', minWidth: 0, height: 260 }}>
+                  <div className="plexon-dash-chart">
                     <ResponsiveContainer width="100%" height={260}>
                       <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
                         <XAxis dataKey="label" tick={{ fontSize: 12 }} />
                         <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                         <Tooltip
-                          formatter={(value) => [Number(value ?? 0).toLocaleString(), t('dashboard.usageTokens')]}
+                          formatter={(value) => [
+                            Number(value ?? 0).toLocaleString(),
+                            t('dashboard.usageTokens'),
+                          ]}
                         />
-                        <Bar dataKey="tokens" radius={[4, 4, 0, 0]}>
+                        <Bar dataKey="tokens" radius={[0, 0, 0, 0]}>
                           {chartData.map((_, i) => (
-                            <Cell key={i} fill="var(--color-primary-main, #1976d2)" />
+                            <Cell key={i} fill="var(--ink, var(--color-primary-main, #1a1a1a))" />
                           ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  </Box>
+                  </div>
                 ) : (
-                  <DashText variant="body2" color="text.secondary">
+                  <Text role="meta" as="p" className="plexon-dash-band-status">
                     {t('dashboard.usageNoData')}
-                  </DashText>
+                  </Text>
                 );
               })()}
-            </Box>
+            </div>
           )}
-        </DashPanel>
+        </section>
       )}
 
       {editId && (

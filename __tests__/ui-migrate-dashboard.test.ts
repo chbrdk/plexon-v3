@@ -18,4 +18,15 @@ describe('dashboard ui migrate (wave 1)', () => {
     expect(page).toContain('ProductCatalog')
     expect(page).toContain("t('dashboard.title')")
   })
+
+  it('usage band uses magazine dash chrome, not Panel wash', () => {
+    expect(page).toContain('data-section="usage"')
+    expect(page).toContain('plexon-dash-band')
+    expect(page).toContain('plexon-dash-table')
+    const usageIdx = page.indexOf('data-section="usage"')
+    expect(usageIdx).toBeGreaterThan(-1)
+    const usageSlice = page.slice(Math.max(0, usageIdx - 120), usageIdx + 400)
+    expect(usageSlice).toContain('plexon-dash-band')
+    expect(usageSlice).not.toContain('DashPanel')
+  })
 })
