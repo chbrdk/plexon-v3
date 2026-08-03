@@ -165,6 +165,8 @@
     "platformInsightsOpenAudion": "AUDION",
     "platformInsightsLegacyBadge": "Noch nicht verknüpft",
     "platformInsightsLegacyHint": "Produkt-only (Legacy) — noch keine PLEXON-Collection.",
+    "productSurfaceFederated": "Föderiert",
+    "productSurfaceNative": "Nativ",
     "productPlexonDescription": "Zentrale Control Plane für Identität, Profile, Usage und produktübergreifende Einstiegspunkte.",
     "productAudionDescription": "Föderierter Einstieg in AUDION mit PLEXON-Identity, Profilabgleich und zentralem Usage-Reporting.",
     "productCheckionDescription": "Föderierter Einstieg in CHECKION mit PLEXON-Identity, Profilabgleich und zentralem Usage-Reporting.",

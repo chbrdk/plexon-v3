@@ -54,7 +54,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
     <article className="plexon-collection-card">
       <header className="plexon-collection-card-head">
         <Text role="meta" as="p" className="plexon-collection-card-kicker">
-          {domain ?? t('dashboard.platformInsightsSubtitle')}
+          {domain ?? '\u00a0'}
         </Text>
         {!canOpenPlatform ? (
           <span className="plexon-collection-card-badge" title={t('dashboard.platformInsightsLegacyHint')}>

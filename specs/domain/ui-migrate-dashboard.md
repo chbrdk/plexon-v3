@@ -13,7 +13,7 @@ Wave 1 removed legacy imports via adapters (`DashText`/`DashButton`/…). That i
 
 | Capability | Decision | Notes |
 |------------|----------|-------|
-| Product teasers / ProductCatalog | **keep** | Already `@msqdx/ui` |
+| Product teasers / ProductCatalog | **reshape** | Same collection magazine tiles as projects (`plexon-collection-card`) |
 | Platform project insights | **keep** | Reshape cards to Panel/RankedList |
 | Usage summary / chart | **reshape** | Keep data; simplify chrome; challenge admin+user mix on one page |
 | Admin user CRUD on home | **challenge** | Prefer deep-link to `/admin/users` — home may only show entry CTA |

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Chip, Panel, Spinner, Text } from '@msqdx/ui'
+import { Button, Spinner, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { API_PLATFORM_PRODUCTS } from '@/lib/constants'
 import { buildFederatedLaunchHref } from '@/lib/federation-links'
@@ -14,6 +14,8 @@ import {
 } from '@/lib/platform-products'
 
 type ProductCatalogVariant = 'dashboard' | 'page'
+
+const CAPABILITY_PREVIEW = 3
 
 export function ProductCatalog({
   variant = 'dashboard',
@@ -77,18 +79,18 @@ export function ProductCatalog({
     [router],
   )
 
-  const statusConfig = useCallback(
-    (product: PlatformProductSummary): { label: string; tone: 'success' | 'warning' | 'danger' | 'neutral' } => {
+  const statusLabel = useCallback(
+    (product: PlatformProductSummary): string => {
       switch (product.runtimeStatus) {
         case 'healthy':
-          return { label: t('dashboard.runtimeHealthy'), tone: 'success' }
+          return t('dashboard.runtimeHealthy')
         case 'not_configured':
-          return { label: t('dashboard.runtimeNotConfigured'), tone: 'warning' }
+          return t('dashboard.runtimeNotConfigured')
         case 'unreachable':
-          return { label: t('dashboard.runtimeUnreachable'), tone: 'danger' }
+          return t('dashboard.runtimeUnreachable')
         case 'planned':
         default:
-          return { label: t('dashboard.runtimePlanned'), tone: 'neutral' }
+          return t('dashboard.runtimePlanned')
       }
     },
     [t],
@@ -109,95 +111,113 @@ export function ProductCatalog({
     [t],
   )
 
+  const surfaceKicker = useCallback(
+    (product: PlatformProductSummary): string =>
+      product.surface === 'federated'
+        ? t('dashboard.productSurfaceFederated')
+        : t('dashboard.productSurfaceNative'),
+    [t],
+  )
+
   return (
-    <ul className="plexon-magazine-grid" data-section={dataSection}>
-      {visibleProducts.map((product) => {
-        const status = statusConfig(product)
-        const primaryEntryPoint =
-          product.entryPoints.find((entry) => entry.id === product.launchContext?.entryPointId) ??
-          product.entryPoints.find((entry) => entry.id.endsWith('home') || entry.id.endsWith('admin')) ??
-          product.entryPoints[0]
-        const isPlanned = product.runtimeStatus === 'planned'
+    <div className="plexon-collection-list" data-section={dataSection}>
+      <div className="plexon-collection-grid">
+        {visibleProducts.map((product) => {
+          const status = statusLabel(product)
+          const primaryEntryPoint =
+            product.entryPoints.find((entry) => entry.id === product.launchContext?.entryPointId) ??
+            product.entryPoints.find((entry) => entry.id.endsWith('home') || entry.id.endsWith('admin')) ??
+            product.entryPoints[0]
+          const isPlanned = product.runtimeStatus === 'planned'
+          const capabilityKeys =
+            variant === 'page' ? product.capabilities : product.capabilities.slice(0, CAPABILITY_PREVIEW)
+          const secondaryEntryPoints =
+            variant === 'page' ? product.entryPoints.filter((entry) => entry.id !== primaryEntryPoint?.id) : []
+          const launchDisabled =
+            !product.access.launchable || !primaryEntryPoint?.href || primaryEntryPoint.href === '#'
 
-        return (
-          <li key={product.id}>
-            <Panel
-              className="plexon-magazine-card"
-              style={{
-                opacity: isPlanned ? 0.9 : 1,
-                borderStyle: isPlanned ? 'dashed' : 'solid',
-              }}
+          return (
+            <article
+              key={product.id}
+              className="plexon-collection-card"
+              data-planned={isPlanned ? 'true' : undefined}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
-                <div style={{ minWidth: 0 }}>
-                  <Text role="title" as="h3">
-                    {product.name}
-                  </Text>
-                  <Text role="meta">{t(product.descriptionKey)}</Text>
-                </div>
-                <Chip static>{status.label}</Chip>
-              </div>
+              <header className="plexon-collection-card-head">
+                <Text role="meta" as="p" className="plexon-collection-card-kicker">
+                  {surfaceKicker(product)}
+                </Text>
+                <span className="plexon-collection-card-badge">{status}</span>
+              </header>
 
-              {variant === 'page' ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                  {product.capabilities.map((capability) => (
-                    <Chip static key={`${product.id}-${capability}`}>
-                      {capabilityLabelById[capability] ?? capability}
-                    </Chip>
+              <Text role="headline" as="h3" className="plexon-collection-card-title">
+                {product.name}
+              </Text>
+
+              <Text role="meta" as="p" className="plexon-collection-card-hint">
+                {t(product.descriptionKey)}
+              </Text>
+
+              {product.access.status === 'disabled' ? (
+                <Text role="meta" as="p" className="plexon-collection-card-hint">
+                  {t('dashboard.accessDisabled')}
+                </Text>
+              ) : null}
+
+              {capabilityKeys.length > 0 ? (
+                <div className="plexon-collection-card-stats" aria-label={t('dashboard.productsTitle')}>
+                  {capabilityKeys.map((capability) => (
+                    <div
+                      key={`${product.id}-${capability}`}
+                      className="plexon-collection-metric plexon-product-capability"
+                      data-linked="true"
+                    >
+                      <span className="plexon-collection-metric-label">
+                        {capabilityLabelById[capability] ?? capability}
+                      </span>
+                    </div>
                   ))}
                 </div>
               ) : null}
 
-              {product.access.status === 'disabled' ? (
-                <Text role="meta">{t('dashboard.accessDisabled')}</Text>
-              ) : null}
-
-              <div style={{ display: 'grid', gap: '0.5rem', marginTop: 'auto' }}>
+              <div className="plexon-collection-card-actions">
                 {primaryEntryPoint ? (
-                  <Button
-                    variant="primary"
-                    block
-                    disabled={
-                      !product.access.launchable ||
-                      !primaryEntryPoint.href ||
-                      primaryEntryPoint.href === '#'
-                    }
-                    onClick={() => openHref(product, primaryEntryPoint)}
-                  >
-                    {t(product.primaryActionKey)}
-                  </Button>
+                  <span className="plexon-collection-card-link">
+                    <Button
+                      variant="ghost"
+                      size="md"
+                      disabled={launchDisabled}
+                      onClick={() => openHref(product, primaryEntryPoint)}
+                    >
+                      {t(product.primaryActionKey)}
+                    </Button>
+                  </span>
                 ) : null}
-                {variant === 'page' && product.entryPoints.length > 1 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                    {product.entryPoints.slice(1).map((entryPoint) => (
-                      <Button
-                        key={entryPoint.id}
-                        variant="ghost"
-                        disabled={
-                          !product.access.launchable || !entryPoint.href || entryPoint.href === '#'
-                        }
-                        onClick={() => openHref(product, entryPoint)}
-                      >
-                        {t(entryPoint.labelKey)}
-                      </Button>
-                    ))}
-                  </div>
-                ) : null}
-                {loading && variant === 'page' ? (
-                  <Text role="meta">
-                    <Spinner size="sm" /> {t('common.loading')}
-                  </Text>
-                ) : null}
+                {secondaryEntryPoints.map((entryPoint) => (
+                  <span key={entryPoint.id} className="plexon-collection-card-link">
+                    <Button
+                      variant="ghost"
+                      size="md"
+                      disabled={!product.access.launchable || !entryPoint.href || entryPoint.href === '#'}
+                      onClick={() => openHref(product, entryPoint)}
+                    >
+                      {t(entryPoint.labelKey)}
+                    </Button>
+                  </span>
+                ))}
               </div>
-            </Panel>
-          </li>
-        )
-      })}
-    </ul>
+            </article>
+          )
+        })}
+      </div>
+      {loading && variant === 'page' ? (
+        <Text role="meta" as="p" className="plexon-collection-list-status">
+          <Spinner size="sm" /> {t('common.loading')}
+        </Text>
+      ) : null}
+    </div>
   )
 }
 
 export function isPromotedProduct(productId: PlatformProductId): boolean {
   return getStaticPlatformProductSummaries().some((product) => product.id === productId && product.promoted)
 }
-

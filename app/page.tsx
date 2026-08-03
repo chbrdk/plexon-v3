@@ -927,115 +927,85 @@ export default function DashboardPage() {
 
       {/* Zentrale Nutzer – nur für Admins sichtbar */}
       {isAdmin && (
-      <DashPanel
-        variant="flat"
-        borderRadius="button"
-        sx={{
-          p: 'var(--msqdx-spacing-md)',
-          border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-          bgcolor: 'var(--color-card-bg)',
-          color: 'var(--color-text-on-light)',
-        }}
-        data-section="checkion-users"
-      >
-        <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
-          {t('dashboard.centralUsers') ?? 'Zentrale Nutzer'}
-        </DashText>
-        <DashText variant="body2" sx={{ color: 'var(--color-text-secondary)', mb: 2 }}>
-          {t('dashboard.centralUsersSubtitle') ?? 'Ein Konto für alle Dienste (CHECKION, AUDION, VIDEON). Registrierung nur hier; Anmeldung dort mit denselben Zugangsdaten.'}
-        </DashText>
+      <section className="plexon-dash-band" data-section="checkion-users">
+        <header className="plexon-dash-band-head">
+          <Text role="title" as="h2" className="plexon-dash-band-title">
+            {t('dashboard.centralUsers') ?? 'Zentrale Nutzer'}
+          </Text>
+          <Text role="meta" as="p" className="plexon-dash-band-deck">
+            {t('dashboard.centralUsersSubtitle') ??
+              'Ein Konto für alle Dienste (CHECKION, AUDION, VIDEON). Registrierung nur hier; Anmeldung dort mit denselben Zugangsdaten.'}
+          </Text>
+        </header>
 
         {notConfigured && (
-          <Box
-            sx={{
-              p: 2,
-              borderRadius: 'var(--msqdx-radius-sm)',
-              bgcolor: 'var(--color-bg-subtle)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <DashText variant="body2">
-              {error?.includes('Database not configured') ? t('dashboard.centralNotConfigured') : error}
-            </DashText>
-          </Box>
+          <Text role="meta" as="p" className="plexon-dash-band-status">
+            {error?.includes('Database not configured') ? t('dashboard.centralNotConfigured') : error}
+          </Text>
         )}
 
         {!notConfigured && error && (
-          <Box sx={{ p: 2, borderRadius: 1, bgcolor: 'error.light', color: 'error.contrastText', mb: 2 }}>
-            <DashText variant="body2">{error}</DashText>
-          </Box>
+          <Text role="meta" as="p" className="plexon-dash-band-status is-error">
+            {error}
+          </Text>
         )}
 
         {!notConfigured && loading && (
-          <DashText variant="body2" color="text.secondary">{t('common.loading')}</DashText>
+          <Text role="meta" as="p" className="plexon-dash-band-status">
+            {t('common.loading')}
+          </Text>
         )}
 
         {!notConfigured && !loading && users.length === 0 && !error && (
-          <DashText variant="body2" color="text.secondary">
+          <Text role="meta" as="p" className="plexon-dash-band-status">
             {t('dashboard.noUsers')}
-          </DashText>
+          </Text>
         )}
 
         {!notConfigured && !loading && users.length > 0 && (
-          <Box sx={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '0.875rem',
-              }}
-            >
+          <div className="plexon-dash-table-wrap">
+            <table className="plexon-dash-table">
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.email')}
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.name')}
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.company')}
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.locale')}
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.role')}
-                  </th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    {t('dashboard.createdAt')}
-                  </th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
+                  <th scope="col">{t('dashboard.email')}</th>
+                  <th scope="col">{t('dashboard.name')}</th>
+                  <th scope="col">{t('dashboard.company')}</th>
+                  <th scope="col">{t('dashboard.locale')}</th>
+                  <th scope="col">{t('dashboard.role')}</th>
+                  <th scope="col">{t('dashboard.createdAt')}</th>
+                  <th scope="col" className="plexon-dash-table-actions">
                     {t('dashboard.actions')}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                    <td style={{ padding: '8px 12px' }}>{u.email ?? '—'}</td>
-                    <td style={{ padding: '8px 12px' }}>{u.name ?? '—'}</td>
-                    <td style={{ padding: '8px 12px' }}>{u.company ?? '—'}</td>
-                    <td style={{ padding: '8px 12px' }}>{u.locale ?? '—'}</td>
-                    <td style={{ padding: '8px 12px' }}>{u.role ?? 'user'}</td>
-                    <td style={{ padding: '8px 12px' }}>
+                  <tr key={u.id}>
+                    <td>{u.email ?? '—'}</td>
+                    <td>{u.name ?? '—'}</td>
+                    <td>{u.company ?? '—'}</td>
+                    <td>{u.locale ?? '—'}</td>
+                    <td>{u.role ?? 'user'}</td>
+                    <td className="plexon-dash-table-num">
                       {u.createdAt ? new Date(u.createdAt).toLocaleString() : '—'}
                     </td>
-                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                      <DashButton variant="text" size="small" onClick={() => openEdit(u)}>
-                        {t('dashboard.edit')}
-                      </DashButton>
-                      <DashButton variant="text" size="small" color="error" onClick={() => handleDelete(u.id)} sx={{ ml: 0.5 }}>
-                        {t('dashboard.delete')}
-                      </DashButton>
+                    <td className="plexon-dash-table-actions">
+                      <div className="plexon-dash-row-actions">
+                        <Button variant="ghost" size="md" onClick={() => openEdit(u)}>
+                          {t('dashboard.edit')}
+                        </Button>
+                        <Button variant="danger" size="md" onClick={() => handleDelete(u.id)}>
+                          {t('dashboard.delete')}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </Box>
+          </div>
         )}
-      </DashPanel>
+      </section>
       )}
 
       {/* Nutzung (Tokens pro Dienst/Periode) */}

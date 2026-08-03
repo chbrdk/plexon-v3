@@ -22,6 +22,16 @@ describe('products ui rebuild (wave 3)', () => {
     expect(catalog).not.toContain("from '@mui/material'")
   })
 
+  it('product tiles reuse collection magazine card chrome', () => {
+    expect(catalog).toContain('plexon-collection-grid')
+    expect(catalog).toContain('plexon-collection-card')
+    expect(catalog).toContain('plexon-collection-card-stats')
+    expect(catalog).toContain('plexon-collection-card-actions')
+    expect(catalog).not.toContain('plexon-magazine-card')
+    expect(catalog).not.toContain('Panel')
+    expect(catalog).not.toContain('Chip')
+  })
+
   it('platform project detail uses SectionChrome/Panel and no legacy DS', () => {
     expect(page).toContain('PlatformProjectDashboard')
     expect(page).not.toContain("from '@msqdx/react'")

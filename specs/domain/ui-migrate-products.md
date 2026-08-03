@@ -10,8 +10,8 @@
 
 | Capability | Decision | Notes |
 |------------|----------|-------|
-| Product catalog grid + launch | **keep** | Already `@msqdx/ui` (`ProductCatalog`) |
-| Runtime / access chips | **keep** | Chip status tones |
+| Product catalog grid + launch | **reshape** | Same magazine tiles as Collections (`plexon-collection-grid` / `plexon-collection-card`); `@msqdx/ui` Text + ghost Button |
+| Runtime / access chips | **reshape** | Status as collection-card badge (not Chip Panel chrome) |
 | Federated entry-point open | **keep** | Same `buildFederatedLaunchHref` / paths |
 | Collection name / status / domain | **reshape** | SectionChrome + Chip + Text (no MUI h4); copy = Projekt not “platform project type” |
 | CHECKION / AUDION summaries | **reshape** | Panel bands + StatLede as **capabilities**; external open via Button |
@@ -22,9 +22,9 @@
 
 ## Reuse map
 
-- Magazine: `SectionChrome` + `Panel` like products / settings pages.
-- Stats: `StatLede` for scan / persona counts.
-- Actions: `Button` primary/ghost; no MUI `Link`.
+- Magazine catalog: same composition as `CollectionProjectCard` (kicker / headline / hint / stats / ghost actions).
+- Collection detail: `SectionChrome` + `Panel` + `StatLede` for capability bands.
+- Actions: ghost `Button` on catalog tiles; no MUI `Link`.
 
 ## File set
 
