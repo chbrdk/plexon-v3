@@ -970,7 +970,37 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 .plexon-dash-chart {
   width: 100%;
   min-width: 0;
-  height: 16.25rem;
+  height: 18rem;
+}
+
+.plexon-usage-chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.plexon-usage-chart-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.15rem;
+}
+
+.plexon-dash-chart-tooltip {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--bg, #fff);
+  color: var(--ink, var(--fg));
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.plexon-dash-chart .recharts-cartesian-axis-tick-value {
+  fill: var(--muted);
 }
 
 .plexon-collection-list-status,

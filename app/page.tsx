@@ -41,16 +41,8 @@ import type { AdminProductProjectOption } from '@/lib/admin-product-project-opti
 import { COMPANY_USER_ROLE } from '@/lib/platform-companies';
 import { ProductCatalog } from '@/components/products/ProductCatalog';
 import { FORM_FIELD_ACCENT_SX } from '@/lib/theme-accent';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts';
 import { formatUsageEventDetail } from '@/lib/usage-event-detail';
+import { UsageTokenChart } from '@/components/dashboard/UsageTokenChart';
 import type {
   PlatformEntitlementStatus,
   PlatformLaunchContext,
@@ -1177,61 +1169,13 @@ export default function DashboardPage() {
           ) : null}
 
           {!usageLoading && (usageByDay.length > 0 || usageOwnSummary.length > 0) && (
-            <div className="plexon-dash-subband" data-section="usage-chart">
-              <Text role="title" as="h3" className="plexon-dash-subband-title">
-                {t('dashboard.usageChart')}
-              </Text>
-              <div className="plexon-dash-range">
-                {(['day', 'month', 'year'] as const).map((range) => (
-                  <Button
-                    key={range}
-                    variant={usageChartRange === range ? 'primary' : 'subtle'}
-                    size="sm"
-                    onClick={() => setUsageChartRange(range)}
-                  >
-                    {range === 'day'
-                      ? t('dashboard.usageChartDay')
-                      : range === 'month'
-                        ? t('dashboard.usageChartMonth')
-                        : t('dashboard.usageChartYear')}
-                  </Button>
-                ))}
-              </div>
-              {(() => {
-                const chartData =
-                  usageChartRange === 'day'
-                    ? usageByDay.map((d) => ({ label: d.date.slice(5) || d.date, tokens: d.tokens }))
-                    : usageChartRange === 'month'
-                      ? usageByMonth.map((d) => ({ label: d.period, tokens: d.tokens }))
-                      : usageByYear.map((d) => ({ label: d.year, tokens: d.tokens }));
-                const hasData = chartData.length > 0 && chartData.some((d) => d.tokens > 0);
-                return hasData ? (
-                  <div className="plexon-dash-chart">
-                    <ResponsiveContainer width="100%" height={260}>
-                      <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-                        <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                        <Tooltip
-                          formatter={(value) => [
-                            Number(value ?? 0).toLocaleString(),
-                            t('dashboard.usageTokens'),
-                          ]}
-                        />
-                        <Bar dataKey="tokens" radius={[0, 0, 0, 0]}>
-                          {chartData.map((_, i) => (
-                            <Cell key={i} fill="var(--ink, var(--color-primary-main, #1a1a1a))" />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <Text role="meta" as="p" className="plexon-dash-band-status">
-                    {t('dashboard.usageNoData')}
-                  </Text>
-                );
-              })()}
-            </div>
+            <UsageTokenChart
+              range={usageChartRange}
+              onRangeChange={setUsageChartRange}
+              byDay={usageByDay}
+              byMonth={usageByMonth}
+              byYear={usageByYear}
+            />
           )}
         </section>
       )}

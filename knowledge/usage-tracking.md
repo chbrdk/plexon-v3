@@ -24,7 +24,7 @@ CHECKION und AUDION senden Nutzungs-Events an PLEXON. PLEXON rechnet sie in Toke
   - Tabelle: Dienst, Periode (YYYY-MM), Tokens (bei Admin: inkl. Nutzer-Spalte).
   - **Admin:** Abschnitt **Alle Nutzer – letzte Events** (`GET /api/admin/usage/events`, erste 100 Zeilen, **Mehr laden** mit `offset`); Spalten inkl. Details aus `formatUsageEventDetail` (wie im eigenen Verlauf).
   - **Verlauf:** Letzte Nutzungen des **eingeloggten** Users (Zeit, Dienst, Aktion, Details, Tokens) aus `GET /api/usage` → `recentEvents`.
-  - **Diagramm:** Verbrauch nach Tag (30 Tage), Monat (12 Monate) oder Jahr; Balkendiagramm (Recharts).
+  - **Diagramm:** Verbrauch nach Tag (30 Tage, mit Null-Tagen aufgefüllt), Monat (12 Monate) oder Jahr; Magazine-Balkendiagramm (`UsageTokenChart`, Recharts).
 - Datenquelle: `GET /api/usage` (session-basiert); bei Admin zusätzlich `GET /api/admin/usage` und `GET /api/admin/usage/events`.
 
 ## Env (Services)

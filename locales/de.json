@@ -303,9 +303,10 @@
     "usageAdminEventsEmpty": "Noch keine Nutzungsereignisse in der Datenbank.",
     "usageLoadMore": "Mehr laden",
     "usageChart": "Verbrauch (Diagramm)",
-    "usageChartDay": "Tag (30 Tage)",
-    "usageChartMonth": "Monat (12 Monate)",
-    "usageChartYear": "Jahr"
+    "usageChartDay": "30 Tage",
+    "usageChartMonth": "12 Monate",
+    "usageChartYear": "Jahre",
+    "usageChartTotal": "{n} Tokens in dieser Ansicht"
   },
   "products": {
     "title": "Produktkatalog",
