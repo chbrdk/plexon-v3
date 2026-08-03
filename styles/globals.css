@@ -246,16 +246,17 @@
 .plexon-magazine-card {
   display: grid;
   gap: var(--space-2, 0.5rem);
-  padding: var(--space-3, 0.85rem);
+  padding: 1.1rem 1.15rem 1.2rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius-panel, 12px);
-  background: color-mix(in srgb, var(--bg1, var(--bg0)) 88%, transparent);
+  border-radius: 0;
+  background: transparent;
   color: inherit;
   text-decoration: none;
+  box-shadow: none;
 }
 
 .plexon-magazine-card:hover {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
 }
 
 .plexon-project-capability-strip {
@@ -269,7 +270,7 @@
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.75rem;
   font-weight: 600;
   border: 1px solid var(--line);
@@ -279,20 +280,47 @@
 
 .plexon-capability-chip[data-state='on'] {
   border-color: color-mix(in srgb, var(--accent, #00ca55) 45%, var(--line));
-  color: var(--fg);
-  background: color-mix(in srgb, var(--accent, #00ca55) 12%, transparent);
+  color: var(--ink, var(--fg));
+  background: transparent;
 }
 
 .plexon-collection-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--msqdx-spacing-md, 1rem);
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
 }
 
 .plexon-collection-card {
   display: grid;
-  gap: 0.35rem;
-  padding: var(--space-3, 0.85rem);
+  align-content: start;
+  gap: 0.55rem;
+  min-height: 11rem;
+  margin: 0;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
+}
+
+.plexon-collection-card:hover {
+  border-bottom-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+}
+
+@media (max-width: 720px) {
+  .plexon-collection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plexon-collection-card {
+    min-height: 0;
+  }
 }
 
 .plexon-collection-card-head {
@@ -302,40 +330,72 @@
   gap: 0.5rem;
 }
 
+.plexon-collection-card-kicker {
+  margin: 0;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .plexon-collection-card-title {
   margin: 0;
-  font-size: var(--type-md, 1rem);
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
+  font-weight: var(--weight-light, 300);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-collection-card-hint {
+  margin: 0;
 }
 
 .plexon-collection-card-badge {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.15rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
   color: var(--muted);
   flex-shrink: 0;
   white-space: nowrap;
+  border-radius: 0;
 }
 
-.plexon-collection-card-domain {
-  margin: 0;
+.plexon-collection-card-meta {
+  list-style: none;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
-.plexon-collection-card-domain-spacer {
-  min-height: 0.25rem;
+.plexon-collection-card-meta .ds-chip {
+  border-radius: 0;
 }
 
 .plexon-collection-card-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.15rem 0.35rem;
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
 }
 
 .plexon-collection-card-link {
   text-decoration: none;
   display: inline-flex;
+}
+
+.plexon-collection-card-link .ds-btn {
+  min-height: 0;
+  padding-inline: 0.15rem;
 }
 
 .plexon-collection-list-status,

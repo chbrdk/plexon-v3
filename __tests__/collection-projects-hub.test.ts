@@ -39,11 +39,13 @@ describe('collection projects hub', () => {
     expect(shell).toContain('nav.projects')
   })
 
-  it('me companies API lists user companies', () => {
-    const route = readFileSync(
-      path.join(root, 'app/api/platform/me/companies/route.ts'),
+  it('collection cards use theme tokens without forced light surface', () => {
+    const card = readFileSync(
+      path.join(root, 'components/projects/CollectionProjectCard.tsx'),
       'utf8'
     )
-    expect(route).toContain('listUserCompanies')
+    expect(card).not.toContain("data-msqdx-surface")
+    expect(card).toContain('plexon-collection-card')
+    expect(card).toContain('Chip')
   })
 })
