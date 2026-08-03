@@ -14,3 +14,4 @@
 - **Dashboard API:** `GET /api/platform/projects/{id}/dashboard` (session) aggregates CHECKION/AUDION with service headers incl. `X-Plexon-User-Id`.
 - **Open-AUDION links:** Dashboard and `GET /api/platform/me/project-insights` set AUDION admin URL with `platformProjectHint` (when AUDION summary exists) and always **`platformCompanyId`** (`platform_projects.company_id`). Builder: `lib/audion-admin-launch-url.ts`.
 - **Federation contract:** `2026-05-plexon-federation-v3` (project upsert + summary GET).
+- **Knowledge Pack:** Collection-scoped shared brief (facets) is **not** part of thin upsert. CRUD via dedicated knowledge endpoints — `specs/domain/collection-knowledge-pack.md` · `specs/api/collection-knowledge-pack.md`. Companions: Audion publish, Checkion GEO consume.

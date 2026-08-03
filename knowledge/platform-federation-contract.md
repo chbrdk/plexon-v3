@@ -46,6 +46,13 @@ Die Version wird von `PLEXON` in Service-Antworten gesetzt. Products schicken di
 - `GET /api/platform/products`
 - Zweck: foederierte Produktmetadaten und Runtime-Status fuer Dashboard, Produktkatalog und spaetere Plattform-Surfaces
 
+### Collection Knowledge Pack (v3, spezifiziert)
+
+- `GET/PUT/PATCH /api/platform/projects/:platformProjectId/knowledge…`
+- Zweck: facetierte Shared Briefs pro Collection (nicht Tenant-Company-Default)
+- **Nicht** Teil des thin Project-Upserts (`PUT …/provisioning/projects/{id}`)
+- Spec: `specs/domain/collection-knowledge-pack.md` · `specs/api/collection-knowledge-pack.md`
+
 ## Produkt-Registry
 
 Die Registry in `PLEXON/lib/platform-products.ts` ist die zentrale Quelle fuer:

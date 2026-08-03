@@ -12,6 +12,7 @@ Stand: Mai 2026
 - Produkt-Registry
 - Produktstatus und Health
 - Einstiegspunkte / Deep Links
+- **Collection Knowledge Pack** (facetierte Shared Briefs: Profile, Competitive, Research-Distillate, GEO-Kontext, reservierte Brandion-Facet) — SoT unter der Collection; siehe `specs/domain/collection-knowledge-pack.md`
 - spaeter: globale Suche, zentrale Boards, letzte Aktivitaeten, Read-only-Summaries
 
 ## Was bleibt produktlokal
@@ -21,7 +22,7 @@ Stand: Mai 2026
 - Scan-Launcher
 - Deep-Scan-Ergebnisse
 - Projekt-Workspaces
-- GEO / E-E-A-T
+- GEO / E-E-A-T (Jobs, `queryRuns`, Presence) — Distillate optional in Pack-Facet `geo_context` / `competitive` (`checkion-v3/specs/domain/geo-knowledge-consume.md`)
 - Rank Tracking
 - MCP Server und produktlokale Tool-APIs
 
@@ -29,9 +30,14 @@ Stand: Mai 2026
 
 - Persona-Admin
 - Projekte, Target Groups, Journeys
+- Reiches Knowledge-Dossier / Research (TipTap) — Distillate → Pack-Facet `research_brief` (`audion-v3/specs/domain/knowledge-pack-publish.md`)
 - BFF-/Proxy-Schicht im Next-Web
 - Chat- und Voice-Flows
 - Multi-Service-Runtimes (`api`, `chat-api`, `indexing-api`, Worker)
+
+### BRANDION (spaeter)
+
+- Guidelines, Tokens, Voice, Asset-Checks — produktlokal; Pack-Facet `brand` bleibt **reserviert**, bis Brandion an v3-Federation angebunden ist (nur Refs/Distillate, kein Voll-Dump)
 
 ## Selektive Surface-Konsolidierung
 

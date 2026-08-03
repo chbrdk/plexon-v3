@@ -5,7 +5,7 @@
 - **1A** — always both product mirrors on create  
 - **Fresh start** — plexon-v3 (+ companion product DBs) are new islands; **no** legacy backfill / no product-only insight cards  
 
-**Companion:** `knowledge/platform-projects-central-creation.md` · `knowledge/platform-surface-ownership.md`
+**Companion:** `knowledge/platform-projects-central-creation.md` · `knowledge/platform-surface-ownership.md` · Knowledge Pack: `specs/domain/collection-knowledge-pack.md` · `specs/api/collection-knowledge-pack.md`
 
 ## Goal
 
@@ -64,6 +64,10 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 - Home keeps a short preview (limit 6) with CTAs to the hub.
 - Detail stays `/projects/[id]` (`PlatformProjectDashboard`).
 - Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync both).
+
+## Collection Knowledge Pack
+
+Shared cross-product brief (profile, competitive, research distillates, GEO context, reserved Brandion facet) lives on the Collection — **not** inside thin product upsert and **not** as Tenant-Company default for client work. Structure = facets; product dossiers stay local and publish distillates. Spec: `specs/domain/collection-knowledge-pack.md`. Phasing: Spec → Pack CRUD in Plexon → GEO/Audion consume → Brandion facet later.
 
 ## UI rebuild note
 

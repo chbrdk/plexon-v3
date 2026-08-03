@@ -15,5 +15,15 @@
 - Rail dock storage key: `plexon.v3.railDock`
 - Default theme: `msqdx-dark` (`data-theme` on `<html>`)
 - Specs: `specs/domain/app-shell.md`
+- Specs index: `knowledge/specs-index.md`
+- Collection projects: `specs/domain/collection-projects.md`
+- Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
+- Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
+- Planned knowledge routes (implement Phase 1):  
+  - `GET/PUT /api/platform/projects/:id/knowledge`  
+  - `GET/PATCH /api/platform/projects/:id/knowledge/facets/:facetId`  
+  - `POST /api/platform/projects/:id/knowledge/facets/:facetId/publish`  
+  - Collection detail UI band on `/projects/[id]` (`PlatformProjectDashboard`)
+- Companions: `audion-v3/specs/domain/knowledge-pack-publish.md` · `checkion-v3/specs/domain/geo-knowledge-consume.md`
 - UI rebuild progress: `knowledge/ui-rebuild-msqdx-ui.md`
 - Prod freeze: `chbrdk/PLEXON` — never deploy Coolify prod from this repo
