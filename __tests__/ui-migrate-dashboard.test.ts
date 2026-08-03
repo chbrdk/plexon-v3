@@ -8,15 +8,16 @@ const page = readFileSync(path.join(root, 'app/page.tsx'), 'utf8')
 describe('dashboard ui migrate (wave 1)', () => {
   it('uses @msqdx/ui and no legacy DS imports', () => {
     expect(page).toContain("from '@msqdx/ui'")
-    expect(page).toContain('SectionChrome')
+    expect(page).toContain('plexon-dash-band-title')
     expect(page).not.toContain("from '@msqdx/react'")
     expect(page).not.toContain("from '@mui/material'")
   })
 
-  it('keeps magazine shell + product catalog', () => {
+  it('keeps magazine shell + product catalog without page SectionChrome', () => {
     expect(page).toContain('plexon-magazine')
     expect(page).toContain('ProductCatalog')
-    expect(page).toContain("t('dashboard.title')")
+    expect(page).not.toContain('SectionChrome')
+    expect(page).toContain("t('dashboard.productsTitle')")
   })
 
   it('usage band uses magazine dash chrome, not Panel wash', () => {

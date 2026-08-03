@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Alert, Button, Field, Input, Select, Text } from '@msqdx/ui'
+import { Alert, Button, Dialog, Field, Input, Select, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_PLATFORM_ME_COMPANIES,
@@ -14,9 +14,17 @@ type CompanyOption = { id: string; name: string }
 
 type CreateCollectionProjectFormProps = {
   onCreated?: (platformProjectId: string) => void
+  /** Called after successful create (before navigate). */
+  onClose?: () => void
+  /** Hide chrome when embedded in Dialog. */
+  embedded?: boolean
 }
 
-export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProjectFormProps) {
+export function CreateCollectionProjectForm({
+  onCreated,
+  onClose,
+  embedded = false,
+}: CreateCollectionProjectFormProps) {
   const { t } = useI18n()
   const router = useRouter()
   const [companies, setCompanies] = useState<CompanyOption[]>([])
@@ -38,8 +46,7 @@ export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProje
         const items = Array.isArray(data.items) ? data.items : []
         if (cancelled) return
         setCompanies(items)
-        if (items.length === 1) setCompanyId(items[0].id)
-        else if (items.length > 1 && !companyId) setCompanyId(items[0].id)
+        if (items.length >= 1) setCompanyId(items[0].id)
       } catch (e) {
         if (!cancelled) {
           setCompanies([])
@@ -52,7 +59,6 @@ export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProje
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once
   }, [t])
 
   const canSubmit =
@@ -80,6 +86,7 @@ export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProje
         throw new Error(body.error || t('projects.hub.createError'))
       }
       onCreated?.(body.id)
+      onClose?.()
       router.push(pathPlatformProjectDashboard(body.id))
     } catch (e) {
       setError(e instanceof Error ? e.message : t('projects.hub.createError'))
@@ -98,18 +105,30 @@ export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProje
 
   return (
     <form
-      className="plexon-settings-fields plexon-collection-create"
+      className={
+        embedded
+          ? 'plexon-settings-fields plexon-collection-create plexon-collection-create--embedded'
+          : 'plexon-settings-fields plexon-collection-create'
+      }
       onSubmit={(e) => {
         e.preventDefault()
         void submit()
       }}
     >
-      <Text role="title" as="h3">
-        {t('projects.hub.createTitle')}
-      </Text>
-      <Text role="meta" as="p">
-        {t('projects.hub.createHint')}
-      </Text>
+      {!embedded ? (
+        <>
+          <Text role="title" as="h3">
+            {t('projects.hub.createTitle')}
+          </Text>
+          <Text role="meta" as="p">
+            {t('projects.hub.createHint')}
+          </Text>
+        </>
+      ) : (
+        <Text role="meta" as="p">
+          {t('projects.hub.createHint')}
+        </Text>
+      )}
 
       {companies.length > 1 ? (
         <Field label={t('projects.hub.company')} htmlFor="collection-create-company">
@@ -147,13 +166,59 @@ export function CreateCollectionProjectForm({ onCreated }: CreateCollectionProje
         />
       </Field>
 
-      {error ? (
-        <Alert tone="error">{error}</Alert>
-      ) : null}
+      {error ? <Alert tone="error">{error}</Alert> : null}
 
-      <Button type="submit" variant="primary" disabled={!canSubmit}>
-        {submitting ? t('common.loading') : t('projects.hub.createSubmit')}
-      </Button>
+      <div className="plexon-collection-create-actions">
+        {embedded && onClose ? (
+          <Button type="button" variant="ghost" size="md" onClick={onClose} disabled={submitting}>
+            {t('common.cancel')}
+          </Button>
+        ) : null}
+        <Button type="submit" variant="primary" size="md" disabled={!canSubmit}>
+          {submitting ? t('common.loading') : t('projects.hub.createSubmit')}
+        </Button>
+      </div>
     </form>
+  )
+}
+
+/** First grid tile — Audion-style create card that opens the create dialog. */
+export function CreateCollectionProjectCard({
+  onCreated,
+}: {
+  onCreated?: (platformProjectId: string) => void
+}) {
+  const { t } = useI18n()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        type="button"
+        className="plexon-collection-card plexon-collection-card--create"
+        onClick={() => setOpen(true)}
+      >
+        <span className="plexon-collection-card-kicker">{'\u00a0'}</span>
+        <Text role="headline" as="span" className="plexon-collection-card-title">
+          {t('projects.hub.createTitle')}
+        </Text>
+        <Text role="meta" as="span" className="plexon-collection-card-hint">
+          {t('projects.hub.createHint')}
+        </Text>
+      </button>
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title={t('projects.hub.createTitle')}
+        className="plexon-collection-create-dialog"
+      >
+        <CreateCollectionProjectForm
+          embedded
+          onCreated={onCreated}
+          onClose={() => setOpen(false)}
+        />
+      </Dialog>
+    </>
   )
 }

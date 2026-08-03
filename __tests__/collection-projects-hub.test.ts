@@ -29,6 +29,20 @@ describe('collection projects hub', () => {
     expect(form).toContain('apiPlatformCompanyPlatformProjects')
     expect(form).toContain('API_PLATFORM_ME_COMPANIES')
     expect(form).toContain('pathPlatformProjectDashboard')
+    expect(form).toContain('CreateCollectionProjectCard')
+    expect(form).toContain('plexon-collection-card--create')
+  })
+
+  it('projects hub uses create card in the collection grid', () => {
+    const page = readFileSync(path.join(root, 'app/projects/page.tsx'), 'utf8')
+    const list = readFileSync(
+      path.join(root, 'components/projects/CollectionProjectsList.tsx'),
+      'utf8'
+    )
+    expect(page).toContain('showCreateCard')
+    expect(page).not.toContain('CreateCollectionProjectForm')
+    expect(list).toContain('CreateCollectionProjectCard')
+    expect(list).toContain('showCreateCard')
   })
 
   it('shell nav exposes PATH_PROJECTS', () => {

@@ -6,6 +6,7 @@ import { useI18n } from '@/components/i18n/I18nProvider'
 import { API_PLATFORM_ME_PROJECT_INSIGHTS } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
 import { CollectionProjectCard } from '@/components/projects/CollectionProjectCard'
+import { CreateCollectionProjectCard } from '@/components/projects/CreateCollectionProjectForm'
 
 type InsightsMeta = {
   truncated: boolean
@@ -24,6 +25,9 @@ type CollectionProjectsListProps = {
   /** Bump to refetch when self-fetching. */
   refreshKey?: number
   onLoaded?: (projects: CollectionProjectInsight[], meta: InsightsMeta | null) => void
+  /** Audion-style first-grid create card. */
+  showCreateCard?: boolean
+  onCreated?: (platformProjectId: string) => void
 }
 
 export function CollectionProjectsList({
@@ -34,6 +38,8 @@ export function CollectionProjectsList({
   limit,
   refreshKey = 0,
   onLoaded,
+  showCreateCard = false,
+  onCreated,
 }: CollectionProjectsListProps) {
   const { t } = useI18n()
   const controlled = controlledProjects !== undefined
@@ -108,7 +114,7 @@ export function CollectionProjectsList({
     )
   }
 
-  if (projects.length === 0) {
+  if (projects.length === 0 && !showCreateCard) {
     return (
       <EmptyState className="plexon-collection-list-status">
         {t('dashboard.platformInsightsEmpty')}
@@ -127,10 +133,16 @@ export function CollectionProjectsList({
         </Text>
       ) : null}
       <div className="plexon-collection-grid">
+        {showCreateCard ? <CreateCollectionProjectCard onCreated={onCreated} /> : null}
         {projects.map((row) => (
           <CollectionProjectCard key={row.platformProject.id} row={row} />
         ))}
       </div>
+      {projects.length === 0 && showCreateCard ? (
+        <EmptyState className="plexon-collection-list-status">
+          {t('dashboard.platformInsightsEmpty')}
+        </EmptyState>
+      ) : null}
     </div>
   )
 }

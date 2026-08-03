@@ -14,7 +14,6 @@ import {
   Field,
   Input,
   Panel,
-  SectionChrome,
   Text,
 } from '@msqdx/ui';
 import { useSession } from 'next-auth/react';
@@ -873,28 +872,23 @@ export default function DashboardPage() {
 
   return (
     <div className="plexon-magazine" style={{ maxWidth: 1400, marginInline: 'auto' }}>
-      <SectionChrome
-        title={t('dashboard.title')}
-        meta={<Text role="meta">{t('dashboard.subtitle')}</Text>}
-      />
-
       {sessionStatus === 'authenticated' && (
-        <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }} data-section="product-teasers">
-          <DashText variant="h6" weight="semibold" sx={{ mb: 1.5 }}>
+        <div data-section="product-teasers">
+          <Text role="title" as="h2" className="plexon-dash-band-title">
             {t('dashboard.productsTitle')}
-          </DashText>
+          </Text>
           <ProductCatalog variant="dashboard" dataSection="product-teasers-grid" />
-        </Box>
+        </div>
       )}
 
       {sessionStatus === 'authenticated' && (
-        <Box sx={{ mb: 'var(--msqdx-spacing-lg)' }} data-section="platform-project-insights">
-          <DashText variant="h6" weight="semibold" sx={{ mb: 0.5 }}>
+        <div data-section="platform-project-insights">
+          <Text role="title" as="h2" className="plexon-dash-band-title">
             {t('dashboard.platformInsightsTitle')}
-          </DashText>
-          <DashText variant="body2" sx={{ color: 'var(--color-text-muted-on-light)', mb: 1 }}>
+          </Text>
+          <Text role="meta" as="p" className="plexon-dash-band-deck" style={{ marginBottom: '0.85rem' }}>
             {t('dashboard.platformInsightsSubtitle')}
-          </DashText>
+          </Text>
           <div className="plexon-collection-hub-preview-actions">
             <Link href={PATH_PROJECTS} style={{ textDecoration: 'none' }}>
               <Button variant="primary" size="sm">
@@ -922,7 +916,7 @@ export default function DashboardPage() {
             }
             limit={6}
           />
-        </Box>
+        </div>
       )}
 
       {/* Zentrale Nutzer – nur für Admins sichtbar */}
@@ -1063,26 +1057,89 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {isAdmin && !usageLoading && (
-            <div className="plexon-dash-subband" data-section="usage-admin-events">
-              <Text role="title" as="h3" className="plexon-dash-subband-title">
-                {t('dashboard.usageAdminEventsTitle')}
-              </Text>
-              <Text role="meta" as="p" className="plexon-dash-subband-deck">
-                {t('dashboard.usageAdminEventsSubtitle')}
-              </Text>
-              {adminUsageEvents.length === 0 ? (
-                <Text role="meta" as="p" className="plexon-dash-band-status">
-                  {t('dashboard.usageAdminEventsEmpty')}
-                </Text>
-              ) : (
-                <>
+          {(isAdmin || usageRecentEvents.length > 0) && !usageLoading ? (
+            <div className="plexon-dash-pair">
+              {isAdmin ? (
+                <div className="plexon-dash-subband" data-section="usage-admin-events">
+                  <Text role="title" as="h3" className="plexon-dash-subband-title">
+                    {t('dashboard.usageAdminEventsTitle')}
+                  </Text>
+                  <Text role="meta" as="p" className="plexon-dash-subband-deck">
+                    {t('dashboard.usageAdminEventsSubtitle')}
+                  </Text>
+                  {adminUsageEvents.length === 0 ? (
+                    <Text role="meta" as="p" className="plexon-dash-band-status">
+                      {t('dashboard.usageAdminEventsEmpty')}
+                    </Text>
+                  ) : (
+                    <>
+                      <div className="plexon-dash-table-wrap is-scroll">
+                        <table className="plexon-dash-table">
+                          <thead>
+                            <tr>
+                              <th scope="col">{t('dashboard.usageHistoryTime')}</th>
+                              <th scope="col">{t('dashboard.usageUser')}</th>
+                              <th scope="col">{t('dashboard.usageService')}</th>
+                              <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
+                              <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
+                              <th scope="col" className="plexon-dash-table-num is-end">
+                                {t('dashboard.usageTokens')}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {adminUsageEvents.map((ev) => {
+                              const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
+                              return (
+                                <tr key={ev.id}>
+                                  <td className="plexon-dash-table-num">
+                                    {new Date(ev.createdAt).toLocaleString(undefined, {
+                                      dateStyle: 'short',
+                                      timeStyle: 'short',
+                                    })}
+                                  </td>
+                                  <td style={{ maxWidth: 200, wordBreak: 'break-word' }}>
+                                    {ev.userEmail || ev.userId}
+                                  </td>
+                                  <td>{ev.service}</td>
+                                  <td>{ev.eventType}</td>
+                                  <td className="plexon-dash-table-detail" title={detail || undefined}>
+                                    {detail || '—'}
+                                  </td>
+                                  <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      {adminUsageEventsHasMore && (
+                        <div>
+                          <Button
+                            variant="subtle"
+                            size="md"
+                            onClick={() => void loadMoreAdminUsageEvents()}
+                            disabled={adminUsageEventsLoading}
+                          >
+                            {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ) : null}
+
+              {usageRecentEvents.length > 0 ? (
+                <div className="plexon-dash-subband" data-section="usage-history">
+                  <Text role="title" as="h3" className="plexon-dash-subband-title">
+                    {t('dashboard.usageHistory')}
+                  </Text>
                   <div className="plexon-dash-table-wrap is-scroll">
                     <table className="plexon-dash-table">
                       <thead>
                         <tr>
                           <th scope="col">{t('dashboard.usageHistoryTime')}</th>
-                          <th scope="col">{t('dashboard.usageUser')}</th>
                           <th scope="col">{t('dashboard.usageService')}</th>
                           <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
                           <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
@@ -1092,7 +1149,7 @@ export default function DashboardPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {adminUsageEvents.map((ev) => {
+                        {usageRecentEvents.map((ev) => {
                           const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
                           return (
                             <tr key={ev.id}>
@@ -1101,9 +1158,6 @@ export default function DashboardPage() {
                                   dateStyle: 'short',
                                   timeStyle: 'short',
                                 })}
-                              </td>
-                              <td style={{ maxWidth: 200, wordBreak: 'break-word' }}>
-                                {ev.userEmail || ev.userId}
                               </td>
                               <td>{ev.service}</td>
                               <td>{ev.eventType}</td>
@@ -1117,66 +1171,10 @@ export default function DashboardPage() {
                       </tbody>
                     </table>
                   </div>
-                  {adminUsageEventsHasMore && (
-                    <div>
-                      <Button
-                        variant="subtle"
-                        size="md"
-                        onClick={() => void loadMoreAdminUsageEvents()}
-                        disabled={adminUsageEventsLoading}
-                      >
-                        {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
-                      </Button>
-                    </div>
-                  )}
-                </>
-              )}
+                </div>
+              ) : null}
             </div>
-          )}
-
-          {!usageLoading && usageRecentEvents.length > 0 && (
-            <div className="plexon-dash-subband" data-section="usage-history">
-              <Text role="title" as="h3" className="plexon-dash-subband-title">
-                {t('dashboard.usageHistory')}
-              </Text>
-              <div className="plexon-dash-table-wrap is-scroll">
-                <table className="plexon-dash-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">{t('dashboard.usageHistoryTime')}</th>
-                      <th scope="col">{t('dashboard.usageService')}</th>
-                      <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
-                      <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
-                      <th scope="col" className="plexon-dash-table-num is-end">
-                        {t('dashboard.usageTokens')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usageRecentEvents.map((ev) => {
-                      const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
-                      return (
-                        <tr key={ev.id}>
-                          <td className="plexon-dash-table-num">
-                            {new Date(ev.createdAt).toLocaleString(undefined, {
-                              dateStyle: 'short',
-                              timeStyle: 'short',
-                            })}
-                          </td>
-                          <td>{ev.service}</td>
-                          <td>{ev.eventType}</td>
-                          <td className="plexon-dash-table-detail" title={detail || undefined}>
-                            {detail || '—'}
-                          </td>
-                          <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          ) : null}
 
           {!usageLoading && (usageByDay.length > 0 || usageOwnSummary.length > 0) && (
             <div className="plexon-dash-subband" data-section="usage-chart">
