@@ -32,14 +32,17 @@ RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/ms
 
 # ---- Builder ----
 FROM base AS builder
+# Keep deps installable even if Coolify injects NODE_ENV=production as a build ARG.
 ENV NODE_ENV=development
 COPY --from=ds /workspace/msqdx-ui /workspace/msqdx-ui
 COPY --from=ds /workspace/msqdx-design-system /workspace/msqdx-design-system
 COPY . /workspace/plexon-v3
 WORKDIR /workspace/plexon-v3
 
+# --include=dev: Coolify may force NODE_ENV=production before this stage; without it,
+# typescript/devDeps can be omitted and `next build` fails oddly / gets OOM-killed mid-webpack.
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --ignore-scripts --no-audit --no-fund
+    npm ci --no-audit --no-fund --include=dev
 
 RUN test -d /workspace/msqdx-ui/packages/ui/src \
     && test -f /workspace/msqdx-ui/packages/ui-tokens/dist/index.js \
@@ -48,8 +51,19 @@ RUN test -d /workspace/msqdx-ui/packages/ui/src \
 ENV MSQDX_UI_BASE=../msqdx-ui
 ENV DS_BASE=../msqdx-design-system
 ENV NODE_ENV=production
-ENV NODE_OPTIONS=--max-old-space-size=6144
-RUN npm run build
+# Cap heap for Coolify hosts (~4–8 GB). Higher values invite cgroup OOM (exit 255, no Next error).
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_SOURCEMAPS=1
+# Coolify often marks app secrets "available at buildtime". Blank ONLY for this RUN so
+# Next does not try live DB/auth during compile / page data collection.
+RUN DATABASE_URL= \
+    AUTH_SECRET= \
+    AUTH_URL= \
+    NEXTAUTH_SECRET= \
+    NEXTAUTH_URL= \
+    OPENAI_API_KEY= \
+    npm run build
 
 # ---- Runner ----
 FROM ${NODE_IMAGE} AS runner

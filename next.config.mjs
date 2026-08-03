@@ -14,10 +14,15 @@ const nextConfig = {
   basePath: basePath || undefined,
   assetPrefix: basePath ? `${basePath}/` : undefined,
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   typescript: {
     // Temporary during @msqdx/ui cutover: legacy surfaces still hit shim typing gaps.
     // Remove once Waves 1–7 migrate off bridge/shim (see specs/domain/ui-migrate.md).
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    // Lower peak RSS during Coolify/Docker webpack builds.
+    webpackMemoryOptimizations: true,
   },
   webpack: (config) => {
     config.resolve.symlinks = true
