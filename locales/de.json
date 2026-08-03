@@ -373,7 +373,17 @@
       "startChat": "Chat",
       "openCheckion": "CHECKION öffnen",
       "openAudion": "AUDION öffnen",
-      "openAssistant": "Assistant fragen"
+      "openAssistant": "Assistant fragen",
+      "knowledgeTitle": "Collection-Wissen",
+      "knowledgeSubtitle": "Plattform-Quelle der Wahrheit — gemeinsamer Brief für CHECKION und AUDION.",
+      "knowledgeLoadError": "Collection-Wissen konnte nicht geladen werden.",
+      "knowledgeSharedBadge": "Geteilt",
+      "knowledgeEdit": "Facet bearbeiten",
+      "knowledgeSave": "Facet speichern",
+      "knowledgeEditForbidden": "Keine Berechtigung, Collection-Wissen zu bearbeiten.",
+      "knowledgeBrandReserved": "Kommt mit Brandion — noch keine Brand-Guideline-Daten.",
+      "knowledgeOpenAudionResearch": "Vollständige Research in AUDION bearbeiten",
+      "knowledgeOpenCheckionGeo": "Aktuelles GEO in CHECKION öffnen"
     }
   },
   "settings": {

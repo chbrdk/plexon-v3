@@ -110,6 +110,30 @@ export const platformProjects = pgTable(
   })
 );
 
+/**
+ * Collection Knowledge Pack — shared cross-product brief (facets), one row per Collection.
+ * Spec: specs/domain/collection-knowledge-pack.md — dedicated table (not platform_projects.metadata).
+ */
+export const collectionKnowledgePacks = pgTable(
+  'collection_knowledge_packs',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    revision: integer('revision').notNull().default(1),
+    schemaVersion: text('schema_version').notNull(),
+    facets: jsonb('facets').$type<Record<string, unknown>>().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedByUserId: text('updated_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  },
+  (t) => ({
+    platformProjectUnique: uniqueIndex('collection_knowledge_packs_platform_project_id_uidx').on(
+      t.platformProjectId
+    ),
+  })
+);
+
 /** Local product project id per platform project (CHECKION / AUDION mirror). */
 export const platformProjectProductBindings = pgTable(
   'platform_project_product_bindings',

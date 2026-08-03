@@ -373,7 +373,17 @@
       "startChat": "Chat",
       "openCheckion": "Open CHECKION",
       "openAudion": "Open AUDION",
-      "openAssistant": "Ask assistant"
+      "openAssistant": "Ask assistant",
+      "knowledgeTitle": "Collection knowledge",
+      "knowledgeSubtitle": "Platform source of truth — shared brief across CHECKION and AUDION.",
+      "knowledgeLoadError": "Could not load Collection knowledge.",
+      "knowledgeSharedBadge": "Shared",
+      "knowledgeEdit": "Edit facet",
+      "knowledgeSave": "Save facet",
+      "knowledgeEditForbidden": "You do not have permission to edit Collection knowledge.",
+      "knowledgeBrandReserved": "Coming with Brandion — no brand guideline data yet.",
+      "knowledgeOpenAudionResearch": "Edit full research in AUDION",
+      "knowledgeOpenCheckionGeo": "Open latest GEO in CHECKION"
     }
   },
   "settings": {

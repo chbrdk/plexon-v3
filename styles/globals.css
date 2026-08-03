@@ -284,6 +284,66 @@
   background: transparent;
 }
 
+.plexon-knowledge-band {
+  margin-block: 1.25rem 0.5rem;
+}
+
+.plexon-knowledge-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.plexon-knowledge-toc-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.plexon-knowledge-toc-link[data-empty='false'] {
+  color: var(--ink, var(--fg));
+  font-weight: 600;
+}
+
+.plexon-knowledge-facet-body {
+  display: grid;
+  gap: 0.55rem;
+  padding-block: 0.35rem 0.65rem;
+}
+
+.plexon-knowledge-list {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.plexon-knowledge-section {
+  display: grid;
+  gap: 0.25rem;
+  padding-block: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.plexon-knowledge-edit {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.plexon-knowledge-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .plexon-collection-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));

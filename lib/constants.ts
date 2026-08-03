@@ -215,6 +215,19 @@ export const apiAdminPlatformProjectSync = (id: string) =>
 export const apiPlatformProjectDashboard = (platformProjectId: string) =>
   `/api/platform/projects/${encodeURIComponent(platformProjectId)}/dashboard`;
 
+/** Collection Knowledge Pack (session or service secret). Spec: collection-knowledge-pack. */
+export const apiPlatformProjectKnowledge = (platformProjectId: string) =>
+  `/api/platform/projects/${encodeURIComponent(platformProjectId)}/knowledge`;
+export const apiPlatformProjectKnowledgeFacet = (
+  platformProjectId: string,
+  facetId: string
+) =>
+  `${apiPlatformProjectKnowledge(platformProjectId)}/facets/${encodeURIComponent(facetId)}`;
+export const apiPlatformProjectKnowledgeFacetPublish = (
+  platformProjectId: string,
+  facetId: string
+) => `${apiPlatformProjectKnowledgeFacet(platformProjectId, facetId)}/publish`;
+
 /** Service proxy: CHECKION (legacy/optional when not using central DB). */
 export const API_SERVICES_CHECKION_USERS = '/api/services/checkion/users';
 export const apiServicesCheckionUser = (id: string) => `${API_SERVICES_CHECKION_USERS}/${encodeURIComponent(id)}`;

@@ -19,11 +19,12 @@
 - Collection projects: `specs/domain/collection-projects.md`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
-- Planned knowledge routes (implement Phase 1):  
-  - `GET/PUT /api/platform/projects/:id/knowledge`  
-  - `GET/PATCH /api/platform/projects/:id/knowledge/facets/:facetId`  
-  - `POST /api/platform/projects/:id/knowledge/facets/:facetId/publish`  
-  - Collection detail UI band on `/projects/[id]` (`PlatformProjectDashboard`)
+- Knowledge Pack routes (Phase 1 shipped):
+  - `GET/PUT /api/platform/projects/:id/knowledge` — helpers `apiPlatformProjectKnowledge`
+  - `GET/PATCH /api/platform/projects/:id/knowledge/facets/:facetId` — `apiPlatformProjectKnowledgeFacet`
+  - `POST /api/platform/projects/:id/knowledge/facets/:facetId/publish` — `apiPlatformProjectKnowledgeFacetPublish`
+  - Collection detail UI band on `/projects/[id]` (`CollectionKnowledgeBand` in `PlatformProjectDashboard`)
+  - Table: `collection_knowledge_packs` (Drizzle `lib/db/schema.ts` · migration `0004_collection_knowledge_packs.sql` · `pnpm db:push`)
 - Companions: `audion-v3/specs/domain/knowledge-pack-publish.md` · `checkion-v3/specs/domain/geo-knowledge-consume.md`
 - UI rebuild progress: `knowledge/ui-rebuild-msqdx-ui.md`
 - Prod freeze: `chbrdk/PLEXON` — never deploy Coolify prod from this repo
