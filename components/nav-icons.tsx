@@ -90,3 +90,35 @@ export function NavIconAdmin() {
     </NavSvg>
   )
 }
+
+/** Collection metric — scan / search pulse. */
+export function MetricIconScans() {
+  return (
+    <NavSvg>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </NavSvg>
+  )
+}
+
+/** Collection metric — target groups. */
+export function MetricIconTargetGroups() {
+  return (
+    <NavSvg>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M21.5 19a4 4 0 0 0-5.2-3.8" />
+    </NavSvg>
+  )
+}
+
+/** Collection metric — personas. */
+export function MetricIconPersonas() {
+  return (
+    <NavSvg>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5.5 19a6.5 6.5 0 0 1 13 0" />
+    </NavSvg>
+  )
+}

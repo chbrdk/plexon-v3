@@ -46,6 +46,7 @@ describe('collection projects hub', () => {
     )
     expect(card).not.toContain("data-msqdx-surface")
     expect(card).toContain('plexon-collection-card')
-    expect(card).toContain('Chip')
+    expect(card).toContain('plexon-collection-card-stats')
+    expect(card).toContain('MetricIconScans')
   })
 })
