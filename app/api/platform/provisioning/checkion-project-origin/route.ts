@@ -1,10 +1,7 @@
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { API_STATUS, apiError, handleApiError } from '@/lib/api-error-handler';
-import { getCompanyIdsForUser } from '@/lib/db/companies';
-import { getDb } from '@/lib/db';
 import {
   createPlatformProject,
   deletePlatformProject,
@@ -16,7 +13,6 @@ import {
   getExternalProjectId,
   upsertPlatformProjectBinding,
 } from '@/lib/db/platform-project-bindings';
-import { users } from '@/lib/db/schema';
 import { PLATFORM_PROJECT_BINDING_SYNC_STATUS } from '@/lib/platform-companies';
 import {
   PLEXON_CONTRACT_VERSION_HEADER,
@@ -25,6 +21,7 @@ import {
   readServiceSecret,
 } from '@/lib/platform-contract';
 import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service';
+import { resolveProductOriginOwner } from '@/lib/resolve-product-origin-owner';
 
 function checkSecret(request: Request): boolean {
   const serviceSecret = process.env.PLEXON_SERVICE_SECRET ?? '';
@@ -36,8 +33,9 @@ const bodySchema = z.object({
   checkionProjectId: z.string().min(1),
   name: z.string().min(1),
   domain: z.string().nullable().optional(),
-  ownerPlexonUserId: z.string().min(1),
-  platformCompanyId: z.string().min(1),
+  /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
+  ownerPlexonUserId: z.string().min(1).optional(),
+  platformCompanyId: z.string().min(1).optional(),
 });
 
 export async function POST(request: Request) {
@@ -58,20 +56,23 @@ export async function POST(request: Request) {
     return apiError(msg, API_STATUS.BAD_REQUEST);
   }
 
-  const ownerId = parsed.ownerPlexonUserId.trim();
-  const companyId = parsed.platformCompanyId.trim();
+  let ownerId: string;
+  let companyId: string;
+  try {
+    const resolved = await resolveProductOriginOwner({
+      ownerPlexonUserId: parsed.ownerPlexonUserId,
+      platformCompanyId: parsed.platformCompanyId,
+    });
+    ownerId = resolved.ownerPlexonUserId;
+    companyId = resolved.platformCompanyId;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Could not resolve owner/company';
+    if (msg.includes('Unknown')) return apiError(msg, API_STATUS.NOT_FOUND);
+    if (msg.includes('not a member')) return apiError(msg, API_STATUS.FORBIDDEN);
+    return apiError(msg, API_STATUS.BAD_REQUEST);
+  }
+
   const checkionId = parsed.checkionProjectId.trim();
-
-  const db = getDb();
-  const [ownerRow] = await db.select({ id: users.id }).from(users).where(eq(users.id, ownerId)).limit(1);
-  if (!ownerRow) {
-    return apiError('Unknown ownerPlexonUserId', API_STATUS.NOT_FOUND);
-  }
-
-  const companyIds = await getCompanyIdsForUser(ownerId);
-  if (!companyIds.includes(companyId)) {
-    return apiError('ownerPlexonUserId is not a member of platformCompanyId', API_STATUS.FORBIDDEN);
-  }
 
   const existingPlatformId = await findPlatformProjectIdByProductExternal('checkion', checkionId);
   if (existingPlatformId) {
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
       platformProjectId: existingPlatformId,
       audionProjectId: audionId,
       platformCompanyId: existingProject.companyId,
+      ownerPlexonUserId: ownerId,
     });
   }
 
@@ -145,6 +147,7 @@ export async function POST(request: Request) {
         platformProjectId,
         audionProjectId,
         platformCompanyId: companyId,
+        ownerPlexonUserId: ownerId,
       },
       { status: 201 }
     );

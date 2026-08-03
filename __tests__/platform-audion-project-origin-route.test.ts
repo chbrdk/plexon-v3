@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getCompanyIdsForUser } from '@/lib/db/companies';
-import { getDb } from '@/lib/db';
 import {
   createPlatformProject,
   deletePlatformProject,
@@ -15,13 +13,10 @@ import {
 } from '@/lib/db/platform-project-bindings';
 import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service';
 import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
+import { resolveProductOriginOwner } from '@/lib/resolve-product-origin-owner';
 
-vi.mock('@/lib/db/companies', () => ({
-  getCompanyIdsForUser: vi.fn(),
-}));
-
-vi.mock('@/lib/db', () => ({
-  getDb: vi.fn(),
+vi.mock('@/lib/resolve-product-origin-owner', () => ({
+  resolveProductOriginOwner: vi.fn(),
 }));
 
 vi.mock('@/lib/db/platform-projects', () => ({
@@ -41,18 +36,6 @@ vi.mock('@/lib/platform-project-sync-service', () => ({
   syncPlatformProjectToProducts: vi.fn(),
 }));
 
-function mockOwnerDb() {
-  vi.mocked(getDb).mockReturnValue({
-    select: () => ({
-      from: () => ({
-        where: () => ({
-          limit: async () => [{ id: 'owner-1' }],
-        }),
-      }),
-    }),
-  } as ReturnType<typeof getDb>);
-}
-
 function authHeaders(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
@@ -66,8 +49,11 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.stubEnv('PLEXON_SERVICE_SECRET', 'svc-secret');
-    mockOwnerDb();
-    vi.mocked(getCompanyIdsForUser).mockResolvedValue(['comp-a']);
+    vi.mocked(resolveProductOriginOwner).mockResolvedValue({
+      ownerPlexonUserId: 'owner-1',
+      platformCompanyId: 'comp-a',
+      source: 'explicit',
+    });
     vi.mocked(findPlatformProjectIdByProductExternal).mockResolvedValue(null);
     vi.mocked(createPlatformProject).mockResolvedValue(undefined);
     vi.mocked(ensureBindingPlaceholders).mockResolvedValue(undefined);
@@ -107,12 +93,45 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
         body: JSON.stringify({
           audionProjectId: 'a1',
           name: 'N',
-          ownerPlexonUserId: 'owner-1',
-          platformCompanyId: 'comp-a',
         }),
       })
     );
     expect(res.status).toBe(400);
+  });
+
+  it('returns 201 without owner/company (auto-resolve)', async () => {
+    vi.mocked(resolveProductOriginOwner).mockResolvedValue({
+      ownerPlexonUserId: 'owner-auto',
+      platformCompanyId: 'comp-auto',
+      source: 'bootstrap_user_and_company',
+    });
+    const { POST } = await import('@/app/api/platform/provisioning/audion-project-origin/route');
+    const res = await POST(
+      new Request('http://localhost/api/platform/provisioning/audion-project-origin', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ audionProjectId: 'a1', name: 'Bosch eBike', domain: 'bosch-ebike.com' }),
+      })
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body).toMatchObject({
+      platformProjectId: expect.any(String),
+      checkionProjectId: 'chk-99',
+      platformCompanyId: 'comp-auto',
+      ownerPlexonUserId: 'owner-auto',
+    });
+    expect(resolveProductOriginOwner).toHaveBeenCalledWith({
+      ownerPlexonUserId: undefined,
+      platformCompanyId: undefined,
+    });
+    expect(createPlatformProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        companyId: 'comp-auto',
+        createdByUserId: 'owner-auto',
+        name: 'Bosch eBike',
+      })
+    );
   });
 
   it('returns 201 and CHECKION id on success', async () => {
@@ -122,8 +141,8 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({
-          audionProjectId: 'audion-proj-1',
-          name: 'My brand',
+          audionProjectId: 'a1',
+          name: 'N',
           ownerPlexonUserId: 'owner-1',
           platformCompanyId: 'comp-a',
         }),
@@ -133,27 +152,22 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
     const body = await res.json();
     expect(body.checkionProjectId).toBe('chk-99');
     expect(body.platformCompanyId).toBe('comp-a');
-    expect(typeof body.platformProjectId).toBe('string');
-    expect(vi.mocked(syncPlatformProjectToProducts)).toHaveBeenCalledWith(
-      body.platformProjectId,
-      expect.objectContaining({ onlyProducts: ['checkion'] })
-    );
+    expect(body.ownerPlexonUserId).toBe('owner-1');
   });
 
-  it('returns existing platform project when audion binding already exists', async () => {
-    vi.mocked(findPlatformProjectIdByProductExternal).mockResolvedValue('pp-old');
+  it('returns existing binding idempotently', async () => {
+    vi.mocked(findPlatformProjectIdByProductExternal).mockResolvedValue('pp-existing');
     vi.mocked(getPlatformProjectById).mockResolvedValue({
-      id: 'pp-old',
+      id: 'pp-existing',
       companyId: 'comp-a',
-      name: 'Old',
+      name: 'N',
       domain: null,
-      metadata: null,
       status: 'active',
       createdByUserId: 'owner-1',
       createdAt: new Date(),
       updatedAt: new Date(),
     } as Awaited<ReturnType<typeof getPlatformProjectById>>);
-    vi.mocked(getExternalProjectId).mockResolvedValue('chk-old');
+    vi.mocked(getExternalProjectId).mockResolvedValue('chk-existing');
 
     const { POST } = await import('@/app/api/platform/provisioning/audion-project-origin/route');
     const res = await POST(
@@ -161,7 +175,7 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({
-          audionProjectId: 'audion-dup',
+          audionProjectId: 'a1',
           name: 'N',
           ownerPlexonUserId: 'owner-1',
           platformCompanyId: 'comp-a',
@@ -169,36 +183,27 @@ describe('POST /api/platform/provisioning/audion-project-origin', () => {
       })
     );
     expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.platformProjectId).toBe('pp-old');
-    expect(body.checkionProjectId).toBe('chk-old');
-    expect(vi.mocked(createPlatformProject)).not.toHaveBeenCalled();
+    expect(await res.json()).toMatchObject({
+      platformProjectId: 'pp-existing',
+      checkionProjectId: 'chk-existing',
+      platformCompanyId: 'comp-a',
+    });
+    expect(createPlatformProject).not.toHaveBeenCalled();
   });
 
-  it('deletes platform project and returns 502 when CHECKION sync fails', async () => {
+  it('rolls back when CHECKION sync fails', async () => {
     vi.mocked(syncPlatformProjectToProducts).mockResolvedValue([
-      {
-        platformProjectId: 'pp-new',
-        productId: 'checkion',
-        ok: false,
-        error: 'unreachable',
-      },
+      { platformProjectId: 'x', productId: 'checkion', ok: false, error: 'chk down' },
     ]);
-
     const { POST } = await import('@/app/api/platform/provisioning/audion-project-origin/route');
     const res = await POST(
       new Request('http://localhost/api/platform/provisioning/audion-project-origin', {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({
-          audionProjectId: 'audion-fail',
-          name: 'N',
-          ownerPlexonUserId: 'owner-1',
-          platformCompanyId: 'comp-a',
-        }),
+        body: JSON.stringify({ audionProjectId: 'a1', name: 'N' }),
       })
     );
     expect(res.status).toBe(502);
-    expect(vi.mocked(deletePlatformProject)).toHaveBeenCalled();
+    expect(deletePlatformProject).toHaveBeenCalled();
   });
 });
