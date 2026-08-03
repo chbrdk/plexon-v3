@@ -31,6 +31,7 @@ describe('collection projects hub', () => {
     expect(form).toContain('pathPlatformProjectDashboard')
     expect(form).toContain('CreateCollectionProjectCard')
     expect(form).toContain('plexon-collection-card--create')
+    expect(form).toContain('plexon-edit-dialog')
   })
 
   it('projects hub uses create card in the collection grid', () => {

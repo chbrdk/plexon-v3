@@ -426,6 +426,81 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   max-width: none;
 }
 
+/* Edit dialog — Audion `audion-edit-dialog` defaults */
+.ds-dialog {
+  margin: auto;
+}
+
+.plexon-edit-dialog.ds-dialog {
+  max-width: min(42rem, calc(100vw - 2.5rem));
+  width: 100%;
+}
+
+.plexon-edit-dialog .ds-dialog-sheet {
+  border-radius: 0;
+}
+
+.plexon-edit-dialog .ds-dialog-header {
+  padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3vw, 1.85rem) 1rem;
+}
+
+.plexon-edit-dialog .ds-dialog-title {
+  font-size: clamp(1.45rem, 2.5vw, 1.85rem);
+  letter-spacing: var(--track-label, 0.01em);
+  font-weight: var(--weight-light, 300);
+}
+
+.plexon-edit-dialog .ds-dialog-body {
+  padding: 0.35rem clamp(1.25rem, 3vw, 1.85rem) 1.35rem;
+}
+
+.plexon-edit-dialog .ds-dialog-actions {
+  gap: var(--space-3, 0.85rem);
+  padding: 1rem clamp(1.25rem, 3vw, 1.85rem) clamp(1.15rem, 2.5vw, 1.5rem);
+}
+
+.plexon-edit-dialog .ds-dialog-actions .ds-btn {
+  border-radius: 0;
+  min-height: 2.5rem;
+  padding: 0.55rem 1.05rem;
+}
+
+.plexon-edit-form {
+  display: grid;
+  gap: clamp(1.15rem, 2.5vw, 1.65rem);
+  max-width: none;
+}
+
+.plexon-edit-lede {
+  margin: 0 0 0.25rem;
+  max-width: 48ch;
+  color: var(--muted);
+  font-size: var(--type-sm, 0.88rem);
+  line-height: 1.5;
+}
+
+.plexon-edit-field.ds-field {
+  width: 100%;
+  gap: var(--space-2, 0.5rem);
+}
+
+.plexon-edit-field--hero .ds-input {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: var(--track-label, 0.01em);
+  padding-top: 0.55rem;
+  padding-bottom: 0.65rem;
+  min-height: 2.85rem;
+}
+
+.plexon-edit-field .ds-input,
+.plexon-edit-field .ds-select-trigger {
+  border-radius: 0;
+  min-height: 2.65rem;
+  padding: 0.55rem 0.75rem;
+}
+
 
 .plexon-collection-card[data-planned='true'] {
   opacity: 0.9;

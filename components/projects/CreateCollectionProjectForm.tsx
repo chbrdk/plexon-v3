@@ -14,16 +14,21 @@ type CompanyOption = { id: string; name: string }
 
 type CreateCollectionProjectFormProps = {
   onCreated?: (platformProjectId: string) => void
-  /** Called after successful create (before navigate). */
   onClose?: () => void
-  /** Hide chrome when embedded in Dialog. */
+  /** Hide chrome when embedded in Dialog (actions live in Dialog footer). */
   embedded?: boolean
+  submitting?: boolean
+  onSubmittingChange?: (submitting: boolean) => void
+  formId?: string
 }
 
 export function CreateCollectionProjectForm({
   onCreated,
   onClose,
   embedded = false,
+  submitting: controlledSubmitting,
+  onSubmittingChange,
+  formId = 'plexon-collection-create-form',
 }: CreateCollectionProjectFormProps) {
   const { t } = useI18n()
   const router = useRouter()
@@ -32,8 +37,15 @@ export function CreateCollectionProjectForm({
   const [companyId, setCompanyId] = useState('')
   const [name, setName] = useState('')
   const [domain, setDomain] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [localSubmitting, setLocalSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const submitting = controlledSubmitting ?? localSubmitting
+
+  function setSubmitting(next: boolean) {
+    setLocalSubmitting(next)
+    onSubmittingChange?.(next)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -105,33 +117,22 @@ export function CreateCollectionProjectForm({
 
   return (
     <form
-      className={
-        embedded
-          ? 'plexon-settings-fields plexon-collection-create plexon-collection-create--embedded'
-          : 'plexon-settings-fields plexon-collection-create'
-      }
+      id={formId}
+      className={embedded ? 'plexon-edit-form' : 'plexon-settings-fields plexon-collection-create'}
       onSubmit={(e) => {
         e.preventDefault()
         void submit()
       }}
     >
-      {!embedded ? (
-        <>
-          <Text role="title" as="h3">
-            {t('projects.hub.createTitle')}
-          </Text>
-          <Text role="meta" as="p">
-            {t('projects.hub.createHint')}
-          </Text>
-        </>
-      ) : (
-        <Text role="meta" as="p">
-          {t('projects.hub.createHint')}
-        </Text>
-      )}
+      <p className="plexon-edit-lede">{t('projects.hub.createHint')}</p>
 
       {companies.length > 1 ? (
-        <Field label={t('projects.hub.company')} htmlFor="collection-create-company">
+        <Field
+          label={t('projects.hub.company')}
+          size="md"
+          htmlFor="collection-create-company"
+          className="plexon-edit-field"
+        >
           <Select
             id="collection-create-company"
             value={companyId}
@@ -142,9 +143,15 @@ export function CreateCollectionProjectForm({
         </Field>
       ) : null}
 
-      <Field label={t('projects.hub.name')} htmlFor="collection-create-name">
+      <Field
+        label={t('projects.hub.name')}
+        size="md"
+        htmlFor="collection-create-name"
+        className="plexon-edit-field plexon-edit-field--hero"
+      >
         <Input
           id="collection-create-name"
+          size="md"
           block
           value={name}
           disabled={submitting}
@@ -154,9 +161,15 @@ export function CreateCollectionProjectForm({
         />
       </Field>
 
-      <Field label={t('projects.hub.domain')} htmlFor="collection-create-domain">
+      <Field
+        label={t('projects.hub.domain')}
+        size="md"
+        htmlFor="collection-create-domain"
+        className="plexon-edit-field"
+      >
         <Input
           id="collection-create-domain"
+          size="md"
           block
           value={domain}
           disabled={submitting}
@@ -168,16 +181,13 @@ export function CreateCollectionProjectForm({
 
       {error ? <Alert tone="error">{error}</Alert> : null}
 
-      <div className="plexon-collection-create-actions">
-        {embedded && onClose ? (
-          <Button type="button" variant="ghost" size="md" onClick={onClose} disabled={submitting}>
-            {t('common.cancel')}
+      {!embedded ? (
+        <div className="plexon-collection-create-actions">
+          <Button type="submit" variant="primary" size="md" disabled={!canSubmit}>
+            {submitting ? t('common.loading') : t('projects.hub.createSubmit')}
           </Button>
-        ) : null}
-        <Button type="submit" variant="primary" size="md" disabled={!canSubmit}>
-          {submitting ? t('common.loading') : t('projects.hub.createSubmit')}
-        </Button>
-      </div>
+        </div>
+      ) : null}
     </form>
   )
 }
@@ -190,6 +200,8 @@ export function CreateCollectionProjectCard({
 }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const formId = 'plexon-collection-create-dialog-form'
 
   return (
     <>
@@ -209,12 +221,33 @@ export function CreateCollectionProjectCard({
 
       <Dialog
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          if (!submitting) setOpen(false)
+        }}
         title={t('projects.hub.createTitle')}
-        className="plexon-collection-create-dialog"
+        className="plexon-edit-dialog"
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={() => setOpen(false)}
+              disabled={submitting}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" form={formId} variant="primary" size="md" disabled={submitting}>
+              {submitting ? t('common.loading') : t('projects.hub.createSubmit')}
+            </Button>
+          </>
+        }
       >
         <CreateCollectionProjectForm
           embedded
+          formId={formId}
+          submitting={submitting}
+          onSubmittingChange={setSubmitting}
           onCreated={onCreated}
           onClose={() => setOpen(false)}
         />
