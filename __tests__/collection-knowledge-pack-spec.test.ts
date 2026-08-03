@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { SUGGESTABLE_FACETS } from '../lib/assistant/knowledge-pack/research-knowledge-pack'
 
 const root = path.resolve(__dirname, '..')
 
@@ -10,9 +11,11 @@ describe('collection knowledge pack (implementation)', () => {
     'specs/api/collection-knowledge-pack.md',
     'lib/collection-knowledge-pack.ts',
     'lib/db/collection-knowledge-packs.ts',
+    'lib/assistant/knowledge-pack/research-knowledge-pack.ts',
     'app/api/platform/projects/[platformProjectId]/knowledge/route.ts',
     'app/api/platform/projects/[platformProjectId]/knowledge/facets/[facetId]/route.ts',
     'app/api/platform/projects/[platformProjectId]/knowledge/facets/[facetId]/publish/route.ts',
+    'app/api/platform/projects/[platformProjectId]/knowledge/suggest/route.ts',
     'components/products/CollectionKnowledgeBand.tsx',
     'lib/db/migrations/0004_collection_knowledge_packs.sql',
   ] as const
@@ -38,10 +41,11 @@ describe('collection knowledge pack (implementation)', () => {
     expect(schema).toContain('collectionKnowledgePacks')
     expect(upsert).not.toContain('knowledgePack')
     expect(api).toContain('/api/platform/projects/:platformProjectId/knowledge')
+    expect(api).toContain('/knowledge/suggest')
     expect(api).toContain('PlatformProjectUpsertPayload')
   })
 
-  it('Collection detail uses Accordion knowledge band without MUI', () => {
+  it('Collection detail uses magazine knowledge band with AI suggest', () => {
     const dash = readFileSync(
       path.join(root, 'components/products/PlatformProjectDashboard.tsx'),
       'utf8',
@@ -51,8 +55,14 @@ describe('collection knowledge pack (implementation)', () => {
       'utf8',
     )
     expect(dash).toContain('CollectionKnowledgeBand')
-    expect(band).toContain('Accordion')
-    expect(band).toContain('SectionChrome')
+    expect(band).toContain('plexon-knowledge-band')
+    expect(band).toContain('plexon-knowledge-facet-tile')
+    expect(band).toContain('apiPlatformProjectKnowledgeSuggest')
+    expect(band).toContain('knowledgeSuggestAll')
+    expect(band).toContain('plexon-edit-dialog')
+    expect(band).not.toContain('Accordion')
+    expect(band).not.toContain('Invalid JSON')
+    expect(band).toContain('profileForm')
     expect(band).toContain('knowledgeBrandReserved')
     expect(band).toContain('data-section="collection-knowledge"')
     expect(band).not.toMatch(/@mui\//)
@@ -75,6 +85,14 @@ describe('collection knowledge pack (implementation)', () => {
     expect(collection).toContain('collection-knowledge-pack.md')
     expect(ownership).toContain('Collection Knowledge Pack')
     expect(paths).toContain('apiPlatformProjectKnowledge')
+    expect(paths).toContain('apiPlatformProjectKnowledgeSuggest')
     expect(constants).toContain('apiPlatformProjectKnowledge')
+    expect(constants).toContain('apiPlatformProjectKnowledgeSuggest')
+  })
+
+  it('suggestable facets never include brand', () => {
+    expect(SUGGESTABLE_FACETS).toContain('profile')
+    expect(SUGGESTABLE_FACETS).toContain('sources')
+    expect(SUGGESTABLE_FACETS).not.toContain('brand')
   })
 })

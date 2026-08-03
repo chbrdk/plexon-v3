@@ -231,23 +231,19 @@ Empty Collection → pack created lazily on first GET (all facets empty / `brand
 
 ## Plexon visual / IA (Collection Knowledge surface)
 
-Surface lives on Collection detail `/projects/[id]` (extend `PlatformProjectDashboard`), magazine composition — same language as Audion project magazine / Checkion GEO overview / `@msqdx/ui` `SectionChrome` + `Accordion`. **Not** a separate purple “AI knowledge hub” landing.
+Surface lives on Collection detail `/projects/[id]` (`PlatformProjectDashboard`), magazine composition — dash-band shell, TOC, one facet tile at a time, structured `plexon-edit-dialog` editors. **Not** a separate purple “AI knowledge hub” landing.
 
 ### Composition (structure first)
 
 1. **Masthead** — Collection name (Identity), domain chip, capability sync chips (existing).
-2. **Knowledge band** — `SectionChrome` title e.g. “Collection knowledge” + revision meta; eyebrow clarifies **Platform source of truth**.
-3. **TOC / facet rail** — sticky or top jump links for facets that are non-empty **or** reserved-visible (`brand` shows as “Coming with Brandion”).
-4. **Facet sections** — one job per section: title, one short dek, content. Progressive disclosure: collapsed accordion when many facets; open first non-empty by default.
-5. **SoT vs local labels**
-   - Pack facets: badge **Shared** / “Platform”
-   - Deep links: “Edit full research in Audion”, “Open latest GEO in Checkion” — **Capability-local**
-6. **Publish / refresh actions** (admin)
-   - “Pull latest research distillate” → calls Audion publish helper (or deep-links with return)
-   - “Publish GEO context” → Checkion confirm dialog
-   - Inline edit for `profile` / `competitive` / `sources`
-7. **Empty states** — quiet magazine empty: one sentence + primary CTA per facet (e.g. “Start research in Audion”, “Run GEO”, “Add profile”). No fake placeholder copy pretending Brandion data exists.
-8. **Growth** — when facet count > 5, TOC becomes primary nav; sections remain full-bleed magazine bands, not card grids.
+2. **Knowledge band** — Display title e.g. “Collection knowledge” + revision meta; deck clarifies **Platform source of truth**.
+3. **Header AI** — “Fill project with AI” drafts all suggestable facets (preview → merge apply).
+4. **TOC** — facet jump links (uppercase hairline).
+5. **Active facet tile** — kicker Shared, title, dek, read body, actions: AI suggest / Edit / product deep-links.
+6. **Edit** — structured Field/Input dialog (not raw JSON). `sources` editable; `brand` reserved EmptyState.
+7. **SoT vs local labels** — Pack facets badge **Shared**; deep links to Audion/Checkion remain capability-local.
+8. **Empty states** — quiet magazine empty + AI suggest / manual edit CTAs. No fake Brandion copy.
+9. **Growth** — TOC is primary nav; one active facet tile (not Accordion card chrome).
 
 ### Permissions sketch
 

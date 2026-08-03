@@ -227,6 +227,8 @@ export const apiPlatformProjectKnowledgeFacetPublish = (
   platformProjectId: string,
   facetId: string
 ) => `${apiPlatformProjectKnowledgeFacet(platformProjectId, facetId)}/publish`;
+export const apiPlatformProjectKnowledgeSuggest = (platformProjectId: string) =>
+  `${apiPlatformProjectKnowledge(platformProjectId)}/suggest`;
 
 /** Service proxy: CHECKION (legacy/optional when not using central DB). */
 export const API_SERVICES_CHECKION_USERS = '/api/services/checkion/users';

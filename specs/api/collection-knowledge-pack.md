@@ -23,6 +23,36 @@ Base: Collection-scoped under platform projects.
 | `PUT` | `/api/platform/projects/:platformProjectId/knowledge` | admin session | Replace entire pack body (rare; admin import) — requires `If-Match: revision` |
 | `PATCH` | `/api/platform/projects/:platformProjectId/knowledge/facets/:facetId` | admin session \| service | Merge/replace one facet |
 | `POST` | `/api/platform/projects/:platformProjectId/knowledge/facets/:facetId/publish` | service | Product publish helper (validates product owns facet) |
+| `POST` | `/api/platform/projects/:platformProjectId/knowledge/suggest` | edit session | AI draft facets from domain (does **not** write) |
+
+### POST suggest
+
+**Helper:** `apiPlatformProjectKnowledgeSuggest(platformProjectId)`
+
+Body:
+
+```json
+{ "facetId": "profile" }
+```
+
+Omit `facetId` to draft all suggestable facets (`profile`, `competitive`, `research_brief`, `geo_context`, `sources`). Never drafts `brand`.
+
+Requires Collection `domain` or `profile.primaryDomain`. Uses homepage HTML signals + Claude (`getAssistantCompletionModel`). Response:
+
+```json
+{
+  "platformProjectId": "…",
+  "revision": 1,
+  "facetId": null,
+  "drafts": { "profile": { … }, "competitive": { … } },
+  "signalsSummary": { "url": "…", "domain": "…" },
+  "model": "claude-sonnet-4-6",
+  "usedLlm": true,
+  "warning": null
+}
+```
+
+Client previews drafts, then applies via PATCH `mode: merge` with provenance note `ai-bootstrap` / `ai-suggest`.
 
 Optional company-admin alias (same handlers):
 
