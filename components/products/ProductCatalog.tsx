@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Spinner, Text } from '@msqdx/ui'
+import { Button, CardActions, Spinner, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { API_PLATFORM_PRODUCTS } from '@/lib/constants'
 import { buildFederatedLaunchHref } from '@/lib/federation-links'
@@ -179,7 +179,7 @@ export function ProductCatalog({
                 </div>
               ) : null}
 
-              <div className="plexon-collection-card-actions">
+              <CardActions className="plexon-collection-card-actions">
                 {primaryEntryPoint ? (
                   <span className="plexon-collection-card-link">
                     <Button
@@ -204,7 +204,7 @@ export function ProductCatalog({
                     </Button>
                   </span>
                 ))}
-              </div>
+              </CardActions>
             </article>
           )
         })}

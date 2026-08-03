@@ -27,6 +27,7 @@ describe('products ui rebuild (wave 3)', () => {
     expect(catalog).toContain('plexon-collection-card')
     expect(catalog).toContain('plexon-collection-card-stats')
     expect(catalog).toContain('plexon-collection-card-actions')
+    expect(catalog).toContain('CardActions')
     expect(catalog).not.toContain('plexon-magazine-card')
     expect(catalog).not.toContain('Panel')
     expect(catalog).not.toContain('Chip')

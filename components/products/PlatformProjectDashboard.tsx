@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import NextLink from 'next/link'
-import { Alert, Button, Chip, Panel, SectionChrome, Spinner, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
+import { Alert, Button, CardActions, Chip, Panel, SectionChrome, Spinner, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
 import { CollectionKnowledgeBand } from '@/components/products/CollectionKnowledgeBand'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
@@ -430,7 +430,10 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                               </Text>
                               <Text role="meta">{persona.role}</Text>
                             </div>
-                            <div className="plexon-collection-card-actions">
+                            <CardActions
+                              hairline={false}
+                              className="plexon-collection-card-actions"
+                            >
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -454,7 +457,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
                               >
                                 {t('projects.detail.startChat')}
                               </Button>
-                            </div>
+                            </CardActions>
                           </li>
                         ))}
                       </ul>

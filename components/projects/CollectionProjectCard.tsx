@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { Button, Text } from '@msqdx/ui'
+import { Button, CardActions, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   MetricIconPersonas,
@@ -94,7 +94,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
         />
       </div>
 
-      <div className="plexon-collection-card-actions">
+      <CardActions className="plexon-collection-card-actions">
         {canOpenPlatform ? (
           <Link href={pathPlatformProjectDashboard(pid)} className="plexon-collection-card-link">
             <Button variant="ghost" size="md">
@@ -122,7 +122,7 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
             {t('dashboard.platformInsightsOpenAudion')}
           </Button>
         </a>
-      </div>
+      </CardActions>
     </article>
   )
 }
