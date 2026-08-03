@@ -27,6 +27,7 @@
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
+| Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |
 | UI rebuild | `knowledge/ui-rebuild-msqdx-ui.md` |
 
 ## Companions

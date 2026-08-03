@@ -1,9 +1,10 @@
 # Collection Knowledge Pack — shared cross-product knowledge
 
-**Status:** Accepted (spec only) — 2026-08-03  
+**Status:** Accepted — implemented (v3) — 2026-08-03  
 **Contract:** `2026-05-plexon-federation-v3` (extends with dedicated knowledge endpoints; does **not** enlarge thin project upsert)  
 **Companions:**  
 - API: `specs/api/collection-knowledge-pack.md`  
+- Sync ops: `knowledge/collection-knowledge-sync.md`  
 - AUDION publish: `audion-v3/specs/domain/knowledge-pack-publish.md`  
 - CHECKION consume/publish: `checkion-v3/specs/domain/geo-knowledge-consume.md`  
 - Collection model: `specs/domain/collection-projects.md`  
@@ -34,7 +35,7 @@ Collections accumulate **heterogeneous** knowledge over years: Audion research d
    - **Identity** — `platform_projects` + bindings (federation upsert stays thin).
    - **Shared brief** — Knowledge Pack facets (this spec).
    - **Product-local dossiers** — Audion `knowledgeChapters`, Checkion GEO jobs / project competitors, Brandion guidelines — publish distillates only.
-4. **Pull-on-use** for consumers (GEO suggest, Audion research seed); **explicit publish** from products (never silent full-mirror).
+4. **Pull-on-use** for consumers (GEO suggest, Audion research / personas seed); **autosync distillates** from products after research / GEO complete (Re-sync CTA for dossier edits; never silent full-mirror of product dossiers).
 5. **Version + provenance** on every write path that changes facet content.
 6. **Magazine IA** in Plexon Collection detail — progressive disclosure, SoT vs capability-local labels, `@msqdx/ui` language (no purple AI landing chrome).
 
