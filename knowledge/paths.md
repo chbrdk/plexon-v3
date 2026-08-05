@@ -46,6 +46,7 @@
   - Wave 9 Run Context: catalog outputs + `compare` node — `specs/domain/collection-test-flow.md`
   - Wave 10 Catalog Port UX: labeled I/O ports + `bind` edges — `specs/domain/collection-test-flow.md`
   - Wave 11 Journey product nodes: persona/zielgruppe + presets + journey ports — `specs/domain/collection-test-flow.md`
+  - Wave 12 Authoring polish: delete/duplicate/validate/auto-save — `specs/domain/collection-test-flow.md`
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

@@ -403,17 +403,23 @@ export function createPageQualityTemplate(url: string): CollectionTestFlowDocume
   };
 }
 
-/** First-class AUDION journey nodes shared by journey templates (Wave 5 / 11). */
+/** First-class AUDION journey nodes shared by journey templates (Wave 5 / 11 / 12). */
 function journeyStepNodesAndEdges(
   pageUrl: string,
   xStart: number
 ): { nodes: CollectionFlowNode[]; edges: CollectionFlowEdge[] } {
   const nodes: CollectionFlowNode[] = [
     {
+      id: 'n-zielgruppe',
+      kind: 'zielgruppe',
+      label: 'Zielgruppe',
+      position: { x: xStart, y: 40 },
+    },
+    {
       id: 'n-persona',
       kind: 'persona',
       label: 'Persona',
-      position: { x: xStart, y: 40 },
+      position: { x: xStart + 200, y: 40 },
     },
     {
       id: 'n-start',
@@ -422,7 +428,7 @@ function journeyStepNodesAndEdges(
       url: pageUrl,
       urlKey: pageUrl,
       maxSteps: 8,
-      position: { x: xStart + 200, y: 120 },
+      position: { x: xStart + 400, y: 120 },
     },
     {
       id: 'n-action',
@@ -430,20 +436,31 @@ function journeyStepNodesAndEdges(
       label: 'Explore',
       presetId: 'action-orientieren',
       text: 'Orientiere dich auf der Seite und finde einen klaren nächsten Schritt. Denke laut.',
-      position: { x: xStart + 420, y: 60 },
+      position: { x: xStart + 620, y: 60 },
     },
     {
       id: 'n-success',
       kind: 'success',
       label: 'Done',
       text: 'Aufgabe erledigt — nenne kurz den gefundenen Schritt.',
-      position: { x: xStart + 640, y: 60 },
+      position: { x: xStart + 840, y: 60 },
+    },
+    {
+      id: 'n-frage',
+      kind: 'measure',
+      label: 'Ease',
+      measureKey: 'ease',
+      presetId: 'frage-ease',
+      text: 'Wie leicht war es, dein Ziel zu erreichen?',
+      position: { x: xStart + 1040, y: 60 },
     },
   ];
   const edges: CollectionFlowEdge[] = [
+    { id: 'e-zg-persona', source: 'n-zielgruppe', target: 'n-persona', edgeKind: 'then' },
     { id: 'e-persona-start', source: 'n-persona', target: 'n-start', edgeKind: 'then' },
     { id: 'e-start-action', source: 'n-start', target: 'n-action', edgeKind: 'then' },
     { id: 'e-action-success', source: 'n-action', target: 'n-success', edgeKind: 'then' },
+    { id: 'e-success-frage', source: 'n-success', target: 'n-frage', edgeKind: 'then' },
   ];
   return { nodes, edges };
 }
@@ -458,7 +475,7 @@ export function createJourneyQualityTemplate(url: string): CollectionTestFlowDoc
       kind: 'scan',
       label: 'Page scan',
       url: pageUrl,
-      position: { x: 860, y: 120 },
+      position: { x: 1260, y: 120 },
     },
     {
       id: 'n-score',
@@ -467,24 +484,24 @@ export function createJourneyQualityTemplate(url: string): CollectionTestFlowDoc
       path: 'scan.overallScore',
       op: 'gte',
       value: DEFAULT_SCORE_GATE_THRESHOLD,
-      position: { x: 1080, y: 120 },
+      position: { x: 1480, y: 120 },
     },
     {
       id: 'n-ok',
       kind: 'quality_ok',
       label: 'Quality OK',
-      position: { x: 1320, y: 40 },
+      position: { x: 1720, y: 40 },
     },
     {
       id: 'n-abandon',
       kind: 'abandon',
       label: 'Abandon',
-      position: { x: 1320, y: 200 },
+      position: { x: 1720, y: 200 },
     },
   ];
   const edges: CollectionFlowEdge[] = [
     ...journey.edges,
-    { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e-frage-scan', source: 'n-frage', target: 'n-scan', edgeKind: 'then' },
     { id: 'e-scan-score', source: 'n-scan', target: 'n-score', edgeKind: 'then' },
     {
       id: 'e-score-ok',
@@ -624,14 +641,14 @@ export function createPageQualityIssuesTemplate(url: string): CollectionTestFlow
 export function createJourneyQualityIssuesTemplate(url: string): CollectionTestFlowDocument {
   const pageUrl = url.trim() || 'https://example.com';
   const journey = journeyStepNodesAndEdges(pageUrl, 0);
-  const spine = qualitySpineWithIssueGate(pageUrl, 860);
+  const spine = qualitySpineWithIssueGate(pageUrl, 1260);
   const base: CollectionTestFlowDocument = {
     schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
     templateId: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
     nodes: [...journey.nodes, ...spine.nodes],
     edges: [
       ...journey.edges,
-      { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
+      { id: 'e-frage-scan', source: 'n-frage', target: 'n-scan', edgeKind: 'then' },
       ...spine.edges,
     ],
     journeyFlow: null,

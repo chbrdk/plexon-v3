@@ -303,6 +303,79 @@ export function findProducerNodeIdForPath(
   );
 }
 
+/**
+ * Remove nodes (and incident edges) from an RF graph.
+ * Clears compare `path` when a catalog bind edge to that compare is removed.
+ */
+export function removeNodesFromRfGraph(
+  nodes: CollectionFlowRfNode[],
+  edges: CollectionFlowRfEdge[],
+  nodeIds: Iterable<string>
+): { nodes: CollectionFlowRfNode[]; edges: CollectionFlowRfEdge[] } {
+  const remove = new Set(nodeIds);
+  if (remove.size === 0) return { nodes, edges };
+
+  const clearedComparePaths = new Set<string>();
+  for (const e of edges) {
+    if (e.data?.edgeKind !== 'bind') continue;
+    if (!remove.has(e.source) && !remove.has(e.target)) continue;
+    if (!remove.has(e.target)) clearedComparePaths.add(e.target);
+  }
+
+  const nextEdges = edges.filter((e) => !remove.has(e.source) && !remove.has(e.target));
+  const nextNodes = nodes
+    .filter((n) => !remove.has(n.id))
+    .map((n) => {
+      if (!clearedComparePaths.has(n.id)) return n;
+      const prev = n.data?.flowNode;
+      if (!prev?.path) return n;
+      return {
+        ...n,
+        data: { ...n.data, flowNode: { ...prev, path: undefined, id: n.id } },
+      };
+    });
+
+  return { nodes: nextNodes, edges: nextEdges };
+}
+
+/**
+ * Duplicate selected RF nodes with new ids, offset position.
+ * Does not copy edges — author reconnects (Wave 12).
+ */
+export function duplicateNodesInRfGraph(
+  nodes: CollectionFlowRfNode[],
+  nodeIds: Iterable<string>,
+  offset: { x: number; y: number } = { x: 40, y: 40 }
+): { nodes: CollectionFlowRfNode[]; newIds: string[] } {
+  const selected = new Set(nodeIds);
+  const sources = nodes.filter((n) => selected.has(n.id));
+  if (sources.length === 0) return { nodes, newIds: [] };
+
+  nodeCounter += 1;
+  const stamp = `${Date.now().toString(36)}-${nodeCounter}`;
+  const newIds: string[] = [];
+  const clones: CollectionFlowRfNode[] = sources.map((n, i) => {
+    const flow = n.data.flowNode;
+    const id = `n-${flow.kind}-${stamp}-${i}`;
+    newIds.push(id);
+    return {
+      ...n,
+      id,
+      selected: true,
+      position: { x: n.position.x + offset.x, y: n.position.y + offset.y },
+      data: {
+        ...n.data,
+        flowNode: { ...flow, id, label: `${flow.label || flow.kind} (Kopie)` },
+      },
+    };
+  });
+
+  const clearedSelection = nodes.map((n) =>
+    selected.has(n.id) ? { ...n, selected: false } : n
+  );
+  return { nodes: [...clearedSelection, ...clones], newIds };
+}
+
 /** Build / replace a bind RF edge for a compare node's catalog path. */
 export function makeBindRfEdge(input: {
   sourceId: string;

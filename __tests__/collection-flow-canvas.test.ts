@@ -13,6 +13,8 @@ import {
   isCatalogBindConnection,
   newCollectionFlowNode,
   nextEdgeKindForSource,
+  removeNodesFromRfGraph,
+  duplicateNodesInRfGraph,
   rfToDocument,
   syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
@@ -57,14 +59,16 @@ describe('flowToRf / rfToDocument roundtrip', () => {
     expect(backBind.target).toBe('n-score');
   });
 
-  it('roundtrips first-class journey nodes (persona/start/action/success) for journey-quality', () => {
+  it('roundtrips first-class journey nodes for journey-quality', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     const { nodes, edges } = flowToRf(doc);
     expect(nodes.map((n) => n.data.flowNode.kind)).toEqual([
+      'zielgruppe',
       'persona',
       'start',
       'action',
       'success',
+      'measure',
       'scan',
       'compare',
       'quality_ok',
@@ -75,7 +79,12 @@ describe('flowToRf / rfToDocument roundtrip', () => {
     expect(back.nodes.map((n) => n.kind)).toEqual(doc.nodes.map((n) => n.kind));
     expect(back.edges.filter((e) => e.edgeKind !== 'bind')).toHaveLength(doc.edges.length);
     // journeyFlow carried over from base doc (Save doesn't re-derive it — the run route does).
-    expect(back.journeyFlow?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success']);
+    expect(back.journeyFlow?.nodes.map((n) => n.kind)).toEqual([
+      'start',
+      'action',
+      'success',
+      'measure',
+    ]);
   });
 
   it('preserves gateCondition + pattern for a journey gate node round-trip', () => {
@@ -211,11 +220,11 @@ describe('palette kind sets', () => {
 });
 
 describe('extractJourneyFlowFromDocument', () => {
-  it('extracts start/action/success nodes + edges before the first quality node', () => {
+  it('extracts start/action/success/measure nodes + edges before the first quality node', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     const extracted = extractJourneyFlowFromDocument(doc, 'https://acme.test/page');
-    expect(extracted?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success']);
-    expect(extracted?.edges).toHaveLength(2);
+    expect(extracted?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success', 'measure']);
+    expect(extracted?.edges).toHaveLength(3);
     expect(extracted?.compileReady).toBe(true);
     expect(extracted?.nodes[0].urlKey).toBe('https://acme.test/page');
   });
@@ -223,7 +232,7 @@ describe('extractJourneyFlowFromDocument', () => {
   it('extracts the journey segment even with a trailing issue_gate', () => {
     const doc = createJourneyQualityIssuesTemplate('https://acme.test/');
     const extracted = extractJourneyFlowFromDocument(doc, 'https://acme.test/');
-    expect(extracted?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success']);
+    expect(extracted?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success', 'measure']);
   });
 
   it('is not compileReady (no edges) for a quality-only document — start node only, no journey steps', () => {
@@ -240,5 +249,61 @@ describe('extractJourneyFlowFromDocument', () => {
     const edited = rfToDocument(doc, nodes as CollectionFlowRfNode[], edges as CollectionFlowRfEdge[]);
     const extracted = extractJourneyFlowFromDocument(edited, 'https://acme.test/');
     expect(extracted?.edges[0]).toMatchObject({ from: 'n-start', to: 'n-action', kind: 'then' });
+  });
+});
+
+describe('removeNodesFromRfGraph', () => {
+  it('drops the node, incident edges, and clears compare bind path', () => {
+    const nodes: CollectionFlowRfNode[] = [
+      {
+        id: 'n-success',
+        type: 'collectionFlow',
+        position: { x: 0, y: 0 },
+        data: { flowNode: { id: 'n-success', kind: 'success', label: 'Done' } },
+      },
+      {
+        id: 'n-compare',
+        type: 'collectionFlow',
+        position: { x: 200, y: 0 },
+        data: {
+          flowNode: {
+            id: 'n-compare',
+            kind: 'compare',
+            label: 'Cmp',
+            path: 'journey.taskCompleted',
+          },
+        },
+      },
+    ];
+    const edges: CollectionFlowRfEdge[] = [
+      {
+        id: 'e-bind',
+        source: 'n-success',
+        target: 'n-compare',
+        sourceHandle: 'out:journey.taskCompleted',
+        targetHandle: 'bind:path',
+        data: { edgeKind: 'bind', bindPath: 'journey.taskCompleted' },
+      },
+    ];
+    const next = removeNodesFromRfGraph(nodes, edges, ['n-success']);
+    expect(next.nodes.map((n) => n.id)).toEqual(['n-compare']);
+    expect(next.edges).toHaveLength(0);
+    expect(next.nodes[0]?.data.flowNode.path).toBeUndefined();
+  });
+});
+
+describe('duplicateNodesInRfGraph', () => {
+  it('clones selected nodes with new ids and offset', () => {
+    const { nodes } = flowToRf(createPageQualityTemplate('https://acme.test/'));
+    const id = nodes[0]!.id;
+    const next = duplicateNodesInRfGraph(nodes, [id], { x: 10, y: 20 });
+    expect(next.newIds).toHaveLength(1);
+    expect(next.nodes).toHaveLength(nodes.length + 1);
+    const clone = next.nodes.find((n) => n.id === next.newIds[0]);
+    expect(clone?.position).toEqual({
+      x: nodes[0]!.position.x + 10,
+      y: nodes[0]!.position.y + 20,
+    });
+    expect(clone?.data.flowNode.label).toMatch(/Kopie/);
   });
 });

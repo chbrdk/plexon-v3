@@ -664,7 +664,11 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
       output={runOutputPanel}
       footer={footer}
     >
-      <div className="nodrag nopan msqdx-flow-io-stack" onMouseDown={stopDrag}>
+      {/*
+        nodrag: form edits must not drag the node.
+        Do NOT stopPropagation here — that blocks React Flow selection (and thus Delete).
+      */}
+      <div className="nodrag nopan msqdx-flow-io-stack">
         {inputZone}
         <div className="msqdx-flow-io msqdx-flow-io--params">
           <p className="msqdx-flow-io-title">Parameters</p>

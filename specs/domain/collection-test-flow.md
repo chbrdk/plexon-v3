@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 11 Journey product nodes (shipped)  
+**Status:** Wave 12 Authoring polish  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -278,6 +278,7 @@ Do not place this on legacy `/board` Prismion island.
 | **9 — Run Context + Compare** | Typed `lastRun.context` catalog outputs; `compare` node; migrate/drop specialized gates from palette; inspector output tree | Staging: scan → compare `scan.scores.accessibility` + `scan.issues.criticalCount`; legacy docs auto-migrate |
 | **10 — Catalog Port UX** | Labeled action output ports + compare `bind:path`; `bind` edges (authoring); path↔wire sync; closed catalog only | Staging: drag `scan.overallScore` → compare path; dashed bind wire; run still uses `compare.path` |
 | **11 — Journey product nodes** | `persona` / `zielgruppe` config + extract merge; Frage/Action presets; `measureKey`; `success` journey catalog ports; palette groups Kontext/Schritte/Messung/Steuerung | Staging: Zielgruppe→Persona→Start→Action→Success; bind `journey.taskCompleted`; personas from Collection catalog |
+| **12 — Authoring polish** | Delete/Entf; duplicate; validate-before-Testen; dirty auto-save on run; lean templates `zielgruppe`→`persona`→…→optional Frage | Staging: select→Entf/duplicate; Testen blocks incomplete compare/journey; new flow has Zielgruppe | |
 | **Later** | `set` aliases, array pickers, parallel multi-persona UI, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
@@ -372,6 +373,14 @@ Do not place this on legacy `/board` Prismion island.
 - Palette groups: Kontext / Schritte / Messung / Steuerung + Quality; pickers load Collection Audion catalog from dashboard summary.
 - Template `journey-quality*`: `persona` → `start` → `action` → `success` → quality spine.
 - Helper: `lib/collection-flow-presets.ts` · ports in `lib/collection-flow-node-ports.ts`.
+
+## Wave 12 implementation notes
+
+- Delete: RF selection must not be blocked by node-body `stopPropagation`; `deleteKeyCode` Backspace/Delete; toolbar delete via `removeNodesFromRfGraph` (clears bind paths).
+- Duplicate: selected RF node(s) offset + new ids; no edges copied (author reconnects).
+- Validate-before-Testen (`lib/collection-flow-validate.ts`): require `start`; journey segment needs compile-ready extract; each `compare` needs catalog `path`; warn when `persona` node lacks `personaId`.
+- Dirty canvas: Testen auto-saves snapshot before run (server reads persisted flow).
+- Templates: `zielgruppe` → `persona` → `start` → `action` → `success` → optional `measure` (ease) → quality spine.
 
 ## Open questions (non-blocking)
 

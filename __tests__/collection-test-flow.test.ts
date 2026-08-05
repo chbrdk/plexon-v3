@@ -40,14 +40,16 @@ describe('createPageQualityTemplate', () => {
 });
 
 describe('createJourneyQualityTemplate', () => {
-  it('builds persona → start → action → success → scan → compare with embedded journeyFlow', () => {
+  it('builds zielgruppe → persona → start → action → success → measure → scan → compare', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY);
     expect(doc.nodes.map((n) => n.kind)).toEqual([
+      'zielgruppe',
       'persona',
       'start',
       'action',
       'success',
+      'measure',
       'scan',
       'compare',
       'quality_ok',
@@ -55,7 +57,12 @@ describe('createJourneyQualityTemplate', () => {
     ]);
     expect(documentHasJourneySegment(doc)).toBe(true);
     expect(doc.journeyFlow?.compileReady).toBe(true);
-    expect(doc.journeyFlow?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success']);
+    expect(doc.journeyFlow?.nodes.map((n) => n.kind)).toEqual([
+      'start',
+      'action',
+      'success',
+      'measure',
+    ]);
     expect(doc.journeyFlow?.nodes[0].urlKey).toBe('https://acme.test/page');
     expect(doc.journeyFlow?.edges[0]).toMatchObject({ from: 'n-start', to: 'n-action', kind: 'then' });
   });

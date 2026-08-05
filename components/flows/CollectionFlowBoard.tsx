@@ -58,12 +58,18 @@ import {
   newCollectionFlowNode,
   newCollectionFlowNodeFromPreset,
   nextEdgeKindForSource,
+  removeNodesFromRfGraph,
+  duplicateNodesInRfGraph,
   rfToDocument,
   syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
 import { PALETTE_JOURNEY_GROUPS } from '@/lib/collection-flow-presets'
+import {
+  formatValidationIssues,
+  validateCollectionFlowForRun,
+} from '@/lib/collection-flow-validate'
 import {
   CATALOG_BIND_PATH_HANDLE,
   catalogPathFromOutHandle,
@@ -87,6 +93,7 @@ import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import {
   IconDelete,
+  IconDuplicate,
   IconPlay,
   IconReset,
   IconSave,
@@ -123,6 +130,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const [saveBusy, setSaveBusy] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const selectedIdRef = useRef<string | null>(null)
+  selectedIdRef.current = selectedId
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [audionCatalog, setAudionCatalog] = useState<{
     personas: Array<{ id: string; name: string }>
@@ -422,8 +431,50 @@ function BoardInner({ platformProjectId, initial }: Props) {
     [applyJobToStates, pollOnce, runQualityPhase, stopPolling]
   )
 
+  const onSave = useCallback(async (): Promise<boolean> => {
+    setSaveBusy(true)
+    setSaveMsg(null)
+    try {
+      const doc = getSnapshot()
+      const res = await fetch(apiPlatformProjectFlow(platformProjectId, flow.id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flow: doc }),
+      })
+      const json = (await res.json().catch(() => null)) as (CollectionTestFlowResponse & { error?: string }) | null
+      if (!res.ok) throw new Error(json?.error || `Save failed (${res.status})`)
+      if (json) {
+        setFlow(json)
+        templateRef.current = json
+      }
+      setDirty(false)
+      setSaveMsg('Gespeichert')
+      return true
+    } catch (e) {
+      setSaveMsg(e instanceof Error ? e.message : String(e))
+      return false
+    } finally {
+      setSaveBusy(false)
+    }
+  }, [flow.id, getSnapshot, platformProjectId])
+
   const onTest = useCallback(async () => {
     setRunError(null)
+    const snap = getSnapshot()
+    const validation = validateCollectionFlowForRun(snap)
+    if (!validation.ok) {
+      setRunError(formatValidationIssues(validation.issues))
+      return
+    }
+    const warnings = validation.issues.filter((i) => i.level === 'warning')
+    if (dirty) {
+      const saved = await onSave()
+      if (!saved) {
+        setRunError('Speichern vor Testen fehlgeschlagen — bitte speichern und erneut versuchen.')
+        return
+      }
+    }
+
     setRunBusy(true)
     stopPolling()
     setRunStates({})
@@ -434,7 +485,12 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSoftQSummary(null)
     runMetaRef.current = null
 
-    if (!hasJourney) {
+    const journey = documentHasJourneySegment(snap)
+    if (warnings.length) {
+      setRunError(formatValidationIssues(warnings))
+    }
+
+    if (!journey) {
       try {
         const res = await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
           method: 'POST',
@@ -485,38 +541,21 @@ function BoardInner({ platformProjectId, initial }: Props) {
       setRunError(e instanceof Error ? e.message : String(e))
       setRunBusy(false)
     }
-  }, [flow.id, hasJourney, platformProjectId, startPolling, stopPolling])
+  }, [
+    dirty,
+    flow.id,
+    getSnapshot,
+    onSave,
+    platformProjectId,
+    startPolling,
+    stopPolling,
+  ])
 
   const onStop = useCallback(() => {
     stopPolling()
     setRunBusy(false)
     setRunMeta((m) => (m ? { ...m, status: 'cancelled' } : m))
   }, [stopPolling])
-
-  const onSave = useCallback(async () => {
-    setSaveBusy(true)
-    setSaveMsg(null)
-    try {
-      const doc = getSnapshot()
-      const res = await fetch(apiPlatformProjectFlow(platformProjectId, flow.id), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flow: doc }),
-      })
-      const json = (await res.json().catch(() => null)) as (CollectionTestFlowResponse & { error?: string }) | null
-      if (!res.ok) throw new Error(json?.error || `Save failed (${res.status})`)
-      if (json) {
-        setFlow(json)
-        templateRef.current = json
-      }
-      setDirty(false)
-      setSaveMsg('Gespeichert')
-    } catch (e) {
-      setSaveMsg(e instanceof Error ? e.message : String(e))
-    } finally {
-      setSaveBusy(false)
-    }
-  }, [flow.id, getSnapshot, platformProjectId])
 
   const onUndo = useCallback(() => {
     const prev = historyRef.current.pop()
@@ -741,14 +780,58 @@ function BoardInner({ platformProjectId, initial }: Props) {
   )
 
   const deleteSelected = useCallback(() => {
-    if (!selectedId) return
+    if (runBusy) return
+    const ids = new Set<string>()
+    if (selectedIdRef.current) ids.add(selectedIdRef.current)
+    for (const n of nodes) {
+      if (n.selected) ids.add(n.id)
+    }
+    if (ids.size === 0) return
     pushHistory()
-    setNodes((nds) => nds.filter((n) => n.id !== selectedId))
-    setEdges((eds) => eds.filter((e) => e.source !== selectedId && e.target !== selectedId))
+    const next = removeNodesFromRfGraph(
+      nodes as CollectionFlowRfNodeModel[],
+      edges as CollectionFlowRfEdge[],
+      ids
+    )
+    setNodes(next.nodes)
+    setEdges(next.edges)
     setSelectedId(null)
+    selectedIdRef.current = null
     setDirty(true)
     setSaveMsg(null)
-  }, [selectedId, setNodes, setEdges, pushHistory])
+  }, [runBusy, nodes, edges, setNodes, setEdges, pushHistory])
+
+  const duplicateSelected = useCallback(() => {
+    if (runBusy) return
+    const ids = new Set<string>()
+    if (selectedIdRef.current) ids.add(selectedIdRef.current)
+    for (const n of nodes) {
+      if (n.selected) ids.add(n.id)
+    }
+    if (ids.size === 0) return
+    pushHistory()
+    const { nodes: next, newIds } = duplicateNodesInRfGraph(
+      nodes as CollectionFlowRfNodeModel[],
+      ids
+    )
+    setNodes(next)
+    if (newIds[0]) {
+      setSelectedId(newIds[0])
+      selectedIdRef.current = newIds[0]
+    }
+    setDirty(true)
+    setSaveMsg(null)
+  }, [runBusy, nodes, setNodes, pushHistory])
+
+  const onNodesDelete = useCallback((deleted: CollectionFlowRfNodeModel[]) => {
+    const ids = new Set(deleted.map((n) => n.id))
+    if (selectedIdRef.current && ids.has(selectedIdRef.current)) {
+      setSelectedId(null)
+      selectedIdRef.current = null
+    }
+    setDirty(true)
+    setSaveMsg(null)
+  }, [])
 
   const onManualGate = useCallback(
     async (gateNodeId: string, edgeKind: 'when' | 'otherwise') => {
@@ -907,12 +990,14 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onConnect={onConnect}
           isValidConnection={isValidConnection}
           onEdgesDelete={onEdgesDelete}
+          onNodesDelete={onNodesDelete}
           onSelectionChange={onSelectionChange}
           nodeTypes={nodeTypes}
           fitView
-          deleteKeyCode={null}
+          deleteKeyCode={runBusy ? null : ['Backspace', 'Delete']}
           nodesDraggable={!runBusy}
           nodesConnectable={!runBusy}
+          elementsSelectable={!runBusy}
           connectionLineStyle={{ strokeWidth: 2 }}
           defaultEdgeOptions={{ type: 'smoothstep', animated: false, style: { strokeWidth: 2 } }}
           proOptions={{ hideAttribution: true }}
@@ -961,9 +1046,27 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     size="sm"
                     variant="ghost"
                     className="msqdx-flow-toolbar-btn"
+                    aria-label="Node duplizieren"
+                    title="Node duplizieren"
+                    icon={<IconDuplicate />}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                    }}
+                    onClick={duplicateSelected}
+                    disabled={!selectedId || runBusy}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
                     aria-label="Node löschen"
-                    title="Node löschen"
+                    title="Node löschen (Entf / ⌫)"
                     icon={<IconDelete />}
+                    onMouseDown={(e) => {
+                      // Keep selection: focus move to toolbar must not race-clear before delete.
+                      e.preventDefault()
+                    }}
                     onClick={deleteSelected}
                     disabled={!selectedId || runBusy}
                   />

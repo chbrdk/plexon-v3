@@ -122,3 +122,25 @@ export function IconDelete({ size = 16 }: { size?: number }) {
     </svg>
   )
 }
+
+export function IconDuplicate({ size = 16 }: { size?: number }) {
+  return (
+    <svg className="ui-icon" width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect
+        x="8"
+        y="8"
+        width="12"
+        height="12"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+      <path
+        d="M6 16V6a2 2 0 0 1 2-2h10"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
