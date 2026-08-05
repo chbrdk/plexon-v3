@@ -31,6 +31,7 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   measure: 'Measure',
   journey: 'Journey',
   scan: 'Scan',
+  domain_scan: 'Domain Scan',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   quality_ok: 'Quality OK',
@@ -170,7 +171,11 @@ export function CollectionFlowNodeInspector({
   const lastStep = steps.length ? steps[steps.length - 1] : null
   const canAppend = Boolean(onAppendOutputToNote) && Boolean(lastStep?.result || lastStep?.reasoning)
   const isQualityNode =
-    node.kind === 'scan' || node.kind === 'score_gate' || node.kind === 'issue_gate' || node.kind === 'quality_ok'
+    node.kind === 'scan' ||
+    node.kind === 'domain_scan' ||
+    node.kind === 'score_gate' ||
+    node.kind === 'issue_gate' ||
+    node.kind === 'quality_ok'
 
   const gateBranchLabel = useMemo(() => {
     if (!verdict) return null
@@ -182,7 +187,13 @@ export function CollectionFlowNodeInspector({
   const sections = useMemo((): FlowInspectorSection[] => {
     const out: FlowInspectorSection[] = []
 
-    if (node.text || node.note) {
+    if (
+      node.text ||
+      node.note ||
+      node.kind === 'start' ||
+      node.kind === 'scan' ||
+      node.kind === 'domain_scan'
+    ) {
       out.push({
         id: 'design',
         title: 'Design',
@@ -204,10 +215,24 @@ export function CollectionFlowNodeInspector({
                 {node.urlKey || node.url}
               </InspectorField>
             ) : null}
-            {node.kind === 'scan' && node.url ? (
-              <InspectorField label="URL" tone="target" mono>
-                {node.url}
-              </InspectorField>
+            {node.kind === 'scan' || node.kind === 'domain_scan' ? (
+              <>
+                {node.url ? (
+                  <InspectorField label="URL" tone="target" mono>
+                    {node.url}
+                  </InspectorField>
+                ) : null}
+                {node.kind === 'scan' ? (
+                  <InspectorField label="Mode" tone="meta" mono>
+                    {node.scanMode ?? 'single'}
+                  </InspectorField>
+                ) : null}
+                {node.kind === 'domain_scan' && node.maxPages != null ? (
+                  <InspectorField label="Max pages" tone="meta" mono>
+                    {node.maxPages}
+                  </InspectorField>
+                ) : null}
+              </>
             ) : null}
           </>
         ),
@@ -228,6 +253,10 @@ export function CollectionFlowNodeInspector({
           <>
             {node.kind === 'score_gate' ? (
               <div className="msqdx-flow-inspector-stats">
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Kind</span>
+                  <strong>{node.scoreKind ?? 'overall'}</strong>
+                </div>
                 <div className="msqdx-flow-inspector-stat">
                   <span>Score</span>
                   <strong>{verdict?.overallScore ?? '—'}</strong>

@@ -2691,7 +2691,8 @@ main {
 }
 
 /* Collection quality kind accents (DS covers journey kinds only) */
-.msqdx-flow-rf-node--scan .msqdx-flow-rf-node-head {
+.msqdx-flow-rf-node--scan .msqdx-flow-rf-node-head,
+.msqdx-flow-rf-node--domain_scan .msqdx-flow-rf-node-head {
   border-top-color: #5b8def;
 }
 .msqdx-flow-rf-node--score_gate .msqdx-flow-rf-node-head,

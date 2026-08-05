@@ -31,6 +31,7 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'journey',
   // Family B — CHECKION quality
   'scan',
+  'domain_scan',
   'score_gate',
   'issue_gate',
   'quality_ok',
@@ -38,13 +39,32 @@ export const COLLECTION_FLOW_NODE_KINDS = [
 
 export type CollectionFlowNodeKind = (typeof COLLECTION_FLOW_NODE_KINDS)[number];
 
+/** Page scan depth on `scan` nodes (CHECKION POST /api/scans mode). */
+export type CollectionFlowScanMode = 'single' | 'deep';
+
+/** Score card kinds from CHECKION GET /api/scans/:id/scores (+ overall). */
+export type CollectionFlowScoreKind =
+  | 'overall'
+  | 'accessibility'
+  | 'seo'
+  | 'performance'
+  | 'ux'
+  | 'eco'
+  | 'best_practices'
+  | 'geo'
+  | (string & {});
+
 /** Quality gate conditions — evaluated by PLEXON against CHECKION signals. */
 export type CollectionFlowGateCondition =
   | 'score_at_least'
+  | 'score_below'
   | 'critical_issues'
   | 'no_critical_issues'
+  | 'serious_issues'
+  | 'no_serious_issues'
+  | 'any_issues'
+  | 'no_issues'
   | 'issue_rule_match';
-
 /** AUDION journey gate conditions (closed set, AUDION emits gateSignals). */
 export type AudionGateCondition =
   | 'frustration_high'
@@ -60,7 +80,7 @@ export type CollectionFlowNode = {
   id: string;
   kind: CollectionFlowNodeKind;
   label: string;
-  /** Absolute or relative page URL for `scan` / `start` nodes. */
+  /** Absolute or relative page URL for `scan` / `domain_scan` / `start` nodes. */
   url?: string;
   /** AUDION `start` node URL key (Wave 5 first-class journey nodes). */
   urlKey?: string;
@@ -72,9 +92,15 @@ export type CollectionFlowNode = {
   observeSeconds?: number;
   /** Max agent steps (kind `start`). */
   maxSteps?: number;
-  /** Score threshold for `score_gate` + `score_at_least` (default 70). */
+  /** CHECKION page scan mode on `scan` (default single). Wave 8A. */
+  scanMode?: CollectionFlowScanMode;
+  /** Domain crawl page cap on `domain_scan`. Wave 8A. */
+  maxPages?: number;
+  /** Score threshold for `score_gate` (default 70). */
   threshold?: number;
-  /** Min issue count for `critical_issues` (default 1). */
+  /** Which score to compare on `score_gate` (default overall). Wave 8A. */
+  scoreKind?: CollectionFlowScoreKind;
+  /** Min issue count for severity-band issue gates (default 1). */
   minCount?: number;
   /** Regex / substring for `issue_rule_match` (quality) or `url_match`/`title_match` (journey). */
   pattern?: string;
@@ -127,9 +153,15 @@ export type CollectionFlowLastRun = {
   startedAt: string;
   completedAt: string | null;
   scanId: string | null;
+  /** Wave 8A: domain crawl id when quality path used `domain_scan`. */
+  domainScanId?: string | null;
+  /** Wave 8A: page scan mode used (`single`|`deep`) or `domain`. */
+  scanMode?: CollectionFlowScanMode | 'domain' | null;
   url: string;
   status: string;
   overallScore: number | null;
+  /** Wave 8A: score card kind that was gated (if not overall). */
+  scoreKind?: string | null;
   error?: string | null;
   audionJobId?: string | null;
   audionStudyId?: string | null;
@@ -528,9 +560,19 @@ export function scoreGateThreshold(nodes: CollectionFlowNode[]): number {
 }
 
 export function scanNodeUrl(nodes: CollectionFlowNode[]): string | null {
-  const scan = nodes.find((n) => n.kind === 'scan');
+  const scan =
+    nodes.find((n) => n.kind === 'scan') ??
+    nodes.find((n) => n.kind === 'domain_scan');
   const url = scan?.url?.trim();
   return url || null;
+}
+
+export function qualityScanNode(nodes: CollectionFlowNode[]): CollectionFlowNode | null {
+  return (
+    nodes.find((n) => n.kind === 'domain_scan') ??
+    nodes.find((n) => n.kind === 'scan') ??
+    null
+  );
 }
 
 export function startNodeUrl(nodes: CollectionFlowNode[]): string | null {
@@ -558,6 +600,7 @@ export function documentHasJourneySegment(doc: CollectionTestFlowDocument): bool
 /** Quality-family kinds — used to find where the journey subgraph ends on the canvas. */
 const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'scan',
+  'domain_scan',
   'score_gate',
   'issue_gate',
   'quality_ok',
@@ -641,6 +684,7 @@ export function issueGateNode(nodes: CollectionFlowNode[]): CollectionFlowNode |
 
 export type IssueGateSignals = {
   criticalCount: number;
+  seriousCount: number;
   issueCount: number;
   /** ruleIds present (for issue_rule_match). */
   ruleIds?: string[];
@@ -659,11 +703,24 @@ export function evaluateIssueGatePassed(
   if (cond === 'no_critical_issues') {
     return signals.criticalCount === 0;
   }
+  if (cond === 'no_serious_issues') {
+    return signals.seriousCount === 0;
+  }
+  if (cond === 'no_issues') {
+    return signals.issueCount === 0;
+  }
+  if (cond === 'serious_issues') {
+    return signals.seriousCount < minCount;
+  }
+  if (cond === 'any_issues') {
+    return signals.issueCount < minCount;
+  }
   if (cond === 'issue_rule_match') {
     const pattern = gate.pattern?.trim();
     if (!pattern) return true;
     try {
       const re = new RegExp(pattern, 'i');
+      // Pass when NO matching rule — match ⇒ fail quality (same as Wave 3).
       return !(signals.ruleIds ?? []).some((id) => re.test(id));
     } catch {
       return !(signals.ruleIds ?? []).some((id) =>
@@ -675,6 +732,42 @@ export function evaluateIssueGatePassed(
   return signals.criticalCount < minCount;
 }
 
+export function scoreGateNode(nodes: CollectionFlowNode[]): CollectionFlowNode | null {
+  return nodes.find((n) => n.kind === 'score_gate') ?? null;
+}
+
+/** Effective numeric score for a score_gate (overall or dimension). */
+export function resolveScoreForGate(
+  gate: CollectionFlowNode | null | undefined,
+  overallScore: number | null,
+  scoresByKind?: Record<string, number> | null
+): number | null {
+  const kind = (gate?.scoreKind ?? 'overall').trim().toLowerCase() || 'overall';
+  if (kind === 'overall') {
+    return typeof overallScore === 'number' && Number.isFinite(overallScore)
+      ? overallScore
+      : null;
+  }
+  const v = scoresByKind?.[kind];
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+export function evaluateScoreGatePassed(
+  gate: CollectionFlowNode | null | undefined,
+  score: number | null,
+  pageEvidenceValid: boolean
+): boolean {
+  if (!pageEvidenceValid || typeof score !== 'number' || !Number.isFinite(score)) {
+    return false;
+  }
+  const threshold =
+    typeof gate?.threshold === 'number' && Number.isFinite(gate.threshold)
+      ? gate.threshold
+      : DEFAULT_SCORE_GATE_THRESHOLD;
+  const cond = gate?.gateCondition === 'score_below' ? 'score_below' : 'score_at_least';
+  if (cond === 'score_below') return score < threshold;
+  return score >= threshold;
+}
 function patchJourneyFlowUrl(
   journeyFlow: EmbeddedAudionJourneyFlow,
   url: string
@@ -816,12 +909,16 @@ function emptyRunningOrErrorFields(partial: {
 export function deriveCollectionVerdict(input: {
   scanStatus: string;
   overallScore: number | null;
+  /** Effective score for the score_gate (may be a dimension). Defaults to overallScore. */
+  gatedScore?: number | null;
   threshold?: number;
   blockers?: string[];
   /** When true, require journey task/evidence flags for collectionReady. */
   hasJourneySegment?: boolean;
   taskCompleted?: boolean;
   journeyValidEvidence?: boolean;
+  /** Score gate node when present (for score_below / scoreKind). */
+  scoreGate?: CollectionFlowNode | null;
   /** Issue gate node when present on the flow. */
   issueGate?: CollectionFlowNode | null;
   issueSignals?: IssueGateSignals | null;
@@ -844,7 +941,12 @@ export function deriveCollectionVerdict(input: {
     });
   }
 
-  if (statusRaw === 'failed' || statusRaw === 'cancelled' || statusRaw === 'cancelling') {
+  if (
+    statusRaw === 'failed' ||
+    statusRaw === 'cancelled' ||
+    statusRaw === 'cancelling' ||
+    statusRaw === 'error'
+  ) {
     if (!blockers.length) blockers.push(`Scan status: ${statusRaw}`);
     return emptyRunningOrErrorFields({
       status: 'error',
@@ -858,15 +960,16 @@ export function deriveCollectionVerdict(input: {
     });
   }
 
-  // completed (or unknown terminal treated as complete attempt)
-  const score = input.overallScore;
+  // completed / complete (or unknown terminal treated as complete attempt)
+  const score =
+    input.gatedScore !== undefined ? input.gatedScore : input.overallScore;
   let pageEvidenceValid = true;
   let pageEvidenceCaveat: string | null = null;
 
   if (score == null || !Number.isFinite(score)) {
     pageEvidenceValid = false;
-    pageEvidenceCaveat = 'overallScore fehlt';
-    blockers.push('overallScore fehlt');
+    pageEvidenceCaveat = 'Score fehlt';
+    blockers.push('Score fehlt');
   }
   for (const b of blockers) {
     if (/403|401|blocked|junk|empty/i.test(b)) {
@@ -882,7 +985,11 @@ export function deriveCollectionVerdict(input: {
     ? (input.journeyValidEvidence ?? Boolean(input.taskCompleted))
     : true;
   const validEvidence = journeyValidEvidence && pageEvidenceValid;
-  const scorePassed = pageEvidenceValid && typeof score === 'number' && score >= threshold;
+  const scorePassed = evaluateScoreGatePassed(
+    input.scoreGate,
+    typeof score === 'number' ? score : null,
+    pageEvidenceValid
+  );
 
   const criticalCount = input.issueSignals?.criticalCount ?? null;
   const issueCount = input.issueSignals?.issueCount ?? null;
@@ -939,7 +1046,7 @@ export function deriveCollectionVerdict(input: {
     collectionReady,
     hasJourneySegment,
     hasIssueGate,
-    overallScore: score,
+    overallScore: input.overallScore,
     threshold,
     blockers,
     summary: buildSummary({
@@ -954,7 +1061,7 @@ export function deriveCollectionVerdict(input: {
       scorePassed,
       issueGatePassed,
       criticalCount,
-      overallScore: score,
+      overallScore: typeof score === 'number' ? score : input.overallScore,
       threshold,
       terminalKind,
     }),
@@ -1040,7 +1147,8 @@ export function nodeStatesFromVerdict(
 
   const hasJourney = documentHasJourneySegment(doc);
   const startId = findNodeIdByKind(doc.nodes, 'start');
-  const scanId = findNodeIdByKind(doc.nodes, 'scan');
+  const qualityNode = qualityScanNode(doc.nodes);
+  const scanId = qualityNode?.id ?? null;
   const scoreId = findNodeIdByKind(doc.nodes, 'score_gate');
   const issuesId = findNodeIdByKind(doc.nodes, 'issue_gate');
   const okId = findNodeIdByKind(doc.nodes, 'quality_ok');

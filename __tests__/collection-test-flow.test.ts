@@ -10,7 +10,9 @@ import {
   deriveJourneyErrorVerdict,
   documentHasJourneySegment,
   evaluateIssueGatePassed,
+  evaluateScoreGatePassed,
   issueGateNode,
+  resolveScoreForGate,
   nodeStatesFromVerdict,
   scoreGateThreshold,
 } from '@/lib/collection-test-flow';
@@ -93,7 +95,7 @@ describe('deriveCollectionVerdict', () => {
     expect(v.pageEvidenceValid).toBe(false);
     expect(v.qualityPassed).toBe(false);
     expect(v.collectionReady).toBe(false);
-    expect(v.pageEvidenceCaveat).toMatch(/overallScore/);
+    expect(v.pageEvidenceCaveat).toMatch(/Score fehlt/);
   });
 
   it('errors on failed scan status', () => {
@@ -194,8 +196,31 @@ describe('issue_gate Wave 3', () => {
       gateCondition: 'critical_issues' as const,
       minCount: 1,
     };
-    expect(evaluateIssueGatePassed(gate, { criticalCount: 0, issueCount: 3 })).toBe(true);
-    expect(evaluateIssueGatePassed(gate, { criticalCount: 2, issueCount: 5 })).toBe(false);
+    expect(evaluateIssueGatePassed(gate, { criticalCount: 0, seriousCount: 0, issueCount: 3 })).toBe(true);
+    expect(evaluateIssueGatePassed(gate, { criticalCount: 2, seriousCount: 1, issueCount: 5 })).toBe(false);
+  });
+
+  it('evaluateIssueGatePassed for serious_issues / no_issues', () => {
+    const serious = {
+      id: 'n-issues',
+      kind: 'issue_gate' as const,
+      label: 'Issues',
+      gateCondition: 'serious_issues' as const,
+      minCount: 1,
+    };
+    expect(
+      evaluateIssueGatePassed(serious, { criticalCount: 0, seriousCount: 0, issueCount: 2 })
+    ).toBe(true);
+    expect(
+      evaluateIssueGatePassed(serious, { criticalCount: 0, seriousCount: 2, issueCount: 2 })
+    ).toBe(false);
+    const none = { ...serious, gateCondition: 'no_issues' as const };
+    expect(evaluateIssueGatePassed(none, { criticalCount: 0, seriousCount: 0, issueCount: 0 })).toBe(
+      true
+    );
+    expect(evaluateIssueGatePassed(none, { criticalCount: 0, seriousCount: 0, issueCount: 1 })).toBe(
+      false
+    );
   });
 
   it('fails quality when critical issues present despite score pass', () => {
@@ -205,7 +230,7 @@ describe('issue_gate Wave 3', () => {
       scanStatus: 'completed',
       overallScore: 90,
       issueGate: gate,
-      issueSignals: { criticalCount: 2, issueCount: 4 },
+      issueSignals: { criticalCount: 2, seriousCount: 0, issueCount: 4 },
     });
     expect(v.scorePassed).toBe(true);
     expect(v.issueGatePassed).toBe(false);
@@ -222,7 +247,7 @@ describe('issue_gate Wave 3', () => {
       scanStatus: 'completed',
       overallScore: 90,
       issueGate: gate,
-      issueSignals: { criticalCount: 0, issueCount: 2 },
+      issueSignals: { criticalCount: 0, seriousCount: 0, issueCount: 2 },
     });
     expect(v.issueGateBranch).toBe('pass');
     expect(v.qualityPassed).toBe(true);
@@ -239,5 +264,20 @@ describe('issue_gate Wave 3', () => {
     });
     expect(states['n-issues']).toBe('done');
     expect(states['n-ok']).toBe('done');
+  });
+});
+
+describe('Wave 8A scoreKind', () => {
+  it('resolveScoreForGate picks dimension', () => {
+    const gate = {
+      id: 'n-score',
+      kind: 'score_gate' as const,
+      label: 'Score',
+      scoreKind: 'accessibility',
+      threshold: 70,
+    };
+    expect(resolveScoreForGate(gate, 90, { accessibility: 55 })).toBe(55);
+    expect(evaluateScoreGatePassed(gate, 55, true)).toBe(false);
+    expect(evaluateScoreGatePassed(gate, 80, true)).toBe(true);
   });
 });

@@ -133,9 +133,21 @@ describe('palette kind sets', () => {
       'abandon',
       'measure',
     ]);
-    expect(PALETTE_QUALITY_KINDS).toEqual(['scan', 'score_gate', 'issue_gate', 'quality_ok']);
+    expect(PALETTE_QUALITY_KINDS).toEqual([
+      'scan',
+      'domain_scan',
+      'score_gate',
+      'issue_gate',
+      'quality_ok',
+    ]);
     const overlap = PALETTE_JOURNEY_KINDS.filter((k) => (PALETTE_QUALITY_KINDS as string[]).includes(k));
     expect(overlap).toHaveLength(0);
+  });
+
+  it('defaults scanMode / scoreKind / domain maxPages', () => {
+    expect(newCollectionFlowNode('scan').scanMode).toBe('single');
+    expect(newCollectionFlowNode('domain_scan').maxPages).toBe(50);
+    expect(newCollectionFlowNode('score_gate').scoreKind).toBe('overall');
   });
 });
 

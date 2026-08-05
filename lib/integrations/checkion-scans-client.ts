@@ -8,6 +8,7 @@ import { pollUntil } from '@/lib/assistant/poll-until';
 import {
   checkionApiScanDetail,
   checkionApiScanIssues,
+  checkionApiScanScores,
   checkionApiScans,
 } from '@/lib/paths/checkion-api';
 import type { IssueGateSignals } from '@/lib/collection-test-flow';
@@ -66,6 +67,7 @@ function parseScan(body: unknown): CheckionScanSummary | null {
 export async function startCheckionSingleScan(input: {
   projectId: string;
   url: string;
+  mode?: 'single' | 'deep';
   platformProjectId?: string | null;
   audionRunId?: string | null;
   stepUrl?: string | null;
@@ -76,6 +78,7 @@ export async function startCheckionSingleScan(input: {
 
   const url = input.url.trim();
   const projectId = input.projectId.trim();
+  const mode = input.mode === 'deep' ? 'deep' : 'single';
   if (!url) return { ok: false, error: 'URL fehlt' };
   if (!projectId) return { ok: false, error: 'Checkion projectId fehlt' };
 
@@ -85,7 +88,7 @@ export async function startCheckionSingleScan(input: {
       headers: auth.headers,
       body: JSON.stringify({
         projectId,
-        mode: 'single',
+        mode,
         url,
         waitForCompletion: input.waitForCompletion === true,
         ...(input.platformProjectId
@@ -172,10 +175,11 @@ export async function pollCheckionSingleScan(
   });
 }
 
-/** Start single scan and poll until terminal (or return immediately if already terminal). */
+/** Start page scan (single|deep) and poll until terminal. */
 export async function runCheckionSingleScan(input: {
   projectId: string;
   url: string;
+  mode?: 'single' | 'deep';
   platformProjectId?: string | null;
   audionRunId?: string | null;
   stepUrl?: string | null;
@@ -186,6 +190,7 @@ export async function runCheckionSingleScan(input: {
   const started = await startCheckionSingleScan({
     projectId: input.projectId,
     url: input.url,
+    mode: input.mode,
     platformProjectId: input.platformProjectId,
     audionRunId: input.audionRunId,
     stepUrl: input.stepUrl,
@@ -256,12 +261,64 @@ export async function fetchCheckionScanIssues(
       });
     }
     const criticalCount = items.filter((i) => i.severity === 'critical').length;
+    const seriousCount = items.filter((i) => i.severity === 'serious').length;
     const signals: IssueGateSignals = {
       criticalCount,
+      seriousCount,
       issueCount: items.length,
       ruleIds: items.map((i) => i.ruleId).filter(Boolean),
     };
     return { ok: true, items, signals };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** GET /api/scans/:id/scores → map kind → value (0–100). */
+export async function fetchCheckionScanScores(
+  scanId: string
+): Promise<
+  | { ok: true; byKind: Record<string, number> }
+  | { ok: false; error: string }
+> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  try {
+    const res = await fetch(checkionApiScanScores(scanId), {
+      headers: auth.headers,
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `CHECKION scan scores: HTTP ${res.status}` };
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: 'CHECKION scan scores: ungültiges JSON' };
+    }
+    const rawItems = Array.isArray(json)
+      ? json
+      : json && typeof json === 'object' && Array.isArray((json as { items?: unknown }).items)
+        ? (json as { items: unknown[] }).items
+        : [];
+    const byKind: Record<string, number> = {};
+    for (const row of rawItems) {
+      if (!row || typeof row !== 'object') continue;
+      const o = row as Record<string, unknown>;
+      const kind = typeof o.kind === 'string' ? o.kind.trim().toLowerCase() : '';
+      const value =
+        typeof o.value === 'number'
+          ? o.value
+          : typeof o.score === 'number'
+            ? o.score
+            : null;
+      if (!kind || value == null || !Number.isFinite(value)) continue;
+      byKind[kind] = value;
+    }
+    return { ok: true, byKind };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }

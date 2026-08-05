@@ -9,7 +9,13 @@ import type {
   CollectionFlowNode as CollectionFlowNodeModel,
   CollectionFlowNodeKind,
 } from '@/lib/collection-test-flow'
-import { AUDION_GATE_OPTIONS, type CollectionFlowRfNodeData } from '@/lib/collection-flow-canvas'
+import {
+  AUDION_GATE_OPTIONS,
+  COLLECTION_SCAN_MODE_OPTIONS,
+  COLLECTION_SCORE_KIND_OPTIONS,
+  ISSUE_GATE_CONDITION_OPTIONS,
+  type CollectionFlowRfNodeData,
+} from '@/lib/collection-flow-canvas'
 
 type CollectionFlowNodeType = Node<CollectionFlowRfNodeData, 'collectionFlow'>
 
@@ -25,16 +31,11 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   measure: 'Measure',
   journey: 'Journey',
   scan: 'Scan',
+  domain_scan: 'Domain Scan',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   quality_ok: 'Quality OK',
 }
-
-const ISSUE_GATE_CONDITIONS: CollectionFlowGateCondition[] = [
-  'critical_issues',
-  'no_critical_issues',
-  'issue_rule_match',
-]
 
 function stopDrag(e: MouseEvent) {
   e.stopPropagation()
@@ -65,6 +66,13 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const onStartUrl = (e: ChangeEvent<HTMLInputElement>) =>
     patch({ urlKey: e.target.value, url: e.target.value })
   const onScanUrl = (e: ChangeEvent<HTMLInputElement>) => patch({ url: e.target.value })
+  const onScanMode = (e: ChangeEvent<HTMLSelectElement>) =>
+    patch({ scanMode: e.target.value as 'single' | 'deep' })
+  const onMaxPages = (e: ChangeEvent<HTMLInputElement>) => {
+    const n = Number(e.target.value)
+    patch({ maxPages: Number.isFinite(n) ? n : undefined })
+  }
+  const onScoreKind = (e: ChangeEvent<HTMLSelectElement>) => patch({ scoreKind: e.target.value })
   const onPattern = (e: ChangeEvent<HTMLInputElement>) => patch({ pattern: e.target.value })
   const onSeconds = (e: ChangeEvent<HTMLInputElement>) => {
     const n = Number(e.target.value)
@@ -202,16 +210,59 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         ) : null}
 
         {kind === 'scan' ? (
-          <label className="msqdx-flow-rf-field">
-            <span>URL</span>
-            <Input
-              block
-              size="sm"
-              value={flowNode.url ?? ''}
-              onChange={onScanUrl}
-              placeholder="leer = Journey finalUrl"
-            />
-          </label>
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>URL</span>
+              <Input
+                block
+                size="sm"
+                value={flowNode.url ?? ''}
+                onChange={onScanUrl}
+                placeholder="leer = Journey finalUrl"
+              />
+            </label>
+            <label className="msqdx-flow-rf-field">
+              <span>Mode</span>
+              <select
+                className="msqdx-flow-rf-select"
+                value={flowNode.scanMode ?? 'single'}
+                onChange={onScanMode}
+              >
+                {COLLECTION_SCAN_MODE_OPTIONS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </>
+        ) : null}
+
+        {kind === 'domain_scan' ? (
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>URL</span>
+              <Input
+                block
+                size="sm"
+                value={flowNode.url ?? ''}
+                onChange={onScanUrl}
+                placeholder="Domain / Start-URL"
+              />
+            </label>
+            <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
+              <span>Max pages</span>
+              <Input
+                size="sm"
+                className="msqdx-flow-rf-input--narrow"
+                type="number"
+                min={1}
+                max={500}
+                value={flowNode.maxPages ?? 50}
+                onChange={onMaxPages}
+              />
+            </label>
+          </>
         ) : null}
 
         {isJourneyGate ? (
@@ -246,18 +297,34 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         ) : null}
 
         {kind === 'score_gate' ? (
-          <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
-            <span>Threshold</span>
-            <Input
-              size="sm"
-              className="msqdx-flow-rf-input--narrow"
-              type="number"
-              min={0}
-              max={100}
-              value={flowNode.threshold ?? 70}
-              onChange={onThreshold}
-            />
-          </label>
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>Score</span>
+              <select
+                className="msqdx-flow-rf-select"
+                value={flowNode.scoreKind ?? 'overall'}
+                onChange={onScoreKind}
+              >
+                {COLLECTION_SCORE_KIND_OPTIONS.map((k) => (
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
+              <span>Threshold</span>
+              <Input
+                size="sm"
+                className="msqdx-flow-rf-input--narrow"
+                type="number"
+                min={0}
+                max={100}
+                value={flowNode.threshold ?? 70}
+                onChange={onThreshold}
+              />
+            </label>
+          </>
         ) : null}
 
         {kind === 'issue_gate' ? (
@@ -269,7 +336,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
                 value={(flowNode.gateCondition as string) ?? 'critical_issues'}
                 onChange={onIssueGateCondition}
               >
-                {ISSUE_GATE_CONDITIONS.map((c) => (
+                {ISSUE_GATE_CONDITION_OPTIONS.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -281,7 +348,9 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
                 <span>pattern</span>
                 <Input block size="sm" value={flowNode.pattern ?? ''} onChange={onPattern} placeholder="ruleId regex" />
               </label>
-            ) : (
+            ) : flowNode.gateCondition === 'no_critical_issues' ||
+              flowNode.gateCondition === 'no_serious_issues' ||
+              flowNode.gateCondition === 'no_issues' ? null : (
               <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
                 <span>Min count</span>
                 <Input

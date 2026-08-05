@@ -170,10 +170,33 @@ export const PALETTE_JOURNEY_KINDS: CollectionFlowNodeKind[] = [
 /** Palette — Family B (CHECKION quality). */
 export const PALETTE_QUALITY_KINDS: CollectionFlowNodeKind[] = [
   'scan',
+  'domain_scan',
   'score_gate',
   'issue_gate',
   'quality_ok',
 ];
+
+export const COLLECTION_SCAN_MODE_OPTIONS = ['single', 'deep'] as const;
+
+export const COLLECTION_SCORE_KIND_OPTIONS = [
+  'overall',
+  'accessibility',
+  'seo',
+  'performance',
+  'ux',
+  'eco',
+  'best_practices',
+] as const;
+
+export const ISSUE_GATE_CONDITION_OPTIONS = [
+  'critical_issues',
+  'no_critical_issues',
+  'serious_issues',
+  'no_serious_issues',
+  'any_issues',
+  'no_issues',
+  'issue_rule_match',
+] as const;
 
 /** AUDION journey gate conditions (closed set) for the `gate` node inspector select. */
 export const AUDION_GATE_OPTIONS = [
@@ -227,6 +250,7 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
       ...base,
       gateCondition: 'score_at_least',
       threshold: DEFAULT_SCORE_GATE_THRESHOLD,
+      scoreKind: 'overall',
     };
   }
   if (kind === 'issue_gate') {
@@ -234,7 +258,8 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
   }
   if (kind === 'observe') return { ...base, text: 'Schau dich kurz um.', observeSeconds: 30 };
   if (kind === 'start') return { ...base, url: '', urlKey: '', maxSteps: 8 };
-  if (kind === 'scan') return { ...base, url: '' };
+  if (kind === 'scan') return { ...base, url: '', scanMode: 'single' };
+  if (kind === 'domain_scan') return { ...base, url: '', maxPages: 50 };
   if (
     kind === 'prompt' ||
     kind === 'action' ||

@@ -9,11 +9,15 @@ import {
   ensureFlowDocument,
   issueGateNode,
   nodeStatesFromVerdict,
+  qualityScanNode,
   resolveJourneyFlowForRun,
+  resolveScoreForGate,
   scanNodeUrl,
+  scoreGateNode,
   scoreGateThreshold,
   startNodeUrl,
   type CollectionFlowLastRun,
+  type CollectionFlowScanMode,
   type CollectionVerdict,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
@@ -27,8 +31,13 @@ import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { runAudionJourneySegment, rollupCollectionVerdictToAudionWave } from '@/lib/integrations/audion-journey-client';
 import {
   fetchCheckionScanIssues,
+  fetchCheckionScanScores,
   runCheckionSingleScan,
 } from '@/lib/integrations/checkion-scans-client';
+import {
+  fetchCheckionDomainScanV3Issues,
+  runCheckionDomainScanV3,
+} from '@/lib/integrations/checkion-domain-scans-v3-client';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import { platformJson } from '@/lib/platform-contract';
 
@@ -181,26 +190,108 @@ export async function POST(
       if (journey.job.finalUrl) scanUrl = journey.job.finalUrl;
     }
 
-    const scanResult = await runCheckionSingleScan({
-      projectId: checkionProjectId,
-      url: scanUrl,
-      platformProjectId: id,
-      audionRunId: audionJobId,
-      stepUrl: stepUrl ?? scanUrl,
-    });
+    const qualityNode = qualityScanNode(doc.nodes);
+    const useDomain = qualityNode?.kind === 'domain_scan';
+    const pageScanMode: CollectionFlowScanMode =
+      qualityNode?.scanMode === 'deep' ? 'deep' : 'single';
+    const scoreGate = scoreGateNode(doc.nodes);
+
+    type QualityResult = {
+      ok: boolean;
+      error?: string;
+      id: string | null;
+      status: string;
+      overallScore: number | null;
+      url: string;
+      scanError?: string | null;
+      domainScanId?: string | null;
+      scanMode: CollectionFlowScanMode | 'domain';
+      pageScanId?: string | null;
+    };
+
+    let quality: QualityResult;
+    if (useDomain) {
+      const domainResult = await runCheckionDomainScanV3({
+        projectId: checkionProjectId,
+        url: scanUrl,
+        maxPages:
+          typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
+      });
+      if (!domainResult.ok) {
+        quality = {
+          ok: false,
+          error: domainResult.error,
+          id: domainResult.scan?.id ?? null,
+          status: domainResult.scan?.status ?? 'failed',
+          overallScore: domainResult.scan?.overallScore ?? null,
+          url: domainResult.scan?.url || scanUrl,
+          scanError: domainResult.scan?.error ?? null,
+          domainScanId: domainResult.scan?.id ?? null,
+          scanMode: 'domain',
+          pageScanId: null,
+        };
+      } else {
+        quality = {
+          ok: true,
+          id: domainResult.scan.id,
+          status: domainResult.scan.status,
+          overallScore: domainResult.scan.overallScore,
+          url: domainResult.scan.url || scanUrl,
+          scanError: domainResult.scan.error ?? null,
+          domainScanId: domainResult.scan.id,
+          scanMode: 'domain',
+          pageScanId: null,
+        };
+      }
+    } else {
+      const scanResult = await runCheckionSingleScan({
+        projectId: checkionProjectId,
+        url: scanUrl,
+        mode: pageScanMode,
+        platformProjectId: id,
+        audionRunId: audionJobId,
+        stepUrl: stepUrl ?? scanUrl,
+      });
+      if (!scanResult.ok) {
+        quality = {
+          ok: false,
+          error: scanResult.error,
+          id: scanResult.scan?.id ?? null,
+          status: scanResult.scan?.status ?? 'failed',
+          overallScore: scanResult.scan?.overallScore ?? null,
+          url: scanResult.scan?.url || scanUrl,
+          scanError: scanResult.scan?.error ?? null,
+          domainScanId: null,
+          scanMode: pageScanMode,
+          pageScanId: scanResult.scan?.id ?? null,
+        };
+      } else {
+        quality = {
+          ok: true,
+          id: scanResult.scan.id,
+          status: scanResult.scan.status,
+          overallScore: scanResult.scan.overallScore,
+          url: scanResult.scan.url || scanUrl,
+          scanError: scanResult.scan.error ?? null,
+          domainScanId: null,
+          scanMode: pageScanMode,
+          pageScanId: scanResult.scan.id,
+        };
+      }
+    }
 
     const blockers: string[] = [];
-    if (!scanResult.ok) {
-      blockers.push(scanResult.error);
-      const partial = scanResult.scan;
+    if (!quality.ok) {
+      blockers.push(quality.error ?? 'Scan fehlgeschlagen');
       const verdictBase = deriveCollectionVerdict({
-        scanStatus: partial?.status ?? 'failed',
-        overallScore: partial?.overallScore ?? null,
+        scanStatus: quality.status,
+        overallScore: quality.overallScore,
         threshold,
         blockers,
         hasJourneySegment: hasJourney,
         taskCompleted,
         journeyValidEvidence,
+        scoreGate,
       });
       const errorVerdict: CollectionVerdict = {
         ...verdictBase,
@@ -208,18 +299,20 @@ export async function POST(
         flowCompleted: false,
         collectionReady: false,
         pageEvidenceValid: false,
-        pageEvidenceCaveat: scanResult.error,
-        summary: `Fehler — ${scanResult.error}`,
+        pageEvidenceCaveat: quality.error ?? 'Scan fehlgeschlagen',
+        summary: `Fehler — ${quality.error ?? 'Scan fehlgeschlagen'}`,
         blockers,
       };
       const lastRun: CollectionFlowLastRun = {
         startedAt,
         completedAt: new Date().toISOString(),
-        scanId: partial?.id ?? null,
+        scanId: quality.pageScanId ?? null,
+        domainScanId: quality.domainScanId ?? null,
+        scanMode: quality.scanMode,
         url: scanUrl,
-        status: partial?.status ?? 'error',
-        overallScore: partial?.overallScore ?? null,
-        error: scanResult.error,
+        status: quality.status,
+        overallScore: quality.overallScore,
+        error: quality.error ?? null,
         audionJobId,
         audionStudyId,
         audionWaveId,
@@ -239,29 +332,51 @@ export async function POST(
       });
     }
 
-    const scan = scanResult.scan;
-    if (scan.error) blockers.push(scan.error);
+    if (quality.scanError) blockers.push(quality.scanError);
 
     const hasIssues = documentHasIssueGate(doc);
     const gate = issueGateNode(doc.nodes);
     let issueSignals: IssueGateSignals | null = null;
-    if (hasIssues && scan.id) {
-      const issuesRes = await fetchCheckionScanIssues(scan.id);
-      if (!issuesRes.ok) {
-        blockers.push(issuesRes.error);
+    if (hasIssues && quality.id) {
+      if (useDomain) {
+        const issuesRes = await fetchCheckionDomainScanV3Issues(quality.id);
+        if (!issuesRes.ok) blockers.push(issuesRes.error);
+        else issueSignals = issuesRes.signals;
       } else {
-        issueSignals = issuesRes.signals;
+        const issuesRes = await fetchCheckionScanIssues(quality.id);
+        if (!issuesRes.ok) blockers.push(issuesRes.error);
+        else issueSignals = issuesRes.signals;
       }
     }
 
+    let gatedScore: number | null | undefined = undefined;
+    let scoresByKind: Record<string, number> | null = null;
+    const scoreKind = (scoreGate?.scoreKind ?? 'overall').trim().toLowerCase() || 'overall';
+    if (!useDomain && scoreKind !== 'overall' && quality.pageScanId) {
+      const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
+      if (!scoresRes.ok) {
+        blockers.push(scoresRes.error);
+      } else {
+        scoresByKind = scoresRes.byKind;
+        gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, scoresByKind);
+        if (gatedScore == null) {
+          blockers.push(`Score kind „${scoreKind}“ fehlt`);
+        }
+      }
+    } else {
+      gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, null);
+    }
+
     const verdict = deriveCollectionVerdict({
-      scanStatus: scan.status,
-      overallScore: scan.overallScore,
+      scanStatus: quality.status,
+      overallScore: quality.overallScore,
+      gatedScore,
       threshold,
       blockers,
       hasJourneySegment: hasJourney,
       taskCompleted,
       journeyValidEvidence,
+      scoreGate,
       issueGate: gate,
       issueSignals,
     });
@@ -277,21 +392,20 @@ export async function POST(
         platformProjectId: id,
         flowId: fid,
         verdict,
-        scanId: scan.id,
-        stepUrl: stepUrl ?? scan.url ?? scanUrl,
-        overallScore: scan.overallScore,
+        scanId: quality.pageScanId ?? quality.id,
+        stepUrl: stepUrl ?? quality.url ?? scanUrl,
+        overallScore: quality.overallScore,
       });
       waveEvaluateOk = rollup.waveEvaluateOk;
       waveRollupOk = rollup.ok && rollup.waveRollupOk;
     }
 
-    // Best-effort KP distillate (journey + quality-only)
     const distillate = await distillCollectionFlowToKnowledgePack({
       platformProjectId: id,
       flowId: fid,
       verdict,
-      scanId: scan.id,
-      overallScore: scan.overallScore,
+      scanId: quality.pageScanId ?? quality.id,
+      overallScore: quality.overallScore,
       updatedByUserId: user.id,
     });
     knowledgeDistillateOk = distillate.ok;
@@ -299,15 +413,18 @@ export async function POST(
     const lastRun: CollectionFlowLastRun = {
       startedAt,
       completedAt: new Date().toISOString(),
-      scanId: scan.id,
-      url: scan.url || scanUrl,
-      status: scan.status,
-      overallScore: scan.overallScore,
-      error: scan.error ?? null,
+      scanId: quality.pageScanId ?? null,
+      domainScanId: quality.domainScanId ?? null,
+      scanMode: quality.scanMode,
+      scoreKind: scoreKind !== 'overall' ? scoreKind : null,
+      url: quality.url || scanUrl,
+      status: quality.status,
+      overallScore: quality.overallScore,
+      error: quality.scanError ?? null,
       audionJobId,
       audionStudyId,
       audionWaveId,
-      stepUrl: stepUrl ?? scan.url ?? scanUrl,
+      stepUrl: stepUrl ?? quality.url ?? scanUrl,
       issueCount: issueSignals?.issueCount ?? null,
       criticalCount: issueSignals?.criticalCount ?? null,
       issueGateBranch: verdict.issueGateBranch,

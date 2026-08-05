@@ -41,7 +41,7 @@
   - Board chrome: `@msqdx/ui` flow organisms (`.msqdx-flow-*`, `flow-board-chrome.md`) via `components/flows/CollectionFlowBoard.tsx` + RF node / inspector / palette — no `plexon-flow-board.css`
   - Canvas helpers: `lib/collection-flow-canvas.ts`
   - Live journey: `POST …/flows/:flowId/run/journey` · `GET …/journey-jobs/:jobId` · quality via existing `…/run`
-  - Chrome parity smoke: Storybook MagazineBoard + Audion `/studies/flows/{id}` vs this board URL (same DS class family)
+  - Wave 8A quality catalog: `scan.scanMode` single|deep · `domain_scan` · `scoreKind` · expanded issue_gate conditions — `specs/domain/collection-test-flow.md`
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

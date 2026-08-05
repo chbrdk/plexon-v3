@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 4 Study rollup implemented (2026-08-05)  
+**Status:** Wave 8A Checkion quality catalog (in progress)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -26,9 +26,9 @@ Users see **one Projekt**. Capabilities stay product-local; Plexon owns the cros
 
 - Second product-only project model
 - Porting Audion Board 1:1 into Plexon as a skin
-- Domain-crawl / GEO / Brandion nodes in Wave 0–1
 - Collaborative multi-user live editing
 - Replacing React Flow or inventing a second DS graph primitive
+- Dumping every Checkion UI surface as a node (Overview / Share / Settings stay deep-links)
 
 ## Ownership
 
@@ -71,13 +71,40 @@ Gates that depend only on journey signals stay in family A (`url_match`, `goal_r
 
 ### B — Page / Quality (CHECKION capability)
 
-| Kind | Role |
-|------|------|
-| `page` | Explicit page URL (defaults to active cursor URL from prior journey step) |
-| `scan` | Trigger CHECKION `mode: single` on bound project |
-| `issue_gate` | Branch on issue severity / count / rule family |
-| `score_gate` | Branch on score band / threshold |
-| `quality_ok` | Positive quality terminal (optional; may map to journey `success`) |
+Orchestration nodes only — start job → poll → signal → branch. Report chrome stays in CHECKION via deep links.
+
+| Kind | Role | Wave |
+|------|------|------|
+| `page` | Explicit page URL (optional; defaults to journey/start URL) | later |
+| `scan` | CHECKION page scan — `scanMode: single \| deep` (default `single`) | **8A** |
+| `domain_scan` | CHECKION domain crawl — `POST /api/domain-scans` (`maxPages?`) | **8A** |
+| `issue_gate` | Branch on issue severity / count / rule family | 3 + **8A** |
+| `score_gate` | Branch on overall **or** score dimension (`scoreKind`) | 1 + **8A** |
+| `quality_ok` | Positive quality terminal | 1 |
+| `geo_job` | CHECKION GEO job (`POST /api/geo-jobs`) | **8B** (spec only) |
+| `geo_gate` | Branch on GEO discoverability / EEAT signal | **8B** (spec only) |
+
+#### Keep / reshape / drop (quality catalog)
+
+| Decision | Item |
+|----------|------|
+| **Keep** | `scan` single path; `score_gate` overall; `issue_gate` critical; Collection verdict + dossier deep links |
+| **Reshape** | `scan` gains `scanMode`; `score_gate` gains `scoreKind`; `issue_gate` gains severity-band conditions |
+| **Add** | `domain_scan` (Wave 8A); `geo_job` / `geo_gate` (Wave 8B) |
+| **Drop as nodes** | Result Overview, Share links, Reports, Settings, Saliency canvas — link from Run strip / Verdict only |
+
+Node fields (quality):
+
+| Field | On | Notes |
+|-------|-----|-------|
+| `url` | `scan`, `domain_scan`, `start` | Empty scan URL → journey `finalUrl` / start URL |
+| `scanMode` | `scan` | `single` (default) \| `deep` |
+| `maxPages` | `domain_scan` | Optional crawl cap (default server/env) |
+| `threshold` | `score_gate` | Default **70** |
+| `scoreKind` | `score_gate` | `overall` (default) \| Checkion score card `kind` (`accessibility`, `seo`, `performance`, `ux`, `eco`, `best_practices`, …) via `GET /api/scans/:id/scores` |
+| `minCount` | `issue_gate` | Default **1** |
+| `pattern` | `issue_gate` | For `issue_rule_match` |
+| `gateCondition` | `issue_gate` / `score_gate` | Closed set below |
 
 ### C — Orchestration (PLEXON)
 
@@ -100,20 +127,22 @@ Same as Audion V1: `then` | `when` | `otherwise` | `parallel`.
 
 `frustration_high`, `url_match`, `title_match`, `consent_accepted`, `consent_rejected`, `goal_reached`, `confusion_named`, `time_elapsed`.
 
-### Quality (new — CHECKION emits / Plexon evaluates)
+### Quality (CHECKION emits / Plexon evaluates)
 
 | Id | Meaning | Signal source |
 |----|---------|---------------|
-| `scan_complete` | Single-page scan finished successfully | CHECKION job status |
-| `score_at_least` | Aggregate / lens score ≥ `threshold` | Scan score payload + node `threshold` |
+| `scan_complete` | Page/domain scan finished successfully | CHECKION job status |
+| `score_at_least` | Score ≥ `threshold` (overall or `scoreKind`) | Scan / domain `overallScore` or score card |
 | `score_below` | Score &lt; `threshold` | Same |
-| `critical_issues` | Count of critical (or worse) issues ≥ `minCount` | Issues summary |
-| `no_critical_issues` | Zero critical issues | Issues summary |
-| `issue_rule_match` | At least one issue matching `pattern` (rule id / family) | Issues list |
+| `critical_issues` | Count of **critical** ≥ `minCount` | Issues summary |
+| `no_critical_issues` | Zero critical | Issues summary |
+| `serious_issues` | Count of **serious** ≥ `minCount` | Issues summary |
+| `no_serious_issues` | Zero serious | Issues summary |
+| `any_issues` | Total issues ≥ `minCount` | Issues summary |
+| `no_issues` | Zero issues | Issues summary |
+| `issue_rule_match` | At least one issue matching `pattern` (rule id / family) → **fail** branch when match present | Issues list |
 
-Node fields for quality gates: `threshold?: number`, `minCount?: number`, `pattern?: string`, `lensId?: string` (optional future).
-
-Do **not** invent open-ended expression languages in MVP.
+Do **not** invent open-ended expression languages.
 
 ## Graph rules
 
@@ -214,7 +243,9 @@ Do not place this on legacy `/board` Prismion island.
 | **5 — Board chrome + authoring** | Immersive Audion-parity docks (toolbar / Bausteine / run strip / inspector); edit drag/connect/palette/undo/Save; Audion + Checkion node kinds on one RF canvas | Side-by-side with Audion board feels same family; can author journey+quality without leaving Plexon |
 | **6 — Live run on canvas** | Client-orchestrated journey poll paints node states / path / Inspector; then quality segment on same board; Stop/cancel | Running Collection flow feels like Audion Testen + quality gates |
 | **7 — Polish** | Output→Note, Reset-to-template, Evaluate deep-link / Soft-Q read-only summary; smoke + tests | edit→save→run→verdict contract green |
-| **Later** | Parallel multi-page, GEO nodes, Brandion, multi-user live | Out of MVP |
+| **8A — Checkion quality catalog** | `scan.scanMode` single\|deep; `domain_scan`; `scoreKind` on `score_gate`; expanded `issue_gate` severity conditions; palette + RF/inspector + run BFF | Staging: deep page scan + domain crawl + dimension gate + serious_issues branch |
+| **8B — GEO nodes** | `geo_job` + `geo_gate` (discoverability / EEAT) | Later |
+| **Later** | Parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -254,13 +285,23 @@ Do not place this on legacy `/board` Prismion island.
 
 ## Wave 5–7 implementation notes
 
-- Graph SoT stays `collection_test_flows`. Node kinds = Audion closed set (`prompt`/`observe`/`action`/`gate`/`message`/`measure`/`success`/…) **plus** quality (`scan`/`score_gate`/`issue_gate`/`quality_ok`) and legacy opaque `journey`.
+- Graph SoT stays `collection_test_flows`. Node kinds = Audion closed set (`prompt`/`observe`/`action`/`gate`/`message`/`measure`/`success`/…) **plus** quality (`scan`/`domain_scan`/`score_gate`/`issue_gate`/`quality_ok`) and legacy opaque `journey`.
 - Edges use Audion kinds `then`|`when`|`otherwise`|`parallel` (stored as `edgeKind`; score/issue gates also use `when: pass|fail`).
 - Board chrome SoT: `@msqdx/ui` `.msqdx-flow-*` (`flow-board-chrome.md`) — not a Plexon-only CSS fork.
 - Save via `PATCH …/flows/:flowId` with full `flow` document; Undo is session-local.
 - Wave 6: `POST …/run/journey` → poll `GET …/journey-jobs/:jobId` → `POST …/run` with journey handoff for Checkion + verdict.
 - Soft-Q edit remains Audion Wave; board offers Evaluate deep link + read-only Soft-Q summary when wave ids present.
 
+## Wave 8A implementation notes
+
+- `scan.scanMode`: `POST {CHECKION}/api/scans` with `mode: single|deep` (Audion journey handoff still prefers `single` for step URL).
+- `domain_scan`: `POST {CHECKION}/api/domain-scans` `{ projectId, url, maxPages? }` → poll `GET /api/domain-scans/:id` (`overallScore`, status). Deep link `pathCheckionDomainResult`.
+- `score_gate.scoreKind`: when set and ≠ `overall`, fetch `GET /api/scans/:id/scores` and compare that card’s `value` (0–100) to `threshold`. Domain scans use `overallScore` only in 8A.
+- `issue_gate`: evaluate against expanded `IssueGateSignals` (`criticalCount`, `seriousCount`, `issueCount`, `ruleIds`).
+- Palette Quality section: `scan`, `domain_scan`, `score_gate`, `issue_gate`, `quality_ok`.
+- `lastRun` may include `scanMode`, `domainScanId` when domain path used.
+
 ## Open questions (non-blocking)
 
 - Richer Soft-Q mapping from Checkion lenses — later if product asks.
+- Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when gate follows `domain_scan`.

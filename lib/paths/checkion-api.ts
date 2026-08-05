@@ -63,6 +63,27 @@ export function checkionApiScanIssues(scanId: string): string {
   return `${checkionApiScanDetail(scanId)}/issues`;
 }
 
+/** GET /api/scans/:id/scores */
+export function checkionApiScanScores(scanId: string): string {
+  return `${checkionApiScanDetail(scanId)}/scores`;
+}
+
+/** POST/GET /api/domain-scans — contracts DomainScanLight (v3). */
+export function checkionApiDomainScans(): string {
+  const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
+  return `${base}/api/domain-scans`;
+}
+
+/** GET /api/domain-scans/:id */
+export function checkionApiDomainScanDetail(domainScanId: string): string {
+  return `${checkionApiDomainScans()}/${encodeURIComponent(domainScanId)}`;
+}
+
+/** GET /api/domain-scans/:id/issues */
+export function checkionApiDomainScanIssues(domainScanId: string): string {
+  return `${checkionApiDomainScanDetail(domainScanId)}/issues`;
+}
+
 export function checkionApiScanProject(scanId: string): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
   return `${base}/api/scan/${encodeURIComponent(scanId)}/project`;
