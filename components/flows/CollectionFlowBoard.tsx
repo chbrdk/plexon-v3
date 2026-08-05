@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import Link from 'next/link'
 import {
   Background,
@@ -18,11 +18,13 @@ import '@xyflow/react/dist/style.css'
 import {
   Button,
   Chip,
+  ContextMenu,
   FlowBoardPalette,
   FlowBoardStage,
   FlowBoardToolbar,
   FlowRunStrip,
   Text,
+  type ContextMenuItem,
 } from '@msqdx/ui'
 import {
   apiPlatformProjectFlow,
@@ -141,6 +143,12 @@ function BoardInner({ platformProjectId, initial }: Props) {
   selectedIdRef.current = selectedId
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [webhookOpen, setWebhookOpen] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    target: 'pane' | 'node'
+    nodeId?: string
+  } | null>(null)
   const [audionCatalog, setAudionCatalog] = useState<{
     personas: Array<{ id: string; name: string }>
     targetGroups: Array<{ id: string; name: string; segment: string }>
@@ -900,14 +908,14 @@ function BoardInner({ platformProjectId, initial }: Props) {
   )
 
   const onNodeDragStop = useCallback(
-    (_e: MouseEvent, node: CollectionFlowRfNodeModel) => {
+    (_e: ReactMouseEvent, node: CollectionFlowRfNodeModel) => {
       snapNodesAfterDrag([node])
     },
     [snapNodesAfterDrag]
   )
 
   const onSelectionDragStop = useCallback(
-    (_e: MouseEvent, nodesDragged: CollectionFlowRfNodeModel[]) => {
+    (_e: ReactMouseEvent, nodesDragged: CollectionFlowRfNodeModel[]) => {
       snapNodesAfterDrag(nodesDragged)
     },
     [snapNodesAfterDrag]
@@ -1045,6 +1053,120 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSaveMsg(null)
     setRunError(null)
   }, [runBusy, nodes, edges, setNodes, setEdges, pushHistory])
+
+  const closeContextMenu = useCallback(() => setContextMenu(null), [])
+
+  const contextMenuItems = useMemo((): ContextMenuItem[] => {
+    if (!contextMenu) return []
+    const busy = runBusy
+    if (contextMenu.target === 'pane') {
+      return [
+        {
+          id: 'palette',
+          label: 'Bausteine öffnen',
+          disabled: busy,
+          onSelect: () => setPaletteOpen(true),
+        },
+        {
+          id: 'undo',
+          label: 'Rückgängig',
+          disabled: busy || historyLen < 1,
+          onSelect: () => onUndo(),
+        },
+      ]
+    }
+    const nodeId = contextMenu.nodeId
+    const kind = nodes.find((n) => n.id === nodeId)?.data?.flowNode?.kind
+    const canParallel = kind === 'zielgruppe' || kind === 'persona'
+    const items: ContextMenuItem[] = [
+      {
+        id: 'duplicate',
+        label: 'Duplizieren',
+        disabled: busy || !nodeId,
+        onSelect: () => {
+          if (nodeId) {
+            setSelectedId(nodeId)
+            selectedIdRef.current = nodeId
+          }
+          duplicateSelected()
+        },
+      },
+      {
+        id: 'delete',
+        label: 'Löschen',
+        shortcut: '⌫',
+        danger: true,
+        disabled: busy || !nodeId,
+        onSelect: () => {
+          if (nodeId) {
+            setSelectedId(nodeId)
+            selectedIdRef.current = nodeId
+          }
+          deleteSelected()
+        },
+      },
+    ]
+    if (canParallel) {
+      items.push({
+        id: 'parallel',
+        label: 'Parallel-Persona',
+        disabled: busy || !nodeId,
+        onSelect: () => {
+          if (nodeId) {
+            setSelectedId(nodeId)
+            selectedIdRef.current = nodeId
+          }
+          addParallelPersona()
+        },
+      })
+    }
+    items.push({
+      id: 'inspector',
+      label: 'Inspector öffnen',
+      disabled: !nodeId,
+      onSelect: () => {
+        if (nodeId) {
+          setSelectedId(nodeId)
+          selectedIdRef.current = nodeId
+        }
+      },
+    })
+    return items
+  }, [
+    contextMenu,
+    runBusy,
+    historyLen,
+    onUndo,
+    nodes,
+    duplicateSelected,
+    deleteSelected,
+    addParallelPersona,
+  ])
+
+  const onPaneContextMenu = useCallback(
+    (event: ReactMouseEvent | MouseEvent) => {
+      event.preventDefault()
+      if (runBusy) return
+      setContextMenu({ x: event.clientX, y: event.clientY, target: 'pane' })
+    },
+    [runBusy]
+  )
+
+  const onNodeContextMenu = useCallback(
+    (event: ReactMouseEvent | MouseEvent, node: CollectionFlowRfNodeModel) => {
+      event.preventDefault()
+      if (runBusy) return
+      setSelectedId(node.id)
+      selectedIdRef.current = node.id
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        target: 'node',
+        nodeId: node.id,
+      })
+    },
+    [runBusy]
+  )
 
   const onNodesDelete = useCallback((deleted: CollectionFlowRfNodeModel[]) => {
     const ids = new Set(deleted.map((n) => n.id))
@@ -1217,6 +1339,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onSelectionChange={onSelectionChange}
           onNodeDragStop={onNodeDragStop}
           onSelectionDragStop={onSelectionDragStop}
+          onPaneContextMenu={onPaneContextMenu}
+          onNodeContextMenu={onNodeContextMenu}
           nodeTypes={nodeTypes}
           fitView
           deleteKeyCode={runBusy ? null : ['Backspace', 'Delete']}
@@ -1625,6 +1749,15 @@ function BoardInner({ platformProjectId, initial }: Props) {
               />
             </CollectionFlowFloatingPanel>
           ) : null}
+
+          <ContextMenu
+            open={Boolean(contextMenu)}
+            x={contextMenu?.x ?? 0}
+            y={contextMenu?.y ?? 0}
+            onClose={closeContextMenu}
+            items={contextMenuItems}
+            label="Flow Board Menü"
+          />
         </>
       }
     />

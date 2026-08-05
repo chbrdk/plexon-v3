@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 15 Flow triggers + node collision  
+**Status:** Wave 16 Flow board context menu  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -282,6 +282,7 @@ Do not place this on legacy `/board` Prismion island.
 | **13 — Compare presets + parallel authoring** | Quality palette presets (score/a11y/issues/journey/geo); `parallel` out on Zielgruppe/Persona; add sibling Persona (authoring only; runtime still one extract persona) | Staging: drop Compare Score≥70; Parallel handle + toolbar adds second Persona wire |
 | **14 — Parallel persona runtime** | Detect Zielgruppe→Persona `then`+`parallel` siblings; sequential Audion segments (one personaId each); aggregate `journey.taskCompleted`/`validEvidence` (AND); catalog `personaCount`/`allTaskCompleted`; live board chains slots | Staging: two Personas → Testen runs both → quality once with AND |
 | **15 — Flow triggers + node collision** | Per-flow webhook secret + service-secret trigger; `202` + poll `collection_flow_runs`; optional `callbackUrl`; closed body `url?`/`companyName?`; AABB snap so nodes cannot overlap | Staging: rotate secret → POST webhook → poll complete; drag onto node snaps free |
+| **16 — Board context menu** | Right-click authoring via shared `@msqdx/ui` `ContextMenu` (node: dup/delete/‖P/inspector; pane: Bausteine/undo) | Staging: right-click node → Duplizieren; pane → Bausteine |
 | **Later** | Canvas `trigger`/cron nodes; `set` aliases; array pickers; concurrent multi-job live; Brandion; multi-user live; saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
@@ -408,6 +409,11 @@ Do not place this on legacy `/board` Prismion island.
 - Table `collection_flow_runs` + flow columns `webhook_enabled`, `webhook_secret_hash`, `webhook_secret_hint`. Rotate via `POST …/webhook/rotate`; enable via `PATCH` `{ webhookEnabled }`.
 - Shared executor `lib/collection-flow-execute.ts` (UI sync `…/run` + async worker). Still updates flow `lastVerdict`/`lastRun`.
 - **Node collision:** `lib/collection-flow-collision.ts` — on drag-stop / palette / duplicate / ‖P, snap AABB with gap so nodes cannot stack. Free move while dragging.
+
+## Wave 16 implementation notes
+
+- Right-click uses `@msqdx/ui` `ContextMenu` (central DS). Board supplies items only.
+- Node: Duplizieren, Löschen, Parallel-Persona (zielgruppe/persona), Inspector. Pane: Bausteine, Rückgängig. Disabled while run busy. No Testen/Save/Webhook in menu.
 
 ## Open questions (non-blocking)
 

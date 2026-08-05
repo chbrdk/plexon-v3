@@ -54,6 +54,7 @@
     - Helpers `apiPlatformProjectFlowTriggerWebhook` / `…Service` / `…FlowRunStatus` / `…FlowWebhookRotate`
     - Tables: webhook columns on `collection_test_flows` + `collection_flow_runs` (migration `0006_collection_flow_triggers.sql`)
     - Collision: `lib/collection-flow-collision.ts` on board drag-stop / place
+    - Wave 16 Context menu: `@msqdx/ui` ContextMenu on CollectionFlowBoard (node + pane)
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
