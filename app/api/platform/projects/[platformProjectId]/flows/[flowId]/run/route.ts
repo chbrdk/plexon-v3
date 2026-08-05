@@ -13,6 +13,7 @@ import {
   geoJobNode,
   geoJobQueriesFromText,
   issueGateNode,
+  listJourneyPersonaSlots,
   nodeStatesFromVerdict,
   qualityScanNode,
   resolveJourneyFlowForRun,
@@ -147,6 +148,8 @@ export async function POST(
     let scanUrl = runUrl;
     let taskCompleted = !hasJourney;
     let journeyValidEvidence = !hasJourney;
+    let journeyPersonaRuns: NonNullable<CollectionFlowLastRun['journeyPersonaRuns']> | null = null;
+    let journeyPersonaCount = 1;
 
     // Wave 6: board already ran the journey segment live (POST …/run/journey + poll) and
     // hands off the finished job here — skip re-running AUDION, go straight to the scan.
@@ -169,6 +172,14 @@ export async function POST(
         typeof body.stepUrl === 'string' && body.stepUrl.trim() ? body.stepUrl.trim() : null;
       taskCompleted = body.taskCompleted === true;
       journeyValidEvidence = body.journeyValidEvidence === true;
+      if (typeof body.personaCount === 'number' && Number.isFinite(body.personaCount)) {
+        journeyPersonaCount = Math.max(1, Math.floor(body.personaCount));
+      }
+      if (Array.isArray(body.journeyPersonaRuns)) {
+        journeyPersonaRuns = body.journeyPersonaRuns as NonNullable<
+          CollectionFlowLastRun['journeyPersonaRuns']
+        >;
+      }
       if (stepUrl) scanUrl = stepUrl;
     } else if (hasJourney) {
       const audionProjectId = await getExternalProjectId(id, 'audion');
@@ -179,64 +190,123 @@ export async function POST(
         );
       }
 
-      const journeyFlow = resolveJourneyFlowForRun(doc, runUrl);
-      if (!journeyFlow) {
-        return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
-      }
+      const slots = listJourneyPersonaSlots(doc);
+      const runSlots =
+        slots.length > 0
+          ? slots
+          : [
+              {
+                nodeId: '',
+                personaId: null,
+                personaName: null,
+                segment: null,
+                via: 'orphan' as const,
+                primary: true,
+              },
+            ];
 
-      const journey = await runAudionJourneySegment({
-        projectId: audionProjectId,
-        flow: journeyFlow,
-        name: `${row.name} · journey`,
-      });
+      const personaRuns: NonNullable<CollectionFlowLastRun['journeyPersonaRuns']> = [];
+      let allTask = true;
+      let allEvidence = true;
+      let primaryStepUrl: string | null = null;
 
-      if (!journey.ok) {
-        audionStudyId = journey.studyId ?? null;
-        audionWaveId = journey.waveId ?? null;
-        audionJobId = journey.jobId ?? null;
-        if (journey.job) {
-          taskCompleted = journey.job.taskCompleted;
-          journeyValidEvidence = journey.job.validEvidence;
-          stepUrl = journey.job.finalUrl;
+      for (const slot of runSlots) {
+        const journeyFlow = resolveJourneyFlowForRun(doc, runUrl, {
+          personaNodeId: slot.nodeId || null,
+        });
+        if (!journeyFlow) {
+          return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
         }
-        const verdict = deriveJourneyErrorVerdict({
-          error: journey.error,
-          threshold,
+        const label = slot.personaName || slot.personaId || 'journey';
+        const journey = await runAudionJourneySegment({
+          projectId: audionProjectId,
+          flow: journeyFlow,
+          name: `${row.name} · ${label}`,
         });
-        const lastRun: CollectionFlowLastRun = {
-          startedAt,
-          completedAt: new Date().toISOString(),
-          scanId: null,
-          url: runUrl,
-          status: 'error',
-          overallScore: null,
-          error: journey.error,
-          audionJobId,
-          audionStudyId,
-          audionWaveId,
-          stepUrl,
-        };
-        const saved = await persistFlowRunResult({
-          platformProjectId: id,
-          flowId: fid,
-          verdict,
-          lastRun,
+
+        personaRuns.push({
+          personaNodeId: slot.nodeId || 'start',
+          personaId: slot.personaId,
+          personaName: slot.personaName,
+          jobId: journey.jobId ?? journey.job?.jobId ?? null,
+          studyId: journey.studyId ?? null,
+          waveId: journey.waveId ?? null,
+          taskCompleted: journey.job?.taskCompleted ?? false,
+          validEvidence: journey.job?.validEvidence ?? false,
+          finalUrl: journey.job?.finalUrl ?? null,
+          error: journey.ok ? null : journey.error,
         });
-        return platformJson({
-          flow: saved ? toCollectionTestFlowResponse(saved) : null,
-          verdict,
-          lastRun,
-          nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
-        });
+
+        if (!journey.ok) {
+          audionStudyId = journey.studyId ?? null;
+          audionWaveId = journey.waveId ?? null;
+          audionJobId = journey.jobId ?? null;
+          if (journey.job) {
+            taskCompleted = journey.job.taskCompleted;
+            journeyValidEvidence = journey.job.validEvidence;
+            stepUrl = journey.job.finalUrl;
+          }
+          const verdict = deriveJourneyErrorVerdict({
+            error: journey.error,
+            threshold,
+          });
+          const lastRun: CollectionFlowLastRun = {
+            startedAt,
+            completedAt: new Date().toISOString(),
+            scanId: null,
+            url: runUrl,
+            status: 'error',
+            overallScore: null,
+            error: journey.error,
+            audionJobId,
+            audionStudyId,
+            audionWaveId,
+            stepUrl,
+            journeyPersonaRuns: personaRuns,
+            context: {
+              outputs: setContextBundle(
+                runContext,
+                'journey',
+                buildJourneyCatalogBundle({
+                  taskCompleted: false,
+                  validEvidence: false,
+                  finalUrl: stepUrl,
+                  personaCount: runSlots.length,
+                })
+              ).outputs,
+            },
+          };
+          const saved = await persistFlowRunResult({
+            platformProjectId: id,
+            flowId: fid,
+            verdict,
+            lastRun,
+          });
+          return platformJson({
+            flow: saved ? toCollectionTestFlowResponse(saved) : null,
+            verdict,
+            lastRun,
+            nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
+          });
+        }
+
+        allTask = allTask && journey.job.taskCompleted;
+        allEvidence = allEvidence && journey.job.validEvidence;
+        if (slot.primary || !primaryStepUrl) {
+          primaryStepUrl = journey.job.finalUrl;
+          audionStudyId = journey.studyId;
+          audionWaveId = journey.waveId;
+          audionJobId = journey.jobId;
+        }
+        if (journey.job.finalUrl) stepUrl = journey.job.finalUrl;
       }
 
-      audionStudyId = journey.studyId;
-      audionWaveId = journey.waveId;
-      audionJobId = journey.jobId;
-      taskCompleted = journey.job.taskCompleted;
-      journeyValidEvidence = journey.job.validEvidence;
-      stepUrl = journey.job.finalUrl;
-      if (journey.job.finalUrl) scanUrl = journey.job.finalUrl;
+      taskCompleted = allTask;
+      journeyValidEvidence = allEvidence;
+      if (primaryStepUrl) stepUrl = primaryStepUrl;
+      if (stepUrl) scanUrl = stepUrl;
+      journeyPersonaRuns = personaRuns;
+      journeyPersonaCount = runSlots.length;
     }
 
     if (hasJourney) {
@@ -247,8 +317,23 @@ export async function POST(
           taskCompleted,
           validEvidence: journeyValidEvidence,
           finalUrl: stepUrl,
+          personaCount: journeyPersonaCount,
         })
       );
+      for (const run of journeyPersonaRuns ?? []) {
+        runContext = setContextBundle(
+          runContext,
+          run.personaNodeId,
+          {
+            taskCompleted: run.taskCompleted,
+            validEvidence: run.validEvidence,
+            finalUrl: run.finalUrl,
+            personaId: run.personaId,
+            personaName: run.personaName,
+          },
+          run.personaNodeId
+        );
+      }
     }
 
     // qualityNode already resolved above (Wave 8B may be geo-only)
@@ -681,6 +766,7 @@ export async function POST(
       knowledgeDistillateOk,
       context: runContext,
       compareResults,
+      journeyPersonaRuns,
     };
 
     const saved = await persistFlowRunResult({

@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 13 Compare presets + parallel persona authoring  
+**Status:** Wave 14 Parallel persona runtime  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -280,7 +280,8 @@ Do not place this on legacy `/board` Prismion island.
 | **11 — Journey product nodes** | `persona` / `zielgruppe` config + extract merge; Frage/Action presets; `measureKey`; `success` journey catalog ports; palette groups Kontext/Schritte/Messung/Steuerung | Staging: Zielgruppe→Persona→Start→Action→Success; bind `journey.taskCompleted`; personas from Collection catalog |
 | **12 — Authoring polish** | Delete/Entf; duplicate; validate-before-Testen; dirty auto-save on run; lean templates `zielgruppe`→`persona`→…→optional Frage | Staging: select→Entf/duplicate; Testen blocks incomplete compare/journey; new flow has Zielgruppe |
 | **13 — Compare presets + parallel authoring** | Quality palette presets (score/a11y/issues/journey/geo); `parallel` out on Zielgruppe/Persona; add sibling Persona (authoring only; runtime still one extract persona) | Staging: drop Compare Score≥70; Parallel handle + toolbar adds second Persona wire |
-| **Later** | `set` aliases, array pickers, parallel multi-persona **runtime**, Brandion, multi-user live, saliency | Out of MVP |
+| **14 — Parallel persona runtime** | Detect Zielgruppe→Persona `then`+`parallel` siblings; sequential Audion segments (one personaId each); aggregate `journey.taskCompleted`/`validEvidence` (AND); catalog `personaCount`/`allTaskCompleted`; live board chains slots | Staging: two Personas → Testen runs both → quality once with AND |
+| **Later** | `set` aliases, array pickers, concurrent multi-job live, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -389,6 +390,15 @@ Do not place this on legacy `/board` Prismion island.
 - Zielgruppe/Persona expose control out `parallel` (label Parallel) beside Weiter.
 - `addParallelPersonaSibling`: toolbar adds a second Persona wired with `edgeKind: parallel` from the same Zielgruppe (or from selected Persona’s source). Runtime extract still merges **one** nearest persona onto `start`; validate warns when parallel persona edges exist.
 - Helper: quality presets in `lib/collection-flow-presets.ts`; parallel helper in `lib/collection-flow-canvas.ts`.
+
+## Wave 14 implementation notes
+
+- `listJourneyPersonaSlots(doc)`: Zielgruppe out-edges `then` (primary) + `parallel` (siblings) → Persona nodes; fallback single reverse-find when no slots.
+- `extractJourneyFlowFromDocument(doc, url, { personaNodeId })` merges that Persona (+ Zielgruppe segment) onto `start`.
+- Sync `POST …/run`: sequential `runAudionJourneySegment` per slot; AND-aggregate task/evidence; primary/last job ids for rollup; `lastRun.journeyPersonaRuns[]`.
+- Live `POST …/run/journey`: `personaNodeId` body; board chains slots then one quality handoff with aggregates.
+- Catalog: `journey.personaCount`, `journey.allTaskCompleted` (+ existing AND fields). No free expressions.
+- Validate: parallel siblings require `personaId`; authoring-only warning removed.
 
 ## Open questions (non-blocking)
 

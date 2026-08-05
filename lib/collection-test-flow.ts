@@ -215,6 +215,19 @@ export type CollectionFlowLastRun = {
   audionStudyId?: string | null;
   audionWaveId?: string | null;
   stepUrl?: string | null;
+  /** Wave 14: per-persona journey segment results (sequential fan-out). */
+  journeyPersonaRuns?: Array<{
+    personaNodeId: string;
+    personaId: string | null;
+    personaName: string | null;
+    jobId: string | null;
+    studyId: string | null;
+    waveId: string | null;
+    taskCompleted: boolean;
+    validEvidence: boolean;
+    finalUrl: string | null;
+    error?: string | null;
+  }> | null;
   issueCount?: number | null;
   criticalCount?: number | null;
   issueGateBranch?: 'pass' | 'fail' | null;
@@ -813,20 +826,92 @@ export function migrateLegacyQualityGates(
 }
 
 /**
+ * Persona slots for Wave 14 sequential fan-out.
+ * Primary = Zielgruppe → then → Persona; siblings = Zielgruppe → parallel → Persona.
+ */
+export type JourneyPersonaSlot = {
+  nodeId: string;
+  personaId: string | null;
+  personaName: string | null;
+  segment: string | null;
+  via: 'then' | 'parallel' | 'orphan';
+  primary: boolean;
+};
+
+function journeyCandidateNodes(doc: CollectionTestFlowDocument): CollectionFlowNode[] {
+  const firstQualityIdx = doc.nodes.findIndex((n) => QUALITY_FAMILY_KINDS.has(n.kind));
+  return (firstQualityIdx === -1 ? doc.nodes : doc.nodes.slice(0, firstQualityIdx)).filter(
+    (n) => n.kind !== 'journey'
+  );
+}
+
+export function listJourneyPersonaSlots(doc: CollectionTestFlowDocument): JourneyPersonaSlot[] {
+  const byId = new Map(doc.nodes.map((n) => [n.id, n]));
+  const ziel = doc.nodes.find((n) => n.kind === 'zielgruppe');
+  const slots: JourneyPersonaSlot[] = [];
+  const seen = new Set<string>();
+
+  const pushPersona = (
+    node: CollectionFlowNode,
+    via: JourneyPersonaSlot['via'],
+    primary: boolean
+  ) => {
+    if (node.kind !== 'persona' || seen.has(node.id)) return;
+    seen.add(node.id);
+    slots.push({
+      nodeId: node.id,
+      personaId: node.personaId?.trim() || null,
+      personaName: node.personaName?.trim() || null,
+      segment: node.segment?.trim() || ziel?.segment?.trim() || null,
+      via,
+      primary,
+    });
+  };
+
+  if (ziel) {
+    const outs = doc.edges.filter(
+      (e) => e.source === ziel.id && (e.edgeKind ?? 'then') !== 'bind'
+    );
+    const thenTargets = outs.filter((e) => (e.edgeKind ?? 'then') === 'then');
+    const parallelTargets = outs.filter((e) => e.edgeKind === 'parallel');
+    let primarySet = false;
+    for (const e of thenTargets) {
+      const n = byId.get(e.target);
+      if (!n || n.kind !== 'persona') continue;
+      pushPersona(n, 'then', !primarySet);
+      primarySet = true;
+    }
+    for (const e of parallelTargets) {
+      const n = byId.get(e.target);
+      if (!n || n.kind !== 'persona') continue;
+      pushPersona(n, 'parallel', !primarySet);
+      if (!primarySet) primarySet = true;
+    }
+  }
+
+  for (const n of doc.nodes) {
+    if (n.kind === 'persona') pushPersona(n, 'orphan', slots.length === 0);
+  }
+
+  if (slots.length > 0 && !slots.some((s) => s.primary)) {
+    slots[0]!.primary = true;
+  }
+  return slots;
+}
+
+/**
  * Build an embedded Audion-shaped journey subgraph from first-class journey nodes on the
- * canvas (Wave 5 / 11). Config kinds `persona` / `zielgruppe` merge onto `start` and are
+ * canvas (Wave 5 / 11 / 14). Config kinds `persona` / `zielgruppe` merge onto `start` and are
  * omitted from the agent graph. Falls back to `doc.journeyFlow` / null when no start.
- * @see specs/domain/collection-test-flow.md — Wave 5–7 / 11 implementation notes
+ * @see specs/domain/collection-test-flow.md — Wave 5–7 / 11 / 14 implementation notes
  */
 export function extractJourneyFlowFromDocument(
   doc: CollectionTestFlowDocument,
-  url: string
+  url: string,
+  opts?: { personaNodeId?: string | null }
 ): EmbeddedAudionJourneyFlow | null {
   const pageUrl = url.trim() || 'https://example.com';
-  const firstQualityIdx = doc.nodes.findIndex((n) => QUALITY_FAMILY_KINDS.has(n.kind));
-  const candidateNodes = (
-    firstQualityIdx === -1 ? doc.nodes : doc.nodes.slice(0, firstQualityIdx)
-  ).filter((n) => n.kind !== 'journey');
+  const candidateNodes = journeyCandidateNodes(doc);
 
   if (!candidateNodes.some((n) => n.kind === 'start')) {
     if (doc.journeyFlow?.nodes?.length) return patchJourneyFlowUrl(doc.journeyFlow, pageUrl);
@@ -841,8 +926,15 @@ export function extractJourneyFlowFromDocument(
     return null;
   }
 
-  const personaCfg = [...candidateNodes].reverse().find((n) => n.kind === 'persona');
-  const zielCfg = [...candidateNodes].reverse().find((n) => n.kind === 'zielgruppe');
+  const slots = listJourneyPersonaSlots(doc);
+  const forcedId = opts?.personaNodeId?.trim() || null;
+  const allPersonas = doc.nodes.filter((n) => n.kind === 'persona');
+  const personaCfg = forcedId
+    ? allPersonas.find((n) => n.id === forcedId)
+    : slots.find((s) => s.primary)
+      ? allPersonas.find((n) => n.id === slots.find((s) => s.primary)!.nodeId)
+      : [...allPersonas].reverse()[0];
+  const zielCfg = [...doc.nodes].reverse().find((n) => n.kind === 'zielgruppe');
   const mergedPersonaId = start.personaId?.trim() || personaCfg?.personaId?.trim() || null;
   const mergedPersonaName =
     start.personaName?.trim() || personaCfg?.personaName?.trim() || null;
@@ -1084,10 +1176,11 @@ function patchJourneyFlowUrl(
 
 export function resolveJourneyFlowForRun(
   doc: CollectionTestFlowDocument,
-  url: string
+  url: string,
+  opts?: { personaNodeId?: string | null }
 ): EmbeddedAudionJourneyFlow | null {
   if (!documentHasJourneySegment(doc)) return null;
-  const extracted = extractJourneyFlowFromDocument(doc, url);
+  const extracted = extractJourneyFlowFromDocument(doc, url, opts);
   if (extracted?.nodes?.length) return extracted;
   if (doc.journeyFlow?.nodes?.length) {
     return patchJourneyFlowUrl(doc.journeyFlow, url);

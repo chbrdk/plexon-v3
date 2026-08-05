@@ -168,6 +168,24 @@ function BoardInner({ platformProjectId, initial }: Props) {
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const runMetaRef = useRef<{ studyId: string; waveId: string; jobId: string } | null>(null)
+  const personaAggRef = useRef<{
+    taskCompleted: boolean
+    validEvidence: boolean
+    finalUrl: string | null
+    personaCount: number
+    nextPersonaNodeId: string | null
+    runs: Array<{
+      personaNodeId: string
+      personaId: string | null
+      personaName: string | null
+      jobId: string | null
+      studyId: string | null
+      waveId: string | null
+      taskCompleted: boolean
+      validEvidence: boolean
+      finalUrl: string | null
+    }>
+  } | null>(null)
   const historyRef = useRef<GraphSnap[]>([])
   const skipHistoryRef = useRef(false)
   const [historyLen, setHistoryLen] = useState(0)
@@ -369,19 +387,25 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const runQualityPhase = useCallback(
     async (job: AudionJourneyJobSnapshot) => {
       const meta = runMetaRef.current
+      const agg = personaAggRef.current
+      const taskCompleted = agg ? agg.taskCompleted && job.taskCompleted : job.taskCompleted
+      const journeyValidEvidence = agg ? agg.validEvidence && job.validEvidence : job.validEvidence
+      const stepUrl = agg?.finalUrl || job.finalUrl
       try {
         const res = await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             phase: 'quality',
-            audionJobId: job.jobId,
+            audionJobId: agg?.runs[0]?.jobId || job.jobId,
             audionStudyId: meta?.studyId,
             audionWaveId: meta?.waveId,
-            stepUrl: job.finalUrl,
-            taskCompleted: job.taskCompleted,
-            journeyValidEvidence: job.validEvidence,
-            url: job.finalUrl || undefined,
+            stepUrl,
+            taskCompleted,
+            journeyValidEvidence,
+            personaCount: agg?.personaCount ?? 1,
+            journeyPersonaRuns: agg?.runs,
+            url: stepUrl || undefined,
           }),
         })
         const json = (await res.json().catch(() => null)) as {
@@ -398,10 +422,77 @@ function BoardInner({ platformProjectId, initial }: Props) {
       } catch (e) {
         setRunError(e instanceof Error ? e.message : String(e))
       } finally {
+        personaAggRef.current = null
         setRunBusy(false)
       }
     },
     [flow.id, loadSoftQSummary, platformProjectId]
+  )
+
+  const startJourneySlot = useCallback(
+    async (personaNodeId: string | null) => {
+      const res = await fetch(apiPlatformProjectFlowRunJourney(platformProjectId, flow.id), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(personaNodeId ? { personaNodeId } : {}),
+      })
+      const started = (await res.json().catch(() => null)) as {
+        error?: string
+        studyId?: string
+        waveId?: string
+        jobId?: string
+        personaNodeId?: string | null
+        personaCount?: number
+        nextPersonaNodeId?: string | null
+        personaSlots?: Array<{
+          nodeId: string
+          personaId: string | null
+          personaName: string | null
+        }>
+      } | null
+      if (!res.ok || !started?.jobId || !started.studyId || !started.waveId) {
+        throw new Error(started?.error || `Journey start failed (${res.status})`)
+      }
+      const slotMeta = started.personaSlots?.find((s) => s.nodeId === started.personaNodeId)
+      const prev = personaAggRef.current
+      personaAggRef.current = {
+        taskCompleted: prev?.taskCompleted ?? true,
+        validEvidence: prev?.validEvidence ?? true,
+        finalUrl: prev?.finalUrl ?? null,
+        personaCount: started.personaCount ?? prev?.personaCount ?? 1,
+        nextPersonaNodeId: started.nextPersonaNodeId ?? null,
+        runs: prev?.runs ?? [],
+      }
+      // stash pending slot identity on meta for when job completes
+      runMetaRef.current = {
+        studyId: started.studyId,
+        waveId: started.waveId,
+        jobId: started.jobId,
+        ...(slotMeta
+          ? {
+              pendingPersonaNodeId: slotMeta.nodeId,
+              pendingPersonaId: slotMeta.personaId,
+              pendingPersonaName: slotMeta.personaName,
+            }
+          : {}),
+      } as {
+        studyId: string
+        waveId: string
+        jobId: string
+        pendingPersonaNodeId?: string
+        pendingPersonaId?: string | null
+        pendingPersonaName?: string | null
+      }
+      setRunMeta({
+        studyId: started.studyId,
+        waveId: started.waveId,
+        jobId: started.jobId,
+        status: 'running',
+        stepCount: 0,
+      })
+      return started.jobId
+    },
+    [flow.id, platformProjectId]
   )
 
   const startPolling = useCallback(
@@ -413,6 +504,47 @@ function BoardInner({ platformProjectId, initial }: Props) {
           applyJobToStates(job)
           if (job.status === 'complete') {
             stopPolling()
+            const meta = runMetaRef.current as {
+              studyId: string
+              waveId: string
+              jobId: string
+              pendingPersonaNodeId?: string
+              pendingPersonaId?: string | null
+              pendingPersonaName?: string | null
+            } | null
+            const prev = personaAggRef.current
+            if (prev && meta) {
+              personaAggRef.current = {
+                ...prev,
+                taskCompleted: prev.taskCompleted && job.taskCompleted,
+                validEvidence: prev.validEvidence && job.validEvidence,
+                finalUrl: prev.finalUrl || job.finalUrl,
+                runs: [
+                  ...prev.runs,
+                  {
+                    personaNodeId: meta.pendingPersonaNodeId || 'persona',
+                    personaId: meta.pendingPersonaId ?? null,
+                    personaName: meta.pendingPersonaName ?? null,
+                    jobId: job.jobId,
+                    studyId: meta.studyId,
+                    waveId: meta.waveId,
+                    taskCompleted: job.taskCompleted,
+                    validEvidence: job.validEvidence,
+                    finalUrl: job.finalUrl,
+                  },
+                ],
+              }
+            }
+            const nextId = personaAggRef.current?.nextPersonaNodeId
+            if (nextId) {
+              setRunError(
+                `Persona ${personaAggRef.current?.runs.length ?? 1}/${personaAggRef.current?.personaCount ?? 1} fertig — starte nächste…`
+              )
+              const nextJobId = await startJourneySlot(nextId)
+              startPolling(nextJobId)
+              return
+            }
+            setRunError(null)
             await runQualityPhase(job)
           } else if (job.status === 'error') {
             stopPolling()
@@ -428,7 +560,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       void tick()
       pollRef.current = setInterval(() => void tick(), POLL_MS)
     },
-    [applyJobToStates, pollOnce, runQualityPhase, stopPolling]
+    [applyJobToStates, pollOnce, runQualityPhase, startJourneySlot, stopPolling]
   )
 
   const onSave = useCallback(async (): Promise<boolean> => {
@@ -514,32 +646,20 @@ function BoardInner({ platformProjectId, initial }: Props) {
     }
 
     try {
-      const res = await fetch(apiPlatformProjectFlowRunJourney(platformProjectId, flow.id), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
-      const started = (await res.json().catch(() => null)) as {
-        error?: string
-        studyId?: string
-        waveId?: string
-        jobId?: string
-      } | null
-      if (!res.ok || !started?.jobId || !started.studyId || !started.waveId) {
-        throw new Error(started?.error || `Journey start failed (${res.status})`)
+      personaAggRef.current = {
+        taskCompleted: true,
+        validEvidence: true,
+        finalUrl: null,
+        personaCount: 1,
+        nextPersonaNodeId: null,
+        runs: [],
       }
-      runMetaRef.current = { studyId: started.studyId, waveId: started.waveId, jobId: started.jobId }
-      setRunMeta({
-        studyId: started.studyId,
-        waveId: started.waveId,
-        jobId: started.jobId,
-        status: 'running',
-        stepCount: 0,
-      })
-      startPolling(started.jobId)
+      const jobId = await startJourneySlot(null)
+      startPolling(jobId)
     } catch (e) {
       setRunError(e instanceof Error ? e.message : String(e))
       setRunBusy(false)
+      personaAggRef.current = null
     }
   }, [
     dirty,
@@ -547,6 +667,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
     getSnapshot,
     onSave,
     platformProjectId,
+    startJourneySlot,
     startPolling,
     stopPolling,
   ])

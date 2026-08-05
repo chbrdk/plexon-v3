@@ -67,6 +67,8 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
   { path: 'journey.taskCompleted', label: 'taskCompleted', group: 'journey' },
   { path: 'journey.validEvidence', label: 'validEvidence', group: 'journey' },
   { path: 'journey.finalUrl', label: 'finalUrl', group: 'journey' },
+  { path: 'journey.personaCount', label: 'personaCount', group: 'journey' },
+  { path: 'journey.allTaskCompleted', label: 'allTaskCompleted', group: 'journey' },
   { path: 'run.url', label: 'url', group: 'run' },
   { path: 'run.startedAt', label: 'startedAt', group: 'run' },
 ];
@@ -311,11 +313,18 @@ export function buildJourneyCatalogBundle(input: {
   taskCompleted: boolean;
   validEvidence: boolean;
   finalUrl: string | null;
+  personaCount?: number;
 }): Record<string, unknown> {
+  const personaCount =
+    typeof input.personaCount === 'number' && Number.isFinite(input.personaCount)
+      ? input.personaCount
+      : 1;
   return {
     taskCompleted: input.taskCompleted,
     validEvidence: input.validEvidence,
     finalUrl: input.finalUrl,
+    personaCount,
+    allTaskCompleted: input.taskCompleted,
   };
 }
 

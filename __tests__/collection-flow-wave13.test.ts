@@ -53,14 +53,22 @@ describe('Wave 13 compare presets + parallel persona', () => {
 
   it('warns on parallel persona edges during validate', () => {
     const doc = createJourneyQualityTemplate('https://a.test');
+    doc.nodes.push({
+      id: 'n-persona-2',
+      kind: 'persona',
+      label: 'P2',
+      personaId: 'p-2',
+      personaName: 'Second',
+    });
     doc.edges.push({
       id: 'e-par',
       source: 'n-zielgruppe',
-      target: 'n-persona',
+      target: 'n-persona-2',
       edgeKind: 'parallel',
     });
     const result = validateCollectionFlowForRun(doc);
-    expect(result.issues.some((i) => i.code === 'parallel_persona_authoring')).toBe(true);
+    expect(result.ok).toBe(true);
+    expect(result.issues.some((i) => i.code === 'parallel_persona_authoring')).toBe(false);
   });
 
   it('still accepts page-quality with compare presets fields', () => {

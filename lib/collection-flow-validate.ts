@@ -7,6 +7,7 @@
 import {
   documentHasJourneySegment,
   extractJourneyFlowFromDocument,
+  listJourneyPersonaSlots,
   startNodeUrl,
   type CollectionTestFlowDocument,
 } from '@/lib/collection-test-flow';
@@ -81,14 +82,16 @@ export function validateCollectionFlowForRun(
     }
   }
 
-  const parallelPersonaEdges = doc.edges.filter((e) => (e.edgeKind ?? 'then') === 'parallel');
-  if (parallelPersonaEdges.length > 0) {
-    issues.push({
-      level: 'warning',
-      code: 'parallel_persona_authoring',
-      message:
-        'Parallel-Persona ist authoring-only: der Lauf merged weiterhin eine Persona auf Start (nächste Wave: Runtime-Fan-out).',
-    });
+  const parallelSlots = listJourneyPersonaSlots(doc).filter((s) => s.via === 'parallel');
+  for (const slot of parallelSlots) {
+    if (!slot.personaId) {
+      issues.push({
+        level: 'error',
+        code: 'parallel_persona_unset',
+        message: `Parallel-Persona „${slot.personaName || slot.nodeId}“ braucht eine Catalog-Persona.`,
+        nodeId: slot.nodeId,
+      });
+    }
   }
 
   if (documentHasJourneySegment(doc)) {

@@ -10,6 +10,7 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import {
   documentHasJourneySegment,
   ensureFlowDocument,
+  listJourneyPersonaSlots,
   resolveJourneyFlowForRun,
   scanNodeUrl,
   startNodeUrl,
@@ -55,6 +56,10 @@ export async function POST(
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const urlOverride =
       typeof body.url === 'string' && body.url.trim() ? body.url.trim() : null;
+    const personaNodeId =
+      typeof body.personaNodeId === 'string' && body.personaNodeId.trim()
+        ? body.personaNodeId.trim()
+        : null;
     const baseUrl = urlOverride ?? startNodeUrl(doc.nodes) ?? scanNodeUrl(doc.nodes);
     if (!baseUrl) {
       return apiError('Start URL missing — set start node urlKey or pass url', API_STATUS.BAD_REQUEST);
@@ -68,24 +73,48 @@ export async function POST(
       );
     }
 
-    const journeyFlow = resolveJourneyFlowForRun(doc, baseUrl);
+    const slots = listJourneyPersonaSlots(doc);
+    const slot =
+      (personaNodeId ? slots.find((s) => s.nodeId === personaNodeId) : null) ??
+      slots.find((s) => s.primary) ??
+      slots[0] ??
+      null;
+
+    const journeyFlow = resolveJourneyFlowForRun(doc, baseUrl, {
+      personaNodeId: slot?.nodeId ?? personaNodeId,
+    });
     if (!journeyFlow) {
       return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
     }
 
+    const label = slot?.personaName || slot?.personaId || 'primary';
     const started = await startAudionJourneySegment({
       projectId: audionProjectId,
       flow: journeyFlow,
-      name: `${row.name} · live test`,
+      name: `${row.name} · ${label}`,
     });
     if (!started.ok) {
       return apiError(started.error, API_STATUS.BAD_REQUEST);
     }
 
+    const slotIndex = slot ? slots.findIndex((s) => s.nodeId === slot.nodeId) : 0;
+    const nextSlot = slotIndex >= 0 ? slots[slotIndex + 1] : undefined;
+
     return platformJson({
       studyId: started.studyId,
       waveId: started.waveId,
       jobId: started.jobId,
+      personaNodeId: slot?.nodeId ?? null,
+      personaIndex: slotIndex >= 0 ? slotIndex : 0,
+      personaCount: Math.max(slots.length, 1),
+      nextPersonaNodeId: nextSlot?.nodeId ?? null,
+      personaSlots: slots.map((s) => ({
+        nodeId: s.nodeId,
+        personaId: s.personaId,
+        personaName: s.personaName,
+        primary: s.primary,
+        via: s.via,
+      })),
     });
   } catch (e) {
     return handleApiError(e, { context: 'collection flow run/journey POST' });
