@@ -42,6 +42,17 @@ export function checkionApiScan(): string {
   return `${base}/api/scan`;
 }
 
+/** POST/GET /api/scans — contracts ScanSummary (mode single|deep). Not legacy `/api/scan`. */
+export function checkionApiScans(): string {
+  const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
+  return `${base}/api/scans`;
+}
+
+/** GET /api/scans/:id */
+export function checkionApiScanDetail(scanId: string): string {
+  return `${checkionApiScans()}/${encodeURIComponent(scanId)}`;
+}
+
 export function checkionApiScanProject(scanId: string): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
   return `${base}/api/scan/${encodeURIComponent(scanId)}/project`;

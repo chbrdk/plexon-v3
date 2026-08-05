@@ -134,6 +134,29 @@ export const collectionKnowledgePacks = pgTable(
   })
 );
 
+/**
+ * Collection Test Flow — quality / journey graph per Collection (many rows).
+ * Spec: specs/domain/collection-test-flow.md — Wave 1 quality path; lastVerdict on flow jsonb.
+ */
+export const collectionTestFlows = pgTable(
+  'collection_test_flows',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    flow: jsonb('flow').$type<Record<string, unknown>>().notNull(),
+    ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    templateId: text('template_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    platformProjectIdx: index('collection_test_flows_platform_project_id_idx').on(t.platformProjectId),
+  })
+);
+
 /** Local product project id per platform project (CHECKION / AUDION mirror). */
 export const platformProjectProductBindings = pgTable(
   'platform_project_product_bindings',

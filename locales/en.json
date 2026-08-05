@@ -385,6 +385,7 @@
       "navCheckion": "CHECKION",
       "navAudion": "AUDION",
       "navBindings": "Links",
+      "navFlows": "Flows",
       "knowledgeLoadError": "Could not load Collection knowledge.",
       "knowledgeSharedBadge": "Shared",
       "knowledgeEdit": "Edit",

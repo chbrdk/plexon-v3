@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Draft — Accepted direction (2026-08-05)  
+**Status:** Wave 1 quality path implemented (2026-08-05) — journey embed Wave 2  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -170,7 +170,7 @@ Align with Audion Phase 7, extend for quality:
 
 Caveats: infra blockers (403, empty scan) set `pageEvidenceValid=false` with reason — same spirit as Audion `inferValidEvidence` junk rules.
 
-Persist last Collection verdict on the saved flow row (deferred detail in Wave 2).
+**Wave 1:** Persist `lastVerdict` + `lastRun` metadata on the flow **jsonb** (no `collection_flow_runs` table yet). Score signal = CHECKION contracts `overallScore`.
 
 ## Persistence (sketch)
 
@@ -178,9 +178,9 @@ Persist last Collection verdict on the saved flow row (deferred detail in Wave 2
 |-------|-------|
 | `collection_test_flows` (Plexon) | `id`, `platform_project_id`, `name`, `flow` jsonb, `owner_id`, `template_id`, timestamps |
 | Optional link | `audion_saved_flow_id` / template reference for imported journey subgraphs |
-| Runs | `collection_flow_runs` — cursor, correlation ids, verdict jsonb |
+| Runs (Wave 2+) | `collection_flow_runs` — cursor, correlation ids, verdict jsonb |
 
-Exact Drizzle migration in API wave — domain SoT first.
+Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`.
 
 ## UI (Plexon)
 
@@ -206,7 +206,7 @@ Do not place this on legacy `/board` Prismion island.
 | Wave | Deliverable | Exit criteria |
 |------|-------------|---------------|
 | **0 — Spec** (this doc) | Domain contract + node/gate sets + ownership | Merged; linked from `collection-projects.md` + `paths.md` |
-| **1 — MVP graph + scan node** | Persist Collection flow; Board UI shell; `start` → journey segment (Audion) **or** `start` → `scan` → `score_gate` → terminal; poll scan; Collection verdict card | One staging smoke: Collection with both bindings; run completes with `collectionReady` true/false explained |
+| **1 — MVP quality path** | Persist Collection flow; Board UI shell; quality path only: `start` → `scan` → `score_gate` → `quality_ok` / `abandon`; CHECKION `POST /api/scans` `mode=single` + poll `overallScore`; Collection verdict on flow jsonb | Staging smoke: `/projects/{id}/flows` + run against Collection with Checkion binding; `collectionReady` explained |
 | **2 — Journey embed** | Import / embed Audion `UxTestFlow` subgraph; handoff URL → auto `scan`; correlation ids end-to-end | Same URL tracked in Audion steps + Checkion scan |
 | **3 — Issue gates + dossier link** | `issue_gate` / `critical_issues`; deep link to Issues report surface | Gate branch visible on Board |
 | **4 — Study rollup** | Push Collection verdict into Audion wave evaluate / Soft-Q notes; optional Knowledge Pack distillate | Evaluate shows cross-product evidence rates |
@@ -219,7 +219,14 @@ Do not place this on legacy `/board` Prismion island.
 3. Explicit: orchestration in Plexon; execution in capabilities; no second project model.
 4. MVP Wave 1 scope is small enough to implement without redesigning Audion agent or Checkion scan core.
 
+## Wave 1 implementation notes
+
+- **Quality path only** — Audion journey agent embed waits for Wave 2.
+- Canonical score: CHECKION `ScanSummary.overallScore` (0–100); gate `score_at_least` default threshold **70**.
+- Routes: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` · BFF under `/api/platform/projects/:id/flows…`.
+- Auth: same session/ACL as Collection Knowledge Pack APIs.
+
 ## Open questions (non-blocking)
 
-- Whether Wave 1 journey segment calls Audion agent **directly** from Plexon BFF vs creating an Audion Study/Wave row first (prefer Wave row for evidence parity with Phase 7).
-- Score field canonical name across Checkion lenses (aggregate vs lens-specific) — resolve against Checkion contracts in Wave 1 implementation.
+- Whether Wave 2 journey segment calls Audion agent **directly** from Plexon BFF vs creating an Audion Study/Wave row first (prefer Wave row for evidence parity with Phase 7).
+- Lens-specific scores beyond `overallScore` (issue gates / dossier) — Wave 3.

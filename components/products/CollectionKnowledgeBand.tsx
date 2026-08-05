@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import Link from 'next/link'
 import {
   Alert,
   Button,
@@ -18,6 +19,7 @@ import {
   apiPlatformProjectKnowledge,
   apiPlatformProjectKnowledgeFacet,
   apiPlatformProjectKnowledgeSuggest,
+  pathPlatformProjectFlows,
 } from '@/lib/constants'
 import {
   KNOWLEDGE_FACET_IDS,
@@ -733,6 +735,12 @@ export function CollectionKnowledgeBand({
                   {t(capabilityLabelKey(item.id as CapabilityNavId))}
                 </button>
               ))}
+              <Link
+                href={pathPlatformProjectFlows(platformProjectId)}
+                className="plexon-knowledge-toc-link plexon-knowledge-toc-link--flows"
+              >
+                {t('projects.detail.navFlows')}
+              </Link>
             </div>
           </nav>
 

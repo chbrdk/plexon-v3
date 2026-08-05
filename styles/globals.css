@@ -2592,3 +2592,199 @@ main {
   left: 12px;
   z-index: 10;
 }
+
+/* —— Collection Test Flow (Wave 1) —— */
+.plexon-flow-gallery {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.plexon-flow-gallery-head h1 {
+  margin: 0.35rem 0 0.25rem;
+}
+
+.plexon-flow-gallery-create {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--msqdx-border, #333);
+  border-bottom: 1px solid var(--msqdx-border, #333);
+}
+
+.plexon-flow-gallery-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.plexon-flow-gallery-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--msqdx-border, #333);
+  text-decoration: none;
+  color: inherit;
+}
+
+.plexon-flow-gallery-item:hover {
+  opacity: 0.85;
+}
+
+.plexon-flow-back {
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.plexon-flow-board-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 50vh;
+  justify-content: center;
+}
+
+.plexon-flow-board {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 4rem);
+  min-height: 480px;
+  background: var(--msqdx-bg, #0c0c0c);
+}
+
+.plexon-flow-board .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.plexon-flow-node {
+  min-width: 9.5rem;
+  max-width: 14rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--msqdx-surface, #141414);
+  border: 1px solid var(--msqdx-border-strong, #555);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.plexon-flow-node[data-state='running'] {
+  border-color: var(--msqdx-accent, #c4a35a);
+}
+
+.plexon-flow-node[data-state='done'] {
+  border-color: var(--msqdx-success, #3d8b6e);
+}
+
+.plexon-flow-node[data-state='error'] {
+  border-color: var(--msqdx-danger, #b84a4a);
+}
+
+.plexon-flow-node[data-state='skipped'] {
+  opacity: 0.45;
+}
+
+.plexon-flow-node-kind {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.plexon-flow-node-label {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+}
+
+.plexon-flow-node-detail {
+  margin: 0.25rem 0 0;
+  word-break: break-all;
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+
+.plexon-flow-handle {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 0 !important;
+  background: var(--msqdx-border-strong, #666) !important;
+  border: none !important;
+}
+
+.plexon-flow-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.plexon-flow-toolbar-title {
+  flex: 1;
+  min-width: 6rem;
+}
+
+.plexon-flow-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 16rem;
+}
+
+.plexon-flow-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 14rem;
+  max-width: 20rem;
+  padding: 0.25rem 0;
+}
+
+.plexon-flow-verdict[data-ready='true'] {
+  border-left: 2px solid var(--msqdx-success, #3d8b6e);
+  padding-left: 0.75rem;
+}
+
+.plexon-flow-verdict[data-ready='false'] {
+  border-left: 2px solid var(--msqdx-border-strong, #555);
+  padding-left: 0.75rem;
+}
+
+.plexon-flow-verdict-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+}
+
+.plexon-flow-verdict-flags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.75rem;
+  font-family: var(--msqdx-font-mono, ui-monospace, monospace);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.plexon-flow-verdict-flags li[data-ok='true'] {
+  opacity: 1;
+}
+
+.plexon-flow-verdict-flags li[data-ok='false'] {
+  opacity: 0.55;
+}
+
+.plexon-knowledge-toc-link--flows {
+  text-decoration: none;
+  color: inherit;
+}

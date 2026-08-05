@@ -19,6 +19,12 @@
 - Specs index: `knowledge/specs-index.md`
 - Collection projects: `specs/domain/collection-projects.md`
 - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
+- Collection Test Flow Wave 1 (quality path shipped):
+  - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
+  - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`
+  - Table: `collection_test_flows` (Drizzle `lib/db/schema.ts` · migration `0005_collection_test_flows.sql` · `pnpm db:push`)
+  - CHECKION client: `lib/integrations/checkion-scans-client.ts` → `POST {CHECKION_API}/api/scans` `mode=single` + poll detail (`checkionApiScans` / `checkionApiScanDetail`)
+  - Smoke: `knowledge/collection-test-flow-smoke.md`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
 - Knowledge Pack routes (Phase 1 shipped):

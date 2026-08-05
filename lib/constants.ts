@@ -62,6 +62,12 @@ export const pathAdminUserEditOnDashboard = (userId: string) => pathAdminUser(us
 export const pathPlatformProjectDashboard = (platformProjectId: string) =>
   `/projects/${encodeURIComponent(platformProjectId)}`;
 
+/** Collection Test Flow gallery + board (Wave 1). Spec: collection-test-flow.md */
+export const pathPlatformProjectFlows = (platformProjectId: string) =>
+  `${pathPlatformProjectDashboard(platformProjectId)}/flows`;
+export const pathPlatformProjectFlow = (platformProjectId: string, flowId: string) =>
+  `${pathPlatformProjectFlows(platformProjectId)}/${encodeURIComponent(flowId)}`;
+
 /** Google Fonts for assistant generative UI (Noto Sans + IBM Plex Mono). */
 export const FONT_URL_ASSISTANT_UI =
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap';
@@ -231,6 +237,14 @@ export const apiPlatformProjectKnowledgeFacetPublish = (
 ) => `${apiPlatformProjectKnowledgeFacet(platformProjectId, facetId)}/publish`;
 export const apiPlatformProjectKnowledgeSuggest = (platformProjectId: string) =>
   `${apiPlatformProjectKnowledge(platformProjectId)}/suggest`;
+
+/** Collection Test Flow CRUD + run (session). Spec: collection-test-flow.md Wave 1 */
+export const apiPlatformProjectFlows = (platformProjectId: string) =>
+  `/api/platform/projects/${encodeURIComponent(platformProjectId)}/flows`;
+export const apiPlatformProjectFlow = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlows(platformProjectId)}/${encodeURIComponent(flowId)}`;
+export const apiPlatformProjectFlowRun = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/run`;
 
 /** Service proxy: CHECKION (legacy/optional when not using central DB). */
 export const API_SERVICES_CHECKION_USERS = '/api/services/checkion/users';
