@@ -18,6 +18,7 @@
 - Specs: `specs/domain/app-shell.md`
 - Specs index: `knowledge/specs-index.md`
 - Collection projects: `specs/domain/collection-projects.md`
+- Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
 - Knowledge Pack routes (Phase 1 shipped):

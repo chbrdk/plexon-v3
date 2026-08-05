@@ -69,6 +69,10 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 
 Shared cross-product brief (profile, competitive, research distillates, GEO context, reserved Brandion facet) lives on the Collection — **not** inside thin product upsert and **not** as Tenant-Company default for client work. Structure = facets; product dossiers stay local and publish distillates. Spec: `specs/domain/collection-knowledge-pack.md`. Phasing: Spec → Pack CRUD in Plexon → GEO/Audion consume → Brandion facet later.
 
+## Collection Test Flow
+
+Cross-product **test program** on the Collection: AUDION journey nodes + CHECKION page-scan / score / issue gates, orchestrated in Plexon with a unified evidence verdict. Spec: `specs/domain/collection-test-flow.md`. Does **not** replace product-local boards; does **not** invent a second project type.
+
 ## UI rebuild note
 
 Independent of UI migrate waves. Wave 5+ (Assistant) must compose Audion chat chrome **and** speak Collection projects — do not invent a second project model in the assistant UI.

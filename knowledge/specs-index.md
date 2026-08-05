@@ -5,6 +5,7 @@
 |------|------|
 | App shell | `specs/domain/app-shell.md` |
 | Collection projects | `specs/domain/collection-projects.md` |
+| Collection Test Flow | `specs/domain/collection-test-flow.md` |
 | Collection Knowledge Pack | `specs/domain/collection-knowledge-pack.md` |
 | UI migrate (index) | `specs/domain/ui-migrate.md` |
 | UI migrate — dashboard | `specs/domain/ui-migrate-dashboard.md` |

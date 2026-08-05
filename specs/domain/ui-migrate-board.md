@@ -4,6 +4,8 @@
 **Route:** `/board*`  
 **Implements:** `app/board/**` · `components/board/**` · bridge/shim deletion (deferred)
 
+**Not this:** Collection Test Flow (AUDION + CHECKION orchestration on `/projects/[id]/flows`) — see `specs/domain/collection-test-flow.md`. That surface is new magazine workspace chrome + capability dispatch; it must **not** grow the Prismion/`@msqdx/react` island.
+
 ## Challenge — keep / reshape / drop
 
 | Capability | Decision | Notes |
