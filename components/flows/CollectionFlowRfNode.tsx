@@ -133,28 +133,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     (runState === 'active' || runState === 'done' || runState === 'error')
 
   const targetHandle =
-    kind === 'compare' ? (
-      <>
-        <Handle
-          type="target"
-          position={Position.Left}
-          id="in"
-          className="msqdx-flow-rf-handle"
-          style={{ top: '22%' }}
-          title="in"
-        />
-        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--in">in</span>
-        <Handle
-          type="target"
-          position={Position.Left}
-          id={CATALOG_BIND_PATH_HANDLE}
-          className="msqdx-flow-rf-handle msqdx-flow-rf-handle--bind"
-          style={{ top: '52%' }}
-          title="path"
-        />
-        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--bind">path</span>
-      </>
-    ) : (
+    kind === 'compare' ? undefined : (
       <Handle type="target" position={Position.Left} id="in" className="msqdx-flow-rf-handle" />
     )
 
@@ -396,22 +375,42 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
 
         {kind === 'compare' ? (
           <>
-            <label
-              className={`msqdx-flow-rf-field${flowNode.path ? ' msqdx-flow-rf-field--bound' : ''}`}
-            >
-              <span>Path</span>
-              <select
-                className="msqdx-flow-rf-select"
-                value={flowNode.path ?? 'scan.overallScore'}
-                onChange={onComparePath}
+            <div className="msqdx-flow-catalog-ports msqdx-flow-catalog-ports--in" aria-label="Inputs">
+              <p className="msqdx-flow-catalog-ports-title">Inputs</p>
+              <div className="msqdx-flow-catalog-port msqdx-flow-catalog-port--in" title="Control in">
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id="in"
+                  className="msqdx-flow-rf-handle msqdx-flow-rf-handle--catalog-in"
+                />
+                <span className="msqdx-flow-catalog-port-label">in</span>
+                <span className="msqdx-flow-catalog-port-hint">flow</span>
+              </div>
+              <div
+                className={`msqdx-flow-catalog-port msqdx-flow-catalog-port--in${flowNode.path ? ' is-bound' : ''}`}
+                title="Catalog path"
               >
-                {listCatalogPathsForPicker().map((p) => (
-                  <option key={p.path} value={p.path}>
-                    {p.path}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <Handle
+                  type="target"
+                  position={Position.Left}
+                  id={CATALOG_BIND_PATH_HANDLE}
+                  className="msqdx-flow-rf-handle msqdx-flow-rf-handle--catalog-in msqdx-flow-rf-handle--bind"
+                />
+                <span className="msqdx-flow-catalog-port-label">path</span>
+                <select
+                  className="msqdx-flow-rf-select msqdx-flow-catalog-port-select"
+                  value={flowNode.path ?? 'scan.overallScore'}
+                  onChange={onComparePath}
+                >
+                  {listCatalogPathsForPicker().map((p) => (
+                    <option key={p.path} value={p.path}>
+                      {p.path}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <label className="msqdx-flow-rf-field">
               <span>Op</span>
               <select

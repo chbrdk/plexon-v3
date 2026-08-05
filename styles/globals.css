@@ -2706,13 +2706,28 @@ main {
 }
 
 /* Wave 10 catalog ports */
+.msqdx-flow-rf-node--compare,
+.msqdx-flow-rf-node--scan,
+.msqdx-flow-rf-node--domain_scan,
+.msqdx-flow-rf-node--geo_job {
+  overflow: visible;
+}
 .msqdx-flow-catalog-ports {
   margin: 0.35rem 0 0.15rem;
-  padding: 0.25rem 0.35rem 0.35rem;
+  padding: 0.25rem 0.55rem 0.35rem;
   border-top: 1px solid color-mix(in srgb, var(--border, #ccc) 70%, transparent);
 }
+.msqdx-flow-catalog-ports--in {
+  margin-top: 0;
+  margin-left: -0.55rem;
+  margin-right: -0.55rem;
+  padding-left: 0.75rem;
+  padding-right: 0.55rem;
+  border-top: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, #ccc) 70%, transparent);
+}
 .msqdx-flow-catalog-ports-title {
-  margin: 0 0 0.2rem;
+  margin: 0 0 0.25rem;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -2724,10 +2739,16 @@ main {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  min-height: 1.15rem;
+  gap: 0.35rem;
+  min-height: 1.45rem;
   padding-right: 0.55rem;
   font-size: 0.72rem;
   line-height: 1.2;
+}
+.msqdx-flow-catalog-port--in {
+  justify-content: flex-start;
+  padding-left: 0.55rem;
+  padding-right: 0.15rem;
 }
 .msqdx-flow-catalog-port-label {
   opacity: 0.85;
@@ -2735,31 +2756,46 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 11rem;
+  flex: 0 0 auto;
+  min-width: 2.2rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.msqdx-flow-catalog-port-hint {
+  opacity: 0.55;
+  font-size: 0.65rem;
+}
+.msqdx-flow-catalog-port-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 .msqdx-flow-rf-handle--catalog-out {
+  position: absolute !important;
   right: -5px !important;
+  left: auto !important;
   top: 50% !important;
   transform: translate(50%, -50%);
   background: #5b8def;
+  z-index: 2;
+}
+.msqdx-flow-rf-handle--catalog-in {
+  position: absolute !important;
+  left: -5px !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%);
+  z-index: 2;
 }
 .msqdx-flow-rf-handle--bind {
   background: #5b8def;
 }
-.msqdx-flow-rf-port-label--bind,
-.msqdx-flow-rf-port-label--in {
-  left: 12px;
-  font-size: 0.65rem;
-  opacity: 0.75;
-}
-.msqdx-flow-rf-port-label--in {
-  top: 18%;
-}
-.msqdx-flow-rf-port-label--bind {
-  top: 48%;
-}
-.msqdx-flow-rf-field--bound span:first-child::after {
+.msqdx-flow-catalog-port--in.is-bound .msqdx-flow-catalog-port-label::after {
   content: ' · wired';
   font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
   opacity: 0.65;
 }
 .react-flow__edge.msqdx-flow-edge--bind path {
