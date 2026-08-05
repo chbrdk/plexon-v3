@@ -114,3 +114,13 @@ export function audionPlatformStudyWave(studyId: string, waveId: string): string
 export function audionPlatformJourneyJob(jobId: string): string {
   return `${audionPlatformBase()}/ux-journey-agent/run/${encodeURIComponent(jobId)}`;
 }
+
+/** POST /api/ux-journey-agent/run/{jobId}/gate-branch */
+export function audionPlatformJourneyJobGateBranch(jobId: string): string {
+  return `${audionPlatformJourneyJob(jobId)}/gate-branch`;
+}
+
+/** POST /api/studies/flows/hybrid-segment */
+export function audionPlatformFlowsHybridSegment(): string {
+  return `${audionPlatformBase()}/studies/flows/hybrid-segment`;
+}

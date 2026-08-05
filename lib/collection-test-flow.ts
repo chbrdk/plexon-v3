@@ -11,23 +11,50 @@ export const COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES = 'page-quality-issues
 export const COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES =
   'journey-quality-issues' as const;
 
+/**
+ * Wave 5: Audion journey kinds (closed set, semantics owned by AUDION) plus PLEXON/CHECKION
+ * quality kinds and the legacy opaque `journey` kind (kept for back-compat documents).
+ * @see specs/domain/collection-test-flow.md — Node families A/B/C
+ */
 export const COLLECTION_FLOW_NODE_KINDS = [
+  // Family A — AUDION journey (closed set, do not redefine semantics)
   'start',
+  'prompt',
+  'observe',
+  'action',
+  'gate',
+  'message',
+  'success',
+  'abandon',
+  'measure',
+  // Legacy opaque journey embed (Wave 2) — kept for back-compat
   'journey',
+  // Family B — CHECKION quality
   'scan',
   'score_gate',
   'issue_gate',
   'quality_ok',
-  'abandon',
 ] as const;
 
 export type CollectionFlowNodeKind = (typeof COLLECTION_FLOW_NODE_KINDS)[number];
 
+/** Quality gate conditions — evaluated by PLEXON against CHECKION signals. */
 export type CollectionFlowGateCondition =
   | 'score_at_least'
   | 'critical_issues'
   | 'no_critical_issues'
   | 'issue_rule_match';
+
+/** AUDION journey gate conditions (closed set, AUDION emits gateSignals). */
+export type AudionGateCondition =
+  | 'frustration_high'
+  | 'url_match'
+  | 'title_match'
+  | 'consent_accepted'
+  | 'consent_rejected'
+  | 'goal_reached'
+  | 'confusion_named'
+  | 'time_elapsed';
 
 export type CollectionFlowNode = {
   id: string;
@@ -35,22 +62,36 @@ export type CollectionFlowNode = {
   label: string;
   /** Absolute or relative page URL for `scan` / `start` nodes. */
   url?: string;
+  /** AUDION `start` node URL key (Wave 5 first-class journey nodes). */
+  urlKey?: string;
+  /** Instruction / question text for prompt|action|message|abandon|success|measure|observe. */
+  text?: string;
+  /** Free-form annotation, persisted on the flow jsonb. */
+  note?: string;
+  /** Observe window in seconds (kind `observe`). */
+  observeSeconds?: number;
+  /** Max agent steps (kind `start`). */
+  maxSteps?: number;
   /** Score threshold for `score_gate` + `score_at_least` (default 70). */
   threshold?: number;
   /** Min issue count for `critical_issues` (default 1). */
   minCount?: number;
-  /** Regex / substring for `issue_rule_match` against ruleId. */
+  /** Regex / substring for `issue_rule_match` (quality) or `url_match`/`title_match` (journey). */
   pattern?: string;
-  gateCondition?: CollectionFlowGateCondition;
+  gateCondition?: CollectionFlowGateCondition | AudionGateCondition;
   position?: { x: number; y: number };
 };
+
+export type CollectionFlowEdgeKind = 'then' | 'when' | 'otherwise' | 'parallel';
 
 export type CollectionFlowEdge = {
   id: string;
   source: string;
   target: string;
-  /** For gates: which branch this edge represents. */
+  /** For quality gates: which branch this edge represents. */
   when?: 'pass' | 'fail';
+  /** Audion edge kind (Wave 5) — journey gates use `when`/`otherwise`, sequential steps `then`. */
+  edgeKind?: CollectionFlowEdgeKind;
   label?: string;
 };
 
@@ -224,14 +265,22 @@ export function createPageQualityTemplate(url: string): CollectionTestFlowDocume
     },
   ];
   const edges: CollectionFlowEdge[] = [
-    { id: 'e-start-scan', source: 'n-start', target: 'n-scan' },
-    { id: 'e-scan-score', source: 'n-scan', target: 'n-score' },
-    { id: 'e-score-ok', source: 'n-score', target: 'n-ok', when: 'pass', label: 'pass' },
+    { id: 'e-start-scan', source: 'n-start', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e-scan-score', source: 'n-scan', target: 'n-score', edgeKind: 'then' },
+    {
+      id: 'e-score-ok',
+      source: 'n-score',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
     {
       id: 'e-score-abandon',
       source: 'n-score',
       target: 'n-abandon',
       when: 'fail',
+      edgeKind: 'otherwise',
       label: 'fail',
     },
   ];
@@ -246,24 +295,54 @@ export function createPageQualityTemplate(url: string): CollectionTestFlowDocume
   };
 }
 
+/** First-class AUDION journey nodes shared by journey templates (Wave 5). */
+function journeyStepNodesAndEdges(
+  pageUrl: string,
+  xStart: number
+): { nodes: CollectionFlowNode[]; edges: CollectionFlowEdge[] } {
+  const nodes: CollectionFlowNode[] = [
+    {
+      id: 'n-start',
+      kind: 'start',
+      label: 'Start',
+      url: pageUrl,
+      urlKey: pageUrl,
+      maxSteps: 8,
+      position: { x: xStart, y: 120 },
+    },
+    {
+      id: 'n-action',
+      kind: 'action',
+      label: 'Explore',
+      text: 'Orientiere dich auf der Seite und finde einen klaren nächsten Schritt. Denke laut.',
+      position: { x: xStart + 220, y: 60 },
+    },
+    {
+      id: 'n-success',
+      kind: 'success',
+      label: 'Done',
+      text: 'Aufgabe erledigt — nenne kurz den gefundenen Schritt.',
+      position: { x: xStart + 440, y: 60 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e-start-action', source: 'n-start', target: 'n-action', edgeKind: 'then' },
+    { id: 'e-action-success', source: 'n-action', target: 'n-success', edgeKind: 'then' },
+  ];
+  return { nodes, edges };
+}
+
 export function createJourneyQualityTemplate(url: string): CollectionTestFlowDocument {
   const pageUrl = url.trim() || 'https://example.com';
-  const journeyFlow = createMinimalAudionJourneyFlow(pageUrl);
+  const journey = journeyStepNodesAndEdges(pageUrl, 0);
   const nodes: CollectionFlowNode[] = [
-    { id: 'n-start', kind: 'start', label: 'Start', url: pageUrl, position: { x: 0, y: 120 } },
-    {
-      id: 'n-journey',
-      kind: 'journey',
-      label: 'AUDION journey',
-      url: pageUrl,
-      position: { x: 200, y: 120 },
-    },
+    ...journey.nodes,
     {
       id: 'n-scan',
       kind: 'scan',
       label: 'Page scan',
       url: pageUrl,
-      position: { x: 420, y: 120 },
+      position: { x: 660, y: 120 },
     },
     {
       id: 'n-score',
@@ -271,43 +350,52 @@ export function createJourneyQualityTemplate(url: string): CollectionTestFlowDoc
       label: `Score ≥ ${DEFAULT_SCORE_GATE_THRESHOLD}`,
       gateCondition: 'score_at_least',
       threshold: DEFAULT_SCORE_GATE_THRESHOLD,
-      position: { x: 640, y: 120 },
+      position: { x: 880, y: 120 },
     },
     {
       id: 'n-ok',
       kind: 'quality_ok',
       label: 'Quality OK',
-      position: { x: 880, y: 40 },
+      position: { x: 1120, y: 40 },
     },
     {
       id: 'n-abandon',
       kind: 'abandon',
       label: 'Abandon',
-      position: { x: 880, y: 200 },
+      position: { x: 1120, y: 200 },
     },
   ];
   const edges: CollectionFlowEdge[] = [
-    { id: 'e-start-journey', source: 'n-start', target: 'n-journey' },
-    { id: 'e-journey-scan', source: 'n-journey', target: 'n-scan' },
-    { id: 'e-scan-score', source: 'n-scan', target: 'n-score' },
-    { id: 'e-score-ok', source: 'n-score', target: 'n-ok', when: 'pass', label: 'pass' },
+    ...journey.edges,
+    { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e-scan-score', source: 'n-scan', target: 'n-score', edgeKind: 'then' },
+    {
+      id: 'e-score-ok',
+      source: 'n-score',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
     {
       id: 'e-score-abandon',
       source: 'n-score',
       target: 'n-abandon',
       when: 'fail',
+      edgeKind: 'otherwise',
       label: 'fail',
     },
   ];
-  return {
+  const base: CollectionTestFlowDocument = {
     schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
     templateId: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
     nodes,
     edges,
-    journeyFlow,
+    journeyFlow: null,
     lastVerdict: null,
     lastRun: null,
   };
+  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
 }
 
 const DEFAULT_CRITICAL_MIN_COUNT = 1;
@@ -354,21 +442,37 @@ function qualitySpineWithIssueGate(pageUrl: string, xScan: number): {
     },
   ];
   const edges: CollectionFlowEdge[] = [
-    { id: 'e-scan-score', source: 'n-scan', target: 'n-score' },
-    { id: 'e-score-issues', source: 'n-score', target: 'n-issues', when: 'pass', label: 'pass' },
+    { id: 'e-scan-score', source: 'n-scan', target: 'n-score', edgeKind: 'then' },
+    {
+      id: 'e-score-issues',
+      source: 'n-score',
+      target: 'n-issues',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
     {
       id: 'e-score-abandon',
       source: 'n-score',
       target: 'n-abandon',
       when: 'fail',
+      edgeKind: 'otherwise',
       label: 'fail',
     },
-    { id: 'e-issues-ok', source: 'n-issues', target: 'n-ok', when: 'pass', label: 'pass' },
+    {
+      id: 'e-issues-ok',
+      source: 'n-issues',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
     {
       id: 'e-issues-abandon',
       source: 'n-issues',
       target: 'n-abandon',
       when: 'fail',
+      edgeKind: 'otherwise',
       label: 'fail',
     },
   ];
@@ -387,7 +491,7 @@ export function createPageQualityIssuesTemplate(url: string): CollectionTestFlow
       ...spine.nodes,
     ],
     edges: [
-      { id: 'e-start-scan', source: 'n-start', target: 'n-scan' },
+      { id: 'e-start-scan', source: 'n-start', target: 'n-scan', edgeKind: 'then' },
       ...spine.edges,
     ],
     journeyFlow: null,
@@ -396,34 +500,25 @@ export function createPageQualityIssuesTemplate(url: string): CollectionTestFlow
   };
 }
 
-/** Wave 3: journey + quality + issue_gate. */
+/** Wave 3/5: journey + quality + issue_gate (first-class journey nodes). */
 export function createJourneyQualityIssuesTemplate(url: string): CollectionTestFlowDocument {
   const pageUrl = url.trim() || 'https://example.com';
-  const journeyFlow = createMinimalAudionJourneyFlow(pageUrl);
-  const spine = qualitySpineWithIssueGate(pageUrl, 420);
-  return {
+  const journey = journeyStepNodesAndEdges(pageUrl, 0);
+  const spine = qualitySpineWithIssueGate(pageUrl, 660);
+  const base: CollectionTestFlowDocument = {
     schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
     templateId: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
-    nodes: [
-      { id: 'n-start', kind: 'start', label: 'Start', url: pageUrl, position: { x: 0, y: 120 } },
-      {
-        id: 'n-journey',
-        kind: 'journey',
-        label: 'AUDION journey',
-        url: pageUrl,
-        position: { x: 200, y: 120 },
-      },
-      ...spine.nodes,
-    ],
+    nodes: [...journey.nodes, ...spine.nodes],
     edges: [
-      { id: 'e-start-journey', source: 'n-start', target: 'n-journey' },
-      { id: 'e-journey-scan', source: 'n-journey', target: 'n-scan' },
+      ...journey.edges,
+      { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
       ...spine.edges,
     ],
-    journeyFlow,
+    journeyFlow: null,
     lastVerdict: null,
     lastRun: null,
   };
+  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
 }
 
 export function scoreGateThreshold(nodes: CollectionFlowNode[]): number {
@@ -443,8 +538,97 @@ export function startNodeUrl(nodes: CollectionFlowNode[]): string | null {
   return start?.url?.trim() || null;
 }
 
+/** Kinds whose presence on the canvas implies a real journey segment (Wave 5). */
+const JOURNEY_SEGMENT_DETECT_KINDS = new Set<CollectionFlowNodeKind>([
+  'prompt',
+  'observe',
+  'action',
+  'message',
+  'measure',
+  'gate',
+]);
+
 export function documentHasJourneySegment(doc: CollectionTestFlowDocument): boolean {
-  return Boolean(doc.journeyFlow?.nodes?.length) || doc.nodes.some((n) => n.kind === 'journey');
+  if (Boolean(doc.journeyFlow?.nodes?.length)) return true;
+  return doc.nodes.some(
+    (n) => n.kind === 'journey' || JOURNEY_SEGMENT_DETECT_KINDS.has(n.kind)
+  );
+}
+
+/** Quality-family kinds — used to find where the journey subgraph ends on the canvas. */
+const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
+  'scan',
+  'score_gate',
+  'issue_gate',
+  'quality_ok',
+]);
+
+/**
+ * Build an embedded Audion-shaped journey subgraph from first-class journey nodes on the
+ * canvas (Wave 5). Falls back to `doc.journeyFlow` / null when the canvas has no journey nodes.
+ * @see specs/domain/collection-test-flow.md — Wave 5–7 implementation notes
+ */
+export function extractJourneyFlowFromDocument(
+  doc: CollectionTestFlowDocument,
+  url: string
+): EmbeddedAudionJourneyFlow | null {
+  const pageUrl = url.trim() || 'https://example.com';
+  const firstQualityIdx = doc.nodes.findIndex((n) => QUALITY_FAMILY_KINDS.has(n.kind));
+  const candidateNodes = (
+    firstQualityIdx === -1 ? doc.nodes : doc.nodes.slice(0, firstQualityIdx)
+  ).filter((n) => n.kind !== 'journey');
+
+  if (!candidateNodes.some((n) => n.kind === 'start')) {
+    if (doc.journeyFlow?.nodes?.length) return patchJourneyFlowUrl(doc.journeyFlow, pageUrl);
+    return null;
+  }
+
+  const ids = new Set(candidateNodes.map((n) => n.id));
+  const edges = doc.edges
+    .filter((e) => ids.has(e.source) && ids.has(e.target))
+    .map((e) => ({
+      id: e.id,
+      from: e.source,
+      to: e.target,
+      kind: (e.edgeKind ??
+        (e.when === 'pass' ? 'when' : e.when === 'fail' ? 'otherwise' : 'then')) as
+        | 'then'
+        | 'when'
+        | 'otherwise'
+        | 'parallel',
+    }));
+  const nodes = candidateNodes.map((n) => ({
+    id: n.id,
+    kind: n.kind,
+    label: n.label,
+    text: n.text ?? null,
+    urlKey: n.kind === 'start' ? pageUrl : (n.urlKey ?? null),
+    maxSteps: n.kind === 'start' ? (n.maxSteps ?? 8) : (n.maxSteps ?? null),
+  }));
+  const nodeKindsUsed = [...new Set(nodes.map((n) => n.kind))];
+
+  return {
+    id: doc.journeyFlow?.id ?? 'collection-journey-canvas',
+    name: doc.journeyFlow?.name ?? 'Collection journey',
+    description:
+      doc.journeyFlow?.description ?? 'Journey segment extracted from Collection Test Flow canvas.',
+    scenarioIndex: doc.journeyFlow?.scenarioIndex ?? 0,
+    primaryArchetype: doc.journeyFlow?.primaryArchetype ?? 'findability',
+    nodeKindsUsed,
+    defaultWaveKey: doc.journeyFlow?.defaultWaveKey ?? 'collection-journey',
+    compileReady: nodes.length > 0 && edges.length > 0,
+    domainProfileId: doc.journeyFlow?.domainProfileId ?? 'core',
+    softScoreKeys: doc.journeyFlow?.softScoreKeys ?? [
+      'ease',
+      'findability',
+      'clarity',
+      'usefulness',
+      'likelihood',
+      'overall',
+    ],
+    nodes,
+    edges,
+  };
 }
 
 export function documentHasIssueGate(doc: CollectionTestFlowDocument): boolean {
@@ -509,6 +693,8 @@ export function resolveJourneyFlowForRun(
   url: string
 ): EmbeddedAudionJourneyFlow | null {
   if (!documentHasJourneySegment(doc)) return null;
+  const extracted = extractJourneyFlowFromDocument(doc, url);
+  if (extracted?.nodes?.length) return extracted;
   if (doc.journeyFlow?.nodes?.length) {
     return patchJourneyFlowUrl(doc.journeyFlow, url);
   }
@@ -816,6 +1002,24 @@ export function ensureFlowDocument(raw: unknown): CollectionTestFlowDocument {
 
 export type CollectionFlowNodeRunState = 'idle' | 'running' | 'done' | 'error' | 'skipped';
 
+function findNodeIdByKind(
+  nodes: CollectionFlowNode[],
+  kind: CollectionFlowNodeKind
+): string | null {
+  return nodes.find((n) => n.kind === kind)?.id ?? null;
+}
+
+/**
+ * Journey-family node ids on the canvas before the first quality-family node (Wave 5).
+ * Generalizes the old hardcoded `n-journey` id to support first-class journey nodes
+ * (`start` → `action`/`prompt`/… → `success`) as well as the legacy opaque `journey` kind.
+ */
+function journeyMiddleNodeIds(doc: CollectionTestFlowDocument): string[] {
+  const firstQualityIdx = doc.nodes.findIndex((n) => QUALITY_FAMILY_KINDS.has(n.kind));
+  const slice = firstQualityIdx === -1 ? doc.nodes : doc.nodes.slice(0, firstQualityIdx);
+  return slice.filter((n) => n.kind !== 'start').map((n) => n.id);
+}
+
 /** Paint node states after a run from the derived verdict (+ optional lastRun). */
 export function nodeStatesFromVerdict(
   doc: CollectionTestFlowDocument,
@@ -827,21 +1031,32 @@ export function nodeStatesFromVerdict(
 
   if (verdict.status === 'pending') return states;
 
-  const mark = (id: string, s: CollectionFlowNodeRunState) => {
-    if (states[id] !== undefined) states[id] = s;
+  const mark = (id: string | null, s: CollectionFlowNodeRunState) => {
+    if (id && states[id] !== undefined) states[id] = s;
+  };
+  const markMany = (ids: string[], s: CollectionFlowNodeRunState) => {
+    for (const id of ids) mark(id, s);
   };
 
   const hasJourney = documentHasJourneySegment(doc);
-  mark('n-start', 'done');
+  const startId = findNodeIdByKind(doc.nodes, 'start');
+  const scanId = findNodeIdByKind(doc.nodes, 'scan');
+  const scoreId = findNodeIdByKind(doc.nodes, 'score_gate');
+  const issuesId = findNodeIdByKind(doc.nodes, 'issue_gate');
+  const okId = findNodeIdByKind(doc.nodes, 'quality_ok');
+  const abandonId = [...doc.nodes].reverse().find((n) => n.kind === 'abandon')?.id ?? null;
+  const journeyIds = hasJourney ? journeyMiddleNodeIds(doc) : [];
+
+  mark(startId, 'done');
 
   if (verdict.status === 'running') {
     if (hasJourney && !lastRun?.audionJobId) {
-      mark('n-journey', 'running');
+      markMany(journeyIds, 'running');
     } else if (hasJourney) {
-      mark('n-journey', 'done');
-      mark('n-scan', 'running');
+      markMany(journeyIds, 'done');
+      mark(scanId, 'running');
     } else {
-      mark('n-scan', 'running');
+      mark(scanId, 'running');
     }
     return states;
   }
@@ -850,48 +1065,48 @@ export function nodeStatesFromVerdict(
     if (hasJourney && !lastRun?.scanId && !verdict.pageEvidenceValid) {
       // Journey failed before / without a completed scan handoff
       if (lastRun?.audionJobId && verdict.taskCompleted) {
-        mark('n-journey', 'done');
-        mark('n-scan', 'error');
+        markMany(journeyIds, 'done');
+        mark(scanId, 'error');
       } else if (lastRun?.audionJobId) {
-        mark('n-journey', 'error');
-        mark('n-scan', 'skipped');
+        markMany(journeyIds, 'error');
+        mark(scanId, 'skipped');
       } else {
-        mark('n-journey', 'error');
-        mark('n-scan', 'skipped');
+        markMany(journeyIds, 'error');
+        mark(scanId, 'skipped');
       }
     } else {
-      if (hasJourney) mark('n-journey', 'done');
-      mark('n-scan', 'error');
+      markMany(journeyIds, 'done');
+      mark(scanId, 'error');
     }
-    mark('n-score', 'skipped');
-    mark('n-issues', 'skipped');
-    mark('n-ok', 'skipped');
-    mark('n-abandon', 'skipped');
+    mark(scoreId, 'skipped');
+    mark(issuesId, 'skipped');
+    mark(okId, 'skipped');
+    mark(abandonId, 'skipped');
     return states;
   }
 
-  if (hasJourney) mark('n-journey', 'done');
-  mark('n-scan', 'done');
-  mark('n-score', 'done');
+  markMany(journeyIds, 'done');
+  mark(scanId, 'done');
+  mark(scoreId, 'done');
 
   const hasIssues = documentHasIssueGate(doc);
   if (!verdict.scorePassed) {
-    if (hasIssues) mark('n-issues', 'skipped');
-    mark('n-ok', 'skipped');
-    mark('n-abandon', 'done');
+    if (hasIssues) mark(issuesId, 'skipped');
+    mark(okId, 'skipped');
+    mark(abandonId, 'done');
     return states;
   }
 
   if (hasIssues) {
-    mark('n-issues', 'done');
+    mark(issuesId, 'done');
   }
 
   if (verdict.terminalKind === 'quality_ok') {
-    mark('n-ok', 'done');
-    mark('n-abandon', 'skipped');
+    mark(okId, 'done');
+    mark(abandonId, 'skipped');
   } else {
-    mark('n-ok', 'skipped');
-    mark('n-abandon', 'done');
+    mark(okId, 'skipped');
+    mark(abandonId, 'done');
   }
   return states;
 }

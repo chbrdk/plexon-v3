@@ -1,10 +1,12 @@
-# Collection Test Flow — staging smoke (Wave 1–4)
+# Collection Test Flow — staging smoke (Wave 1–7)
 
 Routes (helpers in `lib/constants.ts`):
 
 - Gallery: `/projects/{platformProjectId}/flows`
 - Board: `/projects/{platformProjectId}/flows/{flowId}`
 - Run: `POST /api/platform/projects/{id}/flows/{flowId}/run`
+- **Wave 6** Live journey start: `POST /api/platform/projects/{id}/flows/{flowId}/run/journey`
+- **Wave 6** Live journey poll: `GET /api/platform/projects/{id}/flows/{flowId}/journey-jobs/{jobId}`
 
 ## Preconditions
 
@@ -46,6 +48,36 @@ Routes (helpers in `lib/constants.ts`):
 3. Open **Open in AUDION** — Evaluate / Soft-Q notes should mention Collection rollup.
 4. Knowledge Pack `research_brief` may gain section **Collection Test Flow** (optional distillate).
 5. `lastRun` flags: `waveEvaluateOk`, `waveRollupOk`, `knowledgeDistillateOk`.
+
+## Wave 5 — immersive n8n-style board (canvas parity)
+
+1. Open a flow board — confirm full-bleed immersive canvas (React Flow `Background` + `MiniMap` + `Controls`), toolbar dock top, palette FAB bottom-right (`plexon-flow-board-active` on `<body>`).
+2. Palette → **Journey** section (`start, prompt, observe, action, gate, message, success, abandon, measure`) and **Quality** section (`scan, score_gate, issue_gate, quality_ok`); adding a node drops it on canvas and marks the board dirty.
+3. Drag a node → position persists after **Save** (PATCH `flow` with the React-Flow-derived document) and after reload.
+4. Select a node → inspector dock opens on the right showing design fields (label/text/note/url/urlKey/threshold/gateCondition as applicable).
+5. Connect a `gate`/`score_gate`/`issue_gate` node's two handles → edges default to `when` then `otherwise`; label renders `wenn` / `sonst` on canvas.
+6. **Undo** restores the previous graph snapshot (session history, no reload); **Reset** restores the template snapshot loaded on open.
+7. Journey templates (`createJourneyQualityTemplate` / `…IssuesTemplate`) now render first-class canvas nodes `start → action → success → scan → score_gate → quality_ok/abandon` (no opaque `journey` blob node) — verify node chips show human labels, not raw ids.
+
+## Wave 6 — client-orchestrated live run
+
+1. On a journey+quality flow, press **Testen** — expect immediate `POST …/run/journey` (creates Study+Wave, starts, returns `{ studyId, waveId, jobId }` without waiting for completion).
+2. Board polls `GET …/journey-jobs/{jobId}` every ~2s; node run-state pips animate `idle → active → done` along the default path (`start → action → success`), latest agent step text/screenshot appears as `runOutput` on the active node.
+3. **Stop** clears the poll interval (best-effort — does not cancel the Audion job server-side).
+4. On job completion, board auto-hands off to quality: `POST …/run` with `{ phase: 'quality', audionJobId, audionStudyId, audionWaveId, stepUrl, taskCompleted, journeyValidEvidence }` — verify the scan uses `stepUrl` (journey `finalUrl`), not the flow's static start URL.
+5. Quality-only flows (no journey segment): **Testen** skips `run/journey` entirely and calls `POST …/run` directly (`{}` or `{ phase: 'quality' }` with no journey ids — server treats it as a normal quality-only run, unaffected by Wave 6 handoff).
+6. Inspector panel on a journey node shows the accumulated step list (action/target/result) for the current run — "Add to note" button appends the latest step summary to the node's `note` field.
+7. Run strip surfaces status text, step count, and (once ids are known) deep links to the Audion study/wave and Checkion scan/issues.
+8. On a live `gate` node: **Wenn → Agent** / **Sonst → Agent** posts `…/journey-jobs/{jobId}/gate-branch`.
+9. **Agent-Segment** on prompt/observe/action/message posts `…/hybrid-segment`.
+10. After quality handoff, Soft-Q chip may appear (keys + Collection rollup flag) from `GET …/wave-summary`.
+
+## Wave 7 — hardening / parity check
+
+1. Re-run Waves 1–4 flows through the new board UI end-to-end (page-quality, journey+quality, issue gates, Study rollup) — verdict/lastRun semantics unchanged, only the canvas + live-run UX is new.
+2. Confirm `documentHasJourneySegment` still correctly detects legacy `journey`-kind docs (back-compat) alongside new first-class Audion node docs.
+3. Confirm Save round-trips edited canvases without losing `gateCondition`, `threshold`, `minCount`, `urlKey`, or edge `when`/`edgeKind` — reload after Save and diff.
+4. `pnpm vitest run __tests__/collection-flow-canvas.test.ts __tests__/collection-test-flow.test.ts __tests__/collection-test-flow-api.test.ts` green in CI before shipping.
 
 ## Failures to check
 

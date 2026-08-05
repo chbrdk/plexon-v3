@@ -198,8 +198,9 @@ Do not place this on legacy `/board` Prismion island.
 | | |
 |--|--|
 | **Keep** | Audion journey node semantics + Live-Gates; Checkion single-scan API; Collection bindings; DS FloatingPanel |
-| **Reshape** | Audion Board → capability workspace; Plexon composes multi-capability graph + Collection verdict |
-| **Drop** | Copy-paste Audion glass board into Plexon; product-only “Audion flow project”; open expression gates; dumping Checkion report magazine onto Overview |
+| **Reshape** | Audion Board → Collection capability workspace: **same board chrome + authoring UX** as Audion Phase 5–8, plus Checkion/orchestration nodes and Collection verdict on one canvas |
+| **Drop** | Glass/MUI/Prismion `/board` island; product-only “Audion flow project”; open expression gates; dumping Checkion report magazine onto Overview |
+| **Parity (Waves 5–7)** | Board authoring, palette, Save/Undo, Testen/Stop, live node states, path highlight, Inspector, Live-Gate branch, Agent-Segment patterns — Soft-Q edit / Compare stay on Audion Wave (deep link + Wave-4 rollup) |
 
 ## Phasing
 
@@ -210,6 +211,9 @@ Do not place this on legacy `/board` Prismion island.
 | **2 — Journey embed** | Template `journey-quality`: Collection `journey` node + embedded Audion `journeyFlow`; Study/Wave `from-flow` → start → poll; handoff `finalUrl` → CHECKION scan with `platformProjectId` / `audionRunId` / `stepUrl`; verdict adds `taskCompleted` / `validEvidence` | Staging smoke: same URL in Audion job + Checkion scan correlation |
 | **3 — Issue gates + dossier link** | Template `page-quality-issues` (+ journey variant): `issue_gate` with `critical_issues` / `no_critical_issues`; fetch `GET /api/scans/:id/issues`; branch on Board; deep link `/results/:id/issues` | Staging: gate branch visible; dossier link opens CHECKION Issues |
 | **4 — Study rollup** | After journey run: Audion `evaluate` + PATCH wave (`reportMarkdown` / Soft-Q `notes` + cross-product rates); optional Knowledge Pack `research_brief` distillate | Evaluate/Study shows Collection verdict notes; KP section when distillate ok |
+| **5 — Board chrome + authoring** | Immersive Audion-parity docks (toolbar / Bausteine / run strip / inspector); edit drag/connect/palette/undo/Save; Audion + Checkion node kinds on one RF canvas | Side-by-side with Audion board feels same family; can author journey+quality without leaving Plexon |
+| **6 — Live run on canvas** | Client-orchestrated journey poll paints node states / path / Inspector; then quality segment on same board; Stop/cancel | Running Collection flow feels like Audion Testen + quality gates |
+| **7 — Polish** | Output→Note, Reset-to-template, Evaluate deep-link / Soft-Q read-only summary; smoke + tests | edit→save→run→verdict contract green |
 | **Later** | Parallel multi-page, GEO nodes, Brandion, multi-user live | Out of MVP |
 
 ## Acceptance (Wave 0)
@@ -247,6 +251,15 @@ Do not place this on legacy `/board` Prismion island.
 - Soft-Q **scores** stay Audion Evaluate output — Plexon does not invent Soft-Q values from Checkion.
 - Optional distillate: merge section `collection-test-flow-latest` into Knowledge Pack `research_brief` (product `plexon`). Best-effort; run success does not depend on KP/wave PATCH.
 - `lastRun` flags: `waveEvaluateOk`, `waveRollupOk`, `knowledgeDistillateOk`.
+
+## Wave 5–7 implementation notes
+
+- Graph SoT stays `collection_test_flows`. Node kinds = Audion closed set (`prompt`/`observe`/`action`/`gate`/`message`/`measure`/`success`/…) **plus** quality (`scan`/`score_gate`/`issue_gate`/`quality_ok`) and legacy opaque `journey`.
+- Edges use Audion kinds `then`|`when`|`otherwise`|`parallel` (stored as `edgeKind`; score/issue gates also use `when: pass|fail`).
+- Board mirrors Audion FloatingPanel docks + RF node chrome (`.plexon-flow-*` magazine, not glass).
+- Save via `PATCH …/flows/:flowId` with full `flow` document; Undo is session-local.
+- Wave 6: `POST …/run/journey` → poll `GET …/journey-jobs/:jobId` → `POST …/run` with journey handoff for Checkion + verdict.
+- Soft-Q edit remains Audion Wave; board offers Evaluate deep link + read-only Soft-Q summary when wave ids present.
 
 ## Open questions (non-blocking)
 

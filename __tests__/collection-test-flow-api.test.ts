@@ -14,8 +14,10 @@ import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { runCheckionSingleScan, fetchCheckionScanIssues } from '@/lib/integrations/checkion-scans-client';
 import {
+  fetchJourneyJob,
   runAudionJourneySegment,
   rollupCollectionVerdictToAudionWave,
+  startAudionJourneySegment,
 } from '@/lib/integrations/audion-journey-client';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import {
@@ -71,6 +73,8 @@ vi.mock('@/lib/integrations/checkion-scans-client', () => ({
 
 vi.mock('@/lib/integrations/audion-journey-client', () => ({
   runAudionJourneySegment: vi.fn(),
+  startAudionJourneySegment: vi.fn(),
+  fetchJourneyJob: vi.fn(),
   rollupCollectionVerdictToAudionWave: vi.fn(),
 }));
 
@@ -262,7 +266,8 @@ describe('Collection Test Flow run API', () => {
     expect(body.lastRun.scanId).toBe('scan-2');
     expect(body.lastRun.waveRollupOk).toBe(true);
     expect(body.lastRun.knowledgeDistillateOk).toBe(true);
-    expect(body.nodeStates['n-journey']).toBe('done');
+    expect(body.nodeStates['n-action']).toBe('done');
+    expect(body.nodeStates['n-success']).toBe('done');
     expect(rollupCollectionVerdictToAudionWave).toHaveBeenCalledWith(
       expect.objectContaining({
         studyId: 'study-1',
@@ -386,5 +391,135 @@ describe('Collection Test Flow run API', () => {
     );
     const item = toCollectionTestFlowResponse(flowRow() as never);
     expect(item.flow.nodes[0].kind).toBe('start');
+  });
+
+  it('POST run/journey starts a Study+Wave without polling (Wave 6)', async () => {
+    vi.mocked(getCollectionTestFlow).mockResolvedValue(journeyFlowRow() as never);
+    vi.mocked(startAudionJourneySegment).mockResolvedValue({
+      ok: true,
+      studyId: 'study-live-1',
+      waveId: 'wave-live-1',
+      jobId: 'job-live-1',
+    });
+
+    const { POST } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/[flowId]/run/journey/route'
+    );
+    const res = await POST(new Request('http://local/run/journey', { method: 'POST', body: '{}' }), {
+      params: Promise.resolve({ platformProjectId: 'pp-1', flowId: 'flow-j1' }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { studyId: string; waveId: string; jobId: string };
+    expect(body.studyId).toBe('study-live-1');
+    expect(body.waveId).toBe('wave-live-1');
+    expect(body.jobId).toBe('job-live-1');
+    expect(startAudionJourneySegment).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: 'aud-proj-1' })
+    );
+    expect(runAudionJourneySegment).not.toHaveBeenCalled();
+  });
+
+  it('POST run/journey 400s when the flow has no journey segment', async () => {
+    vi.mocked(getCollectionTestFlow).mockResolvedValue(flowRow() as never);
+
+    const { POST } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/[flowId]/run/journey/route'
+    );
+    const res = await POST(new Request('http://local/run/journey', { method: 'POST', body: '{}' }), {
+      params: Promise.resolve({ platformProjectId: 'pp-1', flowId: 'flow-1' }),
+    });
+    expect(res.status).toBe(400);
+    expect(startAudionJourneySegment).not.toHaveBeenCalled();
+  });
+
+  it('GET journey-jobs/:jobId proxies fetchJourneyJob (Wave 6 board poll)', async () => {
+    vi.mocked(fetchJourneyJob).mockResolvedValue({
+      ok: true,
+      job: {
+        jobId: 'job-live-1',
+        status: 'running',
+        finalUrl: null,
+        success: null,
+        taskCompleted: false,
+        validEvidence: false,
+        steps: [{ step: 1, action: 'click', target: 'button.cta' }],
+      },
+    });
+
+    const { GET } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/[flowId]/journey-jobs/[jobId]/route'
+    );
+    const res = await GET(new Request('http://local/journey-jobs/job-live-1'), {
+      params: Promise.resolve({ platformProjectId: 'pp-1', flowId: 'flow-j1', jobId: 'job-live-1' }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { jobId: string; status: string; steps: unknown[] };
+    expect(body.jobId).toBe('job-live-1');
+    expect(body.status).toBe('running');
+    expect(body.steps).toHaveLength(1);
+    expect(fetchJourneyJob).toHaveBeenCalledWith('job-live-1');
+  });
+
+  it('POST run with phase=quality handoff skips re-running Audion and uses provided job/ids', async () => {
+    vi.mocked(getCollectionTestFlow).mockResolvedValue(journeyFlowRow() as never);
+    vi.mocked(runCheckionSingleScan).mockResolvedValue({
+      ok: true,
+      scan: {
+        id: 'scan-handoff',
+        projectId: 'chk-proj-1',
+        mode: 'single',
+        url: 'https://acme.test/explored',
+        status: 'completed',
+        overallScore: 93,
+      },
+    });
+    vi.mocked(persistFlowRunResult).mockImplementation(async (input) => ({
+      ...journeyFlowRow(),
+      flow: {
+        ...createJourneyQualityTemplate('https://acme.test/'),
+        lastVerdict: input.verdict,
+        lastRun: input.lastRun,
+      } as unknown as Record<string, unknown>,
+    }));
+
+    const { POST } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/[flowId]/run/route'
+    );
+    const res = await POST(
+      new Request('http://local/run', {
+        method: 'POST',
+        body: JSON.stringify({
+          phase: 'quality',
+          audionJobId: 'job-live-1',
+          audionStudyId: 'study-live-1',
+          audionWaveId: 'wave-live-1',
+          stepUrl: 'https://acme.test/explored',
+          taskCompleted: true,
+          journeyValidEvidence: true,
+        }),
+      }),
+      { params: Promise.resolve({ platformProjectId: 'pp-1', flowId: 'flow-j1' }) }
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      verdict: { collectionReady: boolean; taskCompleted: boolean };
+      lastRun: { audionJobId: string; audionStudyId: string; scanId: string };
+    };
+    expect(body.verdict.taskCompleted).toBe(true);
+    expect(body.verdict.collectionReady).toBe(true);
+    expect(body.lastRun.audionJobId).toBe('job-live-1');
+    expect(body.lastRun.audionStudyId).toBe('study-live-1');
+    expect(body.lastRun.scanId).toBe('scan-handoff');
+    expect(runAudionJourneySegment).not.toHaveBeenCalled();
+    expect(runCheckionSingleScan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://acme.test/explored',
+        audionRunId: 'job-live-1',
+        stepUrl: 'https://acme.test/explored',
+      })
+    );
+    expect(rollupCollectionVerdictToAudionWave).toHaveBeenCalledWith(
+      expect.objectContaining({ studyId: 'study-live-1', waveId: 'wave-live-1' })
+    );
   });
 });

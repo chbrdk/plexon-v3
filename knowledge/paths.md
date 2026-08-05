@@ -37,6 +37,12 @@
 - Collection Test Flow Wave 4 (Study rollup):
   - After journey: `audionPlatformStudyWaveEvaluate` + PATCH wave (`audionPlatformStudyWave`)
   - Rollup helper `lib/collection-flow-rollup.ts`; KP distillate → `research_brief` section `collection-test-flow-latest`
+- Collection Test Flow Waves 5–7 (Audion board parity):
+  - Board chrome: `components/flows/CollectionFlowBoard.tsx` + RF node / inspector / palette
+  - Canvas helpers: `lib/collection-flow-canvas.ts`
+  - Live journey: `POST …/flows/:flowId/run/journey` · `GET …/journey-jobs/:jobId` · quality via existing `…/run`
+  - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
+  - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
 - Knowledge Pack routes (Phase 1 shipped):

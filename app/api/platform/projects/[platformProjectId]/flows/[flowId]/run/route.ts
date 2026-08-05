@@ -90,7 +90,29 @@ export async function POST(
     let taskCompleted = !hasJourney;
     let journeyValidEvidence = !hasJourney;
 
-    if (hasJourney) {
+    // Wave 6: board already ran the journey segment live (POST …/run/journey + poll) and
+    // hands off the finished job here — skip re-running AUDION, go straight to the scan.
+    const phase = typeof body.phase === 'string' ? body.phase.trim() : null;
+    const handoffJobId =
+      typeof body.audionJobId === 'string' && body.audionJobId.trim() ? body.audionJobId.trim() : null;
+    const isQualityPhaseHandoff = hasJourney && phase === 'quality' && Boolean(handoffJobId);
+
+    if (isQualityPhaseHandoff) {
+      audionJobId = handoffJobId;
+      audionStudyId =
+        typeof body.audionStudyId === 'string' && body.audionStudyId.trim()
+          ? body.audionStudyId.trim()
+          : null;
+      audionWaveId =
+        typeof body.audionWaveId === 'string' && body.audionWaveId.trim()
+          ? body.audionWaveId.trim()
+          : null;
+      stepUrl =
+        typeof body.stepUrl === 'string' && body.stepUrl.trim() ? body.stepUrl.trim() : null;
+      taskCompleted = body.taskCompleted === true;
+      journeyValidEvidence = body.journeyValidEvidence === true;
+      if (stepUrl) scanUrl = stepUrl;
+    } else if (hasJourney) {
       const audionProjectId = await getExternalProjectId(id, 'audion');
       if (!audionProjectId) {
         return apiError(

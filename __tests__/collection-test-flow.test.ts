@@ -34,12 +34,13 @@ describe('createPageQualityTemplate', () => {
 });
 
 describe('createJourneyQualityTemplate', () => {
-  it('builds start → journey → scan → score_gate with embedded journeyFlow', () => {
+  it('builds start → action → success → scan → score_gate with embedded journeyFlow (Wave 5 first-class nodes)', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY);
     expect(doc.nodes.map((n) => n.kind)).toEqual([
       'start',
-      'journey',
+      'action',
+      'success',
       'scan',
       'score_gate',
       'quality_ok',
@@ -160,7 +161,8 @@ describe('deriveCollectionVerdict', () => {
       overallScore: 88,
       audionJobId: 'job-1',
     });
-    expect(states['n-journey']).toBe('done');
+    expect(states['n-action']).toBe('done');
+    expect(states['n-success']).toBe('done');
     expect(states['n-ok']).toBe('done');
   });
 

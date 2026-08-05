@@ -7,7 +7,9 @@ import { getAudionServiceToken } from '@/lib/constants';
 import { pollUntil } from '@/lib/assistant/poll-until';
 import type { CollectionVerdict, EmbeddedAudionJourneyFlow } from '@/lib/collection-test-flow';
 import {
+  audionPlatformFlowsHybridSegment,
   audionPlatformJourneyJob,
+  audionPlatformJourneyJobGateBranch,
   audionPlatformStudiesFromFlow,
   audionPlatformStudyWave,
   audionPlatformStudyWaveEvaluate,
@@ -20,6 +22,17 @@ import {
   mergeEvaluationNotes,
 } from '@/lib/collection-flow-rollup';
 
+export type AudionJourneyStep = {
+  step?: number;
+  action?: string;
+  target?: string;
+  result?: string;
+  reasoning?: string | null;
+  timestamp?: string | null;
+  screenshot?: string | null;
+  screenshotUrl?: string | null;
+};
+
 export type AudionJourneyJobSnapshot = {
   jobId: string;
   status: string;
@@ -29,6 +42,9 @@ export type AudionJourneyJobSnapshot = {
   validEvidence: boolean;
   error?: string | null;
   gateSignals?: Record<string, unknown> | null;
+  /** Raw agent steps (Wave 6) — used by the board to paint node states / outputs / inspector. */
+  steps?: AudionJourneyStep[];
+  flowCursor?: Record<string, unknown> | null;
 };
 
 export type AudionJourneySegmentResult =
@@ -80,6 +96,27 @@ function pickFinalUrl(job: Record<string, unknown>): string | null {
   return null;
 }
 
+function mapJourneySteps(result: Record<string, unknown> | null): AudionJourneyStep[] {
+  const raw = result?.steps;
+  if (!Array.isArray(raw)) return [];
+  const steps: AudionJourneyStep[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const o = item as Record<string, unknown>;
+    steps.push({
+      step: typeof o.step === 'number' ? o.step : undefined,
+      action: typeof o.action === 'string' ? o.action : undefined,
+      target: typeof o.target === 'string' ? o.target : undefined,
+      result: typeof o.result === 'string' ? o.result : undefined,
+      reasoning: typeof o.reasoning === 'string' ? o.reasoning : null,
+      timestamp: typeof o.timestamp === 'string' ? o.timestamp : null,
+      screenshot: typeof o.screenshot === 'string' ? o.screenshot : null,
+      screenshotUrl: typeof o.screenshotUrl === 'string' ? o.screenshotUrl : null,
+    });
+  }
+  return steps;
+}
+
 function mapJobSnapshot(jobId: string, body: Record<string, unknown>): AudionJourneyJobSnapshot {
   const status = typeof body.status === 'string' ? body.status : 'running';
   const result = (body.result ?? null) as Record<string, unknown> | null;
@@ -102,6 +139,10 @@ function mapJobSnapshot(jobId: string, body: Record<string, unknown>): AudionJou
         : null;
   const validEvidence =
     status === 'complete' && !error && (taskCompleted || Boolean(finalUrl));
+  const flowCursor =
+    body.flowCursor && typeof body.flowCursor === 'object'
+      ? (body.flowCursor as Record<string, unknown>)
+      : null;
 
   return {
     jobId,
@@ -112,6 +153,8 @@ function mapJobSnapshot(jobId: string, body: Record<string, unknown>): AudionJou
     validEvidence,
     error,
     gateSignals: gate,
+    steps: mapJourneySteps(result),
+    flowCursor,
   };
 }
 
@@ -266,6 +309,76 @@ export async function syncStudyWave(input: {
       };
     }
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Live-Gate: tell the agent which when/otherwise branch to take. */
+export async function postJourneyGateBranch(input: {
+  jobId: string;
+  gateNodeId: string;
+  edgeKind: 'when' | 'otherwise';
+}): Promise<
+  | { ok: true; flowCursor?: Record<string, unknown> | null }
+  | { ok: false; error: string }
+> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return auth;
+  try {
+    const res = await fetch(audionPlatformJourneyJobGateBranch(input.jobId), {
+      method: 'POST',
+      headers: auth.headers,
+      body: JSON.stringify({
+        gateNodeId: input.gateNodeId,
+        edgeKind: input.edgeKind,
+      }),
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: `AUDION gate-branch: HTTP ${res.status} – ${text.slice(0, 160)}`,
+      };
+    }
+    const json = text ? (JSON.parse(text) as { flowCursor?: Record<string, unknown> }) : {};
+    return { ok: true, flowCursor: json.flowCursor ?? null };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Hybrid Agent-Segment for a single journey node (Wave 6). */
+export async function postHybridSegment(input: {
+  projectId: string;
+  nodeId: string;
+  flow: EmbeddedAudionJourneyFlow;
+}): Promise<{ ok: true; jobId?: string } | { ok: false; error: string }> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return auth;
+  try {
+    const res = await fetch(audionPlatformFlowsHybridSegment(), {
+      method: 'POST',
+      headers: auth.headers,
+      body: JSON.stringify({
+        projectId: input.projectId,
+        nodeId: input.nodeId,
+        flow: input.flow,
+      }),
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: `AUDION hybrid-segment: HTTP ${res.status} – ${text.slice(0, 160)}`,
+      };
+    }
+    const json = text
+      ? (JSON.parse(text) as { jobId?: string; started?: { jobId?: string } })
+      : {};
+    return { ok: true, jobId: json.jobId ?? json.started?.jobId };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
@@ -446,6 +559,43 @@ export async function rollupCollectionVerdictToAudionWave(input: {
       error: e instanceof Error ? e.message : String(e),
     };
   }
+}
+
+export type AudionJourneyStartOnlyResult =
+  | { ok: true; studyId: string; waveId: string; jobId: string }
+  | { ok: false; error: string; studyId?: string; waveId?: string };
+
+/**
+ * Create Study/Wave from embedded flow and start it — no poll (Wave 6 live board run).
+ * The caller (board) polls `fetchJourneyJob` client-side via the journey-jobs proxy route.
+ */
+export async function startAudionJourneySegment(input: {
+  projectId: string;
+  flow: EmbeddedAudionJourneyFlow;
+  name?: string;
+}): Promise<AudionJourneyStartOnlyResult> {
+  const created = await createStudyFromFlow(input);
+  if (!created.ok) return created;
+
+  const started = await startStudyWave({
+    studyId: created.studyId,
+    waveId: created.waveId,
+  });
+  if (!started.ok) {
+    return {
+      ok: false,
+      error: started.error,
+      studyId: created.studyId,
+      waveId: created.waveId,
+    };
+  }
+
+  return {
+    ok: true,
+    studyId: created.studyId,
+    waveId: created.waveId,
+    jobId: started.jobId,
+  };
 }
 
 /** Create Study/Wave from embedded flow, start, poll to terminal, optional sync. */

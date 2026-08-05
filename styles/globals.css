@@ -1,4 +1,5 @@
 @import '../../msqdx-ui/packages/ui/src/styles.css';
+@import './plexon-flow-board.css';
 
 /* Fill the stage next to the rail — no artificial content column cap */
 .app-main {

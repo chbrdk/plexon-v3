@@ -245,6 +245,24 @@ export const apiPlatformProjectFlow = (platformProjectId: string, flowId: string
   `${apiPlatformProjectFlows(platformProjectId)}/${encodeURIComponent(flowId)}`;
 export const apiPlatformProjectFlowRun = (platformProjectId: string, flowId: string) =>
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/run`;
+/** Wave 6: start-only Audion journey segment (create study + wave + start, no poll). */
+export const apiPlatformProjectFlowRunJourney = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/run/journey`;
+/** Wave 6: poll a live journey job started via `apiPlatformProjectFlowRunJourney`. */
+export const apiPlatformProjectFlowJourneyJob = (
+  platformProjectId: string,
+  flowId: string,
+  jobId: string
+) => `${apiPlatformProjectFlow(platformProjectId, flowId)}/journey-jobs/${encodeURIComponent(jobId)}`;
+export const apiPlatformProjectFlowJourneyGateBranch = (
+  platformProjectId: string,
+  flowId: string,
+  jobId: string
+) => `${apiPlatformProjectFlowJourneyJob(platformProjectId, flowId, jobId)}/gate-branch`;
+export const apiPlatformProjectFlowHybridSegment = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/hybrid-segment`;
+export const apiPlatformProjectFlowWaveSummary = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/wave-summary`;
 
 /** Service proxy: CHECKION (legacy/optional when not using central DB). */
 export const API_SERVICES_CHECKION_USERS = '/api/services/checkion/users';

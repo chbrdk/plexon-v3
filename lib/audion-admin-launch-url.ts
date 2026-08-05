@@ -72,3 +72,11 @@ export function buildAudionJourneyUrl(webOrigin: string, journeyId: string): str
 export function buildAudionStudyUrl(webOrigin: string, studyId: string): string {
   return buildAudionAppUrl(webOrigin, `/studies/${encodeURIComponent(studyId)}`);
 }
+
+/** AUDION Study Wave detail — Soft-Q / Evaluate read-only summary deep link (Wave 6–7). */
+export function buildAudionStudyWaveUrl(webOrigin: string, studyId: string, waveId: string): string {
+  return buildAudionAppUrl(
+    webOrigin,
+    `/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}`
+  );
+}

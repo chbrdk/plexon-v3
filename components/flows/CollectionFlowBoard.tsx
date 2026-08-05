@@ -1,292 +1,947 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Background,
   Controls,
+  MiniMap,
   ReactFlow,
   ReactFlowProvider,
-  type Edge,
-  type Node,
+  addEdge,
+  useEdgesState,
+  useNodesState,
+  type Connection,
+  type OnSelectionChangeParams,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Alert, Button, Spinner, Text } from '@msqdx/ui'
-import { FloatingPanel } from '@/lib/msqdx-ui'
+import { Alert, Button, Chip, Text } from '@msqdx/ui'
 import {
+  apiPlatformProjectFlow,
+  apiPlatformProjectFlowHybridSegment,
+  apiPlatformProjectFlowJourneyGateBranch,
+  apiPlatformProjectFlowJourneyJob,
   apiPlatformProjectFlowRun,
+  apiPlatformProjectFlowRunJourney,
+  apiPlatformProjectFlowWaveSummary,
   getAudionWebOrigin,
   pathPlatformProjectFlows,
 } from '@/lib/constants'
-import { buildAudionStudyUrl } from '@/lib/audion-admin-launch-url'
+import { buildAudionStudyUrl, buildAudionStudyWaveUrl } from '@/lib/audion-admin-launch-url'
 import { pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import {
   documentHasJourneySegment,
-  nodeStatesFromVerdict,
+  resolveJourneyFlowForRun,
+  scanNodeUrl,
+  startNodeUrl,
+  type CollectionFlowNode,
+  type CollectionFlowNodeKind,
   type CollectionFlowNodeRunState,
   type CollectionTestFlowDocument,
   type CollectionVerdict,
 } from '@/lib/collection-test-flow'
+import {
+  PALETTE_JOURNEY_KINDS,
+  PALETTE_QUALITY_KINDS,
+  edgeKindLabel,
+  flowToRf,
+  newCollectionFlowNode,
+  nextEdgeKindForSource,
+  rfToDocument,
+  type CollectionFlowRfEdge,
+  type CollectionFlowRfNode as CollectionFlowRfNodeModel,
+} from '@/lib/collection-flow-canvas'
+import {
+  buildJobRunSummary,
+  mapJobToFlowNodeInspector,
+  mapJobToFlowNodeOutputs,
+  mapJobToFlowNodeStates,
+  type FlowJobRunSummary,
+  type FlowNodeInspectorData,
+  type FlowNodeRunOutput,
+  type FlowNodeRunState,
+  type FlowRunProgressInput,
+} from '@/lib/collection-flow-run-progress'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
-import { CollectionFlowNode, type CollectionFlowRfNodeData } from './CollectionFlowNode'
+import type { AudionJourneyJobSnapshot } from '@/lib/integrations/audion-journey-client'
+import { CollectionFlowFloatingPanel } from './CollectionFlowFloatingPanel'
+import { CollectionFlowRfNode } from './CollectionFlowRfNode'
+import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
+import {
+  IconDelete,
+  IconGrip,
+  IconPlay,
+  IconPlus,
+  IconReset,
+  IconSave,
+  IconStop,
+  IconUndo,
+} from './collection-flow-icons'
 
-const nodeTypes = { collectionFlow: CollectionFlowNode }
+const nodeTypes = { collectionFlow: CollectionFlowRfNode }
+const POLL_MS = 2000
+const HISTORY_MAX = 30
+
+type GraphSnap = { nodes: CollectionFlowRfNodeModel[]; edges: CollectionFlowRfEdge[] }
 
 type Props = {
   platformProjectId: string
   initial: CollectionTestFlowResponse
 }
 
-function toRf(
-  doc: CollectionTestFlowDocument,
-  states: Record<string, CollectionFlowNodeRunState>,
-  verdict?: CollectionVerdict | null
-): { nodes: Node[]; edges: Edge[] } {
-  const nodes: Node[] = doc.nodes.map((n) => ({
-    id: n.id,
-    type: 'collectionFlow',
-    position: n.position ?? { x: 0, y: 0 },
-    data: {
-      kind: n.kind,
-      label: n.label,
-      detail: n.url ?? (n.threshold != null ? `≥ ${n.threshold}` : undefined),
-      runState: states[n.id] ?? 'idle',
-    } satisfies CollectionFlowRfNodeData,
-  }))
-  const activeIssue =
-    verdict?.issueGateBranch === 'pass'
-      ? 'e-issues-ok'
-      : verdict?.issueGateBranch === 'fail'
-        ? 'e-issues-abandon'
-        : null
-  const activeScore =
-    verdict?.status === 'complete'
-      ? verdict.scorePassed
-        ? 'e-score-issues'
-        : 'e-score-abandon'
-      : null
-  const edges: Edge[] = doc.edges.map((e) => {
-    const taken =
-      e.id === activeIssue ||
-      (activeScore && e.id === activeScore) ||
-      (verdict?.scorePassed && e.id === 'e-score-ok' && !doc.nodes.some((n) => n.kind === 'issue_gate'))
-    return {
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      label: e.label ?? e.when,
-      animated: Boolean(taken),
-      style: {
-        stroke: taken
-          ? 'var(--msqdx-accent, #c4a35a)'
-          : 'var(--msqdx-border-strong, #666)',
-        strokeWidth: taken ? 2 : 1,
-      },
-    }
-  })
-  return { nodes, edges }
+function toRfRunStates(
+  states: Record<string, CollectionFlowNodeRunState>
+): Record<string, FlowNodeRunState> {
+  const out: Record<string, FlowNodeRunState> = {}
+  for (const [id, s] of Object.entries(states)) out[id] = s === 'running' ? 'active' : s
+  return out
 }
 
 function BoardInner({ platformProjectId, initial }: Props) {
+  const templateRef = useRef(initial)
+  const initialRf = useMemo(() => flowToRf(initial.flow), [initial])
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialRf.nodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialRf.edges)
   const [flow, setFlow] = useState(initial)
-  const [nodeStates, setNodeStates] = useState<Record<string, CollectionFlowNodeRunState>>(
-    () => {
-      const v = initial.flow.lastVerdict
-      if (!v) return {}
-      return nodeStatesFromVerdict(initial.flow, v, initial.flow.lastRun)
+  const [dirty, setDirty] = useState(false)
+  const [saveBusy, setSaveBusy] = useState(false)
+  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  const [runBusy, setRunBusy] = useState(false)
+  const [runError, setRunError] = useState<string | null>(null)
+  const [runStates, setRunStates] = useState<Record<string, FlowNodeRunState>>({})
+  const [runOutputs, setRunOutputs] = useState<Record<string, FlowNodeRunOutput>>({})
+  const [inspectorByNode, setInspectorByNode] = useState<Record<string, FlowNodeInspectorData>>({})
+  const [jobSummary, setJobSummary] = useState<FlowJobRunSummary | null>(null)
+  const [runMeta, setRunMeta] = useState<{
+    studyId: string
+    waveId: string
+    jobId: string
+    status: string
+    stepCount: number
+  } | null>(null)
+  const [softQSummary, setSoftQSummary] = useState<{
+    softScoreKeys: string[]
+    hasCollectionRollup: boolean
+  } | null>(null)
+
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const runMetaRef = useRef<{ studyId: string; waveId: string; jobId: string } | null>(null)
+  const historyRef = useRef<GraphSnap[]>([])
+  const skipHistoryRef = useRef(false)
+  const [historyLen, setHistoryLen] = useState(0)
+
+  const pushHistory = useCallback(() => {
+    if (skipHistoryRef.current) return
+    const snap: GraphSnap = {
+      nodes: structuredClone(nodes) as CollectionFlowRfNodeModel[],
+      edges: structuredClone(edges) as CollectionFlowRfEdge[],
     }
+    historyRef.current = [...historyRef.current.slice(-(HISTORY_MAX - 1)), snap]
+    setHistoryLen(historyRef.current.length)
+  }, [nodes, edges])
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+  }, [])
+
+  useEffect(() => () => stopPolling(), [stopPolling])
+
+  useEffect(() => {
+    document.body.classList.add('plexon-flow-board-active')
+    return () => document.body.classList.remove('plexon-flow-board-active')
+  }, [])
+
+  const getSnapshot = useCallback(
+    (): CollectionTestFlowDocument =>
+      rfToDocument(flow.flow, nodes as CollectionFlowRfNodeModel[], edges as CollectionFlowRfEdge[]),
+    [flow.flow, nodes, edges]
   )
-  const [running, setRunning] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const hasJourney = documentHasJourneySegment(flow.flow)
   const verdict: CollectionVerdict | null | undefined = flow.flow.lastVerdict
   const lastRun = flow.flow.lastRun
 
-  const { nodes, edges } = useMemo(
-    () => toRf(flow.flow, nodeStates, verdict),
-    [flow.flow, nodeStates, verdict]
+  const onUpdateNode = useCallback(
+    (nodeId: string, patch: Partial<CollectionFlowNode>) => {
+      pushHistory()
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id !== nodeId) return n
+          const prev = (n as CollectionFlowRfNodeModel).data?.flowNode
+          return {
+            ...n,
+            data: { ...n.data, flowNode: { ...prev, ...patch, id: nodeId } },
+          }
+        })
+      )
+      setDirty(true)
+      setSaveMsg(null)
+    },
+    [setNodes, pushHistory]
   )
 
-  const run = useCallback(async () => {
-    setRunning(true)
-    setError(null)
-    setNodeStates((prev) => ({
-      ...prev,
-      'n-start': 'done',
-      ...(hasJourney
-        ? { 'n-journey': 'running', 'n-scan': 'idle' }
-        : { 'n-scan': 'running' }),
-      'n-score': 'idle',
-      'n-ok': 'idle',
-      'n-abandon': 'idle',
-    }))
+  const onOutputToNote = useCallback(
+    (nodeId: string) => {
+      const out = runOutputs[nodeId]
+      if (!out?.text?.trim()) return
+      const node = nodes.find((n) => n.id === nodeId) as CollectionFlowRfNodeModel | undefined
+      const prev = node?.data?.flowNode?.note?.trim() ?? ''
+      const addition = out.text.trim()
+      onUpdateNode(nodeId, { note: prev ? `${prev}\n${addition}` : addition })
+    },
+    [nodes, onUpdateNode, runOutputs]
+  )
+
+  const onInspectorOutputToNote = useCallback(
+    (nodeId: string) => {
+      const data = inspectorByNode[nodeId]
+      const last = data?.steps?.length ? data.steps[data.steps.length - 1] : null
+      if (!last) return
+      const parts = [last.action, last.target, last.result, last.reasoning].filter(
+        (v): v is string => Boolean(v?.trim())
+      )
+      const addition = parts.join('\n').trim()
+      if (!addition) return
+      const node = nodes.find((n) => n.id === nodeId) as CollectionFlowRfNodeModel | undefined
+      const prev = node?.data?.flowNode?.note?.trim() ?? ''
+      onUpdateNode(nodeId, { note: prev ? `${prev}\n${addition}` : addition })
+    },
+    [inspectorByNode, nodes, onUpdateNode]
+  )
+
+  const getJourneyFlowSnapshot = useCallback(() => {
+    const doc = getSnapshot()
+    const baseUrl = startNodeUrl(doc.nodes) ?? scanNodeUrl(doc.nodes) ?? 'https://example.com'
+    return resolveJourneyFlowForRun(doc, baseUrl)
+  }, [getSnapshot])
+
+  const applyJobToStates = useCallback(
+    (job: AudionJourneyJobSnapshot) => {
+      const journeyFlow = getJourneyFlowSnapshot()
+      if (!journeyFlow) return
+      const input: FlowRunProgressInput = {
+        status: job.status,
+        steps: job.steps ?? [],
+        finalUrl: job.finalUrl,
+        success: job.success,
+        error: job.error,
+        jobId: job.jobId,
+        gateSignals: job.gateSignals,
+      }
+      setRunStates(mapJobToFlowNodeStates(journeyFlow, input))
+      setRunOutputs(mapJobToFlowNodeOutputs(journeyFlow, input))
+      setInspectorByNode(mapJobToFlowNodeInspector(journeyFlow, input))
+      setJobSummary(buildJobRunSummary(input))
+      setRunMeta((m) => (m ? { ...m, status: job.status, stepCount: job.steps?.length ?? 0 } : m))
+    },
+    [getJourneyFlowSnapshot]
+  )
+
+  const pollOnce = useCallback(
+    async (jobId: string): Promise<AudionJourneyJobSnapshot> => {
+      const res = await fetch(apiPlatformProjectFlowJourneyJob(platformProjectId, flow.id, jobId), {
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      })
+      const json = (await res.json().catch(() => null)) as
+        | (AudionJourneyJobSnapshot & { error?: string })
+        | null
+      if (!res.ok) {
+        throw new Error(json?.error || `Job poll failed (${res.status})`)
+      }
+      if (!json) throw new Error('Job poll: leere Antwort')
+      return json
+    },
+    [flow.id, platformProjectId]
+  )
+
+  const loadSoftQSummary = useCallback(
+    async (studyId: string, waveId: string) => {
+      try {
+        const qs = new URLSearchParams({ studyId, waveId })
+        const res = await fetch(
+          `${apiPlatformProjectFlowWaveSummary(platformProjectId, flow.id)}?${qs}`
+        )
+        if (!res.ok) return
+        const json = (await res.json()) as {
+          softScoreKeys?: string[]
+          hasCollectionRollup?: boolean
+        }
+        setSoftQSummary({
+          softScoreKeys: json.softScoreKeys ?? [],
+          hasCollectionRollup: Boolean(json.hasCollectionRollup),
+        })
+      } catch {
+        /* best-effort */
+      }
+    },
+    [flow.id, platformProjectId]
+  )
+
+  const runQualityPhase = useCallback(
+    async (job: AudionJourneyJobSnapshot) => {
+      const meta = runMetaRef.current
+      try {
+        const res = await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phase: 'quality',
+            audionJobId: job.jobId,
+            audionStudyId: meta?.studyId,
+            audionWaveId: meta?.waveId,
+            stepUrl: job.finalUrl,
+            taskCompleted: job.taskCompleted,
+            journeyValidEvidence: job.validEvidence,
+            url: job.finalUrl || undefined,
+          }),
+        })
+        const json = (await res.json().catch(() => null)) as {
+          error?: string
+          flow?: CollectionTestFlowResponse
+          nodeStates?: Record<string, CollectionFlowNodeRunState>
+        } | null
+        if (!res.ok) throw new Error(json?.error || `Run failed (${res.status})`)
+        if (json?.flow) setFlow(json.flow)
+        if (json?.nodeStates) setRunStates((prev) => ({ ...prev, ...toRfRunStates(json.nodeStates!) }))
+        if (meta?.studyId && meta?.waveId) {
+          void loadSoftQSummary(meta.studyId, meta.waveId)
+        }
+      } catch (e) {
+        setRunError(e instanceof Error ? e.message : String(e))
+      } finally {
+        setRunBusy(false)
+      }
+    },
+    [flow.id, loadSoftQSummary, platformProjectId]
+  )
+
+  const startPolling = useCallback(
+    (jobId: string) => {
+      stopPolling()
+      const tick = async () => {
+        try {
+          const job = await pollOnce(jobId)
+          applyJobToStates(job)
+          if (job.status === 'complete') {
+            stopPolling()
+            await runQualityPhase(job)
+          } else if (job.status === 'error') {
+            stopPolling()
+            setRunError(job.error || 'Journey job error')
+            setRunBusy(false)
+          }
+        } catch (e) {
+          setRunError(e instanceof Error ? e.message : String(e))
+          stopPolling()
+          setRunBusy(false)
+        }
+      }
+      void tick()
+      pollRef.current = setInterval(() => void tick(), POLL_MS)
+    },
+    [applyJobToStates, pollOnce, runQualityPhase, stopPolling]
+  )
+
+  const onTest = useCallback(async () => {
+    setRunError(null)
+    setRunBusy(true)
+    stopPolling()
+    setRunStates({})
+    setRunOutputs({})
+    setInspectorByNode({})
+    setJobSummary(null)
+    setRunMeta(null)
+    setSoftQSummary(null)
+    runMetaRef.current = null
+
+    if (!hasJourney) {
+      try {
+        const res = await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        })
+        const json = (await res.json().catch(() => null)) as {
+          error?: string
+          flow?: CollectionTestFlowResponse
+          nodeStates?: Record<string, CollectionFlowNodeRunState>
+        } | null
+        if (!res.ok) throw new Error(json?.error || `Run failed (${res.status})`)
+        if (json?.flow) setFlow(json.flow)
+        if (json?.nodeStates) setRunStates(toRfRunStates(json.nodeStates))
+      } catch (e) {
+        setRunError(e instanceof Error ? e.message : String(e))
+      } finally {
+        setRunBusy(false)
+      }
+      return
+    }
+
     try {
-      const res = await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
+      const res = await fetch(apiPlatformProjectFlowRunJourney(platformProjectId, flow.id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })
-      const json = (await res.json().catch(() => null)) as {
+      const started = (await res.json().catch(() => null)) as {
         error?: string
-        flow?: CollectionTestFlowResponse
-        verdict?: CollectionVerdict
-        nodeStates?: Record<string, CollectionFlowNodeRunState>
+        studyId?: string
+        waveId?: string
+        jobId?: string
       } | null
-      if (!res.ok) {
-        throw new Error(json?.error || `Run failed (${res.status})`)
+      if (!res.ok || !started?.jobId || !started.studyId || !started.waveId) {
+        throw new Error(started?.error || `Journey start failed (${res.status})`)
       }
-      if (json?.flow) setFlow(json.flow)
-      if (json?.nodeStates) setNodeStates(json.nodeStates)
+      runMetaRef.current = { studyId: started.studyId, waveId: started.waveId, jobId: started.jobId }
+      setRunMeta({
+        studyId: started.studyId,
+        waveId: started.waveId,
+        jobId: started.jobId,
+        status: 'running',
+        stepCount: 0,
+      })
+      startPolling(started.jobId)
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-      setNodeStates((prev) => ({
-        ...prev,
-        ...(hasJourney ? { 'n-journey': 'error' } : { 'n-scan': 'error' }),
-      }))
-    } finally {
-      setRunning(false)
+      setRunError(e instanceof Error ? e.message : String(e))
+      setRunBusy(false)
     }
-  }, [flow.id, hasJourney, platformProjectId])
+  }, [flow.id, hasJourney, platformProjectId, startPolling, stopPolling])
+
+  const onStop = useCallback(() => {
+    stopPolling()
+    setRunBusy(false)
+    setRunMeta((m) => (m ? { ...m, status: 'cancelled' } : m))
+  }, [stopPolling])
+
+  const onSave = useCallback(async () => {
+    setSaveBusy(true)
+    setSaveMsg(null)
+    try {
+      const doc = getSnapshot()
+      const res = await fetch(apiPlatformProjectFlow(platformProjectId, flow.id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flow: doc }),
+      })
+      const json = (await res.json().catch(() => null)) as (CollectionTestFlowResponse & { error?: string }) | null
+      if (!res.ok) throw new Error(json?.error || `Save failed (${res.status})`)
+      if (json) {
+        setFlow(json)
+        templateRef.current = json
+      }
+      setDirty(false)
+      setSaveMsg('Gespeichert')
+    } catch (e) {
+      setSaveMsg(e instanceof Error ? e.message : String(e))
+    } finally {
+      setSaveBusy(false)
+    }
+  }, [flow.id, getSnapshot, platformProjectId])
+
+  const onUndo = useCallback(() => {
+    const prev = historyRef.current.pop()
+    if (!prev) return
+    setHistoryLen(historyRef.current.length)
+    skipHistoryRef.current = true
+    setNodes(prev.nodes)
+    setEdges(prev.edges)
+    setDirty(true)
+    skipHistoryRef.current = false
+  }, [setNodes, setEdges])
+
+  const reset = useCallback(() => {
+    pushHistory()
+    const next = flowToRf(templateRef.current.flow)
+    setNodes(next.nodes)
+    setEdges(next.edges)
+    setSelectedId(null)
+    setDirty(false)
+    setSaveMsg(null)
+  }, [pushHistory, setNodes, setEdges])
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return
+      pushHistory()
+      const sourceRf = nodes.find((n) => n.id === connection.source) as CollectionFlowRfNodeModel | undefined
+      const kind = nextEdgeKindForSource(
+        sourceRf?.data?.flowNode,
+        edges.map((e) => ({ from: e.source, kind: (e.data as CollectionFlowRfEdge['data'])?.edgeKind ?? 'then' })),
+        connection.source,
+        connection.sourceHandle
+      )
+      const id = `e-${connection.source}-${connection.target}-${Date.now().toString(36)}`
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            id,
+            sourceHandle: connection.sourceHandle ?? kind,
+            targetHandle: connection.targetHandle ?? 'in',
+            label: edgeKindLabel(kind),
+            data: { edgeKind: kind },
+          },
+          eds
+        )
+      )
+      setDirty(true)
+      setSaveMsg(null)
+    },
+    [nodes, edges, setEdges, pushHistory]
+  )
+
+  const onSelectionChange = useCallback(({ nodes: sel }: OnSelectionChangeParams) => {
+    setSelectedId(sel[0]?.id ?? null)
+  }, [])
+
+  const addNode = useCallback(
+    (kind: CollectionFlowNodeKind) => {
+      pushHistory()
+      const flowNode = newCollectionFlowNode(kind)
+      const maxY = nodes.reduce((m, n) => Math.max(m, n.position.y), 0)
+      const rfNode: CollectionFlowRfNodeModel = {
+        id: flowNode.id,
+        type: 'collectionFlow',
+        position: { x: 40, y: maxY + 200 },
+        data: { flowNode },
+      }
+      setNodes((nds) => [...nds, rfNode])
+      setSelectedId(flowNode.id)
+      setDirty(true)
+      setSaveMsg(null)
+      setPaletteOpen(false)
+    },
+    [nodes, setNodes, pushHistory]
+  )
+
+  const deleteSelected = useCallback(() => {
+    if (!selectedId) return
+    pushHistory()
+    setNodes((nds) => nds.filter((n) => n.id !== selectedId))
+    setEdges((eds) => eds.filter((e) => e.source !== selectedId && e.target !== selectedId))
+    setSelectedId(null)
+    setDirty(true)
+    setSaveMsg(null)
+  }, [selectedId, setNodes, setEdges, pushHistory])
+
+  const onManualGate = useCallback(
+    async (gateNodeId: string, edgeKind: 'when' | 'otherwise') => {
+      const jobId = runMetaRef.current?.jobId ?? runMeta?.jobId
+      if (!jobId) {
+        setRunError('Kein laufender Job — zuerst Testen starten.')
+        return
+      }
+      setRunError(null)
+      try {
+        const res = await fetch(
+          apiPlatformProjectFlowJourneyGateBranch(platformProjectId, flow.id, jobId),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gateNodeId, edgeKind }),
+          }
+        )
+        const json = (await res.json().catch(() => null)) as { error?: string } | null
+        if (!res.ok) throw new Error(json?.error || `Gate branch failed (${res.status})`)
+      } catch (e) {
+        setRunError(e instanceof Error ? e.message : String(e))
+      }
+    },
+    [flow.id, platformProjectId, runMeta?.jobId]
+  )
+
+  const onPlaySegment = useCallback(
+    async (nodeId: string) => {
+      setRunError(null)
+      try {
+        const res = await fetch(apiPlatformProjectFlowHybridSegment(platformProjectId, flow.id), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nodeId }),
+        })
+        const json = (await res.json().catch(() => null)) as {
+          error?: string
+          jobId?: string | null
+        } | null
+        if (!res.ok) throw new Error(json?.error || `Agent-Segment failed (${res.status})`)
+        if (json?.jobId) {
+          setRunMeta((prev) =>
+            prev
+              ? { ...prev, jobId: json.jobId!, status: 'running' }
+              : {
+                  studyId: runMetaRef.current?.studyId ?? '',
+                  waveId: runMetaRef.current?.waveId ?? '',
+                  jobId: json.jobId!,
+                  status: 'running',
+                  stepCount: 0,
+                }
+          )
+        }
+      } catch (e) {
+        setRunError(e instanceof Error ? e.message : String(e))
+      }
+    },
+    [flow.id, platformProjectId]
+  )
+
+  const nodesForFlow = useMemo(
+    () =>
+      nodes.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          onUpdate: onUpdateNode,
+          runState: runStates[n.id] ?? 'idle',
+          runOutput: runOutputs[n.id] ?? null,
+          runBusy,
+          onManualGate: (edgeKind: 'when' | 'otherwise') => void onManualGate(n.id, edgeKind),
+          onPlaySegment: () => void onPlaySegment(n.id),
+          onOutputToNote: () => onOutputToNote(n.id),
+          onOpenInspector: () => setSelectedId(n.id),
+        },
+      })),
+    [nodes, onManualGate, onOutputToNote, onPlaySegment, onUpdateNode, runBusy, runOutputs, runStates]
+  )
+
+  const selectedFlowNode = useMemo(() => {
+    if (!selectedId) return null
+    const rf = nodes.find((n) => n.id === selectedId) as CollectionFlowRfNodeModel | undefined
+    return rf?.data?.flowNode ?? null
+  }, [nodes, selectedId])
 
   const studyHref =
-    lastRun?.audionStudyId != null
-      ? buildAudionStudyUrl(getAudionWebOrigin(), lastRun.audionStudyId)
-      : null
+    runMeta?.studyId != null
+      ? buildAudionStudyUrl(getAudionWebOrigin(), runMeta.studyId)
+      : lastRun?.audionStudyId != null
+        ? buildAudionStudyUrl(getAudionWebOrigin(), lastRun.audionStudyId)
+        : null
+  const waveHref =
+    runMeta?.studyId && runMeta?.waveId
+      ? buildAudionStudyWaveUrl(getAudionWebOrigin(), runMeta.studyId, runMeta.waveId)
+      : lastRun?.audionStudyId && lastRun?.audionWaveId
+        ? buildAudionStudyWaveUrl(getAudionWebOrigin(), lastRun.audionStudyId, lastRun.audionWaveId)
+        : null
   const scanHref = lastRun?.scanId ? pathCheckionScanResult(lastRun.scanId) : null
   const issuesHref = lastRun?.scanId ? pathCheckionScanIssues(lastRun.scanId) : null
 
   return (
-    <div className="plexon-flow-board">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        fitView
-        nodesDraggable={!running}
-        nodesConnectable={false}
-        elementsSelectable
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background gap={24} size={1} />
-        <Controls showInteractive={false} />
-      </ReactFlow>
+    <div className="plexon-flow-canvas-shell plexon-flow-canvas-shell--immersive">
+      <div className="plexon-flow-board-stage">
+        <div className="plexon-flow-canvas-viewport plexon-flow-canvas-viewport--fullscreen">
+          <ReactFlow
+            nodes={nodesForFlow}
+            edges={edges}
+            onNodesChange={(c) => {
+              if (
+                c.some(
+                  (ch) =>
+                    ch.type === 'remove' ||
+                    ch.type === 'add' ||
+                    (ch.type === 'position' && 'dragging' in ch && ch.dragging === false)
+                )
+              ) {
+                pushHistory()
+                setDirty(true)
+                setSaveMsg(null)
+              }
+              onNodesChange(c)
+            }}
+            onEdgesChange={(c) => {
+              if (c.some((ch) => ch.type === 'remove' || ch.type === 'add')) {
+                pushHistory()
+                setDirty(true)
+                setSaveMsg(null)
+              }
+              onEdgesChange(c)
+            }}
+            onConnect={onConnect}
+            onSelectionChange={onSelectionChange}
+            nodeTypes={nodeTypes}
+            fitView
+            deleteKeyCode={null}
+            nodesDraggable={!runBusy}
+            nodesConnectable={!runBusy}
+            connectionLineStyle={{ strokeWidth: 2 }}
+            defaultEdgeOptions={{ type: 'smoothstep', animated: false, style: { strokeWidth: 2 } }}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background gap={18} size={1} />
+            <Controls showInteractive={false} />
+            <MiniMap pannable zoomable />
+          </ReactFlow>
+        </div>
 
-      <FloatingPanel
-        storageKey={`plexon.flow.toolbar.${flow.id}`}
-        defaultEdge="top"
-        defaultOffset={16}
-        variant="toolbar"
-        surface="solid"
-        ariaLabel="Flow toolbar"
-        className="plexon-flow-float"
-      >
-        <div className="plexon-flow-toolbar">
-          <Link
-            href={pathPlatformProjectFlows(platformProjectId)}
-            className="plexon-flow-back"
-          >
-            ← Flows
-          </Link>
-          <Text role="title" as="span" className="plexon-flow-toolbar-title">
-            {flow.name}
-          </Text>
-          <Button
-            variant="primary"
-            size="md"
-            disabled={running}
-            onClick={() => void run()}
-          >
-            {running ? (
+        <CollectionFlowFloatingPanel
+          storageKey={`plexon.flow.toolbar.${flow.id}`}
+          defaultEdge="top"
+          defaultOffset={0.06}
+          variant="toolbar"
+          ariaLabel="Flow Board Aktionen"
+        >
+          <div className="plexon-flow-canvas-toolbar plexon-flow-canvas-toolbar--compact">
+            <span className="plexon-flow-toolbar-grip" title="Verschieben">
+              <IconGrip />
+            </span>
+            <Link
+              href={pathPlatformProjectFlows(platformProjectId)}
+              className="plexon-flow-toolbar-btn"
+              title="Zurück zu Flows"
+            >
+              ← Flows
+            </Link>
+            <Text role="title" as="span" className="plexon-flow-toolbar-title">
+              {flow.name}
+            </Text>
+            <span className="plexon-flow-toolbar-sep" aria-hidden />
+            <Button
+              type="button"
+              size="sm"
+              variant="primary"
+              className="plexon-flow-toolbar-btn"
+              aria-label={runBusy ? 'Läuft' : 'Testen'}
+              title={runBusy ? 'Läuft…' : 'Testen'}
+              icon={<IconPlay />}
+              onClick={() => void onTest()}
+              disabled={runBusy}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="subtle"
+              className="plexon-flow-toolbar-btn"
+              aria-label="Stop"
+              title="Stop"
+              icon={<IconStop />}
+              onClick={onStop}
+              disabled={!runBusy}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="subtle"
+              className="plexon-flow-toolbar-btn"
+              aria-label={saveBusy ? 'Speichert' : 'Speichern'}
+              title={saveMsg ?? (saveBusy ? 'Speichert…' : 'Speichern')}
+              icon={<IconSave />}
+              onClick={() => void onSave()}
+              disabled={saveBusy}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="subtle"
+              className="plexon-flow-toolbar-btn"
+              aria-label="Undo"
+              title="Undo"
+              icon={<IconUndo />}
+              onClick={onUndo}
+              disabled={historyLen < 1}
+            />
+            {dirty ? (
+              <Chip size="sm" static className="plexon-flow-toolbar-chip">
+                edit
+              </Chip>
+            ) : saveMsg === 'Gespeichert' ? (
+              <Chip size="sm" static className="plexon-flow-toolbar-chip">
+                ok
+              </Chip>
+            ) : null}
+            <Button
+              type="button"
+              size="sm"
+              variant="subtle"
+              className="plexon-flow-toolbar-btn"
+              aria-label="Reset zum Template"
+              title="Reset zum Template"
+              icon={<IconReset />}
+              onClick={reset}
+              disabled={!dirty}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="plexon-flow-toolbar-btn"
+              aria-label="Node löschen"
+              title="Node löschen"
+              icon={<IconDelete />}
+              onClick={deleteSelected}
+              disabled={!selectedId || runBusy}
+            />
+          </div>
+        </CollectionFlowFloatingPanel>
+
+        <CollectionFlowFloatingPanel
+          storageKey={`plexon.flow.palette.${flow.id}`}
+          defaultEdge="left"
+          defaultOffset={0.38}
+          title={paletteOpen ? 'Bausteine' : undefined}
+          variant={paletteOpen ? 'panel' : 'toolbar'}
+          className={
+            paletteOpen ? 'plexon-flow-float-panel--palette-open' : 'plexon-flow-float-panel--palette-collapsed'
+          }
+          ariaLabel="Flow Bausteine"
+        >
+          {paletteOpen ? (
+            <div className="plexon-flow-palette">
+              <div className="plexon-flow-palette-head">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="plexon-flow-toolbar-btn"
+                  aria-label="Bausteine schließen"
+                  title="Schließen"
+                  onClick={() => setPaletteOpen(false)}
+                >
+                  ×
+                </Button>
+              </div>
+              <p className="plexon-flow-canvas-hint">Journey (Audion)</p>
+              <div className="plexon-flow-palette-row">
+                {PALETTE_JOURNEY_KINDS.map((kind) => (
+                  <Button
+                    key={kind}
+                    type="button"
+                    size="sm"
+                    variant="subtle"
+                    onClick={() => addNode(kind)}
+                    disabled={runBusy}
+                  >
+                    {kind}
+                  </Button>
+                ))}
+              </div>
+              <p className="plexon-flow-canvas-hint">Quality (Checkion)</p>
+              <div className="plexon-flow-palette-row">
+                {PALETTE_QUALITY_KINDS.map((kind) => (
+                  <Button
+                    key={kind}
+                    type="button"
+                    size="sm"
+                    variant="subtle"
+                    onClick={() => addNode(kind)}
+                    disabled={runBusy}
+                  >
+                    {kind}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              size="md"
+              variant="subtle"
+              className="plexon-flow-palette-fab"
+              aria-label="Bausteine hinzufügen"
+              title="Bausteine"
+              icon={<IconPlus size={22} />}
+              disabled={runBusy}
+              onClick={() => setPaletteOpen(true)}
+            />
+          )}
+        </CollectionFlowFloatingPanel>
+
+        <CollectionFlowFloatingPanel
+          storageKey={`plexon.flow.run.${flow.id}`}
+          defaultEdge="bottom"
+          defaultOffset={0.5}
+          title="Run"
+          variant="strip"
+          ariaLabel="Run Status"
+        >
+          <div className="plexon-flow-run-strip">
+            {runMeta ? (
               <>
-                <Spinner size="sm" /> Testen…
+                <Chip size="sm" static>
+                  {runMeta.status}
+                </Chip>
+                <span>
+                  steps {jobSummary?.stepCount ?? runMeta.stepCount} · job {runMeta.jobId.slice(0, 10)}…
+                </span>
               </>
             ) : (
-              'Testen'
+              <Text role="meta" as="p">
+                {lastRun
+                  ? [
+                      `Letzter Lauf · ${lastRun.status}`,
+                      lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
+                      lastRun.issueGateBranch ? `issueGate ${lastRun.issueGateBranch}` : null,
+                      lastRun.criticalCount != null ? `${lastRun.criticalCount} critical` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : hasJourney
+                    ? 'Journey + Quality: start → journey → scan → gates'
+                    : 'Quality-Pfad: start → scan → score_gate → terminal'}
+              </Text>
             )}
-          </Button>
-        </div>
-      </FloatingPanel>
+            {(studyHref || waveHref || scanHref || issuesHref) && (
+              <span className="plexon-flow-run-strip-links">
+                {studyHref ? (
+                  <a href={studyHref} target="_blank" rel="noreferrer">
+                    AUDION Study
+                  </a>
+                ) : null}
+                {waveHref ? (
+                  <a href={waveHref} target="_blank" rel="noreferrer">
+                    Soft-Q / Evaluate
+                  </a>
+                ) : null}
+                {softQSummary ? (
+                  <Chip size="sm" static>
+                    Soft-Q {softQSummary.softScoreKeys.length} keys
+                    {softQSummary.hasCollectionRollup ? ' · Collection rollup' : ''}
+                  </Chip>
+                ) : null}
+                {scanHref ? (
+                  <a href={scanHref} target="_blank" rel="noreferrer">
+                    CHECKION Scan
+                  </a>
+                ) : null}
+                {issuesHref ? (
+                  <a href={issuesHref} target="_blank" rel="noreferrer">
+                    Issues Dossier
+                  </a>
+                ) : null}
+              </span>
+            )}
+          </div>
+          <CollectionFlowVerdictCard verdict={verdict} />
+        </CollectionFlowFloatingPanel>
 
-      <FloatingPanel
-        storageKey={`plexon.flow.strip.${flow.id}`}
-        defaultEdge="bottom"
-        defaultOffset={16}
-        variant="strip"
-        surface="solid"
-        ariaLabel="Run strip"
-        className="plexon-flow-float"
-      >
-        <div className="plexon-flow-strip">
-          {error ? <Alert tone="error">{error}</Alert> : null}
-          <Text role="meta" as="p">
-            {lastRun
-              ? [
-                  `Last run · ${lastRun.status}`,
-                  lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
-                  lastRun.issueGateBranch
-                    ? `issueGate ${lastRun.issueGateBranch}`
-                    : null,
-                  lastRun.criticalCount != null
-                    ? `${lastRun.criticalCount} critical`
-                    : null,
-                  lastRun.waveRollupOk === true
-                    ? 'wave rollup ok'
-                    : lastRun.waveEvaluateOk === false
-                      ? 'wave evaluate failed'
-                      : lastRun.waveRollupOk === false
-                        ? 'wave rollup failed'
-                        : null,
-                  lastRun.knowledgeDistillateOk === true
-                    ? 'KP distillate ok'
-                    : lastRun.knowledgeDistillateOk === false
-                      ? 'KP distillate failed'
-                      : null,
-                  lastRun.audionJobId ? `job ${lastRun.audionJobId}` : null,
-                  lastRun.scanId ? `scan ${lastRun.scanId}` : null,
-                  lastRun.stepUrl ? `step ${lastRun.stepUrl}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ')
-              : hasJourney
-                ? 'Journey + quality: start → journey → scan → gates'
-                : 'Quality path: start → scan → score_gate → terminal'}
-          </Text>
-          {(studyHref || scanHref || issuesHref) && (
-            <div className="plexon-flow-strip-links">
-              {studyHref ? (
-                <a href={studyHref} target="_blank" rel="noreferrer">
-                  Open in AUDION
-                </a>
-              ) : null}
-              {scanHref ? (
-                <a href={scanHref} target="_blank" rel="noreferrer">
-                  Open CHECKION scan
-                </a>
-              ) : null}
-              {issuesHref ? (
-                <a href={issuesHref} target="_blank" rel="noreferrer">
-                  Open Issues dossier
-                </a>
-              ) : null}
-            </div>
-          )}
-        </div>
-      </FloatingPanel>
+        {selectedFlowNode ? (
+          <CollectionFlowFloatingPanel
+            storageKey={`plexon.flow.inspector.${flow.id}`}
+            defaultEdge="right"
+            defaultOffset={0.22}
+            title="Inspector"
+            className="plexon-flow-float-panel--inspector"
+            ariaLabel="Node Inspector"
+          >
+            <CollectionFlowNodeInspector
+              node={selectedFlowNode}
+              runState={runStates[selectedId!] ?? 'idle'}
+              inspector={inspectorByNode[selectedId!] ?? null}
+              jobSummary={jobSummary}
+              verdict={verdict}
+              onClose={() => setSelectedId(null)}
+              onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+            />
+          </CollectionFlowFloatingPanel>
+        ) : null}
 
-      <FloatingPanel
-        storageKey={`plexon.flow.verdict.${flow.id}`}
-        defaultEdge="right"
-        defaultOffset={24}
-        variant="panel"
-        surface="solid"
-        title="Verdict"
-        ariaLabel="Collection verdict"
-        className="plexon-flow-float"
-      >
-        <CollectionFlowVerdictCard verdict={verdict} />
-      </FloatingPanel>
+        {runError ? <p className="plexon-flow-board-alert">{runError}</p> : null}
+      </div>
     </div>
   )
 }
