@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  actionKindForCatalogRoot,
   buildScanCatalogBundle,
+  catalogPathFromOutHandle,
+  catalogPortsForActionKind,
   emptyRunContext,
   evaluateCompareOp,
   evaluateCompareNode,
@@ -58,5 +61,16 @@ describe('collection-flow-run-context', () => {
       ctx
     );
     expect(pass.passed).toBe(true);
+  });
+
+  it('catalogPortsForActionKind filters by writer root', () => {
+    const scanPorts = catalogPortsForActionKind('scan');
+    expect(scanPorts.every((p) => p.path.startsWith('scan.'))).toBe(true);
+    expect(catalogPortsForActionKind('geo_job').some((p) => p.path === 'geo.citedShare')).toBe(
+      true
+    );
+    expect(actionKindForCatalogRoot('domain')).toBe('domain_scan');
+    expect(catalogPathFromOutHandle('out:scan.url')).toBe('scan.url');
+    expect(catalogPathFromOutHandle('then')).toBe(null);
   });
 });

@@ -73,6 +73,63 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
 
 const CATALOG_PATH_SET = new Set(CATALOG_PATH_OPTIONS.map((o) => o.path));
 
+export const CATALOG_OUT_HANDLE_PREFIX = 'out:';
+export const CATALOG_BIND_PATH_HANDLE = 'bind:path';
+
+export type CatalogPortDef = {
+  path: string;
+  label: string;
+  handleId: string;
+  group: string;
+};
+
+const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
+  scan: 'scan',
+  domain_scan: 'domain',
+  geo_job: 'geo',
+};
+
+const ROOT_TO_ACTION_KIND: Record<string, string> = {
+  scan: 'scan',
+  domain: 'domain_scan',
+  geo: 'geo_job',
+};
+
+export function catalogOutHandleId(path: string): string {
+  return `${CATALOG_OUT_HANDLE_PREFIX}${path}`;
+}
+
+export function catalogPathFromOutHandle(handle: string | null | undefined): string | null {
+  if (!handle || !handle.startsWith(CATALOG_OUT_HANDLE_PREFIX)) return null;
+  const path = handle.slice(CATALOG_OUT_HANDLE_PREFIX.length).trim();
+  return path && isCatalogPath(path) ? path : null;
+}
+
+export function catalogRootFromPath(path: string): string | null {
+  const root = path.trim().split('.')[0];
+  return root || null;
+}
+
+export function actionKindForCatalogRoot(root: string): string | null {
+  return ROOT_TO_ACTION_KIND[root] ?? null;
+}
+
+export function catalogRootForActionKind(kind: string): string | null {
+  return ACTION_KIND_TO_ROOT[kind] ?? null;
+}
+
+/** Output ports for action nodes that write catalog bundles (Wave 10). */
+export function catalogPortsForActionKind(kind: string): CatalogPortDef[] {
+  const root = catalogRootForActionKind(kind);
+  if (!root) return [];
+  return CATALOG_PATH_OPTIONS.filter((o) => o.group === root).map((o) => ({
+    path: o.path,
+    label: o.label,
+    handleId: catalogOutHandleId(o.path),
+    group: o.group,
+  }));
+}
+
 export function listCatalogPathsForPicker(): typeof CATALOG_PATH_OPTIONS {
   return CATALOG_PATH_OPTIONS;
 }

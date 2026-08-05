@@ -1,7 +1,7 @@
 /**
  * Map CollectionTestFlowDocument ↔ React Flow nodes/edges (Wave 5).
  * Port of Audion `ux-flow-canvas.ts` pattern — no `@audion-v3/contracts` import here.
- * @see specs/domain/collection-test-flow.md — Wave 5–7 implementation notes
+ * @see specs/domain/collection-test-flow.md — Wave 5–7 / 10 implementation notes
  */
 
 import type { Edge as RfEdge, Node as RfNode } from '@xyflow/react';
@@ -14,6 +14,15 @@ import {
   type CollectionTestFlowDocument,
 } from './collection-test-flow';
 import type { FlowNodeRunOutput, FlowNodeRunState } from './collection-flow-run-progress';
+import {
+  CATALOG_BIND_PATH_HANDLE,
+  catalogOutHandleId,
+  catalogPathFromOutHandle,
+  catalogPortsForActionKind,
+  catalogRootFromPath,
+  actionKindForCatalogRoot,
+  isCatalogPath,
+} from './collection-flow-run-context';
 
 export type CollectionFlowGateEvaluation = {
   matched?: boolean;
@@ -39,20 +48,35 @@ export type CollectionFlowRfNodeData = {
   onOpenInspector?: () => void;
 };
 
-export type CollectionFlowRfEdgeData = { edgeKind: CollectionFlowEdgeKind };
+export type CollectionFlowRfEdgeData = {
+  edgeKind: CollectionFlowEdgeKind;
+  bindPath?: string;
+};
 
 export type CollectionFlowRfNode = RfNode<CollectionFlowRfNodeData>;
 export type CollectionFlowRfEdge = RfEdge<CollectionFlowRfEdgeData>;
+
+export const CONTROL_EDGE_KINDS = new Set<CollectionFlowEdgeKind>([
+  'then',
+  'when',
+  'otherwise',
+  'parallel',
+]);
 
 const EDGE_LABEL: Record<CollectionFlowEdgeKind, string> = {
   then: 'dann',
   when: 'wenn',
   otherwise: 'sonst',
   parallel: 'parallel',
+  bind: 'bind',
 };
 
 export function edgeKindLabel(kind: CollectionFlowEdgeKind): string {
   return EDGE_LABEL[kind] ?? kind;
+}
+
+export function isControlEdgeKind(kind: CollectionFlowEdgeKind | undefined | null): boolean {
+  return kind != null && CONTROL_EDGE_KINDS.has(kind);
 }
 
 export function sourceHandleForEdgeKind(kind: CollectionFlowEdgeKind): string | undefined {
@@ -69,6 +93,8 @@ const GATE_LIKE_KINDS = new Set<CollectionFlowNodeKind>([
   'issue_gate',
   'geo_gate',
 ]);
+
+const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>(['scan', 'domain_scan', 'geo_job']);
 
 function edgeKindFromDoc(e: CollectionFlowEdge): CollectionFlowEdgeKind {
   if (e.edgeKind) return e.edgeKind;
@@ -95,6 +121,20 @@ function whenFromEdgeKind(
   return undefined;
 }
 
+function bindPathFromDocEdge(e: CollectionFlowEdge): string | undefined {
+  if (e.bindPath && isCatalogPath(e.bindPath)) return e.bindPath.trim();
+  return undefined;
+}
+
+function shortBindLabel(path: string): string {
+  const parts = path.split('.');
+  return parts[parts.length - 1] || path;
+}
+
+function bindEdgeStyle(): { strokeDasharray: string; strokeWidth: number } {
+  return { strokeDasharray: '6 4', strokeWidth: 1.5 };
+}
+
 /** Map the persisted flow document to React Flow nodes/edges (positions are UI-only). */
 export function flowToRf(doc: CollectionTestFlowDocument): {
   nodes: CollectionFlowRfNode[];
@@ -109,6 +149,23 @@ export function flowToRf(doc: CollectionTestFlowDocument): {
   }));
   const edges: CollectionFlowRfEdge[] = doc.edges.map((e) => {
     const kind = edgeKindFromDoc(e);
+    if (kind === 'bind') {
+      const bindPath =
+        bindPathFromDocEdge(e) ??
+        (typeof e.label === 'string' && isCatalogPath(e.label) ? e.label.trim() : undefined);
+      const path = bindPath ?? 'scan.overallScore';
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        sourceHandle: catalogOutHandleId(path),
+        targetHandle: CATALOG_BIND_PATH_HANDLE,
+        label: e.label ?? shortBindLabel(path),
+        className: 'msqdx-flow-edge--bind',
+        style: bindEdgeStyle(),
+        data: { edgeKind: 'bind', bindPath: path },
+      };
+    }
     const source = byId.get(e.source);
     const handle = GATE_LIKE_KINDS.has(source?.kind as CollectionFlowNodeKind)
       ? kind === 'when' || kind === 'otherwise'
@@ -125,6 +182,28 @@ export function flowToRf(doc: CollectionTestFlowDocument): {
       data: { edgeKind: kind },
     };
   });
+
+  // Synthesize visual bind wires from compare.path when no bind edge exists yet.
+  const boundTargets = new Set(
+    edges.filter((e) => e.data?.edgeKind === 'bind').map((e) => e.target)
+  );
+  const producers = doc.nodes.map((n) => ({ id: n.id, kind: n.kind }));
+  for (const n of doc.nodes) {
+    if (n.kind !== 'compare' || !n.path || !isCatalogPath(n.path) || boundTargets.has(n.id)) {
+      continue;
+    }
+    const sourceId = findProducerNodeIdForPath(producers, n.path);
+    if (!sourceId) continue;
+    edges.push(
+      makeBindRfEdge({
+        sourceId,
+        targetId: n.id,
+        path: n.path,
+        id: `e-bind-synth-${n.id}`,
+      })
+    );
+  }
+
   return { nodes, edges };
 }
 
@@ -142,6 +221,21 @@ export function rfToDocument(
   const byId = new Map(cfNodes.map((n) => [n.id, n]));
   const cfEdges: CollectionFlowEdge[] = edges.map((e) => {
     const fromHandle = e.sourceHandle;
+    const catalogPath = catalogPathFromOutHandle(fromHandle);
+    if (e.data?.edgeKind === 'bind' || catalogPath || e.targetHandle === CATALOG_BIND_PATH_HANDLE) {
+      const path =
+        e.data?.bindPath ??
+        catalogPath ??
+        (typeof e.label === 'string' && isCatalogPath(e.label) ? e.label.trim() : '');
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        edgeKind: 'bind' as const,
+        bindPath: path || undefined,
+        label: typeof e.label === 'string' ? e.label : shortBindLabel(path || 'bind'),
+      };
+    }
     const kindFromHandle: CollectionFlowEdgeKind | null =
       fromHandle === 'when' ||
       fromHandle === 'otherwise' ||
@@ -165,6 +259,76 @@ export function rfToDocument(
     nodes: cfNodes,
     edges: cfEdges,
   };
+}
+
+/** True when connecting an action catalog output into compare `bind:path`. */
+export function isCatalogBindConnection(
+  sourceKind: CollectionFlowNodeKind | undefined,
+  sourceHandle: string | null | undefined,
+  targetKind: CollectionFlowNodeKind | undefined,
+  targetHandle: string | null | undefined
+): boolean {
+  if (targetKind !== 'compare') return false;
+  if (targetHandle !== CATALOG_BIND_PATH_HANDLE) return false;
+  const path = catalogPathFromOutHandle(sourceHandle);
+  if (!path) return false;
+  if (!sourceKind || !ACTION_PORT_KINDS.has(sourceKind)) return false;
+  const root = catalogRootFromPath(path);
+  if (!root) return false;
+  return actionKindForCatalogRoot(root) === sourceKind;
+}
+
+export function findProducerNodeIdForPath(
+  nodes: Array<{ id: string; kind: CollectionFlowNodeKind }>,
+  path: string
+): string | null {
+  const root = catalogRootFromPath(path);
+  if (!root) return null;
+  const kind = actionKindForCatalogRoot(root) as CollectionFlowNodeKind | null;
+  if (!kind) return null;
+  return nodes.find((n) => n.kind === kind)?.id ?? null;
+}
+
+/** Build / replace a bind RF edge for a compare node's catalog path. */
+export function makeBindRfEdge(input: {
+  sourceId: string;
+  targetId: string;
+  path: string;
+  id?: string;
+}): CollectionFlowRfEdge {
+  const path = input.path.trim();
+  return {
+    id: input.id ?? `e-bind-${input.sourceId}-${input.targetId}`,
+    source: input.sourceId,
+    target: input.targetId,
+    sourceHandle: catalogOutHandleId(path),
+    targetHandle: CATALOG_BIND_PATH_HANDLE,
+    label: shortBindLabel(path),
+    className: 'msqdx-flow-edge--bind',
+    style: bindEdgeStyle(),
+    data: { edgeKind: 'bind', bindPath: path },
+  };
+}
+
+/** Upsert bind edge for compare path; removes prior binds into the compare. */
+export function syncBindEdgesForComparePath(
+  edges: CollectionFlowRfEdge[],
+  nodes: CollectionFlowRfNode[],
+  compareNodeId: string,
+  path: string | undefined | null
+): CollectionFlowRfEdge[] {
+  const without = edges.filter(
+    (e) => !(e.target === compareNodeId && e.data?.edgeKind === 'bind')
+  );
+  const trimmed = path?.trim() ?? '';
+  if (!trimmed || !isCatalogPath(trimmed)) return without;
+  const producers = nodes.map((n) => ({
+    id: n.id,
+    kind: n.data.flowNode.kind,
+  }));
+  const sourceId = findProducerNodeIdForPath(producers, trimmed);
+  if (!sourceId) return without;
+  return [...without, makeBindRfEdge({ sourceId, targetId: compareNodeId, path: trimmed })];
 }
 
 /** Palette — Family A (AUDION journey, closed set). */
@@ -248,6 +412,9 @@ export function nextEdgeKindForSource(
   sourceId: string,
   sourceHandle?: string | null
 ): CollectionFlowEdgeKind {
+  if (catalogPathFromOutHandle(sourceHandle)) {
+    return 'bind';
+  }
   if (
     sourceHandle === 'when' ||
     sourceHandle === 'otherwise' ||
@@ -257,7 +424,7 @@ export function nextEdgeKindForSource(
     return sourceHandle;
   }
   if (GATE_LIKE_KINDS.has(sourceNode?.kind as CollectionFlowNodeKind)) {
-    const outs = existingEdges.filter((e) => e.from === sourceId);
+    const outs = existingEdges.filter((e) => e.from === sourceId && isControlEdgeKind(e.kind));
     if (!outs.some((e) => e.kind === 'when')) return 'when';
     if (!outs.some((e) => e.kind === 'otherwise')) return 'otherwise';
   }
@@ -326,3 +493,5 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
   }
   return base;
 }
+
+export { catalogPortsForActionKind, CATALOG_BIND_PATH_HANDLE, catalogOutHandleId };

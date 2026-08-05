@@ -156,6 +156,7 @@ export function CollectionFlowNodeInspector({
   jobSummary,
   verdict,
   lastRun,
+  bindSourceLabel,
   onClose,
   onAppendOutputToNote,
 }: {
@@ -165,6 +166,8 @@ export function CollectionFlowNodeInspector({
   jobSummary?: FlowJobRunSummary | null
   verdict?: CollectionVerdict | null
   lastRun?: CollectionFlowLastRun | null
+  /** Wave 10: label of action node wired into compare.path via bind edge. */
+  bindSourceLabel?: string | null
   onClose: () => void
   onAppendOutputToNote?: () => void
 }) {
@@ -292,6 +295,12 @@ export function CollectionFlowNodeInspector({
                   <span>Path</span>
                   <strong>{node.path ?? '—'}</strong>
                 </div>
+                {bindSourceLabel ? (
+                  <div className="msqdx-flow-inspector-stat">
+                    <span>Bind from</span>
+                    <strong>{bindSourceLabel}</strong>
+                  </div>
+                ) : null}
                 <div className="msqdx-flow-inspector-stat">
                   <span>Op</span>
                   <strong>{node.op ?? 'gte'}</strong>

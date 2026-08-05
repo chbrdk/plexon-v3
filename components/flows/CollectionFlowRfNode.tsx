@@ -11,11 +11,13 @@ import type {
 } from '@/lib/collection-test-flow'
 import {
   AUDION_GATE_OPTIONS,
+  CATALOG_BIND_PATH_HANDLE,
   COLLECTION_COMPARE_OP_OPTIONS,
   COLLECTION_SCAN_MODE_OPTIONS,
   COLLECTION_SCORE_KIND_OPTIONS,
   GEO_GATE_CONDITION_OPTIONS,
   ISSUE_GATE_CONDITION_OPTIONS,
+  catalogPortsForActionKind,
   type CollectionFlowRfNodeData,
 } from '@/lib/collection-flow-canvas'
 import { listCatalogPathsForPicker } from '@/lib/collection-flow-run-context'
@@ -124,13 +126,37 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const isJourneyGate = kind === 'gate'
   const isQualityGate =
     kind === 'compare' || kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate'
+  const catalogOutPorts = catalogPortsForActionKind(kind)
+  const hasCatalogOutputs = catalogOutPorts.length > 0
   const showOutput =
     Boolean(runOutput?.text || runOutput?.imageUrl || runOutput?.label) &&
     (runState === 'active' || runState === 'done' || runState === 'error')
 
-  const targetHandle = (
-    <Handle type="target" position={Position.Left} id="in" className="msqdx-flow-rf-handle" />
-  )
+  const targetHandle =
+    kind === 'compare' ? (
+      <>
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="in"
+          className="msqdx-flow-rf-handle"
+          style={{ top: '22%' }}
+          title="in"
+        />
+        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--in">in</span>
+        <Handle
+          type="target"
+          position={Position.Left}
+          id={CATALOG_BIND_PATH_HANDLE}
+          className="msqdx-flow-rf-handle msqdx-flow-rf-handle--bind"
+          style={{ top: '52%' }}
+          title="path"
+        />
+        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--bind">path</span>
+      </>
+    ) : (
+      <Handle type="target" position={Position.Left} id="in" className="msqdx-flow-rf-handle" />
+    )
 
   const sourceHandles =
     isJourneyGate || isQualityGate ? (
@@ -159,7 +185,14 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         </span>
       </>
     ) : (
-      <Handle type="source" position={Position.Right} id="then" className="msqdx-flow-rf-handle" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="then"
+        className="msqdx-flow-rf-handle msqdx-flow-rf-handle--then"
+        style={hasCatalogOutputs ? { top: 'auto', bottom: 14 } : undefined}
+        title="dann"
+      />
     )
 
   const output = showOutput ? (
@@ -313,6 +346,23 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
           </>
         ) : null}
 
+        {hasCatalogOutputs ? (
+          <div className="msqdx-flow-catalog-ports" aria-label="Outputs">
+            <p className="msqdx-flow-catalog-ports-title">Outputs</p>
+            {catalogOutPorts.map((port) => (
+              <div key={port.path} className="msqdx-flow-catalog-port" title={port.path}>
+                <span className="msqdx-flow-catalog-port-label">{port.label}</span>
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={port.handleId}
+                  className="msqdx-flow-rf-handle msqdx-flow-rf-handle--catalog-out"
+                />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         {isJourneyGate ? (
           <>
             <label className="msqdx-flow-rf-field">
@@ -346,7 +396,9 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
 
         {kind === 'compare' ? (
           <>
-            <label className="msqdx-flow-rf-field">
+            <label
+              className={`msqdx-flow-rf-field${flowNode.path ? ' msqdx-flow-rf-field--bound' : ''}`}
+            >
               <span>Path</span>
               <select
                 className="msqdx-flow-rf-select"

@@ -53,12 +53,19 @@ import {
   PALETTE_QUALITY_KINDS,
   edgeKindLabel,
   flowToRf,
+  isCatalogBindConnection,
+  makeBindRfEdge,
   newCollectionFlowNode,
   nextEdgeKindForSource,
   rfToDocument,
+  syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
+import {
+  CATALOG_BIND_PATH_HANDLE,
+  catalogPathFromOutHandle,
+} from '@/lib/collection-flow-run-context'
 import {
   buildJobRunSummary,
   mapJobToFlowNodeInspector,
@@ -182,10 +189,28 @@ function BoardInner({ platformProjectId, initial }: Props) {
           }
         })
       )
+      if ('path' in patch) {
+        setEdges((eds) => {
+          const nextNodes = nodes.map((n) => {
+            if (n.id !== nodeId) return n
+            const prev = (n as CollectionFlowRfNodeModel).data?.flowNode
+            return {
+              ...n,
+              data: { ...n.data, flowNode: { ...prev, ...patch, id: nodeId } },
+            }
+          }) as CollectionFlowRfNodeModel[]
+          return syncBindEdgesForComparePath(
+            eds as CollectionFlowRfEdge[],
+            nextNodes,
+            nodeId,
+            patch.path
+          )
+        })
+      }
       setDirty(true)
       setSaveMsg(null)
     },
-    [setNodes, pushHistory]
+    [setNodes, setEdges, pushHistory, nodes]
   )
 
   const onOutputToNote = useCallback(
@@ -468,17 +493,93 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSaveMsg(null)
   }, [pushHistory, setNodes, setEdges])
 
+  const isValidConnection = useCallback(
+    (connection: Connection | CollectionFlowRfEdge) => {
+      const sourceId = connection.source
+      const targetId = connection.target
+      if (!sourceId || !targetId || sourceId === targetId) return false
+      const sourceRf = nodes.find((n) => n.id === sourceId) as CollectionFlowRfNodeModel | undefined
+      const targetRf = nodes.find((n) => n.id === targetId) as CollectionFlowRfNodeModel | undefined
+      const sourceKind = sourceRf?.data?.flowNode?.kind
+      const targetKind = targetRf?.data?.flowNode?.kind
+      const sh = connection.sourceHandle
+      const th = connection.targetHandle
+
+      const isBindAttempt =
+        Boolean(catalogPathFromOutHandle(sh)) || th === CATALOG_BIND_PATH_HANDLE
+      if (isBindAttempt) {
+        return isCatalogBindConnection(sourceKind, sh, targetKind, th ?? CATALOG_BIND_PATH_HANDLE)
+      }
+      if (th === CATALOG_BIND_PATH_HANDLE) return false
+      if (catalogPathFromOutHandle(sh)) return false
+      return true
+    },
+    [nodes]
+  )
+
   const onConnect = useCallback(
     (connection: Connection) => {
       if (!connection.source || !connection.target) return
+      if (!isValidConnection(connection)) return
       pushHistory()
-      const sourceRf = nodes.find((n) => n.id === connection.source) as CollectionFlowRfNodeModel | undefined
+      const sourceRf = nodes.find((n) => n.id === connection.source) as
+        | CollectionFlowRfNodeModel
+        | undefined
+      const targetRf = nodes.find((n) => n.id === connection.target) as
+        | CollectionFlowRfNodeModel
+        | undefined
+      const bindPath = catalogPathFromOutHandle(connection.sourceHandle)
+
+      if (
+        bindPath &&
+        targetRf?.data?.flowNode?.kind === 'compare' &&
+        (connection.targetHandle === CATALOG_BIND_PATH_HANDLE ||
+          connection.targetHandle == null)
+      ) {
+        setNodes((nds) =>
+          nds.map((n) => {
+            if (n.id !== connection.target) return n
+            const prev = (n as CollectionFlowRfNodeModel).data?.flowNode
+            return {
+              ...n,
+              data: { ...n.data, flowNode: { ...prev, path: bindPath, id: n.id } },
+            }
+          })
+        )
+        setEdges((eds) => {
+          const without = eds.filter(
+            (e) =>
+              !(
+                e.target === connection.target &&
+                (e.data as CollectionFlowRfEdge['data'])?.edgeKind === 'bind'
+              )
+          )
+          return [
+            ...without,
+            makeBindRfEdge({
+              sourceId: connection.source!,
+              targetId: connection.target!,
+              path: bindPath,
+            }),
+          ]
+        })
+        setDirty(true)
+        setSaveMsg(null)
+        return
+      }
+
       const kind = nextEdgeKindForSource(
         sourceRf?.data?.flowNode,
-        edges.map((e) => ({ from: e.source, kind: (e.data as CollectionFlowRfEdge['data'])?.edgeKind ?? 'then' })),
+        edges
+          .filter((e) => (e.data as CollectionFlowRfEdge['data'])?.edgeKind !== 'bind')
+          .map((e) => ({
+            from: e.source,
+            kind: (e.data as CollectionFlowRfEdge['data'])?.edgeKind ?? 'then',
+          })),
         connection.source,
         connection.sourceHandle
       )
+      if (kind === 'bind') return
       const id = `e-${connection.source}-${connection.target}-${Date.now().toString(36)}`
       setEdges((eds) =>
         addEdge(
@@ -496,7 +597,34 @@ function BoardInner({ platformProjectId, initial }: Props) {
       setDirty(true)
       setSaveMsg(null)
     },
-    [nodes, edges, setEdges, pushHistory]
+    [nodes, edges, setEdges, setNodes, pushHistory, isValidConnection]
+  )
+
+  const onEdgesDelete = useCallback(
+    (deleted: CollectionFlowRfEdge[]) => {
+      for (const e of deleted) {
+        if ((e.data as CollectionFlowRfEdge['data'])?.edgeKind !== 'bind') continue
+        const path =
+          (e.data as CollectionFlowRfEdge['data'])?.bindPath ??
+          catalogPathFromOutHandle(e.sourceHandle)
+        const targetId = e.target
+        if (!targetId || !path) continue
+        setNodes((nds) =>
+          nds.map((n) => {
+            if (n.id !== targetId) return n
+            const prev = (n as CollectionFlowRfNodeModel).data?.flowNode
+            if (prev?.path !== path) return n
+            return {
+              ...n,
+              data: { ...n.data, flowNode: { ...prev, path: undefined, id: n.id } },
+            }
+          })
+        )
+      }
+      setDirty(true)
+      setSaveMsg(null)
+    },
+    [setNodes]
   )
 
   const onSelectionChange = useCallback(({ nodes: sel }: OnSelectionChangeParams) => {
@@ -618,6 +746,18 @@ function BoardInner({ platformProjectId, initial }: Props) {
     return rf?.data?.flowNode ?? null
   }, [nodes, selectedId])
 
+  const bindSourceLabel = useMemo(() => {
+    if (!selectedId || selectedFlowNode?.kind !== 'compare') return null
+    const bind = (edges as CollectionFlowRfEdge[]).find(
+      (e) => e.target === selectedId && e.data?.edgeKind === 'bind'
+    )
+    if (!bind) return null
+    const src = nodes.find((n) => n.id === bind.source) as CollectionFlowRfNodeModel | undefined
+    const label = src?.data?.flowNode?.label ?? bind.source
+    const path = bind.data?.bindPath ?? selectedFlowNode.path
+    return path ? `${label} · ${path}` : label
+  }, [edges, nodes, selectedFlowNode, selectedId])
+
   const studyHref =
     runMeta?.studyId != null
       ? buildAudionStudyUrl(getAudionWebOrigin(), runMeta.studyId)
@@ -665,6 +805,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
             onEdgesChange(c)
           }}
           onConnect={onConnect}
+          isValidConnection={isValidConnection}
+          onEdgesDelete={onEdgesDelete}
           onSelectionChange={onSelectionChange}
           nodeTypes={nodeTypes}
           fitView
@@ -937,6 +1079,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 jobSummary={jobSummary}
                 verdict={verdict}
                 lastRun={lastRun}
+                bindSourceLabel={bindSourceLabel}
                 onClose={() => setSelectedId(null)}
                 onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
               />

@@ -10,19 +10,28 @@ import {
   PALETTE_QUALITY_KINDS,
   edgeKindLabel,
   flowToRf,
+  isCatalogBindConnection,
   newCollectionFlowNode,
   nextEdgeKindForSource,
   rfToDocument,
+  syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode,
 } from '@/lib/collection-flow-canvas';
+import { catalogPortsForActionKind } from '@/lib/collection-flow-run-context';
 
 describe('flowToRf / rfToDocument roundtrip', () => {
   it('preserves node kinds/fields and edge kinds for a page-quality doc', () => {
     const doc = createPageQualityTemplate('https://acme.test/');
     const { nodes, edges } = flowToRf(doc);
     expect(nodes).toHaveLength(doc.nodes.length);
-    expect(edges).toHaveLength(doc.edges.length);
+    const controlEdges = edges.filter((e) => e.data?.edgeKind !== 'bind');
+    const bindEdges = edges.filter((e) => e.data?.edgeKind === 'bind');
+    expect(controlEdges).toHaveLength(doc.edges.length);
+    expect(bindEdges).toHaveLength(1);
+    expect(bindEdges[0]?.data?.bindPath).toBe('scan.overallScore');
+    expect(bindEdges[0]?.sourceHandle).toBe('out:scan.overallScore');
+    expect(bindEdges[0]?.targetHandle).toBe('bind:path');
 
     const scoreNode = nodes.find((n) => n.id === 'n-score')!;
     expect(scoreNode.data.flowNode.kind).toBe('compare');
@@ -43,6 +52,9 @@ describe('flowToRf / rfToDocument roundtrip', () => {
     const backFail = back.edges.find((e) => e.id === 'e-score-abandon')!;
     expect(backFail.when).toBe('fail');
     expect(backFail.edgeKind).toBe('otherwise');
+    const backBind = back.edges.find((e) => e.edgeKind === 'bind')!;
+    expect(backBind.bindPath).toBe('scan.overallScore');
+    expect(backBind.target).toBe('n-score');
   });
 
   it('roundtrips first-class journey nodes (start/action/success) for journey-quality', () => {
@@ -60,7 +72,7 @@ describe('flowToRf / rfToDocument roundtrip', () => {
 
     const back = rfToDocument(doc, nodes, edges);
     expect(back.nodes.map((n) => n.kind)).toEqual(doc.nodes.map((n) => n.kind));
-    expect(back.edges).toHaveLength(doc.edges.length);
+    expect(back.edges.filter((e) => e.edgeKind !== 'bind')).toHaveLength(doc.edges.length);
     // journeyFlow carried over from base doc (Save doesn't re-derive it — the run route does).
     expect(back.journeyFlow?.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'success']);
   });
@@ -110,6 +122,42 @@ describe('nextEdgeKindForSource', () => {
     const actionNode = newCollectionFlowNode('action', 'n-action');
     expect(nextEdgeKindForSource(actionNode, [], 'n-action', 'parallel')).toBe('parallel');
   });
+
+  it('returns bind for catalog out handles', () => {
+    const scan = newCollectionFlowNode('scan', 'n-scan');
+    expect(nextEdgeKindForSource(scan, [], 'n-scan', 'out:scan.overallScore')).toBe('bind');
+  });
+});
+
+describe('catalog bind ports', () => {
+  it('lists scan/domain/geo ports and validates bind connections', () => {
+    expect(catalogPortsForActionKind('scan').some((p) => p.path === 'scan.overallScore')).toBe(
+      true
+    );
+    expect(catalogPortsForActionKind('domain_scan')[0]?.handleId.startsWith('out:')).toBe(true);
+    expect(catalogPortsForActionKind('start')).toEqual([]);
+    expect(
+      isCatalogBindConnection('scan', 'out:scan.overallScore', 'compare', 'bind:path')
+    ).toBe(true);
+    expect(
+      isCatalogBindConnection('scan', 'out:geo.citedShare', 'compare', 'bind:path')
+    ).toBe(false);
+    expect(isCatalogBindConnection('scan', 'then', 'compare', 'in')).toBe(false);
+  });
+
+  it('syncBindEdgesForComparePath upserts and clears bind wires', () => {
+    const doc = createPageQualityTemplate('https://acme.test/');
+    const { nodes } = flowToRf(doc);
+    let edges: CollectionFlowRfEdge[] = [];
+    edges = syncBindEdgesForComparePath(edges, nodes, 'n-score', 'scan.overallScore');
+    expect(edges).toHaveLength(1);
+    expect(edges[0]?.data?.bindPath).toBe('scan.overallScore');
+    edges = syncBindEdgesForComparePath(edges, nodes, 'n-score', 'scan.issues.criticalCount');
+    expect(edges).toHaveLength(1);
+    expect(edges[0]?.data?.bindPath).toBe('scan.issues.criticalCount');
+    edges = syncBindEdgesForComparePath(edges, nodes, 'n-score', '');
+    expect(edges).toHaveLength(0);
+  });
 });
 
 describe('edgeKindLabel', () => {
@@ -118,6 +166,7 @@ describe('edgeKindLabel', () => {
     expect(edgeKindLabel('when')).toBe('wenn');
     expect(edgeKindLabel('otherwise')).toBe('sonst');
     expect(edgeKindLabel('parallel')).toBe('parallel');
+    expect(edgeKindLabel('bind')).toBe('bind');
   });
 });
 

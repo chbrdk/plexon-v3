@@ -127,7 +127,7 @@ export type CollectionFlowNode = {
   position?: { x: number; y: number };
 };
 
-export type CollectionFlowEdgeKind = 'then' | 'when' | 'otherwise' | 'parallel';
+export type CollectionFlowEdgeKind = 'then' | 'when' | 'otherwise' | 'parallel' | 'bind';
 
 export type CollectionFlowEdge = {
   id: string;
@@ -135,8 +135,10 @@ export type CollectionFlowEdge = {
   target: string;
   /** For quality gates: which branch this edge represents. */
   when?: 'pass' | 'fail';
-  /** Audion edge kind (Wave 5) — journey gates use `when`/`otherwise`, sequential steps `then`. */
+  /** Audion edge kind (Wave 5) — journey gates use `when`/`otherwise`, sequential steps `then`. Wave 10 adds authoring-only `bind`. */
   edgeKind?: CollectionFlowEdgeKind;
+  /** Catalog path for `bind` edges (Wave 10). Eval SoT remains `compare.path`. */
+  bindPath?: string;
   label?: string;
 };
 
@@ -787,6 +789,7 @@ export function extractJourneyFlowFromDocument(
   const ids = new Set(candidateNodes.map((n) => n.id));
   const edges = doc.edges
     .filter((e) => ids.has(e.source) && ids.has(e.target))
+    .filter((e) => (e.edgeKind ?? 'then') !== 'bind')
     .map((e) => ({
       id: e.id,
       from: e.source,

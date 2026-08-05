@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 9 Run Context + Compare (shipped)  
+**Status:** Wave 10 Catalog Port UX (shipped)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -89,7 +89,7 @@ Orchestration nodes only — start job → poll → signal → branch. Report ch
 |----------|------|
 | **Keep** | `scan` / `domain_scan` / `geo_job` as **actions**; Collection verdict + dossier deep links |
 | **Reshape** | Specialized gates → single `compare` over closed catalog paths (n8n-style field reuse) |
-| **Add** | `runContext` (typed node outputs) + `compare` node (Wave 9) |
+| **Add** | `runContext` (typed node outputs) + `compare` node (Wave 9); labeled catalog **ports** + `bind` wires (Wave 10) |
 | **Drop from authoring** | `score_gate`, `issue_gate`, `geo_gate` (palette); free JS/JSONPath expressions |
 | **Drop as nodes** | Result Overview, Share links, Reports, Settings, Saliency canvas — link from Run strip / Verdict only |
 
@@ -119,9 +119,13 @@ MVP may fold `hand_off` into sequential edges (implicit handoff when leaving a c
 
 ## Edge kinds
 
-Same as Audion V1: `then` | `when` | `otherwise` | `parallel`.
+Control (Audion V1 + walkable by runner): `then` | `when` | `otherwise` | `parallel`.
 
-## Compare + catalog paths (Wave 9)
+Authoring-only (Wave 10): **`bind`** — wires a closed catalog field from an action output port into `compare.path`. Runner **ignores** `bind` when walking the active path. Optional `bindPath` on the edge stores the catalog path (SoT for eval remains `compare.path`).
+
+## Catalog paths + ports (Waves 9–10)
+
+### Catalog paths (Wave 9)
 
 Actions write typed bundles into `lastRun.context.outputs` (also aliased by root: `scan`, `domain`, `geo`, `journey`, `run`).
 
@@ -135,6 +139,18 @@ Actions write typed bundles into `lastRun.context.outputs` (also aliased by root
 
 Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
 **Closed catalog paths only** — no free JS or JSONPath.
+
+### Catalog ports (Wave 10)
+
+n8n-like I/O without open expressions:
+
+| Side | Node | Ports |
+|------|------|--------|
+| **Out** | `scan` / `domain_scan` / `geo_job` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, …) |
+| **In** | `compare` | Control `in` + bind target `bind:path` (“path”) |
+| **Out** | `compare` | Control `when` / `otherwise` (unchanged) |
+
+Connecting `out:<catalogPath>` → `bind:path` sets `compare.path` and upserts a dashed `bind` edge (replaces any prior bind into that compare). Path `<select>` remains a fallback and keeps the bind edge in sync. Journey/`run` paths stay picker-only this wave (no output ports yet).
 
 ### Legacy gate → compare (on `ensureFlowDocument`)
 
@@ -253,7 +269,8 @@ Do not place this on legacy `/board` Prismion island.
 | **8A — Checkion quality catalog** | `scan.scanMode` single\|deep; `domain_scan`; `scoreKind` on `score_gate`; expanded `issue_gate` severity conditions; palette + RF/inspector + run BFF | Staging: deep page scan + domain crawl + dimension gate + serious_issues branch |
 | **8B — GEO nodes** | `geo_job` + `geo_gate` (`cited_share_*`, `geo_fitness_*`); v3 `/api/geo-jobs` client; deep link `/geo/:id/overview` | Staging: GEO-only or journey→geo→gate; strip opens GEO overview |
 | **9 — Run Context + Compare** | Typed `lastRun.context` catalog outputs; `compare` node; migrate/drop specialized gates from palette; inspector output tree | Staging: scan → compare `scan.scores.accessibility` + `scan.issues.criticalCount`; legacy docs auto-migrate |
-| **Later** | `set` aliases, array pickers, parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
+| **10 — Catalog Port UX** | Labeled action output ports + compare `bind:path`; `bind` edges (authoring); path↔wire sync; closed catalog only | Staging: drag `scan.overallScore` → compare path; dashed bind wire; run still uses `compare.path` |
+| **Later** | `set` aliases, array pickers, journey/`run` ports, parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -329,6 +346,15 @@ Do not place this on legacy `/board` Prismion island.
 - Verdict: `compareResults[]` + `qualityPassed` = AND of compares; legacy score/issue/geo flags kept as derived compat.
 - Inspector: Output tree for action nodes; compare shows path/actual/pass.
 - Helper: `lib/collection-flow-run-context.ts`.
+
+## Wave 10 implementation notes
+
+- Edge kind `bind` + optional `bindPath`; RF handles `out:<path>` → `bind:path`.
+- Action nodes (`scan`/`domain_scan`/`geo_job`): Outputs strip with one Handle per catalog leaf for that root; control `then` stays separate.
+- Compare: left control `in` + `bind:path`; path select remains; op/value literals only.
+- Board: `isValidConnection` / `onConnect` for bind (sets path, replaces prior bind); path change upserts bind to matching producer; bind delete clears path when matched.
+- Runner and journey extract skip `bind` edges.
+- Helper: `catalogPortsForActionKind` / `isCatalogBindConnection` in run-context + canvas.
 
 ## Open questions (non-blocking)
 
