@@ -5,7 +5,13 @@ import {
 } from '@/lib/collection-knowledge-pack-auth';
 import { getRequestUser } from '@/lib/auth-request-user';
 import {
+  COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
+  COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
+  COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
+  createJourneyQualityIssuesTemplate,
+  createJourneyQualityTemplate,
+  createPageQualityIssuesTemplate,
   createPageQualityTemplate,
 } from '@/lib/collection-test-flow';
 import {
@@ -22,6 +28,16 @@ function authError(code: 'unauthorized' | 'forbidden' | 'contract'): Response {
     return apiError('Invalid or missing X-Plexon-Contract-Version', API_STATUS.BAD_REQUEST);
   }
   return apiError('Forbidden', API_STATUS.FORBIDDEN);
+}
+
+function resolveCreateUrl(
+  body: Record<string, unknown> | null,
+  domain: string | null | undefined
+): string {
+  if (typeof body?.url === 'string' && body.url.trim()) return body.url.trim();
+  const d = domain?.trim();
+  if (!d) return '';
+  return d.startsWith('http') ? d : `https://${d}`;
 }
 
 export async function GET(
@@ -71,25 +87,42 @@ export async function POST(
     }
 
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    const rawTemplate =
+      typeof body?.templateId === 'string' ? body.templateId.trim() : COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY;
+    const templateId =
+      rawTemplate === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY ||
+      rawTemplate === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES ||
+      rawTemplate === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+        ? rawTemplate
+        : COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY;
+    const defaultName =
+      templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+        ? 'Journey + quality + issues'
+        : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
+          ? 'Page quality + issues'
+          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
+            ? 'Journey + quality'
+            : 'Page quality';
     const name =
       typeof body?.name === 'string' && body.name.trim()
         ? body.name.trim()
-        : 'Page quality';
-    const url =
-      typeof body?.url === 'string' && body.url.trim()
-        ? body.url.trim()
-        : project.domain?.trim()
-          ? project.domain.startsWith('http')
-            ? project.domain.trim()
-            : `https://${project.domain.trim()}`
-          : '';
+        : defaultName;
+    const url = resolveCreateUrl(body, project.domain);
 
-    const flow = createPageQualityTemplate(url);
+    const flow =
+      templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+        ? createJourneyQualityIssuesTemplate(url)
+        : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
+          ? createPageQualityIssuesTemplate(url)
+          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
+            ? createJourneyQualityTemplate(url)
+            : createPageQualityTemplate(url);
+
     const row = await createCollectionTestFlow({
       platformProjectId: id,
       name,
       flow,
-      templateId: COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
+      templateId,
       ownerId: user.id,
     });
 

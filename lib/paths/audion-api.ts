@@ -1,4 +1,4 @@
-import { getAudionAdminUrl, getAudionServiceApiUrl } from '@/lib/constants';
+import { getAudionAdminUrl, getAudionPlatformApiBase, getAudionServiceApiUrl } from '@/lib/constants';
 
 export function audionApiProjectsList(): string {
   const base = getAudionServiceApiUrl().replace(/\/+$/, '');
@@ -78,4 +78,29 @@ export function audionApiTargetGroupChunkSimilar(
   const base = getAudionServiceApiUrl().replace(/\/+$/, '');
   const params = new URLSearchParams({ limit: String(limit) });
   return `${base}/target-groups/${encodeURIComponent(targetGroupId)}/knowledge/chunks/${encodeURIComponent(chunkId)}/similar?${params}`;
+}
+
+/** AUDION Next.js BFF base (`getAudionPlatformApiBase`) — Studies / journey agent. */
+function audionPlatformBase(): string {
+  return getAudionPlatformApiBase().replace(/\/+$/, '');
+}
+
+/** POST /api/studies/from-flow */
+export function audionPlatformStudiesFromFlow(): string {
+  return `${audionPlatformBase()}/studies/from-flow`;
+}
+
+/** POST /api/studies/{studyId}/waves/{waveId}/start */
+export function audionPlatformStudyWaveStart(studyId: string, waveId: string): string {
+  return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}/start`;
+}
+
+/** POST /api/studies/{studyId}/waves/{waveId}/sync */
+export function audionPlatformStudyWaveSync(studyId: string, waveId: string): string {
+  return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}/sync`;
+}
+
+/** GET /api/ux-journey-agent/run/{jobId} */
+export function audionPlatformJourneyJob(jobId: string): string {
+  return `${audionPlatformBase()}/ux-journey-agent/run/${encodeURIComponent(jobId)}`;
 }

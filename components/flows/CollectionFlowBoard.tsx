@@ -15,9 +15,13 @@ import { Alert, Button, Spinner, Text } from '@msqdx/ui'
 import { FloatingPanel } from '@/lib/msqdx-ui'
 import {
   apiPlatformProjectFlowRun,
+  getAudionWebOrigin,
   pathPlatformProjectFlows,
 } from '@/lib/constants'
+import { buildAudionStudyUrl } from '@/lib/audion-admin-launch-url'
+import { pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import {
+  documentHasJourneySegment,
   nodeStatesFromVerdict,
   type CollectionFlowNodeRunState,
   type CollectionTestFlowDocument,
@@ -36,7 +40,8 @@ type Props = {
 
 function toRf(
   doc: CollectionTestFlowDocument,
-  states: Record<string, CollectionFlowNodeRunState>
+  states: Record<string, CollectionFlowNodeRunState>,
+  verdict?: CollectionVerdict | null
 ): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = doc.nodes.map((n) => ({
     id: n.id,
@@ -49,13 +54,37 @@ function toRf(
       runState: states[n.id] ?? 'idle',
     } satisfies CollectionFlowRfNodeData,
   }))
-  const edges: Edge[] = doc.edges.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-    label: e.label ?? e.when,
-    style: { stroke: 'var(--msqdx-border-strong, #666)' },
-  }))
+  const activeIssue =
+    verdict?.issueGateBranch === 'pass'
+      ? 'e-issues-ok'
+      : verdict?.issueGateBranch === 'fail'
+        ? 'e-issues-abandon'
+        : null
+  const activeScore =
+    verdict?.status === 'complete'
+      ? verdict.scorePassed
+        ? 'e-score-issues'
+        : 'e-score-abandon'
+      : null
+  const edges: Edge[] = doc.edges.map((e) => {
+    const taken =
+      e.id === activeIssue ||
+      (activeScore && e.id === activeScore) ||
+      (verdict?.scorePassed && e.id === 'e-score-ok' && !doc.nodes.some((n) => n.kind === 'issue_gate'))
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      label: e.label ?? e.when,
+      animated: Boolean(taken),
+      style: {
+        stroke: taken
+          ? 'var(--msqdx-accent, #c4a35a)'
+          : 'var(--msqdx-border-strong, #666)',
+        strokeWidth: taken ? 2 : 1,
+      },
+    }
+  })
   return { nodes, edges }
 }
 
@@ -65,18 +94,20 @@ function BoardInner({ platformProjectId, initial }: Props) {
     () => {
       const v = initial.flow.lastVerdict
       if (!v) return {}
-      return nodeStatesFromVerdict(initial.flow, v)
+      return nodeStatesFromVerdict(initial.flow, v, initial.flow.lastRun)
     }
   )
   const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { nodes, edges } = useMemo(
-    () => toRf(flow.flow, nodeStates),
-    [flow.flow, nodeStates]
-  )
-
+  const hasJourney = documentHasJourneySegment(flow.flow)
   const verdict: CollectionVerdict | null | undefined = flow.flow.lastVerdict
+  const lastRun = flow.flow.lastRun
+
+  const { nodes, edges } = useMemo(
+    () => toRf(flow.flow, nodeStates, verdict),
+    [flow.flow, nodeStates, verdict]
+  )
 
   const run = useCallback(async () => {
     setRunning(true)
@@ -84,7 +115,9 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setNodeStates((prev) => ({
       ...prev,
       'n-start': 'done',
-      'n-scan': 'running',
+      ...(hasJourney
+        ? { 'n-journey': 'running', 'n-scan': 'idle' }
+        : { 'n-scan': 'running' }),
       'n-score': 'idle',
       'n-ok': 'idle',
       'n-abandon': 'idle',
@@ -108,11 +141,21 @@ function BoardInner({ platformProjectId, initial }: Props) {
       if (json?.nodeStates) setNodeStates(json.nodeStates)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
-      setNodeStates((prev) => ({ ...prev, 'n-scan': 'error' }))
+      setNodeStates((prev) => ({
+        ...prev,
+        ...(hasJourney ? { 'n-journey': 'error' } : { 'n-scan': 'error' }),
+      }))
     } finally {
       setRunning(false)
     }
-  }, [flow.id, platformProjectId])
+  }, [flow.id, hasJourney, platformProjectId])
+
+  const studyHref =
+    lastRun?.audionStudyId != null
+      ? buildAudionStudyUrl(getAudionWebOrigin(), lastRun.audionStudyId)
+      : null
+  const scanHref = lastRun?.scanId ? pathCheckionScanResult(lastRun.scanId) : null
+  const issuesHref = lastRun?.scanId ? pathCheckionScanIssues(lastRun.scanId) : null
 
   return (
     <div className="plexon-flow-board">
@@ -178,14 +221,45 @@ function BoardInner({ platformProjectId, initial }: Props) {
         <div className="plexon-flow-strip">
           {error ? <Alert tone="error">{error}</Alert> : null}
           <Text role="meta" as="p">
-            {flow.flow.lastRun
-              ? `Last run · ${flow.flow.lastRun.status}` +
-                (flow.flow.lastRun.overallScore != null
-                  ? ` · score ${flow.flow.lastRun.overallScore}`
-                  : '') +
-                (flow.flow.lastRun.scanId ? ` · ${flow.flow.lastRun.scanId}` : '')
-              : 'Quality path: start → scan → score_gate → terminal'}
+            {lastRun
+              ? [
+                  `Last run · ${lastRun.status}`,
+                  lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
+                  lastRun.issueGateBranch
+                    ? `issueGate ${lastRun.issueGateBranch}`
+                    : null,
+                  lastRun.criticalCount != null
+                    ? `${lastRun.criticalCount} critical`
+                    : null,
+                  lastRun.audionJobId ? `job ${lastRun.audionJobId}` : null,
+                  lastRun.scanId ? `scan ${lastRun.scanId}` : null,
+                  lastRun.stepUrl ? `step ${lastRun.stepUrl}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
+              : hasJourney
+                ? 'Journey + quality: start → journey → scan → gates'
+                : 'Quality path: start → scan → score_gate → terminal'}
           </Text>
+          {(studyHref || scanHref || issuesHref) && (
+            <div className="plexon-flow-strip-links">
+              {studyHref ? (
+                <a href={studyHref} target="_blank" rel="noreferrer">
+                  Open in AUDION
+                </a>
+              ) : null}
+              {scanHref ? (
+                <a href={scanHref} target="_blank" rel="noreferrer">
+                  Open CHECKION scan
+                </a>
+              ) : null}
+              {issuesHref ? (
+                <a href={issuesHref} target="_blank" rel="noreferrer">
+                  Open Issues dossier
+                </a>
+              ) : null}
+            </div>
+          )}
         </div>
       </FloatingPanel>
 

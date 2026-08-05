@@ -18,7 +18,7 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
           Noch kein Lauf
         </Text>
         <Text role="body" as="p">
-          Mit Testen den Quality-Pfad starten.
+          Mit Testen den Flow starten.
         </Text>
       </div>
     )
@@ -41,14 +41,30 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
         <li data-ok={verdict.flowCompleted ? 'true' : 'false'}>
           flowCompleted: {String(verdict.flowCompleted)}
         </li>
-        <li data-ok={verdict.pageEvidenceValid ? 'true' : 'false'}>
-          pageEvidenceValid: {String(verdict.pageEvidenceValid)}
+        {verdict.hasJourneySegment ? (
+          <li data-ok={verdict.taskCompleted ? 'true' : 'false'}>
+            taskCompleted: {String(verdict.taskCompleted)}
+          </li>
+        ) : null}
+        <li data-ok={verdict.validEvidence ? 'true' : 'false'}>
+          validEvidence: {String(verdict.validEvidence)}
         </li>
-        <li data-ok={verdict.qualityPassed ? 'true' : 'false'}>
-          qualityPassed: {String(verdict.qualityPassed)}
+        <li data-ok={verdict.scorePassed ? 'true' : 'false'}>
+          scorePassed: {String(verdict.scorePassed)}
           {verdict.overallScore != null
             ? ` (score ${verdict.overallScore} / ≥${verdict.threshold})`
             : ''}
+        </li>
+        {verdict.hasIssueGate ? (
+          <li data-ok={verdict.issueGatePassed ? 'true' : 'false'}>
+            issueGate: {verdict.issueGateBranch ?? '—'}
+            {verdict.criticalCount != null
+              ? ` · ${verdict.criticalCount} critical / ${verdict.issueCount ?? 0} issues`
+              : ''}
+          </li>
+        ) : null}
+        <li data-ok={verdict.qualityPassed ? 'true' : 'false'}>
+          qualityPassed: {String(verdict.qualityPassed)}
         </li>
         <li data-ok={verdict.collectionReady ? 'true' : 'false'}>
           collectionReady: {String(verdict.collectionReady)}

@@ -14,6 +14,7 @@ import {
   checkionApiToolsContrast,
   pathCheckionDomainResult,
   pathCheckionDomainScan,
+  pathCheckionScanIssues,
   pathCheckionScanResult,
 } from '@/lib/paths/checkion-api';
 
@@ -40,6 +41,7 @@ describe('checkion-api paths', () => {
   it('builds catalog deep-links', () => {
     expect(pathCheckionDomainResult('dom-1')).toMatch(/\/domain\/dom-1$/);
     expect(pathCheckionScanResult('scan-1')).toMatch(/\/results\/scan-1$/);
+    expect(pathCheckionScanIssues('scan-1')).toMatch(/\/results\/scan-1\/issues$/);
   });
 
   it('builds project assign endpoints', () => {

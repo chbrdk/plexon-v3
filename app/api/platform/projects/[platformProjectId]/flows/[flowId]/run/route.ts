@@ -3,11 +3,19 @@ import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { getRequestUser } from '@/lib/auth-request-user';
 import {
   deriveCollectionVerdict,
+  deriveJourneyErrorVerdict,
+  documentHasIssueGate,
+  documentHasJourneySegment,
   ensureFlowDocument,
+  issueGateNode,
   nodeStatesFromVerdict,
+  resolveJourneyFlowForRun,
   scanNodeUrl,
   scoreGateThreshold,
+  startNodeUrl,
   type CollectionFlowLastRun,
+  type CollectionVerdict,
+  type IssueGateSignals,
 } from '@/lib/collection-test-flow';
 import {
   getCollectionTestFlow,
@@ -16,7 +24,11 @@ import {
 } from '@/lib/db/collection-test-flows';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
-import { runCheckionSingleScan } from '@/lib/integrations/checkion-scans-client';
+import { runAudionJourneySegment } from '@/lib/integrations/audion-journey-client';
+import {
+  fetchCheckionScanIssues,
+  runCheckionSingleScan,
+} from '@/lib/integrations/checkion-scans-client';
 import { platformJson } from '@/lib/platform-contract';
 
 export const runtime = 'nodejs';
@@ -51,8 +63,9 @@ export async function POST(
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const urlOverride =
       typeof body.url === 'string' && body.url.trim() ? body.url.trim() : null;
-    const url = urlOverride ?? scanNodeUrl(doc.nodes);
-    if (!url) {
+    const baseUrl =
+      urlOverride ?? scanNodeUrl(doc.nodes) ?? startNodeUrl(doc.nodes);
+    if (!baseUrl) {
       return apiError('Scan URL missing — set domain or pass url', API_STATUS.BAD_REQUEST);
     }
 
@@ -64,43 +77,130 @@ export async function POST(
       );
     }
 
+    const hasJourney = documentHasJourneySegment(doc);
     const startedAt = new Date().toISOString();
     const threshold = scoreGateThreshold(doc.nodes);
+
+    let audionJobId: string | null = null;
+    let audionStudyId: string | null = null;
+    let audionWaveId: string | null = null;
+    let stepUrl: string | null = null;
+    let scanUrl = baseUrl;
+    let taskCompleted = !hasJourney;
+    let journeyValidEvidence = !hasJourney;
+
+    if (hasJourney) {
+      const audionProjectId = await getExternalProjectId(id, 'audion');
+      if (!audionProjectId) {
+        return apiError(
+          'AUDION binding missing — bind an Audion project on this Collection',
+          API_STATUS.BAD_REQUEST
+        );
+      }
+
+      const journeyFlow = resolveJourneyFlowForRun(doc, baseUrl);
+      if (!journeyFlow) {
+        return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
+      }
+
+      const journey = await runAudionJourneySegment({
+        projectId: audionProjectId,
+        flow: journeyFlow,
+        name: `${row.name} · journey`,
+      });
+
+      if (!journey.ok) {
+        audionStudyId = journey.studyId ?? null;
+        audionWaveId = journey.waveId ?? null;
+        audionJobId = journey.jobId ?? null;
+        if (journey.job) {
+          taskCompleted = journey.job.taskCompleted;
+          journeyValidEvidence = journey.job.validEvidence;
+          stepUrl = journey.job.finalUrl;
+        }
+        const verdict = deriveJourneyErrorVerdict({
+          error: journey.error,
+          threshold,
+        });
+        const lastRun: CollectionFlowLastRun = {
+          startedAt,
+          completedAt: new Date().toISOString(),
+          scanId: null,
+          url: baseUrl,
+          status: 'error',
+          overallScore: null,
+          error: journey.error,
+          audionJobId,
+          audionStudyId,
+          audionWaveId,
+          stepUrl,
+        };
+        const saved = await persistFlowRunResult({
+          platformProjectId: id,
+          flowId: fid,
+          verdict,
+          lastRun,
+        });
+        return platformJson({
+          flow: saved ? toCollectionTestFlowResponse(saved) : null,
+          verdict,
+          lastRun,
+          nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
+        });
+      }
+
+      audionStudyId = journey.studyId;
+      audionWaveId = journey.waveId;
+      audionJobId = journey.jobId;
+      taskCompleted = journey.job.taskCompleted;
+      journeyValidEvidence = journey.job.validEvidence;
+      stepUrl = journey.job.finalUrl;
+      if (journey.job.finalUrl) scanUrl = journey.job.finalUrl;
+    }
+
     const scanResult = await runCheckionSingleScan({
       projectId: checkionProjectId,
-      url,
+      url: scanUrl,
       platformProjectId: id,
+      audionRunId: audionJobId,
+      stepUrl: stepUrl ?? scanUrl,
     });
 
     const blockers: string[] = [];
     if (!scanResult.ok) {
       blockers.push(scanResult.error);
       const partial = scanResult.scan;
-      const verdict = deriveCollectionVerdict({
+      const verdictBase = deriveCollectionVerdict({
         scanStatus: partial?.status ?? 'failed',
         overallScore: partial?.overallScore ?? null,
         threshold,
         blockers,
+        hasJourneySegment: hasJourney,
+        taskCompleted,
+        journeyValidEvidence,
       });
-      const lastRun: CollectionFlowLastRun = {
-        startedAt,
-        completedAt: new Date().toISOString(),
-        scanId: partial?.id ?? null,
-        url,
-        status: partial?.status ?? 'error',
-        overallScore: partial?.overallScore ?? null,
-        error: scanResult.error,
-      };
-      // Force error status when client failed before/during poll
-      const errorVerdict = {
-        ...verdict,
-        status: 'error' as const,
+      const errorVerdict: CollectionVerdict = {
+        ...verdictBase,
+        status: 'error',
         flowCompleted: false,
         collectionReady: false,
         pageEvidenceValid: false,
         pageEvidenceCaveat: scanResult.error,
         summary: `Fehler — ${scanResult.error}`,
         blockers,
+      };
+      const lastRun: CollectionFlowLastRun = {
+        startedAt,
+        completedAt: new Date().toISOString(),
+        scanId: partial?.id ?? null,
+        url: scanUrl,
+        status: partial?.status ?? 'error',
+        overallScore: partial?.overallScore ?? null,
+        error: scanResult.error,
+        audionJobId,
+        audionStudyId,
+        audionWaveId,
+        stepUrl: stepUrl ?? scanUrl,
       };
       const saved = await persistFlowRunResult({
         platformProjectId: id,
@@ -112,28 +212,52 @@ export async function POST(
         flow: saved ? toCollectionTestFlowResponse(saved) : null,
         verdict: errorVerdict,
         lastRun,
-        nodeStates: nodeStatesFromVerdict(doc, errorVerdict),
+        nodeStates: nodeStatesFromVerdict(doc, errorVerdict, lastRun),
       });
     }
 
     const scan = scanResult.scan;
     if (scan.error) blockers.push(scan.error);
 
+    const hasIssues = documentHasIssueGate(doc);
+    const gate = issueGateNode(doc.nodes);
+    let issueSignals: IssueGateSignals | null = null;
+    if (hasIssues && scan.id) {
+      const issuesRes = await fetchCheckionScanIssues(scan.id);
+      if (!issuesRes.ok) {
+        blockers.push(issuesRes.error);
+      } else {
+        issueSignals = issuesRes.signals;
+      }
+    }
+
     const verdict = deriveCollectionVerdict({
       scanStatus: scan.status,
       overallScore: scan.overallScore,
       threshold,
       blockers,
+      hasJourneySegment: hasJourney,
+      taskCompleted,
+      journeyValidEvidence,
+      issueGate: gate,
+      issueSignals,
     });
 
     const lastRun: CollectionFlowLastRun = {
       startedAt,
       completedAt: new Date().toISOString(),
       scanId: scan.id,
-      url: scan.url || url,
+      url: scan.url || scanUrl,
       status: scan.status,
       overallScore: scan.overallScore,
       error: scan.error ?? null,
+      audionJobId,
+      audionStudyId,
+      audionWaveId,
+      stepUrl: stepUrl ?? scan.url ?? scanUrl,
+      issueCount: issueSignals?.issueCount ?? null,
+      criticalCount: issueSignals?.criticalCount ?? null,
+      issueGateBranch: verdict.issueGateBranch,
     };
 
     const saved = await persistFlowRunResult({
@@ -147,7 +271,7 @@ export async function POST(
       flow: saved ? toCollectionTestFlowResponse(saved) : null,
       verdict,
       lastRun,
-      nodeStates: nodeStatesFromVerdict(doc, verdict),
+      nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
     });
   } catch (e) {
     return handleApiError(e, { context: 'collection flow run POST' });

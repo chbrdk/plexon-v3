@@ -19,6 +19,11 @@ export function pathCheckionScanResult(scanId: string): string {
   return `${base}/results/${encodeURIComponent(scanId)}`;
 }
 
+/** CHECKION Issues dossier (report surface). */
+export function pathCheckionScanIssues(scanId: string): string {
+  return `${pathCheckionScanResult(scanId)}/issues`;
+}
+
 /** Domain scan magazine detail — `CHECKION/app/domain/[id]/…`. */
 export function pathCheckionDomainResult(domainScanId: string): string {
   const base = getCheckionUrl().replace(/\/+$/, '');
@@ -51,6 +56,11 @@ export function checkionApiScans(): string {
 /** GET /api/scans/:id */
 export function checkionApiScanDetail(scanId: string): string {
   return `${checkionApiScans()}/${encodeURIComponent(scanId)}`;
+}
+
+/** GET /api/scans/:id/issues */
+export function checkionApiScanIssues(scanId: string): string {
+  return `${checkionApiScanDetail(scanId)}/issues`;
 }
 
 export function checkionApiScanProject(scanId: string): string {

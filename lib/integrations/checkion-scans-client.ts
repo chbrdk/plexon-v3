@@ -1,11 +1,16 @@
 /**
  * CHECKION single-page scans via contracts `/api/scans` (not legacy `/api/scan`).
- * Spec: collection-test-flow.md Wave 1
+ * Spec: collection-test-flow.md Wave 1–3
  */
 
 import { resolveCheckionServiceAuth } from '@/lib/integrations/checkion-connectivity';
 import { pollUntil } from '@/lib/assistant/poll-until';
-import { checkionApiScanDetail, checkionApiScans } from '@/lib/paths/checkion-api';
+import {
+  checkionApiScanDetail,
+  checkionApiScanIssues,
+  checkionApiScans,
+} from '@/lib/paths/checkion-api';
+import type { IssueGateSignals } from '@/lib/collection-test-flow';
 
 export type CheckionScanSummary = {
   id: string;
@@ -62,6 +67,8 @@ export async function startCheckionSingleScan(input: {
   projectId: string;
   url: string;
   platformProjectId?: string | null;
+  audionRunId?: string | null;
+  stepUrl?: string | null;
   waitForCompletion?: boolean;
 }): Promise<StartSingleScanResult> {
   const auth = requireAuthHeaders();
@@ -84,6 +91,8 @@ export async function startCheckionSingleScan(input: {
         ...(input.platformProjectId
           ? { platformProjectId: input.platformProjectId }
           : {}),
+        ...(input.audionRunId ? { audionRunId: input.audionRunId } : {}),
+        ...(input.stepUrl ? { stepUrl: input.stepUrl } : {}),
       }),
       cache: 'no-store',
     });
@@ -168,6 +177,8 @@ export async function runCheckionSingleScan(input: {
   projectId: string;
   url: string;
   platformProjectId?: string | null;
+  audionRunId?: string | null;
+  stepUrl?: string | null;
 }): Promise<
   | { ok: true; scan: CheckionScanSummary }
   | { ok: false; error: string; scan?: CheckionScanSummary }
@@ -176,6 +187,8 @@ export async function runCheckionSingleScan(input: {
     projectId: input.projectId,
     url: input.url,
     platformProjectId: input.platformProjectId,
+    audionRunId: input.audionRunId,
+    stepUrl: input.stepUrl,
     waitForCompletion: false,
   });
   if (!started.ok) return started;
@@ -189,4 +202,67 @@ export async function runCheckionSingleScan(input: {
     return { ok: false, error: polled.error, scan: started.scan };
   }
   return { ok: true, scan: polled.value };
+}
+
+export type CheckionIssueItem = {
+  id: string;
+  severity: string;
+  ruleId: string;
+  title?: string;
+};
+
+export async function fetchCheckionScanIssues(
+  scanId: string
+): Promise<
+  | { ok: true; items: CheckionIssueItem[]; signals: IssueGateSignals }
+  | { ok: false; error: string }
+> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return { ok: false, error: auth.error };
+
+  try {
+    const res = await fetch(checkionApiScanIssues(scanId), {
+      headers: auth.headers,
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `CHECKION scan issues: HTTP ${res.status}` };
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: 'CHECKION scan issues: ungültiges JSON' };
+    }
+    const rawItems = Array.isArray(json)
+      ? json
+      : json && typeof json === 'object' && Array.isArray((json as { items?: unknown }).items)
+        ? (json as { items: unknown[] }).items
+        : [];
+    const items: CheckionIssueItem[] = [];
+    for (const row of rawItems) {
+      if (!row || typeof row !== 'object') continue;
+      const o = row as Record<string, unknown>;
+      const id = typeof o.id === 'string' ? o.id : null;
+      const severity = typeof o.severity === 'string' ? o.severity : 'minor';
+      const ruleId = typeof o.ruleId === 'string' ? o.ruleId : '';
+      if (!id) continue;
+      items.push({
+        id,
+        severity,
+        ruleId,
+        title: typeof o.title === 'string' ? o.title : undefined,
+      });
+    }
+    const criticalCount = items.filter((i) => i.severity === 'critical').length;
+    const signals: IssueGateSignals = {
+      criticalCount,
+      issueCount: items.length,
+      ruleIds: items.map((i) => i.ruleId).filter(Boolean),
+    };
+    return { ok: true, items, signals };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
 }

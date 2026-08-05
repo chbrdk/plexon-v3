@@ -25,6 +25,15 @@
   - Table: `collection_test_flows` (Drizzle `lib/db/schema.ts` · migration `0005_collection_test_flows.sql` · `pnpm db:push`)
   - CHECKION client: `lib/integrations/checkion-scans-client.ts` → `POST {CHECKION_API}/api/scans` `mode=single` + poll detail (`checkionApiScans` / `checkionApiScanDetail`)
   - Smoke: `knowledge/collection-test-flow-smoke.md`
+- Collection Test Flow Wave 2 (journey embed):
+  - Template `journey-quality` + embedded `journeyFlow`; client `lib/integrations/audion-journey-client.ts`
+  - Audion platform paths: `audionPlatformStudiesFromFlow` / wave start+sync / `audionPlatformJourneyJob` via `getAudionPlatformApiBase()`
+  - Correlation: Checkion scan body `audionRunId` + `stepUrl` (+ `platformProjectId`)
+  - Requires AUDION + CHECKION bindings and `AUDION_API_TOKEN` for full run
+- Collection Test Flow Wave 3 (issue gates):
+  - Templates `page-quality-issues` / `journey-quality-issues` with `issue_gate` (`critical_issues` default)
+  - `GET /api/scans/:id/issues` via `checkionApiScanIssues` / `fetchCheckionScanIssues`
+  - Dossier: `pathCheckionScanIssues(scanId)` → `/results/{id}/issues`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
 - Knowledge Pack routes (Phase 1 shipped):

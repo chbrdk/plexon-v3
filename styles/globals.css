@@ -2788,3 +2788,22 @@ main {
   text-decoration: none;
   color: inherit;
 }
+
+.plexon-flow-gallery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.plexon-flow-strip-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.plexon-flow-strip-links a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

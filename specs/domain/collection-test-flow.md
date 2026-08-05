@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 1 quality path implemented (2026-08-05) — journey embed Wave 2  
+**Status:** Wave 3 issue gates implemented (2026-08-05) — Study rollup Wave 4  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -207,8 +207,8 @@ Do not place this on legacy `/board` Prismion island.
 |------|-------------|---------------|
 | **0 — Spec** (this doc) | Domain contract + node/gate sets + ownership | Merged; linked from `collection-projects.md` + `paths.md` |
 | **1 — MVP quality path** | Persist Collection flow; Board UI shell; quality path only: `start` → `scan` → `score_gate` → `quality_ok` / `abandon`; CHECKION `POST /api/scans` `mode=single` + poll `overallScore`; Collection verdict on flow jsonb | Staging smoke: `/projects/{id}/flows` + run against Collection with Checkion binding; `collectionReady` explained |
-| **2 — Journey embed** | Import / embed Audion `UxTestFlow` subgraph; handoff URL → auto `scan`; correlation ids end-to-end | Same URL tracked in Audion steps + Checkion scan |
-| **3 — Issue gates + dossier link** | `issue_gate` / `critical_issues`; deep link to Issues report surface | Gate branch visible on Board |
+| **2 — Journey embed** | Template `journey-quality`: Collection `journey` node + embedded Audion `journeyFlow`; Study/Wave `from-flow` → start → poll; handoff `finalUrl` → CHECKION scan with `platformProjectId` / `audionRunId` / `stepUrl`; verdict adds `taskCompleted` / `validEvidence` | Staging smoke: same URL in Audion job + Checkion scan correlation |
+| **3 — Issue gates + dossier link** | Template `page-quality-issues` (+ journey variant): `issue_gate` with `critical_issues` / `no_critical_issues`; fetch `GET /api/scans/:id/issues`; branch on Board; deep link `/results/:id/issues` | Staging: gate branch visible; dossier link opens CHECKION Issues |
 | **4 — Study rollup** | Push Collection verdict into Audion wave evaluate / Soft-Q notes; optional Knowledge Pack distillate | Evaluate shows cross-product evidence rates |
 | **Later** | Parallel multi-page, GEO nodes, Brandion, multi-user live | Out of MVP |
 
@@ -221,12 +221,26 @@ Do not place this on legacy `/board` Prismion island.
 
 ## Wave 1 implementation notes
 
-- **Quality path only** — Audion journey agent embed waits for Wave 2.
+- **Quality path only** — template `page-quality`; Audion journey agent embed is Wave 2.
 - Canonical score: CHECKION `ScanSummary.overallScore` (0–100); gate `score_at_least` default threshold **70**.
 - Routes: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` · BFF under `/api/platform/projects/:id/flows…`.
 - Auth: same session/ACL as Collection Knowledge Pack APIs.
 
+## Wave 2 implementation notes
+
+- Template **`journey-quality`**: board `start` → `journey` → `scan` → `score_gate` → terminals; jsonb embeds Audion-shaped `journeyFlow` (minimal `start`→`action`→`success`).
+- Journey via Audion **Study/Wave** (`POST /api/studies/from-flow` → wave start → poll `/api/ux-journey-agent/run/{jobId}` → optional sync). Bearer `AUDION_API_TOKEN` against platform API base — not `X-Service-Secret`.
+- Scan URL = journey `finalUrl` (else start/scan node URL). Correlation on CHECKION POST: `platformProjectId`, `audionRunId` (= jobId), `stepUrl`.
+- `collectionReady` with journey = `taskCompleted` ∧ `validEvidence` ∧ `qualityPassed`; quality-only still treats task as satisfied.
+
+## Wave 3 implementation notes
+
+- Node `issue_gate` after `score_gate` on templates `page-quality-issues` / `journey-quality-issues`.
+- Default condition `critical_issues` with `minCount: 1` — quality pass when critical count &lt; minCount; `no_critical_issues` when count === 0.
+- Issues via `GET {CHECKION}/api/scans/:id/issues` (`checkionApiScanIssues`); severity `critical` only (contracts `IssueSeverity`).
+- `qualityPassed` = score gate ∧ issue gate (when present). Dossier UI: `pathCheckionScanIssues(scanId)` → `/results/{id}/issues`.
+- `lastRun` / verdict expose `criticalCount`, `issueCount`, `issueGateBranch` (`pass`|`fail`).
+
 ## Open questions (non-blocking)
 
-- Whether Wave 2 journey segment calls Audion agent **directly** from Plexon BFF vs creating an Audion Study/Wave row first (prefer Wave row for evidence parity with Phase 7).
-- Lens-specific scores beyond `overallScore` (issue gates / dossier) — Wave 3.
+- `issue_rule_match` pattern gates — later refinement of Wave 3 if needed.
