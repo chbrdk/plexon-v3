@@ -37,7 +37,7 @@ export function CollectionFlowFloatingPanel({
       ariaLabel={ariaLabel}
       variant={variant}
       surface="solid"
-      className={['plexon-flow-float-panel', className].filter(Boolean).join(' ')}
+      className={['msqdx-flow-float-panel', className].filter(Boolean).join(' ')}
     >
       {children}
     </FloatingPanel>

@@ -2,7 +2,7 @@
 
 import { memo, useCallback, type ChangeEvent, type MouseEvent } from 'react'
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react'
-import { Button, Input, Textarea } from '@msqdx/ui'
+import { Button, FlowNodeCard, Input, Textarea } from '@msqdx/ui'
 import type {
   AudionGateCondition,
   CollectionFlowGateCondition,
@@ -97,35 +97,99 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     Boolean(runOutput?.text || runOutput?.imageUrl || runOutput?.label) &&
     (runState === 'active' || runState === 'done' || runState === 'error')
 
+  const targetHandle = (
+    <Handle type="target" position={Position.Left} id="in" className="msqdx-flow-rf-handle" />
+  )
+
+  const sourceHandles =
+    isJourneyGate || isQualityGate ? (
+      <>
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="when"
+          className="msqdx-flow-rf-handle msqdx-flow-rf-handle--when"
+          style={{ top: '38%' }}
+          title={isQualityGate ? 'pass' : 'wenn'}
+        />
+        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--when">
+          {isQualityGate ? 'pass' : 'wenn'}
+        </span>
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="otherwise"
+          className="msqdx-flow-rf-handle msqdx-flow-rf-handle--otherwise"
+          style={{ top: '72%' }}
+          title={isQualityGate ? 'fail' : 'sonst'}
+        />
+        <span className="msqdx-flow-rf-port-label msqdx-flow-rf-port-label--otherwise">
+          {isQualityGate ? 'fail' : 'sonst'}
+        </span>
+      </>
+    ) : (
+      <Handle type="source" position={Position.Right} id="then" className="msqdx-flow-rf-handle" />
+    )
+
+  const output = showOutput ? (
+    <>
+      <p className="msqdx-flow-rf-output-label">
+        Output
+        {runOutput?.step != null ? ` · #${runOutput.step}` : ''}
+      </p>
+      {runOutput?.label ? (
+        <p className="msqdx-flow-rf-output-headline">{runOutput.label}</p>
+      ) : null}
+      {runOutput?.text ? <pre className="msqdx-flow-rf-output-text">{runOutput.text}</pre> : null}
+      {runOutput?.text && onOutputToNote ? (
+        <Button type="button" size="sm" variant="ghost" onClick={() => onOutputToNote()}>
+          In Note übernehmen
+        </Button>
+      ) : null}
+      {runOutput?.imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          className="msqdx-flow-rf-output-img"
+          src={runOutput.imageUrl}
+          alt={runOutput.label ? `Screenshot: ${runOutput.label}` : 'Step screenshot'}
+        />
+      ) : null}
+    </>
+  ) : undefined
+
+  const footer =
+    isJourneyGate && runBusy && onManualGate ? (
+      <div className="msqdx-flow-rf-gate-actions nodrag nopan" onMouseDown={stopDrag}>
+        <Button type="button" size="sm" variant="subtle" onClick={() => onManualGate('when')}>
+          Wenn → Agent
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => onManualGate('otherwise')}>
+          Sonst → Agent
+        </Button>
+      </div>
+    ) : undefined
+
   return (
-    <div
-      className={`plexon-flow-rf-node plexon-flow-rf-node--${kind} plexon-flow-rf-node--run-${runState}${showOutput ? ' has-output' : ''}${selected ? ' is-selected' : ''}`}
+    <FlowNodeCard
+      kind={kind}
+      kindLabel={KIND_LABEL[kind] ?? kind}
+      nodeId={id}
+      selected={selected}
+      runState={runState}
+      hasOutput={showOutput}
+      targetHandle={targetHandle}
+      sourceHandles={sourceHandles}
+      output={output}
+      footer={footer}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="in"
-        className="plexon-flow-rf-handle"
-      />
-
-      <header className="plexon-flow-rf-node-head">
-        <span className="plexon-flow-rf-node-kind">{KIND_LABEL[kind] ?? kind}</span>
-        <span className="plexon-flow-rf-node-run" data-run={runState}>
-          {runState === 'idle' ? '' : runState}
-        </span>
-        <span className="plexon-flow-rf-node-id" title={id}>
-          {id}
-        </span>
-      </header>
-
-      <div className="plexon-flow-rf-node-body nodrag nopan" onMouseDown={stopDrag}>
-        <label className="plexon-flow-rf-field">
+      <div className="nodrag nopan" onMouseDown={stopDrag}>
+        <label className="msqdx-flow-rf-field">
           <span>Name</span>
           <Input block size="sm" value={flowNode.label} onChange={onLabel} placeholder="Node name" />
         </label>
 
         {kind === 'start' ? (
-          <label className="plexon-flow-rf-field">
+          <label className="msqdx-flow-rf-field">
             <span>urlKey</span>
             <Input
               block
@@ -138,7 +202,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         ) : null}
 
         {kind === 'scan' ? (
-          <label className="plexon-flow-rf-field">
+          <label className="msqdx-flow-rf-field">
             <span>URL</span>
             <Input
               block
@@ -152,10 +216,10 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
 
         {isJourneyGate ? (
           <>
-            <label className="plexon-flow-rf-field">
+            <label className="msqdx-flow-rf-field">
               <span>Condition</span>
               <select
-                className="plexon-flow-rf-select"
+                className="msqdx-flow-rf-select"
                 value={(flowNode.gateCondition as string) ?? 'goal_reached'}
                 onChange={onJourneyGateCondition}
               >
@@ -167,36 +231,26 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
               </select>
             </label>
             {(flowNode.gateCondition === 'url_match' || flowNode.gateCondition === 'title_match') && (
-              <label className="plexon-flow-rf-field">
+              <label className="msqdx-flow-rf-field">
                 <span>pattern</span>
                 <Input block size="sm" value={flowNode.pattern ?? ''} onChange={onPattern} placeholder="regex" />
               </label>
             )}
             {gateEvaluation ? (
-              <p className="plexon-flow-rf-gate-evidence">
+              <p className="msqdx-flow-rf-gate-evidence">
                 Live: {gateEvaluation.matched ? 'match' : '—'}
                 {gateEvaluation.evidence ? ` · ${gateEvaluation.evidence}` : ''}
               </p>
-            ) : null}
-            {runBusy && onManualGate ? (
-              <div className="plexon-flow-rf-gate-actions nodrag nopan" onMouseDown={stopDrag}>
-                <Button type="button" size="sm" variant="subtle" onClick={() => onManualGate('when')}>
-                  Wenn → Agent
-                </Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => onManualGate('otherwise')}>
-                  Sonst → Agent
-                </Button>
-              </div>
             ) : null}
           </>
         ) : null}
 
         {kind === 'score_gate' ? (
-          <label className="plexon-flow-rf-field plexon-flow-rf-field--inline">
+          <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
             <span>Threshold</span>
             <Input
               size="sm"
-              className="plexon-flow-rf-input--narrow"
+              className="msqdx-flow-rf-input--narrow"
               type="number"
               min={0}
               max={100}
@@ -208,10 +262,10 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
 
         {kind === 'issue_gate' ? (
           <>
-            <label className="plexon-flow-rf-field">
+            <label className="msqdx-flow-rf-field">
               <span>Condition</span>
               <select
-                className="plexon-flow-rf-select"
+                className="msqdx-flow-rf-select"
                 value={(flowNode.gateCondition as string) ?? 'critical_issues'}
                 onChange={onIssueGateCondition}
               >
@@ -223,16 +277,16 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
               </select>
             </label>
             {flowNode.gateCondition === 'issue_rule_match' ? (
-              <label className="plexon-flow-rf-field">
+              <label className="msqdx-flow-rf-field">
                 <span>pattern</span>
                 <Input block size="sm" value={flowNode.pattern ?? ''} onChange={onPattern} placeholder="ruleId regex" />
               </label>
             ) : (
-              <label className="plexon-flow-rf-field plexon-flow-rf-field--inline">
+              <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
                 <span>Min count</span>
                 <Input
                   size="sm"
-                  className="plexon-flow-rf-input--narrow"
+                  className="msqdx-flow-rf-input--narrow"
                   type="number"
                   min={1}
                   value={flowNode.minCount ?? 1}
@@ -244,11 +298,11 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         ) : null}
 
         {kind === 'observe' ? (
-          <label className="plexon-flow-rf-field plexon-flow-rf-field--inline">
+          <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
             <span>Sekunden</span>
             <Input
               size="sm"
-              className="plexon-flow-rf-input--narrow"
+              className="msqdx-flow-rf-input--narrow"
               type="number"
               min={1}
               value={flowNode.observeSeconds ?? 30}
@@ -258,7 +312,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         ) : null}
 
         {showText ? (
-          <label className="plexon-flow-rf-field">
+          <label className="msqdx-flow-rf-field">
             <span>{kind === 'measure' ? 'Frage' : 'Text'}</span>
             <Textarea
               block
@@ -271,12 +325,12 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
           </label>
         ) : null}
 
-        <label className="plexon-flow-rf-field">
+        <label className="msqdx-flow-rf-field">
           <span>Note</span>
           <Textarea
             block
             size="sm"
-            className="plexon-flow-rf-textarea--note"
+            className="msqdx-flow-rf-textarea--note"
             rows={2}
             value={flowNode.note ?? ''}
             onChange={onNote}
@@ -284,61 +338,8 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
             placeholder="Annotation / Beobachtung…"
           />
         </label>
-
-        {showOutput ? (
-          <div className="plexon-flow-rf-output">
-            <p className="plexon-flow-rf-output-label">
-              Output
-              {runOutput?.step != null ? ` · #${runOutput.step}` : ''}
-            </p>
-            {runOutput?.label ? <p className="plexon-flow-rf-output-headline">{runOutput.label}</p> : null}
-            {runOutput?.text ? <pre className="plexon-flow-rf-output-text">{runOutput.text}</pre> : null}
-            {runOutput?.text && onOutputToNote ? (
-              <Button type="button" size="sm" variant="ghost" onClick={() => onOutputToNote()}>
-                In Note übernehmen
-              </Button>
-            ) : null}
-            {runOutput?.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className="plexon-flow-rf-output-img"
-                src={runOutput.imageUrl}
-                alt={runOutput.label ? `Screenshot: ${runOutput.label}` : 'Step screenshot'}
-              />
-            ) : null}
-          </div>
-        ) : null}
       </div>
-
-      {isJourneyGate || isQualityGate ? (
-        <>
-          <Handle
-            type="source"
-            position={Position.Right}
-            id="when"
-            className="plexon-flow-rf-handle plexon-flow-rf-handle--when"
-            style={{ top: '38%' }}
-            title={isQualityGate ? 'pass' : 'wenn'}
-          />
-          <span className="plexon-flow-rf-port-label plexon-flow-rf-port-label--when">
-            {isQualityGate ? 'pass' : 'wenn'}
-          </span>
-          <Handle
-            type="source"
-            position={Position.Right}
-            id="otherwise"
-            className="plexon-flow-rf-handle plexon-flow-rf-handle--otherwise"
-            style={{ top: '72%' }}
-            title={isQualityGate ? 'fail' : 'sonst'}
-          />
-          <span className="plexon-flow-rf-port-label plexon-flow-rf-port-label--otherwise">
-            {isQualityGate ? 'fail' : 'sonst'}
-          </span>
-        </>
-      ) : (
-        <Handle type="source" position={Position.Right} id="then" className="plexon-flow-rf-handle" />
-      )}
-    </div>
+    </FlowNodeCard>
   )
 }
 

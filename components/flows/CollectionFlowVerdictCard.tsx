@@ -7,10 +7,11 @@ type Props = {
   verdict: CollectionVerdict | null | undefined
 }
 
+/** Collection-domain verdict band — chrome via `.msqdx-flow-verdict`; flags stay product-local. */
 export function CollectionFlowVerdictCard({ verdict }: Props) {
   if (!verdict) {
     return (
-      <div className="plexon-flow-verdict" data-ready="false">
+      <div className="msqdx-flow-verdict plexon-flow-verdict" data-ready="false">
         <Text role="meta" as="p" className="plexon-flow-verdict-kicker">
           Collection verdict
         </Text>
@@ -26,7 +27,7 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
 
   return (
     <div
-      className="plexon-flow-verdict"
+      className="msqdx-flow-verdict plexon-flow-verdict"
       data-ready={verdict.collectionReady ? 'true' : 'false'}
       data-status={verdict.status}
     >
@@ -71,12 +72,12 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
         </li>
       </ul>
       {verdict.pageEvidenceCaveat ? (
-        <Text role="meta" as="p">
+        <Text role="meta" as="p" className="msqdx-flow-verdict-caveat">
           {verdict.pageEvidenceCaveat}
         </Text>
       ) : null}
       {verdict.blockers.length > 0 ? (
-        <Text role="meta" as="p">
+        <Text role="meta" as="p" className="msqdx-flow-verdict-blockers">
           {verdict.blockers.join(' · ')}
         </Text>
       ) : null}

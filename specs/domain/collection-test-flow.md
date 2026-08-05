@@ -7,7 +7,7 @@
 - Collection model: `specs/domain/collection-projects.md`
 - AUDION journey graph: `audion-v3/specs/domain/ux-test-flow-model.md` (Phases 1–8)
 - AUDION ↔ CHECKION page handoff: `audion-v3/specs/domain/checkion-single-scan-trigger.md` · `checkion-v3/specs/domain/audion-journey-scan-trigger.md`
-- Shared chrome: `msqdx-ui/specs/domain/floating-panel.md`
+- Shared chrome: `msqdx-ui/specs/domain/floating-panel.md` · `msqdx-ui/specs/domain/flow-board-chrome.md`
 - Evidence (AUDION): Phase 7 Completion & evidence in `ux-test-flow-model.md`
 
 **Not this:** Legacy Prismion `/board` island (`specs/domain/ui-migrate-board.md`) — separate surface; Collection Test Flow does **not** extend that MUI/bridge canvas.
@@ -188,7 +188,7 @@ Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`.
 |---------|------|
 | `/projects/[platformProjectId]/flows` | Gallery + create from template |
 | `/projects/[platformProjectId]/flows/[flowId]` | Immersive **Board** (workspace magazine) |
-| Chrome | `@msqdx/ui` `FloatingPanel`, square `Button`/`Chip`, magazine tokens — same Phase 8 rules as Audion board |
+| Chrome | `@msqdx/ui` flow board chrome (`FlowBoardStage`, `FlowNodeCard`, …) + `FloatingPanel`; square `Button`/`Chip` — SoT in `flow-board-chrome.md` |
 | Deep links | “Open in AUDION wave” / “Open CHECKION scan result” with Collection context |
 
 Do not place this on legacy `/board` Prismion island.
@@ -256,7 +256,7 @@ Do not place this on legacy `/board` Prismion island.
 
 - Graph SoT stays `collection_test_flows`. Node kinds = Audion closed set (`prompt`/`observe`/`action`/`gate`/`message`/`measure`/`success`/…) **plus** quality (`scan`/`score_gate`/`issue_gate`/`quality_ok`) and legacy opaque `journey`.
 - Edges use Audion kinds `then`|`when`|`otherwise`|`parallel` (stored as `edgeKind`; score/issue gates also use `when: pass|fail`).
-- Board mirrors Audion FloatingPanel docks + RF node chrome (`.plexon-flow-*` magazine, not glass).
+- Board chrome SoT: `@msqdx/ui` `.msqdx-flow-*` (`flow-board-chrome.md`) — not a Plexon-only CSS fork.
 - Save via `PATCH …/flows/:flowId` with full `flow` document; Undo is session-local.
 - Wave 6: `POST …/run/journey` → poll `GET …/journey-jobs/:jobId` → `POST …/run` with journey handoff for Checkion + verdict.
 - Soft-Q edit remains Audion Wave; board offers Evaluate deep link + read-only Soft-Q summary when wave ids present.

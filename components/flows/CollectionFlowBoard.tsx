@@ -15,7 +15,15 @@ import {
   type OnSelectionChangeParams,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { Alert, Button, Chip, Text } from '@msqdx/ui'
+import {
+  Button,
+  Chip,
+  FlowBoardPalette,
+  FlowBoardStage,
+  FlowBoardToolbar,
+  FlowRunStrip,
+  Text,
+} from '@msqdx/ui'
 import {
   apiPlatformProjectFlow,
   apiPlatformProjectFlowHybridSegment,
@@ -70,9 +78,7 @@ import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import {
   IconDelete,
-  IconGrip,
   IconPlay,
-  IconPlus,
   IconReset,
   IconSave,
   IconStop,
@@ -152,11 +158,6 @@ function BoardInner({ platformProjectId, initial }: Props) {
   }, [])
 
   useEffect(() => () => stopPolling(), [stopPolling])
-
-  useEffect(() => {
-    document.body.classList.add('plexon-flow-board-active')
-    return () => document.body.classList.remove('plexon-flow-board-active')
-  }, [])
 
   const getSnapshot = useCallback(
     (): CollectionTestFlowDocument =>
@@ -633,180 +634,181 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const issuesHref = lastRun?.scanId ? pathCheckionScanIssues(lastRun.scanId) : null
 
   return (
-    <div className="plexon-flow-canvas-shell plexon-flow-canvas-shell--immersive">
-      <div className="plexon-flow-board-stage">
-        <div className="plexon-flow-canvas-viewport plexon-flow-canvas-viewport--fullscreen">
-          <ReactFlow
-            nodes={nodesForFlow}
-            edges={edges}
-            onNodesChange={(c) => {
-              if (
-                c.some(
-                  (ch) =>
-                    ch.type === 'remove' ||
-                    ch.type === 'add' ||
-                    (ch.type === 'position' && 'dragging' in ch && ch.dragging === false)
-                )
-              ) {
-                pushHistory()
-                setDirty(true)
-                setSaveMsg(null)
-              }
-              onNodesChange(c)
-            }}
-            onEdgesChange={(c) => {
-              if (c.some((ch) => ch.type === 'remove' || ch.type === 'add')) {
-                pushHistory()
-                setDirty(true)
-                setSaveMsg(null)
-              }
-              onEdgesChange(c)
-            }}
-            onConnect={onConnect}
-            onSelectionChange={onSelectionChange}
-            nodeTypes={nodeTypes}
-            fitView
-            deleteKeyCode={null}
-            nodesDraggable={!runBusy}
-            nodesConnectable={!runBusy}
-            connectionLineStyle={{ strokeWidth: 2 }}
-            defaultEdgeOptions={{ type: 'smoothstep', animated: false, style: { strokeWidth: 2 } }}
-            proOptions={{ hideAttribution: true }}
+    <FlowBoardStage
+      alert={runError ?? undefined}
+      viewport={
+        <ReactFlow
+          nodes={nodesForFlow}
+          edges={edges}
+          onNodesChange={(c) => {
+            if (
+              c.some(
+                (ch) =>
+                  ch.type === 'remove' ||
+                  ch.type === 'add' ||
+                  (ch.type === 'position' && 'dragging' in ch && ch.dragging === false)
+              )
+            ) {
+              pushHistory()
+              setDirty(true)
+              setSaveMsg(null)
+            }
+            onNodesChange(c)
+          }}
+          onEdgesChange={(c) => {
+            if (c.some((ch) => ch.type === 'remove' || ch.type === 'add')) {
+              pushHistory()
+              setDirty(true)
+              setSaveMsg(null)
+            }
+            onEdgesChange(c)
+          }}
+          onConnect={onConnect}
+          onSelectionChange={onSelectionChange}
+          nodeTypes={nodeTypes}
+          fitView
+          deleteKeyCode={null}
+          nodesDraggable={!runBusy}
+          nodesConnectable={!runBusy}
+          connectionLineStyle={{ strokeWidth: 2 }}
+          defaultEdgeOptions={{ type: 'smoothstep', animated: false, style: { strokeWidth: 2 } }}
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background gap={18} size={1} />
+          <Controls showInteractive={false} />
+          <MiniMap pannable zoomable />
+        </ReactFlow>
+      }
+      overlays={
+        <>
+          <CollectionFlowFloatingPanel
+            storageKey={`plexon.flow.toolbar.${flow.id}`}
+            defaultEdge="top"
+            defaultOffset={0.06}
+            variant="toolbar"
+            ariaLabel="Flow Board Aktionen"
+            className="msqdx-flow-float-panel--toolbar"
           >
-            <Background gap={18} size={1} />
-            <Controls showInteractive={false} />
-            <MiniMap pannable zoomable />
-          </ReactFlow>
-        </div>
-
-        <CollectionFlowFloatingPanel
-          storageKey={`plexon.flow.toolbar.${flow.id}`}
-          defaultEdge="top"
-          defaultOffset={0.06}
-          variant="toolbar"
-          ariaLabel="Flow Board Aktionen"
-        >
-          <div className="plexon-flow-canvas-toolbar plexon-flow-canvas-toolbar--compact">
-            <span className="plexon-flow-toolbar-grip" title="Verschieben">
-              <IconGrip />
-            </span>
-            <Link
-              href={pathPlatformProjectFlows(platformProjectId)}
-              className="plexon-flow-toolbar-btn"
-              title="Zurück zu Flows"
+            <FlowBoardToolbar
+              leading={
+                <>
+                  <Link
+                    href={pathPlatformProjectFlows(platformProjectId)}
+                    className="msqdx-flow-toolbar-btn"
+                    title="Zurück zu Flows"
+                  >
+                    ← Flows
+                  </Link>
+                  <Text role="title" as="span" className="msqdx-flow-toolbar-title">
+                    {flow.name}
+                  </Text>
+                </>
+              }
+              dirty={dirty}
+              dirtyLabel="edit"
+              trailing={
+                <>
+                  {saveMsg === 'Gespeichert' && !dirty ? (
+                    <Chip size="sm" static className="msqdx-flow-toolbar-chip">
+                      ok
+                    </Chip>
+                  ) : null}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
+                    aria-label="Node löschen"
+                    title="Node löschen"
+                    icon={<IconDelete />}
+                    onClick={deleteSelected}
+                    disabled={!selectedId || runBusy}
+                  />
+                </>
+              }
             >
-              ← Flows
-            </Link>
-            <Text role="title" as="span" className="plexon-flow-toolbar-title">
-              {flow.name}
-            </Text>
-            <span className="plexon-flow-toolbar-sep" aria-hidden />
-            <Button
-              type="button"
-              size="sm"
-              variant="primary"
-              className="plexon-flow-toolbar-btn"
-              aria-label={runBusy ? 'Läuft' : 'Testen'}
-              title={runBusy ? 'Läuft…' : 'Testen'}
-              icon={<IconPlay />}
-              onClick={() => void onTest()}
-              disabled={runBusy}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="subtle"
-              className="plexon-flow-toolbar-btn"
-              aria-label="Stop"
-              title="Stop"
-              icon={<IconStop />}
-              onClick={onStop}
-              disabled={!runBusy}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="subtle"
-              className="plexon-flow-toolbar-btn"
-              aria-label={saveBusy ? 'Speichert' : 'Speichern'}
-              title={saveMsg ?? (saveBusy ? 'Speichert…' : 'Speichern')}
-              icon={<IconSave />}
-              onClick={() => void onSave()}
-              disabled={saveBusy}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="subtle"
-              className="plexon-flow-toolbar-btn"
-              aria-label="Undo"
-              title="Undo"
-              icon={<IconUndo />}
-              onClick={onUndo}
-              disabled={historyLen < 1}
-            />
-            {dirty ? (
-              <Chip size="sm" static className="plexon-flow-toolbar-chip">
-                edit
-              </Chip>
-            ) : saveMsg === 'Gespeichert' ? (
-              <Chip size="sm" static className="plexon-flow-toolbar-chip">
-                ok
-              </Chip>
-            ) : null}
-            <Button
-              type="button"
-              size="sm"
-              variant="subtle"
-              className="plexon-flow-toolbar-btn"
-              aria-label="Reset zum Template"
-              title="Reset zum Template"
-              icon={<IconReset />}
-              onClick={reset}
-              disabled={!dirty}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="plexon-flow-toolbar-btn"
-              aria-label="Node löschen"
-              title="Node löschen"
-              icon={<IconDelete />}
-              onClick={deleteSelected}
-              disabled={!selectedId || runBusy}
-            />
-          </div>
-        </CollectionFlowFloatingPanel>
+              <Button
+                type="button"
+                size="sm"
+                variant="primary"
+                className="msqdx-flow-toolbar-btn"
+                aria-label={runBusy ? 'Läuft' : 'Testen'}
+                title={runBusy ? 'Läuft…' : 'Testen'}
+                icon={<IconPlay />}
+                onClick={() => void onTest()}
+                disabled={runBusy}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="subtle"
+                className="msqdx-flow-toolbar-btn"
+                aria-label="Stop"
+                title="Stop"
+                icon={<IconStop />}
+                onClick={onStop}
+                disabled={!runBusy}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="subtle"
+                className="msqdx-flow-toolbar-btn"
+                aria-label={saveBusy ? 'Speichert' : 'Speichern'}
+                title={saveMsg ?? (saveBusy ? 'Speichert…' : 'Speichern')}
+                icon={<IconSave />}
+                onClick={() => void onSave()}
+                disabled={saveBusy}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="subtle"
+                className="msqdx-flow-toolbar-btn"
+                aria-label="Undo"
+                title="Undo"
+                icon={<IconUndo />}
+                onClick={onUndo}
+                disabled={historyLen < 1}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="subtle"
+                className="msqdx-flow-toolbar-btn"
+                aria-label="Reset zum Template"
+                title="Reset zum Template"
+                icon={<IconReset />}
+                onClick={reset}
+                disabled={!dirty}
+              />
+            </FlowBoardToolbar>
+          </CollectionFlowFloatingPanel>
 
-        <CollectionFlowFloatingPanel
-          storageKey={`plexon.flow.palette.${flow.id}`}
-          defaultEdge="left"
-          defaultOffset={0.38}
-          title={paletteOpen ? 'Bausteine' : undefined}
-          variant={paletteOpen ? 'panel' : 'toolbar'}
-          className={
-            paletteOpen ? 'plexon-flow-float-panel--palette-open' : 'plexon-flow-float-panel--palette-collapsed'
-          }
-          ariaLabel="Flow Bausteine"
-        >
-          {paletteOpen ? (
-            <div className="plexon-flow-palette">
-              <div className="plexon-flow-palette-head">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className="plexon-flow-toolbar-btn"
-                  aria-label="Bausteine schließen"
-                  title="Schließen"
-                  onClick={() => setPaletteOpen(false)}
-                >
-                  ×
-                </Button>
-              </div>
-              <p className="plexon-flow-canvas-hint">Journey (Audion)</p>
-              <div className="plexon-flow-palette-row">
+          <CollectionFlowFloatingPanel
+            storageKey={`plexon.flow.palette.${flow.id}`}
+            defaultEdge="left"
+            defaultOffset={0.38}
+            title={paletteOpen ? 'Bausteine' : undefined}
+            variant={paletteOpen ? 'panel' : 'toolbar'}
+            className={
+              paletteOpen
+                ? 'msqdx-flow-float-panel--palette-open'
+                : 'msqdx-flow-float-panel--palette-collapsed'
+            }
+            ariaLabel="Flow Bausteine"
+          >
+            <FlowBoardPalette
+              open={paletteOpen}
+              onOpenChange={(open) => {
+                if (open && runBusy) return
+                setPaletteOpen(open)
+              }}
+              title="Bausteine"
+              fabLabel="Bausteine hinzufügen"
+            >
+              <p className="msqdx-flow-canvas-hint">Journey (Audion)</p>
+              <div className="msqdx-flow-palette-row">
                 {PALETTE_JOURNEY_KINDS.map((kind) => (
                   <Button
                     key={kind}
@@ -820,8 +822,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   </Button>
                 ))}
               </div>
-              <p className="plexon-flow-canvas-hint">Quality (Checkion)</p>
-              <div className="plexon-flow-palette-row">
+              <p className="msqdx-flow-canvas-hint">Quality (Checkion)</p>
+              <div className="msqdx-flow-palette-row">
                 {PALETTE_QUALITY_KINDS.map((kind) => (
                   <Button
                     key={kind}
@@ -835,114 +837,107 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   </Button>
                 ))}
               </div>
-            </div>
-          ) : (
-            <Button
-              type="button"
-              size="md"
-              variant="subtle"
-              className="plexon-flow-palette-fab"
-              aria-label="Bausteine hinzufügen"
-              title="Bausteine"
-              icon={<IconPlus size={22} />}
-              disabled={runBusy}
-              onClick={() => setPaletteOpen(true)}
-            />
-          )}
-        </CollectionFlowFloatingPanel>
+            </FlowBoardPalette>
+          </CollectionFlowFloatingPanel>
 
-        <CollectionFlowFloatingPanel
-          storageKey={`plexon.flow.run.${flow.id}`}
-          defaultEdge="bottom"
-          defaultOffset={0.5}
-          title="Run"
-          variant="strip"
-          ariaLabel="Run Status"
-        >
-          <div className="plexon-flow-run-strip">
-            {runMeta ? (
-              <>
-                <Chip size="sm" static>
-                  {runMeta.status}
-                </Chip>
-                <span>
-                  steps {jobSummary?.stepCount ?? runMeta.stepCount} · job {runMeta.jobId.slice(0, 10)}…
-                </span>
-              </>
-            ) : (
-              <Text role="meta" as="p">
-                {lastRun
-                  ? [
-                      `Letzter Lauf · ${lastRun.status}`,
-                      lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
-                      lastRun.issueGateBranch ? `issueGate ${lastRun.issueGateBranch}` : null,
-                      lastRun.criticalCount != null ? `${lastRun.criticalCount} critical` : null,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')
-                  : hasJourney
-                    ? 'Journey + Quality: start → journey → scan → gates'
-                    : 'Quality-Pfad: start → scan → score_gate → terminal'}
-              </Text>
-            )}
-            {(studyHref || waveHref || scanHref || issuesHref) && (
-              <span className="plexon-flow-run-strip-links">
-                {studyHref ? (
-                  <a href={studyHref} target="_blank" rel="noreferrer">
-                    AUDION Study
-                  </a>
-                ) : null}
-                {waveHref ? (
-                  <a href={waveHref} target="_blank" rel="noreferrer">
-                    Soft-Q / Evaluate
-                  </a>
-                ) : null}
-                {softQSummary ? (
-                  <Chip size="sm" static>
-                    Soft-Q {softQSummary.softScoreKeys.length} keys
-                    {softQSummary.hasCollectionRollup ? ' · Collection rollup' : ''}
-                  </Chip>
-                ) : null}
-                {scanHref ? (
-                  <a href={scanHref} target="_blank" rel="noreferrer">
-                    CHECKION Scan
-                  </a>
-                ) : null}
-                {issuesHref ? (
-                  <a href={issuesHref} target="_blank" rel="noreferrer">
-                    Issues Dossier
-                  </a>
-                ) : null}
-              </span>
-            )}
-          </div>
-          <CollectionFlowVerdictCard verdict={verdict} />
-        </CollectionFlowFloatingPanel>
-
-        {selectedFlowNode ? (
           <CollectionFlowFloatingPanel
-            storageKey={`plexon.flow.inspector.${flow.id}`}
-            defaultEdge="right"
-            defaultOffset={0.22}
-            title="Inspector"
-            className="plexon-flow-float-panel--inspector"
-            ariaLabel="Node Inspector"
+            storageKey={`plexon.flow.run.${flow.id}`}
+            defaultEdge="bottom"
+            defaultOffset={0.5}
+            title="Run"
+            variant="strip"
+            className="msqdx-flow-float-panel--run"
+            ariaLabel="Run Status"
           >
-            <CollectionFlowNodeInspector
-              node={selectedFlowNode}
-              runState={runStates[selectedId!] ?? 'idle'}
-              inspector={inspectorByNode[selectedId!] ?? null}
-              jobSummary={jobSummary}
-              verdict={verdict}
-              onClose={() => setSelectedId(null)}
-              onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+            <FlowRunStrip
+              status={
+                runMeta ? (
+                  <Chip size="sm" static>
+                    {runMeta.status}
+                  </Chip>
+                ) : undefined
+              }
+              meta={
+                runMeta ? (
+                  <span>
+                    steps {jobSummary?.stepCount ?? runMeta.stepCount} · job {runMeta.jobId.slice(0, 10)}…
+                  </span>
+                ) : (
+                  <Text role="meta" as="p">
+                    {lastRun
+                      ? [
+                          `Letzter Lauf · ${lastRun.status}`,
+                          lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
+                          lastRun.issueGateBranch ? `issueGate ${lastRun.issueGateBranch}` : null,
+                          lastRun.criticalCount != null ? `${lastRun.criticalCount} critical` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')
+                      : hasJourney
+                        ? 'Journey + Quality: start → journey → scan → gates'
+                        : 'Quality-Pfad: start → scan → score_gate → terminal'}
+                  </Text>
+                )
+              }
+              links={
+                studyHref || waveHref || scanHref || issuesHref || softQSummary ? (
+                  <>
+                    {studyHref ? (
+                      <a href={studyHref} target="_blank" rel="noreferrer">
+                        AUDION Study
+                      </a>
+                    ) : null}
+                    {waveHref ? (
+                      <a href={waveHref} target="_blank" rel="noreferrer">
+                        Soft-Q / Evaluate
+                      </a>
+                    ) : null}
+                    {softQSummary ? (
+                      <Chip size="sm" static>
+                        Soft-Q {softQSummary.softScoreKeys.length} keys
+                        {softQSummary.hasCollectionRollup ? ' · Collection rollup' : ''}
+                      </Chip>
+                    ) : null}
+                    {scanHref ? (
+                      <a href={scanHref} target="_blank" rel="noreferrer">
+                        CHECKION Scan
+                      </a>
+                    ) : null}
+                    {issuesHref ? (
+                      <a href={issuesHref} target="_blank" rel="noreferrer">
+                        Issues Dossier
+                      </a>
+                    ) : null}
+                  </>
+                ) : undefined
+              }
+              verdict={<CollectionFlowVerdictCard verdict={verdict} />}
             />
           </CollectionFlowFloatingPanel>
-        ) : null}
 
-        {runError ? <p className="plexon-flow-board-alert">{runError}</p> : null}
-      </div>
-    </div>
+          {selectedFlowNode ? (
+            <CollectionFlowFloatingPanel
+              storageKey={`plexon.flow.inspector.${flow.id}`}
+              defaultEdge="right"
+              defaultOffset={0.22}
+              title="Inspector"
+              className="msqdx-flow-float-panel--inspector"
+              ariaLabel="Node Inspector"
+            >
+              <CollectionFlowNodeInspector
+                node={selectedFlowNode}
+                runState={runStates[selectedId!] ?? 'idle'}
+                inspector={inspectorByNode[selectedId!] ?? null}
+                jobSummary={jobSummary}
+                verdict={verdict}
+                onClose={() => setSelectedId(null)}
+                onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+              />
+            </CollectionFlowFloatingPanel>
+          ) : null}
+        </>
+      }
+    />
   )
 }
 

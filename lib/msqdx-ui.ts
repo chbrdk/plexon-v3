@@ -44,6 +44,21 @@ export type {
   FloatingPanelSurface,
   FloatingPanelVariant,
 } from '../../msqdx-ui/packages/ui/src/components/FloatingPanel'
+export { FlowBoardStage } from '../../msqdx-ui/packages/ui/src/components/FlowBoardStage'
+export type { FlowBoardStageProps } from '../../msqdx-ui/packages/ui/src/components/FlowBoardStage'
+export { FlowBoardToolbar } from '../../msqdx-ui/packages/ui/src/components/FlowBoardToolbar'
+export type { FlowBoardToolbarProps } from '../../msqdx-ui/packages/ui/src/components/FlowBoardToolbar'
+export { FlowBoardPalette } from '../../msqdx-ui/packages/ui/src/components/FlowBoardPalette'
+export type { FlowBoardPaletteProps } from '../../msqdx-ui/packages/ui/src/components/FlowBoardPalette'
+export { FlowNodeCard } from '../../msqdx-ui/packages/ui/src/components/FlowNodeCard'
+export type { FlowNodeCardProps, FlowNodeRunState } from '../../msqdx-ui/packages/ui/src/components/FlowNodeCard'
+export { FlowInspectorShell } from '../../msqdx-ui/packages/ui/src/components/FlowInspectorShell'
+export type {
+  FlowInspectorShellProps,
+  FlowInspectorSection,
+} from '../../msqdx-ui/packages/ui/src/components/FlowInspectorShell'
+export { FlowRunStrip } from '../../msqdx-ui/packages/ui/src/components/FlowRunStrip'
+export type { FlowRunStripProps } from '../../msqdx-ui/packages/ui/src/components/FlowRunStrip'
 export {
   IconShare,
   IconHistory,

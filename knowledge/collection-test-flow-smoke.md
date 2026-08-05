@@ -51,7 +51,7 @@ Routes (helpers in `lib/constants.ts`):
 
 ## Wave 5 — immersive n8n-style board (canvas parity)
 
-1. Open a flow board — confirm full-bleed immersive canvas (React Flow `Background` + `MiniMap` + `Controls`), toolbar dock top, palette FAB bottom-right (`plexon-flow-board-active` on `<body>`).
+1. Open a flow board — confirm full-bleed immersive canvas (React Flow `Background` + `MiniMap` + `Controls`), toolbar dock top, palette FAB (`body.msqdx-flow-board-active` via `@msqdx/ui` `FlowBoardStage`).
 2. Palette → **Journey** section (`start, prompt, observe, action, gate, message, success, abandon, measure`) and **Quality** section (`scan, score_gate, issue_gate, quality_ok`); adding a node drops it on canvas and marks the board dirty.
 3. Drag a node → position persists after **Save** (PATCH `flow` with the React-Flow-derived document) and after reload.
 4. Select a node → inspector dock opens on the right showing design fields (label/text/note/url/urlKey/threshold/gateCondition as applicable).
@@ -78,6 +78,13 @@ Routes (helpers in `lib/constants.ts`):
 2. Confirm `documentHasJourneySegment` still correctly detects legacy `journey`-kind docs (back-compat) alongside new first-class Audion node docs.
 3. Confirm Save round-trips edited canvases without losing `gateCondition`, `threshold`, `minCount`, `urlKey`, or edge `when`/`edgeKind` — reload after Save and diff.
 4. `pnpm vitest run __tests__/collection-flow-canvas.test.ts __tests__/collection-test-flow.test.ts __tests__/collection-test-flow-api.test.ts` green in CI before shipping.
+
+## DS chrome parity (Option A)
+
+1. Storybook (`URL_MSQDX_UI_STORYBOOK`): `Organisms/FlowBoardStage` → **MagazineBoard** — node cards, docks, inspector, run strip share `.msqdx-flow-*`.
+2. Side-by-side: Audion `/studies/flows/{flowId}` vs Plexon `/projects/{id}/flows/{flowId}` — same chrome family (stage, toolbar, palette FAB, RF node card, inspector sections, run strip). Domain (Testen / Soft-Q / Checkion / Collection verdict) differs; classnames do not.
+3. Confirm `body.msqdx-flow-board-active` (not `audion-flow-board-active` / plexon fork) while the board is mounted.
+4. Confirm no parallel board CSS: Audion globals have no `.audion-flow-*` SoT; Plexon has no `styles/plexon-flow-board.css`.
 
 ## Failures to check
 
