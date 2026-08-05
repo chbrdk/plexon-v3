@@ -61,22 +61,24 @@ const OTHERWISE_OUT = (failLabel: string): NodePortSlot => ({
 const COMPARE_VALUE_IN: NodePortSlot = {
   handleId: CATALOG_BIND_PATH_HANDLE,
   label: 'Wert',
-  hint: 'Feld vom Scan / GEO verdrahten',
+  hint: 'Feld vom Scan / Journey / GEO verdrahten',
   role: 'data',
 };
 
 /** Closed I/O map — how many input points each kind exposes. */
 export const NODE_IO_BY_KIND: Partial<Record<CollectionFlowNodeKind, NodeIoSchema>> = {
-  start: { inputs: [], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  start: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   prompt: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   observe: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   action: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   message: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   measure: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
-  success: { inputs: [FLOW_IN], controlOutputs: [], catalogOutputs: false },
+  persona: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  zielgruppe: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  success: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   abandon: { inputs: [FLOW_IN], controlOutputs: [], catalogOutputs: false },
   quality_ok: { inputs: [FLOW_IN], controlOutputs: [], catalogOutputs: false },
-  journey: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  journey: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   gate: {
     inputs: [FLOW_IN],
     controlOutputs: [WHEN_OUT('Wenn'), OTHERWISE_OUT('Sonst')],

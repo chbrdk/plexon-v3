@@ -40,10 +40,11 @@ describe('createPageQualityTemplate', () => {
 });
 
 describe('createJourneyQualityTemplate', () => {
-  it('builds start → action → success → scan → compare with embedded journeyFlow (Wave 5 first-class nodes)', () => {
+  it('builds persona → start → action → success → scan → compare with embedded journeyFlow', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY);
     expect(doc.nodes.map((n) => n.kind)).toEqual([
+      'persona',
       'start',
       'action',
       'success',

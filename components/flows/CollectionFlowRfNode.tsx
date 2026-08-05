@@ -25,19 +25,22 @@ import {
   nodeIoSchemaForKind,
   type NodePortSlot,
 } from '@/lib/collection-flow-node-ports'
+import { COLLECTION_MEASURE_KEY_OPTIONS } from '@/lib/collection-flow-presets'
 
 type CollectionFlowNodeType = Node<CollectionFlowRfNodeData, 'collectionFlow'>
 
 const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   start: 'Start',
-  prompt: 'Prompt',
-  observe: 'Observe',
+  prompt: 'Aufgabe',
+  observe: 'Beobachten',
   action: 'Action',
   gate: 'Gate',
-  message: 'Message',
+  message: 'Nachricht',
   success: 'Success',
   abandon: 'Abandon',
-  measure: 'Measure',
+  measure: 'Frage',
+  persona: 'Persona',
+  zielgruppe: 'Zielgruppe',
   journey: 'Journey',
   scan: 'Scan',
   domain_scan: 'Domain Scan',
@@ -71,6 +74,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const onManualGate = data.onManualGate
   const onOutputToNote = data.onOutputToNote
   const onOpenInspector = data.onOpenInspector
+  const audionCatalog = data.audionCatalog
   const kind = flowNode.kind
   const io = nodeIoSchemaForKind(kind)
   const catalogOutPorts = catalogOutputSlotsForKind(kind)
@@ -202,6 +206,81 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
             onChange={onStartUrl}
             placeholder="url key or https://…"
           />
+        </label>
+      ) : null}
+
+      {kind === 'persona' ? (
+        <label className="msqdx-flow-rf-field">
+          <span>Persona</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={flowNode.personaId ?? ''}
+            onChange={(e) => {
+              const id = e.target.value
+              const hit = audionCatalog?.personas.find((p) => p.id === id)
+              patch({
+                personaId: id || undefined,
+                personaName: hit?.name,
+              })
+            }}
+          >
+            <option value="">— aus Collection wählen —</option>
+            {(audionCatalog?.personas ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          {!audionCatalog?.personas?.length ? (
+            <span className="msqdx-flow-io-hint">Keine Personas geladen (Audion-Binding?)</span>
+          ) : null}
+        </label>
+      ) : null}
+
+      {kind === 'zielgruppe' ? (
+        <label className="msqdx-flow-rf-field">
+          <span>Zielgruppe</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={flowNode.targetGroupId ?? ''}
+            onChange={(e) => {
+              const id = e.target.value
+              const hit = audionCatalog?.targetGroups.find((t) => t.id === id)
+              patch({
+                targetGroupId: id || undefined,
+                targetGroupName: hit?.name,
+                segment: hit?.segment || undefined,
+              })
+            }}
+          >
+            <option value="">— aus Collection wählen —</option>
+            {(audionCatalog?.targetGroups ?? []).map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+                {t.segment ? ` (${t.segment})` : ''}
+              </option>
+            ))}
+          </select>
+          {!audionCatalog?.targetGroups?.length ? (
+            <span className="msqdx-flow-io-hint">Keine Zielgruppen geladen (Audion-Binding?)</span>
+          ) : null}
+        </label>
+      ) : null}
+
+      {kind === 'measure' ? (
+        <label className="msqdx-flow-rf-field">
+          <span>Soft-Q Key</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={flowNode.measureKey ?? 'overall'}
+            onChange={(e) => patch({ measureKey: e.target.value })}
+          >
+            {COLLECTION_MEASURE_KEY_OPTIONS.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
         </label>
       ) : null}
 

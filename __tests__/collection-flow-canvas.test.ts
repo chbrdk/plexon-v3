@@ -57,10 +57,11 @@ describe('flowToRf / rfToDocument roundtrip', () => {
     expect(backBind.target).toBe('n-score');
   });
 
-  it('roundtrips first-class journey nodes (start/action/success) for journey-quality', () => {
+  it('roundtrips first-class journey nodes (persona/start/action/success) for journey-quality', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     const { nodes, edges } = flowToRf(doc);
     expect(nodes.map((n) => n.data.flowNode.kind)).toEqual([
+      'persona',
       'start',
       'action',
       'success',
@@ -173,15 +174,17 @@ describe('edgeKindLabel', () => {
 describe('palette kind sets', () => {
   it('splits journey vs quality kinds into disjoint closed sets', () => {
     expect(PALETTE_JOURNEY_KINDS).toEqual([
+      'zielgruppe',
+      'persona',
       'start',
       'prompt',
       'observe',
       'action',
+      'measure',
       'gate',
       'message',
       'success',
       'abandon',
-      'measure',
     ]);
     expect(PALETTE_QUALITY_KINDS).toEqual([
       'scan',

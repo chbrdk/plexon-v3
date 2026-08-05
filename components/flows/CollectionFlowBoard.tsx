@@ -32,6 +32,7 @@ import {
   apiPlatformProjectFlowRun,
   apiPlatformProjectFlowRunJourney,
   apiPlatformProjectFlowWaveSummary,
+  apiPlatformProjectDashboard,
   getAudionWebOrigin,
   pathPlatformProjectFlows,
 } from '@/lib/constants'
@@ -49,19 +50,20 @@ import {
   type CollectionVerdict,
 } from '@/lib/collection-test-flow'
 import {
-  PALETTE_JOURNEY_KINDS,
   PALETTE_QUALITY_KINDS,
   edgeKindLabel,
   flowToRf,
   isCatalogBindConnection,
   makeBindRfEdge,
   newCollectionFlowNode,
+  newCollectionFlowNodeFromPreset,
   nextEdgeKindForSource,
   rfToDocument,
   syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
+import { PALETTE_JOURNEY_GROUPS } from '@/lib/collection-flow-presets'
 import {
   CATALOG_BIND_PATH_HANDLE,
   catalogPathFromOutHandle,
@@ -122,6 +124,10 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [audionCatalog, setAudionCatalog] = useState<{
+    personas: Array<{ id: string; name: string }>
+    targetGroups: Array<{ id: string; name: string; segment: string }>
+  } | null>(null)
   const [runDockOpen, setRunDockOpen] = useState(() => {
     try {
       const raw = localStorage.getItem(`plexon.flow.run.open.${initial.id}`)
@@ -175,6 +181,36 @@ function BoardInner({ platformProjectId, initial }: Props) {
   }, [])
 
   useEffect(() => () => stopPolling(), [stopPolling])
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch(apiPlatformProjectDashboard(platformProjectId))
+        if (!res.ok) return
+        const json = (await res.json().catch(() => null)) as {
+          audion?: {
+            personas?: Array<{ id: string; name: string }>
+            targetGroups?: Array<{ id: string; name: string; segment?: string }>
+          } | null
+        } | null
+        if (cancelled || !json?.audion) return
+        setAudionCatalog({
+          personas: (json.audion.personas ?? []).map((p) => ({ id: p.id, name: p.name })),
+          targetGroups: (json.audion.targetGroups ?? []).map((t) => ({
+            id: t.id,
+            name: t.name,
+            segment: t.segment ?? '',
+          })),
+        })
+      } catch {
+        /* ignore — pickers stay empty */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [platformProjectId])
 
   const getSnapshot = useCallback(
     (): CollectionTestFlowDocument =>
@@ -684,6 +720,26 @@ function BoardInner({ platformProjectId, initial }: Props) {
     [nodes, setNodes, pushHistory]
   )
 
+  const addPreset = useCallback(
+    (presetId: string) => {
+      pushHistory()
+      const flowNode = newCollectionFlowNodeFromPreset(presetId)
+      const maxY = nodes.reduce((m, n) => Math.max(m, n.position.y), 0)
+      const rfNode: CollectionFlowRfNodeModel = {
+        id: flowNode.id,
+        type: 'collectionFlow',
+        position: { x: 40, y: maxY + 200 },
+        data: { flowNode },
+      }
+      setNodes((nds) => [...nds, rfNode])
+      setSelectedId(flowNode.id)
+      setDirty(true)
+      setSaveMsg(null)
+      setPaletteOpen(false)
+    },
+    [nodes, setNodes, pushHistory]
+  )
+
   const deleteSelected = useCallback(() => {
     if (!selectedId) return
     pushHistory()
@@ -768,9 +824,20 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onPlaySegment: () => void onPlaySegment(n.id),
           onOutputToNote: () => onOutputToNote(n.id),
           onOpenInspector: () => setSelectedId(n.id),
+          audionCatalog,
         },
       })),
-    [nodes, onManualGate, onOutputToNote, onPlaySegment, onUpdateNode, runBusy, runOutputs, runStates]
+    [
+      nodes,
+      onManualGate,
+      onOutputToNote,
+      onPlaySegment,
+      onUpdateNode,
+      runBusy,
+      runOutputs,
+      runStates,
+      audionCatalog,
+    ]
   )
 
   const selectedFlowNode = useMemo(() => {
@@ -983,21 +1050,25 @@ function BoardInner({ platformProjectId, initial }: Props) {
               title="Bausteine"
               fabLabel="Bausteine hinzufügen"
             >
-              <p className="msqdx-flow-canvas-hint">Journey (Audion)</p>
-              <div className="msqdx-flow-palette-row">
-                {PALETTE_JOURNEY_KINDS.map((kind) => (
-                  <Button
-                    key={kind}
-                    type="button"
-                    size="sm"
-                    variant="subtle"
-                    onClick={() => addNode(kind)}
-                    disabled={runBusy}
-                  >
-                    {kind}
-                  </Button>
-                ))}
-              </div>
+              {PALETTE_JOURNEY_GROUPS.map((group) => (
+                <div key={group.id}>
+                  <p className="msqdx-flow-canvas-hint">{group.title}</p>
+                  <div className="msqdx-flow-palette-row">
+                    {group.presets.map((preset) => (
+                      <Button
+                        key={preset.id}
+                        type="button"
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => addPreset(preset.id)}
+                        disabled={runBusy}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
               <p className="msqdx-flow-canvas-hint">Quality (Checkion)</p>
               <div className="msqdx-flow-palette-row">
                 {PALETTE_QUALITY_KINDS.map((kind) => (

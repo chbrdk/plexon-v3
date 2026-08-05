@@ -87,12 +87,15 @@ const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
   scan: 'scan',
   domain_scan: 'domain',
   geo_job: 'geo',
+  success: 'journey',
+  journey: 'journey',
 };
 
 const ROOT_TO_ACTION_KIND: Record<string, string> = {
   scan: 'scan',
   domain: 'domain_scan',
   geo: 'geo_job',
+  journey: 'success',
 };
 
 export function catalogOutHandleId(path: string): string {

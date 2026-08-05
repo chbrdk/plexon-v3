@@ -27,6 +27,9 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'success',
   'abandon',
   'measure',
+  // Collection config — merge onto start on extract (Wave 11)
+  'persona',
+  'zielgruppe',
   // Legacy opaque journey embed (Wave 2) — kept for back-compat
   'journey',
   // Family B — CHECKION quality
@@ -124,6 +127,20 @@ export type CollectionFlowNode = {
   op?: 'gte' | 'lte' | 'gt' | 'lt' | 'eq' | 'neq' | 'exists' | 'not_exists';
   /** Expected value for `compare` (Wave 9). */
   value?: string | number | boolean | null;
+  /** Audion persona id on `persona` / `start` (Wave 11). */
+  personaId?: string;
+  /** Display name for persona picker. */
+  personaName?: string;
+  /** Audion / TG segment string merged onto start (Wave 11). */
+  segment?: string;
+  /** Collection target-group id on `zielgruppe`. */
+  targetGroupId?: string;
+  /** Display name for Zielgruppe picker. */
+  targetGroupName?: string;
+  /** Soft-Q / SEQ key on `measure` (Wave 11). */
+  measureKey?: string;
+  /** Palette preset id for action/measure factories (Wave 11). */
+  presetId?: string;
   position?: { x: number; y: number };
 };
 
@@ -161,6 +178,10 @@ export type EmbeddedAudionJourneyFlow = {
     text?: string | null;
     urlKey?: string | null;
     maxSteps?: number | null;
+    personaId?: string | null;
+    personaName?: string | null;
+    segment?: string | null;
+    measureKey?: string | null;
   }>;
   edges: Array<{
     id: string;
@@ -382,12 +403,18 @@ export function createPageQualityTemplate(url: string): CollectionTestFlowDocume
   };
 }
 
-/** First-class AUDION journey nodes shared by journey templates (Wave 5). */
+/** First-class AUDION journey nodes shared by journey templates (Wave 5 / 11). */
 function journeyStepNodesAndEdges(
   pageUrl: string,
   xStart: number
 ): { nodes: CollectionFlowNode[]; edges: CollectionFlowEdge[] } {
   const nodes: CollectionFlowNode[] = [
+    {
+      id: 'n-persona',
+      kind: 'persona',
+      label: 'Persona',
+      position: { x: xStart, y: 40 },
+    },
     {
       id: 'n-start',
       kind: 'start',
@@ -395,24 +422,26 @@ function journeyStepNodesAndEdges(
       url: pageUrl,
       urlKey: pageUrl,
       maxSteps: 8,
-      position: { x: xStart, y: 120 },
+      position: { x: xStart + 200, y: 120 },
     },
     {
       id: 'n-action',
       kind: 'action',
       label: 'Explore',
+      presetId: 'action-orientieren',
       text: 'Orientiere dich auf der Seite und finde einen klaren nächsten Schritt. Denke laut.',
-      position: { x: xStart + 220, y: 60 },
+      position: { x: xStart + 420, y: 60 },
     },
     {
       id: 'n-success',
       kind: 'success',
       label: 'Done',
       text: 'Aufgabe erledigt — nenne kurz den gefundenen Schritt.',
-      position: { x: xStart + 440, y: 60 },
+      position: { x: xStart + 640, y: 60 },
     },
   ];
   const edges: CollectionFlowEdge[] = [
+    { id: 'e-persona-start', source: 'n-persona', target: 'n-start', edgeKind: 'then' },
     { id: 'e-start-action', source: 'n-start', target: 'n-action', edgeKind: 'then' },
     { id: 'e-action-success', source: 'n-action', target: 'n-success', edgeKind: 'then' },
   ];
@@ -429,7 +458,7 @@ export function createJourneyQualityTemplate(url: string): CollectionTestFlowDoc
       kind: 'scan',
       label: 'Page scan',
       url: pageUrl,
-      position: { x: 660, y: 120 },
+      position: { x: 860, y: 120 },
     },
     {
       id: 'n-score',
@@ -438,19 +467,19 @@ export function createJourneyQualityTemplate(url: string): CollectionTestFlowDoc
       path: 'scan.overallScore',
       op: 'gte',
       value: DEFAULT_SCORE_GATE_THRESHOLD,
-      position: { x: 880, y: 120 },
+      position: { x: 1080, y: 120 },
     },
     {
       id: 'n-ok',
       kind: 'quality_ok',
       label: 'Quality OK',
-      position: { x: 1120, y: 40 },
+      position: { x: 1320, y: 40 },
     },
     {
       id: 'n-abandon',
       kind: 'abandon',
       label: 'Abandon',
-      position: { x: 1120, y: 200 },
+      position: { x: 1320, y: 200 },
     },
   ];
   const edges: CollectionFlowEdge[] = [
@@ -595,7 +624,7 @@ export function createPageQualityIssuesTemplate(url: string): CollectionTestFlow
 export function createJourneyQualityIssuesTemplate(url: string): CollectionTestFlowDocument {
   const pageUrl = url.trim() || 'https://example.com';
   const journey = journeyStepNodesAndEdges(pageUrl, 0);
-  const spine = qualitySpineWithIssueGate(pageUrl, 660);
+  const spine = qualitySpineWithIssueGate(pageUrl, 860);
   const base: CollectionTestFlowDocument = {
     schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
     templateId: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
@@ -768,8 +797,9 @@ export function migrateLegacyQualityGates(
 
 /**
  * Build an embedded Audion-shaped journey subgraph from first-class journey nodes on the
- * canvas (Wave 5). Falls back to `doc.journeyFlow` / null when the canvas has no journey nodes.
- * @see specs/domain/collection-test-flow.md — Wave 5–7 implementation notes
+ * canvas (Wave 5 / 11). Config kinds `persona` / `zielgruppe` merge onto `start` and are
+ * omitted from the agent graph. Falls back to `doc.journeyFlow` / null when no start.
+ * @see specs/domain/collection-test-flow.md — Wave 5–7 / 11 implementation notes
  */
 export function extractJourneyFlowFromDocument(
   doc: CollectionTestFlowDocument,
@@ -786,7 +816,26 @@ export function extractJourneyFlowFromDocument(
     return null;
   }
 
-  const ids = new Set(candidateNodes.map((n) => n.id));
+  const configKinds = new Set<CollectionFlowNodeKind>(['persona', 'zielgruppe']);
+  const agentNodes = candidateNodes.filter((n) => !configKinds.has(n.kind));
+  const start = agentNodes.find((n) => n.kind === 'start');
+  if (!start) {
+    if (doc.journeyFlow?.nodes?.length) return patchJourneyFlowUrl(doc.journeyFlow, pageUrl);
+    return null;
+  }
+
+  const personaCfg = [...candidateNodes].reverse().find((n) => n.kind === 'persona');
+  const zielCfg = [...candidateNodes].reverse().find((n) => n.kind === 'zielgruppe');
+  const mergedPersonaId = start.personaId?.trim() || personaCfg?.personaId?.trim() || null;
+  const mergedPersonaName =
+    start.personaName?.trim() || personaCfg?.personaName?.trim() || null;
+  const mergedSegment =
+    start.segment?.trim() ||
+    zielCfg?.segment?.trim() ||
+    personaCfg?.segment?.trim() ||
+    null;
+
+  const ids = new Set(agentNodes.map((n) => n.id));
   const edges = doc.edges
     .filter((e) => ids.has(e.source) && ids.has(e.target))
     .filter((e) => (e.edgeKind ?? 'then') !== 'bind')
@@ -801,14 +850,34 @@ export function extractJourneyFlowFromDocument(
         | 'otherwise'
         | 'parallel',
     }));
-  const nodes = candidateNodes.map((n) => ({
-    id: n.id,
-    kind: n.kind,
-    label: n.label,
-    text: n.text ?? null,
-    urlKey: n.kind === 'start' ? pageUrl : (n.urlKey ?? null),
-    maxSteps: n.kind === 'start' ? (n.maxSteps ?? 8) : (n.maxSteps ?? null),
-  }));
+  const nodes = agentNodes.map((n) => {
+    if (n.kind === 'start') {
+      return {
+        id: n.id,
+        kind: n.kind,
+        label: n.label,
+        text: n.text ?? null,
+        urlKey: pageUrl,
+        maxSteps: n.maxSteps ?? 8,
+        personaId: mergedPersonaId,
+        personaName: mergedPersonaName,
+        segment: mergedSegment,
+        measureKey: null,
+      };
+    }
+    return {
+      id: n.id,
+      kind: n.kind,
+      label: n.label,
+      text: n.text ?? null,
+      urlKey: n.urlKey ?? null,
+      maxSteps: n.maxSteps ?? null,
+      personaId: null,
+      personaName: null,
+      segment: null,
+      measureKey: n.kind === 'measure' ? (n.measureKey ?? null) : null,
+    };
+  });
   const nodeKindsUsed = [...new Set(nodes.map((n) => n.kind))];
 
   return {

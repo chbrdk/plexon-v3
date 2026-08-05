@@ -20,9 +20,10 @@ import {
   catalogPathFromOutHandle,
   catalogPortsForActionKind,
   catalogRootFromPath,
-  actionKindForCatalogRoot,
+  catalogRootForActionKind,
   isCatalogPath,
 } from './collection-flow-run-context';
+import { presetById } from './collection-flow-presets';
 
 export type CollectionFlowGateEvaluation = {
   matched?: boolean;
@@ -46,6 +47,11 @@ export type CollectionFlowRfNodeData = {
   onOutputToNote?: () => void;
   /** Focus note field → ensure node selected for inspector. */
   onOpenInspector?: () => void;
+  /** Wave 11: Collection Audion catalog for persona / Zielgruppe pickers. */
+  audionCatalog?: {
+    personas: Array<{ id: string; name: string }>;
+    targetGroups: Array<{ id: string; name: string; segment: string }>;
+  } | null;
 };
 
 export type CollectionFlowRfEdgeData = {
@@ -94,7 +100,13 @@ const GATE_LIKE_KINDS = new Set<CollectionFlowNodeKind>([
   'geo_gate',
 ]);
 
-const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>(['scan', 'domain_scan', 'geo_job']);
+const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>([
+  'scan',
+  'domain_scan',
+  'geo_job',
+  'success',
+  'journey',
+]);
 
 function edgeKindFromDoc(e: CollectionFlowEdge): CollectionFlowEdgeKind {
   if (e.edgeKind) return e.edgeKind;
@@ -275,7 +287,8 @@ export function isCatalogBindConnection(
   if (!sourceKind || !ACTION_PORT_KINDS.has(sourceKind)) return false;
   const root = catalogRootFromPath(path);
   if (!root) return false;
-  return actionKindForCatalogRoot(root) === sourceKind;
+  // success + opaque journey both write the journey.* catalog root (Wave 11).
+  return catalogRootForActionKind(sourceKind) === root;
 }
 
 export function findProducerNodeIdForPath(
@@ -284,9 +297,10 @@ export function findProducerNodeIdForPath(
 ): string | null {
   const root = catalogRootFromPath(path);
   if (!root) return null;
-  const kind = actionKindForCatalogRoot(root) as CollectionFlowNodeKind | null;
-  if (!kind) return null;
-  return nodes.find((n) => n.kind === kind)?.id ?? null;
+  return (
+    nodes.find((n) => ACTION_PORT_KINDS.has(n.kind) && catalogRootForActionKind(n.kind) === root)
+      ?.id ?? null
+  );
 }
 
 /** Build / replace a bind RF edge for a compare node's catalog path. */
@@ -331,17 +345,19 @@ export function syncBindEdgesForComparePath(
   return [...without, makeBindRfEdge({ sourceId, targetId: compareNodeId, path: trimmed })];
 }
 
-/** Palette — Family A (AUDION journey, closed set). */
+/** Palette — Family A kinds (flat list for tests / back-compat). Prefer presets groups in UI. */
 export const PALETTE_JOURNEY_KINDS: CollectionFlowNodeKind[] = [
+  'zielgruppe',
+  'persona',
   'start',
   'prompt',
   'observe',
   'action',
+  'measure',
   'gate',
   'message',
   'success',
   'abandon',
-  'measure',
 ];
 
 /** Palette — Family B (CHECKION quality). Wave 9: compare replaces specialized gates. */
@@ -471,6 +487,9 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
   }
   if (kind === 'observe') return { ...base, text: 'Schau dich kurz um.', observeSeconds: 30 };
   if (kind === 'start') return { ...base, url: '', urlKey: '', maxSteps: 8 };
+  if (kind === 'persona') return { ...base, label: 'Persona' };
+  if (kind === 'zielgruppe') return { ...base, label: 'Zielgruppe' };
+  if (kind === 'measure') return { ...base, text: '', measureKey: 'overall' };
   if (kind === 'scan') return { ...base, url: '', scanMode: 'single' };
   if (kind === 'domain_scan') return { ...base, url: '', maxPages: 50 };
   if (kind === 'geo_job') {
@@ -486,12 +505,27 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
     kind === 'action' ||
     kind === 'message' ||
     kind === 'abandon' ||
-    kind === 'success' ||
-    kind === 'measure'
+    kind === 'success'
   ) {
     return { ...base, text: '' };
   }
   return base;
+}
+
+/** Create a node from a Wave 11 palette preset. */
+export function newCollectionFlowNodeFromPreset(
+  presetId: string,
+  id?: string
+): CollectionFlowNode {
+  const preset = presetById(presetId);
+  if (!preset) return newCollectionFlowNode('action', id);
+  const base = newCollectionFlowNode(preset.kind, id);
+  return {
+    ...base,
+    ...preset.defaults,
+    id: base.id,
+    kind: preset.kind,
+  };
 }
 
 export { catalogPortsForActionKind, CATALOG_BIND_PATH_HANDLE, catalogOutHandleId };

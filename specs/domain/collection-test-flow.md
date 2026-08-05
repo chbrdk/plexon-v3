@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 10 Catalog Port UX (shipped)  
+**Status:** Wave 11 Journey product nodes (shipped)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -58,16 +58,20 @@ Deep links always carry `platformProjectId` when available (`collection-projects
 
 ### A — Journey (AUDION capability)
 
-Reuse closed set from Audion `UxTestFlow` (do not redefine semantics):
+Reuse closed set from Audion `UxTestFlow` (do not redefine semantics), plus Collection **config** kinds that merge into `start` on extract:
 
 | Kind | Role |
 |------|------|
-| `start` | URL / urlKey, optional persona, device |
-| `prompt` / `observe` / `action` / `message` | Journey steps |
-| `measure` | Soft-Q / SEQ |
-| `success` / `abandon` | Journey terminals (may still trail `measure`) |
+| `zielgruppe` | **Config (Wave 11)** — pick Collection target group → `segment` / names on extract |
+| `persona` | **Config (Wave 11)** — pick Collection Audion persona → `personaId` / `personaName` on extract |
+| `start` | URL / urlKey, optional persona fields (also filled from config nodes) |
+| `prompt` / `observe` / `action` / `message` | Journey steps (palette may use **presets** for `action` / Frage) |
+| `measure` | Soft-Q / SEQ — `measureKey` + question `text` (Wave 11) |
+| `success` / `abandon` | Journey terminals; `success` writes `journey.*` catalog outputs |
 
 Gates that depend only on journey signals stay in family A (`url_match`, `goal_reached`, `frustration_high`, … — Audion closed set).
+
+**Extract rule:** `persona` / `zielgruppe` are authoring-only — omitted from the Audion agent graph; their fields merge onto the journey `start` before `from-flow`.
 
 ### B — Page / Quality (CHECKION capability)
 
@@ -146,9 +150,10 @@ n8n-like I/O without open expressions:
 
 | Side | Node | Ports |
 |------|------|--------|
-| **Out** | `scan` / `domain_scan` / `geo_job` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, …) |
-| **In** | `compare` | Control `in` + bind target `bind:path` (“path”) |
-| **Out** | `compare` | Control `when` / `otherwise` (unchanged) |
+| **Out** | `scan` / `domain_scan` / `geo_job` / `success` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, `out:journey.taskCompleted`, …) |
+| **In** | `compare` | Control `in` (Ablauf) + bind target `bind:path` (Wert) |
+| **Out** | `compare` | Control `when` / `otherwise` (Pass/Fail) |
+| **Config** | `persona` / `zielgruppe` | Ablauf in + Weiter out only (no catalog dump) |
 
 Connecting `out:<catalogPath>` → `bind:path` (UI label **Wert**) sets `compare.path` and upserts a dashed `bind` edge. Path select remains a fallback. Journey/`run` paths stay picker-only this wave.
 
@@ -272,7 +277,8 @@ Do not place this on legacy `/board` Prismion island.
 | **8B — GEO nodes** | `geo_job` + `geo_gate` (`cited_share_*`, `geo_fitness_*`); v3 `/api/geo-jobs` client; deep link `/geo/:id/overview` | Staging: GEO-only or journey→geo→gate; strip opens GEO overview |
 | **9 — Run Context + Compare** | Typed `lastRun.context` catalog outputs; `compare` node; migrate/drop specialized gates from palette; inspector output tree | Staging: scan → compare `scan.scores.accessibility` + `scan.issues.criticalCount`; legacy docs auto-migrate |
 | **10 — Catalog Port UX** | Labeled action output ports + compare `bind:path`; `bind` edges (authoring); path↔wire sync; closed catalog only | Staging: drag `scan.overallScore` → compare path; dashed bind wire; run still uses `compare.path` |
-| **Later** | `set` aliases, array pickers, journey/`run` ports, parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
+| **11 — Journey product nodes** | `persona` / `zielgruppe` config + extract merge; Frage/Action presets; `measureKey`; `success` journey catalog ports; palette groups Kontext/Schritte/Messung/Steuerung | Staging: Zielgruppe→Persona→Start→Action→Success; bind `journey.taskCompleted`; personas from Collection catalog |
+| **Later** | `set` aliases, array pickers, parallel multi-persona UI, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -357,6 +363,15 @@ Do not place this on legacy `/board` Prismion island.
 - Board: `isValidConnection` / `onConnect` for bind (sets path, replaces prior bind); path change upserts bind to matching producer; bind delete clears path when matched.
 - Runner and journey extract skip `bind` edges.
 - Helper: `catalogPortsForActionKind` / `isCatalogBindConnection` in run-context + canvas.
+
+## Wave 11 implementation notes
+
+- Config kinds `persona` / `zielgruppe`: fields `personaId`/`personaName` / `targetGroupId`/`targetGroupName`/`segment`; omitted from Audion agent graph; merge onto `start` in `extractJourneyFlowFromDocument`.
+- `measure.measureKey` + Frage presets; Action presets via `presetId` + starter `text` (kinds stay `measure`/`action`).
+- `success` (and opaque `journey`) expose `journey.*` catalog output ports; Compare Wert may bind them.
+- Palette groups: Kontext / Schritte / Messung / Steuerung + Quality; pickers load Collection Audion catalog from dashboard summary.
+- Template `journey-quality*`: `persona` → `start` → `action` → `success` → quality spine.
+- Helper: `lib/collection-flow-presets.ts` · ports in `lib/collection-flow-node-ports.ts`.
 
 ## Open questions (non-blocking)
 
