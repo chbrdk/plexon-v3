@@ -376,6 +376,67 @@ export function duplicateNodesInRfGraph(
   return { nodes: [...clearedSelection, ...clones], newIds };
 }
 
+/**
+ * Add a sibling Persona wired with `parallel` from the same Zielgruppe (Wave 13).
+ * Authoring only — extract still uses the nearest single persona.
+ */
+export function addParallelPersonaSibling(
+  nodes: CollectionFlowRfNode[],
+  edges: CollectionFlowRfEdge[],
+  anchorId: string
+): { nodes: CollectionFlowRfNode[]; edges: CollectionFlowRfEdge[]; newId: string | null } {
+  const anchor = nodes.find((n) => n.id === anchorId);
+  if (!anchor) return { nodes, edges, newId: null };
+  const kind = anchor.data.flowNode.kind;
+
+  let sourceId: string | null = null;
+  if (kind === 'zielgruppe') {
+    sourceId = anchor.id;
+  } else if (kind === 'persona') {
+    const into = edges.find(
+      (e) =>
+        e.target === anchor.id &&
+        (e.data?.edgeKind === 'then' || e.data?.edgeKind === 'parallel' || !e.data?.edgeKind)
+    );
+    sourceId = into?.source ?? null;
+    if (!sourceId) {
+      const zg = nodes.find((n) => n.data.flowNode.kind === 'zielgruppe');
+      sourceId = zg?.id ?? null;
+    }
+  } else {
+    return { nodes, edges, newId: null };
+  }
+  if (!sourceId) return { nodes, edges, newId: null };
+
+  const flowNode = newCollectionFlowNode('persona');
+  flowNode.label = 'Persona (parallel)';
+  const rfNode: CollectionFlowRfNode = {
+    id: flowNode.id,
+    type: 'collectionFlow',
+    position: {
+      x: anchor.position.x + 40,
+      y: anchor.position.y + 120,
+    },
+    selected: true,
+    data: { flowNode },
+  };
+  const edge: CollectionFlowRfEdge = {
+    id: `e-parallel-${sourceId}-${flowNode.id}`,
+    source: sourceId,
+    target: flowNode.id,
+    sourceHandle: 'parallel',
+    targetHandle: 'in',
+    label: edgeKindLabel('parallel'),
+    data: { edgeKind: 'parallel' },
+  };
+  const cleared = nodes.map((n) => ({ ...n, selected: false }));
+  return {
+    nodes: [...cleared, rfNode],
+    edges: [...edges, edge],
+    newId: flowNode.id,
+  };
+}
+
 /** Build / replace a bind RF edge for a compare node's catalog path. */
 export function makeBindRfEdge(input: {
   sourceId: string;

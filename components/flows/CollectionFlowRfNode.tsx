@@ -195,6 +195,9 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
         <span>Name</span>
         <Input block size="sm" value={flowNode.label} onChange={onLabel} placeholder="Node name" />
       </label>
+      {flowNode.presetId ? (
+        <p className="msqdx-flow-io-hint">Preset · {flowNode.presetId}</p>
+      ) : null}
 
       {kind === 'start' ? (
         <label className="msqdx-flow-rf-field">

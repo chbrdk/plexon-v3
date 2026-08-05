@@ -50,7 +50,6 @@ import {
   type CollectionVerdict,
 } from '@/lib/collection-test-flow'
 import {
-  PALETTE_QUALITY_KINDS,
   edgeKindLabel,
   flowToRf,
   isCatalogBindConnection,
@@ -60,12 +59,13 @@ import {
   nextEdgeKindForSource,
   removeNodesFromRfGraph,
   duplicateNodesInRfGraph,
+  addParallelPersonaSibling,
   rfToDocument,
   syncBindEdgesForComparePath,
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
-import { PALETTE_JOURNEY_GROUPS } from '@/lib/collection-flow-presets'
+import { PALETTE_JOURNEY_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
 import {
   formatValidationIssues,
   validateCollectionFlowForRun,
@@ -823,6 +823,37 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSaveMsg(null)
   }, [runBusy, nodes, setNodes, pushHistory])
 
+  const addParallelPersona = useCallback(() => {
+    if (runBusy) return
+    const anchor =
+      selectedIdRef.current ??
+      nodes.find((n) => n.selected)?.id ??
+      nodes.find((n) => (n as CollectionFlowRfNodeModel).data?.flowNode?.kind === 'zielgruppe')
+        ?.id ??
+      null
+    if (!anchor) {
+      setRunError('Zielgruppe oder Persona wählen, dann Parallel-Persona hinzufügen.')
+      return
+    }
+    pushHistory()
+    const next = addParallelPersonaSibling(
+      nodes as CollectionFlowRfNodeModel[],
+      edges as CollectionFlowRfEdge[],
+      anchor
+    )
+    if (!next.newId) {
+      setRunError('Parallel-Persona nur von Zielgruppe oder Persona aus.')
+      return
+    }
+    setNodes(next.nodes)
+    setEdges(next.edges)
+    setSelectedId(next.newId)
+    selectedIdRef.current = next.newId
+    setDirty(true)
+    setSaveMsg(null)
+    setRunError(null)
+  }, [runBusy, nodes, edges, setNodes, setEdges, pushHistory])
+
   const onNodesDelete = useCallback((deleted: CollectionFlowRfNodeModel[]) => {
     const ids = new Set(deleted.map((n) => n.id))
     if (selectedIdRef.current && ids.has(selectedIdRef.current)) {
@@ -1046,6 +1077,21 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     size="sm"
                     variant="ghost"
                     className="msqdx-flow-toolbar-btn"
+                    aria-label="Parallel-Persona"
+                    title="Parallel-Persona (Authoring)"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                    }}
+                    onClick={addParallelPersona}
+                    disabled={runBusy}
+                  >
+                    ‖P
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
                     aria-label="Node duplizieren"
                     title="Node duplizieren"
                     icon={<IconDuplicate />}
@@ -1172,21 +1218,25 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   </div>
                 </div>
               ))}
-              <p className="msqdx-flow-canvas-hint">Quality (Checkion)</p>
-              <div className="msqdx-flow-palette-row">
-                {PALETTE_QUALITY_KINDS.map((kind) => (
-                  <Button
-                    key={kind}
-                    type="button"
-                    size="sm"
-                    variant="subtle"
-                    onClick={() => addNode(kind)}
-                    disabled={runBusy}
-                  >
-                    {kind}
-                  </Button>
-                ))}
-              </div>
+              {PALETTE_QUALITY_GROUPS.map((group) => (
+                <div key={group.id}>
+                  <p className="msqdx-flow-canvas-hint">{group.title}</p>
+                  <div className="msqdx-flow-palette-row">
+                    {group.presets.map((preset) => (
+                      <Button
+                        key={preset.id}
+                        type="button"
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => addPreset(preset.id)}
+                        disabled={runBusy}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </FlowBoardPalette>
           </CollectionFlowFloatingPanel>
 

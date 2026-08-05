@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 12 Authoring polish  
+**Status:** Wave 13 Compare presets + parallel persona authoring  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -278,8 +278,9 @@ Do not place this on legacy `/board` Prismion island.
 | **9 — Run Context + Compare** | Typed `lastRun.context` catalog outputs; `compare` node; migrate/drop specialized gates from palette; inspector output tree | Staging: scan → compare `scan.scores.accessibility` + `scan.issues.criticalCount`; legacy docs auto-migrate |
 | **10 — Catalog Port UX** | Labeled action output ports + compare `bind:path`; `bind` edges (authoring); path↔wire sync; closed catalog only | Staging: drag `scan.overallScore` → compare path; dashed bind wire; run still uses `compare.path` |
 | **11 — Journey product nodes** | `persona` / `zielgruppe` config + extract merge; Frage/Action presets; `measureKey`; `success` journey catalog ports; palette groups Kontext/Schritte/Messung/Steuerung | Staging: Zielgruppe→Persona→Start→Action→Success; bind `journey.taskCompleted`; personas from Collection catalog |
-| **12 — Authoring polish** | Delete/Entf; duplicate; validate-before-Testen; dirty auto-save on run; lean templates `zielgruppe`→`persona`→…→optional Frage | Staging: select→Entf/duplicate; Testen blocks incomplete compare/journey; new flow has Zielgruppe | |
-| **Later** | `set` aliases, array pickers, parallel multi-persona UI, Brandion, multi-user live, saliency | Out of MVP |
+| **12 — Authoring polish** | Delete/Entf; duplicate; validate-before-Testen; dirty auto-save on run; lean templates `zielgruppe`→`persona`→…→optional Frage | Staging: select→Entf/duplicate; Testen blocks incomplete compare/journey; new flow has Zielgruppe |
+| **13 — Compare presets + parallel authoring** | Quality palette presets (score/a11y/issues/journey/geo); `parallel` out on Zielgruppe/Persona; add sibling Persona (authoring only; runtime still one extract persona) | Staging: drop Compare Score≥70; Parallel handle + toolbar adds second Persona wire |
+| **Later** | `set` aliases, array pickers, parallel multi-persona **runtime**, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -381,6 +382,13 @@ Do not place this on legacy `/board` Prismion island.
 - Validate-before-Testen (`lib/collection-flow-validate.ts`): require `start`; journey segment needs compile-ready extract; each `compare` needs catalog `path`; warn when `persona` node lacks `personaId`.
 - Dirty canvas: Testen auto-saves snapshot before run (server reads persisted flow).
 - Templates: `zielgruppe` → `persona` → `start` → `action` → `success` → optional `measure` (ease) → quality spine.
+
+## Wave 13 implementation notes
+
+- Quality palette presets (`PALETTE_QUALITY_GROUPS`): Compare Score ≥70 / A11y / keine Criticals / Journey done / GEO cited; plus Scan / Domain / GEO / Quality OK with German labels — still kinds `compare`|`scan`|… + `presetId`.
+- Zielgruppe/Persona expose control out `parallel` (label Parallel) beside Weiter.
+- `addParallelPersonaSibling`: toolbar adds a second Persona wired with `edgeKind: parallel` from the same Zielgruppe (or from selected Persona’s source). Runtime extract still merges **one** nearest persona onto `start`; validate warns when parallel persona edges exist.
+- Helper: quality presets in `lib/collection-flow-presets.ts`; parallel helper in `lib/collection-flow-canvas.ts`.
 
 ## Open questions (non-blocking)
 

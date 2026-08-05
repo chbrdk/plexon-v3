@@ -44,6 +44,13 @@ const THEN_OUT: NodePortSlot = {
   role: 'flow',
 };
 
+const PARALLEL_OUT: NodePortSlot = {
+  handleId: 'parallel',
+  label: 'Parallel',
+  hint: 'Geschwister-Zweig (z. B. zweite Persona)',
+  role: 'flow',
+};
+
 const WHEN_OUT = (passLabel: string): NodePortSlot => ({
   handleId: 'when',
   label: passLabel,
@@ -73,8 +80,8 @@ export const NODE_IO_BY_KIND: Partial<Record<CollectionFlowNodeKind, NodeIoSchem
   action: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   message: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
   measure: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
-  persona: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
-  zielgruppe: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  persona: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT, PARALLEL_OUT], catalogOutputs: false },
+  zielgruppe: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT, PARALLEL_OUT], catalogOutputs: false },
   success: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   abandon: { inputs: [FLOW_IN], controlOutputs: [], catalogOutputs: false },
   quality_ok: { inputs: [FLOW_IN], controlOutputs: [], catalogOutputs: false },

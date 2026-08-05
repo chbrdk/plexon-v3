@@ -1,14 +1,26 @@
 /**
- * Palette presets for Journey product nodes (Wave 11).
- * Presets still emit closed Audion kinds (`action` / `measure`) — no new agent kinds.
+ * Palette presets for Journey + Quality product nodes (Waves 11 / 13).
+ * Presets still emit closed kinds — no new agent kinds / no free expressions.
  * @see specs/domain/collection-test-flow.md
  */
 
-import type { CollectionFlowNode, CollectionFlowNodeKind } from '@/lib/collection-test-flow';
+import {
+  DEFAULT_SCORE_GATE_THRESHOLD,
+  type CollectionFlowNode,
+  type CollectionFlowNodeKind,
+} from '@/lib/collection-test-flow';
+
+export type CollectionFlowPresetGroup =
+  | 'kontext'
+  | 'schritte'
+  | 'messung'
+  | 'steuerung'
+  | 'qualität'
+  | 'vergleich';
 
 export type CollectionFlowPreset = {
   id: string;
-  group: 'kontext' | 'schritte' | 'messung' | 'steuerung';
+  group: CollectionFlowPresetGroup;
   /** Palette button label. */
   label: string;
   kind: CollectionFlowNodeKind;
@@ -181,15 +193,107 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
     kind: 'abandon',
     defaults: { label: 'Abandon', text: '' },
   },
+  // Wave 13 — Quality / Compare
+  {
+    id: 'scan',
+    group: 'qualität',
+    label: 'Page Scan',
+    kind: 'scan',
+    defaults: { label: 'Page scan', scanMode: 'single', presetId: 'scan' },
+  },
+  {
+    id: 'domain_scan',
+    group: 'qualität',
+    label: 'Domain Scan',
+    kind: 'domain_scan',
+    defaults: { label: 'Domain Scan', presetId: 'domain_scan' },
+  },
+  {
+    id: 'geo_job',
+    group: 'qualität',
+    label: 'GEO Job',
+    kind: 'geo_job',
+    defaults: { label: 'GEO Job', presetId: 'geo_job' },
+  },
+  {
+    id: 'quality_ok',
+    group: 'qualität',
+    label: 'Quality OK',
+    kind: 'quality_ok',
+    defaults: { label: 'Quality OK', presetId: 'quality_ok' },
+  },
+  {
+    id: 'compare-score-70',
+    group: 'vergleich',
+    label: `Compare: Score ≥ ${DEFAULT_SCORE_GATE_THRESHOLD}`,
+    kind: 'compare',
+    defaults: {
+      label: `Score ≥ ${DEFAULT_SCORE_GATE_THRESHOLD}`,
+      presetId: 'compare-score-70',
+      path: 'scan.overallScore',
+      op: 'gte',
+      value: DEFAULT_SCORE_GATE_THRESHOLD,
+    },
+  },
+  {
+    id: 'compare-a11y',
+    group: 'vergleich',
+    label: 'Compare: A11y ≥ 70',
+    kind: 'compare',
+    defaults: {
+      label: 'A11y ≥ 70',
+      presetId: 'compare-a11y',
+      path: 'scan.scores.accessibility',
+      op: 'gte',
+      value: DEFAULT_SCORE_GATE_THRESHOLD,
+    },
+  },
+  {
+    id: 'compare-no-critical',
+    group: 'vergleich',
+    label: 'Compare: keine Criticals',
+    kind: 'compare',
+    defaults: {
+      label: 'Keine Criticals',
+      presetId: 'compare-no-critical',
+      path: 'scan.issues.criticalCount',
+      op: 'eq',
+      value: 0,
+    },
+  },
+  {
+    id: 'compare-journey-done',
+    group: 'vergleich',
+    label: 'Compare: Journey done',
+    kind: 'compare',
+    defaults: {
+      label: 'Journey done',
+      presetId: 'compare-journey-done',
+      path: 'journey.taskCompleted',
+      op: 'eq',
+      value: true,
+    },
+  },
+  {
+    id: 'compare-geo-cited',
+    group: 'vergleich',
+    label: 'Compare: GEO cited ≥ 70',
+    kind: 'compare',
+    defaults: {
+      label: 'GEO cited ≥ 70',
+      presetId: 'compare-geo-cited',
+      path: 'geo.citedShare',
+      op: 'gte',
+      value: DEFAULT_SCORE_GATE_THRESHOLD,
+    },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{
-  id: CollectionFlowPreset['group'];
+  id: CollectionFlowPresetGroup;
   title: string;
   presets: CollectionFlowPreset[];
-}> = (
-  ['kontext', 'schritte', 'messung', 'steuerung'] as const
-).map((id) => ({
+}> = (['kontext', 'schritte', 'messung', 'steuerung'] as const).map((id) => ({
   id,
   title:
     id === 'kontext'
@@ -199,6 +303,21 @@ export const PALETTE_JOURNEY_GROUPS: Array<{
         : id === 'messung'
           ? 'Messung'
           : 'Steuerung',
+  presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),
+}));
+
+export const PALETTE_QUALITY_GROUPS: Array<{
+  id: CollectionFlowPresetGroup;
+  title: string;
+  presets: CollectionFlowPreset[];
+}> = (
+  [
+    { id: 'qualität' as const, title: 'Qualität' },
+    { id: 'vergleich' as const, title: 'Vergleich' },
+  ] as const
+).map(({ id, title }) => ({
+  id,
+  title,
   presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),
 }));
 

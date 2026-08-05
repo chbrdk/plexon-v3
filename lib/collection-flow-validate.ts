@@ -81,6 +81,16 @@ export function validateCollectionFlowForRun(
     }
   }
 
+  const parallelPersonaEdges = doc.edges.filter((e) => (e.edgeKind ?? 'then') === 'parallel');
+  if (parallelPersonaEdges.length > 0) {
+    issues.push({
+      level: 'warning',
+      code: 'parallel_persona_authoring',
+      message:
+        'Parallel-Persona ist authoring-only: der Lauf merged weiterhin eine Persona auf Start (nächste Wave: Runtime-Fan-out).',
+    });
+  }
+
   if (documentHasJourneySegment(doc)) {
     const extracted = extractJourneyFlowFromDocument(doc, url || 'https://example.com');
     if (!extracted?.compileReady) {
