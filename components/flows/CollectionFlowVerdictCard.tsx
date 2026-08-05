@@ -56,6 +56,14 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
             ? ` (score ${verdict.overallScore} / ≥${verdict.threshold})`
             : ''}
         </li>
+        {verdict.hasCompareGates ? (
+          <li data-ok={verdict.comparePassed ? 'true' : 'false'}>
+            compare: {verdict.comparePassed ? 'pass' : 'fail'}
+            {verdict.compareResults?.length
+              ? ` · ${verdict.compareResults.filter((r) => r.passed).length}/${verdict.compareResults.length}`
+              : ''}
+          </li>
+        ) : null}
         {verdict.hasIssueGate ? (
           <li data-ok={verdict.issueGatePassed ? 'true' : 'false'}>
             issueGate: {verdict.issueGateBranch ?? '—'}

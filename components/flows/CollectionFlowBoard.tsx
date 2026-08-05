@@ -936,6 +936,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 inspector={inspectorByNode[selectedId!] ?? null}
                 jobSummary={jobSummary}
                 verdict={verdict}
+                lastRun={lastRun}
                 onClose={() => setSelectedId(null)}
                 onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
               />

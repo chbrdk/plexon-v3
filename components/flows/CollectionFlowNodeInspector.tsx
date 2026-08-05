@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Button, FlowInspectorShell, type FlowInspectorSection } from '@msqdx/ui'
 import type {
+  CollectionFlowLastRun,
   CollectionFlowNode,
   CollectionFlowNodeKind,
   CollectionVerdict,
 } from '@/lib/collection-test-flow'
+import { flattenContextForInspector } from '@/lib/collection-flow-run-context'
 import type {
   FlowJobRunSummary,
   FlowNodeInspectorData,
@@ -33,6 +35,7 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   scan: 'Scan',
   domain_scan: 'Domain Scan',
   geo_job: 'GEO Job',
+  compare: 'Compare',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   geo_gate: 'GEO Gate',
@@ -152,6 +155,7 @@ export function CollectionFlowNodeInspector({
   inspector,
   jobSummary,
   verdict,
+  lastRun,
   onClose,
   onAppendOutputToNote,
 }: {
@@ -160,6 +164,7 @@ export function CollectionFlowNodeInspector({
   inspector?: FlowNodeInspectorData | null
   jobSummary?: FlowJobRunSummary | null
   verdict?: CollectionVerdict | null
+  lastRun?: CollectionFlowLastRun | null
   onClose: () => void
   onAppendOutputToNote?: () => void
 }) {
@@ -176,6 +181,7 @@ export function CollectionFlowNodeInspector({
     node.kind === 'scan' ||
     node.kind === 'domain_scan' ||
     node.kind === 'geo_job' ||
+    node.kind === 'compare' ||
     node.kind === 'score_gate' ||
     node.kind === 'issue_gate' ||
     node.kind === 'geo_gate' ||
@@ -183,11 +189,29 @@ export function CollectionFlowNodeInspector({
 
   const gateBranchLabel = useMemo(() => {
     if (!verdict) return null
+    if (node.kind === 'compare') {
+      const row = verdict.compareResults?.find((r) => r.nodeId === node.id)
+      if (!row) return null
+      return row.passed ? 'pass' : 'fail'
+    }
     if (node.kind === 'score_gate') return verdict.scorePassed ? 'pass' : 'fail'
     if (node.kind === 'issue_gate') return verdict.issueGatePassed ? 'pass' : 'fail'
     if (node.kind === 'geo_gate') return verdict.geoGatePassed ? 'pass' : 'fail'
     return null
-  }, [node.kind, verdict])
+  }, [node.id, node.kind, verdict])
+
+  const outputRoot =
+    node.kind === 'scan'
+      ? 'scan'
+      : node.kind === 'domain_scan'
+        ? 'domain'
+        : node.kind === 'geo_job'
+          ? 'geo'
+          : null
+  const outputRows = useMemo(() => {
+    if (!outputRoot || !lastRun?.context) return []
+    return flattenContextForInspector(lastRun.context, outputRoot)
+  }, [lastRun?.context, outputRoot])
 
   const sections = useMemo((): FlowInspectorSection[] => {
     const out: FlowInspectorSection[] = []
@@ -262,6 +286,40 @@ export function CollectionFlowNodeInspector({
         ) : undefined,
         children: (
           <>
+            {node.kind === 'compare' ? (
+              <div className="msqdx-flow-inspector-stats">
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Path</span>
+                  <strong>{node.path ?? '—'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Op</span>
+                  <strong>{node.op ?? 'gte'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Value</span>
+                  <strong>{node.value != null ? String(node.value) : '—'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Actual</span>
+                  <strong>
+                    {verdict?.compareResults?.find((r) => r.nodeId === node.id)?.actual != null
+                      ? String(verdict.compareResults.find((r) => r.nodeId === node.id)?.actual)
+                      : '—'}
+                  </strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Pass</span>
+                  <strong>
+                    {verdict?.compareResults?.find((r) => r.nodeId === node.id)
+                      ? verdict.compareResults.find((r) => r.nodeId === node.id)?.passed
+                        ? 'ja'
+                        : 'nein'
+                      : '—'}
+                  </strong>
+                </div>
+              </div>
+            ) : null}
             {node.kind === 'score_gate' ? (
               <div className="msqdx-flow-inspector-stats">
                 <div className="msqdx-flow-inspector-stat">
@@ -354,6 +412,24 @@ export function CollectionFlowNodeInspector({
               </p>
             ) : null}
           </>
+        ),
+      })
+    }
+
+    if (outputRows.length > 0) {
+      out.push({
+        id: 'output',
+        title: 'Output',
+        defaultOpen: true,
+        children: (
+          <div className="msqdx-flow-inspector-stats">
+            {outputRows.slice(0, 24).map((row) => (
+              <div key={row.key} className="msqdx-flow-inspector-stat">
+                <span>{row.key}</span>
+                <strong>{row.value}</strong>
+              </div>
+            ))}
+          </div>
         ),
       })
     }
@@ -478,6 +554,7 @@ export function CollectionFlowNodeInspector({
     jobSummary,
     node,
     onAppendOutputToNote,
+    outputRows,
     steps,
     verdict,
   ])

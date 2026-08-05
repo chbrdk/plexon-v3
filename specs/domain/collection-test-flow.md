@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 8B GEO nodes (shipped)  
+**Status:** Wave 9 Run Context + Compare (shipped)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -76,21 +76,21 @@ Orchestration nodes only — start job → poll → signal → branch. Report ch
 | Kind | Role | Wave |
 |------|------|------|
 | `page` | Explicit page URL (optional; defaults to journey/start URL) | later |
-| `scan` | CHECKION page scan — `scanMode: single \| deep` (default `single`) | **8A** |
-| `domain_scan` | CHECKION domain crawl — `POST /api/domain-scans` (`maxPages?`) | **8A** |
-| `issue_gate` | Branch on issue severity / count / rule family | 3 + **8A** |
-| `score_gate` | Branch on overall **or** score dimension (`scoreKind`) | 1 + **8A** |
+| `scan` | CHECKION page scan — `scanMode: single \| deep` (default `single`); writes `scan.*` catalog output | **8A** / **9** |
+| `domain_scan` | CHECKION domain crawl — writes `domain.*` | **8A** / **9** |
+| `geo_job` | CHECKION GEO job — writes `geo.*` | **8B** / **9** |
+| `compare` | Branch on catalog path + closed op (`gte`/`lte`/…) | **9** |
 | `quality_ok` | Positive quality terminal | 1 |
-| `geo_job` | CHECKION GEO job (`POST /api/geo-jobs`) | **8B** |
-| `geo_gate` | Branch on citedShare / geoFitness (EEAT) | **8B** |
+| `score_gate` / `issue_gate` / `geo_gate` | **Legacy** — migrated to `compare` on load (Wave 9) | 1–8B |
 
 #### Keep / reshape / drop (quality catalog)
 
 | Decision | Item |
 |----------|------|
-| **Keep** | `scan` single path; `score_gate` overall; `issue_gate` critical; Collection verdict + dossier deep links |
-| **Reshape** | `scan` gains `scanMode`; `score_gate` gains `scoreKind`; `issue_gate` gains severity-band conditions |
-| **Add** | `domain_scan` (Wave 8A); `geo_job` / `geo_gate` (Wave 8B) |
+| **Keep** | `scan` / `domain_scan` / `geo_job` as **actions**; Collection verdict + dossier deep links |
+| **Reshape** | Specialized gates → single `compare` over closed catalog paths (n8n-style field reuse) |
+| **Add** | `runContext` (typed node outputs) + `compare` node (Wave 9) |
+| **Drop from authoring** | `score_gate`, `issue_gate`, `geo_gate` (palette); free JS/JSONPath expressions |
 | **Drop as nodes** | Result Overview, Share links, Reports, Settings, Saliency canvas — link from Run strip / Verdict only |
 
 Node fields (quality):
@@ -98,15 +98,13 @@ Node fields (quality):
 | Field | On | Notes |
 |-------|-----|-------|
 | `url` | `scan`, `domain_scan`, `geo_job`, `start` | Empty → journey `finalUrl` / start URL |
-| `companyName` | `geo_job` | Brand hint when URL empty (Checkion requires url **or** companyName) |
+| `companyName` | `geo_job` | Brand hint when URL empty |
 | `scanMode` | `scan` | `single` (default) \| `deep` |
-| `maxPages` | `domain_scan` | Optional crawl cap (default server/env) |
-| `text` | `geo_job` | Optional queries — one prompt per line (else Checkion brand defaults) |
-| `threshold` | `score_gate`, `geo_gate` | Default **70** |
-| `scoreKind` | `score_gate` | `overall` (default) \| Checkion score card `kind` |
-| `minCount` | `issue_gate` | Default **1** |
-| `pattern` | `issue_gate` | For `issue_rule_match` |
-| `gateCondition` | `issue_gate` / `score_gate` / `geo_gate` | Closed set below |
+| `maxPages` | `domain_scan` | Optional crawl cap |
+| `text` | `geo_job` | Optional queries — one prompt per line |
+| `path` | `compare` | Catalog path e.g. `scan.overallScore`, `scan.scores.accessibility` |
+| `op` | `compare` | `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists` |
+| `value` | `compare` | Expected number/string/boolean (ignored for exists ops) |
 
 ### C — Orchestration (PLEXON)
 
@@ -123,39 +121,41 @@ MVP may fold `hand_off` into sequential edges (implicit handoff when leaving a c
 
 Same as Audion V1: `then` | `when` | `otherwise` | `parallel`.
 
-## Gate conditions (extended closed set)
+## Compare + catalog paths (Wave 9)
 
-### Journey (existing — AUDION emits)
+Actions write typed bundles into `lastRun.context.outputs` (also aliased by root: `scan`, `domain`, `geo`, `journey`, `run`).
 
-`frustration_high`, `url_match`, `title_match`, `consent_accepted`, `consent_rejected`, `goal_reached`, `confusion_named`, `time_elapsed`.
+| Root | From | Paths (picker catalog) |
+|------|------|------------------------|
+| `scan` | page `scan` | `status`, `overallScore`, `url`, `issueCount`, `scores.accessibility`, `scores.seo`, `scores.performance`, `scores.ux`, `scores.eco`, `scores.best_practices`, `issues.criticalCount`, `issues.seriousCount`, `issues.issueCount` |
+| `domain` | `domain_scan` | `status`, `overallScore`, `pageCount`, `issueCount`, `issues.criticalCount`, `issues.seriousCount`, `issues.issueCount` |
+| `geo` | `geo_job` | `status`, `citedShare`, `geoFitness`, `overallScore`, `url` |
+| `journey` | Audion segment | `taskCompleted`, `validEvidence`, `finalUrl` |
+| `run` | orchestration | `url`, `startedAt` |
 
-### Quality (CHECKION emits / Plexon evaluates)
+Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
+**Closed catalog paths only** — no free JS or JSONPath.
 
-| Id | Meaning | Signal source |
-|----|---------|---------------|
-| `scan_complete` | Page/domain scan finished successfully | CHECKION job status |
-| `score_at_least` | Score ≥ `threshold` (overall or `scoreKind`) | Scan / domain `overallScore` or score card |
-| `score_below` | Score &lt; `threshold` | Same |
-| `critical_issues` | Count of **critical** ≥ `minCount` | Issues summary |
-| `no_critical_issues` | Zero critical | Issues summary |
-| `serious_issues` | Count of **serious** ≥ `minCount` | Issues summary |
-| `no_serious_issues` | Zero serious | Issues summary |
-| `any_issues` | Total issues ≥ `minCount` | Issues summary |
-| `no_issues` | Zero issues | Issues summary |
-| `issue_rule_match` | At least one issue matching `pattern` (rule id / family) → **fail** branch when match present | Issues list |
-| `cited_share_at_least` | GEO `citedShare` ≥ `threshold` | `GeoOverview.job.citedShare` |
-| `cited_share_below` | GEO `citedShare` &lt; `threshold` | Same |
-| `geo_fitness_at_least` | `eeat.geoFitness` \|\| `job.overallScore` ≥ `threshold` | GEO overview (needs page scan on job) |
-| `geo_fitness_below` | geoFitness &lt; `threshold` | Same |
+### Legacy gate → compare (on `ensureFlowDocument`)
 
-Do **not** invent open-ended expression languages.
+| Legacy | Migrates to |
+|--------|-------------|
+| `score_gate` overall / `score_at_least` | `compare` `scan.overallScore` `gte` threshold |
+| `score_gate` + `scoreKind` | `compare` `scan.scores.{kind}` `gte`/`lte` |
+| `issue_gate` `critical_issues` | `compare` `scan.issues.criticalCount` `lt` minCount |
+| `issue_gate` `no_critical_issues` | `compare` `scan.issues.criticalCount` `eq` 0 |
+| `issue_gate` `serious_*` / `any_*` / `no_*` | analogous `issues.*` compares |
+| `issue_rule_match` | `compare` `scan.issues.issueCount` `eq` 0 (regex dropped in Wave 9) |
+| `geo_gate` cited / fitness | `compare` `geo.citedShare` / `geo.geoFitness` |
+
+Journey closed-set conditions on family-A `gate` are unchanged.
 
 ## Graph rules
 
 1. Exactly one `start` (journey family) **or** one `page` as entry — MVP prefers `start` with URL, optional immediate `scan` via `then`.
 2. Capability segments are contiguous runs of family A **or** family B between orchestration nodes.
-3. `gate` / `issue_gate` / `score_gate` require `when` + `otherwise`.
-4. Terminals: journey `success`|`abandon` and/or `quality_ok`; Collection flow is complete when the **active path** reaches any terminal and required quality gates on that path are evaluated.
+3. `gate` / `compare` (and legacy quality gates until migrated) require `when` + `otherwise`.
+4. Terminals: journey `success`|`abandon` and/or `quality_ok`; Collection flow is complete when the **active path** reaches any terminal and required quality compares on that path are evaluated.
 5. No cycles in MVP templates.
 6. Every capability node carries optional `note` (persisted on Collection flow jsonb).
 
@@ -165,29 +165,30 @@ Do **not** invent open-ended expression languages.
 Plexon Collection Flow runner
   ├── resolve bindings (audion + checkion must be in_sync for full run)
   ├── walk active path
-  ├── journey segment → AUDION journey agent (flow_graph subset + persona)
-  ├── quality segment → CHECKION POST /api/scans mode=single (+ poll)
-  ├── evaluate gates on merged signal bus
-  └── emit CollectionFlowCursor + CollectionVerdict
+  ├── journey segment → AUDION journey agent → write journey.* bundle
+  ├── quality actions → CHECKION scan/domain/geo → write scan|domain|geo.* bundles
+  ├── evaluate compare nodes against runContext catalog
+  └── emit CollectionFlowCursor + CollectionVerdict (+ lastRun.context)
 ```
 
-### Signal bus (Collection)
+### Signal bus / Run Context (Collection)
 
-Plexon merges:
+Plexon merges into `CollectionFlowRunContext`:
 
 | Bundle | Origin |
 |--------|--------|
-| `journeySignals` | Audion `gateSignals` + scorecard coverage + flowCursor |
-| `qualitySignals` | Checkion scan status, scores, issue counts, finalUrl |
-| `correlation` | `platformProjectId`, `audionJobId` / wave run id, `checkionScanId`, `stepUrl` |
+| `journey` | Audion task/evidence/finalUrl |
+| `scan` / `domain` / `geo` | Checkion action outputs (catalog) |
+| `run` | url, startedAt |
+| `correlation` | `platformProjectId`, audion/checkion ids |
 
 Reuse existing handoff fields from `checkion-single-scan-trigger.md` (`platformProjectId`, `audionRunId`, `stepUrl`).
 
 ### Dispatch rules (MVP)
 
-1. **Journey segment:** compile contiguous A-nodes to Audion `flow_graph` (or lean task + graph) via existing Study-from-flow / agent start APIs. Prefer binding `external_project_id` for Audion project.
-2. **Scan node:** `POST {CHECKION}/api/scans` with `mode: single`, `projectId` = Checkion binding, `url` = page URL from `page` node or last journey `finalUrl` / start URL, plus correlation.
-3. **Quality gate:** evaluate only after scan terminal state; do not block journey mid-step unless the graph places the gate there.
+1. **Journey segment:** compile contiguous A-nodes to Audion `flow_graph` via existing Study-from-flow / agent start APIs.
+2. **Scan node:** `POST {CHECKION}/api/scans` with mode, projectId, url, correlation — then materialize `scan.*` catalog (scores + issue counts).
+3. **Compare:** evaluate only after required action bundles exist; missing path → fail (unless `exists`/`not_exists`).
 4. Failures: binding missing / sync failed → Collection run `error` with capability chip; do not invent a product-only project.
 
 ## Evidence & Collection verdict
@@ -234,7 +235,7 @@ Do not place this on legacy `/board` Prismion island.
 |--|--|
 | **Keep** | Audion journey node semantics + Live-Gates; Checkion single-scan API; Collection bindings; DS FloatingPanel |
 | **Reshape** | Audion Board → Collection capability workspace: **same board chrome + authoring UX** as Audion Phase 5–8, plus Checkion/orchestration nodes and Collection verdict on one canvas |
-| **Drop** | Glass/MUI/Prismion `/board` island; product-only “Audion flow project”; open expression gates; dumping Checkion report magazine onto Overview |
+| **Drop** | Glass/MUI/Prismion `/board` island; product-only “Audion flow project”; free JS/JSONPath expressions; dumping Checkion report magazine onto Overview |
 | **Parity (Waves 5–7)** | Board authoring, palette, Save/Undo, Testen/Stop, live node states, path highlight, Inspector, Live-Gate branch, Agent-Segment patterns — Soft-Q edit / Compare stay on Audion Wave (deep link + Wave-4 rollup) |
 
 ## Phasing
@@ -251,7 +252,8 @@ Do not place this on legacy `/board` Prismion island.
 | **7 — Polish** | Output→Note, Reset-to-template, Evaluate deep-link / Soft-Q read-only summary; smoke + tests | edit→save→run→verdict contract green |
 | **8A — Checkion quality catalog** | `scan.scanMode` single\|deep; `domain_scan`; `scoreKind` on `score_gate`; expanded `issue_gate` severity conditions; palette + RF/inspector + run BFF | Staging: deep page scan + domain crawl + dimension gate + serious_issues branch |
 | **8B — GEO nodes** | `geo_job` + `geo_gate` (`cited_share_*`, `geo_fitness_*`); v3 `/api/geo-jobs` client; deep link `/geo/:id/overview` | Staging: GEO-only or journey→geo→gate; strip opens GEO overview |
-| **Later** | Parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
+| **9 — Run Context + Compare** | Typed `lastRun.context` catalog outputs; `compare` node; migrate/drop specialized gates from palette; inspector output tree | Staging: scan → compare `scan.scores.accessibility` + `scan.issues.criticalCount`; legacy docs auto-migrate |
+| **Later** | `set` aliases, array pickers, parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -317,8 +319,20 @@ Do not place this on legacy `/board` Prismion island.
 - Palette: add `geo_job`, `geo_gate` under Quality.
 - `lastRun.geoJobId` when GEO ran.
 
+## Wave 9 implementation notes
+
+- Actions (`scan`, `domain_scan`, `geo_job`) write catalog bundles into `lastRun.context.outputs` (roots `scan`|`domain`|`geo` plus per-nodeId).
+- New node `compare`: fields `path`, `op`, `value`; dual `when`/`otherwise` handles.
+- `ensureFlowDocument` → `migrateLegacyQualityGates` converts `score_gate`/`issue_gate`/`geo_gate` → `compare` and rewires edges.
+- Palette Quality: `scan`, `domain_scan`, `geo_job`, `compare`, `quality_ok` (no specialized gates).
+- Templates emit `compare` (e.g. `scan.overallScore` `gte` 70; issues template adds `scan.issues.criticalCount` `lt` 1).
+- Verdict: `compareResults[]` + `qualityPassed` = AND of compares; legacy score/issue/geo flags kept as derived compat.
+- Inspector: Output tree for action nodes; compare shows path/actual/pass.
+- Helper: `lib/collection-flow-run-context.ts`.
+
 ## Open questions (non-blocking)
 
 - Richer Soft-Q mapping from Checkion lenses — later if product asks.
-- Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when gate follows `domain_scan`.
+- Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when compare follows `domain_scan`.
 - Multi-provider GEO models beyond OpenAI defaults — product later.
+- `set` / array pickers (`issues[].ruleId`) — later wave.

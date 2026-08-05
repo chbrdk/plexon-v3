@@ -12,7 +12,7 @@ import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
-import { runCheckionSingleScan, fetchCheckionScanIssues } from '@/lib/integrations/checkion-scans-client';
+import { runCheckionSingleScan, fetchCheckionScanIssues, fetchCheckionScanScores } from '@/lib/integrations/checkion-scans-client';
 import {
   fetchJourneyJob,
   runAudionJourneySegment,
@@ -69,6 +69,7 @@ vi.mock('@/lib/collection-knowledge-pack-auth', async (importOriginal) => {
 vi.mock('@/lib/integrations/checkion-scans-client', () => ({
   runCheckionSingleScan: vi.fn(),
   fetchCheckionScanIssues: vi.fn(),
+  fetchCheckionScanScores: vi.fn(),
 }));
 
 vi.mock('@/lib/integrations/audion-journey-client', () => ({
@@ -151,6 +152,15 @@ describe('Collection Test Flow run API', () => {
       waveRollupOk: true,
     });
     vi.mocked(distillCollectionFlowToKnowledgePack).mockResolvedValue({ ok: true });
+    vi.mocked(fetchCheckionScanIssues).mockResolvedValue({
+      ok: true,
+      items: [],
+      signals: { criticalCount: 0, seriousCount: 0, issueCount: 0, ruleIds: [] },
+    });
+    vi.mocked(fetchCheckionScanScores).mockResolvedValue({
+      ok: true,
+      byKind: { accessibility: 80, seo: 80, performance: 80 },
+    });
   });
 
   it('POST run returns collectionReady when Checkion score passes', async () => {
@@ -320,7 +330,12 @@ describe('Collection Test Flow run API', () => {
         { id: 'i1', severity: 'critical', ruleId: 'color-contrast' },
         { id: 'i2', severity: 'minor', ruleId: 'label' },
       ],
-      signals: { criticalCount: 1, issueCount: 2, ruleIds: ['color-contrast', 'label'] },
+      signals: {
+        criticalCount: 1,
+        seriousCount: 0,
+        issueCount: 2,
+        ruleIds: ['color-contrast', 'label'],
+      },
     });
     vi.mocked(persistFlowRunResult).mockImplementation(async (input) => ({
       ...row,
@@ -340,19 +355,18 @@ describe('Collection Test Flow run API', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       verdict: {
-        scorePassed: boolean;
-        issueGatePassed: boolean;
-        issueGateBranch: string;
+        comparePassed: boolean;
+        qualityPassed: boolean;
         collectionReady: boolean;
       };
-      lastRun: { criticalCount: number; issueGateBranch: string };
+      lastRun: { criticalCount: number; compareResults: Array<{ nodeId: string; passed: boolean }> };
       nodeStates: Record<string, string>;
     };
-    expect(body.verdict.scorePassed).toBe(true);
-    expect(body.verdict.issueGatePassed).toBe(false);
-    expect(body.verdict.issueGateBranch).toBe('fail');
+    expect(body.verdict.comparePassed).toBe(false);
+    expect(body.verdict.qualityPassed).toBe(false);
     expect(body.verdict.collectionReady).toBe(false);
     expect(body.lastRun.criticalCount).toBe(1);
+    expect(body.lastRun.compareResults.find((r) => r.nodeId === 'n-issues')?.passed).toBe(false);
     expect(body.nodeStates['n-issues']).toBe('done');
     expect(body.nodeStates['n-abandon']).toBe('done');
     expect(fetchCheckionScanIssues).toHaveBeenCalledWith('scan-iss');

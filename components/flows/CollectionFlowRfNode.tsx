@@ -11,12 +11,14 @@ import type {
 } from '@/lib/collection-test-flow'
 import {
   AUDION_GATE_OPTIONS,
+  COLLECTION_COMPARE_OP_OPTIONS,
   COLLECTION_SCAN_MODE_OPTIONS,
   COLLECTION_SCORE_KIND_OPTIONS,
   GEO_GATE_CONDITION_OPTIONS,
   ISSUE_GATE_CONDITION_OPTIONS,
   type CollectionFlowRfNodeData,
 } from '@/lib/collection-flow-canvas'
+import { listCatalogPathsForPicker } from '@/lib/collection-flow-run-context'
 
 type CollectionFlowNodeType = Node<CollectionFlowRfNodeData, 'collectionFlow'>
 
@@ -34,6 +36,7 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   scan: 'Scan',
   domain_scan: 'Domain Scan',
   geo_job: 'GEO Job',
+  compare: 'Compare',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   geo_gate: 'GEO Gate',
@@ -96,6 +99,18 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     patch({ gateCondition: e.target.value as CollectionFlowGateCondition })
   const onGeoGateCondition = (e: ChangeEvent<HTMLSelectElement>) =>
     patch({ gateCondition: e.target.value as CollectionFlowGateCondition })
+  const onComparePath = (e: ChangeEvent<HTMLSelectElement>) => patch({ path: e.target.value })
+  const onCompareOp = (e: ChangeEvent<HTMLSelectElement>) =>
+    patch({ op: e.target.value as CollectionFlowNodeModel['op'] })
+  const onCompareValue = (e: ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    if (raw === '') {
+      patch({ value: undefined })
+      return
+    }
+    const n = Number(raw)
+    patch({ value: Number.isFinite(n) && raw.trim() !== '' ? n : raw })
+  }
 
   const showText =
     kind === 'prompt' ||
@@ -107,7 +122,8 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     kind === 'observe' ||
     kind === 'geo_job'
   const isJourneyGate = kind === 'gate'
-  const isQualityGate = kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate'
+  const isQualityGate =
+    kind === 'compare' || kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate'
   const showOutput =
     Boolean(runOutput?.text || runOutput?.imageUrl || runOutput?.label) &&
     (runState === 'active' || runState === 'done' || runState === 'error')
@@ -324,6 +340,50 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
                 Live: {gateEvaluation.matched ? 'match' : '—'}
                 {gateEvaluation.evidence ? ` · ${gateEvaluation.evidence}` : ''}
               </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {kind === 'compare' ? (
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>Path</span>
+              <select
+                className="msqdx-flow-rf-select"
+                value={flowNode.path ?? 'scan.overallScore'}
+                onChange={onComparePath}
+              >
+                {listCatalogPathsForPicker().map((p) => (
+                  <option key={p.path} value={p.path}>
+                    {p.path}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="msqdx-flow-rf-field">
+              <span>Op</span>
+              <select
+                className="msqdx-flow-rf-select"
+                value={flowNode.op ?? 'gte'}
+                onChange={onCompareOp}
+              >
+                {COLLECTION_COMPARE_OP_OPTIONS.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {flowNode.op !== 'exists' && flowNode.op !== 'not_exists' ? (
+              <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
+                <span>Value</span>
+                <Input
+                  size="sm"
+                  className="msqdx-flow-rf-input--narrow"
+                  value={flowNode.value != null ? String(flowNode.value) : '70'}
+                  onChange={onCompareValue}
+                />
+              </label>
             ) : null}
           </>
         ) : null}

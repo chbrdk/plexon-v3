@@ -25,8 +25,9 @@ describe('flowToRf / rfToDocument roundtrip', () => {
     expect(edges).toHaveLength(doc.edges.length);
 
     const scoreNode = nodes.find((n) => n.id === 'n-score')!;
-    expect(scoreNode.data.flowNode.kind).toBe('score_gate');
-    expect(scoreNode.data.flowNode.threshold).toBe(70);
+    expect(scoreNode.data.flowNode.kind).toBe('compare');
+    expect(scoreNode.data.flowNode.value).toBe(70);
+    expect(scoreNode.data.flowNode.path).toBe('scan.overallScore');
 
     const passEdge = edges.find((e) => e.id === 'e-score-ok')!;
     expect(passEdge.sourceHandle).toBe('when');
@@ -52,7 +53,7 @@ describe('flowToRf / rfToDocument roundtrip', () => {
       'action',
       'success',
       'scan',
-      'score_gate',
+      'compare',
       'quality_ok',
       'abandon',
     ]);
@@ -137,18 +138,19 @@ describe('palette kind sets', () => {
       'scan',
       'domain_scan',
       'geo_job',
-      'score_gate',
-      'issue_gate',
-      'geo_gate',
+      'compare',
       'quality_ok',
     ]);
     const overlap = PALETTE_JOURNEY_KINDS.filter((k) => (PALETTE_QUALITY_KINDS as string[]).includes(k));
     expect(overlap).toHaveLength(0);
   });
 
-  it('defaults scanMode / scoreKind / domain maxPages / geo defaults', () => {
+  it('defaults scanMode / compare / domain maxPages / geo defaults', () => {
     expect(newCollectionFlowNode('scan').scanMode).toBe('single');
     expect(newCollectionFlowNode('domain_scan').maxPages).toBe(50);
+    expect(newCollectionFlowNode('compare').path).toBe('scan.overallScore');
+    expect(newCollectionFlowNode('compare').op).toBe('gte');
+    expect(newCollectionFlowNode('compare').value).toBe(70);
     expect(newCollectionFlowNode('score_gate').scoreKind).toBe('overall');
     expect(newCollectionFlowNode('geo_job').companyName).toBe('');
     expect(newCollectionFlowNode('geo_gate').gateCondition).toBe('cited_share_at_least');

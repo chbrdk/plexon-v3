@@ -9,28 +9,30 @@ import {
   deriveCollectionVerdict,
   deriveJourneyErrorVerdict,
   documentHasJourneySegment,
+  ensureFlowDocument,
   evaluateGeoGatePassed,
   evaluateIssueGatePassed,
   evaluateScoreGatePassed,
   geoJobQueriesFromText,
-  issueGateNode,
+  migrateLegacyQualityGates,
   resolveScoreForGate,
   nodeStatesFromVerdict,
   scoreGateThreshold,
 } from '@/lib/collection-test-flow';
 
 describe('createPageQualityTemplate', () => {
-  it('builds start → scan → score_gate → quality_ok|abandon', () => {
+  it('builds start → scan → compare → quality_ok|abandon', () => {
     const doc = createPageQualityTemplate('https://acme.test/');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY);
     expect(doc.nodes.map((n) => n.kind)).toEqual([
       'start',
       'scan',
-      'score_gate',
+      'compare',
       'quality_ok',
       'abandon',
     ]);
     expect(doc.nodes.find((n) => n.kind === 'scan')?.url).toBe('https://acme.test/');
+    expect(doc.nodes.find((n) => n.kind === 'compare')?.path).toBe('scan.overallScore');
     expect(scoreGateThreshold(doc.nodes)).toBe(70);
     expect(doc.edges).toHaveLength(4);
     expect(doc.edges.filter((e) => e.when === 'pass' || e.when === 'fail')).toHaveLength(2);
@@ -38,7 +40,7 @@ describe('createPageQualityTemplate', () => {
 });
 
 describe('createJourneyQualityTemplate', () => {
-  it('builds start → action → success → scan → score_gate with embedded journeyFlow (Wave 5 first-class nodes)', () => {
+  it('builds start → action → success → scan → compare with embedded journeyFlow (Wave 5 first-class nodes)', () => {
     const doc = createJourneyQualityTemplate('https://acme.test/page');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY);
     expect(doc.nodes.map((n) => n.kind)).toEqual([
@@ -46,7 +48,7 @@ describe('createJourneyQualityTemplate', () => {
       'action',
       'success',
       'scan',
-      'score_gate',
+      'compare',
       'quality_ok',
       'abandon',
     ]);
@@ -180,13 +182,13 @@ describe('deriveCollectionVerdict', () => {
 });
 
 describe('issue_gate Wave 3', () => {
-  it('createPageQualityIssuesTemplate wires score → issue_gate → terminals', () => {
+  it('createPageQualityIssuesTemplate wires score → compare critical → terminals', () => {
     const doc = createPageQualityIssuesTemplate('https://acme.test/');
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES);
-    expect(doc.nodes.map((n) => n.kind)).toContain('issue_gate');
-    const gate = issueGateNode(doc.nodes)!;
-    expect(gate.gateCondition).toBe('critical_issues');
-    expect(gate.minCount).toBe(1);
+    expect(doc.nodes.filter((n) => n.kind === 'compare')).toHaveLength(2);
+    const critical = doc.nodes.find((n) => n.id === 'n-issues');
+    expect(critical?.path).toBe('scan.issues.criticalCount');
+    expect(critical?.op).toBe('lt');
     expect(doc.edges.some((e) => e.source === 'n-score' && e.target === 'n-issues')).toBe(true);
   });
 
@@ -225,33 +227,34 @@ describe('issue_gate Wave 3', () => {
     );
   });
 
-  it('fails quality when critical issues present despite score pass', () => {
-    const doc = createPageQualityIssuesTemplate('https://x.test');
-    const gate = issueGateNode(doc.nodes);
+  it('fails quality when critical compare fails despite score pass', () => {
     const v = deriveCollectionVerdict({
       scanStatus: 'completed',
       overallScore: 90,
-      issueGate: gate,
+      compareResults: [
+        { nodeId: 'n-score', path: 'scan.overallScore', passed: true, actual: 90 },
+        { nodeId: 'n-issues', path: 'scan.issues.criticalCount', passed: false, actual: 2 },
+      ],
       issueSignals: { criticalCount: 2, seriousCount: 0, issueCount: 4 },
     });
-    expect(v.scorePassed).toBe(true);
-    expect(v.issueGatePassed).toBe(false);
-    expect(v.issueGateBranch).toBe('fail');
+    expect(v.comparePassed).toBe(false);
     expect(v.qualityPassed).toBe(false);
     expect(v.collectionReady).toBe(false);
     expect(v.terminalKind).toBe('abandon');
   });
 
-  it('passes when score ok and zero criticals', () => {
+  it('passes when score ok and zero criticals via compare', () => {
     const doc = createPageQualityIssuesTemplate('https://x.test');
-    const gate = issueGateNode(doc.nodes);
     const v = deriveCollectionVerdict({
       scanStatus: 'completed',
       overallScore: 90,
-      issueGate: gate,
+      compareResults: [
+        { nodeId: 'n-score', path: 'scan.overallScore', passed: true, actual: 90 },
+        { nodeId: 'n-issues', path: 'scan.issues.criticalCount', passed: true, actual: 0 },
+      ],
       issueSignals: { criticalCount: 0, seriousCount: 0, issueCount: 2 },
     });
-    expect(v.issueGateBranch).toBe('pass');
+    expect(v.comparePassed).toBe(true);
     expect(v.qualityPassed).toBe(true);
     expect(v.collectionReady).toBe(true);
     const states = nodeStatesFromVerdict(doc, v, {
@@ -262,7 +265,7 @@ describe('issue_gate Wave 3', () => {
       status: 'completed',
       overallScore: 90,
       criticalCount: 0,
-      issueGateBranch: 'pass',
+      compareResults: v.compareResults,
     });
     expect(states['n-issues']).toBe('done');
     expect(states['n-ok']).toBe('done');
@@ -340,5 +343,51 @@ describe('Wave 8B geo_gate', () => {
   it('geoJobQueriesFromText splits lines', () => {
     expect(geoJobQueriesFromText('a\n\nb\n c ')).toEqual(['a', 'b', 'c']);
     expect(geoJobQueriesFromText('')).toEqual([]);
+  });
+});
+
+describe('Wave 9 migrate + compare', () => {
+  it('migrateLegacyQualityGates converts score_gate to compare', () => {
+    const legacy = {
+      schemaVersion: '2026-08-collection-flow-v1' as const,
+      templateId: 'page-quality',
+      nodes: [
+        { id: 'n-start', kind: 'start' as const, label: 'Start' },
+        { id: 'n-scan', kind: 'scan' as const, label: 'Scan' },
+        {
+          id: 'n-score',
+          kind: 'score_gate' as const,
+          label: 'Score',
+          gateCondition: 'score_at_least' as const,
+          threshold: 70,
+        },
+      ],
+      edges: [],
+    };
+    const migrated = migrateLegacyQualityGates(legacy);
+    expect(migrated.nodes.find((n) => n.id === 'n-score')).toMatchObject({
+      kind: 'compare',
+      path: 'scan.overallScore',
+      op: 'gte',
+      value: 70,
+    });
+  });
+
+  it('ensureFlowDocument migrates legacy gates', () => {
+    const doc = ensureFlowDocument({
+      nodes: [
+        { id: 'n-start', kind: 'start', label: 'Start' },
+        {
+          id: 'n-g',
+          kind: 'geo_gate',
+          label: 'GEO',
+          gateCondition: 'cited_share_at_least',
+          threshold: 40,
+        },
+      ],
+      edges: [],
+    });
+    expect(doc.nodes.find((n) => n.id === 'n-g')?.kind).toBe('compare');
+    expect(doc.nodes.find((n) => n.id === 'n-g')?.path).toBe('geo.citedShare');
   });
 });

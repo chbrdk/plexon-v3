@@ -64,6 +64,7 @@ export function sourceHandleForEdgeKind(kind: CollectionFlowEdgeKind): string | 
 
 const GATE_LIKE_KINDS = new Set<CollectionFlowNodeKind>([
   'gate',
+  'compare',
   'score_gate',
   'issue_gate',
   'geo_gate',
@@ -81,7 +82,12 @@ function whenFromEdgeKind(
   kind: CollectionFlowEdgeKind,
   sourceKind: CollectionFlowNodeKind | undefined
 ): 'pass' | 'fail' | undefined {
-  if (sourceKind !== 'score_gate' && sourceKind !== 'issue_gate' && sourceKind !== 'geo_gate') {
+  if (
+    sourceKind !== 'compare' &&
+    sourceKind !== 'score_gate' &&
+    sourceKind !== 'issue_gate' &&
+    sourceKind !== 'geo_gate'
+  ) {
     return undefined;
   }
   if (kind === 'when') return 'pass';
@@ -174,14 +180,12 @@ export const PALETTE_JOURNEY_KINDS: CollectionFlowNodeKind[] = [
   'measure',
 ];
 
-/** Palette — Family B (CHECKION quality). */
+/** Palette — Family B (CHECKION quality). Wave 9: compare replaces specialized gates. */
 export const PALETTE_QUALITY_KINDS: CollectionFlowNodeKind[] = [
   'scan',
   'domain_scan',
   'geo_job',
-  'score_gate',
-  'issue_gate',
-  'geo_gate',
+  'compare',
   'quality_ok',
 ];
 
@@ -195,6 +199,17 @@ export const COLLECTION_SCORE_KIND_OPTIONS = [
   'ux',
   'eco',
   'best_practices',
+] as const;
+
+export const COLLECTION_COMPARE_OP_OPTIONS = [
+  'gte',
+  'lte',
+  'gt',
+  'lt',
+  'eq',
+  'neq',
+  'exists',
+  'not_exists',
 ] as const;
 
 export const ISSUE_GATE_CONDITION_OPTIONS = [
@@ -261,6 +276,14 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
     .join(' ');
   const base: CollectionFlowNode = { id: nodeId, kind, label };
   if (kind === 'gate') return { ...base, gateCondition: 'goal_reached' };
+  if (kind === 'compare') {
+    return {
+      ...base,
+      path: 'scan.overallScore',
+      op: 'gte',
+      value: DEFAULT_SCORE_GATE_THRESHOLD,
+    };
+  }
   if (kind === 'score_gate') {
     return {
       ...base,

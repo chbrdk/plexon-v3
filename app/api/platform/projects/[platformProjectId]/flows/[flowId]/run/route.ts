@@ -45,6 +45,16 @@ import {
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
 import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import {
+  buildDomainCatalogBundle,
+  buildGeoCatalogBundle,
+  buildJourneyCatalogBundle,
+  buildScanCatalogBundle,
+  emptyRunContext,
+  evaluateAllCompares,
+  setContextBundle,
+  type CollectionFlowRunContext,
+} from '@/lib/collection-flow-run-context';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import { platformJson } from '@/lib/platform-contract';
 
@@ -124,6 +134,11 @@ export async function POST(
     const startedAt = new Date().toISOString();
     const threshold = scoreGateThreshold(doc.nodes);
     const runUrl = baseUrl || '';
+    let runContext: CollectionFlowRunContext = setContextBundle(
+      emptyRunContext(),
+      'run',
+      { url: runUrl, startedAt }
+    );
 
     let audionJobId: string | null = null;
     let audionStudyId: string | null = null;
@@ -224,16 +239,34 @@ export async function POST(
       if (journey.job.finalUrl) scanUrl = journey.job.finalUrl;
     }
 
+    if (hasJourney) {
+      runContext = setContextBundle(
+        runContext,
+        'journey',
+        buildJourneyCatalogBundle({
+          taskCompleted,
+          validEvidence: journeyValidEvidence,
+          finalUrl: stepUrl,
+        })
+      );
+    }
+
     // qualityNode already resolved above (Wave 8B may be geo-only)
     const useDomain = qualityNode?.kind === 'domain_scan';
     const pageScanMode: CollectionFlowScanMode =
       qualityNode?.scanMode === 'deep' ? 'deep' : 'single';
     const scoreGate = scoreGateNode(doc.nodes);
     const geoGate = geoGateNode(doc.nodes);
+    const hasCompare = doc.nodes.some((n) => n.kind === 'compare');
     const needGeoFitness =
-      documentHasGeoGate(doc) &&
-      (geoGate?.gateCondition === 'geo_fitness_at_least' ||
-        geoGate?.gateCondition === 'geo_fitness_below');
+      (!hasCompare &&
+        documentHasGeoGate(doc) &&
+        (geoGate?.gateCondition === 'geo_fitness_at_least' ||
+          geoGate?.gateCondition === 'geo_fitness_below')) ||
+      (hasCompare &&
+        doc.nodes.some(
+          (n) => n.kind === 'compare' && (n.path ?? '').startsWith('geo.geoFitness')
+        ));
 
     type QualityResult = {
       ok: boolean;
@@ -378,43 +411,66 @@ export async function POST(
       if (quality.scanError) blockers.push(quality.scanError);
     }
 
+    // Always materialize issue + score catalog for page/domain actions (Wave 9 compare).
     const hasIssues = documentHasIssueGate(doc);
     const gate = issueGateNode(doc.nodes);
     let issueSignals: IssueGateSignals | null = null;
-    if (hasIssues && quality?.id) {
+    let scoresByKind: Record<string, number> | null = null;
+    if (quality?.id) {
       if (useDomain) {
         const issuesRes = await fetchCheckionDomainScanV3Issues(quality.id);
-        if (!issuesRes.ok) blockers.push(issuesRes.error);
-        else issueSignals = issuesRes.signals;
+        if (!issuesRes.ok) {
+          if (hasIssues || hasCompare) blockers.push(issuesRes.error);
+        } else issueSignals = issuesRes.signals;
       } else {
         const issuesRes = await fetchCheckionScanIssues(quality.id);
-        if (!issuesRes.ok) blockers.push(issuesRes.error);
-        else issueSignals = issuesRes.signals;
+        if (!issuesRes.ok) {
+          if (hasIssues || hasCompare) blockers.push(issuesRes.error);
+        } else issueSignals = issuesRes.signals;
+        if (quality.pageScanId) {
+          const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
+          if (scoresRes.ok) scoresByKind = scoresRes.byKind;
+          else if (hasCompare) blockers.push(scoresRes.error);
+        }
       }
     }
 
     let gatedScore: number | null | undefined = undefined;
     const scoreKind = (scoreGate?.scoreKind ?? 'overall').trim().toLowerCase() || 'overall';
     if (quality) {
-      if (!useDomain && scoreKind !== 'overall' && quality.pageScanId) {
-        const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
-        if (!scoresRes.ok) {
-          blockers.push(scoresRes.error);
-        } else {
-          gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, scoresRes.byKind);
-          if (gatedScore == null) {
-            blockers.push(`Score kind „${scoreKind}“ fehlt`);
-          }
-        }
+      gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, scoresByKind);
+      if (useDomain) {
+        runContext = setContextBundle(
+          runContext,
+          'domain',
+          buildDomainCatalogBundle({
+            status: quality.status,
+            overallScore: quality.overallScore,
+            pageCount: null,
+            issues: issueSignals,
+          }),
+          qualityNode?.id
+        );
       } else {
-        gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, null);
+        runContext = setContextBundle(
+          runContext,
+          'scan',
+          buildScanCatalogBundle({
+            status: quality.status,
+            overallScore: quality.overallScore,
+            url: quality.url || scanUrl,
+            scoresByKind,
+            issues: issueSignals,
+          }),
+          qualityNode?.id
+        );
       }
     }
 
     let geoJobId: string | null = null;
     let geoSignals: GeoGateSignals | null = null;
     let geoCitedShare: number | null = null;
-    let geoFitness: number | null = null;
+    let geoFitnessVal: number | null = null;
     let geoStatus: string | null = null;
     let geoOverall: number | null = null;
     let geoUrl = quality?.url || scanUrl || runUrl;
@@ -434,10 +490,29 @@ export async function POST(
         geoJobId = geoResult.job?.id ?? null;
         geoStatus = geoResult.job?.status ?? 'failed';
         geoCitedShare = geoResult.job?.citedShare ?? null;
-        geoFitness = geoResult.job?.geoFitness ?? null;
+        geoFitnessVal = geoResult.job?.geoFitness ?? null;
         geoOverall = geoResult.job?.overallScore ?? null;
         if (geoResult.job?.url) geoUrl = geoResult.job.url;
-
+        if (geoResult.job) {
+          runContext = setContextBundle(
+            runContext,
+            'geo',
+            buildGeoCatalogBundle({
+              status: geoStatus,
+              citedShare: geoCitedShare,
+              geoFitness: geoFitnessVal,
+              overallScore: geoOverall,
+              url: geoUrl,
+            }),
+            geoNode?.id
+          );
+        }
+        const compareResults = evaluateAllCompares(doc.nodes, runContext).map((r) => ({
+          nodeId: r.nodeId,
+          path: r.path,
+          passed: r.passed,
+          actual: r.actual ?? null,
+        }));
         const verdictBase = deriveCollectionVerdict({
           scanStatus: geoStatus,
           overallScore: quality?.overallScore ?? geoOverall,
@@ -447,12 +522,13 @@ export async function POST(
           hasJourneySegment: hasJourney,
           taskCompleted,
           journeyValidEvidence,
-          scoreGate,
-          issueGate: gate,
+          scoreGate: hasCompare ? null : scoreGate,
+          issueGate: hasCompare ? null : gate,
           issueSignals,
-          geoGate,
+          geoGate: hasCompare ? null : geoGate,
           geoSignals: null,
-          requirePageScore: Boolean(scoreGate) || hasPageQuality,
+          compareResults: hasCompare ? compareResults : null,
+          requirePageScore: hasPageQuality,
         });
         const errorVerdict: CollectionVerdict = {
           ...verdictBase,
@@ -476,7 +552,7 @@ export async function POST(
           status: geoStatus,
           overallScore: quality?.overallScore ?? geoOverall,
           citedShare: geoCitedShare,
-          geoFitness,
+          geoFitness: geoFitnessVal,
           error: geoResult.error,
           audionJobId,
           audionStudyId,
@@ -484,6 +560,8 @@ export async function POST(
           stepUrl: stepUrl ?? geoUrl,
           issueCount: issueSignals?.issueCount ?? null,
           criticalCount: issueSignals?.criticalCount ?? null,
+          context: runContext,
+          compareResults,
         };
         const saved = await persistFlowRunResult({
           platformProjectId: id,
@@ -502,11 +580,31 @@ export async function POST(
       geoJobId = geoResult.job.id;
       geoSignals = geoResult.signals;
       geoCitedShare = geoResult.signals.citedShare;
-      geoFitness = geoResult.signals.geoFitness;
+      geoFitnessVal = geoResult.signals.geoFitness;
       geoStatus = geoResult.job.status;
       geoOverall = geoResult.job.overallScore;
       if (geoResult.job.url) geoUrl = geoResult.job.url;
+      runContext = setContextBundle(
+        runContext,
+        'geo',
+        buildGeoCatalogBundle({
+          status: geoStatus,
+          citedShare: geoCitedShare,
+          geoFitness: geoFitnessVal,
+          overallScore: geoOverall,
+          url: geoUrl,
+        }),
+        geoNode?.id
+      );
     }
+
+    const compareEvals = evaluateAllCompares(doc.nodes, runContext);
+    const compareResults = compareEvals.map((r) => ({
+      nodeId: r.nodeId,
+      path: r.path,
+      passed: r.passed,
+      actual: r.actual ?? null,
+    }));
 
     const terminalStatus = quality?.status ?? geoStatus ?? 'completed';
     const overallForVerdict = quality?.overallScore ?? geoOverall;
@@ -519,12 +617,13 @@ export async function POST(
       hasJourneySegment: hasJourney,
       taskCompleted,
       journeyValidEvidence,
-      scoreGate,
-      issueGate: gate,
+      scoreGate: hasCompare ? null : scoreGate,
+      issueGate: hasCompare ? null : gate,
       issueSignals,
-      geoGate,
+      geoGate: hasCompare ? null : geoGate,
       geoSignals,
-      requirePageScore: Boolean(scoreGate) || hasPageQuality,
+      compareResults: hasCompare ? compareResults : null,
+      requirePageScore: hasPageQuality,
     });
 
     let waveEvaluateOk: boolean | null = null;
@@ -568,7 +667,7 @@ export async function POST(
       status: terminalStatus,
       overallScore: overallForVerdict,
       citedShare: geoCitedShare,
-      geoFitness,
+      geoFitness: geoFitnessVal,
       error: quality?.scanError ?? null,
       audionJobId,
       audionStudyId,
@@ -580,6 +679,8 @@ export async function POST(
       waveEvaluateOk,
       waveRollupOk,
       knowledgeDistillateOk,
+      context: runContext,
+      compareResults,
     };
 
     const saved = await persistFlowRunResult({
