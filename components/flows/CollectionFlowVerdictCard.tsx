@@ -64,6 +64,13 @@ export function CollectionFlowVerdictCard({ verdict }: Props) {
               : ''}
           </li>
         ) : null}
+        {verdict.hasGeoGate ? (
+          <li data-ok={verdict.geoGatePassed ? 'true' : 'false'}>
+            geoGate: {verdict.geoGateBranch ?? '—'}
+            {verdict.citedShare != null ? ` · cited ${verdict.citedShare}%` : ''}
+            {verdict.geoFitness != null ? ` · fitness ${verdict.geoFitness}` : ''}
+          </li>
+        ) : null}
         <li data-ok={verdict.qualityPassed ? 'true' : 'false'}>
           qualityPassed: {String(verdict.qualityPassed)}
         </li>

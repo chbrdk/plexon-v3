@@ -136,18 +136,23 @@ describe('palette kind sets', () => {
     expect(PALETTE_QUALITY_KINDS).toEqual([
       'scan',
       'domain_scan',
+      'geo_job',
       'score_gate',
       'issue_gate',
+      'geo_gate',
       'quality_ok',
     ]);
     const overlap = PALETTE_JOURNEY_KINDS.filter((k) => (PALETTE_QUALITY_KINDS as string[]).includes(k));
     expect(overlap).toHaveLength(0);
   });
 
-  it('defaults scanMode / scoreKind / domain maxPages', () => {
+  it('defaults scanMode / scoreKind / domain maxPages / geo defaults', () => {
     expect(newCollectionFlowNode('scan').scanMode).toBe('single');
     expect(newCollectionFlowNode('domain_scan').maxPages).toBe(50);
     expect(newCollectionFlowNode('score_gate').scoreKind).toBe('overall');
+    expect(newCollectionFlowNode('geo_job').companyName).toBe('');
+    expect(newCollectionFlowNode('geo_gate').gateCondition).toBe('cited_share_at_least');
+    expect(newCollectionFlowNode('geo_gate').threshold).toBe(70);
   });
 });
 

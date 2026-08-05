@@ -32,8 +32,10 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   journey: 'Journey',
   scan: 'Scan',
   domain_scan: 'Domain Scan',
+  geo_job: 'GEO Job',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
+  geo_gate: 'GEO Gate',
   quality_ok: 'Quality OK',
 }
 
@@ -173,14 +175,17 @@ export function CollectionFlowNodeInspector({
   const isQualityNode =
     node.kind === 'scan' ||
     node.kind === 'domain_scan' ||
+    node.kind === 'geo_job' ||
     node.kind === 'score_gate' ||
     node.kind === 'issue_gate' ||
+    node.kind === 'geo_gate' ||
     node.kind === 'quality_ok'
 
   const gateBranchLabel = useMemo(() => {
     if (!verdict) return null
     if (node.kind === 'score_gate') return verdict.scorePassed ? 'pass' : 'fail'
     if (node.kind === 'issue_gate') return verdict.issueGatePassed ? 'pass' : 'fail'
+    if (node.kind === 'geo_gate') return verdict.geoGatePassed ? 'pass' : 'fail'
     return null
   }, [node.kind, verdict])
 
@@ -192,7 +197,8 @@ export function CollectionFlowNodeInspector({
       node.note ||
       node.kind === 'start' ||
       node.kind === 'scan' ||
-      node.kind === 'domain_scan'
+      node.kind === 'domain_scan' ||
+      node.kind === 'geo_job'
     ) {
       out.push({
         id: 'design',
@@ -201,7 +207,7 @@ export function CollectionFlowNodeInspector({
         children: (
           <>
             {node.text ? (
-              <InspectorField label="Text" tone="meta">
+              <InspectorField label={node.kind === 'geo_job' ? 'Queries' : 'Text'} tone="meta">
                 <pre className="msqdx-flow-inspector-pre">{node.text}</pre>
               </InspectorField>
             ) : null}
@@ -215,11 +221,16 @@ export function CollectionFlowNodeInspector({
                 {node.urlKey || node.url}
               </InspectorField>
             ) : null}
-            {node.kind === 'scan' || node.kind === 'domain_scan' ? (
+            {node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job' ? (
               <>
                 {node.url ? (
                   <InspectorField label="URL" tone="target" mono>
                     {node.url}
+                  </InspectorField>
+                ) : null}
+                {node.kind === 'geo_job' && node.companyName ? (
+                  <InspectorField label="Company" tone="meta" mono>
+                    {node.companyName}
                   </InspectorField>
                 ) : null}
                 {node.kind === 'scan' ? (
@@ -288,6 +299,38 @@ export function CollectionFlowNodeInspector({
                 <div className="msqdx-flow-inspector-stat">
                   <span>Pass</span>
                   <strong>{verdict ? (verdict.issueGatePassed ? 'ja' : 'nein') : '—'}</strong>
+                </div>
+              </div>
+            ) : null}
+            {node.kind === 'geo_gate' ? (
+              <div className="msqdx-flow-inspector-stats">
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Condition</span>
+                  <strong>{node.gateCondition ?? 'cited_share_at_least'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Cited</span>
+                  <strong>{verdict?.citedShare != null ? `${verdict.citedShare}%` : '—'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Fitness</span>
+                  <strong>{verdict?.geoFitness ?? '—'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Pass</span>
+                  <strong>{verdict ? (verdict.geoGatePassed ? 'ja' : 'nein') : '—'}</strong>
+                </div>
+              </div>
+            ) : null}
+            {node.kind === 'geo_job' ? (
+              <div className="msqdx-flow-inspector-stats">
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Cited</span>
+                  <strong>{verdict?.citedShare != null ? `${verdict.citedShare}%` : '—'}</strong>
+                </div>
+                <div className="msqdx-flow-inspector-stat">
+                  <span>Fitness</span>
+                  <strong>{verdict?.geoFitness ?? '—'}</strong>
                 </div>
               </div>
             ) : null}

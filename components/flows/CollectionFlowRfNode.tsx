@@ -13,6 +13,7 @@ import {
   AUDION_GATE_OPTIONS,
   COLLECTION_SCAN_MODE_OPTIONS,
   COLLECTION_SCORE_KIND_OPTIONS,
+  GEO_GATE_CONDITION_OPTIONS,
   ISSUE_GATE_CONDITION_OPTIONS,
   type CollectionFlowRfNodeData,
 } from '@/lib/collection-flow-canvas'
@@ -32,8 +33,10 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   journey: 'Journey',
   scan: 'Scan',
   domain_scan: 'Domain Scan',
+  geo_job: 'GEO Job',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
+  geo_gate: 'GEO Gate',
   quality_ok: 'Quality OK',
 }
 
@@ -65,6 +68,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const onNote = (e: ChangeEvent<HTMLTextAreaElement>) => patch({ note: e.target.value })
   const onStartUrl = (e: ChangeEvent<HTMLInputElement>) =>
     patch({ urlKey: e.target.value, url: e.target.value })
+  const onCompanyName = (e: ChangeEvent<HTMLInputElement>) => patch({ companyName: e.target.value })
   const onScanUrl = (e: ChangeEvent<HTMLInputElement>) => patch({ url: e.target.value })
   const onScanMode = (e: ChangeEvent<HTMLSelectElement>) =>
     patch({ scanMode: e.target.value as 'single' | 'deep' })
@@ -90,6 +94,8 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     patch({ gateCondition: e.target.value as AudionGateCondition })
   const onIssueGateCondition = (e: ChangeEvent<HTMLSelectElement>) =>
     patch({ gateCondition: e.target.value as CollectionFlowGateCondition })
+  const onGeoGateCondition = (e: ChangeEvent<HTMLSelectElement>) =>
+    patch({ gateCondition: e.target.value as CollectionFlowGateCondition })
 
   const showText =
     kind === 'prompt' ||
@@ -98,9 +104,10 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     kind === 'abandon' ||
     kind === 'success' ||
     kind === 'measure' ||
-    kind === 'observe'
+    kind === 'observe' ||
+    kind === 'geo_job'
   const isJourneyGate = kind === 'gate'
-  const isQualityGate = kind === 'score_gate' || kind === 'issue_gate'
+  const isQualityGate = kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate'
   const showOutput =
     Boolean(runOutput?.text || runOutput?.imageUrl || runOutput?.label) &&
     (runState === 'active' || runState === 'done' || runState === 'error')
@@ -265,6 +272,31 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
           </>
         ) : null}
 
+        {kind === 'geo_job' ? (
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>URL</span>
+              <Input
+                block
+                size="sm"
+                value={flowNode.url ?? ''}
+                onChange={onScanUrl}
+                placeholder="leer = Journey finalUrl"
+              />
+            </label>
+            <label className="msqdx-flow-rf-field">
+              <span>Company</span>
+              <Input
+                block
+                size="sm"
+                value={flowNode.companyName ?? ''}
+                onChange={onCompanyName}
+                placeholder="wenn URL leer"
+              />
+            </label>
+          </>
+        ) : null}
+
         {isJourneyGate ? (
           <>
             <label className="msqdx-flow-rf-field">
@@ -366,6 +398,37 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
           </>
         ) : null}
 
+        {kind === 'geo_gate' ? (
+          <>
+            <label className="msqdx-flow-rf-field">
+              <span>Condition</span>
+              <select
+                className="msqdx-flow-rf-select"
+                value={(flowNode.gateCondition as string) ?? 'cited_share_at_least'}
+                onChange={onGeoGateCondition}
+              >
+                {GEO_GATE_CONDITION_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
+              <span>Threshold</span>
+              <Input
+                size="sm"
+                className="msqdx-flow-rf-input--narrow"
+                type="number"
+                min={0}
+                max={100}
+                value={flowNode.threshold ?? 70}
+                onChange={onThreshold}
+              />
+            </label>
+          </>
+        ) : null}
+
         {kind === 'observe' ? (
           <label className="msqdx-flow-rf-field msqdx-flow-rf-field--inline">
             <span>Sekunden</span>
@@ -382,14 +445,18 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
 
         {showText ? (
           <label className="msqdx-flow-rf-field">
-            <span>{kind === 'measure' ? 'Frage' : 'Text'}</span>
+            <span>{kind === 'measure' ? 'Frage' : kind === 'geo_job' ? 'Queries' : 'Text'}</span>
             <Textarea
               block
               size="sm"
               rows={kind === 'observe' ? 2 : 3}
               value={flowNode.text ?? ''}
               onChange={onText}
-              placeholder="Instruction / question…"
+              placeholder={
+                kind === 'geo_job'
+                  ? 'Eine Query pro Zeile (optional)'
+                  : 'Instruction / question…'
+              }
             />
           </label>
         ) : null}

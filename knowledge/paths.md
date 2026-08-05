@@ -42,6 +42,7 @@
   - Canvas helpers: `lib/collection-flow-canvas.ts`
   - Live journey: `POST …/flows/:flowId/run/journey` · `GET …/journey-jobs/:jobId` · quality via existing `…/run`
   - Wave 8A quality catalog: `scan.scanMode` single|deep · `domain_scan` · `scoreKind` · expanded issue_gate conditions — `specs/domain/collection-test-flow.md`
+  - Wave 8B GEO: `geo_job` / `geo_gate` · `checkionApiGeoJobs` · `pathCheckionGeoOverview` → `/geo/{id}/overview`
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

@@ -9,8 +9,10 @@ import {
   deriveCollectionVerdict,
   deriveJourneyErrorVerdict,
   documentHasJourneySegment,
+  evaluateGeoGatePassed,
   evaluateIssueGatePassed,
   evaluateScoreGatePassed,
+  geoJobQueriesFromText,
   issueGateNode,
   resolveScoreForGate,
   nodeStatesFromVerdict,
@@ -279,5 +281,64 @@ describe('Wave 8A scoreKind', () => {
     expect(resolveScoreForGate(gate, 90, { accessibility: 55 })).toBe(55);
     expect(evaluateScoreGatePassed(gate, 55, true)).toBe(false);
     expect(evaluateScoreGatePassed(gate, 80, true)).toBe(true);
+  });
+});
+
+describe('Wave 8B geo_gate', () => {
+  it('evaluateGeoGatePassed cited_share / geo_fitness', () => {
+    const cited = {
+      id: 'n-geo-gate',
+      kind: 'geo_gate' as const,
+      label: 'GEO',
+      gateCondition: 'cited_share_at_least' as const,
+      threshold: 40,
+    };
+    expect(evaluateGeoGatePassed(cited, { citedShare: 55, geoFitness: null })).toBe(true);
+    expect(evaluateGeoGatePassed(cited, { citedShare: 20, geoFitness: null })).toBe(false);
+
+    const fitness = {
+      ...cited,
+      gateCondition: 'geo_fitness_at_least' as const,
+      threshold: 70,
+    };
+    expect(evaluateGeoGatePassed(fitness, { citedShare: 90, geoFitness: 80 })).toBe(true);
+    expect(evaluateGeoGatePassed(fitness, { citedShare: 90, geoFitness: 50 })).toBe(false);
+  });
+
+  it('deriveCollectionVerdict requires geo_gate when present', () => {
+    const geoGate = {
+      id: 'n-geo-gate',
+      kind: 'geo_gate' as const,
+      label: 'GEO Gate',
+      gateCondition: 'cited_share_at_least' as const,
+      threshold: 50,
+    };
+    const fail = deriveCollectionVerdict({
+      scanStatus: 'completed',
+      overallScore: null,
+      requirePageScore: false,
+      geoGate,
+      geoSignals: { citedShare: 30, geoFitness: null },
+    });
+    expect(fail.geoGatePassed).toBe(false);
+    expect(fail.qualityPassed).toBe(false);
+    expect(fail.terminalKind).toBe('abandon');
+
+    const pass = deriveCollectionVerdict({
+      scanStatus: 'completed',
+      overallScore: null,
+      requirePageScore: false,
+      geoGate,
+      geoSignals: { citedShare: 70, geoFitness: 80 },
+    });
+    expect(pass.geoGatePassed).toBe(true);
+    expect(pass.qualityPassed).toBe(true);
+    expect(pass.collectionReady).toBe(true);
+    expect(pass.citedShare).toBe(70);
+  });
+
+  it('geoJobQueriesFromText splits lines', () => {
+    expect(geoJobQueriesFromText('a\n\nb\n c ')).toEqual(['a', 'b', 'c']);
+    expect(geoJobQueriesFromText('')).toEqual([]);
   });
 });

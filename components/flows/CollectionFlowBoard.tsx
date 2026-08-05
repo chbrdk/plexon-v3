@@ -36,7 +36,7 @@ import {
   pathPlatformProjectFlows,
 } from '@/lib/constants'
 import { buildAudionStudyUrl, buildAudionStudyWaveUrl } from '@/lib/audion-admin-launch-url'
-import { pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
+import { pathCheckionGeoOverview, pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import {
   documentHasJourneySegment,
   resolveJourneyFlowForRun,
@@ -632,6 +632,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
         : null
   const scanHref = lastRun?.scanId ? pathCheckionScanResult(lastRun.scanId) : null
   const issuesHref = lastRun?.scanId ? pathCheckionScanIssues(lastRun.scanId) : null
+  const geoHref = lastRun?.geoJobId ? pathCheckionGeoOverview(lastRun.geoJobId) : null
 
   return (
     <FlowBoardStage
@@ -880,7 +881,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 )
               }
               links={
-                studyHref || waveHref || scanHref || issuesHref || softQSummary ? (
+                studyHref || waveHref || scanHref || issuesHref || geoHref || softQSummary ? (
                   <>
                     {studyHref ? (
                       <a href={studyHref} target="_blank" rel="noreferrer">
@@ -906,6 +907,11 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     {issuesHref ? (
                       <a href={issuesHref} target="_blank" rel="noreferrer">
                         Issues Dossier
+                      </a>
+                    ) : null}
+                    {geoHref ? (
+                      <a href={geoHref} target="_blank" rel="noreferrer">
+                        GEO Overview
                       </a>
                     ) : null}
                   </>

@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 8A Checkion quality catalog (in progress)  
+**Status:** Wave 8B GEO nodes (shipped)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -81,8 +81,8 @@ Orchestration nodes only — start job → poll → signal → branch. Report ch
 | `issue_gate` | Branch on issue severity / count / rule family | 3 + **8A** |
 | `score_gate` | Branch on overall **or** score dimension (`scoreKind`) | 1 + **8A** |
 | `quality_ok` | Positive quality terminal | 1 |
-| `geo_job` | CHECKION GEO job (`POST /api/geo-jobs`) | **8B** (spec only) |
-| `geo_gate` | Branch on GEO discoverability / EEAT signal | **8B** (spec only) |
+| `geo_job` | CHECKION GEO job (`POST /api/geo-jobs`) | **8B** |
+| `geo_gate` | Branch on citedShare / geoFitness (EEAT) | **8B** |
 
 #### Keep / reshape / drop (quality catalog)
 
@@ -97,14 +97,16 @@ Node fields (quality):
 
 | Field | On | Notes |
 |-------|-----|-------|
-| `url` | `scan`, `domain_scan`, `start` | Empty scan URL → journey `finalUrl` / start URL |
+| `url` | `scan`, `domain_scan`, `geo_job`, `start` | Empty → journey `finalUrl` / start URL |
+| `companyName` | `geo_job` | Brand hint when URL empty (Checkion requires url **or** companyName) |
 | `scanMode` | `scan` | `single` (default) \| `deep` |
 | `maxPages` | `domain_scan` | Optional crawl cap (default server/env) |
-| `threshold` | `score_gate` | Default **70** |
-| `scoreKind` | `score_gate` | `overall` (default) \| Checkion score card `kind` (`accessibility`, `seo`, `performance`, `ux`, `eco`, `best_practices`, …) via `GET /api/scans/:id/scores` |
+| `text` | `geo_job` | Optional queries — one prompt per line (else Checkion brand defaults) |
+| `threshold` | `score_gate`, `geo_gate` | Default **70** |
+| `scoreKind` | `score_gate` | `overall` (default) \| Checkion score card `kind` |
 | `minCount` | `issue_gate` | Default **1** |
 | `pattern` | `issue_gate` | For `issue_rule_match` |
-| `gateCondition` | `issue_gate` / `score_gate` | Closed set below |
+| `gateCondition` | `issue_gate` / `score_gate` / `geo_gate` | Closed set below |
 
 ### C — Orchestration (PLEXON)
 
@@ -141,6 +143,10 @@ Same as Audion V1: `then` | `when` | `otherwise` | `parallel`.
 | `any_issues` | Total issues ≥ `minCount` | Issues summary |
 | `no_issues` | Zero issues | Issues summary |
 | `issue_rule_match` | At least one issue matching `pattern` (rule id / family) → **fail** branch when match present | Issues list |
+| `cited_share_at_least` | GEO `citedShare` ≥ `threshold` | `GeoOverview.job.citedShare` |
+| `cited_share_below` | GEO `citedShare` &lt; `threshold` | Same |
+| `geo_fitness_at_least` | `eeat.geoFitness` \|\| `job.overallScore` ≥ `threshold` | GEO overview (needs page scan on job) |
+| `geo_fitness_below` | geoFitness &lt; `threshold` | Same |
 
 Do **not** invent open-ended expression languages.
 
@@ -244,7 +250,7 @@ Do not place this on legacy `/board` Prismion island.
 | **6 — Live run on canvas** | Client-orchestrated journey poll paints node states / path / Inspector; then quality segment on same board; Stop/cancel | Running Collection flow feels like Audion Testen + quality gates |
 | **7 — Polish** | Output→Note, Reset-to-template, Evaluate deep-link / Soft-Q read-only summary; smoke + tests | edit→save→run→verdict contract green |
 | **8A — Checkion quality catalog** | `scan.scanMode` single\|deep; `domain_scan`; `scoreKind` on `score_gate`; expanded `issue_gate` severity conditions; palette + RF/inspector + run BFF | Staging: deep page scan + domain crawl + dimension gate + serious_issues branch |
-| **8B — GEO nodes** | `geo_job` + `geo_gate` (discoverability / EEAT) | Later |
+| **8B — GEO nodes** | `geo_job` + `geo_gate` (`cited_share_*`, `geo_fitness_*`); v3 `/api/geo-jobs` client; deep link `/geo/:id/overview` | Staging: GEO-only or journey→geo→gate; strip opens GEO overview |
 | **Later** | Parallel multi-page, Brandion, multi-user live, saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
@@ -301,7 +307,18 @@ Do not place this on legacy `/board` Prismion island.
 - Palette Quality section: `scan`, `domain_scan`, `score_gate`, `issue_gate`, `quality_ok`.
 - `lastRun` may include `scanMode`, `domainScanId` when domain path used.
 
+## Wave 8B implementation notes
+
+- `geo_job`: `POST {CHECKION}/api/geo-jobs` with `{ projectId, platformProjectId?, url?, companyName?, queries? }` — at least one of url/companyName; queries from node `text` (newline-separated) when present.
+- Poll `GET /api/geo-jobs/:id` until `completed`/`failed`; parse `job.citedShare`, `eeat.geoFitness` / `job.overallScore`.
+- `geo_gate`: closed conditions `cited_share_at_least` \| `cited_share_below` \| `geo_fitness_at_least` \| `geo_fitness_below` + `threshold` (default 70).
+- Run path: if graph has page `scan`/`domain_scan`, run that first; if `geo_job` present, run GEO after (or alone when no page scan). `qualityPassed` ∧= `geoGatePassed` when `geo_gate` present.
+- Deep link: `pathCheckionGeoOverview(jobId)` → `{CHECKION}/geo/{id}/overview`.
+- Palette: add `geo_job`, `geo_gate` under Quality.
+- `lastRun.geoJobId` when GEO ran.
+
 ## Open questions (non-blocking)
 
 - Richer Soft-Q mapping from Checkion lenses — later if product asks.
 - Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when gate follows `domain_scan`.
+- Multi-provider GEO models beyond OpenAI defaults — product later.

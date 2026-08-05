@@ -32,8 +32,10 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   // Family B — CHECKION quality
   'scan',
   'domain_scan',
+  'geo_job',
   'score_gate',
   'issue_gate',
+  'geo_gate',
   'quality_ok',
 ] as const;
 
@@ -64,7 +66,11 @@ export type CollectionFlowGateCondition =
   | 'no_serious_issues'
   | 'any_issues'
   | 'no_issues'
-  | 'issue_rule_match';
+  | 'issue_rule_match'
+  | 'cited_share_at_least'
+  | 'cited_share_below'
+  | 'geo_fitness_at_least'
+  | 'geo_fitness_below';
 /** AUDION journey gate conditions (closed set, AUDION emits gateSignals). */
 export type AudionGateCondition =
   | 'frustration_high'
@@ -80,11 +86,16 @@ export type CollectionFlowNode = {
   id: string;
   kind: CollectionFlowNodeKind;
   label: string;
-  /** Absolute or relative page URL for `scan` / `domain_scan` / `start` nodes. */
+  /** Absolute or relative page URL for `scan` / `domain_scan` / `geo_job` / `start` nodes. */
   url?: string;
+  /** Brand hint on `geo_job` when URL empty (Checkion: url or companyName). Wave 8B. */
+  companyName?: string;
   /** AUDION `start` node URL key (Wave 5 first-class journey nodes). */
   urlKey?: string;
-  /** Instruction / question text for prompt|action|message|abandon|success|measure|observe. */
+  /**
+   * Instruction / question text for prompt|action|message|abandon|success|measure|observe.
+   * On `geo_job`: optional queries, one prompt per line.
+   */
   text?: string;
   /** Free-form annotation, persisted on the flow jsonb. */
   note?: string;
@@ -155,11 +166,17 @@ export type CollectionFlowLastRun = {
   scanId: string | null;
   /** Wave 8A: domain crawl id when quality path used `domain_scan`. */
   domainScanId?: string | null;
+  /** Wave 8B: GEO job id when quality path used `geo_job`. */
+  geoJobId?: string | null;
   /** Wave 8A: page scan mode used (`single`|`deep`) or `domain`. */
   scanMode?: CollectionFlowScanMode | 'domain' | null;
   url: string;
   status: string;
   overallScore: number | null;
+  /** Wave 8B: GEO citedShare (0–100) when geo ran. */
+  citedShare?: number | null;
+  /** Wave 8B: EEAT geoFitness / overall when present. */
+  geoFitness?: number | null;
   /** Wave 8A: score card kind that was gated (if not overall). */
   scoreKind?: string | null;
   error?: string | null;
@@ -194,8 +211,13 @@ export type CollectionVerdict = {
   /** Issue gate passed when present; true when no issue_gate. */
   issueGatePassed: boolean;
   issueGateBranch: 'pass' | 'fail' | null;
+  /** GEO gate passed when present; true when no geo_gate. Wave 8B. */
+  geoGatePassed: boolean;
+  geoGateBranch: 'pass' | 'fail' | null;
   criticalCount: number | null;
   issueCount: number | null;
+  citedShare: number | null;
+  geoFitness: number | null;
   qualityPassed: boolean;
   /**
    * Quality-only: flowCompleted ∧ pageEvidenceValid ∧ qualityPassed.
@@ -204,6 +226,7 @@ export type CollectionVerdict = {
   collectionReady: boolean;
   hasJourneySegment: boolean;
   hasIssueGate: boolean;
+  hasGeoGate: boolean;
   overallScore: number | null;
   threshold: number;
   blockers: string[];
@@ -554,7 +577,8 @@ export function createJourneyQualityIssuesTemplate(url: string): CollectionTestF
 }
 
 export function scoreGateThreshold(nodes: CollectionFlowNode[]): number {
-  const gate = nodes.find((n) => n.kind === 'score_gate');
+  const gate =
+    nodes.find((n) => n.kind === 'score_gate') ?? nodes.find((n) => n.kind === 'geo_gate');
   const t = gate?.threshold;
   return typeof t === 'number' && Number.isFinite(t) ? t : DEFAULT_SCORE_GATE_THRESHOLD;
 }
@@ -601,8 +625,10 @@ export function documentHasJourneySegment(doc: CollectionTestFlowDocument): bool
 const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'scan',
   'domain_scan',
+  'geo_job',
   'score_gate',
   'issue_gate',
+  'geo_gate',
   'quality_ok',
 ]);
 
@@ -678,8 +704,33 @@ export function documentHasIssueGate(doc: CollectionTestFlowDocument): boolean {
   return doc.nodes.some((n) => n.kind === 'issue_gate');
 }
 
+export function documentHasGeoGate(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => n.kind === 'geo_gate');
+}
+
+export function documentHasGeoJob(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => n.kind === 'geo_job');
+}
+
 export function issueGateNode(nodes: CollectionFlowNode[]): CollectionFlowNode | null {
   return nodes.find((n) => n.kind === 'issue_gate') ?? null;
+}
+
+export function geoJobNode(nodes: CollectionFlowNode[]): CollectionFlowNode | null {
+  return nodes.find((n) => n.kind === 'geo_job') ?? null;
+}
+
+export function geoGateNode(nodes: CollectionFlowNode[]): CollectionFlowNode | null {
+  return nodes.find((n) => n.kind === 'geo_gate') ?? null;
+}
+
+/** Parse newline-separated GEO queries from `geo_job.text`. */
+export function geoJobQueriesFromText(text: string | null | undefined): string[] {
+  if (!text?.trim()) return [];
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 export type IssueGateSignals = {
@@ -688,6 +739,11 @@ export type IssueGateSignals = {
   issueCount: number;
   /** ruleIds present (for issue_rule_match). */
   ruleIds?: string[];
+};
+
+export type GeoGateSignals = {
+  citedShare: number | null;
+  geoFitness: number | null;
 };
 
 /** Whether the issue_gate quality intent is satisfied (pass branch). */
@@ -768,6 +824,30 @@ export function evaluateScoreGatePassed(
   if (cond === 'score_below') return score < threshold;
   return score >= threshold;
 }
+
+/** Whether the geo_gate quality intent is satisfied (pass branch). Wave 8B. */
+export function evaluateGeoGatePassed(
+  gate: CollectionFlowNode,
+  signals: GeoGateSignals
+): boolean {
+  const threshold =
+    typeof gate.threshold === 'number' && Number.isFinite(gate.threshold)
+      ? gate.threshold
+      : DEFAULT_SCORE_GATE_THRESHOLD;
+  const cond = gate.gateCondition ?? 'cited_share_at_least';
+  if (cond === 'cited_share_below') {
+    return typeof signals.citedShare === 'number' && signals.citedShare < threshold;
+  }
+  if (cond === 'geo_fitness_at_least') {
+    return typeof signals.geoFitness === 'number' && signals.geoFitness >= threshold;
+  }
+  if (cond === 'geo_fitness_below') {
+    return typeof signals.geoFitness === 'number' && signals.geoFitness < threshold;
+  }
+  // cited_share_at_least (default)
+  return typeof signals.citedShare === 'number' && signals.citedShare >= threshold;
+}
+
 function patchJourneyFlowUrl(
   journeyFlow: EmbeddedAudionJourneyFlow,
   url: string
@@ -803,10 +883,13 @@ function buildSummary(input: {
   taskCompleted: boolean;
   hasJourneySegment: boolean;
   hasIssueGate: boolean;
+  hasGeoGate: boolean;
   scorePassed: boolean;
   issueGatePassed: boolean;
+  geoGatePassed: boolean;
   criticalCount: number | null;
   overallScore: number | null;
+  citedShare: number | null;
   threshold: number;
   terminalKind: CollectionVerdict['terminalKind'];
 }): string {
@@ -822,9 +905,11 @@ function buildSummary(input: {
       input.hasIssueGate && input.criticalCount != null
         ? `, ${input.criticalCount} critical`
         : '';
+    const geo =
+      input.hasGeoGate && input.citedShare != null ? `, cited ${input.citedShare}%` : '';
     return input.hasJourneySegment
-      ? `Collection bereit — Task ok, Score ${input.overallScore ?? '—'} ≥ ${input.threshold}${crit}.`
-      : `Collection bereit — Score ${input.overallScore ?? '—'} ≥ ${input.threshold}${crit}.`;
+      ? `Collection bereit — Task ok, Score ${input.overallScore ?? '—'} ≥ ${input.threshold}${crit}${geo}.`
+      : `Collection bereit — Score ${input.overallScore ?? '—'} ≥ ${input.threshold}${crit}${geo}.`;
   }
   if (input.hasJourneySegment && !input.taskCompleted) {
     return 'Journey-Task nicht abgeschlossen — Collection nicht bereit.';
@@ -837,6 +922,9 @@ function buildSummary(input: {
   }
   if (input.hasIssueGate && !input.issueGatePassed) {
     return `Issue Gate verfehlt — ${input.criticalCount ?? 0} critical issue(s).`;
+  }
+  if (input.hasGeoGate && !input.geoGatePassed) {
+    return `GEO Gate verfehlt — citedShare ${input.citedShare ?? '—'} / threshold ${input.threshold}.`;
   }
   if (input.terminalKind === 'abandon') {
     return `Quality Gate verfehlt — Score ${input.overallScore ?? '—'} < ${input.threshold}.`;
@@ -854,6 +942,7 @@ function emptyRunningOrErrorFields(partial: {
   blockers: string[];
   hasJourneySegment: boolean;
   hasIssueGate?: boolean;
+  hasGeoGate?: boolean;
   pageEvidenceCaveat?: string | null;
   taskCompleted?: boolean;
 }): CollectionVerdict {
@@ -863,6 +952,7 @@ function emptyRunningOrErrorFields(partial: {
   const validEvidence = false;
   const collectionReady = false;
   const hasIssueGate = Boolean(partial.hasIssueGate);
+  const hasGeoGate = Boolean(partial.hasGeoGate);
   return {
     status: partial.status,
     flowCompleted: false,
@@ -875,12 +965,17 @@ function emptyRunningOrErrorFields(partial: {
     scorePassed: false,
     issueGatePassed: !hasIssueGate,
     issueGateBranch: null,
+    geoGatePassed: !hasGeoGate,
+    geoGateBranch: null,
     criticalCount: null,
     issueCount: null,
+    citedShare: null,
+    geoFitness: null,
     qualityPassed,
     collectionReady,
     hasJourneySegment: partial.hasJourneySegment,
     hasIssueGate,
+    hasGeoGate,
     overallScore: partial.overallScore,
     threshold: partial.threshold,
     blockers: partial.blockers,
@@ -893,10 +988,13 @@ function emptyRunningOrErrorFields(partial: {
       taskCompleted,
       hasJourneySegment: partial.hasJourneySegment,
       hasIssueGate,
+      hasGeoGate,
       scorePassed: false,
       issueGatePassed: !hasIssueGate,
+      geoGatePassed: !hasGeoGate,
       criticalCount: null,
       overallScore: partial.overallScore,
+      citedShare: null,
       threshold: partial.threshold,
       terminalKind: null,
     }),
@@ -904,7 +1002,7 @@ function emptyRunningOrErrorFields(partial: {
 }
 
 /**
- * Derive Collection verdict from CHECKION scan (+ optional journey / issue signals).
+ * Derive Collection verdict from CHECKION scan (+ optional journey / issue / GEO signals).
  */
 export function deriveCollectionVerdict(input: {
   scanStatus: string;
@@ -917,16 +1015,27 @@ export function deriveCollectionVerdict(input: {
   hasJourneySegment?: boolean;
   taskCompleted?: boolean;
   journeyValidEvidence?: boolean;
+  /**
+   * When false, missing page score does not invalidate evidence (GEO-only / no score_gate).
+   * Default true when a score_gate is present.
+   */
+  requirePageScore?: boolean;
   /** Score gate node when present (for score_below / scoreKind). */
   scoreGate?: CollectionFlowNode | null;
   /** Issue gate node when present on the flow. */
   issueGate?: CollectionFlowNode | null;
   issueSignals?: IssueGateSignals | null;
+  /** GEO gate node when present. Wave 8B. */
+  geoGate?: CollectionFlowNode | null;
+  geoSignals?: GeoGateSignals | null;
 }): CollectionVerdict {
   const threshold = input.threshold ?? DEFAULT_SCORE_GATE_THRESHOLD;
   const blockers = [...(input.blockers ?? [])];
   const hasJourneySegment = Boolean(input.hasJourneySegment);
   const hasIssueGate = Boolean(input.issueGate);
+  const hasGeoGate = Boolean(input.geoGate);
+  /** Default true (Wave 1–8A); GEO-only sets false. */
+  const requirePageScore = input.requirePageScore ?? true;
   const statusRaw = input.scanStatus.trim().toLowerCase();
 
   if (statusRaw === 'queued' || statusRaw === 'running' || statusRaw === 'paused') {
@@ -937,6 +1046,7 @@ export function deriveCollectionVerdict(input: {
       blockers,
       hasJourneySegment,
       hasIssueGate,
+      hasGeoGate,
       taskCompleted: hasJourneySegment ? Boolean(input.taskCompleted) : true,
     });
   }
@@ -955,6 +1065,7 @@ export function deriveCollectionVerdict(input: {
       blockers,
       hasJourneySegment,
       hasIssueGate,
+      hasGeoGate,
       pageEvidenceCaveat: blockers[0] ?? 'Scan fehlgeschlagen',
       taskCompleted: hasJourneySegment ? Boolean(input.taskCompleted) : false,
     });
@@ -966,7 +1077,7 @@ export function deriveCollectionVerdict(input: {
   let pageEvidenceValid = true;
   let pageEvidenceCaveat: string | null = null;
 
-  if (score == null || !Number.isFinite(score)) {
+  if (requirePageScore && (score == null || !Number.isFinite(score))) {
     pageEvidenceValid = false;
     pageEvidenceCaveat = 'Score fehlt';
     blockers.push('Score fehlt');
@@ -985,11 +1096,19 @@ export function deriveCollectionVerdict(input: {
     ? (input.journeyValidEvidence ?? Boolean(input.taskCompleted))
     : true;
   const validEvidence = journeyValidEvidence && pageEvidenceValid;
-  const scorePassed = evaluateScoreGatePassed(
-    input.scoreGate,
-    typeof score === 'number' ? score : null,
-    pageEvidenceValid
-  );
+  const scorePassed = !requirePageScore
+    ? true
+    : evaluateScoreGatePassed(
+        input.scoreGate ?? {
+          id: '_implicit-score',
+          kind: 'score_gate',
+          label: 'Score',
+          threshold,
+          gateCondition: 'score_at_least',
+        },
+        typeof score === 'number' ? score : null,
+        pageEvidenceValid
+      );
 
   const criticalCount = input.issueSignals?.criticalCount ?? null;
   const issueCount = input.issueSignals?.issueCount ?? null;
@@ -1006,7 +1125,22 @@ export function deriveCollectionVerdict(input: {
     }
   }
 
-  const qualityPassed = scorePassed && issueGatePassed;
+  const citedShare = input.geoSignals?.citedShare ?? null;
+  const geoFitness = input.geoSignals?.geoFitness ?? null;
+  let geoGatePassed = true;
+  let geoGateBranch: 'pass' | 'fail' | null = null;
+  if (hasGeoGate && input.geoGate) {
+    if (!input.geoSignals) {
+      geoGatePassed = false;
+      geoGateBranch = 'fail';
+      blockers.push('GEO signals fehlen');
+    } else {
+      geoGatePassed = evaluateGeoGatePassed(input.geoGate, input.geoSignals);
+      geoGateBranch = geoGatePassed ? 'pass' : 'fail';
+    }
+  }
+
+  const qualityPassed = scorePassed && issueGatePassed && geoGatePassed;
   // Terminal: fail at earliest gate
   let terminalKind: CollectionVerdict['terminalKind'];
   let terminalNodeId: string | null;
@@ -1014,6 +1148,9 @@ export function deriveCollectionVerdict(input: {
     terminalKind = 'abandon';
     terminalNodeId = 'n-abandon';
   } else if (hasIssueGate && !issueGatePassed) {
+    terminalKind = 'abandon';
+    terminalNodeId = 'n-abandon';
+  } else if (hasGeoGate && !geoGatePassed) {
     terminalKind = 'abandon';
     terminalNodeId = 'n-abandon';
   } else if (qualityPassed) {
@@ -1040,12 +1177,17 @@ export function deriveCollectionVerdict(input: {
     scorePassed,
     issueGatePassed,
     issueGateBranch,
+    geoGatePassed,
+    geoGateBranch,
     criticalCount,
     issueCount,
+    citedShare,
+    geoFitness,
     qualityPassed,
     collectionReady,
     hasJourneySegment,
     hasIssueGate,
+    hasGeoGate,
     overallScore: input.overallScore,
     threshold,
     blockers,
@@ -1058,10 +1200,13 @@ export function deriveCollectionVerdict(input: {
       taskCompleted,
       hasJourneySegment,
       hasIssueGate,
+      hasGeoGate,
       scorePassed,
       issueGatePassed,
+      geoGatePassed,
       criticalCount,
       overallScore: typeof score === 'number' ? score : input.overallScore,
+      citedShare,
       threshold,
       terminalKind,
     }),
@@ -1149,8 +1294,10 @@ export function nodeStatesFromVerdict(
   const startId = findNodeIdByKind(doc.nodes, 'start');
   const qualityNode = qualityScanNode(doc.nodes);
   const scanId = qualityNode?.id ?? null;
+  const geoJobId = findNodeIdByKind(doc.nodes, 'geo_job');
   const scoreId = findNodeIdByKind(doc.nodes, 'score_gate');
   const issuesId = findNodeIdByKind(doc.nodes, 'issue_gate');
+  const geoGateId = findNodeIdByKind(doc.nodes, 'geo_gate');
   const okId = findNodeIdByKind(doc.nodes, 'quality_ok');
   const abandonId = [...doc.nodes].reverse().find((n) => n.kind === 'abandon')?.id ?? null;
   const journeyIds = hasJourney ? journeyMiddleNodeIds(doc) : [];
@@ -1162,44 +1309,56 @@ export function nodeStatesFromVerdict(
       markMany(journeyIds, 'running');
     } else if (hasJourney) {
       markMany(journeyIds, 'done');
-      mark(scanId, 'running');
+      mark(scanId ?? geoJobId, 'running');
     } else {
-      mark(scanId, 'running');
+      mark(scanId ?? geoJobId, 'running');
     }
     return states;
   }
 
   if (verdict.status === 'error') {
-    if (hasJourney && !lastRun?.scanId && !verdict.pageEvidenceValid) {
+    if (hasJourney && !lastRun?.scanId && !lastRun?.geoJobId && !verdict.pageEvidenceValid) {
       // Journey failed before / without a completed scan handoff
       if (lastRun?.audionJobId && verdict.taskCompleted) {
         markMany(journeyIds, 'done');
-        mark(scanId, 'error');
+        mark(scanId ?? geoJobId, 'error');
       } else if (lastRun?.audionJobId) {
         markMany(journeyIds, 'error');
         mark(scanId, 'skipped');
+        mark(geoJobId, 'skipped');
       } else {
         markMany(journeyIds, 'error');
         mark(scanId, 'skipped');
+        mark(geoJobId, 'skipped');
       }
     } else {
       markMany(journeyIds, 'done');
-      mark(scanId, 'error');
+      if (lastRun?.geoJobId && !lastRun?.scanId && !lastRun?.domainScanId) {
+        mark(geoJobId, 'error');
+        mark(scanId, 'skipped');
+      } else {
+        mark(scanId, 'error');
+        mark(geoJobId, lastRun?.geoJobId ? 'error' : 'skipped');
+      }
     }
     mark(scoreId, 'skipped');
     mark(issuesId, 'skipped');
+    mark(geoGateId, 'skipped');
     mark(okId, 'skipped');
     mark(abandonId, 'skipped');
     return states;
   }
 
   markMany(journeyIds, 'done');
-  mark(scanId, 'done');
-  mark(scoreId, 'done');
+  mark(scanId, scanId ? 'done' : 'idle');
+  mark(geoJobId, geoJobId ? 'done' : 'idle');
+  mark(scoreId, scoreId ? 'done' : 'idle');
 
   const hasIssues = documentHasIssueGate(doc);
+  const hasGeo = documentHasGeoGate(doc);
   if (!verdict.scorePassed) {
     if (hasIssues) mark(issuesId, 'skipped');
+    if (hasGeo) mark(geoGateId, 'skipped');
     mark(okId, 'skipped');
     mark(abandonId, 'done');
     return states;
@@ -1207,6 +1366,16 @@ export function nodeStatesFromVerdict(
 
   if (hasIssues) {
     mark(issuesId, 'done');
+    if (!verdict.issueGatePassed) {
+      if (hasGeo) mark(geoGateId, 'skipped');
+      mark(okId, 'skipped');
+      mark(abandonId, 'done');
+      return states;
+    }
+  }
+
+  if (hasGeo) {
+    mark(geoGateId, 'done');
   }
 
   if (verdict.terminalKind === 'quality_ok') {

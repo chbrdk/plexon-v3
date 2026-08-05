@@ -4,9 +4,14 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import {
   deriveCollectionVerdict,
   deriveJourneyErrorVerdict,
+  documentHasGeoGate,
+  documentHasGeoJob,
   documentHasIssueGate,
   documentHasJourneySegment,
   ensureFlowDocument,
+  geoGateNode,
+  geoJobNode,
+  geoJobQueriesFromText,
   issueGateNode,
   nodeStatesFromVerdict,
   qualityScanNode,
@@ -19,6 +24,7 @@ import {
   type CollectionFlowLastRun,
   type CollectionFlowScanMode,
   type CollectionVerdict,
+  type GeoGateSignals,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
 import {
@@ -38,6 +44,7 @@ import {
   fetchCheckionDomainScanV3Issues,
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
+import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import { platformJson } from '@/lib/platform-contract';
 
@@ -73,10 +80,36 @@ export async function POST(
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const urlOverride =
       typeof body.url === 'string' && body.url.trim() ? body.url.trim() : null;
+    const geoNode = geoJobNode(doc.nodes);
+    const qualityNode = qualityScanNode(doc.nodes);
+    const hasPageQuality = Boolean(qualityNode);
+    const hasGeo = documentHasGeoJob(doc);
+    const geoCompany =
+      (typeof body.companyName === 'string' && body.companyName.trim()
+        ? body.companyName.trim()
+        : null) ||
+      geoNode?.companyName?.trim() ||
+      '';
     const baseUrl =
-      urlOverride ?? scanNodeUrl(doc.nodes) ?? startNodeUrl(doc.nodes);
-    if (!baseUrl) {
-      return apiError('Scan URL missing — set domain or pass url', API_STATUS.BAD_REQUEST);
+      urlOverride ??
+      scanNodeUrl(doc.nodes) ??
+      (geoNode?.url?.trim() || null) ??
+      startNodeUrl(doc.nodes);
+
+    if (!hasPageQuality && !hasGeo) {
+      return apiError(
+        'Quality path missing — add scan, domain_scan, or geo_job',
+        API_STATUS.BAD_REQUEST
+      );
+    }
+    if (!baseUrl && !geoCompany) {
+      return apiError(
+        'Scan URL missing — set domain, geo url/companyName, or pass url',
+        API_STATUS.BAD_REQUEST
+      );
+    }
+    if (documentHasJourneySegment(doc) && !baseUrl) {
+      return apiError('Journey requires a start/scan URL', API_STATUS.BAD_REQUEST);
     }
 
     const checkionProjectId = await getExternalProjectId(id, 'checkion');
@@ -90,12 +123,13 @@ export async function POST(
     const hasJourney = documentHasJourneySegment(doc);
     const startedAt = new Date().toISOString();
     const threshold = scoreGateThreshold(doc.nodes);
+    const runUrl = baseUrl || '';
 
     let audionJobId: string | null = null;
     let audionStudyId: string | null = null;
     let audionWaveId: string | null = null;
     let stepUrl: string | null = null;
-    let scanUrl = baseUrl;
+    let scanUrl = runUrl;
     let taskCompleted = !hasJourney;
     let journeyValidEvidence = !hasJourney;
 
@@ -130,7 +164,7 @@ export async function POST(
         );
       }
 
-      const journeyFlow = resolveJourneyFlowForRun(doc, baseUrl);
+      const journeyFlow = resolveJourneyFlowForRun(doc, runUrl);
       if (!journeyFlow) {
         return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
       }
@@ -158,7 +192,7 @@ export async function POST(
           startedAt,
           completedAt: new Date().toISOString(),
           scanId: null,
-          url: baseUrl,
+          url: runUrl,
           status: 'error',
           overallScore: null,
           error: journey.error,
@@ -190,11 +224,16 @@ export async function POST(
       if (journey.job.finalUrl) scanUrl = journey.job.finalUrl;
     }
 
-    const qualityNode = qualityScanNode(doc.nodes);
+    // qualityNode already resolved above (Wave 8B may be geo-only)
     const useDomain = qualityNode?.kind === 'domain_scan';
     const pageScanMode: CollectionFlowScanMode =
       qualityNode?.scanMode === 'deep' ? 'deep' : 'single';
     const scoreGate = scoreGateNode(doc.nodes);
+    const geoGate = geoGateNode(doc.nodes);
+    const needGeoFitness =
+      documentHasGeoGate(doc) &&
+      (geoGate?.gateCondition === 'geo_fitness_at_least' ||
+        geoGate?.gateCondition === 'geo_fitness_below');
 
     type QualityResult = {
       ok: boolean;
@@ -205,139 +244,144 @@ export async function POST(
       url: string;
       scanError?: string | null;
       domainScanId?: string | null;
-      scanMode: CollectionFlowScanMode | 'domain';
+      scanMode: CollectionFlowScanMode | 'domain' | null;
       pageScanId?: string | null;
     };
 
-    let quality: QualityResult;
-    if (useDomain) {
-      const domainResult = await runCheckionDomainScanV3({
-        projectId: checkionProjectId,
-        url: scanUrl,
-        maxPages:
-          typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
-      });
-      if (!domainResult.ok) {
-        quality = {
-          ok: false,
-          error: domainResult.error,
-          id: domainResult.scan?.id ?? null,
-          status: domainResult.scan?.status ?? 'failed',
-          overallScore: domainResult.scan?.overallScore ?? null,
-          url: domainResult.scan?.url || scanUrl,
-          scanError: domainResult.scan?.error ?? null,
-          domainScanId: domainResult.scan?.id ?? null,
-          scanMode: 'domain',
-          pageScanId: null,
-        };
-      } else {
-        quality = {
-          ok: true,
-          id: domainResult.scan.id,
-          status: domainResult.scan.status,
-          overallScore: domainResult.scan.overallScore,
-          url: domainResult.scan.url || scanUrl,
-          scanError: domainResult.scan.error ?? null,
-          domainScanId: domainResult.scan.id,
-          scanMode: 'domain',
-          pageScanId: null,
-        };
-      }
-    } else {
-      const scanResult = await runCheckionSingleScan({
-        projectId: checkionProjectId,
-        url: scanUrl,
-        mode: pageScanMode,
-        platformProjectId: id,
-        audionRunId: audionJobId,
-        stepUrl: stepUrl ?? scanUrl,
-      });
-      if (!scanResult.ok) {
-        quality = {
-          ok: false,
-          error: scanResult.error,
-          id: scanResult.scan?.id ?? null,
-          status: scanResult.scan?.status ?? 'failed',
-          overallScore: scanResult.scan?.overallScore ?? null,
-          url: scanResult.scan?.url || scanUrl,
-          scanError: scanResult.scan?.error ?? null,
-          domainScanId: null,
-          scanMode: pageScanMode,
-          pageScanId: scanResult.scan?.id ?? null,
-        };
-      } else {
-        quality = {
-          ok: true,
-          id: scanResult.scan.id,
-          status: scanResult.scan.status,
-          overallScore: scanResult.scan.overallScore,
-          url: scanResult.scan.url || scanUrl,
-          scanError: scanResult.scan.error ?? null,
-          domainScanId: null,
-          scanMode: pageScanMode,
-          pageScanId: scanResult.scan.id,
-        };
-      }
-    }
-
     const blockers: string[] = [];
-    if (!quality.ok) {
-      blockers.push(quality.error ?? 'Scan fehlgeschlagen');
-      const verdictBase = deriveCollectionVerdict({
-        scanStatus: quality.status,
-        overallScore: quality.overallScore,
-        threshold,
-        blockers,
-        hasJourneySegment: hasJourney,
-        taskCompleted,
-        journeyValidEvidence,
-        scoreGate,
-      });
-      const errorVerdict: CollectionVerdict = {
-        ...verdictBase,
-        status: 'error',
-        flowCompleted: false,
-        collectionReady: false,
-        pageEvidenceValid: false,
-        pageEvidenceCaveat: quality.error ?? 'Scan fehlgeschlagen',
-        summary: `Fehler — ${quality.error ?? 'Scan fehlgeschlagen'}`,
-        blockers,
-      };
-      const lastRun: CollectionFlowLastRun = {
-        startedAt,
-        completedAt: new Date().toISOString(),
-        scanId: quality.pageScanId ?? null,
-        domainScanId: quality.domainScanId ?? null,
-        scanMode: quality.scanMode,
-        url: scanUrl,
-        status: quality.status,
-        overallScore: quality.overallScore,
-        error: quality.error ?? null,
-        audionJobId,
-        audionStudyId,
-        audionWaveId,
-        stepUrl: stepUrl ?? scanUrl,
-      };
-      const saved = await persistFlowRunResult({
-        platformProjectId: id,
-        flowId: fid,
-        verdict: errorVerdict,
-        lastRun,
-      });
-      return platformJson({
-        flow: saved ? toCollectionTestFlowResponse(saved) : null,
-        verdict: errorVerdict,
-        lastRun,
-        nodeStates: nodeStatesFromVerdict(doc, errorVerdict, lastRun),
-      });
-    }
+    let quality: QualityResult | null = null;
 
-    if (quality.scanError) blockers.push(quality.scanError);
+    if (hasPageQuality) {
+      if (useDomain) {
+        const domainResult = await runCheckionDomainScanV3({
+          projectId: checkionProjectId,
+          url: scanUrl,
+          maxPages:
+            typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
+        });
+        if (!domainResult.ok) {
+          quality = {
+            ok: false,
+            error: domainResult.error,
+            id: domainResult.scan?.id ?? null,
+            status: domainResult.scan?.status ?? 'failed',
+            overallScore: domainResult.scan?.overallScore ?? null,
+            url: domainResult.scan?.url || scanUrl,
+            scanError: domainResult.scan?.error ?? null,
+            domainScanId: domainResult.scan?.id ?? null,
+            scanMode: 'domain',
+            pageScanId: null,
+          };
+        } else {
+          quality = {
+            ok: true,
+            id: domainResult.scan.id,
+            status: domainResult.scan.status,
+            overallScore: domainResult.scan.overallScore,
+            url: domainResult.scan.url || scanUrl,
+            scanError: domainResult.scan.error ?? null,
+            domainScanId: domainResult.scan.id,
+            scanMode: 'domain',
+            pageScanId: null,
+          };
+        }
+      } else {
+        const scanResult = await runCheckionSingleScan({
+          projectId: checkionProjectId,
+          url: scanUrl,
+          mode: pageScanMode,
+          platformProjectId: id,
+          audionRunId: audionJobId,
+          stepUrl: stepUrl ?? scanUrl,
+        });
+        if (!scanResult.ok) {
+          quality = {
+            ok: false,
+            error: scanResult.error,
+            id: scanResult.scan?.id ?? null,
+            status: scanResult.scan?.status ?? 'failed',
+            overallScore: scanResult.scan?.overallScore ?? null,
+            url: scanResult.scan?.url || scanUrl,
+            scanError: scanResult.scan?.error ?? null,
+            domainScanId: null,
+            scanMode: pageScanMode,
+            pageScanId: scanResult.scan?.id ?? null,
+          };
+        } else {
+          quality = {
+            ok: true,
+            id: scanResult.scan.id,
+            status: scanResult.scan.status,
+            overallScore: scanResult.scan.overallScore,
+            url: scanResult.scan.url || scanUrl,
+            scanError: scanResult.scan.error ?? null,
+            domainScanId: null,
+            scanMode: pageScanMode,
+            pageScanId: scanResult.scan.id,
+          };
+        }
+      }
+
+      if (!quality.ok) {
+        blockers.push(quality.error ?? 'Scan fehlgeschlagen');
+        const verdictBase = deriveCollectionVerdict({
+          scanStatus: quality.status,
+          overallScore: quality.overallScore,
+          threshold,
+          blockers,
+          hasJourneySegment: hasJourney,
+          taskCompleted,
+          journeyValidEvidence,
+          scoreGate,
+          geoGate,
+          requirePageScore: Boolean(scoreGate) || !hasGeo,
+        });
+        const errorVerdict: CollectionVerdict = {
+          ...verdictBase,
+          status: 'error',
+          flowCompleted: false,
+          collectionReady: false,
+          pageEvidenceValid: false,
+          pageEvidenceCaveat: quality.error ?? 'Scan fehlgeschlagen',
+          summary: `Fehler — ${quality.error ?? 'Scan fehlgeschlagen'}`,
+          blockers,
+        };
+        const lastRun: CollectionFlowLastRun = {
+          startedAt,
+          completedAt: new Date().toISOString(),
+          scanId: quality.pageScanId ?? null,
+          domainScanId: quality.domainScanId ?? null,
+          scanMode: quality.scanMode,
+          url: scanUrl || runUrl,
+          status: quality.status,
+          overallScore: quality.overallScore,
+          error: quality.error ?? null,
+          audionJobId,
+          audionStudyId,
+          audionWaveId,
+          stepUrl: stepUrl ?? (scanUrl || runUrl),
+        };
+        const saved = await persistFlowRunResult({
+          platformProjectId: id,
+          flowId: fid,
+          verdict: errorVerdict,
+          lastRun,
+        });
+        return platformJson({
+          flow: saved ? toCollectionTestFlowResponse(saved) : null,
+          verdict: errorVerdict,
+          lastRun,
+          nodeStates: nodeStatesFromVerdict(doc, errorVerdict, lastRun),
+        });
+      }
+
+      if (quality.scanError) blockers.push(quality.scanError);
+    }
 
     const hasIssues = documentHasIssueGate(doc);
     const gate = issueGateNode(doc.nodes);
     let issueSignals: IssueGateSignals | null = null;
-    if (hasIssues && quality.id) {
+    if (hasIssues && quality?.id) {
       if (useDomain) {
         const issuesRes = await fetchCheckionDomainScanV3Issues(quality.id);
         if (!issuesRes.ok) blockers.push(issuesRes.error);
@@ -350,27 +394,126 @@ export async function POST(
     }
 
     let gatedScore: number | null | undefined = undefined;
-    let scoresByKind: Record<string, number> | null = null;
     const scoreKind = (scoreGate?.scoreKind ?? 'overall').trim().toLowerCase() || 'overall';
-    if (!useDomain && scoreKind !== 'overall' && quality.pageScanId) {
-      const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
-      if (!scoresRes.ok) {
-        blockers.push(scoresRes.error);
-      } else {
-        scoresByKind = scoresRes.byKind;
-        gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, scoresByKind);
-        if (gatedScore == null) {
-          blockers.push(`Score kind „${scoreKind}“ fehlt`);
+    if (quality) {
+      if (!useDomain && scoreKind !== 'overall' && quality.pageScanId) {
+        const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
+        if (!scoresRes.ok) {
+          blockers.push(scoresRes.error);
+        } else {
+          gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, scoresRes.byKind);
+          if (gatedScore == null) {
+            blockers.push(`Score kind „${scoreKind}“ fehlt`);
+          }
         }
+      } else {
+        gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, null);
       }
-    } else {
-      gatedScore = resolveScoreForGate(scoreGate, quality.overallScore, null);
     }
 
+    let geoJobId: string | null = null;
+    let geoSignals: GeoGateSignals | null = null;
+    let geoCitedShare: number | null = null;
+    let geoFitness: number | null = null;
+    let geoStatus: string | null = null;
+    let geoOverall: number | null = null;
+    let geoUrl = quality?.url || scanUrl || runUrl;
+
+    if (hasGeo) {
+      const queries = geoJobQueriesFromText(geoNode?.text);
+      const geoResult = await runCheckionGeoJobV3({
+        projectId: checkionProjectId,
+        platformProjectId: id,
+        url: geoNode?.url?.trim() || scanUrl || runUrl || undefined,
+        companyName: geoCompany || undefined,
+        queries: queries.length ? queries : undefined,
+        includePageScan: needGeoFitness && !hasPageQuality,
+      });
+      if (!geoResult.ok) {
+        blockers.push(geoResult.error);
+        geoJobId = geoResult.job?.id ?? null;
+        geoStatus = geoResult.job?.status ?? 'failed';
+        geoCitedShare = geoResult.job?.citedShare ?? null;
+        geoFitness = geoResult.job?.geoFitness ?? null;
+        geoOverall = geoResult.job?.overallScore ?? null;
+        if (geoResult.job?.url) geoUrl = geoResult.job.url;
+
+        const verdictBase = deriveCollectionVerdict({
+          scanStatus: geoStatus,
+          overallScore: quality?.overallScore ?? geoOverall,
+          gatedScore: quality ? gatedScore : geoOverall,
+          threshold,
+          blockers,
+          hasJourneySegment: hasJourney,
+          taskCompleted,
+          journeyValidEvidence,
+          scoreGate,
+          issueGate: gate,
+          issueSignals,
+          geoGate,
+          geoSignals: null,
+          requirePageScore: Boolean(scoreGate) || hasPageQuality,
+        });
+        const errorVerdict: CollectionVerdict = {
+          ...verdictBase,
+          status: 'error',
+          flowCompleted: false,
+          collectionReady: false,
+          pageEvidenceValid: false,
+          pageEvidenceCaveat: geoResult.error,
+          summary: `Fehler — ${geoResult.error}`,
+          blockers,
+        };
+        const lastRun: CollectionFlowLastRun = {
+          startedAt,
+          completedAt: new Date().toISOString(),
+          scanId: quality?.pageScanId ?? null,
+          domainScanId: quality?.domainScanId ?? null,
+          geoJobId,
+          scanMode: quality?.scanMode ?? null,
+          scoreKind: scoreKind !== 'overall' ? scoreKind : null,
+          url: geoUrl,
+          status: geoStatus,
+          overallScore: quality?.overallScore ?? geoOverall,
+          citedShare: geoCitedShare,
+          geoFitness,
+          error: geoResult.error,
+          audionJobId,
+          audionStudyId,
+          audionWaveId,
+          stepUrl: stepUrl ?? geoUrl,
+          issueCount: issueSignals?.issueCount ?? null,
+          criticalCount: issueSignals?.criticalCount ?? null,
+        };
+        const saved = await persistFlowRunResult({
+          platformProjectId: id,
+          flowId: fid,
+          verdict: errorVerdict,
+          lastRun,
+        });
+        return platformJson({
+          flow: saved ? toCollectionTestFlowResponse(saved) : null,
+          verdict: errorVerdict,
+          lastRun,
+          nodeStates: nodeStatesFromVerdict(doc, errorVerdict, lastRun),
+        });
+      }
+
+      geoJobId = geoResult.job.id;
+      geoSignals = geoResult.signals;
+      geoCitedShare = geoResult.signals.citedShare;
+      geoFitness = geoResult.signals.geoFitness;
+      geoStatus = geoResult.job.status;
+      geoOverall = geoResult.job.overallScore;
+      if (geoResult.job.url) geoUrl = geoResult.job.url;
+    }
+
+    const terminalStatus = quality?.status ?? geoStatus ?? 'completed';
+    const overallForVerdict = quality?.overallScore ?? geoOverall;
     const verdict = deriveCollectionVerdict({
-      scanStatus: quality.status,
-      overallScore: quality.overallScore,
-      gatedScore,
+      scanStatus: terminalStatus,
+      overallScore: overallForVerdict,
+      gatedScore: quality ? gatedScore : geoOverall ?? geoCitedShare,
       threshold,
       blockers,
       hasJourneySegment: hasJourney,
@@ -379,6 +522,9 @@ export async function POST(
       scoreGate,
       issueGate: gate,
       issueSignals,
+      geoGate,
+      geoSignals,
+      requirePageScore: Boolean(scoreGate) || hasPageQuality,
     });
 
     let waveEvaluateOk: boolean | null = null;
@@ -392,9 +538,9 @@ export async function POST(
         platformProjectId: id,
         flowId: fid,
         verdict,
-        scanId: quality.pageScanId ?? quality.id,
-        stepUrl: stepUrl ?? quality.url ?? scanUrl,
-        overallScore: quality.overallScore,
+        scanId: quality?.pageScanId ?? quality?.id ?? geoJobId,
+        stepUrl: stepUrl ?? quality?.url ?? geoUrl,
+        overallScore: overallForVerdict,
       });
       waveEvaluateOk = rollup.waveEvaluateOk;
       waveRollupOk = rollup.ok && rollup.waveRollupOk;
@@ -404,8 +550,8 @@ export async function POST(
       platformProjectId: id,
       flowId: fid,
       verdict,
-      scanId: quality.pageScanId ?? quality.id,
-      overallScore: quality.overallScore,
+      scanId: quality?.pageScanId ?? quality?.id ?? geoJobId,
+      overallScore: overallForVerdict,
       updatedByUserId: user.id,
     });
     knowledgeDistillateOk = distillate.ok;
@@ -413,18 +559,21 @@ export async function POST(
     const lastRun: CollectionFlowLastRun = {
       startedAt,
       completedAt: new Date().toISOString(),
-      scanId: quality.pageScanId ?? null,
-      domainScanId: quality.domainScanId ?? null,
-      scanMode: quality.scanMode,
+      scanId: quality?.pageScanId ?? null,
+      domainScanId: quality?.domainScanId ?? null,
+      geoJobId,
+      scanMode: quality?.scanMode ?? null,
       scoreKind: scoreKind !== 'overall' ? scoreKind : null,
-      url: quality.url || scanUrl,
-      status: quality.status,
-      overallScore: quality.overallScore,
-      error: quality.scanError ?? null,
+      url: quality?.url || geoUrl,
+      status: terminalStatus,
+      overallScore: overallForVerdict,
+      citedShare: geoCitedShare,
+      geoFitness,
+      error: quality?.scanError ?? null,
       audionJobId,
       audionStudyId,
       audionWaveId,
-      stepUrl: stepUrl ?? quality.url ?? scanUrl,
+      stepUrl: stepUrl ?? quality?.url ?? geoUrl,
       issueCount: issueSignals?.issueCount ?? null,
       criticalCount: issueSignals?.criticalCount ?? null,
       issueGateBranch: verdict.issueGateBranch,

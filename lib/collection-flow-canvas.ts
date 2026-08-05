@@ -62,7 +62,12 @@ export function sourceHandleForEdgeKind(kind: CollectionFlowEdgeKind): string | 
   return undefined;
 }
 
-const GATE_LIKE_KINDS = new Set<CollectionFlowNodeKind>(['gate', 'score_gate', 'issue_gate']);
+const GATE_LIKE_KINDS = new Set<CollectionFlowNodeKind>([
+  'gate',
+  'score_gate',
+  'issue_gate',
+  'geo_gate',
+]);
 
 function edgeKindFromDoc(e: CollectionFlowEdge): CollectionFlowEdgeKind {
   if (e.edgeKind) return e.edgeKind;
@@ -76,7 +81,9 @@ function whenFromEdgeKind(
   kind: CollectionFlowEdgeKind,
   sourceKind: CollectionFlowNodeKind | undefined
 ): 'pass' | 'fail' | undefined {
-  if (sourceKind !== 'score_gate' && sourceKind !== 'issue_gate') return undefined;
+  if (sourceKind !== 'score_gate' && sourceKind !== 'issue_gate' && sourceKind !== 'geo_gate') {
+    return undefined;
+  }
   if (kind === 'when') return 'pass';
   if (kind === 'otherwise') return 'fail';
   return undefined;
@@ -171,8 +178,10 @@ export const PALETTE_JOURNEY_KINDS: CollectionFlowNodeKind[] = [
 export const PALETTE_QUALITY_KINDS: CollectionFlowNodeKind[] = [
   'scan',
   'domain_scan',
+  'geo_job',
   'score_gate',
   'issue_gate',
+  'geo_gate',
   'quality_ok',
 ];
 
@@ -196,6 +205,13 @@ export const ISSUE_GATE_CONDITION_OPTIONS = [
   'any_issues',
   'no_issues',
   'issue_rule_match',
+] as const;
+
+export const GEO_GATE_CONDITION_OPTIONS = [
+  'cited_share_at_least',
+  'cited_share_below',
+  'geo_fitness_at_least',
+  'geo_fitness_below',
 ] as const;
 
 /** AUDION journey gate conditions (closed set) for the `gate` node inspector select. */
@@ -256,10 +272,25 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
   if (kind === 'issue_gate') {
     return { ...base, gateCondition: 'critical_issues', minCount: 1 };
   }
+  if (kind === 'geo_gate') {
+    return {
+      ...base,
+      gateCondition: 'cited_share_at_least',
+      threshold: DEFAULT_SCORE_GATE_THRESHOLD,
+    };
+  }
   if (kind === 'observe') return { ...base, text: 'Schau dich kurz um.', observeSeconds: 30 };
   if (kind === 'start') return { ...base, url: '', urlKey: '', maxSteps: 8 };
   if (kind === 'scan') return { ...base, url: '', scanMode: 'single' };
   if (kind === 'domain_scan') return { ...base, url: '', maxPages: 50 };
+  if (kind === 'geo_job') {
+    return {
+      ...base,
+      url: '',
+      companyName: '',
+      text: '',
+    };
+  }
   if (
     kind === 'prompt' ||
     kind === 'action' ||

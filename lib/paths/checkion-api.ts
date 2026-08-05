@@ -30,6 +30,12 @@ export function pathCheckionDomainResult(domainScanId: string): string {
   return `${base}/domain/${encodeURIComponent(domainScanId)}`;
 }
 
+/** GEO magazine overview — `CHECKION/app/geo/[id]/overview`. Wave 8B. */
+export function pathCheckionGeoOverview(jobId: string): string {
+  const base = getCheckionUrl().replace(/\/+$/, '');
+  return `${base}/geo/${encodeURIComponent(jobId)}/overview`;
+}
+
 export function pathCheckionDomainScan(input: {
   url: string;
   scanId?: string;
@@ -82,6 +88,17 @@ export function checkionApiDomainScanDetail(domainScanId: string): string {
 /** GET /api/domain-scans/:id/issues */
 export function checkionApiDomainScanIssues(domainScanId: string): string {
   return `${checkionApiDomainScanDetail(domainScanId)}/issues`;
+}
+
+/** POST/GET /api/geo-jobs — contracts GeoOverview (v3). Wave 8B. */
+export function checkionApiGeoJobs(): string {
+  const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
+  return `${base}/api/geo-jobs`;
+}
+
+/** GET /api/geo-jobs/:id */
+export function checkionApiGeoJobDetail(jobId: string): string {
+  return `${checkionApiGeoJobs()}/${encodeURIComponent(jobId)}`;
 }
 
 export function checkionApiScanProject(scanId: string): string {

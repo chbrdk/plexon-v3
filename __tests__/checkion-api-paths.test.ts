@@ -14,8 +14,11 @@ import {
   checkionApiToolsContrast,
   pathCheckionDomainResult,
   pathCheckionDomainScan,
+  pathCheckionGeoOverview,
   pathCheckionScanIssues,
   pathCheckionScanResult,
+  checkionApiGeoJobs,
+  checkionApiGeoJobDetail,
 } from '@/lib/paths/checkion-api';
 
 describe('checkion-api paths', () => {
@@ -42,6 +45,12 @@ describe('checkion-api paths', () => {
     expect(pathCheckionDomainResult('dom-1')).toMatch(/\/domain\/dom-1$/);
     expect(pathCheckionScanResult('scan-1')).toMatch(/\/results\/scan-1$/);
     expect(pathCheckionScanIssues('scan-1')).toMatch(/\/results\/scan-1\/issues$/);
+    expect(pathCheckionGeoOverview('geo-1')).toMatch(/\/geo\/geo-1\/overview$/);
+  });
+
+  it('builds v3 geo-jobs API paths', () => {
+    expect(checkionApiGeoJobs()).toMatch(/\/api\/geo-jobs$/);
+    expect(checkionApiGeoJobDetail('geo-1')).toMatch(/\/api\/geo-jobs\/geo-1$/);
   });
 
   it('builds project assign endpoints', () => {
