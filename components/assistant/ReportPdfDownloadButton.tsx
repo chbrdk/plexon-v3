@@ -1,21 +1,19 @@
-'use client';
+'use client'
 
-import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton';
+import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
 
 type ReportPdfDownloadButtonProps = {
-  pdfUrl: string;
-  label: string;
-  errorLabel?: string;
-  size?: 'small' | 'medium';
-  sx?: Record<string, unknown>;
-};
+  pdfUrl: string
+  label: string
+  errorLabel?: string
+  size?: 'sm' | 'md' | 'small' | 'medium'
+}
 
 export function ReportPdfDownloadButton({
   pdfUrl,
   label,
   errorLabel = 'PDF-Export fehlgeschlagen',
-  size = 'small',
-  sx,
+  size = 'sm',
 }: ReportPdfDownloadButtonProps) {
   return (
     <ReportBinaryDownloadButton
@@ -24,7 +22,6 @@ export function ReportPdfDownloadButton({
       format="pdf"
       errorLabel={errorLabel}
       size={size}
-      sx={sx}
     />
-  );
+  )
 }

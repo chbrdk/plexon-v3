@@ -96,21 +96,33 @@ NEXT_PUBLIC_AUDION_ADMIN_URL=https://audion-v3.projects-a.plygrnd.tech/
 
 ---
 
-## 4. Explizit **nicht** setzen (Wave A)
+## 4. Explizit **nicht** setzen (Wave A — Control Plane only)
 
 ```text
 CHECKION_DATABASE_URL
 AUDION_DATABASE_URL
 MIGRATION_MSQDX_PLATFORM_PROJECTS
-CHECKION_API_URL
-CHECKION_API_TOKEN
-AUDION_API_URL
-AUDION_API_TOKEN
-NEXT_PUBLIC_CHECKION_URL          # Prod-URL — erst wenn checkion-v3 existiert
-ANTHROPIC_API_KEY                 # optional; Board später
+ANTHROPIC_API_KEY                 # optional; Board / AI suggest später
 ```
 
 Kein Prod-`PLEXON_SERVICE_SECRET`, keine Prod-`DATABASE_URL`.
+
+---
+
+## 4b. Wave B — Event Quick Check End-to-End (Staging)
+
+Sobald **checkion-v3** und **audion-v3** laufen, auf **plexon-v3** setzen (sonst wirkt Quick Check „tot“):
+
+```bash
+NEXT_PUBLIC_CHECKION_URL=https://checkion-v3.projects-a.plygrnd.tech
+CHECKION_API_URL=https://checkion-v3.projects-a.plygrnd.tech
+CHECKION_API_TOKEN=checkion_<64-hex>
+
+AUDION_API_URL=https://audion-v3.projects-a.plygrnd.tech/api
+AUDION_API_TOKEN=audion_<hex>
+```
+
+Smoke: `knowledge/event-quick-check-staging-smoke.md` · Readiness: `GET /api/assistant/event-quick-check/readiness`
 
 ---
 

@@ -1,27 +1,19 @@
-'use client';
+'use client'
 
-import { Typography } from '@mui/material';
-import { MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
+import { Text } from '@msqdx/ui'
 
 type Props = {
-  title: string;
-  subtitle?: string;
-};
+  title: string
+  subtitle?: string
+}
 
 export function ReportSectionHeader({ title, subtitle }: Props) {
   return (
-    <>
-      <Typography
-        variant="subtitle1"
-        sx={{ fontWeight: MSQDX_TYPOGRAPHY.fontWeight.semibold, mt: 0.5 }}
-      >
+    <div className="plexon-report-section-header">
+      <Text role="title" as="h3">
         {title}
-      </Typography>
-      {subtitle ? (
-        <Typography variant="caption" color="text.secondary">
-          {subtitle}
-        </Typography>
-      ) : null}
-    </>
-  );
+      </Text>
+      {subtitle ? <Text role="meta">{subtitle}</Text> : null}
+    </div>
+  )
 }

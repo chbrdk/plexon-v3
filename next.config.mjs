@@ -16,8 +16,8 @@ const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   typescript: {
-    // Temporary during @msqdx/ui cutover: legacy surfaces still hit shim typing gaps.
-    // Remove once Waves 1–7 migrate off bridge/shim (see specs/domain/ui-migrate.md).
+    // Temporary: generative UI + board still on @msqdx/react / MUI shims.
+    // Inventory: knowledge/msqdx-shim-inventory.md — flip to false when that set is small + tsc clean.
     ignoreBuildErrors: true,
   },
   experimental: {

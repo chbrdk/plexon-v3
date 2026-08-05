@@ -15,6 +15,10 @@ const shellFiles = [
   'components/assistant/ConfirmActionCard.tsx',
   'components/assistant/PlannerStepCard.tsx',
   'components/assistant/AgentActivityTrace.tsx',
+  'components/assistant/ReportCollectionBar.tsx',
+  'components/assistant/ReportBinaryDownloadButton.tsx',
+  'components/assistant/ReportPdfDownloadButton.tsx',
+  'components/assistant/PublicReportView.tsx',
   'components/assistant-ui/AssistantChatBubble.tsx',
 ]
 

@@ -5,6 +5,11 @@ export const EQC_PAGE_COPY = {
   pageTitle: QUICK_CHECK_LABEL,
   pageLead:
     'Domain-Scan, AUDION-Persona und GEO-Wettbewerb in einem Durchlauf — ohne Chat, mit vollem Report-Dashboard.',
+  readinessTitle: 'Produkt-APIs nicht verdrahtet',
+  readinessLead:
+    'Quick Check ist live in plexon-v3 — Deep Scan, Personas und GEO brauchen aber checkion-v3 und audion-v3 auf diesem Container.',
+  readinessOpsHint:
+    'Ops: Coolify plexon-v3 → CHECKION_API_URL + CHECKION_API_TOKEN (checkion-v3) und AUDION_API_URL + AUDION_API_TOKEN (audion-v3). Siehe knowledge/event-quick-check-staging-smoke.md.',
   urlLabel: 'Website-URL',
   urlPlaceholder: 'https://beispiel.de',
   projectNameLabel: 'Projektname (optional)',

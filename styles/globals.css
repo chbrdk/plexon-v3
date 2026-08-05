@@ -1656,6 +1656,17 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   min-width: 0;
 }
 
+.plexon-eqc-readiness {
+  margin-bottom: 1.25rem;
+}
+
+.plexon-eqc-readiness-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
 .plexon-eqc-stack {
   display: flex;
   flex-direction: column;
@@ -1907,6 +1918,250 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-eqc-alert-banner {
   margin-bottom: 0.75rem;
+}
+
+/* EQC report sections (assistant / dashboard bodies) */
+.plexon-eqc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.75rem;
+}
+
+.plexon-eqc-workflow-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--line, rgba(15, 23, 42, 0.12));
+}
+
+.plexon-eqc-workflow-row:last-child {
+  border-bottom: none;
+}
+
+.plexon-eqc-workflow-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.plexon-eqc-trait-list {
+  margin-top: 0.35rem;
+}
+
+.plexon-eqc-trait {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.plexon-eqc-trait-bar {
+  height: 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink, #0f172a) 10%, transparent);
+  overflow: hidden;
+}
+
+.plexon-eqc-trait-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-secondary-dx-pink, #f256b6);
+  transition: width 0.2s ease;
+}
+
+.plexon-eqc-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .plexon-eqc-split-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .plexon-eqc-split-grid--lg {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.plexon-eqc-status--success {
+  border-color: color-mix(in srgb, var(--color-secondary-dx-green, #00ca55) 45%, var(--line));
+  color: var(--color-secondary-dx-green, #00ca55);
+}
+
+.plexon-eqc-status--error {
+  border-color: color-mix(in srgb, #ef4444 45%, var(--line));
+  color: #ef4444;
+}
+
+.plexon-eqc-status--warning {
+  border-color: color-mix(in srgb, var(--color-secondary-dx-orange, #ff6a3b) 45%, var(--line));
+  color: var(--color-secondary-dx-orange, #ff6a3b);
+}
+
+.plexon-eqc-status--default {
+  opacity: 0.9;
+}
+
+.plexon-eqc-appendix-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plexon-eqc-appendix-toggle,
+.plexon-eqc-appendix-chevron {
+  padding-inline: 0.25rem;
+}
+
+.plexon-eqc-appendix-body {
+  margin-top: 0.5rem;
+}
+
+.plexon-report-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: var(--color-text-on-light, var(--ink, #0f172a));
+}
+
+.plexon-report-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plexon-report-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.plexon-report-exec-title {
+  font-weight: 700;
+}
+
+.plexon-report-download {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.plexon-report-cart-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--line, var(--color-secondary-dx-grey-light-tint));
+  background: var(--color-bg-subtle, var(--bg-subtle));
+}
+
+.plexon-report-cart-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.plexon-report-cart-dialog .ds-dialog-sheet {
+  max-width: 28rem;
+  width: min(100vw - 2rem, 28rem);
+}
+
+.plexon-report-cart-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.plexon-report-cart-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plexon-report-cart-pins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: min(50vh, 22rem);
+  overflow-y: auto;
+}
+
+.plexon-report-cart-pin {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plexon-report-cart-pin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.plexon-report-cart-share {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line, var(--color-secondary-dx-grey-light-tint));
+}
+
+.plexon-report-cart-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.plexon-public-report {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  min-height: 100vh;
+  color: var(--color-text-on-light, var(--text));
+  background: var(--color-bg-subtle, var(--bg-subtle));
+}
+
+.plexon-public-report-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.plexon-public-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.plexon-public-report-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40vh;
+  padding: 2rem;
+  text-align: center;
 }
 
 .plexon-spinner {

@@ -17,6 +17,8 @@ function collectTsx(dir: string): string[] {
 
 const eqcFiles = [
   'app/event-quick-check/page.tsx',
+  'components/assistant/reports/event-quick-check/EventQuickCheckReportSections.tsx',
+  'components/assistant/reports/ReportSectionHeader.tsx',
   ...collectTsx(path.join(root, 'components/event-quick-check')).map((f) =>
     path.relative(root, f).split(path.sep).join('/')
   ),

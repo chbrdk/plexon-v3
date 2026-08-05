@@ -12,6 +12,7 @@
 - Companion: `https://audion-v3.projects-a.plygrnd.tech`
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - Federation contract: `2026-05-plexon-federation-v3`
+- Admin user edit: `/admin/users/[id]` · `pathAdminUser(id)` (legacy `/?editUser=` redirects here)
 - Rail dock storage key: `plexon.v3.railDock`
 - Default theme: `msqdx-dark` (`data-theme` on `<html>`)
 - Specs: `specs/domain/app-shell.md`

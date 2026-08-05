@@ -55,8 +55,10 @@ export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;
 export const PATH_ADMIN_USERS = `${PATH_ADMIN}/users`;
 export const pathAdminCompany = (id: string) =>
   `${PATH_ADMIN_COMPANIES}/${encodeURIComponent(id)}`;
-export const pathAdminUserEditOnDashboard = (userId: string) =>
-  `${PATH_HOME}?${new URLSearchParams({ editUser: userId }).toString()}`;
+export const pathAdminUser = (id: string) =>
+  `${PATH_ADMIN_USERS}/${encodeURIComponent(id)}`;
+/** @deprecated Prefer pathAdminUser — edit lives at /admin/users/[id]. */
+export const pathAdminUserEditOnDashboard = (userId: string) => pathAdminUser(userId);
 export const pathPlatformProjectDashboard = (platformProjectId: string) =>
   `/projects/${encodeURIComponent(platformProjectId)}`;
 

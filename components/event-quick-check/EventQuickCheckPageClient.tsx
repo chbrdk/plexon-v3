@@ -18,6 +18,7 @@ import { EventQuickCheckDeepScanPanel } from '@/components/event-quick-check/Eve
 import { EventQuickCheckGeoQuestionsPanel } from '@/components/event-quick-check/EventQuickCheckGeoQuestionsPanel';
 import { EventQuickCheckDashboardView } from '@/components/event-quick-check/EventQuickCheckDashboardView';
 import { EventQuickCheckHistoryDialog } from '@/components/event-quick-check/EventQuickCheckHistoryDialog';
+import { EventQuickCheckReadinessBanner } from '@/components/event-quick-check/EventQuickCheckReadinessBanner';
 import { UiStepList } from '@/components/assistant-ui/organisms/UiStepList';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
@@ -743,6 +744,8 @@ export function EventQuickCheckPageClient() {
               {EQC_PAGE_COPY.historyOpenButton}
             </Button>
           </div>
+
+          <EventQuickCheckReadinessBanner />
 
           {phase === 'loading-run' ? (
             <div className="plexon-eqc-center">

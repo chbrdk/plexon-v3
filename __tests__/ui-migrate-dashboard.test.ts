@@ -30,4 +30,24 @@ describe('dashboard ui migrate (wave 1)', () => {
     expect(usageSlice).toContain('plexon-dash-band')
     expect(usageSlice).not.toContain('DashPanel')
   })
+
+  it('routes admin user edit off the dashboard modal onto /admin/users/[id]', () => {
+    expect(page).toContain('pathAdminUser')
+    expect(page).not.toContain('setEditId')
+    expect(page).not.toContain('openEdit')
+    expect(page).not.toMatch(/editId\s*&&/)
+
+    const editPage = readFileSync(path.join(root, 'app/admin/users/[id]/page.tsx'), 'utf8')
+    expect(editPage).toContain('AdminUserEditForm')
+    expect(editPage).toContain('PATH_ADMIN_USERS')
+
+    const form = readFileSync(path.join(root, 'components/admin/AdminUserEditForm.tsx'), 'utf8')
+    expect(form).toContain("'use client'")
+    expect(form).toContain('apiAdminUser')
+    expect(form).toContain("from '@msqdx/ui'")
+
+    const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8')
+    expect(constants).toContain('export const pathAdminUser')
+    expect(constants).toMatch(/pathAdminUserEditOnDashboard[\s\S]*pathAdminUser/)
+  })
 })

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Chip, Collapse, LinearProgress, Stack, Typography } from '@mui/material';
-import { MSQDX_COLORS, MSQDX_SPACING, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
+import { Button, Chip, Text } from '@msqdx/ui';
 import type {
   EventQuickCheckReportModel,
   EventQuickCheckReportPersonaTrait,
@@ -28,8 +27,8 @@ import {
   eqcSectionHelpAriaLabel,
 } from '@/lib/assistant/event-quick-check/event-quick-check-section-help';
 import { InfoTooltip } from '@/components/InfoTooltip';
-import { PLEXON_META_CHIP_SX } from '@/lib/theme-accent';
 
+/** Status tone suffix for `plexon-eqc-status--*` / `data-tone`. */
 export function stepStatusColor(status: string): 'success' | 'error' | 'default' | 'warning' {
   if (status === 'done') return 'success';
   if (status === 'error') return 'error';
@@ -40,29 +39,30 @@ export function stepStatusColor(status: string): 'success' | 'error' | 'default'
 function TraitBars({ traits }: { traits: EventQuickCheckReportPersonaTrait[] }) {
   if (!traits || !Array.isArray(traits) || traits.length === 0) return null;
   return (
-    <Stack spacing={1} sx={{ mt: 1 }}>
+    <div className="plexon-eqc-stack-sm plexon-eqc-trait-list">
       {traits.map((t) => {
         const pct = Math.round(t.score <= 1 ? t.score * 100 : t.score);
+        const width = Math.min(100, pct);
         return (
-          <Box key={t.name}>
-            <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.25 }}>
-              <Typography variant="caption">{t.displayName}</Typography>
-              <Typography variant="caption">{pct}%</Typography>
-            </Stack>
-            <LinearProgress
-              variant="determinate"
-              value={Math.min(100, pct)}
-              sx={{
-                height: 6,
-                borderRadius: 1,
-                bgcolor: MSQDX_COLORS.greyLight,
-                '& .MuiLinearProgress-bar': { bgcolor: MSQDX_COLORS.brand.pink },
-              }}
-            />
-          </Box>
+          <div key={t.name} className="plexon-eqc-trait">
+            <div className="plexon-eqc-row-between">
+              <Text role="hint">{t.displayName}</Text>
+              <Text role="hint">{pct}%</Text>
+            </div>
+            <div
+              className="plexon-eqc-trait-bar"
+              role="progressbar"
+              aria-valuenow={width}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={t.displayName}
+            >
+              <div className="plexon-eqc-trait-bar-fill" style={{ width: `${width}%` }} />
+            </div>
+          </div>
         );
       })}
-    </Stack>
+    </div>
   );
 }
 
@@ -77,55 +77,45 @@ export function EventQuickCheckExecutiveHeader({
   const generatedAtLabel = formatReportGeneratedAt(report.meta.generatedAt);
 
   return (
-    <Box sx={{ color: 'var(--color-text-on-light)' }}>
+    <div className="plexon-eqc-stack plexon-report-exec">
       {!hideTitle ? (
-        <Typography variant="h5" sx={{ fontWeight: MSQDX_TYPOGRAPHY.fontWeight.bold, mb: 0.5 }}>
+        <Text role="title" as="h2" className="plexon-report-exec-title">
           {report.meta.title}
-        </Typography>
+        </Text>
       ) : null}
-      <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mb: 1 }}>
-        <Chip size="small" label={report.meta.domain} variant="outlined" sx={PLEXON_META_CHIP_SX} />
-        <Chip size="small" label={report.meta.projectName} variant="outlined" sx={PLEXON_META_CHIP_SX} />
+      <div className="plexon-eqc-chip-row">
+        <Chip static size="sm">
+          {report.meta.domain}
+        </Chip>
+        <Chip static size="sm">
+          {report.meta.projectName}
+        </Chip>
         {generatedAtLabel ? (
-          <Chip size="small" label={generatedAtLabel} variant="outlined" sx={PLEXON_META_CHIP_SX} />
+          <Chip static size="sm">
+            {generatedAtLabel}
+          </Chip>
         ) : null}
-      </Stack>
-      {report.meta.url ? (
-        <Typography variant="body2" sx={{ color: 'var(--color-text-on-light)' }}>
-          {report.meta.url}
-        </Typography>
-      ) : null}
-      {report.executive.summary ? (
-        <Typography variant="body1" sx={{ mt: 1.5 }}>
-          {report.executive.summary}
-        </Typography>
-      ) : null}
+      </div>
+      {report.meta.url ? <Text role="body">{report.meta.url}</Text> : null}
+      {report.executive.summary ? <Text role="body">{report.executive.summary}</Text> : null}
       {report.executive.fazit ? (
-        <Box sx={{ mt: 1.5 }}>
-          <UiAlertBlock
-            tone={report.executive.fazitTone ?? 'info'}
-            title={EQC_REPORT_COPY.fazit}
-            message={report.executive.fazit}
-          />
-        </Box>
+        <UiAlertBlock
+          tone={report.executive.fazitTone ?? 'info'}
+          title={EQC_REPORT_COPY.fazit}
+          message={report.executive.fazit}
+        />
       ) : null}
-    </Box>
+    </div>
   );
 }
 
 function KpiTileGrid({ report }: SectionProps) {
   return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))',
-        gap: `${MSQDX_SPACING.gap.sm}px`,
-      }}
-    >
+    <div className="plexon-eqc-kpi-grid">
       {report.executive.kpiTiles.map((item) => (
         <UiMetricTile key={`${item.label}-${item.value}`} item={item} />
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -140,40 +130,29 @@ export function EventQuickCheckKpiSection({
 
 export function EventQuickCheckWorkflowSection({ report }: SectionProps) {
   return (
-    <Stack spacing={1}>
-      {report.workflow.steps.map((s) => (
-        <Box
-          key={s.id}
-          sx={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 1,
-            py: 0.75,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:last-child': { borderBottom: 'none' },
-          }}
-        >
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {s.label}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {s.detail}
-            </Typography>
-          </Box>
-          <Chip size="small" label={s.status} color={stepStatusColor(s.status)} variant="outlined" />
-        </Box>
-      ))}
-    </Stack>
+    <div className="plexon-eqc-stack-sm">
+      {report.workflow.steps.map((s) => {
+        const tone = stepStatusColor(s.status);
+        return (
+          <div key={s.id} className="plexon-eqc-workflow-row">
+            <div className="plexon-eqc-workflow-copy">
+              <Text role="label">{s.label}</Text>
+              <Text role="hint">{s.detail}</Text>
+            </div>
+            <Chip static size="sm" className={`plexon-eqc-status--${tone}`}>
+              {s.status}
+            </Chip>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
 export function EventQuickCheckDomainSection({ report }: SectionProps) {
   if (!report.domain) return null;
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       <UiMetricGrid
         title={EQC_REPORT_COPY.sectionDomainScan}
         items={[
@@ -190,7 +169,7 @@ export function EventQuickCheckDomainSection({ report }: SectionProps) {
           rows={report.domain.topIssues.map((i) => [i.title, i.count])}
         />
       ) : null}
-    </Stack>
+    </div>
   );
 }
 
@@ -199,7 +178,7 @@ export function EventQuickCheckDomainComparisonSection({ report }: SectionProps)
   if (!comparison?.rows.length) return null;
 
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       <UiDataTable
         title={EQC_REPORT_COPY.sectionDomainComparison}
         columns={[
@@ -220,9 +199,9 @@ export function EventQuickCheckDomainComparisonSection({ report }: SectionProps)
         ])}
       />
       {comparison.failedDomains?.length ? (
-        <Typography variant="body2" color="text.secondary">
+        <Text role="hint">
           {EQC_REPORT_COPY.domainComparisonFailed}: {comparison.failedDomains.join(' · ')}
-        </Typography>
+        </Text>
       ) : null}
       {comparison.checkionProjectHref ? (
         <UiLinkList
@@ -236,7 +215,7 @@ export function EventQuickCheckDomainComparisonSection({ report }: SectionProps)
           ]}
         />
       ) : null}
-    </Stack>
+    </div>
   );
 }
 
@@ -257,42 +236,27 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
     persona.geoQuestions?.length ? persona.geoQuestions : personas.length === 1 ? report.geo.questions : [];
 
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       {personas.length > 1 ? (
-        <Stack direction="row" flexWrap="wrap" gap={1} useFlexGap alignItems="center">
-          <Chip
-            size="small"
-            label={EQC_REPORT_COPY.personaSwitcherLabel}
-            variant="outlined"
-            sx={{ ...PLEXON_META_CHIP_SX, pointerEvents: 'none' }}
-          />
+        <div className="plexon-eqc-chip-row">
+          <Chip static size="sm">
+            {EQC_REPORT_COPY.personaSwitcherLabel}
+          </Chip>
           {personas.map((p) => {
             const selected = p.id === persona.id;
             return (
               <Chip
                 key={p.id}
-                size="small"
-                label={p.name}
+                size="sm"
+                selected={selected}
                 title={p.segment}
-                variant={selected ? 'filled' : 'outlined'}
                 onClick={() => setActivePersonaId(p.id)}
-                sx={{
-                  ...PLEXON_META_CHIP_SX,
-                  ...(selected
-                    ? {
-                        bgcolor: 'var(--color-theme-accent) !important',
-                        borderColor: 'var(--color-theme-accent) !important',
-                        color: 'var(--color-theme-accent-contrast, #000) !important',
-                        '& .MuiChip-label': {
-                          color: 'var(--color-theme-accent-contrast, #000) !important',
-                        },
-                      }
-                    : {}),
-                }}
-              />
+              >
+                {p.name}
+              </Chip>
             );
           })}
-        </Stack>
+        </div>
       ) : null}
       <UiPersonaCardBlock
         title={persona.name}
@@ -308,7 +272,7 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
           },
         ]}
       />
-      {persona.bio ? <Typography variant="body2">{persona.bio}</Typography> : null}
+      {persona.bio ? <Text role="body">{persona.bio}</Text> : null}
       <TraitBars traits={persona.traits} />
       {geoQuestions.length > 0 ? (
         <UiRecommendationList
@@ -316,13 +280,7 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
           items={geoQuestions.map((q, i) => ({ title: `${i + 1}. ${q}` }))}
         />
       ) : null}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-          gap: `${MSQDX_SPACING.scale.sm}px`,
-        }}
-      >
+      <div className="plexon-eqc-split-grid">
         {persona.goals.length > 0 ? (
           <UiFindingList
             title={EQC_REPORT_COPY.sectionGoals}
@@ -347,8 +305,8 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
             }))}
           />
         ) : null}
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
@@ -366,7 +324,7 @@ export function EventQuickCheckMarketSection({ report }: SectionProps) {
           : 'info';
 
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       {market.status !== 'complete' ? (
         <UiAlertBlock
           tone={statusTone}
@@ -379,9 +337,7 @@ export function EventQuickCheckMarketSection({ report }: SectionProps) {
           }
         />
       ) : null}
-      {market.executiveSummary ? (
-        <Typography variant="body1">{market.executiveSummary}</Typography>
-      ) : null}
+      {market.executiveSummary ? <Text role="body">{market.executiveSummary}</Text> : null}
       {market.keyFindings.length > 0 ? (
         <UiRecommendationList
           title={EQC_REPORT_COPY.sectionMarketFindings}
@@ -390,17 +346,13 @@ export function EventQuickCheckMarketSection({ report }: SectionProps) {
           }))}
         />
       ) : null}
-      {market.implications ? (
-        <Typography variant="body2" sx={{ color: 'var(--color-text-on-light)' }}>
-          {market.implications}
-        </Typography>
-      ) : null}
+      {market.implications ? <Text role="body">{market.implications}</Text> : null}
       {market.echonHref ? (
         <UiLinkList
           links={[{ label: EQC_REPORT_COPY.linkEchonResearch, href: market.echonHref, external: true }]}
         />
       ) : null}
-    </Stack>
+    </div>
   );
 }
 
@@ -425,7 +377,7 @@ export function EventQuickCheckGeoSection({
   if (!hasContent) return null;
 
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       {geo.status === 'failed' || geo.status === 'partial' ? (
         <UiAlertBlock
           tone="warning"
@@ -496,7 +448,7 @@ export function EventQuickCheckGeoSection({
           }))}
         />
       ) : null}
-    </Stack>
+    </div>
   );
 }
 
@@ -508,7 +460,7 @@ export function EventQuickCheckInsightsSection({ report }: SectionProps) {
   if (!hasContent) return null;
 
   return (
-    <Stack spacing={1.5}>
+    <div className="plexon-eqc-stack">
       {insights.fazit ? (
         <UiAlertBlock
           tone={insights.fazitTone ?? 'info'}
@@ -516,13 +468,7 @@ export function EventQuickCheckInsightsSection({ report }: SectionProps) {
           message={insights.fazit}
         />
       ) : null}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
-          gap: `${MSQDX_SPACING.scale.md}px`,
-        }}
-      >
+      <div className="plexon-eqc-split-grid plexon-eqc-split-grid--lg">
         {insights.findings.length > 0 ? (
           <UiFindingList title={EQC_REPORT_COPY.sectionFindings} items={insights.findings} />
         ) : null}
@@ -532,8 +478,8 @@ export function EventQuickCheckInsightsSection({ report }: SectionProps) {
             items={insights.recommendations}
           />
         ) : null}
-      </Box>
-    </Stack>
+      </div>
+    </div>
   );
 }
 
@@ -542,54 +488,36 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
 
   return (
     <UiBlockSurface>
-      <Box
-        sx={{
-          display: 'flex',
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 1,
-        }}
-      >
-        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
-          <Box
-            component="button"
+      <div className="plexon-eqc-appendix-head">
+        <div className="plexon-eqc-row">
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
+            className="plexon-eqc-appendix-toggle"
             onClick={() => setOpen((v) => !v)}
-            sx={{
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              p: 0,
-              textAlign: 'left',
-            }}
           >
-            <Typography variant="subtitle2">{EQC_REPORT_COPY.sectionAppendix}</Typography>
-          </Box>
+            <Text role="label">{EQC_REPORT_COPY.sectionAppendix}</Text>
+          </Button>
           <InfoTooltip
             title={EQC_SECTION_HELP.appendix}
             placement="top"
             ariaLabel={eqcSectionHelpAriaLabel(EQC_REPORT_COPY.sectionAppendix)}
           />
-        </Stack>
-        <Box
-          component="button"
+        </div>
+        <Button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          variant="ghost"
+          size="sm"
           aria-expanded={open}
-          sx={{
-            border: 'none',
-            background: 'transparent',
-            cursor: 'pointer',
-            p: 0,
-            flexShrink: 0,
-          }}
+          className="plexon-eqc-appendix-chevron"
+          onClick={() => setOpen((v) => !v)}
         >
-          <Typography variant="caption">{open ? '▾' : '▸'}</Typography>
-        </Box>
-      </Box>
-      <Collapse in={open}>
-        <Box sx={{ mt: 1 }}>
+          {open ? '▾' : '▸'}
+        </Button>
+      </div>
+      {open ? (
+        <div className="plexon-eqc-stack plexon-eqc-appendix-body">
           <UiKeyValueList
             items={[
               ...(report.appendix.scanId ? [{ label: 'Scan-ID', value: report.appendix.scanId }] : []),
@@ -607,8 +535,8 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
           {report.appendix.links.length > 0 ? (
             <UiLinkList title={EQC_REPORT_COPY.links} links={report.appendix.links} />
           ) : null}
-        </Box>
-      </Collapse>
+        </div>
+      ) : null}
     </UiBlockSurface>
   );
 }
@@ -616,43 +544,36 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
 /** Linear one-pager layout (chat / pinned blocks). */
 export function EventQuickCheckReportStack({ report }: SectionProps) {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: `${MSQDX_SPACING.scale.md}px`,
-      }}
-    >
+    <div className="plexon-report-stack">
       <EventQuickCheckExecutiveHeader report={report} />
       <EventQuickCheckKpiSection report={report} />
-      <Box>
+      <div className="plexon-report-section">
         <ReportSectionHeader title={EQC_REPORT_COPY.sectionWorkflow} />
-        <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
-          {report.workflow.steps.map((s) => (
-            <Chip
-              key={s.id}
-              size="small"
-              label={`${s.label}: ${s.detail}`}
-              color={stepStatusColor(s.status)}
-              variant="outlined"
-            />
-          ))}
-        </Stack>
-      </Box>
+        <div className="plexon-eqc-chip-row">
+          {report.workflow.steps.map((s) => {
+            const tone = stepStatusColor(s.status);
+            return (
+              <Chip key={s.id} static size="sm" className={`plexon-eqc-status--${tone}`}>
+                {`${s.label}: ${s.detail}`}
+              </Chip>
+            );
+          })}
+        </div>
+      </div>
       {report.domain ? (
-        <Box>
+        <div className="plexon-report-section">
           <ReportSectionHeader title={EQC_REPORT_COPY.sectionDomain} />
           <EventQuickCheckDomainSection report={report} />
-        </Box>
+        </div>
       ) : null}
       {report.domainComparison?.rows.length ? (
-        <Box>
+        <div className="plexon-report-section">
           <ReportSectionHeader title={EQC_REPORT_COPY.sectionDomainComparison} />
           <EventQuickCheckDomainComparisonSection report={report} />
-        </Box>
+        </div>
       ) : null}
       {report.persona || report.personas?.length ? (
-        <Box>
+        <div className="plexon-report-section">
           <ReportSectionHeader
             title={
               (report.personas?.length ?? 0) > 1
@@ -661,25 +582,25 @@ export function EventQuickCheckReportStack({ report }: SectionProps) {
             }
           />
           <EventQuickCheckPersonaSection report={report} />
-        </Box>
+        </div>
       ) : null}
       {report.market ? (
-        <Box>
+        <div className="plexon-report-section">
           <ReportSectionHeader title={EQC_REPORT_COPY.sectionMarket} />
           <EventQuickCheckMarketSection report={report} />
-        </Box>
+        </div>
       ) : null}
-      <Box>
+      <div className="plexon-report-section">
         <ReportSectionHeader title={EQC_REPORT_COPY.sectionGeo} />
         <EventQuickCheckGeoSection report={report} />
-      </Box>
+      </div>
       {report.insights ? (
-        <Box>
+        <div className="plexon-report-section">
           <ReportSectionHeader title={EQC_REPORT_COPY.sectionInsights} />
           <EventQuickCheckInsightsSection report={report} />
-        </Box>
+        </div>
       ) : null}
       <EventQuickCheckAppendixSection report={report} />
-    </Box>
+    </div>
   );
 }

@@ -2,6 +2,11 @@
 
 Festes Playbook für Events/Demos: eine Unternehmens-URL → schneller Cross-Product-Check.
 
+> **v3 Hinweis:** Die Oberfläche `/event-quick-check` ist in plexon-v3 **vorhanden** (Nav + APIs).  
+> Wenn Runs scheitern oder der Flow „tot“ wirkt → Produkt-Env fehlt (nicht die Feature-Route).  
+> Staging-Smoke: `knowledge/event-quick-check-staging-smoke.md` · Readiness-API: `GET /api/assistant/event-quick-check/readiness`.  
+> Parity-Status: `knowledge/plexon-v3-parity-matrix.md`.
+
 ## Trigger (Assistent)
 
 Beispiel-Prompts:

@@ -8,7 +8,7 @@ import {
   API_ADMIN_USERS,
   apiAdminUser,
   pathAdminCompany,
-  pathAdminUserEditOnDashboard,
+  pathAdminUser,
 } from '@/lib/constants'
 
 type UserOrg = { companyId: string; companyName: string; companySlug: string | null; role: string }
@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
                     <td className="plexon-admin-mono">{u.id}</td>
                     <td className="plexon-admin-table__actions">
                       <div className="plexon-settings-actions plexon-admin-row-actions">
-                        <NextLink href={pathAdminUserEditOnDashboard(u.id)}>
+                        <NextLink href={pathAdminUser(u.id)}>
                           <Button variant="primary" size="sm">
                             {t('admin.fullEdit')}
                           </Button>

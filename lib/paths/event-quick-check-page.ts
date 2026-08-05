@@ -11,6 +11,10 @@ export const pathEventQuickCheckRun = (workflowRunId?: string | null): string =>
 
 export const API_EVENT_QUICK_CHECK_RUNS = '/api/assistant/event-quick-check/runs' as const;
 
+/** Config gate: CHECKION/AUDION env for Quick Check (session). */
+export const API_EVENT_QUICK_CHECK_READINESS =
+  '/api/assistant/event-quick-check/readiness' as const;
+
 export const apiEventQuickCheckRun = (runId: string): string =>
   `${API_EVENT_QUICK_CHECK_RUNS}/${encodeURIComponent(runId)}`;
 
