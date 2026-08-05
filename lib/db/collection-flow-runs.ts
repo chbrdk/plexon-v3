@@ -43,12 +43,34 @@ export function toCollectionFlowRunResponse(row: CollectionFlowRunRow): Collecti
   };
 }
 
+/** Closed subset of UI Testen / journey body stored on the run row (Wave 17). */
+export function closedUiRunRequest(body: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (typeof body.phase === 'string' && body.phase.trim()) out.phase = body.phase.trim();
+  if (typeof body.url === 'string' && body.url.trim()) out.url = body.url.trim();
+  if (typeof body.companyName === 'string' && body.companyName.trim()) {
+    out.companyName = body.companyName.trim();
+  }
+  if (typeof body.personaNodeId === 'string' && body.personaNodeId.trim()) {
+    out.personaNodeId = body.personaNodeId.trim();
+  }
+  if (typeof body.historyRunId === 'string' && body.historyRunId.trim()) {
+    out.historyRunId = body.historyRunId.trim();
+  }
+  if (typeof body.audionJobId === 'string' && body.audionJobId.trim()) {
+    out.audionJobId = body.audionJobId.trim();
+  }
+  return out;
+}
+
 export async function createCollectionFlowRun(input: {
   flowId: string;
   platformProjectId: string;
   trigger: CollectionFlowRunTrigger;
   request?: Record<string, unknown> | null;
   callbackUrl?: string | null;
+  /** Default `queued` (webhook). UI Testen uses `running`. */
+  status?: CollectionFlowRunStatus;
 }): Promise<CollectionFlowRunRow> {
   const db = getDb();
   const id = randomUUID();
@@ -57,7 +79,7 @@ export async function createCollectionFlowRun(input: {
     id,
     flowId: input.flowId,
     platformProjectId: input.platformProjectId,
-    status: 'queued',
+    status: input.status ?? 'queued',
     trigger: input.trigger,
     request: input.request ?? null,
     callbackUrl: input.callbackUrl ?? null,
@@ -115,6 +137,7 @@ export async function patchCollectionFlowRun(input: {
   lastRun?: CollectionFlowLastRun | null;
   error?: string | null;
   callbackStatus?: string | null;
+  request?: Record<string, unknown> | null;
 }): Promise<CollectionFlowRunRow | null> {
   const db = getDb();
   const now = new Date();
@@ -124,6 +147,7 @@ export async function patchCollectionFlowRun(input: {
   if (input.lastRun !== undefined) patch.lastRun = input.lastRun as unknown as Record<string, unknown>;
   if (input.error !== undefined) patch.error = input.error;
   if (input.callbackStatus !== undefined) patch.callbackStatus = input.callbackStatus;
+  if (input.request !== undefined) patch.request = input.request;
   await db.update(collectionFlowRuns).set(patch).where(eq(collectionFlowRuns.id, input.runId));
   const [row] = await db
     .select()

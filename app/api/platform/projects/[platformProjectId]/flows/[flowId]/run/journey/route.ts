@@ -2,7 +2,8 @@
  * Start-only Audion journey segment for the live board (Wave 6).
  * Creates + starts a Study/Wave from the embedded journey subgraph and returns immediately —
  * the board polls `GET …/journey-jobs/:jobId` client-side to paint node states.
- * @see specs/domain/collection-test-flow.md — Wave 5–7 implementation notes
+ * Wave 17: first slot creates a `collection_flow_runs` row (`trigger: ui`); later slots reuse `historyRunId`.
+ * @see specs/domain/collection-test-flow.md — Wave 5–7 / Wave 17 implementation notes
  */
 import { API_STATUS, apiError, handleApiError } from '@/lib/api-error-handler';
 import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
@@ -16,6 +17,12 @@ import {
   startNodeUrl,
 } from '@/lib/collection-test-flow';
 import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
+import {
+  closedUiRunRequest,
+  createCollectionFlowRun,
+  getCollectionFlowRun,
+  patchCollectionFlowRun,
+} from '@/lib/db/collection-flow-runs';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { startAudionJourneySegment } from '@/lib/integrations/audion-journey-client';
@@ -60,14 +67,53 @@ export async function POST(
       typeof body.personaNodeId === 'string' && body.personaNodeId.trim()
         ? body.personaNodeId.trim()
         : null;
+    const historyRunIdIn =
+      typeof body.historyRunId === 'string' && body.historyRunId.trim()
+        ? body.historyRunId.trim()
+        : null;
+
+    let historyRunId = historyRunIdIn;
+    if (historyRunId) {
+      const existing = await getCollectionFlowRun(id, fid, historyRunId);
+      if (!existing || existing.trigger !== 'ui') {
+        return apiError('history run not found', API_STATUS.NOT_FOUND);
+      }
+      await patchCollectionFlowRun({
+        runId: historyRunId,
+        status: 'running',
+        request: closedUiRunRequest({ ...body, phase: 'journey' }),
+      });
+    } else {
+      const created = await createCollectionFlowRun({
+        flowId: fid,
+        platformProjectId: id,
+        trigger: 'ui',
+        status: 'running',
+        request: closedUiRunRequest({ ...body, phase: 'journey' }),
+      });
+      historyRunId = created.id;
+    }
+
+    const failHistory = async (message: string, status: number) => {
+      await patchCollectionFlowRun({
+        runId: historyRunId!,
+        status: 'error',
+        error: message,
+      });
+      return apiError(message, status);
+    };
+
     const baseUrl = urlOverride ?? startNodeUrl(doc.nodes) ?? scanNodeUrl(doc.nodes);
     if (!baseUrl) {
-      return apiError('Start URL missing — set start node urlKey or pass url', API_STATUS.BAD_REQUEST);
+      return failHistory(
+        'Start URL missing — set start node urlKey or pass url',
+        API_STATUS.BAD_REQUEST
+      );
     }
 
     const audionProjectId = await getExternalProjectId(id, 'audion');
     if (!audionProjectId) {
-      return apiError(
+      return failHistory(
         'AUDION binding missing — bind an Audion project on this Collection',
         API_STATUS.BAD_REQUEST
       );
@@ -84,7 +130,7 @@ export async function POST(
       personaNodeId: slot?.nodeId ?? personaNodeId,
     });
     if (!journeyFlow) {
-      return apiError('Journey flow missing on document', API_STATUS.BAD_REQUEST);
+      return failHistory('Journey flow missing on document', API_STATUS.BAD_REQUEST);
     }
 
     const label = slot?.personaName || slot?.personaId || 'primary';
@@ -94,7 +140,7 @@ export async function POST(
       name: `${row.name} · ${label}`,
     });
     if (!started.ok) {
-      return apiError(started.error, API_STATUS.BAD_REQUEST);
+      return failHistory(started.error, API_STATUS.BAD_REQUEST);
     }
 
     const slotIndex = slot ? slots.findIndex((s) => s.nodeId === slot.nodeId) : 0;
@@ -115,6 +161,7 @@ export async function POST(
         primary: s.primary,
         via: s.via,
       })),
+      historyRunId,
     });
   } catch (e) {
     return handleApiError(e, { context: 'collection flow run/journey POST' });

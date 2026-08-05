@@ -275,6 +275,9 @@ export const apiPlatformProjectFlowRunStatus = (
   flowId: string,
   runId: string
 ) => `${apiPlatformProjectFlow(platformProjectId, flowId)}/runs/${encodeURIComponent(runId)}`;
+/** Wave 17: list Collection Flow runs (newest first). */
+export const apiPlatformProjectFlowRuns = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/runs`;
 /** Wave 15: rotate webhook secret (session edit). */
 export const apiPlatformProjectFlowWebhookRotate = (platformProjectId: string, flowId: string) =>
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/webhook/rotate`;

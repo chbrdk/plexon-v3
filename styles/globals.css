@@ -2828,6 +2828,25 @@ main {
   padding: 0.35rem 0.55rem;
   max-height: none;
 }
+.plexon-flow-history {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: min(92vw, 22rem);
+  max-height: min(70vh, 28rem);
+  overflow: auto;
+}
+.plexon-flow-history__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.plexon-flow-history__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
 .msqdx-flow-run-dock {
   display: flex;
   flex-direction: column;

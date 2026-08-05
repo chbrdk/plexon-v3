@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 16 Flow board context menu  
+**Status:** Wave 17 Collection Flow run history  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -237,7 +237,7 @@ Caveats: infra blockers (403, empty scan) set `pageEvidenceValid=false` with rea
 |-------|-------|
 | `collection_test_flows` (Plexon) | `id`, `platform_project_id`, `name`, `flow` jsonb, `owner_id`, `template_id`, webhook fields (Wave 15), timestamps |
 | Optional link | `audion_saved_flow_id` / template reference for imported journey subgraphs |
-| Runs (Wave 15) | `collection_flow_runs` — status, trigger, request/verdict/lastRun jsonb, optional callback |
+| Runs (Wave 15–17) | `collection_flow_runs` — status, trigger (`ui`/`webhook`/`service`), request/verdict/lastRun jsonb, optional callback; UI + webhook share the same table |
 
 Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`. Wave 15: `0006_collection_flow_triggers.sql`.
 
@@ -283,7 +283,8 @@ Do not place this on legacy `/board` Prismion island.
 | **14 — Parallel persona runtime** | Detect Zielgruppe→Persona `then`+`parallel` siblings; sequential Audion segments (one personaId each); aggregate `journey.taskCompleted`/`validEvidence` (AND); catalog `personaCount`/`allTaskCompleted`; live board chains slots | Staging: two Personas → Testen runs both → quality once with AND |
 | **15 — Flow triggers + node collision** | Per-flow webhook secret + service-secret trigger; `202` + poll `collection_flow_runs`; optional `callbackUrl`; closed body `url?`/`companyName?`; AABB snap so nodes cannot overlap | Staging: rotate secret → POST webhook → poll complete; drag onto node snaps free |
 | **16 — Board context menu** | Right-click authoring via shared `@msqdx/ui` `ContextMenu` (node: dup/delete/‖P/inspector; pane: Bausteine/undo) | Staging: right-click node → Duplizieren; pane → Bausteine |
-| **Later** | Canvas `trigger`/cron nodes; `set` aliases; array pickers; concurrent multi-job live; Brandion; multi-user live; saliency | Out of MVP |
+| **17 — Run history** | UI Testen (+ journey→quality) writes `collection_flow_runs` (`trigger: ui`); `GET …/runs` list; Historie dock paints past verdict without re-exec | Staging: Testen → row in Historie; select older run → node paint + strip |
+| **Later** | Canvas `trigger`/cron nodes; `set` aliases; array pickers; concurrent multi-job live; Brandion; multi-user live; saliency; re-run from history; purge UI | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -414,6 +415,13 @@ Do not place this on legacy `/board` Prismion island.
 
 - Right-click uses `@msqdx/ui` `ContextMenu` (central DS). Board supplies items only.
 - Node: Duplizieren, Löschen, Parallel-Persona (zielgruppe/persona), Inspector. Pane: Bausteine, Rückgängig. Disabled while run busy. No Testen/Save/Webhook in menu.
+
+## Wave 17 implementation notes
+
+- **Shared run log:** every completed UI sync `POST …/run` and live journey→quality handoff write `collection_flow_runs` with `trigger: 'ui'` (create-at-start as `running`, then `complete`/`error`). Flow jsonb `lastVerdict`/`lastRun` still updated for compatibility.
+- Live path: first `POST …/run/journey` creates the history row (`historyRunId`); quality handoff / journey abort patches the same row (one Testen = one history entry).
+- **List:** `GET …/flows/:flowId/runs?limit=` (default 30, max 50), newest first; session view/edit (Knowledge Pack ACL). Detail `GET …/runs/:runId` unchanged.
+- **Historie dock:** toolbar **Hist**; select past run → paint via `nodeStatesFromVerdict` + strip links (read-only; no re-exec). **Aktuell** clears selection back to live / newest.
 
 ## Open questions (non-blocking)
 

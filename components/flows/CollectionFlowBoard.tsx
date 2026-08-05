@@ -42,12 +42,15 @@ import { buildAudionStudyUrl, buildAudionStudyWaveUrl } from '@/lib/audion-admin
 import { pathCheckionGeoOverview, pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import {
   documentHasJourneySegment,
+  ensureFlowDocument,
+  nodeStatesFromVerdict,
   resolveJourneyFlowForRun,
   scanNodeUrl,
   startNodeUrl,
   type CollectionFlowNode,
   type CollectionFlowNodeKind,
   type CollectionFlowNodeRunState,
+  type CollectionFlowLastRun,
   type CollectionTestFlowDocument,
   type CollectionVerdict,
 } from '@/lib/collection-test-flow'
@@ -94,11 +97,13 @@ import {
   type FlowRunProgressInput,
 } from '@/lib/collection-flow-run-progress'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
+import type { CollectionFlowRunResponse } from '@/lib/db/collection-flow-runs'
 import type { AudionJourneyJobSnapshot } from '@/lib/integrations/audion-journey-client'
 import { CollectionFlowFloatingPanel } from './CollectionFlowFloatingPanel'
 import { CollectionFlowRfNode } from './CollectionFlowRfNode'
 import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
 import { CollectionFlowWebhookPanel } from './CollectionFlowWebhookPanel'
+import { CollectionFlowHistoryPanel } from './CollectionFlowHistoryPanel'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import {
   IconDelete,
@@ -143,6 +148,9 @@ function BoardInner({ platformProjectId, initial }: Props) {
   selectedIdRef.current = selectedId
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [webhookOpen, setWebhookOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [viewedRun, setViewedRun] = useState<CollectionFlowRunResponse | null>(null)
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
   const [contextMenu, setContextMenu] = useState<{
     x: number
     y: number
@@ -184,6 +192,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const runMetaRef = useRef<{ studyId: string; waveId: string; jobId: string } | null>(null)
+  const historyRunIdRef = useRef<string | null>(null)
   const personaAggRef = useRef<{
     taskCompleted: boolean
     validEvidence: boolean
@@ -262,8 +271,52 @@ function BoardInner({ platformProjectId, initial }: Props) {
   )
 
   const hasJourney = documentHasJourneySegment(flow.flow)
-  const verdict: CollectionVerdict | null | undefined = flow.flow.lastVerdict
-  const lastRun = flow.flow.lastRun
+  const liveVerdict: CollectionVerdict | null | undefined = flow.flow.lastVerdict
+  const liveLastRun = flow.flow.lastRun
+  const verdict: CollectionVerdict | null | undefined = viewedRun?.verdict ?? liveVerdict
+  const lastRun = viewedRun?.lastRun ?? liveLastRun
+
+  const paintFromRun = useCallback(
+    (run: CollectionFlowRunResponse | null) => {
+      setViewedRun(run)
+      if (!run?.verdict) {
+        if (liveVerdict) {
+          setRunStates(
+            toRfRunStates(nodeStatesFromVerdict(ensureFlowDocument(flow.flow), liveVerdict, liveLastRun))
+          )
+        } else {
+          setRunStates({})
+        }
+        return
+      }
+      setRunStates(
+        toRfRunStates(
+          nodeStatesFromVerdict(ensureFlowDocument(flow.flow), run.verdict, run.lastRun ?? undefined)
+        )
+      )
+    },
+    [flow.flow, liveLastRun, liveVerdict]
+  )
+
+  const abortHistoryRun = useCallback(
+    async (error: string) => {
+      const rid = historyRunIdRef.current
+      if (!rid) return
+      try {
+        await fetch(apiPlatformProjectFlowRun(platformProjectId, flow.id), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phase: 'abort', historyRunId: rid, error }),
+        })
+      } catch {
+        /* best-effort */
+      } finally {
+        historyRunIdRef.current = null
+        setHistoryRefreshKey((k) => k + 1)
+      }
+    },
+    [flow.id, platformProjectId]
+  )
 
   const onUpdateNode = useCallback(
     (nodeId: string, patch: Partial<CollectionFlowNode>) => {
@@ -413,6 +466,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             phase: 'quality',
+            historyRunId: historyRunIdRef.current || undefined,
             audionJobId: agg?.runs[0]?.jobId || job.jobId,
             audionStudyId: meta?.studyId,
             audionWaveId: meta?.waveId,
@@ -428,21 +482,45 @@ function BoardInner({ platformProjectId, initial }: Props) {
           error?: string
           flow?: CollectionTestFlowResponse
           nodeStates?: Record<string, CollectionFlowNodeRunState>
+          historyRunId?: string
+          verdict?: CollectionVerdict
+          lastRun?: CollectionFlowLastRun
         } | null
         if (!res.ok) throw new Error(json?.error || `Run failed (${res.status})`)
         if (json?.flow) setFlow(json.flow)
         if (json?.nodeStates) setRunStates((prev) => ({ ...prev, ...toRfRunStates(json.nodeStates!) }))
+        if (json?.historyRunId) {
+          historyRunIdRef.current = json.historyRunId
+          setViewedRun({
+            id: json.historyRunId,
+            flowId: flow.id,
+            platformProjectId,
+            status: 'complete',
+            trigger: 'ui',
+            request: null,
+            verdict: json.verdict ?? json.flow?.flow.lastVerdict ?? null,
+            lastRun: json.lastRun ?? json.flow?.flow.lastRun ?? null,
+            callbackUrl: null,
+            callbackStatus: null,
+            error: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+        }
+        setHistoryRefreshKey((k) => k + 1)
         if (meta?.studyId && meta?.waveId) {
           void loadSoftQSummary(meta.studyId, meta.waveId)
         }
       } catch (e) {
-        setRunError(e instanceof Error ? e.message : String(e))
+        const message = e instanceof Error ? e.message : String(e)
+        setRunError(message)
+        void abortHistoryRun(message)
       } finally {
         personaAggRef.current = null
         setRunBusy(false)
       }
     },
-    [flow.id, loadSoftQSummary, platformProjectId]
+    [abortHistoryRun, flow.id, loadSoftQSummary, platformProjectId]
   )
 
   const startJourneySlot = useCallback(
@@ -450,7 +528,10 @@ function BoardInner({ platformProjectId, initial }: Props) {
       const res = await fetch(apiPlatformProjectFlowRunJourney(platformProjectId, flow.id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(personaNodeId ? { personaNodeId } : {}),
+        body: JSON.stringify({
+          ...(personaNodeId ? { personaNodeId } : {}),
+          ...(historyRunIdRef.current ? { historyRunId: historyRunIdRef.current } : {}),
+        }),
       })
       const started = (await res.json().catch(() => null)) as {
         error?: string
@@ -460,12 +541,14 @@ function BoardInner({ platformProjectId, initial }: Props) {
         personaNodeId?: string | null
         personaCount?: number
         nextPersonaNodeId?: string | null
+        historyRunId?: string
         personaSlots?: Array<{
           nodeId: string
           personaId: string | null
           personaName: string | null
         }>
       } | null
+      if (started?.historyRunId) historyRunIdRef.current = started.historyRunId
       if (!res.ok || !started?.jobId || !started.studyId || !started.waveId) {
         throw new Error(started?.error || `Journey start failed (${res.status})`)
       }
@@ -564,19 +647,23 @@ function BoardInner({ platformProjectId, initial }: Props) {
             await runQualityPhase(job)
           } else if (job.status === 'error') {
             stopPolling()
-            setRunError(job.error || 'Journey job error')
+            const message = job.error || 'Journey job error'
+            setRunError(message)
             setRunBusy(false)
+            void abortHistoryRun(message)
           }
         } catch (e) {
-          setRunError(e instanceof Error ? e.message : String(e))
+          const message = e instanceof Error ? e.message : String(e)
+          setRunError(message)
           stopPolling()
           setRunBusy(false)
+          void abortHistoryRun(message)
         }
       }
       void tick()
       pollRef.current = setInterval(() => void tick(), POLL_MS)
     },
-    [applyJobToStates, pollOnce, runQualityPhase, startJourneySlot, stopPolling]
+    [abortHistoryRun, applyJobToStates, pollOnce, runQualityPhase, startJourneySlot, stopPolling]
   )
 
   const onSave = useCallback(async (): Promise<boolean> => {
@@ -632,6 +719,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setRunMeta(null)
     setSoftQSummary(null)
     runMetaRef.current = null
+    historyRunIdRef.current = null
+    setViewedRun(null)
 
     const journey = documentHasJourneySegment(snap)
     if (warnings.length) {
@@ -649,12 +738,35 @@ function BoardInner({ platformProjectId, initial }: Props) {
           error?: string
           flow?: CollectionTestFlowResponse
           nodeStates?: Record<string, CollectionFlowNodeRunState>
+          historyRunId?: string
+          verdict?: CollectionVerdict
+          lastRun?: CollectionFlowLastRun
         } | null
         if (!res.ok) throw new Error(json?.error || `Run failed (${res.status})`)
         if (json?.flow) setFlow(json.flow)
         if (json?.nodeStates) setRunStates(toRfRunStates(json.nodeStates))
+        if (json?.historyRunId) {
+          historyRunIdRef.current = json.historyRunId
+          setViewedRun({
+            id: json.historyRunId,
+            flowId: flow.id,
+            platformProjectId,
+            status: 'complete',
+            trigger: 'ui',
+            request: null,
+            verdict: json.verdict ?? json.flow?.flow.lastVerdict ?? null,
+            lastRun: json.lastRun ?? json.flow?.flow.lastRun ?? null,
+            callbackUrl: null,
+            callbackStatus: null,
+            error: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+        }
+        setHistoryRefreshKey((k) => k + 1)
       } catch (e) {
         setRunError(e instanceof Error ? e.message : String(e))
+        setHistoryRefreshKey((k) => k + 1)
       } finally {
         setRunBusy(false)
       }
@@ -673,11 +785,15 @@ function BoardInner({ platformProjectId, initial }: Props) {
       const jobId = await startJourneySlot(null)
       startPolling(jobId)
     } catch (e) {
-      setRunError(e instanceof Error ? e.message : String(e))
+      const message = e instanceof Error ? e.message : String(e)
+      setRunError(message)
       setRunBusy(false)
       personaAggRef.current = null
+      void abortHistoryRun(message)
+      setHistoryRefreshKey((k) => k + 1)
     }
   }, [
+    abortHistoryRun,
     dirty,
     flow.id,
     getSnapshot,
@@ -1395,6 +1511,18 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     size="sm"
                     variant="ghost"
                     className="msqdx-flow-toolbar-btn"
+                    aria-label="Historie"
+                    title="Lauf-Historie"
+                    onClick={() => setHistoryOpen((o) => !o)}
+                    disabled={runBusy}
+                  >
+                    Hist
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
                     aria-label="Webhook"
                     title="Webhook-Trigger"
                     onClick={() => setWebhookOpen((o) => !o)}
@@ -1746,6 +1874,25 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     webhookSecretHint: next.webhookSecretHint,
                   }))
                 }}
+              />
+            </CollectionFlowFloatingPanel>
+          ) : null}
+
+          {historyOpen ? (
+            <CollectionFlowFloatingPanel
+              storageKey={`plexon.flow.history.${flow.id}`}
+              defaultEdge="left"
+              defaultOffset={0.72}
+              title="Historie"
+              ariaLabel="Flow Lauf-Historie"
+            >
+              <CollectionFlowHistoryPanel
+                platformProjectId={platformProjectId}
+                flowId={flow.id}
+                selectedRunId={viewedRun?.id ?? null}
+                refreshKey={historyRefreshKey}
+                onSelect={(run) => paintFromRun(run)}
+                onClose={() => setHistoryOpen(false)}
               />
             </CollectionFlowFloatingPanel>
           ) : null}
