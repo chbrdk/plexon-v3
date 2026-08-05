@@ -13,6 +13,7 @@ import {
   patchCollectionTestFlow,
   toCollectionTestFlowResponse,
 } from '@/lib/db/collection-test-flows';
+import { patchFlowWebhookSettings } from '@/lib/db/collection-flow-runs';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { platformJson } from '@/lib/platform-contract';
 
@@ -83,13 +84,22 @@ export async function PATCH(
     }
 
     const name = typeof body.name === 'string' ? body.name : undefined;
-    const row = await patchCollectionTestFlow({
+    let row = await patchCollectionTestFlow({
       platformProjectId: id,
       flowId: fid,
       name,
       flow: nextFlow,
     });
     if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
+
+    if (typeof body.webhookEnabled === 'boolean') {
+      row = await patchFlowWebhookSettings({
+        platformProjectId: id,
+        flowId: fid,
+        webhookEnabled: body.webhookEnabled,
+      });
+      if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
+    }
 
     return platformJson(toCollectionTestFlowResponse(row));
   } catch (e) {

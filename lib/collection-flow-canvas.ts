@@ -24,6 +24,11 @@ import {
   isCatalogPath,
 } from './collection-flow-run-context';
 import { presetById } from './collection-flow-presets';
+import {
+  DEFAULT_FLOW_NODE_SIZE,
+  findNonOverlappingFlowPosition,
+  flowNodesToCollisionRects,
+} from './collection-flow-collision';
 
 export type CollectionFlowGateEvaluation = {
   matched?: boolean;
@@ -354,20 +359,40 @@ export function duplicateNodesInRfGraph(
   nodeCounter += 1;
   const stamp = `${Date.now().toString(36)}-${nodeCounter}`;
   const newIds: string[] = [];
+  const placed: CollectionFlowRfNode[] = [];
   const clones: CollectionFlowRfNode[] = sources.map((n, i) => {
     const flow = n.data.flowNode;
     const id = `n-${flow.kind}-${stamp}-${i}`;
     newIds.push(id);
-    return {
+    const candidate = { x: n.position.x + offset.x, y: n.position.y + offset.y };
+    const rects = [
+      ...flowNodesToCollisionRects([...nodes, ...placed]),
+      ...placed.map((p) => ({
+        id: p.id,
+        x: p.position.x,
+        y: p.position.y,
+        w: DEFAULT_FLOW_NODE_SIZE.w,
+        h: DEFAULT_FLOW_NODE_SIZE.h,
+      })),
+    ];
+    const position = findNonOverlappingFlowPosition(
+      candidate,
+      DEFAULT_FLOW_NODE_SIZE,
+      id,
+      rects
+    );
+    const clone: CollectionFlowRfNode = {
       ...n,
       id,
       selected: true,
-      position: { x: n.position.x + offset.x, y: n.position.y + offset.y },
+      position,
       data: {
         ...n.data,
         flowNode: { ...flow, id, label: `${flow.label || flow.kind} (Kopie)` },
       },
     };
+    placed.push(clone);
+    return clone;
   });
 
   const clearedSelection = nodes.map((n) =>
@@ -410,13 +435,20 @@ export function addParallelPersonaSibling(
 
   const flowNode = newCollectionFlowNode('persona');
   flowNode.label = 'Persona (parallel)';
+  const candidate = {
+    x: anchor.position.x + 40,
+    y: anchor.position.y + 120,
+  };
+  const position = findNonOverlappingFlowPosition(
+    candidate,
+    DEFAULT_FLOW_NODE_SIZE,
+    flowNode.id,
+    flowNodesToCollisionRects(nodes)
+  );
   const rfNode: CollectionFlowRfNode = {
     id: flowNode.id,
     type: 'collectionFlow',
-    position: {
-      x: anchor.position.x + 40,
-      y: anchor.position.y + 120,
-    },
+    position,
     selected: true,
     data: { flowNode },
   };

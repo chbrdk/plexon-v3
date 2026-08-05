@@ -107,6 +107,9 @@ function flowRow() {
     flow: flow as unknown as Record<string, unknown>,
     ownerId: 'user-1',
     templateId: COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
+    webhookEnabled: false,
+    webhookSecretHash: null,
+    webhookSecretHint: null,
     createdAt: at,
     updatedAt: at,
   };
@@ -122,6 +125,9 @@ function journeyFlowRow() {
     flow: flow as unknown as Record<string, unknown>,
     ownerId: 'user-1',
     templateId: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
+    webhookEnabled: false,
+    webhookSecretHash: null,
+    webhookSecretHint: null,
     createdAt: at,
     updatedAt: at,
   };

@@ -263,6 +263,21 @@ export const apiPlatformProjectFlowHybridSegment = (platformProjectId: string, f
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/hybrid-segment`;
 export const apiPlatformProjectFlowWaveSummary = (platformProjectId: string, flowId: string) =>
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/wave-summary`;
+/** Wave 15: external webhook trigger (Bearer whsec_… or secret header). */
+export const apiPlatformProjectFlowTriggerWebhook = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/triggers/webhook`;
+/** Wave 15: internal service-secret trigger. */
+export const apiPlatformProjectFlowTriggerService = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/triggers/service`;
+/** Wave 15: poll async run status. */
+export const apiPlatformProjectFlowRunStatus = (
+  platformProjectId: string,
+  flowId: string,
+  runId: string
+) => `${apiPlatformProjectFlow(platformProjectId, flowId)}/runs/${encodeURIComponent(runId)}`;
+/** Wave 15: rotate webhook secret (session edit). */
+export const apiPlatformProjectFlowWebhookRotate = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/webhook/rotate`;
 
 /** Service proxy: CHECKION (legacy/optional when not using central DB). */
 export const API_SERVICES_CHECKION_USERS = '/api/services/checkion/users';

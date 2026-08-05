@@ -1,14 +1,13 @@
 import { API_STATUS, apiError, handleApiError } from '@/lib/api-error-handler';
 import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { getRequestUser } from '@/lib/auth-request-user';
-import { ensureFlowDocument } from '@/lib/collection-test-flow';
-import { executeCollectionFlowRun } from '@/lib/collection-flow-execute';
-import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
+import { issueWebhookSecret } from '@/lib/collection-flow-webhook';
+import { patchFlowWebhookSettings } from '@/lib/db/collection-flow-runs';
+import { getCollectionTestFlow, toCollectionTestFlowResponse } from '@/lib/db/collection-test-flows';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { platformJson } from '@/lib/platform-contract';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300;
 
 export async function POST(
   request: Request,
@@ -32,32 +31,25 @@ export async function POST(
       return apiError('Forbidden', API_STATUS.FORBIDDEN);
     }
 
-    const row = await getCollectionTestFlow(id, fid);
-    if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
+    const current = await getCollectionTestFlow(id, fid);
+    if (!current) return apiError('Not found', API_STATUS.NOT_FOUND);
 
-    const doc = ensureFlowDocument(row.flow);
-    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-
-    const result = await executeCollectionFlowRun({
+    const issued = issueWebhookSecret();
+    const row = await patchFlowWebhookSettings({
       platformProjectId: id,
       flowId: fid,
-      flowName: row.name,
-      doc,
-      body,
-      updatedByUserId: user.id,
+      webhookEnabled: true,
+      webhookSecretHash: issued.hash,
+      webhookSecretHint: issued.hint,
     });
-
-    if (!result.ok) {
-      return apiError(result.message, result.status);
-    }
+    if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
 
     return platformJson({
-      flow: result.flow,
-      verdict: result.verdict,
-      lastRun: result.lastRun,
-      nodeStates: result.nodeStates,
+      flow: toCollectionTestFlowResponse(row),
+      webhookSecret: issued.secret,
+      hint: issued.hint,
     });
   } catch (e) {
-    return handleApiError(e, { context: 'collection flow run POST' });
+    return handleApiError(e, { context: 'collection flow webhook rotate' });
   }
 }

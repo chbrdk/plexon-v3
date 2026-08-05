@@ -18,6 +18,8 @@ export type CollectionTestFlowResponse = {
   templateId: string | null;
   ownerId: string | null;
   flow: CollectionTestFlowDocument;
+  webhookEnabled: boolean;
+  webhookSecretHint: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -30,6 +32,8 @@ export function toCollectionTestFlowResponse(row: CollectionTestFlowRow): Collec
     templateId: row.templateId,
     ownerId: row.ownerId,
     flow: ensureFlowDocument(row.flow),
+    webhookEnabled: Boolean(row.webhookEnabled),
+    webhookSecretHint: row.webhookSecretHint ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

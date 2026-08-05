@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 14 Parallel persona runtime  
+**Status:** Wave 15 Flow triggers + node collision  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -229,17 +229,17 @@ Align with Audion Phase 7, extend for quality:
 
 Caveats: infra blockers (403, empty scan) set `pageEvidenceValid=false` with reason — same spirit as Audion `inferValidEvidence` junk rules.
 
-**Wave 1:** Persist `lastVerdict` + `lastRun` metadata on the flow **jsonb** (no `collection_flow_runs` table yet). Score signal = CHECKION contracts `overallScore`.
+**Wave 1:** Persist `lastVerdict` + `lastRun` metadata on the flow **jsonb**. Score signal = CHECKION contracts `overallScore`.
 
 ## Persistence (sketch)
 
 | Store | Notes |
 |-------|-------|
-| `collection_test_flows` (Plexon) | `id`, `platform_project_id`, `name`, `flow` jsonb, `owner_id`, `template_id`, timestamps |
+| `collection_test_flows` (Plexon) | `id`, `platform_project_id`, `name`, `flow` jsonb, `owner_id`, `template_id`, webhook fields (Wave 15), timestamps |
 | Optional link | `audion_saved_flow_id` / template reference for imported journey subgraphs |
-| Runs (Wave 2+) | `collection_flow_runs` — cursor, correlation ids, verdict jsonb |
+| Runs (Wave 15) | `collection_flow_runs` — status, trigger, request/verdict/lastRun jsonb, optional callback |
 
-Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`.
+Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`. Wave 15: `0006_collection_flow_triggers.sql`.
 
 ## UI (Plexon)
 
@@ -281,7 +281,8 @@ Do not place this on legacy `/board` Prismion island.
 | **12 — Authoring polish** | Delete/Entf; duplicate; validate-before-Testen; dirty auto-save on run; lean templates `zielgruppe`→`persona`→…→optional Frage | Staging: select→Entf/duplicate; Testen blocks incomplete compare/journey; new flow has Zielgruppe |
 | **13 — Compare presets + parallel authoring** | Quality palette presets (score/a11y/issues/journey/geo); `parallel` out on Zielgruppe/Persona; add sibling Persona (authoring only; runtime still one extract persona) | Staging: drop Compare Score≥70; Parallel handle + toolbar adds second Persona wire |
 | **14 — Parallel persona runtime** | Detect Zielgruppe→Persona `then`+`parallel` siblings; sequential Audion segments (one personaId each); aggregate `journey.taskCompleted`/`validEvidence` (AND); catalog `personaCount`/`allTaskCompleted`; live board chains slots | Staging: two Personas → Testen runs both → quality once with AND |
-| **Later** | `set` aliases, array pickers, concurrent multi-job live, Brandion, multi-user live, saliency | Out of MVP |
+| **15 — Flow triggers + node collision** | Per-flow webhook secret + service-secret trigger; `202` + poll `collection_flow_runs`; optional `callbackUrl`; closed body `url?`/`companyName?`; AABB snap so nodes cannot overlap | Staging: rotate secret → POST webhook → poll complete; drag onto node snaps free |
+| **Later** | Canvas `trigger`/cron nodes; `set` aliases; array pickers; concurrent multi-job live; Brandion; multi-user live; saliency | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -399,6 +400,14 @@ Do not place this on legacy `/board` Prismion island.
 - Live `POST …/run/journey`: `personaNodeId` body; board chains slots then one quality handoff with aggregates.
 - Catalog: `journey.personaCount`, `journey.allTaskCompleted` (+ existing AND fields). No free expressions.
 - Validate: parallel siblings require `personaId`; authoring-only warning removed.
+
+## Wave 15 implementation notes
+
+- **Triggers (HTTP, no canvas node):** `POST …/flows/:flowId/triggers/webhook` (Bearer `whsec_…` or secret header) and `…/triggers/service` (`PLEXON_SERVICE_SECRET` + `X-Plexon-Contract-Version`). Response `202` `{ runId, statusUrl }`; poll `GET …/runs/:runId`.
+- Closed body only: `url?`, `companyName?`, optional `callbackUrl` (POST once with `{ runId, flowId, platformProjectId, verdict, lastRun }`).
+- Table `collection_flow_runs` + flow columns `webhook_enabled`, `webhook_secret_hash`, `webhook_secret_hint`. Rotate via `POST …/webhook/rotate`; enable via `PATCH` `{ webhookEnabled }`.
+- Shared executor `lib/collection-flow-execute.ts` (UI sync `…/run` + async worker). Still updates flow `lastVerdict`/`lastRun`.
+- **Node collision:** `lib/collection-flow-collision.ts` — on drag-stop / palette / duplicate / ‖P, snap AABB with gap so nodes cannot stack. Free move while dragging.
 
 ## Open questions (non-blocking)
 

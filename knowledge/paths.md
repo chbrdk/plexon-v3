@@ -49,6 +49,11 @@
   - Wave 12 Authoring polish: delete/duplicate/validate/auto-save — `specs/domain/collection-test-flow.md`
   - Wave 13 Compare presets + parallel persona authoring — `specs/domain/collection-test-flow.md`
   - Wave 14 Parallel persona runtime (sequential Audion segments) — `specs/domain/collection-test-flow.md`
+  - Wave 15 Flow triggers + node collision:
+    - `POST …/flows/:flowId/triggers/webhook` · `…/triggers/service` · `GET …/runs/:runId` · `POST …/webhook/rotate`
+    - Helpers `apiPlatformProjectFlowTriggerWebhook` / `…Service` / `…FlowRunStatus` / `…FlowWebhookRotate`
+    - Tables: webhook columns on `collection_test_flows` + `collection_flow_runs` (migration `0006_collection_flow_triggers.sql`)
+    - Collision: `lib/collection-flow-collision.ts` on board drag-stop / place
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

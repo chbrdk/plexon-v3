@@ -67,6 +67,12 @@ import {
 } from '@/lib/collection-flow-canvas'
 import { PALETTE_JOURNEY_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
 import {
+  DEFAULT_FLOW_NODE_SIZE,
+  findNonOverlappingFlowPosition,
+  flowNodesToCollisionRects,
+  resolveFlowNodePositions,
+} from '@/lib/collection-flow-collision'
+import {
   formatValidationIssues,
   validateCollectionFlowForRun,
 } from '@/lib/collection-flow-validate'
@@ -90,6 +96,7 @@ import type { AudionJourneyJobSnapshot } from '@/lib/integrations/audion-journey
 import { CollectionFlowFloatingPanel } from './CollectionFlowFloatingPanel'
 import { CollectionFlowRfNode } from './CollectionFlowRfNode'
 import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
+import { CollectionFlowWebhookPanel } from './CollectionFlowWebhookPanel'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import {
   IconDelete,
@@ -133,6 +140,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const selectedIdRef = useRef<string | null>(null)
   selectedIdRef.current = selectedId
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [webhookOpen, setWebhookOpen] = useState(false)
   const [audionCatalog, setAudionCatalog] = useState<{
     personas: Array<{ id: string; name: string }>
     targetGroups: Array<{ id: string; name: string; segment: string }>
@@ -856,6 +864,55 @@ function BoardInner({ platformProjectId, initial }: Props) {
     }
   }, [runBusy, flow.id])
 
+  const snapNodesAfterDrag = useCallback(
+    (dragged: CollectionFlowRfNodeModel[]) => {
+      if (dragged.length === 0) return
+      setNodes((nds) => {
+        const rects = flowNodesToCollisionRects(nds)
+        const moved = dragged.map((n) => {
+          const cur = nds.find((x) => x.id === n.id) ?? n
+          return {
+            id: cur.id,
+            position: cur.position,
+            size: {
+              w: cur.measured?.width ?? DEFAULT_FLOW_NODE_SIZE.w,
+              h: cur.measured?.height ?? DEFAULT_FLOW_NODE_SIZE.h,
+            },
+          }
+        })
+        const resolved = resolveFlowNodePositions(moved, rects)
+        let changed = false
+        const next = nds.map((n) => {
+          const pos = resolved.get(n.id)
+          if (!pos) return n
+          if (pos.x === n.position.x && pos.y === n.position.y) return n
+          changed = true
+          return { ...n, position: pos }
+        })
+        if (changed) {
+          setDirty(true)
+          setSaveMsg(null)
+        }
+        return changed ? next : nds
+      })
+    },
+    [setNodes]
+  )
+
+  const onNodeDragStop = useCallback(
+    (_e: MouseEvent, node: CollectionFlowRfNodeModel) => {
+      snapNodesAfterDrag([node])
+    },
+    [snapNodesAfterDrag]
+  )
+
+  const onSelectionDragStop = useCallback(
+    (_e: MouseEvent, nodesDragged: CollectionFlowRfNodeModel[]) => {
+      snapNodesAfterDrag(nodesDragged)
+    },
+    [snapNodesAfterDrag]
+  )
+
   const onSelectionChange = useCallback(({ nodes: sel }: OnSelectionChangeParams) => {
     setSelectedId(sel[0]?.id ?? null)
   }, [])
@@ -865,10 +922,17 @@ function BoardInner({ platformProjectId, initial }: Props) {
       pushHistory()
       const flowNode = newCollectionFlowNode(kind)
       const maxY = nodes.reduce((m, n) => Math.max(m, n.position.y), 0)
+      const candidate = { x: 40, y: maxY + 200 }
+      const position = findNonOverlappingFlowPosition(
+        candidate,
+        DEFAULT_FLOW_NODE_SIZE,
+        flowNode.id,
+        flowNodesToCollisionRects(nodes)
+      )
       const rfNode: CollectionFlowRfNodeModel = {
         id: flowNode.id,
         type: 'collectionFlow',
-        position: { x: 40, y: maxY + 200 },
+        position,
         data: { flowNode },
       }
       setNodes((nds) => [...nds, rfNode])
@@ -885,10 +949,17 @@ function BoardInner({ platformProjectId, initial }: Props) {
       pushHistory()
       const flowNode = newCollectionFlowNodeFromPreset(presetId)
       const maxY = nodes.reduce((m, n) => Math.max(m, n.position.y), 0)
+      const candidate = { x: 40, y: maxY + 200 }
+      const position = findNonOverlappingFlowPosition(
+        candidate,
+        DEFAULT_FLOW_NODE_SIZE,
+        flowNode.id,
+        flowNodesToCollisionRects(nodes)
+      )
       const rfNode: CollectionFlowRfNodeModel = {
         id: flowNode.id,
         type: 'collectionFlow',
-        position: { x: 40, y: maxY + 200 },
+        position,
         data: { flowNode },
       }
       setNodes((nds) => [...nds, rfNode])
@@ -1144,6 +1215,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onEdgesDelete={onEdgesDelete}
           onNodesDelete={onNodesDelete}
           onSelectionChange={onSelectionChange}
+          onNodeDragStop={onNodeDragStop}
+          onSelectionDragStop={onSelectionDragStop}
           nodeTypes={nodeTypes}
           fitView
           deleteKeyCode={runBusy ? null : ['Backspace', 'Delete']}
@@ -1193,6 +1266,18 @@ function BoardInner({ platformProjectId, initial }: Props) {
                       ok
                     </Chip>
                   ) : null}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
+                    aria-label="Webhook"
+                    title="Webhook-Trigger"
+                    onClick={() => setWebhookOpen((o) => !o)}
+                    disabled={runBusy}
+                  >
+                    WH
+                  </Button>
                   <Button
                     type="button"
                     size="sm"
@@ -1513,6 +1598,30 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 bindSourceLabel={bindSourceLabel}
                 onClose={() => setSelectedId(null)}
                 onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+              />
+            </CollectionFlowFloatingPanel>
+          ) : null}
+
+          {webhookOpen ? (
+            <CollectionFlowFloatingPanel
+              storageKey={`plexon.flow.webhook.${flow.id}`}
+              defaultEdge="left"
+              defaultOffset={0.18}
+              title="Webhook"
+              ariaLabel="Flow Webhook"
+            >
+              <CollectionFlowWebhookPanel
+                platformProjectId={platformProjectId}
+                flowId={flow.id}
+                webhookEnabled={Boolean(flow.webhookEnabled)}
+                webhookSecretHint={flow.webhookSecretHint ?? null}
+                onUpdated={(next) => {
+                  setFlow((f) => ({
+                    ...f,
+                    webhookEnabled: next.webhookEnabled,
+                    webhookSecretHint: next.webhookSecretHint,
+                  }))
+                }}
               />
             </CollectionFlowFloatingPanel>
           ) : null}

@@ -2,7 +2,7 @@
 /*  PLEXON – Database schema (Drizzle + PostgreSQL)                    */
 /* ------------------------------------------------------------------ */
 
-import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import {
   PLATFORM_ENTITLEMENT_STATUS,
   PLATFORM_ROLE,
@@ -149,11 +149,41 @@ export const collectionTestFlows = pgTable(
     flow: jsonb('flow').$type<Record<string, unknown>>().notNull(),
     ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
     templateId: text('template_id'),
+    webhookEnabled: boolean('webhook_enabled').notNull().default(false),
+    webhookSecretHash: text('webhook_secret_hash'),
+    webhookSecretHint: text('webhook_secret_hint'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     platformProjectIdx: index('collection_test_flows_platform_project_id_idx').on(t.platformProjectId),
+  })
+);
+
+/** Async Collection Test Flow runs (Wave 15 webhook / service triggers). */
+export const collectionFlowRuns = pgTable(
+  'collection_flow_runs',
+  {
+    id: text('id').primaryKey(),
+    flowId: text('flow_id')
+      .notNull()
+      .references(() => collectionTestFlows.id, { onDelete: 'cascade' }),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    status: text('status').notNull().default('queued'),
+    trigger: text('trigger').notNull(),
+    request: jsonb('request').$type<Record<string, unknown>>(),
+    verdict: jsonb('verdict').$type<Record<string, unknown>>(),
+    lastRun: jsonb('last_run').$type<Record<string, unknown>>(),
+    callbackUrl: text('callback_url'),
+    callbackStatus: text('callback_status'),
+    error: text('error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    flowCreatedIdx: index('collection_flow_runs_flow_id_created_at_idx').on(t.flowId, t.createdAt),
   })
 );
 
