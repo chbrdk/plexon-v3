@@ -150,7 +150,9 @@ n8n-like I/O without open expressions:
 | **In** | `compare` | Control `in` + bind target `bind:path` (“path”) |
 | **Out** | `compare` | Control `when` / `otherwise` (unchanged) |
 
-Connecting `out:<catalogPath>` → `bind:path` sets `compare.path` and upserts a dashed `bind` edge (replaces any prior bind into that compare). Path `<select>` remains a fallback and keeps the bind edge in sync. Journey/`run` paths stay picker-only this wave (no output ports yet).
+Connecting `out:<catalogPath>` → `bind:path` (UI label **Wert**) sets `compare.path` and upserts a dashed `bind` edge. Path select remains a fallback. Journey/`run` paths stay picker-only this wave.
+
+Node chrome (n8n-like): each kind declares a fixed I/O schema (`lib/collection-flow-node-ports.ts`) — **INPUT** strip at top (e.g. Compare = Ablauf + Wert), **Parameters** in the middle, **OUTPUT** at the bottom (Pass/Fail or Weiter + catalog Felder).
 
 ### Legacy gate → compare (on `ensureFlowDocument`)
 

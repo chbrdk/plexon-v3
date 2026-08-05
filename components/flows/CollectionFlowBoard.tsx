@@ -122,6 +122,16 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [runDockOpen, setRunDockOpen] = useState(() => {
+    try {
+      const raw = localStorage.getItem(`plexon.flow.run.open.${initial.id}`)
+      if (raw === '0') return false
+      if (raw === '1') return true
+    } catch {
+      /* ignore */
+    }
+    return true
+  })
 
   const [runBusy, setRunBusy] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
@@ -627,6 +637,29 @@ function BoardInner({ platformProjectId, initial }: Props) {
     [setNodes]
   )
 
+  const toggleRunDock = useCallback(() => {
+    setRunDockOpen((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem(`plexon.flow.run.open.${flow.id}`, next ? '1' : '0')
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
+  }, [flow.id])
+
+  // Expand run dock when a live run starts so status stays visible.
+  useEffect(() => {
+    if (!runBusy) return
+    setRunDockOpen(true)
+    try {
+      localStorage.setItem(`plexon.flow.run.open.${flow.id}`, '1')
+    } catch {
+      /* ignore */
+    }
+  }, [runBusy, flow.id])
+
   const onSelectionChange = useCallback(({ nodes: sel }: OnSelectionChangeParams) => {
     setSelectedId(sel[0]?.id ?? null)
   }, [])
@@ -987,80 +1020,133 @@ function BoardInner({ platformProjectId, initial }: Props) {
             storageKey={`plexon.flow.run.${flow.id}`}
             defaultEdge="bottom"
             defaultOffset={0.5}
-            title="Run"
+            title={undefined}
             variant="strip"
-            className="msqdx-flow-float-panel--run"
+            className={
+              runDockOpen
+                ? 'msqdx-flow-float-panel--run'
+                : 'msqdx-flow-float-panel--run msqdx-flow-float-panel--run-collapsed'
+            }
             ariaLabel="Run Status"
           >
-            <FlowRunStrip
-              status={
-                runMeta ? (
-                  <Chip size="sm" static>
-                    {runMeta.status}
-                  </Chip>
-                ) : undefined
-              }
-              meta={
-                runMeta ? (
-                  <span>
-                    steps {jobSummary?.stepCount ?? runMeta.stepCount} · job {runMeta.jobId.slice(0, 10)}…
+            <div className="msqdx-flow-run-dock">
+              <button
+                type="button"
+                className="msqdx-flow-run-dock-toggle"
+                aria-expanded={runDockOpen}
+                aria-controls={`plexon-flow-run-body-${flow.id}`}
+                onClick={toggleRunDock}
+              >
+                <span className="msqdx-flow-run-dock-title">Run</span>
+                {!runDockOpen ? (
+                  <span className="msqdx-flow-run-dock-summary">
+                    {runMeta
+                      ? `${runMeta.status} · ${jobSummary?.stepCount ?? runMeta.stepCount} steps`
+                      : lastRun
+                        ? [
+                            lastRun.status,
+                            lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
+                            verdict?.collectionReady === false
+                              ? 'not ready'
+                              : verdict?.collectionReady
+                                ? 'ready'
+                                : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')
+                        : 'Status & Verdict'}
                   </span>
-                ) : (
-                  <Text role="meta" as="p">
-                    {lastRun
-                      ? [
-                          `Letzter Lauf · ${lastRun.status}`,
-                          lastRun.overallScore != null ? `score ${lastRun.overallScore}` : null,
-                          lastRun.issueGateBranch ? `issueGate ${lastRun.issueGateBranch}` : null,
-                          lastRun.criticalCount != null ? `${lastRun.criticalCount} critical` : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')
-                      : hasJourney
-                        ? 'Journey + Quality: start → journey → scan → gates'
-                        : 'Quality-Pfad: start → scan → score_gate → terminal'}
-                  </Text>
-                )
-              }
-              links={
-                studyHref || waveHref || scanHref || issuesHref || geoHref || softQSummary ? (
-                  <>
-                    {studyHref ? (
-                      <a href={studyHref} target="_blank" rel="noreferrer">
-                        AUDION Study
-                      </a>
-                    ) : null}
-                    {waveHref ? (
-                      <a href={waveHref} target="_blank" rel="noreferrer">
-                        Soft-Q / Evaluate
-                      </a>
-                    ) : null}
-                    {softQSummary ? (
-                      <Chip size="sm" static>
-                        Soft-Q {softQSummary.softScoreKeys.length} keys
-                        {softQSummary.hasCollectionRollup ? ' · Collection rollup' : ''}
-                      </Chip>
-                    ) : null}
-                    {scanHref ? (
-                      <a href={scanHref} target="_blank" rel="noreferrer">
-                        CHECKION Scan
-                      </a>
-                    ) : null}
-                    {issuesHref ? (
-                      <a href={issuesHref} target="_blank" rel="noreferrer">
-                        Issues Dossier
-                      </a>
-                    ) : null}
-                    {geoHref ? (
-                      <a href={geoHref} target="_blank" rel="noreferrer">
-                        GEO Overview
-                      </a>
-                    ) : null}
-                  </>
-                ) : undefined
-              }
-              verdict={<CollectionFlowVerdictCard verdict={verdict} />}
-            />
+                ) : null}
+                <span className="msqdx-flow-run-dock-chevron" aria-hidden>
+                  {runDockOpen ? '▾' : '▸'}
+                </span>
+              </button>
+              {runDockOpen ? (
+                <div id={`plexon-flow-run-body-${flow.id}`} className="msqdx-flow-run-dock-body">
+                  <FlowRunStrip
+                    status={
+                      runMeta ? (
+                        <Chip size="sm" static>
+                          {runMeta.status}
+                        </Chip>
+                      ) : undefined
+                    }
+                    meta={
+                      runMeta ? (
+                        <span>
+                          steps {jobSummary?.stepCount ?? runMeta.stepCount} · job{' '}
+                          {runMeta.jobId.slice(0, 10)}…
+                        </span>
+                      ) : (
+                        <Text role="meta" as="p">
+                          {lastRun
+                            ? [
+                                `Letzter Lauf · ${lastRun.status}`,
+                                lastRun.overallScore != null
+                                  ? `score ${lastRun.overallScore}`
+                                  : null,
+                                lastRun.issueGateBranch
+                                  ? `issueGate ${lastRun.issueGateBranch}`
+                                  : null,
+                                lastRun.criticalCount != null
+                                  ? `${lastRun.criticalCount} critical`
+                                  : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')
+                            : hasJourney
+                              ? 'Journey + Quality: start → journey → scan → gates'
+                              : 'Quality-Pfad: start → scan → score_gate → terminal'}
+                        </Text>
+                      )
+                    }
+                    links={
+                      studyHref ||
+                      waveHref ||
+                      scanHref ||
+                      issuesHref ||
+                      geoHref ||
+                      softQSummary ? (
+                        <>
+                          {studyHref ? (
+                            <a href={studyHref} target="_blank" rel="noreferrer">
+                              AUDION Study
+                            </a>
+                          ) : null}
+                          {waveHref ? (
+                            <a href={waveHref} target="_blank" rel="noreferrer">
+                              Soft-Q / Evaluate
+                            </a>
+                          ) : null}
+                          {softQSummary ? (
+                            <Chip size="sm" static>
+                              Soft-Q {softQSummary.softScoreKeys.length} keys
+                              {softQSummary.hasCollectionRollup ? ' · Collection rollup' : ''}
+                            </Chip>
+                          ) : null}
+                          {scanHref ? (
+                            <a href={scanHref} target="_blank" rel="noreferrer">
+                              CHECKION Scan
+                            </a>
+                          ) : null}
+                          {issuesHref ? (
+                            <a href={issuesHref} target="_blank" rel="noreferrer">
+                              Issues Dossier
+                            </a>
+                          ) : null}
+                          {geoHref ? (
+                            <a href={geoHref} target="_blank" rel="noreferrer">
+                              GEO Overview
+                            </a>
+                          ) : null}
+                        </>
+                      ) : undefined
+                    }
+                    verdict={<CollectionFlowVerdictCard verdict={verdict} />}
+                  />
+                </div>
+              ) : null}
+            </div>
           </CollectionFlowFloatingPanel>
 
           {selectedFlowNode ? (
