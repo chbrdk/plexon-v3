@@ -793,8 +793,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
             variant={paletteOpen ? 'panel' : 'toolbar'}
             className={
               paletteOpen
-                ? 'msqdx-flow-float-panel--palette-open'
-                : 'msqdx-flow-float-panel--palette-collapsed'
+                ? 'msqdx-flow-float-panel--palette msqdx-flow-float-panel--palette-open'
+                : 'msqdx-flow-float-panel--palette msqdx-flow-float-panel--palette-collapsed'
             }
             ariaLabel="Flow Bausteine"
           >

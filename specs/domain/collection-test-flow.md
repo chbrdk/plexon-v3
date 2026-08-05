@@ -188,7 +188,7 @@ Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`.
 |---------|------|
 | `/projects/[platformProjectId]/flows` | Gallery + create from template |
 | `/projects/[platformProjectId]/flows/[flowId]` | Immersive **Board** (workspace magazine) |
-| Chrome | `@msqdx/ui` flow board chrome (`FlowBoardStage`, `FlowNodeCard`, …) + `FloatingPanel`; square `Button`/`Chip` — SoT in `flow-board-chrome.md` |
+| Chrome | `@msqdx/ui` flow board chrome (`FlowBoardStage`, `FlowNodeCard`, …) + `FloatingPanel`; rounded float shells (12px) + pill Bausteine FAB — SoT in `flow-board-chrome.md` |
 | Deep links | “Open in AUDION wave” / “Open CHECKION scan result” with Collection context |
 
 Do not place this on legacy `/board` Prismion island.
