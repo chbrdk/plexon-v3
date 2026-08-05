@@ -1,4 +1,4 @@
-# Collection Test Flow — staging smoke (Wave 1 + 2)
+# Collection Test Flow — staging smoke (Wave 1–4)
 
 Routes (helpers in `lib/constants.ts`):
 
@@ -39,6 +39,14 @@ Routes (helpers in `lib/constants.ts`):
 4. Verdict shows `issueGate: pass|fail` and critical counts; abandon if criticals ≥ 1 even when score passes.
 5. Strip link **Open Issues dossier** → CHECKION `/results/{scanId}/issues`.
 
+## Wave 4 — Study rollup
+
+1. Create a **journey** template (with or without issues) and **Testen**.
+2. After run: Audion Study evaluates; wave notes / report include Collection verdict + cross-product rates.
+3. Open **Open in AUDION** — Evaluate / Soft-Q notes should mention Collection rollup.
+4. Knowledge Pack `research_brief` may gain section **Collection Test Flow** (optional distillate).
+5. `lastRun` flags: `waveEvaluateOk`, `waveRollupOk`, `knowledgeDistillateOk`.
+
 ## Failures to check
 
 - Missing Checkion binding → API 400 with clear message.
@@ -47,3 +55,4 @@ Routes (helpers in `lib/constants.ts`):
 - Score &lt; 70 → `abandon`, `collectionReady=false`, evidence still valid if score present.
 - Journey task fail + quality pass → `collectionReady=false` (`taskCompleted` false).
 - Score pass + ≥1 critical → issue gate fail → `abandon`, dossier link still available.
+- Wave evaluate/PATCH failure → Collection run still succeeds; rollup flags false (best-effort).

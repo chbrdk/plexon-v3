@@ -97,6 +97,12 @@ export type CollectionFlowLastRun = {
   issueCount?: number | null;
   criticalCount?: number | null;
   issueGateBranch?: 'pass' | 'fail' | null;
+  /** Wave 4: Audion evaluate succeeded (journey path only). */
+  waveEvaluateOk?: boolean | null;
+  /** Wave 4: Collection notes/report PATCHed onto wave. */
+  waveRollupOk?: boolean | null;
+  /** Wave 4: Knowledge Pack research_brief distillate. */
+  knowledgeDistillateOk?: boolean | null;
 };
 
 export type CollectionVerdict = {

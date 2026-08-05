@@ -34,6 +34,9 @@
   - Templates `page-quality-issues` / `journey-quality-issues` with `issue_gate` (`critical_issues` default)
   - `GET /api/scans/:id/issues` via `checkionApiScanIssues` / `fetchCheckionScanIssues`
   - Dossier: `pathCheckionScanIssues(scanId)` → `/results/{id}/issues`
+- Collection Test Flow Wave 4 (Study rollup):
+  - After journey: `audionPlatformStudyWaveEvaluate` + PATCH wave (`audionPlatformStudyWave`)
+  - Rollup helper `lib/collection-flow-rollup.ts`; KP distillate → `research_brief` section `collection-test-flow-latest`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`
 - Collection Knowledge Pack (API): `specs/api/collection-knowledge-pack.md`
 - Knowledge Pack routes (Phase 1 shipped):

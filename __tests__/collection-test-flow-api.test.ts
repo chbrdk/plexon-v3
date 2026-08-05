@@ -13,7 +13,11 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { runCheckionSingleScan, fetchCheckionScanIssues } from '@/lib/integrations/checkion-scans-client';
-import { runAudionJourneySegment } from '@/lib/integrations/audion-journey-client';
+import {
+  runAudionJourneySegment,
+  rollupCollectionVerdictToAudionWave,
+} from '@/lib/integrations/audion-journey-client';
+import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import {
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
@@ -67,6 +71,11 @@ vi.mock('@/lib/integrations/checkion-scans-client', () => ({
 
 vi.mock('@/lib/integrations/audion-journey-client', () => ({
   runAudionJourneySegment: vi.fn(),
+  rollupCollectionVerdictToAudionWave: vi.fn(),
+}));
+
+vi.mock('@/lib/collection-flow-knowledge-distillate', () => ({
+  distillCollectionFlowToKnowledgePack: vi.fn(),
 }));
 
 function project() {
@@ -132,6 +141,12 @@ describe('Collection Test Flow run API', () => {
       return null;
     });
     vi.mocked(getCollectionTestFlow).mockResolvedValue(flowRow() as never);
+    vi.mocked(rollupCollectionVerdictToAudionWave).mockResolvedValue({
+      ok: true,
+      waveEvaluateOk: true,
+      waveRollupOk: true,
+    });
+    vi.mocked(distillCollectionFlowToKnowledgePack).mockResolvedValue({ ok: true });
   });
 
   it('POST run returns collectionReady when Checkion score passes', async () => {
@@ -236,7 +251,7 @@ describe('Collection Test Flow run API', () => {
         taskCompleted: boolean;
         hasJourneySegment: boolean;
       };
-      lastRun: { audionJobId: string; stepUrl: string; scanId: string };
+      lastRun: { audionJobId: string; stepUrl: string; scanId: string; waveRollupOk: boolean; knowledgeDistillateOk: boolean };
       nodeStates: Record<string, string>;
     };
     expect(body.verdict.hasJourneySegment).toBe(true);
@@ -245,7 +260,18 @@ describe('Collection Test Flow run API', () => {
     expect(body.lastRun.audionJobId).toBe('job-abc');
     expect(body.lastRun.stepUrl).toBe('https://acme.test/explored');
     expect(body.lastRun.scanId).toBe('scan-2');
+    expect(body.lastRun.waveRollupOk).toBe(true);
+    expect(body.lastRun.knowledgeDistillateOk).toBe(true);
     expect(body.nodeStates['n-journey']).toBe('done');
+    expect(rollupCollectionVerdictToAudionWave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        studyId: 'study-1',
+        waveId: 'wave-1',
+        platformProjectId: 'pp-1',
+        flowId: 'flow-j1',
+      })
+    );
+    expect(distillCollectionFlowToKnowledgePack).toHaveBeenCalled();
     expect(runAudionJourneySegment).toHaveBeenCalledWith(
       expect.objectContaining({ projectId: 'aud-proj-1' })
     );

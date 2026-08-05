@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 3 issue gates implemented (2026-08-05) — Study rollup Wave 4  
+**Status:** Wave 4 Study rollup implemented (2026-08-05)  
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -209,7 +209,7 @@ Do not place this on legacy `/board` Prismion island.
 | **1 — MVP quality path** | Persist Collection flow; Board UI shell; quality path only: `start` → `scan` → `score_gate` → `quality_ok` / `abandon`; CHECKION `POST /api/scans` `mode=single` + poll `overallScore`; Collection verdict on flow jsonb | Staging smoke: `/projects/{id}/flows` + run against Collection with Checkion binding; `collectionReady` explained |
 | **2 — Journey embed** | Template `journey-quality`: Collection `journey` node + embedded Audion `journeyFlow`; Study/Wave `from-flow` → start → poll; handoff `finalUrl` → CHECKION scan with `platformProjectId` / `audionRunId` / `stepUrl`; verdict adds `taskCompleted` / `validEvidence` | Staging smoke: same URL in Audion job + Checkion scan correlation |
 | **3 — Issue gates + dossier link** | Template `page-quality-issues` (+ journey variant): `issue_gate` with `critical_issues` / `no_critical_issues`; fetch `GET /api/scans/:id/issues`; branch on Board; deep link `/results/:id/issues` | Staging: gate branch visible; dossier link opens CHECKION Issues |
-| **4 — Study rollup** | Push Collection verdict into Audion wave evaluate / Soft-Q notes; optional Knowledge Pack distillate | Evaluate shows cross-product evidence rates |
+| **4 — Study rollup** | After journey run: Audion `evaluate` + PATCH wave (`reportMarkdown` / Soft-Q `notes` + cross-product rates); optional Knowledge Pack `research_brief` distillate | Evaluate/Study shows Collection verdict notes; KP section when distillate ok |
 | **Later** | Parallel multi-page, GEO nodes, Brandion, multi-user live | Out of MVP |
 
 ## Acceptance (Wave 0)
@@ -241,6 +241,13 @@ Do not place this on legacy `/board` Prismion island.
 - `qualityPassed` = score gate ∧ issue gate (when present). Dossier UI: `pathCheckionScanIssues(scanId)` → `/results/{id}/issues`.
 - `lastRun` / verdict expose `criticalCount`, `issueCount`, `issueGateBranch` (`pass`|`fail`).
 
+## Wave 4 implementation notes
+
+- After a completed run **with** Audion `studyId`/`waveId`: `POST …/evaluate` then `PATCH` wave with Collection `reportMarkdown` + Soft-Q `notes` (preserve prior evaluate notes) and cross-product rate lines (`taskCompleted`, `pageEvidenceValid`, `qualityPassed`, `collectionReady`).
+- Soft-Q **scores** stay Audion Evaluate output — Plexon does not invent Soft-Q values from Checkion.
+- Optional distillate: merge section `collection-test-flow-latest` into Knowledge Pack `research_brief` (product `plexon`). Best-effort; run success does not depend on KP/wave PATCH.
+- `lastRun` flags: `waveEvaluateOk`, `waveRollupOk`, `knowledgeDistillateOk`.
+
 ## Open questions (non-blocking)
 
-- `issue_rule_match` pattern gates — later refinement of Wave 3 if needed.
+- Richer Soft-Q mapping from Checkion lenses — later if product asks.

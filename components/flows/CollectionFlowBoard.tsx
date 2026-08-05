@@ -231,6 +231,18 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   lastRun.criticalCount != null
                     ? `${lastRun.criticalCount} critical`
                     : null,
+                  lastRun.waveRollupOk === true
+                    ? 'wave rollup ok'
+                    : lastRun.waveEvaluateOk === false
+                      ? 'wave evaluate failed'
+                      : lastRun.waveRollupOk === false
+                        ? 'wave rollup failed'
+                        : null,
+                  lastRun.knowledgeDistillateOk === true
+                    ? 'KP distillate ok'
+                    : lastRun.knowledgeDistillateOk === false
+                      ? 'KP distillate failed'
+                      : null,
                   lastRun.audionJobId ? `job ${lastRun.audionJobId}` : null,
                   lastRun.scanId ? `scan ${lastRun.scanId}` : null,
                   lastRun.stepUrl ? `step ${lastRun.stepUrl}` : null,

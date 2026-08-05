@@ -100,6 +100,16 @@ export function audionPlatformStudyWaveSync(studyId: string, waveId: string): st
   return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}/sync`;
 }
 
+/** POST /api/studies/{studyId}/waves/{waveId}/evaluate */
+export function audionPlatformStudyWaveEvaluate(studyId: string, waveId: string): string {
+  return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}/evaluate`;
+}
+
+/** GET/PATCH /api/studies/{studyId}/waves/{waveId} */
+export function audionPlatformStudyWave(studyId: string, waveId: string): string {
+  return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}`;
+}
+
 /** GET /api/ux-journey-agent/run/{jobId} */
 export function audionPlatformJourneyJob(jobId: string): string {
   return `${audionPlatformBase()}/ux-journey-agent/run/${encodeURIComponent(jobId)}`;

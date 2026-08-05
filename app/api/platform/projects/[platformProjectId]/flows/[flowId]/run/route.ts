@@ -24,11 +24,12 @@ import {
 } from '@/lib/db/collection-test-flows';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
-import { runAudionJourneySegment } from '@/lib/integrations/audion-journey-client';
+import { runAudionJourneySegment, rollupCollectionVerdictToAudionWave } from '@/lib/integrations/audion-journey-client';
 import {
   fetchCheckionScanIssues,
   runCheckionSingleScan,
 } from '@/lib/integrations/checkion-scans-client';
+import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import { platformJson } from '@/lib/platform-contract';
 
 export const runtime = 'nodejs';
@@ -243,6 +244,36 @@ export async function POST(
       issueSignals,
     });
 
+    let waveEvaluateOk: boolean | null = null;
+    let waveRollupOk: boolean | null = null;
+    let knowledgeDistillateOk: boolean | null = null;
+
+    if (audionStudyId && audionWaveId) {
+      const rollup = await rollupCollectionVerdictToAudionWave({
+        studyId: audionStudyId,
+        waveId: audionWaveId,
+        platformProjectId: id,
+        flowId: fid,
+        verdict,
+        scanId: scan.id,
+        stepUrl: stepUrl ?? scan.url ?? scanUrl,
+        overallScore: scan.overallScore,
+      });
+      waveEvaluateOk = rollup.waveEvaluateOk;
+      waveRollupOk = rollup.ok && rollup.waveRollupOk;
+    }
+
+    // Best-effort KP distillate (journey + quality-only)
+    const distillate = await distillCollectionFlowToKnowledgePack({
+      platformProjectId: id,
+      flowId: fid,
+      verdict,
+      scanId: scan.id,
+      overallScore: scan.overallScore,
+      updatedByUserId: user.id,
+    });
+    knowledgeDistillateOk = distillate.ok;
+
     const lastRun: CollectionFlowLastRun = {
       startedAt,
       completedAt: new Date().toISOString(),
@@ -258,6 +289,9 @@ export async function POST(
       issueCount: issueSignals?.issueCount ?? null,
       criticalCount: issueSignals?.criticalCount ?? null,
       issueGateBranch: verdict.issueGateBranch,
+      waveEvaluateOk,
+      waveRollupOk,
+      knowledgeDistillateOk,
     };
 
     const saved = await persistFlowRunResult({
