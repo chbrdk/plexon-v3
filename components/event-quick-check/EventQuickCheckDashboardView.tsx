@@ -258,7 +258,11 @@ export function EventQuickCheckDashboardView({
 
       {report.executive.kpiTiles.length > 0 ? (
         <Band title={EQC_REPORT_COPY.sectionKpi}>
-          <StatLedeGroup aria-label={EQC_REPORT_COPY.sectionKpi}>
+          <StatLedeGroup
+            aria-label={EQC_REPORT_COPY.sectionKpi}
+            columns={report.executive.kpiTiles.length}
+            compact
+          >
             {report.executive.kpiTiles.map((tile, i) => (
               <StatLede
                 key={`${tile.label}-${i}`}
