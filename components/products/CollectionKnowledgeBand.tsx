@@ -738,6 +738,7 @@ export function CollectionKnowledgeBand({
               <Link
                 href={pathPlatformProjectFlows(platformProjectId)}
                 className="plexon-knowledge-toc-link plexon-knowledge-toc-link--flows"
+                data-empty="false"
               >
                 {t('projects.detail.navFlows')}
               </Link>
