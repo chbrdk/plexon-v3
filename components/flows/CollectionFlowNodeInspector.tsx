@@ -1,12 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from 'react'
 import {
   Button,
   ExpressionField,
-  FlowInspectorShell,
+  FlowNodeEditorShell,
+  Input,
   JsonTree,
-  type FlowInspectorSection,
 } from '@msqdx/ui'
 import type {
   CollectionFlowLastRun,
@@ -15,21 +15,28 @@ import type {
   CollectionVerdict,
 } from '@/lib/collection-test-flow'
 import {
-  flattenAllContextOutputs,
-  flattenContextForInspector,
-} from '@/lib/collection-flow-run-context'
-import { formatExpressionForPath } from '@/lib/collection-flow-expression'
+  AUDION_GATE_OPTIONS,
+  COLLECTION_COMPARE_OP_OPTIONS,
+  COLLECTION_SCAN_MODE_OPTIONS,
+  type CollectionFlowRfEdge,
+  type CollectionFlowRfNode,
+} from '@/lib/collection-flow-canvas'
+import {
+  formatExpressionForPath,
+  formatNodeJsonExpression,
+} from '@/lib/collection-flow-expression'
+import {
+  nodeOutputItems,
+  nodeRefsFromRfNodes,
+  upstreamInputsForNode,
+} from '@/lib/collection-flow-inspector-inputs'
+import { flattenAllContextOutputs } from '@/lib/collection-flow-run-context'
 import type {
   FlowJobRunSummary,
   FlowNodeInspectorData,
   FlowNodeInspectorStep,
   FlowNodeRunState,
 } from '@/lib/collection-flow-run-progress'
-
-/**
- * Collection Flow node inspector — domain sections inside DS FlowInspectorShell.
- * @see specs/domain/collection-test-flow.md — Wave 5–7 implementation notes
- */
 
 const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   start: 'Start',
@@ -119,41 +126,20 @@ function InspectorStepCard({
             {open ? '▾' : '▸'}
           </span>
         </button>
-
         {open ? (
           <div className="msqdx-flow-inspector-step-body">
-            <div className="msqdx-flow-inspector-step-meta-row">
-              <span>{step.timestamp ? new Date(step.timestamp).toLocaleTimeString() : '—'}</span>
-            </div>
-            {step.action ? (
-              <InspectorField label="Action" tone="action">
-                {step.action}
-              </InspectorField>
-            ) : null}
-            {step.target ? (
-              <InspectorField label="Target" tone="target" mono>
-                {step.target}
-              </InspectorField>
-            ) : null}
             {step.result ? (
               <InspectorField label="Result" tone="result">
                 <pre className="msqdx-flow-inspector-pre">{step.result}</pre>
               </InspectorField>
             ) : null}
-            {step.reasoning ? (
-              <InspectorField label="Reasoning" tone="reasoning">
-                <pre className="msqdx-flow-inspector-pre">{step.reasoning}</pre>
-              </InspectorField>
-            ) : null}
             {step.imageUrl ? (
-              <InspectorField label="Screenshot" tone="meta">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className="msqdx-flow-inspector-shot"
-                  src={step.imageUrl}
-                  alt={`Screenshot step ${step.step ?? ''}`}
-                />
-              </InspectorField>
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                className="msqdx-flow-inspector-shot"
+                src={step.imageUrl}
+                alt={`Screenshot step ${step.step ?? ''}`}
+              />
             ) : null}
           </div>
         ) : null}
@@ -163,6 +149,7 @@ function InspectorStepCard({
 }
 
 export function CollectionFlowNodeInspector({
+  open,
   node,
   runState,
   inspector,
@@ -170,33 +157,40 @@ export function CollectionFlowNodeInspector({
   verdict,
   lastRun,
   bindSourceLabel,
+  edges = [],
+  rfNodes = [],
+  audionCatalog,
   onClose,
   onAppendOutputToNote,
   onUpdate,
 }: {
+  open: boolean
   node: CollectionFlowNode
   runState: FlowNodeRunState
   inspector?: FlowNodeInspectorData | null
   jobSummary?: FlowJobRunSummary | null
   verdict?: CollectionVerdict | null
   lastRun?: CollectionFlowLastRun | null
-  /** Wave 10: label of action node wired into compare.path via bind edge. */
   bindSourceLabel?: string | null
+  edges?: CollectionFlowRfEdge[]
+  rfNodes?: CollectionFlowRfNode[]
+  audionCatalog?: {
+    personas: Array<{ id: string; name: string }>
+    targetGroups: Array<{ id: string; name: string; segment?: string }>
+  }
   onClose: () => void
   onAppendOutputToNote?: () => void
-  /** Wave 19: patch node fields (path/value/alias/url). */
   onUpdate?: (nodeId: string, patch: Partial<CollectionFlowNode>) => void
 }) {
   const steps = inspector?.steps ?? []
-  const [expandedLatest, setExpandedLatest] = useState(true)
-  const [focusField, setFocusField] = useState<'path' | 'value' | 'alias' | 'url'>('path')
+  const [focusField, setFocusField] = useState<'path' | 'value' | 'alias' | 'url' | 'text' | 'note'>(
+    'path'
+  )
 
   useEffect(() => {
-    setExpandedLatest(true)
-  }, [node.id, steps.length])
+    setFocusField('path')
+  }, [node.id])
 
-  const lastStep = steps.length ? steps[steps.length - 1] : null
-  const canAppend = Boolean(onAppendOutputToNote) && Boolean(lastStep?.result || lastStep?.reasoning)
   const isQualityNode =
     node.kind === 'scan' ||
     node.kind === 'domain_scan' ||
@@ -208,21 +202,44 @@ export function CollectionFlowNodeInspector({
     node.kind === 'geo_gate' ||
     node.kind === 'quality_ok'
 
-  const contextLeaves = useMemo(() => {
+  const nodeById = useMemo(() => nodeRefsFromRfNodes(rfNodes), [rfNodes])
+
+  const upstreamGroups = useMemo(
+    () => upstreamInputsForNode(node.id, edges, nodeById, lastRun?.context ?? null),
+    [node.id, edges, nodeById, lastRun?.context]
+  )
+
+  const globalContextLeaves = useMemo(() => {
     const ctx = lastRun?.context
     if (!ctx?.outputs) return []
     return flattenAllContextOutputs(ctx)
   }, [lastRun?.context])
 
+  const outputItems = useMemo(
+    () => nodeOutputItems(node.id, node.kind, lastRun?.context ?? null),
+    [node.id, node.kind, lastRun?.context]
+  )
+
   const insertPath = useCallback(
     (path: string) => {
       if (!onUpdate) return
-      const expr = formatExpressionForPath(path)
+      const expr = path.includes("$('")
+        ? formatExpressionForPath(path)
+        : formatExpressionForPath(path)
+
+      if (focusField === 'text') {
+        onUpdate(node.id, { text: expr })
+        return
+      }
+      if (focusField === 'note') {
+        onUpdate(node.id, { note: expr })
+        return
+      }
       if (focusField === 'value' && (node.kind === 'compare' || node.kind === 'set')) {
         onUpdate(node.id, { value: expr })
         return
       }
-      if (focusField === 'url' && (node.kind === 'start' || node.kind === 'scan')) {
+      if (focusField === 'url' && (node.kind === 'start' || node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job')) {
         onUpdate(node.id, { url: expr })
         return
       }
@@ -235,492 +252,392 @@ export function CollectionFlowNodeInspector({
     [focusField, node.id, node.kind, onUpdate]
   )
 
-  const gateBranchLabel = useMemo(() => {
-    if (!verdict) return null
-    if (node.kind === 'compare') {
-      const row = verdict.compareResults?.find((r) => r.nodeId === node.id)
-      if (!row) return null
-      return row.passed ? 'pass' : 'fail'
-    }
-    if (node.kind === 'score_gate') return verdict.scorePassed ? 'pass' : 'fail'
-    if (node.kind === 'issue_gate') return verdict.issueGatePassed ? 'pass' : 'fail'
-    if (node.kind === 'geo_gate') return verdict.geoGatePassed ? 'pass' : 'fail'
-    return null
-  }, [node.id, node.kind, verdict])
+  const insertUpstreamPath = useCallback(
+    (sourceNodeId: string, relativePath: string) => {
+      if (!onUpdate) return
+      const expr = formatNodeJsonExpression(sourceNodeId, relativePath)
+      if (focusField === 'value') {
+        onUpdate(node.id, { value: expr })
+        return
+      }
+      if (focusField === 'url') {
+        onUpdate(node.id, { url: expr })
+        return
+      }
+      onUpdate(node.id, { path: expr })
+    },
+    [focusField, node.id, node.kind, onUpdate]
+  )
 
-  const outputRoot =
-    node.kind === 'scan'
-      ? 'scan'
-      : node.kind === 'domain_scan'
-        ? 'domain'
-        : node.kind === 'geo_job'
-          ? 'geo'
-          : null
-  const outputRows = useMemo(() => {
-    if (!outputRoot || !lastRun?.context) return []
-    return flattenContextForInspector(lastRun.context, outputRoot)
-  }, [lastRun?.context, outputRoot])
-
-  const sections = useMemo((): FlowInspectorSection[] => {
-    const out: FlowInspectorSection[] = []
-
-    if (
-      node.text ||
-      node.note ||
-      node.kind === 'start' ||
-      node.kind === 'scan' ||
-      node.kind === 'domain_scan' ||
-      node.kind === 'geo_job'
-    ) {
-      out.push({
-        id: 'design',
-        title: 'Design',
-        defaultOpen: false,
-        children: (
-          <>
-            {node.text ? (
-              <InspectorField label={node.kind === 'geo_job' ? 'Queries' : 'Text'} tone="meta">
-                <pre className="msqdx-flow-inspector-pre">{node.text}</pre>
-              </InspectorField>
-            ) : null}
-            {node.note ? (
-              <InspectorField label="Note" tone="meta">
-                <pre className="msqdx-flow-inspector-pre">{node.note}</pre>
-              </InspectorField>
-            ) : null}
-            {node.kind === 'start' && (node.urlKey || node.url) ? (
-              <InspectorField label="urlKey" tone="target" mono>
-                {node.urlKey || node.url}
-              </InspectorField>
-            ) : null}
-            {node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job' ? (
-              <>
-                {node.url ? (
-                  <InspectorField label="URL" tone="target" mono>
-                    {node.url}
-                  </InspectorField>
-                ) : null}
-                {node.kind === 'geo_job' && node.companyName ? (
-                  <InspectorField label="Company" tone="meta" mono>
-                    {node.companyName}
-                  </InspectorField>
-                ) : null}
-                {node.kind === 'scan' ? (
-                  <InspectorField label="Mode" tone="meta" mono>
-                    {node.scanMode ?? 'single'}
-                  </InspectorField>
-                ) : null}
-                {node.kind === 'domain_scan' && node.maxPages != null ? (
-                  <InspectorField label="Max pages" tone="meta" mono>
-                    {node.maxPages}
-                  </InspectorField>
-                ) : null}
-              </>
-            ) : null}
-          </>
-        ),
-      })
-    }
-
-    if (isQualityNode) {
-      out.push({
-        id: 'quality',
-        title: 'Quality',
-        defaultOpen: true,
-        meta: gateBranchLabel ? (
-          <span className={`msqdx-flow-inspector-pill msqdx-flow-inspector-pill--${gateBranchLabel}`}>
-            {gateBranchLabel}
-          </span>
-        ) : undefined,
-        children: (
-          <>
-            {node.kind === 'compare' ? (
-              <div className="msqdx-flow-inspector-stats">
-                {onUpdate ? (
-                  <>
-                    <ExpressionField
-                      label="Path"
-                      value={node.path ?? ''}
-                      onChange={(v) => onUpdate(node.id, { path: v })}
-                      onFocusField={() => setFocusField('path')}
-                      hint="Catalog path oder {{ expression }}"
-                    />
-                    <ExpressionField
-                      label="Value"
-                      value={node.value != null ? String(node.value) : ''}
-                      onChange={(v) => {
-                        const n = Number(v)
-                        onUpdate(node.id, {
-                          value: v.trim() === '' ? null : Number.isFinite(n) && v.trim() !== '' && !v.includes('{')
-                            ? n
-                            : v,
-                        })
-                      }}
-                      onFocusField={() => setFocusField('value')}
-                      hint="Literal oder {{ expression }}"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className="msqdx-flow-inspector-stat">
-                      <span>Path</span>
-                      <strong>{node.path ?? '—'}</strong>
-                    </div>
-                    <div className="msqdx-flow-inspector-stat">
-                      <span>Value</span>
-                      <strong>{node.value != null ? String(node.value) : '—'}</strong>
-                    </div>
-                  </>
-                )}
-                {bindSourceLabel ? (
-                  <div className="msqdx-flow-inspector-stat">
-                    <span>Bind from</span>
-                    <strong>{bindSourceLabel}</strong>
-                  </div>
-                ) : null}
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Op</span>
-                  <strong>{node.op ?? 'gte'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Actual</span>
-                  <strong>
-                    {verdict?.compareResults?.find((r) => r.nodeId === node.id)?.actual != null
-                      ? String(verdict.compareResults.find((r) => r.nodeId === node.id)?.actual)
-                      : '—'}
-                  </strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Pass</span>
-                  <strong>
-                    {verdict?.compareResults?.find((r) => r.nodeId === node.id)
-                      ? verdict.compareResults.find((r) => r.nodeId === node.id)?.passed
-                        ? 'ja'
-                        : 'nein'
-                      : '—'}
-                  </strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'set' ? (
-              <div className="msqdx-flow-inspector-stats">
-                {onUpdate ? (
-                  <>
-                    <ExpressionField
-                      label="Alias"
-                      value={node.alias ?? ''}
-                      onChange={(v) => onUpdate(node.id, { alias: v })}
-                      onFocusField={() => setFocusField('alias')}
-                      placeholder="score"
-                      hint="Key unter context.outputs"
-                    />
-                    <ExpressionField
-                      label="Source"
-                      value={node.path ?? ''}
-                      onChange={(v) => onUpdate(node.id, { path: v })}
-                      onFocusField={() => setFocusField('path')}
-                      hint="Pfad oder {{ expression }}"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className="msqdx-flow-inspector-stat">
-                      <span>Alias</span>
-                      <strong>{node.alias ?? '—'}</strong>
-                    </div>
-                    <div className="msqdx-flow-inspector-stat">
-                      <span>Source</span>
-                      <strong>{node.path ?? '—'}</strong>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : null}
-            {node.kind === 'score_gate' ? (
-              <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Kind</span>
-                  <strong>{node.scoreKind ?? 'overall'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Score</span>
-                  <strong>{verdict?.overallScore ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Threshold</span>
-                  <strong>{node.threshold ?? verdict?.threshold ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Pass</span>
-                  <strong>{verdict ? (verdict.scorePassed ? 'ja' : 'nein') : '—'}</strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'issue_gate' ? (
-              <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Condition</span>
-                  <strong>{node.gateCondition ?? 'critical_issues'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Critical</span>
-                  <strong>{verdict?.criticalCount ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Issues</span>
-                  <strong>{verdict?.issueCount ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Pass</span>
-                  <strong>{verdict ? (verdict.issueGatePassed ? 'ja' : 'nein') : '—'}</strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'geo_gate' ? (
-              <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Condition</span>
-                  <strong>{node.gateCondition ?? 'cited_share_at_least'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Cited</span>
-                  <strong>{verdict?.citedShare != null ? `${verdict.citedShare}%` : '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Fitness</span>
-                  <strong>{verdict?.geoFitness ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Pass</span>
-                  <strong>{verdict ? (verdict.geoGatePassed ? 'ja' : 'nein') : '—'}</strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'geo_job' ? (
-              <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Cited</span>
-                  <strong>{verdict?.citedShare != null ? `${verdict.citedShare}%` : '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Fitness</span>
-                  <strong>{verdict?.geoFitness ?? '—'}</strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'scan' ? (
-              <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Score</span>
-                  <strong>{verdict?.overallScore ?? '—'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Evidence</span>
-                  <strong>{verdict ? (verdict.pageEvidenceValid ? 'valid' : 'invalid') : '—'}</strong>
-                </div>
-              </div>
-            ) : null}
-            {node.kind === 'quality_ok' ? (
-              <p className="msqdx-flow-inspector-empty">
-                {verdict?.terminalKind === 'quality_ok'
-                  ? 'Erreicht — Collection-Kriterien im letzten Run erfüllt.'
-                  : 'Noch nicht erreicht.'}
-              </p>
-            ) : null}
-          </>
-        ),
-      })
-    }
-
-    if (outputRows.length > 0) {
-      out.push({
-        id: 'output',
-        title: 'Output',
-        defaultOpen: true,
-        children: (
-          <div className="msqdx-flow-inspector-stats">
-            {outputRows.slice(0, 24).map((row) => (
-              <div key={row.key} className="msqdx-flow-inspector-stat">
-                <span>{row.key}</span>
-                <strong>{row.value}</strong>
-              </div>
-            ))}
-          </div>
-        ),
-      })
-    }
-
-    out.push({
-      id: 'context',
-      title: 'Context',
-      defaultOpen: Boolean(onUpdate) && (node.kind === 'compare' || node.kind === 'set'),
-      children: (
-        <JsonTree
-          items={contextLeaves}
-          onSelectPath={onUpdate ? insertPath : undefined}
-          emptyLabel="Nach einem Testen erscheinen hier alle Outputs (inkl. Arrays)."
-        />
-      ),
-    })
-
-    if ((node.kind === 'start' || node.kind === 'scan') && onUpdate) {
-      out.push({
-        id: 'url-expr',
-        title: 'URL',
-        defaultOpen: false,
-        children: (
-          <ExpressionField
-            label="URL"
-            value={node.url ?? ''}
-            onChange={(v) => onUpdate(node.id, { url: v })}
-            onFocusField={() => setFocusField('url')}
-            placeholder="https://… oder {{ journey.finalUrl }}"
-            hint="Literal oder Expression"
-          />
-        ),
-      })
-    }
-
-    if (jobSummary) {
-      out.push({
-        id: 'run',
-        title: 'Run',
-        defaultOpen: true,
-        meta: (
-          <span className="msqdx-flow-inspector-pill">
-            {jobSummary.status ?? '—'} · {formatSec(jobSummary.elapsedSeconds)}
-          </span>
-        ),
-        children: (
-          <>
-            <div className="msqdx-flow-inspector-stats">
-              <div className="msqdx-flow-inspector-stat">
-                <span>Status</span>
-                <strong>{jobSummary.status ?? '—'}</strong>
-              </div>
-              <div className="msqdx-flow-inspector-stat">
-                <span>Steps</span>
-                <strong>{jobSummary.stepCount}</strong>
-              </div>
-              <div className="msqdx-flow-inspector-stat">
-                <span>Dauer</span>
-                <strong>{formatSec(jobSummary.elapsedSeconds)}</strong>
-              </div>
+  const inputColumn = (
+    <>
+      {upstreamGroups.length === 0 ? (
+        <p className="msqdx-flow-inspector-empty">
+          Keine eingehenden Kanten — verbinde einen vorherigen Schritt.
+        </p>
+      ) : (
+        upstreamGroups.map((group) => (
+          <div key={group.sourceNodeId} className="msqdx-flow-node-editor-upstream">
+            <div className="msqdx-flow-node-editor-upstream-head">
+              <span>{group.sourceLabel}</span>
+              <span className="msqdx-flow-node-editor-upstream-kind">{group.sourceKind}</span>
+              {group.bindPath ? (
+                <span className="msqdx-flow-inspector-pill">{group.bindPath}</span>
+              ) : null}
             </div>
-            {jobSummary.jobId ? (
-              <InspectorField label="Job ID" tone="meta" mono>
-                {jobSummary.jobId}
-              </InspectorField>
-            ) : null}
-            {jobSummary.finalUrl ? (
-              <InspectorField label="Final URL" tone="target" mono>
-                {jobSummary.finalUrl}
-              </InspectorField>
-            ) : null}
-            {jobSummary.error ? (
-              <InspectorField label="Error" tone="error">
-                {jobSummary.error}
-              </InspectorField>
-            ) : null}
-          </>
-        ),
-      })
-    }
-
-    if (!isQualityNode) {
-      out.push({
-        id: 'execution',
-        title: 'Execution',
-        defaultOpen: true,
-        meta: steps.length ? (
-          <span className="msqdx-flow-inspector-pill">{steps.length} steps</span>
-        ) : undefined,
-        children: steps.length ? (
-          <>
-            {canAppend ? (
-              <Button type="button" size="sm" variant="subtle" onClick={onAppendOutputToNote}>
-                Letzten Output → Note
-              </Button>
-            ) : null}
-            <ol className="msqdx-flow-inspector-steps">
-              {steps.map((s, i) => (
-                <InspectorStepCard
-                  key={`${s.step ?? i}-${s.timestamp ?? i}`}
-                  step={s}
-                  index={i}
-                  isLast={i === steps.length - 1}
-                  defaultOpen={i === steps.length - 1 && expandedLatest}
-                />
-              ))}
-            </ol>
-          </>
-        ) : (
-          <p className="msqdx-flow-inspector-empty">
-            Noch keine Steps auf dieser Node — Testen starten.
-          </p>
-        ),
-      })
-    }
-
-    if (node.kind === 'gate' && inspector?.gateEvaluation) {
-      out.push({
-        id: 'gate',
-        title: 'Gate',
-        defaultOpen: true,
-        children: (
-          <div
-            className={`msqdx-flow-inspector-gate-card${
-              inspector.gateEvaluation.matched ? ' is-match' : ' is-miss'
-            }`}
-          >
-            <span className="msqdx-flow-inspector-gate-verdict">
-              {inspector.gateEvaluation.matched ? 'Match' : 'Kein Match'}
-            </span>
-            {inspector.gateEvaluation.condition ? (
-              <InspectorField label="Condition" tone="meta" mono>
-                {inspector.gateEvaluation.condition}
-              </InspectorField>
-            ) : null}
-            {inspector.gateEvaluation.evidence ? (
-              <InspectorField label="Evidence" tone="result">
-                {inspector.gateEvaluation.evidence}
-              </InspectorField>
-            ) : null}
+            <JsonTree
+              items={group.items.map((i) => ({
+                path: i.path,
+                value: i.value,
+              }))}
+              onSelectPath={
+                onUpdate
+                  ? (path) => {
+                      if (path.startsWith("$('")) {
+                        insertPath(path)
+                        return
+                      }
+                      const rel = path.replace(/^[^.]+\./, '')
+                      insertUpstreamPath(group.sourceNodeId, rel)
+                    }
+                  : undefined
+              }
+              emptyLabel="Noch kein Output vom Lauf."
+            />
           </div>
-        ),
-      })
-    }
+        ))
+      )}
+      {globalContextLeaves.length > 0 ? (
+        <>
+          <p className="msqdx-flow-inspector-field-label">Gesamter Kontext</p>
+          <JsonTree
+            items={globalContextLeaves}
+            onSelectPath={onUpdate ? insertPath : undefined}
+            emptyLabel="Nach Testen verfügbar."
+          />
+        </>
+      ) : null}
+    </>
+  )
 
-    return out
-  }, [
-    bindSourceLabel,
-    canAppend,
-    contextLeaves,
-    expandedLatest,
-    gateBranchLabel,
-    insertPath,
-    inspector?.gateEvaluation,
-    isQualityNode,
-    jobSummary,
-    node,
-    onAppendOutputToNote,
-    onUpdate,
-    outputRows,
-    steps,
-    verdict,
-  ])
+  const paramsColumn = (
+    <>
+      {onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Name</span>
+          <Input
+            block
+            size="sm"
+            value={node.label}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => onUpdate(node.id, { label: e.target.value })}
+          />
+        </label>
+      ) : (
+        <InspectorField label="Name" tone="meta">
+          {node.label}
+        </InspectorField>
+      )}
+
+      {(node.kind === 'prompt' ||
+        node.kind === 'action' ||
+        node.kind === 'message' ||
+        node.kind === 'measure' ||
+        node.kind === 'observe' ||
+        node.kind === 'success' ||
+        node.kind === 'abandon' ||
+        node.kind === 'geo_job') &&
+      onUpdate ? (
+        <>
+          <ExpressionField
+            label={node.kind === 'geo_job' ? 'Queries' : 'Text'}
+            value={node.text ?? ''}
+            onChange={(v) => onUpdate(node.id, { text: v })}
+            onFocusField={() => setFocusField('text')}
+            hint="Aufgabe / Prompt — Literal oder {{ expression }}"
+          />
+          <ExpressionField
+            label="Note"
+            value={node.note ?? ''}
+            onChange={(v) => onUpdate(node.id, { note: v })}
+            onFocusField={() => setFocusField('note')}
+            hint="Interne Notiz"
+          />
+        </>
+      ) : node.text || node.note ? (
+        <>
+          {node.text ? (
+            <InspectorField label="Text" tone="meta">
+              <pre className="msqdx-flow-inspector-pre">{node.text}</pre>
+            </InspectorField>
+          ) : null}
+          {node.note ? (
+            <InspectorField label="Note" tone="meta">
+              <pre className="msqdx-flow-inspector-pre">{node.note}</pre>
+            </InspectorField>
+          ) : null}
+        </>
+      ) : null}
+
+      {node.kind === 'persona' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Persona</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={node.personaId ?? ''}
+            onChange={(e) => {
+              const pid = e.target.value
+              const hit = audionCatalog?.personas.find((p) => p.id === pid)
+              onUpdate(node.id, { personaId: pid || undefined, personaName: hit?.name })
+            }}
+          >
+            <option value="">— Persona —</option>
+            {(audionCatalog?.personas ?? []).map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {node.kind === 'zielgruppe' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Zielgruppe</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={node.targetGroupId ?? ''}
+            onChange={(e) => {
+              const tid = e.target.value
+              const hit = audionCatalog?.targetGroups.find((t) => t.id === tid)
+              onUpdate(node.id, {
+                targetGroupId: tid || undefined,
+                targetGroupName: hit?.name,
+                segment: hit?.segment || undefined,
+              })
+            }}
+          >
+            <option value="">— Zielgruppe —</option>
+            {(audionCatalog?.targetGroups ?? []).map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {(node.kind === 'start' || node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job') &&
+      onUpdate ? (
+        <ExpressionField
+          label="URL"
+          value={node.url ?? node.urlKey ?? ''}
+          onChange={(v) =>
+            onUpdate(node.id, node.kind === 'start' ? { urlKey: v, url: v } : { url: v })
+          }
+          onFocusField={() => setFocusField('url')}
+          placeholder="https://… oder {{ journey.finalUrl }}"
+        />
+      ) : null}
+
+      {node.kind === 'scan' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Scan-Modus</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={node.scanMode ?? 'single'}
+            onChange={(e) => onUpdate(node.id, { scanMode: e.target.value as 'single' | 'deep' })}
+          >
+            {COLLECTION_SCAN_MODE_OPTIONS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {node.kind === 'compare' && onUpdate ? (
+        <>
+          <ExpressionField
+            label="Path"
+            value={node.path ?? ''}
+            onChange={(v) => onUpdate(node.id, { path: v })}
+            onFocusField={() => setFocusField('path')}
+            hint="Catalog path oder {{ expression }}"
+          />
+          <label className="msqdx-flow-rf-field">
+            <span className="msqdx-flow-inspector-field-label">Op</span>
+            <select
+              className="msqdx-flow-rf-select"
+              value={node.op ?? 'gte'}
+              onChange={(e) => onUpdate(node.id, { op: e.target.value as CollectionFlowNode['op'] })}
+            >
+              {COLLECTION_COMPARE_OP_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+          </label>
+          <ExpressionField
+            label="Value"
+            value={node.value != null ? String(node.value) : ''}
+            onChange={(v) => {
+              const n = Number(v)
+              onUpdate(node.id, {
+                value:
+                  v.trim() === ''
+                    ? null
+                    : Number.isFinite(n) && v.trim() !== '' && !v.includes('{')
+                      ? n
+                      : v,
+              })
+            }}
+            onFocusField={() => setFocusField('value')}
+          />
+          {bindSourceLabel ? (
+            <InspectorField label="Bind from" tone="meta">
+              {bindSourceLabel}
+            </InspectorField>
+          ) : null}
+        </>
+      ) : null}
+
+      {node.kind === 'set' && onUpdate ? (
+        <>
+          <ExpressionField
+            label="Alias"
+            value={node.alias ?? ''}
+            onChange={(v) => onUpdate(node.id, { alias: v })}
+            onFocusField={() => setFocusField('alias')}
+          />
+          <ExpressionField
+            label="Source"
+            value={node.path ?? ''}
+            onChange={(v) => onUpdate(node.id, { path: v })}
+            onFocusField={() => setFocusField('path')}
+          />
+        </>
+      ) : null}
+
+      {node.kind === 'gate' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Condition</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={String(node.gateCondition ?? 'goal_reached')}
+            onChange={(e) => onUpdate(node.id, { gateCondition: e.target.value as CollectionFlowNode['gateCondition'] })}
+          >
+            {AUDION_GATE_OPTIONS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {node.presetId ? (
+        <InspectorField label="Preset" tone="meta">
+          {node.presetId}
+        </InspectorField>
+      ) : null}
+    </>
+  )
+
+  const outputColumn = (
+    <>
+      {outputItems.length > 0 ? (
+        <JsonTree items={outputItems} emptyLabel="Kein strukturierter Output." />
+      ) : (
+        <p className="msqdx-flow-inspector-empty">
+          {lastRun ? 'Kein Output für diese Node im letzten Lauf.' : 'OUTPUT erscheint nach Testen.'}
+        </p>
+      )}
+
+      {node.kind === 'compare' && verdict ? (
+        <div className="msqdx-flow-inspector-stats">
+          <div className="msqdx-flow-inspector-stat">
+            <span>Actual</span>
+            <strong>
+              {verdict.compareResults?.find((r) => r.nodeId === node.id)?.actual ?? '—'}
+            </strong>
+          </div>
+          <div className="msqdx-flow-inspector-stat">
+            <span>Pass</span>
+            <strong>
+              {verdict.compareResults?.find((r) => r.nodeId === node.id)?.passed ? 'ja' : 'nein'}
+            </strong>
+          </div>
+        </div>
+      ) : null}
+
+      {!isQualityNode && steps.length > 0 ? (
+        <>
+          {onAppendOutputToNote ? (
+            <Button type="button" size="sm" variant="subtle" onClick={onAppendOutputToNote}>
+              Letzten Output → Note
+            </Button>
+          ) : null}
+          <ol className="msqdx-flow-inspector-steps">
+            {steps.map((s, i) => (
+              <InspectorStepCard
+                key={`${s.step ?? i}-${s.timestamp ?? i}`}
+                step={s}
+                index={i}
+                isLast={i === steps.length - 1}
+                defaultOpen={i === steps.length - 1}
+              />
+            ))}
+          </ol>
+        </>
+      ) : null}
+
+      {node.kind === 'gate' && inspector?.gateEvaluation ? (
+        <div
+          className={`msqdx-flow-inspector-gate-card${
+            inspector.gateEvaluation.matched ? ' is-match' : ' is-miss'
+          }`}
+        >
+          <span className="msqdx-flow-inspector-gate-verdict">
+            {inspector.gateEvaluation.matched ? 'Match' : 'Kein Match'}
+          </span>
+          {inspector.gateEvaluation.evidence ? (
+            <InspectorField label="Evidence" tone="result">
+              {inspector.gateEvaluation.evidence}
+            </InspectorField>
+          ) : null}
+        </div>
+      ) : null}
+
+      {jobSummary ? (
+        <div className="msqdx-flow-inspector-stats">
+          <div className="msqdx-flow-inspector-stat">
+            <span>Run</span>
+            <strong>{jobSummary.status ?? '—'}</strong>
+          </div>
+          <div className="msqdx-flow-inspector-stat">
+            <span>Dauer</span>
+            <strong>{formatSec(jobSummary.elapsedSeconds)}</strong>
+          </div>
+        </div>
+      ) : null}
+    </>
+  )
 
   return (
-    <FlowInspectorShell
+    <FlowNodeEditorShell
       key={node.id}
+      open={open}
+      onClose={onClose}
       kind={node.kind}
       kindLabel={KIND_LABEL[node.kind] ?? node.kind}
       title={node.label || node.id}
       nodeId={node.id}
       runState={isQualityNode ? 'idle' : runState}
-      onClose={onClose}
-      sections={sections}
-      aria-label="Node Inspector"
+      input={inputColumn}
+      params={paramsColumn}
+      output={outputColumn}
     />
   )
 }

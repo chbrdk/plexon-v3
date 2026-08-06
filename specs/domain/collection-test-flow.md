@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 20 set aliases + open path expressions; compact RF node chrome (post-20)  
+**Status:** Wave 21 n8n fullscreen node editor (INPUT | Parameters | OUTPUT)  
 
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
@@ -449,6 +449,12 @@ Do not place this on legacy `/board` Prismion island.
 
 - Canvas cards drop INPUT / Parameters / OUTPUT bands: edge handle stacks + title/preview; Inspector owns text/expressions/Context.
 - Collision fallback size `220×120` matches compact cards.
+
+## Wave 21 — n8n node editor overlay
+
+- Node click opens **fullscreen** `FlowNodeEditorShell` (`@msqdx/ui`): **INPUT** (upstream edges + global context) | **Parameters** (all fields) | **OUTPUT** (node bundle + run steps).
+- Upstream scoping: `lib/collection-flow-inspector-inputs.ts`; JsonTree insert → focused ExpressionField.
+- Right FloatingPanel inspector retired for Collection Flow boards.
 
 ## Open questions (non-blocking)
 

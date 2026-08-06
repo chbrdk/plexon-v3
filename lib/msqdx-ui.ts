@@ -57,6 +57,8 @@ export type {
   FlowInspectorShellProps,
   FlowInspectorSection,
 } from '../../msqdx-ui/packages/ui/src/components/FlowInspectorShell'
+export { FlowNodeEditorShell } from '../../msqdx-ui/packages/ui/src/components/FlowNodeEditorShell'
+export type { FlowNodeEditorShellProps } from '../../msqdx-ui/packages/ui/src/components/FlowNodeEditorShell'
 export { FlowRunStrip } from '../../msqdx-ui/packages/ui/src/components/FlowRunStrip'
 export type { FlowRunStripProps } from '../../msqdx-ui/packages/ui/src/components/FlowRunStrip'
 export { ContextMenu } from '../../msqdx-ui/packages/ui/src/components/ContextMenu'

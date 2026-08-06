@@ -1832,27 +1832,22 @@ function BoardInner({ platformProjectId, initial }: Props) {
           </CollectionFlowFloatingPanel>
 
           {selectedFlowNode ? (
-            <CollectionFlowFloatingPanel
-              storageKey={`plexon.flow.inspector.${flow.id}`}
-              defaultEdge="right"
-              defaultOffset={0.22}
-              title="Inspector"
-              className="msqdx-flow-float-panel--inspector"
-              ariaLabel="Node Inspector"
-            >
-              <CollectionFlowNodeInspector
-                node={selectedFlowNode}
-                runState={runStates[selectedId!] ?? 'idle'}
-                inspector={inspectorByNode[selectedId!] ?? null}
-                jobSummary={jobSummary}
-                verdict={verdict}
-                lastRun={lastRun}
-                bindSourceLabel={bindSourceLabel}
-                onClose={() => setSelectedId(null)}
-                onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
-                onUpdate={onUpdateNode}
-              />
-            </CollectionFlowFloatingPanel>
+            <CollectionFlowNodeInspector
+              open
+              node={selectedFlowNode}
+              runState={runStates[selectedId!] ?? 'idle'}
+              inspector={inspectorByNode[selectedId!] ?? null}
+              jobSummary={jobSummary}
+              verdict={verdict}
+              lastRun={lastRun}
+              bindSourceLabel={bindSourceLabel}
+              edges={edges as CollectionFlowRfEdge[]}
+              rfNodes={nodes as CollectionFlowRfNodeModel[]}
+              audionCatalog={audionCatalog}
+              onClose={() => setSelectedId(null)}
+              onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+              onUpdate={onUpdateNode}
+            />
           ) : null}
 
           {webhookOpen ? (
