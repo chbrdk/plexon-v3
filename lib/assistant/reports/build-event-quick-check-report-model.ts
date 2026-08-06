@@ -1,5 +1,8 @@
 import type { EventQuickCheckResult, EventQuickCheckStepOutcome } from '@/lib/assistant/playbooks/run-event-quick-check';
-import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
+import {
+  listPersonasFromPreview,
+  resolvePersonaPreviewForReport,
+} from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import type { PersonaPreviewItem } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
 import { EVENT_QUICK_CHECK_ECHON_RESEARCH_ENABLED } from '@/lib/paths/assistant-workflows';
 import type { WorkflowInsightNarrative } from '@/lib/assistant/insights/types';
@@ -111,6 +114,14 @@ export function buildEventQuickCheckReportModel(
   const echonOutcome = quick.outcomes.find((o) => o.stepId === 'echon_market_research');
   const echon = quick.echonMarket;
 
+  const personaPreview = resolvePersonaPreviewForReport({
+    personaPreview: quick.personaPreview,
+    outcomes: quick.outcomes,
+    geoQuestionsByPersona: quick.geoQuestionsByPersona,
+    projectName: quick.projectName,
+  });
+  const personaItemsForKpi = listPersonasFromPreview(personaPreview);
+
   const kpiTiles: EventQuickCheckReportModel['executive']['kpiTiles'] = [
     {
       label: 'Domain-Score',
@@ -131,14 +142,12 @@ export function buildEventQuickCheckReportModel(
     },
     {
       label: 'Personas',
-      value: listPersonasFromPreview(quick.personaPreview).length || '—',
+      value: personaItemsForKpi.length || '—',
       hint:
-        listPersonasFromPreview(quick.personaPreview).length === 1
-          ? quick.personaPreview?.persona?.name
-          : listPersonasFromPreview(quick.personaPreview)
-              .map((p) => p.name)
-              .join(', ') || undefined,
-      tone: listPersonasFromPreview(quick.personaPreview).length ? 'success' : 'warning',
+        personaItemsForKpi.length === 1
+          ? personaItemsForKpi[0]?.name
+          : personaItemsForKpi.map((p) => p.name).join(', ') || undefined,
+      tone: personaItemsForKpi.length ? 'success' : 'warning',
     },
     {
       label: 'GEO-Score',
@@ -313,7 +322,7 @@ export function buildEventQuickCheckReportModel(
     model.domainComparison = domainComparison;
   }
 
-  const personaItems = listPersonasFromPreview(quick.personaPreview);
+  const personaItems = listPersonasFromPreview(personaPreview);
   const questionsByPersonaId = new Map(
     (quick.geoQuestionsByPersona ?? []).map((g) => [g.personaId, g.questions] as const)
   );

@@ -4,6 +4,8 @@ import {
   executeEventQuickCheckRun,
   reportFromWorkflowRun,
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
+import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
+import type { EventQuickCheckResumeCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import {
   EVENT_QUICK_CHECK_COMPANY_BRIEF_KEY,
   EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY,
@@ -15,6 +17,7 @@ import {
   EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
   EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY,
+  EVENT_QUICK_CHECK_CHECKPOINT_KEY,
 } from '@/lib/paths/event-quick-check-page';
 import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
 import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
@@ -36,6 +39,9 @@ export async function GET(
 
   const stored = run.result ?? {};
   const awaitingGeoQuestions = Boolean(stored[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]);
+  const checkpoint = stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as
+    | EventQuickCheckResumeCheckpoint
+    | undefined;
   const deepScan =
     awaitingGeoQuestions || Boolean(stored[EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY])
       ? await resolveEventQuickCheckDeepScanStatus(stored)
@@ -56,6 +62,7 @@ export async function GET(
     geoQuestions: stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_DRAFT_KEY] ?? undefined,
     geoQuestionsByPersona:
       stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] ?? undefined,
+    geoHasPersona: listPersonasFromPreview(checkpoint?.personaPreview).length > 0,
     geoCompetitors: stored[EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY] ?? undefined,
     awaitingCompetitors: Boolean(stored[EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY]),
     competitors: stored[EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY] ?? undefined,

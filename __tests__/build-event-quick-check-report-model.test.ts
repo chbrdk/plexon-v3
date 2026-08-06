@@ -78,4 +78,20 @@ describe('buildEventQuickCheckReportModel', () => {
     expect(model.personas?.[0].geoQuestions).toEqual(['Q-Anna']);
     expect(model.personas?.[1].geoQuestions).toEqual(['Q-Ben']);
   });
+
+  it('recovers personas from outcome preview when top-level preview is missing', () => {
+    const base = eventQuickCheckBvikFixture();
+    const preview = base.personaPreview!;
+    const model = buildEventQuickCheckReportModel({
+      ...base,
+      personaPreview: undefined,
+      outcomes: base.outcomes.map((o) =>
+        o.stepId === 'persona_bootstrap'
+          ? { ...o, data: { preview } }
+          : o
+      ),
+    });
+    expect(model.persona?.name).toBe('Elena');
+    expect(model.executive.kpiTiles.find((t) => t.label === 'Personas')?.value).toBe(1);
+  });
 });

@@ -1,4 +1,5 @@
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
+import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-personas';
 
 export type EventQuickCheckDashboardLayout = {
   showDomain: boolean;
@@ -23,7 +24,7 @@ export function resolveEventQuickCheckDashboardLayout(
 ): EventQuickCheckDashboardLayout {
   const showDomain = Boolean(report.domain);
   const showDomainComparison = Boolean(report.domainComparison?.rows.length);
-  const showPersona = Boolean(report.persona);
+  const showPersona = resolveReportPersonas(report).length > 0;
   const showGeoQuestions = report.geo.questions.length > 0;
   const showGeoQuestionsInGeo = showGeoQuestions && !showPersona;
   const showGeoMetrics =

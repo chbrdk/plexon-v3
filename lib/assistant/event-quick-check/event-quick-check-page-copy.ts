@@ -53,6 +53,8 @@ export const EQC_PAGE_COPY = {
   geoReviewConfirm: 'Fragen bestätigen & GEO-Check starten',
   geoReviewConfirming: 'GEO-Check läuft…',
   geoReviewPersonaHint: 'Abgeleitet aus Persona und Unternehmensprofil.',
+  geoReviewFallbackHint:
+    'Abgeleitet aus Unternehmensprofil und CHECKION-Vorschlägen — ohne AUDION-Persona.',
   geoReviewMultiPersonaHint: 'Pro Persona drei Fragen — gruppiert nach Buyer-Segment.',
   geoReviewPersonaGroupLabel: (name: string, segment: string) => `${name} · ${segment}`,
   depthQuickLabel: 'Quick Check (Demo)',

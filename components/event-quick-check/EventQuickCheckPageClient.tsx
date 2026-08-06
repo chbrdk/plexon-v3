@@ -70,6 +70,7 @@ export function EventQuickCheckPageClient() {
   const [companyBrief, setCompanyBrief] = useState<EventQuickCheckCompanyBrief | null>(null);
   const [geoQuestions, setGeoQuestions] = useState<string[]>([]);
   const [geoQuestionsByPersona, setGeoQuestionsByPersona] = useState<PersonaGeoQuestionGroup[]>();
+  const [geoHasPersona, setGeoHasPersona] = useState(true);
   const [competitors, setCompetitors] = useState<string[]>([]);
   const [maxCompetitors, setMaxCompetitors] = useState(3);
   const [depth, setDepth] = useState<EventQuickCheckDepth>('quick');
@@ -127,6 +128,7 @@ export function EventQuickCheckPageClient() {
     setCompanyBrief(null);
     setGeoQuestions([]);
     setGeoQuestionsByPersona(undefined);
+    setGeoHasPersona(true);
     setCompetitors([]);
     setDeepScanProgress(undefined);
     setCheckionProjectId(undefined);
@@ -156,6 +158,7 @@ export function EventQuickCheckPageClient() {
           awaitingGeoQuestions?: boolean;
           geoQuestions?: string[];
           geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+          geoHasPersona?: boolean;
           awaitingCompetitors?: boolean;
           competitors?: string[];
           maxCompetitors?: number;
@@ -184,6 +187,7 @@ export function EventQuickCheckPageClient() {
         if (data.awaitingGeoQuestions && data.geoQuestions?.length) {
           setGeoQuestions(data.geoQuestions);
           setGeoQuestionsByPersona(data.geoQuestionsByPersona);
+          setGeoHasPersona(data.geoHasPersona !== false);
           if (data.report) setReport(data.report);
           setGeoRerunMode(Boolean(data.report));
           if (data.deepScanProgress) setDeepScanProgress(data.deepScanProgress);
@@ -278,6 +282,7 @@ export function EventQuickCheckPageClient() {
           awaitingGeoQuestions?: boolean;
           geoQuestions?: string[];
           geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+          geoHasPersona?: boolean;
           awaitingCompetitors?: boolean;
           competitors?: string[];
           maxCompetitors?: number;
@@ -303,6 +308,7 @@ export function EventQuickCheckPageClient() {
           setCompanyBrief(null);
           setGeoQuestions(result.geoQuestions);
           setGeoQuestionsByPersona(result.geoQuestionsByPersona);
+          setGeoHasPersona(result.geoHasPersona !== false);
           setPhase('geoReview');
           void refreshHistory();
           return;
@@ -364,6 +370,7 @@ export function EventQuickCheckPageClient() {
           awaitingGeoQuestions?: boolean;
           geoQuestions?: string[];
           geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+          geoHasPersona?: boolean;
           deepScanProgress?: { complete: number; total: number; detail: string };
           checkionProjectId?: string;
         };
@@ -377,6 +384,7 @@ export function EventQuickCheckPageClient() {
           setCompetitors([]);
           setGeoQuestions(result.geoQuestions);
           setGeoQuestionsByPersona(result.geoQuestionsByPersona);
+          setGeoHasPersona(result.geoHasPersona !== false);
           if (result.deepScanProgress) setDeepScanProgress(result.deepScanProgress);
           if (result.checkionProjectId) setCheckionProjectId(result.checkionProjectId);
           setPhase('geoReview');
@@ -496,12 +504,14 @@ export function EventQuickCheckPageClient() {
         error?: string;
         geoQuestions?: string[];
         geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+        geoHasPersona?: boolean;
       };
       if (!res.ok || !result.ok || !result.geoQuestions?.length) {
         throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
       }
       setGeoQuestions(result.geoQuestions);
       setGeoQuestionsByPersona(result.geoQuestionsByPersona);
+      setGeoHasPersona(result.geoHasPersona !== false);
       setGeoRerunMode(true);
       setPhase('geoReview');
     } catch (e) {
@@ -645,6 +655,7 @@ export function EventQuickCheckPageClient() {
         awaitingGeoQuestions?: boolean;
         geoQuestions?: string[];
         geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+        geoHasPersona?: boolean;
       };
 
       if (result.steps?.length) setSteps(result.steps);
@@ -673,6 +684,7 @@ export function EventQuickCheckPageClient() {
         streamRef.current = null;
         setGeoQuestions(result.geoQuestions);
         setGeoQuestionsByPersona(result.geoQuestionsByPersona);
+        setGeoHasPersona(result.geoHasPersona !== false);
         setPhase('geoReview');
         void refreshHistory();
         return;
@@ -826,6 +838,7 @@ export function EventQuickCheckPageClient() {
               <EventQuickCheckGeoQuestionsPanel
                 questions={geoQuestions}
                 groups={geoQuestionsByPersona}
+                hasPersona={geoHasPersona || Boolean(geoQuestionsByPersona?.length)}
                 maxQuestions={maxGeoQuestionsForProfile(
                   resolveEventQuickCheckProfile(depth).personaCount,
                   resolveEventQuickCheckProfile(depth).geoQuestionsPerPersona

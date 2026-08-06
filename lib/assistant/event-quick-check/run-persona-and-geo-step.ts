@@ -1,5 +1,4 @@
 import {
-  buildGeoQuestionsWithoutPersona,
   buildMultiPersonaGeoQuestions,
   buildPersonaGeoQuestions,
   type PersonaGeoQuestionGroup,
@@ -28,15 +27,33 @@ export type PersonaAndGeoStepResult = {
   geoOutcome: EventQuickCheckStepOutcome;
 };
 
-async function buildGeoQuestionsWithoutPersonaLegacy(
-  url: string,
-  companyBrief?: EventQuickCheckCompanyBrief
-) {
-  const built = await buildGeoQuestionsWithoutPersona({ url, companyBrief });
+const PERSONA_REQUIRED_ERROR =
+  'AUDION-Persona konnte nicht erstellt werden. Bitte AUDION prüfen und Quick Check erneut starten.';
+
+function personaMissingResult(input: {
+  error: string;
+  personaPreview?: PersonaBootstrapPreview;
+  geoCompetitors: string[];
+  multi?: boolean;
+}): PersonaAndGeoStepResult {
   return {
-    questions: built.questions,
-    competitors: built.competitors,
-    error: built.suggestError,
+    personaPreview: input.personaPreview,
+    audionSetupRequired: true,
+    geoQuestions: [],
+    geoCompetitors: input.geoCompetitors,
+    personaOutcome: {
+      stepId: 'persona_bootstrap',
+      label: input.multi ? 'AUDION Personas' : 'AUDION Persona',
+      status: 'error',
+      error: input.error,
+    },
+    geoOutcome: {
+      stepId: 'geo_questions',
+      label: 'GEO-Fragen',
+      status: 'error',
+      error: PERSONA_REQUIRED_ERROR,
+      data: { personaMissing: true },
+    },
   };
 }
 
@@ -53,7 +70,6 @@ export async function runPersonaAndGeoQuestionsStep(input: {
 }): Promise<PersonaAndGeoStepResult> {
   let personaPreview: PersonaBootstrapPreview | undefined;
   let audionProjectId = input.audionProjectId;
-  let audionSetupRequired = false;
   let geoQuestions: string[] = [];
   let geoQuestionsByPersona: PersonaGeoQuestionGroup[] | undefined;
   let geoCompetitors = [...input.geoCompetitors];
@@ -69,60 +85,25 @@ export async function runPersonaAndGeoQuestionsStep(input: {
       personaCount: input.profile.personaCount,
     });
     if (!persona.ok) {
-      return {
-        audionSetupRequired: true,
-        geoQuestions: [],
+      return personaMissingResult({
+        error: persona.error,
         geoCompetitors,
-        personaOutcome: {
-          stepId: 'persona_bootstrap',
-          label: 'AUDION Personas',
-          status: 'error',
-          error: persona.error,
-        },
-        geoOutcome: {
-          stepId: 'geo_questions',
-          label: 'GEO-Fragen',
-          status: 'error',
-          error: persona.error,
-        },
-      };
+        multi: true,
+      });
     }
 
     personaPreview = persona.preview;
     const personas = listPersonasFromPreview(persona.preview);
     if (personas.length === 0) {
-      audionSetupRequired = true;
-      const personaOutcome: EventQuickCheckStepOutcome = {
-        stepId: 'persona_bootstrap',
-        label: 'AUDION Personas',
-        status: 'error',
+      return personaMissingResult({
         error: persona.preview.error ?? 'Personas fehlen',
-      };
-      const fallback = await buildGeoQuestionsWithoutPersonaLegacy(input.url, input.companyBrief);
-      geoQuestions = fallback.questions;
-      geoCompetitors = geoCompetitors.length ? geoCompetitors : fallback.competitors;
-      return {
         personaPreview,
-        audionSetupRequired,
-        geoQuestions,
         geoCompetitors,
-        personaOutcome,
-        geoOutcome: {
-          stepId: 'geo_questions',
-          label: 'GEO-Fragen',
-          status: geoQuestions.length ? 'done' : 'error',
-          error: geoQuestions.length ? undefined : fallback.error ?? 'Keine Persona',
-          data: {
-            questions: geoQuestions,
-            competitors: geoCompetitors,
-            personaMissing: true,
-          },
-        },
-      };
+        multi: true,
+      });
     }
 
     audionProjectId = persona.preview.projectId;
-    audionSetupRequired = false;
     if (input.platformProjectId && input.bindAudion) {
       try {
         await input.bindAudion(input.platformProjectId, persona.preview.projectId);
@@ -144,7 +125,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
     return {
       personaPreview,
       audionProjectId,
-      audionSetupRequired,
+      audionSetupRequired: false,
       geoQuestions,
       geoQuestionsByPersona,
       geoCompetitors,
@@ -176,40 +157,15 @@ export async function runPersonaAndGeoQuestionsStep(input: {
   });
 
   if (!persona.ok || !persona.preview.persona) {
-    audionSetupRequired = true;
-    const fallback = await buildGeoQuestionsWithoutPersonaLegacy(input.url, input.companyBrief);
-    geoQuestions = fallback.questions;
-    geoCompetitors = geoCompetitors.length ? geoCompetitors : fallback.competitors;
-    const partial = geoQuestions.length > 0;
-    return {
+    return personaMissingResult({
+      error: persona.ok ? persona.preview.error ?? 'Persona fehlt' : persona.error,
       personaPreview: persona.ok ? persona.preview : undefined,
-      audionSetupRequired,
-      geoQuestions,
       geoCompetitors,
-      personaOutcome: {
-        stepId: 'persona_bootstrap',
-        label: 'AUDION Persona',
-        status: 'error',
-        error: persona.ok ? persona.preview.error ?? 'Persona fehlt' : persona.error,
-      },
-      geoOutcome: {
-        stepId: 'geo_questions',
-        label: 'GEO-Fragen',
-        status: partial ? 'done' : 'error',
-        error: partial ? undefined : fallback.error ?? 'Persona erforderlich für vollständige GEO-Fragen',
-        data: {
-          questions: geoQuestions,
-          source: 'checkion_suggest_only',
-          competitors: geoCompetitors,
-          personaMissing: true,
-        },
-      },
-    };
+    });
   }
 
   personaPreview = persona.preview;
   audionProjectId = persona.preview.projectId;
-  audionSetupRequired = false;
   if (input.platformProjectId && input.bindAudion) {
     try {
       await input.bindAudion(input.platformProjectId, persona.preview.projectId);
@@ -230,7 +186,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
   return {
     personaPreview,
     audionProjectId,
-    audionSetupRequired,
+    audionSetupRequired: false,
     geoQuestions,
     geoCompetitors,
     personaOutcome: {
@@ -253,4 +209,4 @@ export async function runPersonaAndGeoQuestionsStep(input: {
   };
 }
 
-export { personaBootstrapDetailLabel };
+export { personaBootstrapDetailLabel, PERSONA_REQUIRED_ERROR };

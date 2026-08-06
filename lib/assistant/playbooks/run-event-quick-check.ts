@@ -4,9 +4,11 @@ import { QUICK_CHECK_LABEL } from '@/lib/assistant/event-quick-check/quick-check
 import { emitPhase } from '@/lib/assistant/handlers/context';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import {
+  PERSONA_REQUIRED_ERROR,
   personaBootstrapDetailLabel,
   runPersonaAndGeoQuestionsStep,
 } from '@/lib/assistant/event-quick-check/run-persona-and-geo-step';
+import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import type { PlaybookStepPayload } from '@/lib/assistant/playbooks/execute-step';
 import {
   EVENT_QUICK_CHECK_INITIAL_STEPS,
@@ -131,6 +133,7 @@ export type EventQuickCheckRunOptions = {
   companyBrief?: EventQuickCheckCompanyBrief;
   geoQuestions?: string[];
   geoCompetitors?: string[];
+  geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
   resumeCheckpoint?: EventQuickCheckResumeCheckpoint;
   runMode?: EventQuickCheckRunMode;
   depth?: EventQuickCheckDepth;
@@ -377,6 +380,7 @@ export async function runEventQuickCheck(
       audionSetupRequired: checkpoint.audionSetupRequired ?? false,
       checkionProjectId: checkpoint.checkionProjectId ?? null,
       geoQuestions: confirmedGeoQuestions,
+      geoQuestionsByPersona: options.geoQuestionsByPersona,
       geoCompetitors: options.geoCompetitors ?? checkpoint.geoCompetitors,
       echonHandle: checkpoint.echonHandle ?? null,
       echonSkippedReason: checkpoint.echonSkippedReason,
@@ -896,13 +900,52 @@ export async function runEventQuickCheck(
     });
     outcomes.push(personaGeo.personaOutcome);
 
+    const personasReady = listPersonasFromPreview(personaPreview).length > 0;
+    if (!personasReady || personaGeo.personaOutcome.status !== 'done') {
+      steps = await patchStep('geo_questions', {
+        status: 'error',
+        detail: personaGeo.geoOutcome.error ?? PERSONA_REQUIRED_ERROR,
+      });
+      outcomes.push(personaGeo.geoOutcome);
+      steps = await patchStep('geo_questions_confirm', {
+        status: 'error',
+        detail: 'Persona erforderlich',
+      });
+      steps = await patchStep('geo_check', {
+        status: 'error',
+        detail: 'Übersprungen — Persona fehlt',
+      });
+      steps = await patchStep('aggregate', {
+        status: 'error',
+        detail: 'Ohne AUDION-Persona kein Quick Check',
+      });
+      return {
+        ok: false,
+        playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
+        playbookLabel: QUICK_CHECK_LABEL,
+        projectName,
+        url,
+        platformProjectId,
+        outcomes,
+        steps,
+        dashboardPath,
+        geoQuestions: [],
+        domainScan,
+        personaPreview,
+        audionProjectId,
+        audionSetupRequired: true,
+        companyBrief,
+        geoCompetitors,
+        checkionProjectId: checkionProjectId ?? undefined,
+        error: personaGeo.personaOutcome.error ?? PERSONA_REQUIRED_ERROR,
+      };
+    }
+
     streamPhase(
       emit,
-      personaGeo.personaPreview?.persona
-        ? profile.personaCount > 1
-          ? 'GEO-Fragen pro Persona ableiten…'
-          : 'GEO-Fragen aus Persona ableiten…'
-        : 'GEO-Fragen via CHECKION vorschlagen…'
+      profile.personaCount > 1
+        ? 'GEO-Fragen pro Persona ableiten…'
+        : 'GEO-Fragen aus Persona ableiten…'
     );
     steps = await patchStep('geo_questions', {
       status: personaGeo.geoOutcome.status === 'done' ? 'done' : 'error',
@@ -914,7 +957,7 @@ export async function runEventQuickCheck(
     });
     outcomes.push(personaGeo.geoOutcome);
 
-    if (runMode !== 'full_auto') {
+    if (runMode !== 'full_auto' && geoQuestions?.length) {
       steps = await patchStep('geo_questions_confirm', {
         status: 'running',
         detail: 'Bitte GEO-Fragen prüfen',
@@ -1268,13 +1311,52 @@ async function runEventQuickCheckFromCompetitors(
   });
   outcomes.push(personaGeo.personaOutcome);
 
+  const personasReady = listPersonasFromPreview(personaPreview).length > 0;
+  if (!personasReady || personaGeo.personaOutcome.status !== 'done') {
+    steps = await patchStep('geo_questions', {
+      status: 'error',
+      detail: personaGeo.geoOutcome.error ?? PERSONA_REQUIRED_ERROR,
+    });
+    outcomes.push(personaGeo.geoOutcome);
+    steps = await patchStep('geo_questions_confirm', {
+      status: 'error',
+      detail: 'Persona erforderlich',
+    });
+    steps = await patchStep('geo_check', {
+      status: 'error',
+      detail: 'Übersprungen — Persona fehlt',
+    });
+    steps = await patchStep('aggregate', {
+      status: 'error',
+      detail: 'Ohne AUDION-Persona kein Quick Check',
+    });
+    return {
+      ok: false,
+      playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
+      playbookLabel: QUICK_CHECK_LABEL,
+      projectName,
+      url,
+      platformProjectId,
+      outcomes,
+      steps,
+      dashboardPath,
+      geoQuestions: [],
+      domainScan,
+      personaPreview,
+      audionProjectId,
+      audionSetupRequired: true,
+      companyBrief,
+      geoCompetitors,
+      checkionProjectId: checkionProjectId ?? undefined,
+      error: personaGeo.personaOutcome.error ?? PERSONA_REQUIRED_ERROR,
+    };
+  }
+
   streamPhase(
     emit,
-    personaGeo.personaPreview?.persona
-      ? profile.personaCount > 1
-        ? 'GEO-Fragen pro Persona ableiten…'
-        : 'GEO-Fragen aus Persona ableiten…'
-      : 'GEO-Fragen via CHECKION vorschlagen…'
+    profile.personaCount > 1
+      ? 'GEO-Fragen pro Persona ableiten…'
+      : 'GEO-Fragen aus Persona ableiten…'
   );
   steps = await patchStep('geo_questions', {
     status: personaGeo.geoOutcome.status === 'done' ? 'done' : 'error',
@@ -1348,6 +1430,7 @@ async function runEventQuickCheckFromCompetitors(
     audionSetupRequired,
     checkionProjectId,
     geoQuestions: geoQuestions ?? [],
+    geoQuestionsByPersona,
     geoCompetitors,
     echonHandle: null,
   });
@@ -1370,6 +1453,7 @@ type FinishFromGeoInput = {
   audionSetupRequired: boolean;
   checkionProjectId: string | null;
   geoQuestions: string[];
+  geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
   geoCompetitors: string[];
   echonHandle: EchonQuickCheckResearchHandle | null;
   echonSkippedReason?: string;
@@ -1394,6 +1478,7 @@ async function finishEventQuickCheckFromGeo(
     audionSetupRequired,
     checkionProjectId,
     geoQuestions,
+    geoQuestionsByPersona,
     geoCompetitors,
     echonHandle,
     echonSkippedReason,
@@ -1541,6 +1626,7 @@ async function finishEventQuickCheckFromGeo(
     steps,
     dashboardPath,
     geoQuestions,
+    geoQuestionsByPersona,
     geoJob,
     domainScan,
     personaPreview,

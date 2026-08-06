@@ -55,6 +55,7 @@ import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-
 import type { EventQuickCheckRunMode } from '@/lib/assistant/playbooks/run-event-quick-check';
 import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion-project-deep-scan-client';
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
+import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 
 export { domainFromEventQuickCheckUrl, normalizeEventQuickCheckUrl };
 
@@ -98,6 +99,8 @@ export type ExecuteEventQuickCheckRunResult = {
   awaitingGeoQuestions?: boolean;
   geoQuestions?: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+  /** True when AUDION persona(s) exist for this GEO draft. */
+  geoHasPersona?: boolean;
   geoCompetitors?: string[];
   awaitingCompetitors?: boolean;
   competitors?: string[];
@@ -242,6 +245,9 @@ export async function executeEventQuickCheckRun(
 
   if (stored[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY] && !input.geoQuestionsConfirmed) {
     const deepScan = await resolveEventQuickCheckDeepScanStatus(stored);
+    const awaitingCheckpoint = stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as
+      | EventQuickCheckResumeCheckpoint
+      | undefined;
     return {
       ok: true,
       workflowRunId: run.id,
@@ -251,6 +257,7 @@ export async function executeEventQuickCheckRun(
       geoQuestionsByPersona: stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] as
         | PersonaGeoQuestionGroup[]
         | undefined,
+      geoHasPersona: listPersonasFromPreview(awaitingCheckpoint?.personaPreview).length > 0,
       geoCompetitors: stored[EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY] as string[] | undefined,
       companyBrief: stored[EVENT_QUICK_CHECK_COMPANY_BRIEF_CONFIRMED_KEY] as
         | EventQuickCheckCompanyBrief
@@ -361,6 +368,9 @@ export async function executeEventQuickCheckRun(
       emit: input.emit,
       companyBrief: confirmedBrief,
       geoQuestions: confirmedGeoQuestions,
+      geoQuestionsByPersona: stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] as
+        | PersonaGeoQuestionGroup[]
+        | undefined,
       geoCompetitors:
         input.geoCompetitorsConfirmed ??
         (stored[EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY] as string[] | undefined),
@@ -486,6 +496,7 @@ export async function executeEventQuickCheckRun(
       awaitingGeoQuestions: true,
       geoQuestions: quick.geoQuestions,
       geoQuestionsByPersona: quick.geoQuestionsByPersona,
+      geoHasPersona: listPersonasFromPreview(quick.personaPreview).length > 0,
       geoCompetitors: quick.geoCompetitors,
       companyBrief: quick.companyBrief ?? confirmedBrief,
       ...(deepScanStarted
@@ -498,36 +509,61 @@ export async function executeEventQuickCheckRun(
     };
   }
 
-  if (!quick.ok && !quick.outcomes.some((o) => o.status === 'done')) {
+  if (!quick.ok) {
     await updateAssistantWorkflowRun(run.id, {
       status: 'failed',
       steps,
       result: {
         ...stored,
         url,
-        projectName,
-        error: quick.error ?? 'Keine Schritte erfolgreich',
+        projectName: quick.companyBrief?.displayName ?? projectName,
+        platformProjectId: quick.platformProjectId ?? platformProjectId,
+        error: quick.error ?? 'Analyse fehlgeschlagen',
+        ...(stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY]
+          ? {
+              [EVENT_QUICK_CHECK_CHECKPOINT_KEY]: {
+                ...(stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as EventQuickCheckResumeCheckpoint),
+                personaPreview:
+                  quick.personaPreview ??
+                  (stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as EventQuickCheckResumeCheckpoint)
+                    .personaPreview,
+                domainScan:
+                  quick.domainScan ??
+                  (stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as EventQuickCheckResumeCheckpoint)
+                    .domainScan,
+              } satisfies EventQuickCheckResumeCheckpoint,
+            }
+          : {}),
       },
     });
     return {
       ok: false,
       workflowRunId: run.id,
       steps,
-      error: quick.error ?? 'Keine Schritte erfolgreich',
+      error: quick.error ?? 'Analyse fehlgeschlagen',
     };
   }
 
-  const dataLayout = resolveEventQuickCheckReportLayout(quick);
+  const quickForReport = {
+    ...quick,
+    personaPreview: quick.personaPreview ?? checkpoint?.personaPreview,
+    geoQuestionsByPersona:
+      quick.geoQuestionsByPersona ??
+      (stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] as
+        | PersonaGeoQuestionGroup[]
+        | undefined),
+  };
+  const dataLayout = resolveEventQuickCheckReportLayout(quickForReport);
   const enriched = await enrichWorkflowLayout(
     ctx,
-    { workflowType: 'event_quick_check', url: quick.url, quick },
+    { workflowType: 'event_quick_check', url: quick.url, quick: quickForReport },
     dataLayout
   );
 
   const reportBlock = enriched.layout.blocks.find((b) => b.type === 'event_quick_check_report');
   const report =
     (reportBlock?.props.report as EventQuickCheckReportModel | undefined) ??
-    buildEventQuickCheckReportModel(quick, enriched.narrative);
+    buildEventQuickCheckReportModel(quickForReport, enriched.narrative);
 
   await updateAssistantWorkflowRun(run.id, {
     status: quick.ok ? 'completed' : 'failed',

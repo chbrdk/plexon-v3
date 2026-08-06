@@ -8,6 +8,8 @@ import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-
 export type EventQuickCheckGeoQuestionsPanelProps = {
   questions: string[];
   groups?: PersonaGeoQuestionGroup[];
+  /** When false, flat questions came from company-brief / CHECKION fallback (no Audion persona). */
+  hasPersona?: boolean;
   loading?: boolean;
   maxQuestions?: number;
   onConfirm: (questions: string[], groups?: PersonaGeoQuestionGroup[]) => void;
@@ -26,6 +28,7 @@ function flattenGroups(groups: GroupState[]): string[] {
 export function EventQuickCheckGeoQuestionsPanel({
   questions,
   groups,
+  hasPersona = true,
   loading = false,
   maxQuestions = 8,
   onConfirm,
@@ -95,7 +98,11 @@ export function EventQuickCheckGeoQuestionsPanel({
       </Text>
       <Text role="body">{EQC_PAGE_COPY.geoReviewLead}</Text>
       <Text role="hint">
-        {grouped ? EQC_PAGE_COPY.geoReviewMultiPersonaHint : EQC_PAGE_COPY.geoReviewPersonaHint}
+        {grouped
+          ? EQC_PAGE_COPY.geoReviewMultiPersonaHint
+          : hasPersona
+            ? EQC_PAGE_COPY.geoReviewPersonaHint
+            : EQC_PAGE_COPY.geoReviewFallbackHint}
       </Text>
 
       {grouped

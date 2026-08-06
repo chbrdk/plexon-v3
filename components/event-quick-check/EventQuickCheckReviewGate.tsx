@@ -34,6 +34,7 @@ type RunSnapshot = {
   awaitingGeoQuestions?: boolean;
   geoQuestions?: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+  geoHasPersona?: boolean;
   status?: string;
   error?: string;
 };
@@ -277,6 +278,7 @@ export function EventQuickCheckReviewGate({
         <EventQuickCheckGeoQuestionsPanel
           questions={snapshot.geoQuestions}
           groups={snapshot.geoQuestionsByPersona}
+          hasPersona={snapshot.geoHasPersona !== false || Boolean(snapshot.geoQuestionsByPersona?.length)}
           maxQuestions={maxGeoQuestionsForProfile(
             resolveEventQuickCheckProfile(snapshot.geoQuestionsByPersona?.length ? 'complete' : 'quick')
               .personaCount,
