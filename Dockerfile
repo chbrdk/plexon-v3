@@ -32,12 +32,29 @@ RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/ms
 
 # ---- Builder ----
 FROM base AS builder
+ARG MSQDX_UI_REPO=https://github.com/chbrdk/msqdx-ui.git
+ARG MSQDX_UI_BRANCH=main
+ARG MSQDX_DS_REPO=https://github.com/chbrdk/msqdx-design-system.git
+ARG MSQDX_DS_BRANCH=main
 # Keep deps installable even if Coolify injects NODE_ENV=production as a build ARG.
 ENV NODE_ENV=development
 COPY --from=ds /workspace/msqdx-ui /workspace/msqdx-ui
 COPY --from=ds /workspace/msqdx-design-system /workspace/msqdx-design-system
 COPY . /workspace/plexon-v3
 WORKDIR /workspace/plexon-v3
+
+# ds stage is often Docker-cached with a stale msqdx-ui main — refresh after app COPY so
+# webpack aliases (lib/msqdx-ui.ts → ../msqdx-ui/packages/ui/src) match latest DS commits.
+RUN cd /workspace/msqdx-ui \
+    && git fetch origin "${MSQDX_UI_BRANCH}" --depth 1 \
+    && git reset --hard "origin/${MSQDX_UI_BRANCH}" \
+    && pnpm install --frozen-lockfile \
+    && pnpm build \
+    && cd /workspace/msqdx-design-system \
+    && git fetch origin "${MSQDX_DS_BRANCH}" --depth 1 \
+    && git reset --hard "origin/${MSQDX_DS_BRANCH}" \
+    && npm install \
+    && npm run build
 
 # --include=dev: Coolify may force NODE_ENV=production before this stage; without it,
 # typescript/devDeps can be omitted and `next build` fails oddly / gets OOM-killed mid-webpack.

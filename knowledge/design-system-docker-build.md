@@ -22,6 +22,8 @@ Wenn Prismion nur im **Original-Repo** (lokal) existiert, musst du die Änderung
 
 Wenn die **deps-Stage gecacht** ist (z. B. `#10 CACHED`), wird weder neu geklont noch neu gebaut. Enthielt der geklonte Stand beim letzten Build **keine** Prismion-Komponenten (oder ist der Build fehlgeschlagen), fehlen sie in `dist/` und damit in den Exporten von `@msqdx/react`.
 
+**msqdx-ui (2026-08):** PLEXON v3 webpack importiert DS-Quellen aus `/workspace/msqdx-ui` (`lib/msqdx-ui.ts`). Der **builder**-Stage führt nach `COPY` ein `git fetch && reset` auf `msqdx-ui` + `msqdx-design-system` aus, damit ein gecachtes **ds**-Layer nicht veraltete Primitives (z. B. `FlowNodeEditorShell`) liefert. Bei hartnäckigem Cache: Coolify **Redeploy ohne Cache**.
+
 ## Wenn „MsqdxPrismionPorts is not exported“ auftritt
 
 1. **Sicherstellen, dass Prismion im Design-System-Repo ist:** Im Repo `msqdx-design-system` müssen `packages/react/src/components/prismion/` und der Export in `packages/react/src/components/index.ts` (bzw. `src/index.ts`) vorhanden sein und auf den Branch gepusht sein, der geklont wird (z. B. `main`).
