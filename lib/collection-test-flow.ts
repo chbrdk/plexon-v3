@@ -830,6 +830,92 @@ export function migrateLegacyQualityGates(
 }
 
 /**
+ * Wave 22: expand opaque `journey` canvas stub into first-class nodes from `journeyFlow`.
+ * No-op when first-class journey kinds already exist or embed is missing.
+ */
+export function migrateOpaqueJourneyEmbed(
+  doc: CollectionTestFlowDocument
+): CollectionTestFlowDocument {
+  const opaque = doc.nodes.filter((n) => n.kind === 'journey');
+  if (opaque.length === 0) return doc;
+
+  const hasFirstClass = doc.nodes.some(
+    (n) =>
+      n.kind === 'start' ||
+      JOURNEY_SEGMENT_DETECT_KINDS.has(n.kind) ||
+      n.kind === 'success' ||
+      n.kind === 'abandon' ||
+      n.kind === 'measure'
+  );
+  if (hasFirstClass) {
+    // Drop orphan opaque stubs when first-class graph already exists.
+    const remove = new Set(opaque.map((n) => n.id));
+    return {
+      ...doc,
+      nodes: doc.nodes.filter((n) => !remove.has(n.id)),
+      edges: doc.edges.filter((e) => !remove.has(e.source) && !remove.has(e.target)),
+    };
+  }
+
+  const embed = doc.journeyFlow;
+  if (!embed?.nodes?.length) return doc;
+
+  const stub = opaque[0]!;
+  const baseX = stub.position?.x ?? 0;
+  const baseY = stub.position?.y ?? 120;
+  const expandedNodes: CollectionFlowNode[] = embed.nodes.map((n, i) => ({
+    id: n.id,
+    kind: n.kind as CollectionFlowNodeKind,
+    label: n.label || n.kind,
+    text: n.text ?? undefined,
+    url: n.urlKey ?? undefined,
+    urlKey: n.urlKey ?? undefined,
+    maxSteps: n.maxSteps ?? undefined,
+    personaId: n.personaId ?? undefined,
+    personaName: n.personaName ?? undefined,
+    segment: n.segment ?? undefined,
+    measureKey: n.measureKey ?? undefined,
+    position: { x: baseX + i * 200, y: baseY },
+  }));
+  const expandedEdges: CollectionFlowEdge[] = (embed.edges ?? []).map((e) => ({
+    id: e.id,
+    source: e.from,
+    target: e.to,
+    edgeKind: e.kind,
+    when: e.kind === 'when' ? 'pass' : e.kind === 'otherwise' ? 'fail' : undefined,
+  }));
+
+  const opaqueIds = new Set(opaque.map((n) => n.id));
+  const embedIds = new Set(expandedNodes.map((n) => n.id));
+  const startId = expandedNodes.find((n) => n.kind === 'start')?.id;
+  const endId =
+    expandedNodes.find((n) => n.kind === 'success')?.id ??
+    expandedNodes[expandedNodes.length - 1]?.id;
+
+  const rewired: CollectionFlowEdge[] = [];
+  for (const e of doc.edges) {
+    if (opaqueIds.has(e.source) && opaqueIds.has(e.target)) continue;
+    if (opaqueIds.has(e.target) && startId) {
+      rewired.push({ ...e, target: startId });
+      continue;
+    }
+    if (opaqueIds.has(e.source) && endId) {
+      rewired.push({ ...e, source: endId });
+      continue;
+    }
+    if (opaqueIds.has(e.source) || opaqueIds.has(e.target)) continue;
+    rewired.push(e);
+  }
+
+  const kept = doc.nodes.filter((n) => !opaqueIds.has(n.id) && !embedIds.has(n.id));
+  return {
+    ...doc,
+    nodes: [...kept, ...expandedNodes],
+    edges: [...rewired, ...expandedEdges],
+  };
+}
+
+/**
  * Persona slots for Wave 14 sequential fan-out.
  * Primary = Zielgruppe → then → Persona; siblings = Zielgruppe → parallel → Persona.
  */
@@ -1603,7 +1689,7 @@ export function ensureFlowDocument(raw: unknown): CollectionTestFlowDocument {
     lastVerdict: (doc.lastVerdict as CollectionVerdict | null | undefined) ?? null,
     lastRun: (doc.lastRun as CollectionFlowLastRun | null | undefined) ?? null,
   };
-  return migrateLegacyQualityGates(base);
+  return migrateOpaqueJourneyEmbed(migrateLegacyQualityGates(base));
 }
 
 export type CollectionFlowNodeRunState = 'idle' | 'running' | 'done' | 'error' | 'skipped';

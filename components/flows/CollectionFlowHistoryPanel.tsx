@@ -12,6 +12,8 @@ type Props = {
   /** Bump to reload (e.g. after Testen finishes). */
   refreshKey?: number
   onSelect: (run: CollectionFlowRunResponse | null) => void
+  /** Wave 22: fresh Testen on current doc (does not replay past verdict). */
+  onRerun?: () => void
   onClose?: () => void
 }
 
@@ -48,6 +50,7 @@ export function CollectionFlowHistoryPanel({
   selectedRunId,
   refreshKey = 0,
   onSelect,
+  onRerun,
   onClose,
 }: Props) {
   const [items, setItems] = useState<CollectionFlowRunResponse[]>([])
@@ -88,6 +91,11 @@ export function CollectionFlowHistoryPanel({
         <Button type="button" size="sm" variant="ghost" onClick={() => void load()} disabled={busy}>
           Aktualisieren
         </Button>
+        {onRerun && selectedRunId ? (
+          <Button type="button" size="sm" variant="subtle" onClick={() => onRerun()}>
+            Erneut ausführen
+          </Button>
+        ) : null}
         {onClose ? (
           <Button type="button" size="sm" variant="ghost" onClick={onClose}>
             Schließen

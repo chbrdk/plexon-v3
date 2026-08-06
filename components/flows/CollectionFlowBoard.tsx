@@ -477,6 +477,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
             personaCount: agg?.personaCount ?? 1,
             journeyPersonaRuns: agg?.runs,
             url: stepUrl || undefined,
+            steps: job.steps ?? [],
           }),
         })
         const json = (await res.json().catch(() => null)) as {
@@ -1911,6 +1912,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 selectedRunId={viewedRun?.id ?? null}
                 refreshKey={historyRefreshKey}
                 onSelect={(run) => paintFromRun(run)}
+                onRerun={() => void onTest()}
                 onClose={() => setHistoryOpen(false)}
               />
             </CollectionFlowFloatingPanel>

@@ -27,6 +27,7 @@ import {
   type CollectionFlowScanMode,
   type CollectionTestFlowDocument,
   type CollectionVerdict,
+  type EmbeddedAudionJourneyFlow,
   type GeoGateSignals,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
@@ -41,7 +42,6 @@ import {
   fetchCheckionScanIssues,
   fetchCheckionScanScores,
   runCheckionSingleScan,
-  type CheckionIssueItem,
 } from '@/lib/integrations/checkion-scans-client';
 import {
   fetchCheckionDomainScanV3Issues,
@@ -61,9 +61,24 @@ import {
   resolveRunUrlChain,
   seedStartNodeIntoContext,
   setContextBundle,
+  type CatalogIssueItem,
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
+import { seedJourneyNodeOutputsIntoContext } from '@/lib/collection-flow-journey-context';
+import type { FlowRunProgressStep } from '@/lib/collection-flow-run-progress';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
+
+function catalogItemsFromRaw(raw: Array<Record<string, unknown>> | CatalogIssueItem[]): CatalogIssueItem[] {
+  return raw.map((row) => {
+    const o = row as Record<string, unknown>;
+    return {
+      id: typeof o.id === 'string' ? o.id : undefined,
+      severity: typeof o.severity === 'string' ? o.severity : undefined,
+      ruleId: typeof o.ruleId === 'string' ? o.ruleId : undefined,
+      title: typeof o.title === 'string' ? o.title : undefined,
+    };
+  });
+}
 
 export type ExecuteCollectionFlowRunSuccess = {
   ok: true;
@@ -111,14 +126,14 @@ export async function executeCollectionFlowRun(input: {
     runContext = seeded.ctx;
     const startUrlResolved = seeded.startUrl;
 
-    const geoCompany =
+    let geoCompany =
       (typeof body.companyName === 'string' && body.companyName.trim()
         ? body.companyName.trim()
         : null) ||
       resolveFlowParamString(runContext, geoNode?.companyName) ||
       '';
 
-    const { baseUrl, geoUrl: geoUrlResolved } = resolveRunUrlChain({
+    let { baseUrl, geoUrl: geoUrlResolved } = resolveRunUrlChain({
       ctx: runContext,
       urlOverride,
       qualityUrlRaw: qualityNode?.url,
@@ -162,11 +177,11 @@ export async function executeCollectionFlowRun(input: {
 
     // Run-time snapshot: all ExpressionField params resolved against current context
     // (start/run available; journey.* not yet). Document on disk stays unresolved.
-    const resolvedDoc: CollectionTestFlowDocument = {
+    let resolvedDoc: CollectionTestFlowDocument = {
       ...doc,
       nodes: resolveDocumentStringParams(doc.nodes, runContext),
     };
-    const resolvedGeoNode = geoJobNode(resolvedDoc.nodes);
+    let resolvedGeoNode = geoJobNode(resolvedDoc.nodes);
 
     let audionJobId: string | null = null;
     let audionStudyId: string | null = null;
@@ -177,6 +192,8 @@ export async function executeCollectionFlowRun(input: {
     let journeyValidEvidence = !hasJourney;
     let journeyPersonaRuns: NonNullable<CollectionFlowLastRun['journeyPersonaRuns']> | null = null;
     let journeyPersonaCount = 1;
+    let primaryJourneyFlow: EmbeddedAudionJourneyFlow | null = null;
+    let journeySteps: FlowRunProgressStep[] | null = null;
 
     // Wave 6: board already ran the journey segment live (POST …/run/journey + poll) and
     // hands off the finished job here — skip re-running AUDION, go straight to the scan.
@@ -207,6 +224,13 @@ export async function executeCollectionFlowRun(input: {
           CollectionFlowLastRun['journeyPersonaRuns']
         >;
       }
+      if (Array.isArray(body.steps)) {
+        journeySteps = body.steps as FlowRunProgressStep[];
+      }
+      primaryJourneyFlow =
+        resolveJourneyFlowForRun(resolvedDoc, runUrl, { personaNodeId: null }) ??
+        resolvedDoc.journeyFlow ??
+        null;
       if (stepUrl) scanUrl = stepUrl;
     } else if (hasJourney) {
       const audionProjectId = await getExternalProjectId(id, 'audion');
@@ -321,6 +345,8 @@ export async function executeCollectionFlowRun(input: {
           audionStudyId = journey.studyId;
           audionWaveId = journey.waveId;
           audionJobId = journey.jobId;
+          primaryJourneyFlow = journeyFlow;
+          journeySteps = journey.job.steps ?? null;
         }
         if (journey.job.finalUrl) stepUrl = journey.job.finalUrl;
       }
@@ -342,6 +368,7 @@ export async function executeCollectionFlowRun(input: {
           validEvidence: journeyValidEvidence,
           finalUrl: stepUrl,
           personaCount: journeyPersonaCount,
+          jobId: audionJobId,
         })
       );
       for (const run of journeyPersonaRuns ?? []) {
@@ -358,6 +385,33 @@ export async function executeCollectionFlowRun(input: {
           run.personaNodeId
         );
       }
+
+      // Wave 22: seed per-node outputs from agent steps, then re-resolve quality/geo params.
+      if (primaryJourneyFlow && journeySteps?.length) {
+        runContext = seedJourneyNodeOutputsIntoContext(
+          runContext,
+          primaryJourneyFlow,
+          journeySteps,
+          { jobId: audionJobId, status: 'complete' }
+        );
+      }
+      resolvedDoc = {
+        ...doc,
+        nodes: resolveDocumentStringParams(doc.nodes, runContext),
+      };
+      resolvedGeoNode = geoJobNode(resolvedDoc.nodes);
+      const postJourneyUrls = resolveRunUrlChain({
+        ctx: runContext,
+        urlOverride: null,
+        qualityUrlRaw: qualityScanNode(resolvedDoc.nodes)?.url,
+        geoUrlRaw: resolvedGeoNode?.url,
+        startUrl: startUrlResolved,
+      });
+      if (postJourneyUrls.qualityUrl) scanUrl = postJourneyUrls.qualityUrl;
+      else if (stepUrl) scanUrl = stepUrl;
+      if (postJourneyUrls.geoUrl) geoUrlResolved = postJourneyUrls.geoUrl;
+      const reCompany = resolveFlowParamString(runContext, resolvedGeoNode?.companyName);
+      if (reCompany) geoCompany = reCompany;
     }
 
     // qualityNode already resolved above (Wave 8B may be geo-only)
@@ -524,21 +578,24 @@ export async function executeCollectionFlowRun(input: {
     const hasIssues = documentHasIssueGate(doc);
     const gate = issueGateNode(doc.nodes);
     let issueSignals: IssueGateSignals | null = null;
-    let issueItems: CheckionIssueItem[] = [];
+    let issueItems: CatalogIssueItem[] = [];
     let scoresByKind: Record<string, number> | null = null;
     if (quality?.id) {
       if (useDomain) {
         const issuesRes = await fetchCheckionDomainScanV3Issues(quality.id);
         if (!issuesRes.ok) {
           if (hasIssues || hasCompare) blockers.push(issuesRes.error);
-        } else issueSignals = issuesRes.signals;
+        } else {
+          issueSignals = issuesRes.signals;
+          issueItems = catalogItemsFromRaw(issuesRes.items);
+        }
       } else {
         const issuesRes = await fetchCheckionScanIssues(quality.id);
         if (!issuesRes.ok) {
           if (hasIssues || hasCompare) blockers.push(issuesRes.error);
         } else {
           issueSignals = issuesRes.signals;
-          issueItems = issuesRes.items;
+          issueItems = catalogItemsFromRaw(issuesRes.items);
         }
         if (quality.pageScanId) {
           const scoresRes = await fetchCheckionScanScores(quality.pageScanId);

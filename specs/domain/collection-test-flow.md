@@ -115,14 +115,15 @@ Node fields (quality):
 
 ### C — Orchestration (PLEXON)
 
-| Kind | Role |
-|------|------|
-| `gate` | Generic branch; `gateCondition` names closed-set id (journey **or** quality) |
-| `hand_off` | Explicit capability switch (AUDION ↔ CHECKION) with correlation ids |
-| `parallel` | Sibling segments (contrast / multi-persona / multi-page) |
-| `retest` | Re-run prior capability segment after change note |
+| Kind | Role | Status |
+|------|------|--------|
+| `gate` | Journey live branch; Audion closed-set conditions | **Keep** (family A on canvas) |
+| `hand_off` | Explicit AUDION ↔ CHECKION switch | **Deferred** — implicit handoff on segment boundary |
+| `parallel` (node) | Sibling segments as a node kind | **Deferred** — use edge `parallel` + persona slots |
+| `page` | Explicit page URL node | **Deferred** — `start.url` / empty quality URL fallback |
+| `retest` | Re-run prior segment after change note | **Deferred** (Wave 23+) |
 
-MVP may fold `hand_off` into sequential edges (implicit handoff when leaving a capability segment) and keep `hand_off` as optional explicit node.
+Do **not** add Family-C node kinds to the palette. Implicit handoff + control edges cover MVP.
 
 ## Edge kinds
 
@@ -462,8 +463,27 @@ Do not place this on legacy `/board` Prismion island.
 - **Pre-run schema:** INPUT shows catalog paths per upstream node kind (e.g. `scan.overallScore`) before Testen; overlay sheet is opaque with heavy backdrop blur.
 - Right FloatingPanel inspector retired for Collection Flow boards.
 
-## Open questions (non-blocking)
+## Wave 22 — straighten / thin / runtime parity
 
-- Richer Soft-Q mapping from Checkion lenses — later if product asks.
-- Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when compare follows `domain_scan`.
+### Keep / reshape / drop
+
+| Decision | Item |
+|----------|------|
+| **Keep** | Palette A+B; `gate` vs `compare`; `set`; implicit A→B handoff; expression templates |
+| **Drop from roadmap** | `page`, `hand_off`, `retest` as nodes; Parallel-**node** (edge `parallel` stays) |
+| **Thin** | Opaque `journey` node: `ensureFlowDocument` expands `journeyFlow` into first-class canvas nodes when the graph only has a legacy `journey` stub; no new opaque docs |
+| **Legacy** | `score_gate` / `issue_gate` / `geo_gate` — migrate-on-load only; never palette |
+| **Defer (Wave 23+)** | Soft-Q values invented from Checkion lenses; multi-GEO providers; live `{{ }}` **inside** an AUDION step |
+
+### Runtime deliverables
+
+1. **Domain issue parity:** `domain.issues.items[]` populated like page scan (`ruleId`, `severity`, `title`, …) so open-path compares work after `domain_scan`.
+2. **Post-journey node context:** After the Audion segment finishes, seed `outputs[nodeId]` from agent steps (`text` / `result` / `label`). Re-resolve quality URL / companyName / geo queries against that context + `journey.*`. Intra-segment expressions remain impossible until AUDION exposes mid-step context.
+3. **Historie Re-Run:** History dock action **Erneut ausführen** starts a fresh Testen on the **current** document (new run id; paint of the past run stays until the new run finishes).
+4. **Catalog hygiene:** SchemaTree already enriches `issues.items` for `scan`/`domain`; domain runtime must fill items.
+
+## Open questions (Wave 23+)
+
+- Richer Soft-Q mapping from Checkion lenses — product later.
 - Multi-provider GEO models beyond OpenAI defaults — product later.
+- Intra-Audion step expression resolution — needs AUDION contract.
