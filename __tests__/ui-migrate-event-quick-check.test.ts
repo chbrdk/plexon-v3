@@ -24,7 +24,7 @@ const eqcFiles = [
   ),
 ]
 
-describe('event quick check ui rebuild (wave 6)', () => {
+describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
   it('EQC file set has no @mui or @msqdx/react', () => {
     expect(eqcFiles.length).toBeGreaterThan(10)
     for (const rel of eqcFiles) {
@@ -50,12 +50,32 @@ describe('event quick check ui rebuild (wave 6)', () => {
     expect(client).not.toContain('PlexonPageChrome')
   })
 
-  it('spec is Accepted for wave 6', () => {
+  it('done results use magazine chrome without UiBlockSurface panel', () => {
+    const dash = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckDashboardView.tsx'),
+      'utf8'
+    )
+    const panel = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckDashboardPanel.tsx'),
+      'utf8'
+    )
+    expect(dash).toContain('plexon-magazine')
+    expect(dash).toContain('plexon-eqc-results')
+    expect(dash).toContain('SectionChrome')
+    expect(dash).toContain('StatLede')
+    expect(panel).toContain('SectionChrome')
+    expect(panel).not.toContain("from '@/components/assistant-ui/templates/UiBlockSurface'")
+    expect(panel).not.toContain("from '@msqdx/react'")
+  })
+
+  it('spec is Accepted for wave 6 / wave 7 results', () => {
     const spec = readFileSync(
       path.join(root, 'specs/domain/ui-migrate-event-quick-check.md'),
       'utf8'
     )
     expect(spec).toContain('Accepted')
     expect(spec).toContain('plexon-eqc-')
+    expect(spec).toContain('Wave 7')
+    expect(spec).toContain('plexon-magazine')
   })
 })

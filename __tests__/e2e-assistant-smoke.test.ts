@@ -16,16 +16,15 @@ vi.mock('@/lib/db/assistant-workflow-runs', () => ({
   updateAssistantWorkflowRun: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('@/lib/integrations/checkion-domain-scan-client', () => ({
-  startCheckionDomainScan: vi.fn(),
-  pollCheckionDomainScan: vi.fn(),
-  fetchCheckionDomainScanSummary: vi.fn(),
+vi.mock('@/lib/integrations/checkion-domain-scans-v3-client', () => ({
+  startCheckionDomainScanV3: vi.fn(),
+  pollCheckionDomainScanV3: vi.fn(),
+  fetchCheckionDomainScanV3Preview: vi.fn(),
 }));
 
-vi.mock('@/lib/integrations/checkion-geo-client', () => ({
-  startCheckionGeoEeat: vi.fn(),
-  pollCheckionGeoEeatJob: vi.fn(),
-  rerunCheckionGeoCompetitive: vi.fn(),
+vi.mock('@/lib/integrations/checkion-geo-jobs-v3-client', () => ({
+  startCheckionGeoJobV3: vi.fn(),
+  pollCheckionGeoJobV3: vi.fn(),
 }));
 
 vi.mock('@/lib/assistant/auto-assign-checkion', () => ({
@@ -33,11 +32,11 @@ vi.mock('@/lib/assistant/auto-assign-checkion', () => ({
 }));
 
 import {
-  fetchCheckionDomainScanSummary,
-  pollCheckionDomainScan,
-  startCheckionDomainScan,
-} from '@/lib/integrations/checkion-domain-scan-client';
-import { pollCheckionGeoEeatJob, startCheckionGeoEeat } from '@/lib/integrations/checkion-geo-client';
+  fetchCheckionDomainScanV3Preview,
+  pollCheckionDomainScanV3,
+  startCheckionDomainScanV3,
+} from '@/lib/integrations/checkion-domain-scans-v3-client';
+import { pollCheckionGeoJobV3, startCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
 
 describe('assistant workflow ui smoke', () => {
   it('product created layout has blocks', () => {
@@ -131,12 +130,28 @@ describe('e2e assistant smoke — domain_scan pipeline', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('workflow poll + domain scan UI layout', async () => {
-    vi.mocked(startCheckionDomainScan).mockResolvedValue({ ok: true, scanId: 'dom-smoke' });
-    vi.mocked(pollCheckionDomainScan).mockResolvedValue({
+    vi.mocked(startCheckionDomainScanV3).mockResolvedValue({
       ok: true,
-      value: { id: 'dom-smoke', domain: 'example.com', status: 'complete', score: 91 },
+      scan: {
+        id: 'dom-smoke',
+        projectId: 'chk-1',
+        url: 'https://example.com',
+        status: 'queued',
+        overallScore: null,
+      },
     });
-    vi.mocked(fetchCheckionDomainScanSummary).mockResolvedValue({
+    vi.mocked(pollCheckionDomainScanV3).mockResolvedValue({
+      ok: true,
+      scan: {
+        id: 'dom-smoke',
+        projectId: 'chk-1',
+        url: 'https://example.com',
+        status: 'completed',
+        overallScore: 91,
+        pageCount: 8,
+      },
+    });
+    vi.mocked(fetchCheckionDomainScanV3Preview).mockResolvedValue({
       ok: true,
       preview: {
         id: 'dom-smoke',
@@ -162,10 +177,31 @@ describe('e2e assistant smoke — geo poll pipeline', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('workflow geo poll + GEO UI layout', async () => {
-    vi.mocked(startCheckionGeoEeat).mockResolvedValue({ ok: true, jobId: 'geo-smoke' });
-    vi.mocked(pollCheckionGeoEeatJob).mockResolvedValue({
+    vi.mocked(startCheckionGeoJobV3).mockResolvedValue({
       ok: true,
       job: {
+        id: 'geo-smoke',
+        projectId: 'chk-1',
+        url: 'https://example.com',
+        status: 'queued',
+        overallScore: null,
+        citedShare: null,
+        geoFitness: null,
+      },
+    });
+    vi.mocked(pollCheckionGeoJobV3).mockResolvedValue({
+      ok: true,
+      job: {
+        id: 'geo-smoke',
+        projectId: 'chk-1',
+        url: 'https://example.com',
+        status: 'completed',
+        overallScore: 73,
+        citedShare: 50,
+        geoFitness: 70,
+      },
+      signals: { citedShare: 50, geoFitness: 70 },
+      preview: {
         jobId: 'geo-smoke',
         url: 'https://example.com',
         status: 'complete',
@@ -179,7 +215,7 @@ describe('e2e assistant smoke — geo poll pipeline', () => {
       checkionProjectId: 'chk-1',
     });
     expect(workflow.ok).toBe(true);
-    expect(pollCheckionGeoEeatJob).toHaveBeenCalled();
+    expect(pollCheckionGeoJobV3).toHaveBeenCalled();
 
     const layout = buildGeoEeatLayout(workflow.job!);
     expect(layout.blocks.some((b) => b.type === 'metric_grid')).toBe(true);

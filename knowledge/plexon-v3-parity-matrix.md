@@ -23,7 +23,7 @@
 | Platform Projects | ja | Collections + Knowledge Pack | P0 | **Done** (v3 weiter) |
 | Assistant Chat / Playbooks | ja | ja (Shell DS) | P0 | **Done** |
 | Assistant Reports (pin cart / PDF / PPTX) | ja | ja; cart + downloads on `@msqdx/ui` | P1 | **Done** / Polish on generative blocks |
-| **Event Quick Check** | ja | ja (Nav + page + 9 APIs) | P0 | **Ops** (+ readiness banner) / report chrome **Done** |
+| **Event Quick Check** | ja | ja (Nav + page + 9 APIs); Domain/GEO = Checkion v3; Done = Magazine | P0 | **Ops** (env) / Results chrome **Done** |
 | Board (Admin) | ja | ja; Prismion canvas = bridge island | P1 | **Polish** |
 | MCP CHECKION / AUDION / ECHON | env | env; EQC-ECHON off in both | P2 | **Ops** / Later for ECHON in EQC |
 | Billing / Stripe | nein | nein | P2 | **Later** |
@@ -49,7 +49,8 @@
 
 | Item | Status | Notes |
 |------|--------|-------|
-| EQC `EventQuickCheckReportSections` off MUI | **Done** | `@msqdx/ui` + `.plexon-eqc-*` |
+| EQC Report-Organisms / Magazine Done-UI | **Done** | `plexon-eqc-results` + SectionChrome / StatLede |
+| EQC Domain + GEO → Checkion v3 APIs | **Done** | `/api/domain-scans`, `/api/geo-jobs` + adapters |
 | Report download buttons off MUI | **Done** | `ReportBinaryDownloadButton` / PDF |
 | `ReportCollectionBar` off MUI Drawer | **Done** | `@msqdx/ui` Dialog |
 | Generative UI blocks still on bridge | **Polish** | Wave-7 island; see shim inventory |

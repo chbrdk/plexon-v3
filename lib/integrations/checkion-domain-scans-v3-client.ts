@@ -11,6 +11,11 @@ import {
   checkionApiDomainScans,
 } from '@/lib/paths/checkion-api';
 import type { IssueGateSignals } from '@/lib/collection-test-flow';
+import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
+import {
+  mapDomainScanV3ToPreview,
+  type DomainScanV3IssueRow,
+} from '@/lib/integrations/map-domain-scan-v3-preview';
 
 export type CheckionDomainScanSummary = {
   id: string;
@@ -20,6 +25,7 @@ export type CheckionDomainScanSummary = {
   overallScore: number | null;
   pageCount?: number;
   error?: string;
+  issueStats?: { errors: number; warnings: number; notices: number; total: number } | null;
 };
 
 const TERMINAL = new Set(['completed', 'complete', 'failed', 'error', 'cancelled']);
@@ -35,22 +41,44 @@ function requireAuthHeaders():
 function parseDomain(body: unknown): CheckionDomainScanSummary | null {
   if (!body || typeof body !== 'object') return null;
   const o = body as Record<string, unknown>;
-  const id = typeof o.id === 'string' ? o.id : null;
+  const scanRaw =
+    o.scan && typeof o.scan === 'object' ? (o.scan as Record<string, unknown>) : o;
+  const id = typeof scanRaw.id === 'string' ? scanRaw.id : typeof o.id === 'string' ? o.id : null;
   if (!id) return null;
   const overallScore =
-    typeof o.overallScore === 'number' && Number.isFinite(o.overallScore)
-      ? o.overallScore
-      : typeof o.score === 'number' && Number.isFinite(o.score)
-        ? o.score
+    typeof scanRaw.overallScore === 'number' && Number.isFinite(scanRaw.overallScore)
+      ? scanRaw.overallScore
+      : typeof scanRaw.score === 'number' && Number.isFinite(scanRaw.score)
+        ? scanRaw.score
         : null;
+  const statsRaw =
+    scanRaw.issueStats && typeof scanRaw.issueStats === 'object'
+      ? (scanRaw.issueStats as Record<string, unknown>)
+      : null;
+  const issueStats = statsRaw
+    ? {
+        errors: Number(statsRaw.errors ?? 0),
+        warnings: Number(statsRaw.warnings ?? 0),
+        notices: Number(statsRaw.notices ?? 0),
+        total: Number(statsRaw.total ?? 0),
+      }
+    : null;
   return {
     id,
-    projectId: typeof o.projectId === 'string' ? o.projectId : '',
-    url: typeof o.url === 'string' ? o.url : typeof o.domain === 'string' ? o.domain : '',
-    status: typeof o.status === 'string' ? o.status : 'queued',
+    projectId: typeof scanRaw.projectId === 'string' ? scanRaw.projectId : '',
+    url:
+      typeof scanRaw.url === 'string'
+        ? scanRaw.url
+        : typeof scanRaw.rootUrl === 'string'
+          ? scanRaw.rootUrl
+          : typeof scanRaw.domain === 'string'
+            ? scanRaw.domain
+            : '',
+    status: typeof scanRaw.status === 'string' ? scanRaw.status : 'queued',
     overallScore,
-    pageCount: typeof o.pageCount === 'number' ? o.pageCount : undefined,
-    error: typeof o.error === 'string' ? o.error : undefined,
+    pageCount: typeof scanRaw.pageCount === 'number' ? scanRaw.pageCount : undefined,
+    error: typeof scanRaw.error === 'string' ? scanRaw.error : undefined,
+    issueStats,
   };
 }
 
@@ -129,7 +157,11 @@ export async function fetchCheckionDomainScanV3Detail(
 
 export async function pollCheckionDomainScanV3(
   domainScanId: string,
-  options?: { intervalMs?: number; maxMs?: number }
+  options?: {
+    intervalMs?: number;
+    maxMs?: number;
+    onProgress?: (status: string, progress?: number) => void | Promise<void>;
+  }
 ): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string }
@@ -137,16 +169,56 @@ export async function pollCheckionDomainScanV3(
   return pollUntil({
     intervalMs: options?.intervalMs ?? 3000,
     maxMs: options?.maxMs ?? 12 * 60 * 1000,
+    onTick: async (tick) => {
+      if (tick.status) {
+        await options?.onProgress?.(tick.status, tick.progress);
+      }
+    },
     fetch: async () => {
       const res = await fetchCheckionDomainScanV3Detail(domainScanId);
       if (!res.ok) return { done: true, error: res.error, status: 'error' };
       const status = res.scan.status.toLowerCase();
+      if (status === 'failed' || status === 'error' || status === 'cancelled') {
+        return {
+          done: true,
+          error: res.scan.error ?? `Domain-Scan ${status}`,
+          status,
+        };
+      }
       if (TERMINAL.has(status)) {
         return { done: true, value: res.scan, status };
       }
-      return { done: false, status, progress: status === 'running' ? 50 : 10 };
+      const progress =
+        status === 'running' ? 50 : status === 'queued' ? 10 : undefined;
+      return { done: false, status, progress };
     },
   });
+}
+
+/** Detail + issues → DomainScanPreview for EQC / assistant report model. */
+export async function fetchCheckionDomainScanV3Preview(
+  domainScanId: string
+): Promise<{ ok: true; preview: DomainScanPreview } | { ok: false; error: string }> {
+  const detail = await fetchCheckionDomainScanV3Detail(domainScanId);
+  if (!detail.ok) return detail;
+  const issuesRes = await fetchCheckionDomainScanV3Issues(domainScanId);
+  const issueRows: DomainScanV3IssueRow[] = issuesRes.ok
+    ? issuesRes.items.map((o) => ({
+        title: typeof o.title === 'string' ? o.title : undefined,
+        ruleId: typeof o.ruleId === 'string' ? o.ruleId : undefined,
+        severity: typeof o.severity === 'string' ? o.severity : undefined,
+        affectedCount: typeof o.affectedCount === 'number' ? o.affectedCount : undefined,
+        count: typeof o.count === 'number' ? o.count : undefined,
+      }))
+    : [];
+  return {
+    ok: true,
+    preview: mapDomainScanV3ToPreview({
+      scan: detail.scan,
+      issues: issueRows,
+      issueStats: detail.scan.issueStats,
+    }),
+  };
 }
 
 export async function runCheckionDomainScanV3(input: {
@@ -173,7 +245,7 @@ export async function runCheckionDomainScanV3(input: {
 export async function fetchCheckionDomainScanV3Issues(
   domainScanId: string
 ): Promise<
-  | { ok: true; signals: IssueGateSignals }
+  | { ok: true; signals: IssueGateSignals; items: Array<Record<string, unknown>> }
   | { ok: false; error: string }
 > {
   const auth = requireAuthHeaders();
@@ -201,9 +273,11 @@ export async function fetchCheckionDomainScanV3Issues(
     let criticalCount = 0;
     let seriousCount = 0;
     const ruleIds: string[] = [];
+    const items: Array<Record<string, unknown>> = [];
     for (const row of rawItems) {
       if (!row || typeof row !== 'object') continue;
       const o = row as Record<string, unknown>;
+      items.push(o);
       const severity = typeof o.severity === 'string' ? o.severity : 'minor';
       if (severity === 'critical') criticalCount += 1;
       if (severity === 'serious') seriousCount += 1;
@@ -217,6 +291,7 @@ export async function fetchCheckionDomainScanV3Issues(
         issueCount: rawItems.length,
         ruleIds,
       },
+      items,
     };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };

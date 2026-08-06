@@ -1732,6 +1732,90 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 2rem);
 }
 
+.plexon-eqc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: min(100%, 72rem);
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+.plexon-eqc-results-scroll {
+  overflow: auto;
+}
+
+.plexon-eqc-results-header .section-chrome {
+  align-items: flex-start;
+}
+
+.plexon-eqc-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.plexon-eqc-band {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plexon-eqc-band-body {
+  min-width: 0;
+}
+
+.plexon-eqc-band-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line, var(--color-secondary-dx-grey-light-tint));
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--color-text-muted-on-light, var(--muted));
+  cursor: help;
+}
+
+.plexon-eqc-kpi-lede {
+  margin: 0;
+}
+
+.plexon-eqc-appendix-band {
+  border-top: 1px solid var(--line, var(--color-secondary-dx-grey-light-tint));
+  padding-top: 0.75rem;
+}
+
+.plexon-eqc-appendix-summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+.plexon-eqc-appendix-summary::-webkit-details-marker {
+  display: none;
+}
+
+.plexon-eqc-chart-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-chart-title {
+  margin: 0;
+}
+
 .plexon-eqc-dashboard-toolbar {
   display: flex;
   flex-wrap: wrap;

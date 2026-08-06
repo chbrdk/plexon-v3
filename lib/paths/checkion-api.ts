@@ -90,6 +90,11 @@ export function checkionApiDomainScanIssues(domainScanId: string): string {
   return `${checkionApiDomainScanDetail(domainScanId)}/issues`;
 }
 
+/** GET /api/domain-scans/:id/overview — DomainOverview (systemic issues + scores). */
+export function checkionApiDomainScanOverview(domainScanId: string): string {
+  return `${checkionApiDomainScanDetail(domainScanId)}/overview`;
+}
+
 /** POST/GET /api/geo-jobs — contracts GeoOverview (v3). Wave 8B. */
 export function checkionApiGeoJobs(): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');

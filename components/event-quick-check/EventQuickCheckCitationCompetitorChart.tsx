@@ -16,8 +16,6 @@ import {
 import type { CitationCompetitorChartModel } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
 import { citationCompetitorChartColor } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
-import { UI_BLOCK_ICONS } from '@/lib/assistant/ui-typography';
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 
 type Props = {
   model: CitationCompetitorChartModel;
@@ -27,7 +25,10 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
   const barHeight = Math.min(480, 56 + model.rows.length * 44);
 
   return (
-    <UiBlockSurface title={model.title} icon={UI_BLOCK_ICONS.chart}>
+    <div className="plexon-eqc-chart-block">
+      <Text role="label" as="h4" className="plexon-eqc-chart-title">
+        {model.title}
+      </Text>
       {model.subtitle ? (
         <Text role="hint" className="plexon-eqc-chart-subtitle">
           {model.subtitle}
@@ -96,6 +97,6 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </UiBlockSurface>
+    </div>
   );
 }

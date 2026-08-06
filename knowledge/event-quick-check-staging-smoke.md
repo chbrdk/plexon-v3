@@ -47,9 +47,11 @@ Admin-Probes (optional):
 4. [ ] Unternehmensprofil bestätigen
 5. [ ] Wettbewerber bestätigen (Komplettscan) **oder** Quick-Pfad ohne Deep-Scan-Wartezeit
 6. [ ] GEO-Fragen bestätigen
-7. [ ] Report-Dashboard erscheint (Ampel / Persona / GEO)
+7. [ ] **Magazine-Report** erscheint (`plexon-eqc-results` / SectionChrome-Bands: Überblick, KPIs, Domain, Persona, GEO)
 8. [ ] PDF und/oder PPTX Download funktioniert
 9. [ ] Verlauf öffnet den Run erneut (`?run=`)
+
+Erwartung HTTP (DevTools / CHECKION logs): Domain über **`/api/domain-scans`**, GEO über **`/api/geo-jobs`** (nicht Legacy `/api/scan/domain` / `/api/scan/geo-eeat`).
 
 ## Wenn es „fehlt“
 

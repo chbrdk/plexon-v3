@@ -7,6 +7,11 @@ import { resolveCheckionServiceAuth } from '@/lib/integrations/checkion-connecti
 import { pollUntil } from '@/lib/assistant/poll-until';
 import { checkionApiGeoJobDetail, checkionApiGeoJobs } from '@/lib/paths/checkion-api';
 import type { GeoGateSignals } from '@/lib/collection-test-flow';
+import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
+import {
+  mapGeoOverviewV3ToPreview,
+  type GeoOverviewV3Like,
+} from '@/lib/integrations/map-geo-overview-v3-preview';
 
 export type CheckionGeoJobSummary = {
   id: string;
@@ -116,6 +121,7 @@ export async function startCheckionGeoJobV3(input: {
   url?: string;
   companyName?: string;
   queries?: string[];
+  competitors?: string[];
   includePageScan?: boolean;
 }): Promise<
   | { ok: true; job: CheckionGeoJobSummary }
@@ -149,6 +155,7 @@ export async function startCheckionGeoJobV3(input: {
         queries,
         waitForCompletion: false,
         ...(input.includePageScan === true ? { includePageScan: true } : {}),
+        ...(input.competitors?.length ? { competitors: input.competitors } : {}),
       }),
       cache: 'no-store',
     });
@@ -176,7 +183,7 @@ export async function startCheckionGeoJobV3(input: {
 export async function fetchCheckionGeoJobV3Detail(
   jobId: string
 ): Promise<
-  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals }
+  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals; raw: unknown }
   | { ok: false; error: string }
 > {
   const auth = requireAuthHeaders();
@@ -196,34 +203,73 @@ export async function fetchCheckionGeoJobV3Detail(
       ok: true,
       job,
       signals: { citedShare: job.citedShare, geoFitness: job.geoFitness },
+      raw: json,
     };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 }
 
+export async function fetchCheckionGeoJobV3Preview(
+  jobId: string
+): Promise<{ ok: true; job: GeoEeatJobPreview } | { ok: false; error: string }> {
+  const detail = await fetchCheckionGeoJobV3Detail(jobId);
+  if (!detail.ok) return detail;
+  const raw = detail.raw;
+  const overview: GeoOverviewV3Like =
+    raw && typeof raw === 'object' && 'job' in (raw as object)
+      ? (raw as GeoOverviewV3Like)
+      : { job: { id: detail.job.id, url: detail.job.url, status: detail.job.status, overallScore: detail.job.overallScore, citedShare: detail.job.citedShare } };
+  return { ok: true, job: mapGeoOverviewV3ToPreview(overview, jobId) };
+}
+
 export async function pollCheckionGeoJobV3(
   jobId: string,
-  options?: { intervalMs?: number; maxMs?: number }
+  options?: {
+    intervalMs?: number;
+    maxMs?: number;
+    onProgress?: (status: string, progress: number) => void | Promise<void>;
+  }
 ): Promise<
-  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals }
+  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals; preview: GeoEeatJobPreview }
   | { ok: false; error: string }
 > {
   return pollUntil({
     intervalMs: options?.intervalMs ?? 4000,
     maxMs: options?.maxMs ?? 12 * 60 * 1000,
+    onTick: async (tick) => {
+      if (tick.status) {
+        await options?.onProgress?.(tick.status, tick.progress ?? 10);
+      }
+    },
     fetch: async () => {
       const res = await fetchCheckionGeoJobV3Detail(jobId);
       if (!res.ok) return { done: true, error: res.error, status: 'error' };
       const status = res.job.status.toLowerCase();
-      if (TERMINAL.has(status)) {
-        return { done: true, value: { job: res.job, signals: res.signals }, status };
+      if (status === 'failed' || status === 'error') {
+        return { done: true, error: res.job.error ?? `GEO ${status}`, status };
       }
-      return { done: false, status, progress: status === 'running' ? 50 : 10 };
+      if (TERMINAL.has(status)) {
+        const previewRes = await fetchCheckionGeoJobV3Preview(jobId);
+        if (!previewRes.ok) {
+          return { done: true, error: previewRes.error, status };
+        }
+        return {
+          done: true,
+          value: { job: res.job, signals: res.signals, preview: previewRes.job },
+          status,
+        };
+      }
+      return { done: false, status, progress: status === 'running' ? 55 : 15 };
     },
   }).then((r) => {
     if (!r.ok) return { ok: false as const, error: r.error };
-    return { ok: true as const, job: r.value.job, signals: r.value.signals };
+    return {
+      ok: true as const,
+      job: r.value.job,
+      signals: r.value.signals,
+      preview: r.value.preview,
+    };
   });
 }
 

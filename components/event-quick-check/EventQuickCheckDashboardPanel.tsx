@@ -1,43 +1,48 @@
-'use client';
+'use client'
 
-import type { ReactNode, CSSProperties } from 'react';
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
+import type { ReactNode } from 'react'
+import { SectionChrome } from '@msqdx/ui'
 
 type Props = {
-  title?: string;
-  icon?: string;
-  eyebrow?: string;
-  infoTooltip?: string;
-  infoTooltipAriaLabel?: string;
-  children: ReactNode;
-  gridColumn?: { xs?: string; lg?: string };
-};
+  title: string
+  eyebrow?: string
+  infoTooltip?: string
+  infoTooltipAriaLabel?: string
+  children: ReactNode
+  action?: ReactNode
+  as?: 'h2' | 'h3'
+}
 
+/** Magazine band for EQC results — SectionChrome, no UiBlockSurface bridge. */
 export function EventQuickCheckDashboardPanel({
   title,
-  icon,
   eyebrow,
   infoTooltip,
   infoTooltipAriaLabel,
   children,
-  gridColumn,
+  action,
+  as = 'h2',
 }: Props) {
-  const style: CSSProperties | undefined = gridColumn?.lg
-    ? { gridColumn: gridColumn.lg.startsWith('span') ? gridColumn.lg : `span ${gridColumn.lg}` }
-    : undefined;
+  const meta =
+    eyebrow || infoTooltip ? (
+      <span className="plexon-eqc-band-meta">
+        {eyebrow ? <span>{eyebrow}</span> : null}
+        {infoTooltip ? (
+          <span
+            className="plexon-eqc-help"
+            title={infoTooltip}
+            aria-label={infoTooltipAriaLabel ?? title}
+          >
+            i
+          </span>
+        ) : null}
+      </span>
+    ) : undefined
 
   return (
-    <div className="plexon-eqc-dashboard-panel" style={style}>
-      <UiBlockSurface
-        title={title}
-        icon={icon}
-        eyebrow={eyebrow}
-        infoTooltip={infoTooltip}
-        infoTooltipAriaLabel={infoTooltipAriaLabel}
-        sx={{ height: '100%' }}
-      >
-        <div className="plexon-eqc-dashboard-panel-inner">{children}</div>
-      </UiBlockSurface>
-    </div>
-  );
+    <section className="plexon-eqc-band plexon-dash-band" data-section="eqc-results-band">
+      <SectionChrome title={title} meta={meta} action={action} as={as} quiet />
+      <div className="plexon-eqc-band-body">{children}</div>
+    </section>
+  )
 }

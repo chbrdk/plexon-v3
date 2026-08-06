@@ -17,7 +17,6 @@ import { UiMetricTile } from '@/components/assistant-ui/molecules/UiMetricTile';
 import { UiPersonaCardBlock } from '@/components/assistant-ui/organisms/UiPersonaCardBlock';
 import { UiRecommendationList } from '@/components/assistant-ui/organisms/UiRecommendationList';
 import { ReportSectionHeader } from '@/components/assistant/reports/ReportSectionHeader';
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
 import { EventQuickCheckGeoCharts } from '@/components/event-quick-check/EventQuickCheckGeoCharts';
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection';
@@ -26,7 +25,6 @@ import {
   EQC_SECTION_HELP,
   eqcSectionHelpAriaLabel,
 } from '@/lib/assistant/event-quick-check/event-quick-check-section-help';
-import { InfoTooltip } from '@/components/InfoTooltip';
 
 /** Status tone suffix for `plexon-eqc-status--*` / `data-tone`. */
 export function stepStatusColor(status: string): 'success' | 'error' | 'default' | 'warning' {
@@ -483,11 +481,40 @@ export function EventQuickCheckInsightsSection({ report }: SectionProps) {
   );
 }
 
-export function EventQuickCheckAppendixSection({ report }: SectionProps) {
-  const [open, setOpen] = useState(false);
+export function EventQuickCheckAppendixSection({
+  report,
+  bare = false,
+}: SectionProps & { bare?: boolean }) {
+  const [open, setOpen] = useState(bare);
+
+  const body = (
+    <div className="plexon-eqc-stack plexon-eqc-appendix-body">
+      <UiKeyValueList
+        items={[
+          ...(report.appendix.scanId ? [{ label: 'Scan-ID', value: report.appendix.scanId }] : []),
+          ...(report.appendix.geoJobId ? [{ label: 'GEO Job-ID', value: report.appendix.geoJobId }] : []),
+          ...(report.appendix.platformProjectId
+            ? [{ label: 'Projekt', value: report.appendix.platformProjectId }]
+            : []),
+        ]}
+      />
+      <UiDataTable
+        title={EQC_REPORT_COPY.appendixSteps}
+        columns={report.appendix.stepTable.columns}
+        rows={report.appendix.stepTable.rows}
+      />
+      {report.appendix.links.length > 0 ? (
+        <UiLinkList title={EQC_REPORT_COPY.links} links={report.appendix.links} />
+      ) : null}
+    </div>
+  );
+
+  if (bare) {
+    return body;
+  }
 
   return (
-    <UiBlockSurface>
+    <div className="plexon-eqc-appendix">
       <div className="plexon-eqc-appendix-head">
         <div className="plexon-eqc-row">
           <Button
@@ -499,11 +526,13 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
           >
             <Text role="label">{EQC_REPORT_COPY.sectionAppendix}</Text>
           </Button>
-          <InfoTooltip
+          <span
+            className="plexon-eqc-help"
             title={EQC_SECTION_HELP.appendix}
-            placement="top"
-            ariaLabel={eqcSectionHelpAriaLabel(EQC_REPORT_COPY.sectionAppendix)}
-          />
+            aria-label={eqcSectionHelpAriaLabel(EQC_REPORT_COPY.sectionAppendix)}
+          >
+            i
+          </span>
         </div>
         <Button
           type="button"
@@ -516,28 +545,8 @@ export function EventQuickCheckAppendixSection({ report }: SectionProps) {
           {open ? '▾' : '▸'}
         </Button>
       </div>
-      {open ? (
-        <div className="plexon-eqc-stack plexon-eqc-appendix-body">
-          <UiKeyValueList
-            items={[
-              ...(report.appendix.scanId ? [{ label: 'Scan-ID', value: report.appendix.scanId }] : []),
-              ...(report.appendix.geoJobId ? [{ label: 'GEO Job-ID', value: report.appendix.geoJobId }] : []),
-              ...(report.appendix.platformProjectId
-                ? [{ label: 'Projekt', value: report.appendix.platformProjectId }]
-                : []),
-            ]}
-          />
-          <UiDataTable
-            title={EQC_REPORT_COPY.appendixSteps}
-            columns={report.appendix.stepTable.columns}
-            rows={report.appendix.stepTable.rows}
-          />
-          {report.appendix.links.length > 0 ? (
-            <UiLinkList title={EQC_REPORT_COPY.links} links={report.appendix.links} />
-          ) : null}
-        </div>
-      ) : null}
-    </UiBlockSurface>
+      {open ? body : null}
+    </div>
   );
 }
 

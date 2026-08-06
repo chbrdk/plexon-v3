@@ -15,8 +15,6 @@ import {
   buildCitationPositionChart,
 } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain';
-import { UI_BLOCK_ICONS } from '@/lib/assistant/ui-typography';
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 
 type Props = {
   citationHighlights: Array<{ query: string; domain: string; position: number }>;
@@ -132,7 +130,10 @@ export function EventQuickCheckCitationSection({
           <EventQuickCheckGeoBarChart model={simpleChart} />
         ) : null}
 
-        <UiBlockSurface title={EQC_REPORT_COPY.sectionCitations} icon={UI_BLOCK_ICONS.data_table} noPadding>
+        <div className="plexon-eqc-chart-block">
+          <Text role="label" as="h4" className="plexon-eqc-chart-title">
+            {EQC_REPORT_COPY.sectionCitations}
+          </Text>
           <div className="plexon-eqc-citation-table-wrap">
             <table className="plexon-eqc-citation-table">
               <thead>
@@ -174,7 +175,7 @@ export function EventQuickCheckCitationSection({
             </table>
             <Text role="hint">{EQC_REPORT_COPY.geoViewLlmAnswer}</Text>
           </div>
-        </UiBlockSurface>
+        </div>
       </div>
 
       <EventQuickCheckLlmAnswerDialog

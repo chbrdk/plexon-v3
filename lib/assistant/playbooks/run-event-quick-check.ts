@@ -580,35 +580,8 @@ export async function runEventQuickCheck(
 
   const deferScanForCompetitorsGate = profile.scanCompetitors && runMode === 'continue_after_brief';
 
-  if (!deferScanForCompetitorsGate) {
-    streamPhase(emit, `Domain-Scan startet (${profile.scanMaxPages} Seiten)…`);
-    steps = await patchStep('domain_scan', { status: 'running', progress: 5, detail: 'Scan wird gestartet…' });
-  }
-
-  const scanPromise = deferScanForCompetitorsGate
-    ? null
-    : runDomainScanWorkflow(
-        {
-          url,
-          checkionProjectId: null,
-          maxPages: profile.scanMaxPages,
-        },
-        {
-          onExternalProgress: async (status, progress) => {
-            await patchStep('domain_scan', {
-              status: 'running',
-              ...(progress != null ? { progress } : {}),
-              detail: status,
-            });
-            streamPhase(
-              emit,
-              `Domain-Scan: ${status}${progress != null && progress > 0 ? ` (${progress}%)` : ''}`
-            );
-          },
-        }
-      );
-
   let ensured: Awaited<ReturnType<typeof ensurePlatformProductBindings>> | undefined;
+  let scanPromise: ReturnType<typeof runDomainScanWorkflow> | null = null;
 
   if (platformProjectId) {
     steps = await patchStep('ensure_audion', { status: 'running', detail: 'AUDION zuerst, dann CHECKION…' });
@@ -751,7 +724,35 @@ export async function runEventQuickCheck(
         error: 'CHECKION-Projekt erforderlich für Komplettscan',
       });
     }
+  }
 
+  // Domain-Scan after CHECKION binding — v3 `/api/domain-scans` requires projectId.
+  if (!deferScanForCompetitorsGate) {
+    streamPhase(emit, `Domain-Scan startet (${profile.scanMaxPages} Seiten)…`);
+    steps = await patchStep('domain_scan', { status: 'running', progress: 5, detail: 'Scan wird gestartet…' });
+    scanPromise = runDomainScanWorkflow(
+      {
+        url,
+        checkionProjectId: checkionProjectId ?? null,
+        maxPages: profile.scanMaxPages,
+      },
+      {
+        onExternalProgress: async (status, progress) => {
+          await patchStep('domain_scan', {
+            status: 'running',
+            ...(progress != null ? { progress } : {}),
+            detail: status,
+          });
+          streamPhase(
+            emit,
+            `Domain-Scan: ${status}${progress != null && progress > 0 ? ` (${progress}%)` : ''}`
+          );
+        },
+      }
+    );
+  }
+
+  if (platformProjectId) {
     steps = await patchStep('parallel_research', { status: 'running', detail: 'CHECKION & AUDION…' });
     streamPhase(emit, 'Website-Research startet…');
     const researchPromise = runQuickResearch({

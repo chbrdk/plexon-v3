@@ -5,7 +5,9 @@ Festes Playbook für Events/Demos: eine Unternehmens-URL → schneller Cross-Pro
 > **v3 Hinweis:** Die Oberfläche `/event-quick-check` ist in plexon-v3 **vorhanden** (Nav + APIs).  
 > Wenn Runs scheitern oder der Flow „tot“ wirkt → Produkt-Env fehlt (nicht die Feature-Route).  
 > Staging-Smoke: `knowledge/event-quick-check-staging-smoke.md` · Readiness-API: `GET /api/assistant/event-quick-check/readiness`.  
-> Parity-Status: `knowledge/plexon-v3-parity-matrix.md`.
+> Parity-Status: `knowledge/plexon-v3-parity-matrix.md`.  
+> **CHECKION:** Domain-Scan = `/api/domain-scans`, GEO = `/api/geo-jobs` (v3). Deep-Scan (Komplett) weiterhin Projekt-`domain-scan-all`.  
+> **Done-UI:** Magazine (`plexon-magazine plexon-eqc-results`), Workflow-Form bleibt Workstation.
 
 ## Trigger (Assistent)
 
@@ -26,7 +28,7 @@ Route: `PATH_EVENT_QUICK_CHECK` → `/event-quick-check` (`lib/paths/event-quick
 
 - URL-Eingabe + optionaler Projektname
 - Live-Fortschritt via `apiAssistantWorkflowStream(runId)`
-- Ergebnis: volles Dashboard (`EventQuickCheckDashboardView`), nicht Chat-UiBlocks
+- Ergebnis: volles **Magazine-Dashboard** (`EventQuickCheckDashboardView` → `plexon-eqc-results`), nicht Chat-UiBlocks
 - PDF/PPTX: `GET .../event-quick-check/runs/:runId/pdf|pptx`
 
 API:

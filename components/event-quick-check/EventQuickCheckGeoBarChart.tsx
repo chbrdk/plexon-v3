@@ -12,8 +12,6 @@ import {
   YAxis,
 } from 'recharts';
 import type { EventQuickCheckGeoBarChartModel } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
-import { UI_BLOCK_ICONS } from '@/lib/assistant/ui-typography';
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 
 type Props = {
   model: EventQuickCheckGeoBarChartModel;
@@ -28,7 +26,10 @@ export function EventQuickCheckGeoBarChart({ model }: Props) {
   const barHeight = model.horizontal ? Math.min(420, 48 + rows.length * 36) : 260;
 
   return (
-    <UiBlockSurface title={model.title} icon={UI_BLOCK_ICONS.chart}>
+    <div className="plexon-eqc-chart-block">
+      <Text role="label" as="h4" className="plexon-eqc-chart-title">
+        {model.title}
+      </Text>
       {model.subtitle ? (
         <Text role="hint" className="plexon-eqc-chart-subtitle">
           {model.subtitle}
@@ -80,6 +81,6 @@ export function EventQuickCheckGeoBarChart({ model }: Props) {
           )}
         </ResponsiveContainer>
       </div>
-    </UiBlockSurface>
+    </div>
   );
 }
