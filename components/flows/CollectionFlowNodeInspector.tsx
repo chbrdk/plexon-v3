@@ -28,6 +28,7 @@ import {
 import {
   nodeOutputItems,
   nodeRefsFromRfNodes,
+  predictedGlobalContextLeaves,
   upstreamInputsForNode,
 } from '@/lib/collection-flow-inspector-inputs'
 import { flattenAllContextOutputs } from '@/lib/collection-flow-run-context'
@@ -211,13 +212,15 @@ export function CollectionFlowNodeInspector({
 
   const globalContextLeaves = useMemo(() => {
     const ctx = lastRun?.context
-    if (!ctx?.outputs) return []
-    return flattenAllContextOutputs(ctx)
+    if (ctx?.outputs && Object.keys(ctx.outputs).length > 0) {
+      return flattenAllContextOutputs(ctx)
+    }
+    return predictedGlobalContextLeaves()
   }, [lastRun?.context])
 
   const outputItems = useMemo(
-    () => nodeOutputItems(node.id, node.kind, lastRun?.context ?? null),
-    [node.id, node.kind, lastRun?.context]
+    () => nodeOutputItems(node.id, node.kind, lastRun?.context ?? null, node.alias),
+    [node.alias, node.id, node.kind, lastRun?.context]
   )
 
   const insertPath = useCallback(
@@ -281,6 +284,11 @@ export function CollectionFlowNodeInspector({
             <div className="msqdx-flow-node-editor-upstream-head">
               <span>{group.sourceLabel}</span>
               <span className="msqdx-flow-node-editor-upstream-kind">{group.sourceKind}</span>
+              <span
+                className={`msqdx-flow-inspector-pill${group.hasRunData ? '' : ' msqdx-flow-inspector-pill--schema'}`}
+              >
+                {group.hasRunData ? 'Run' : 'Schema'}
+              </span>
               {group.bindPath ? (
                 <span className="msqdx-flow-inspector-pill">{group.bindPath}</span>
               ) : null}
@@ -288,7 +296,7 @@ export function CollectionFlowNodeInspector({
             <JsonTree
               items={group.items.map((i) => ({
                 path: i.path,
-                value: i.value,
+                value: i.predicted ? `${i.value} · Schema` : i.value,
               }))}
               onSelectPath={
                 onUpdate
@@ -309,11 +317,17 @@ export function CollectionFlowNodeInspector({
       )}
       {globalContextLeaves.length > 0 ? (
         <>
-          <p className="msqdx-flow-inspector-field-label">Gesamter Kontext</p>
+          <p className="msqdx-flow-inspector-field-label">
+            {lastRun?.context?.outputs ? 'Gesamter Kontext' : 'Katalog (Schema)'}
+          </p>
           <JsonTree
-            items={globalContextLeaves}
+            items={globalContextLeaves.map((leaf) => ({
+              path: leaf.path,
+              value:
+                'predicted' in leaf && leaf.predicted ? `${leaf.value} · Schema` : String(leaf.value),
+            }))}
             onSelectPath={onUpdate ? insertPath : undefined}
-            emptyLabel="Nach Testen verfügbar."
+            emptyLabel="Kein Katalog verfügbar."
           />
         </>
       ) : null}
@@ -548,11 +562,15 @@ export function CollectionFlowNodeInspector({
   const outputColumn = (
     <>
       {outputItems.length > 0 ? (
-        <JsonTree items={outputItems} emptyLabel="Kein strukturierter Output." />
+        <JsonTree
+          items={outputItems.map((i) => ({
+            path: i.path,
+            value: i.predicted ? `${i.value} · Schema` : i.value,
+          }))}
+          emptyLabel="Kein strukturierter Output."
+        />
       ) : (
-        <p className="msqdx-flow-inspector-empty">
-          {lastRun ? 'Kein Output für diese Node im letzten Lauf.' : 'OUTPUT erscheint nach Testen.'}
-        </p>
+        <p className="msqdx-flow-inspector-empty">Kein Output-Schema für diese Node.</p>
       )}
 
       {node.kind === 'compare' && verdict ? (

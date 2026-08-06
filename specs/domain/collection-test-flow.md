@@ -454,6 +454,7 @@ Do not place this on legacy `/board` Prismion island.
 
 - Node click opens **fullscreen** `FlowNodeEditorShell` (`@msqdx/ui`): **INPUT** (upstream edges + global context) | **Parameters** (all fields) | **OUTPUT** (node bundle + run steps).
 - Upstream scoping: `lib/collection-flow-inspector-inputs.ts`; JsonTree insert → focused ExpressionField.
+- **Pre-run schema:** INPUT shows catalog paths per upstream node kind (e.g. `scan.overallScore`) before Testen; overlay sheet is opaque with heavy backdrop blur.
 - Right FloatingPanel inspector retired for Collection Flow boards.
 
 ## Open questions (non-blocking)
