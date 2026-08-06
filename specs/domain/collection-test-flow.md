@@ -1,6 +1,7 @@
 # Collection Test Flow
 
-**Status:** Wave 17 Collection Flow run history  
+**Status:** Wave 20 set aliases + open path expressions  
+
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -83,7 +84,8 @@ Orchestration nodes only — start job → poll → signal → branch. Report ch
 | `scan` | CHECKION page scan — `scanMode: single \| deep` (default `single`); writes `scan.*` catalog output | **8A** / **9** |
 | `domain_scan` | CHECKION domain crawl — writes `domain.*` | **8A** / **9** |
 | `geo_job` | CHECKION GEO job — writes `geo.*` | **8B** / **9** |
-| `compare` | Branch on catalog path + closed op (`gte`/`lte`/…) | **9** |
+| `compare` | Branch on catalog path / open expression + closed op (`gte`/`lte`/…) | **9** / **18** |
+| `set` | Alias: resolve source expression → `outputs[alias]` before compares | **20** |
 | `quality_ok` | Positive quality terminal | 1 |
 | `score_gate` / `issue_gate` / `geo_gate` | **Legacy** — migrated to `compare` on load (Wave 9) | 1–8B |
 
@@ -92,9 +94,9 @@ Orchestration nodes only — start job → poll → signal → branch. Report ch
 | Decision | Item |
 |----------|------|
 | **Keep** | `scan` / `domain_scan` / `geo_job` as **actions**; Collection verdict + dossier deep links |
-| **Reshape** | Specialized gates → single `compare` over closed catalog paths (n8n-style field reuse) |
-| **Add** | `runContext` (typed node outputs) + `compare` node (Wave 9); labeled catalog **ports** + `bind` wires (Wave 10) |
-| **Drop from authoring** | `score_gate`, `issue_gate`, `geo_gate` (palette); free JS/JSONPath expressions |
+| **Reshape** | Specialized gates → single `compare` over catalog / open path expressions (n8n-style field reuse) |
+| **Add** | `runContext` + `compare` (Wave 9); labeled catalog **ports** + `bind` (Wave 10); open `{{ }}` expressions (Wave 18); Context Tree + ExpressionField (Wave 19); `set` aliases + array picker (Wave 20) |
+| **Drop from authoring** | `score_gate`, `issue_gate`, `geo_gate` (palette); free JavaScript / Code-Node |
 | **Drop as nodes** | Result Overview, Share links, Reports, Settings, Saliency canvas — link from Run strip / Verdict only |
 
 Node fields (quality):
@@ -106,9 +108,10 @@ Node fields (quality):
 | `scanMode` | `scan` | `single` (default) \| `deep` |
 | `maxPages` | `domain_scan` | Optional crawl cap |
 | `text` | `geo_job` | Optional queries — one prompt per line |
-| `path` | `compare` | Catalog path e.g. `scan.overallScore`, `scan.scores.accessibility` |
+| `path` | `compare`, `set` | Catalog path or `{{ expression }}` (Wave 18+) |
 | `op` | `compare` | `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists` |
-| `value` | `compare` | Expected number/string/boolean (ignored for exists ops) |
+| `value` | `compare` | Expected literal or expression (ignored for exists ops) |
+| `alias` | `set` | Output key under `context.outputs[alias]` (Wave 20) |
 
 ### C — Orchestration (PLEXON)
 
@@ -142,7 +145,7 @@ Actions write typed bundles into `lastRun.context.outputs` (also aliased by root
 | `run` | orchestration | `url`, `startedAt` |
 
 Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
-**Closed catalog paths only** — no free JS or JSONPath.
+**Open path expressions (Wave 18+):** `compare.path` / `compare.value` (and later other params) accept bare catalog paths **or** `{{ … }}` expressions resolved against `lastRun.context.outputs` (dot + array index; `$('nodeId').json…`; `$json…`). **No JS `eval`.** Catalog list = recommended picker / port labels only — not a hard evaluate whitelist.
 
 ### Catalog ports (Wave 10)
 
@@ -284,7 +287,10 @@ Do not place this on legacy `/board` Prismion island.
 | **15 — Flow triggers + node collision** | Per-flow webhook secret + service-secret trigger; `202` + poll `collection_flow_runs`; optional `callbackUrl`; closed body `url?`/`companyName?`; AABB snap so nodes cannot overlap | Staging: rotate secret → POST webhook → poll complete; drag onto node snaps free |
 | **16 — Board context menu** | Right-click authoring via shared `@msqdx/ui` `ContextMenu` (node: dup/delete/‖P/inspector; pane: Bausteine/undo) | Staging: right-click node → Duplizieren; pane → Bausteine |
 | **17 — Run history** | UI Testen (+ journey→quality) writes `collection_flow_runs` (`trigger: ui`); `GET …/runs` list; Historie dock paints past verdict without re-exec | Staging: Testen → row in Historie; select older run → node paint + strip |
-| **Later** | Canvas `trigger`/cron nodes; `set` aliases; array pickers; concurrent multi-job live; Brandion; multi-user live; saliency; re-run from history; purge UI | Out of MVP |
+| **18 — Open path expressions** | Safe `{{ }}` dialect (no eval); compare path/value resolve against full context JSON; richer issue/score bundles; catalog = picker hint | Staging: `{{ scan.issues[0].ruleId }}` / bare path still works |
+| **19 — Expression UI** | `@msqdx/ui` JsonTree + ExpressionField; inspector Context Tree insert into params | Staging: click leaf → inserts `{{ path }}` into Compare path |
+| **20 — set + arrays** | `set` node aliases into `outputs`; array expand/insert in tree; catalog ports stay curated leaves | Staging: set alias → compare `$('alias')` / path |
+| **Later** | Canvas `trigger`/cron nodes; concurrent multi-job live; Brandion; multi-user live; saliency; re-run from history; purge UI; free JS Code-Node | Out of MVP |
 
 ## Acceptance (Wave 0)
 
@@ -423,9 +429,24 @@ Do not place this on legacy `/board` Prismion island.
 - **List:** `GET …/flows/:flowId/runs?limit=` (default 30, max 50), newest first; session view/edit (Knowledge Pack ACL). Detail `GET …/runs/:runId` unchanged.
 - **Historie dock:** toolbar **Hist**; select past run → paint via `nodeStatesFromVerdict` + strip links (read-only; no re-exec). **Aktuell** clears selection back to live / newest.
 
+## Wave 18 implementation notes
+
+- **Expressions:** `lib/collection-flow-expression.ts` — `{{ path }}`, `{{ $('nodeId').json.x }}`, `{{ $json.x }}`, bare paths; walker supports `a.b[0].c`. No `eval`.
+- Compare `path`/`value` resolve via expressions; validate warns on bad `{{` syntax; unknown catalog path is no longer a hard error.
+- Scan/domain bundles may include `issues.items[]` (`ruleId`, `severity`, …) for open paths.
+
+## Wave 19 implementation notes
+
+- DS: `@msqdx/ui` `JsonTree` + `ExpressionField` (Plexon wires via `lib/msqdx-ui.ts`).
+- Inspector shows full `lastRun.context.outputs` tree; insert writes `{{ … }}` into focused ExpressionField (compare path/value, start url).
+
+## Wave 20 implementation notes
+
+- Node kind `set`: `path` = source expression, `alias` = output key under `outputs[alias]`; applied before compare eval.
+- JsonTree expands arrays; ports stay curated catalog leaves (no RF handle explosion).
+
 ## Open questions (non-blocking)
 
 - Richer Soft-Q mapping from Checkion lenses — later if product asks.
 - Domain-scan issue dossier parity with page-scan issues API — use domain issues endpoint when compare follows `domain_scan`.
 - Multi-provider GEO models beyond OpenAI defaults — product later.
-- `set` / array pickers (`issues[].ruleId`) — later wave.

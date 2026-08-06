@@ -1,5 +1,5 @@
 /**
- * Collection Flow Run Context — closed catalog paths + compare eval (Wave 9).
+ * Collection Flow Run Context — catalog paths + compare eval (Wave 9) + open expressions (Wave 18).
  * Spec: specs/domain/collection-test-flow.md
  */
 
@@ -8,6 +8,12 @@ import {
   type CollectionFlowNode,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
+import {
+  resolveContextPath,
+  resolveExpression,
+  resolveExpressionScalar,
+  toCatalogScalar,
+} from '@/lib/collection-flow-expression';
 
 export const COLLECTION_FLOW_COMPARE_OPS = [
   'gte',
@@ -37,7 +43,7 @@ export type CompareEvalResult = {
   passed: boolean;
 };
 
-/** Picker entries for the compare path select (closed catalog). */
+/** Picker entries for the compare path select (recommended catalog). */
 export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: string }> = [
   { path: 'scan.status', label: 'status', group: 'scan' },
   { path: 'scan.overallScore', label: 'overallScore', group: 'scan' },
@@ -158,33 +164,37 @@ export function setContextBundle(
   return { outputs };
 }
 
-function getByPath(root: unknown, parts: string[]): unknown {
-  let cur: unknown = root;
-  for (const p of parts) {
-    if (cur == null || typeof cur !== 'object') return undefined;
-    cur = (cur as Record<string, unknown>)[p];
+/**
+ * Apply `set` nodes: resolve source expression → `outputs[alias]` (Wave 20).
+ * Order: document node order among kind === 'set'.
+ */
+export function applySetNodes(
+  nodes: CollectionFlowNode[],
+  ctx: CollectionFlowRunContext
+): CollectionFlowRunContext {
+  let next = ctx;
+  for (const n of nodes) {
+    if (n.kind !== 'set') continue;
+    const alias = (n.alias ?? n.label ?? '').trim();
+    if (!alias) continue;
+    const source = n.path?.trim() ?? '';
+    if (!source) continue;
+    const resolved = resolveExpression(next, source);
+    const bundle: Record<string, unknown> =
+      resolved != null && typeof resolved === 'object' && !Array.isArray(resolved)
+        ? { ...(resolved as Record<string, unknown>) }
+        : { value: resolved };
+    next = setContextBundle(next, alias, bundle, n.id);
   }
-  return cur;
+  return next;
 }
 
-/** Resolve a catalog path against run context outputs (root-first). */
+/** Resolve a path against run context outputs (open paths + array index, Wave 18). */
 export function resolveCatalogPath(
   ctx: CollectionFlowRunContext,
   path: string
 ): CatalogScalar | undefined {
-  const trimmed = path.trim();
-  if (!trimmed) return undefined;
-  const parts = trimmed.split('.').filter(Boolean);
-  if (parts.length < 1) return undefined;
-  const [root, ...rest] = parts;
-  const bundle = ctx.outputs[root!];
-  if (!bundle) return undefined;
-  if (rest.length === 0) return undefined;
-  const raw = getByPath(bundle, rest);
-  if (raw === undefined) return undefined;
-  if (raw === null) return null;
-  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') return raw;
-  return undefined;
+  return toCatalogScalar(resolveContextPath(ctx, path));
 }
 
 export function evaluateCompareOp(
@@ -215,7 +225,7 @@ export function evaluateCompareNode(
 ): CompareEvalResult {
   const path = (node.path ?? 'scan.overallScore').trim();
   const op = (node.op ?? 'gte') as CollectionFlowCompareOp;
-  const expected =
+  const expectedRaw =
     op === 'exists' || op === 'not_exists'
       ? undefined
       : node.value !== undefined
@@ -223,7 +233,9 @@ export function evaluateCompareNode(
         : typeof node.threshold === 'number'
           ? node.threshold
           : DEFAULT_SCORE_GATE_THRESHOLD;
-  const actual = resolveCatalogPath(ctx, path);
+  const actual = resolveExpressionScalar(ctx, path);
+  const expected =
+    expectedRaw === undefined ? undefined : resolveExpressionScalar(ctx, expectedRaw);
   const passed = evaluateCompareOp(op, actual, expected);
   return { nodeId: node.id, path, op, expected, actual, passed };
 }
@@ -242,6 +254,7 @@ export function buildScanCatalogBundle(input: {
   issueCount?: number | null;
   scoresByKind?: Record<string, number> | null;
   issues?: IssueGateSignals | null;
+  issueItems?: CatalogIssueItem[] | null;
 }): Record<string, unknown> {
   const scores: Record<string, number> = {};
   if (input.scoresByKind) {
@@ -254,6 +267,12 @@ export function buildScanCatalogBundle(input: {
     seriousCount: 0,
     issueCount: input.issueCount ?? 0,
   };
+  const items = (input.issueItems ?? []).map((it) => ({
+    id: it.id ?? null,
+    severity: it.severity ?? null,
+    ruleId: it.ruleId ?? null,
+    title: it.title ?? null,
+  }));
   return {
     status: input.status,
     overallScore: input.overallScore,
@@ -264,9 +283,18 @@ export function buildScanCatalogBundle(input: {
       criticalCount: issues.criticalCount,
       seriousCount: issues.seriousCount,
       issueCount: issues.issueCount,
+      ruleIds: issues.ruleIds ?? items.map((i) => i.ruleId).filter(Boolean),
+      items,
     },
   };
 }
+
+export type CatalogIssueItem = {
+  id?: string;
+  severity?: string;
+  ruleId?: string;
+  title?: string;
+};
 
 export function buildDomainCatalogBundle(input: {
   status: string;
@@ -274,12 +302,19 @@ export function buildDomainCatalogBundle(input: {
   pageCount?: number | null;
   issueCount?: number | null;
   issues?: IssueGateSignals | null;
+  issueItems?: CatalogIssueItem[] | null;
 }): Record<string, unknown> {
   const issues = input.issues ?? {
     criticalCount: 0,
     seriousCount: 0,
     issueCount: input.issueCount ?? 0,
   };
+  const items = (input.issueItems ?? []).map((it) => ({
+    id: it.id ?? null,
+    severity: it.severity ?? null,
+    ruleId: it.ruleId ?? null,
+    title: it.title ?? null,
+  }));
   return {
     status: input.status,
     overallScore: input.overallScore,
@@ -289,6 +324,8 @@ export function buildDomainCatalogBundle(input: {
       criticalCount: issues.criticalCount,
       seriousCount: issues.seriousCount,
       issueCount: issues.issueCount,
+      ruleIds: issues.ruleIds ?? items.map((i) => i.ruleId).filter(Boolean),
+      items,
     },
   };
 }
@@ -314,6 +351,9 @@ export function buildJourneyCatalogBundle(input: {
   validEvidence: boolean;
   finalUrl: string | null;
   personaCount?: number;
+  jobId?: string | null;
+  studyId?: string | null;
+  waveId?: string | null;
 }): Record<string, unknown> {
   const personaCount =
     typeof input.personaCount === 'number' && Number.isFinite(input.personaCount)
@@ -325,6 +365,9 @@ export function buildJourneyCatalogBundle(input: {
     finalUrl: input.finalUrl,
     personaCount,
     allTaskCompleted: input.taskCompleted,
+    jobId: input.jobId ?? null,
+    studyId: input.studyId ?? null,
+    waveId: input.waveId ?? null,
   };
 }
 
@@ -335,7 +378,15 @@ export function flattenContextForInspector(
   if (!ctx?.outputs[root]) return [];
   const rows: Array<{ key: string; value: string }> = [];
   const walk = (prefix: string, val: unknown) => {
-    if (val == null || typeof val !== 'object' || Array.isArray(val)) {
+    if (Array.isArray(val)) {
+      if (val.length === 0) {
+        rows.push({ key: prefix, value: '[]' });
+        return;
+      }
+      val.forEach((item, idx) => walk(`${prefix}[${idx}]`, item));
+      return;
+    }
+    if (val == null || typeof val !== 'object') {
       rows.push({
         key: prefix,
         value: val === undefined ? '—' : val === null ? 'null' : String(val),
@@ -348,4 +399,18 @@ export function flattenContextForInspector(
   };
   walk('', ctx.outputs[root]);
   return rows.filter((r) => r.key);
+}
+
+/** Flatten all roots (+ node aliases) for Context Tree (Wave 19). */
+export function flattenAllContextOutputs(
+  ctx: CollectionFlowRunContext | null | undefined
+): Array<{ path: string; value: string }> {
+  if (!ctx?.outputs) return [];
+  const rows: Array<{ path: string; value: string }> = [];
+  for (const root of Object.keys(ctx.outputs)) {
+    for (const row of flattenContextForInspector(ctx, root)) {
+      rows.push({ path: `${root}.${row.key}`.replace(/\.\[/g, '['), value: row.value });
+    }
+  }
+  return rows;
 }

@@ -64,6 +64,10 @@ export type {
   ContextMenuProps,
   ContextMenuItem,
 } from '../../msqdx-ui/packages/ui/src/components/ContextMenu'
+export { JsonTree } from '../../msqdx-ui/packages/ui/src/components/JsonTree'
+export type { JsonTreeProps, JsonTreeItem } from '../../msqdx-ui/packages/ui/src/components/JsonTree'
+export { ExpressionField } from '../../msqdx-ui/packages/ui/src/components/ExpressionField'
+export type { ExpressionFieldProps } from '../../msqdx-ui/packages/ui/src/components/ExpressionField'
 export {
   IconShare,
   IconHistory,

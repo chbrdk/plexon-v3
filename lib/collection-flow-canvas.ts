@@ -633,6 +633,14 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
       value: DEFAULT_SCORE_GATE_THRESHOLD,
     };
   }
+  if (kind === 'set') {
+    return {
+      ...base,
+      label: 'Set',
+      alias: 'alias',
+      path: 'scan.overallScore',
+    };
+  }
   if (kind === 'score_gate') {
     return {
       ...base,

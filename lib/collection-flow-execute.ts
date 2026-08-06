@@ -43,6 +43,7 @@ import {
   fetchCheckionScanIssues,
   fetchCheckionScanScores,
   runCheckionSingleScan,
+  type CheckionIssueItem,
 } from '@/lib/integrations/checkion-scans-client';
 import {
   fetchCheckionDomainScanV3Issues,
@@ -56,6 +57,7 @@ import {
   buildScanCatalogBundle,
   emptyRunContext,
   evaluateAllCompares,
+  applySetNodes,
   setContextBundle,
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
@@ -493,6 +495,7 @@ export async function executeCollectionFlowRun(input: {
     const hasIssues = documentHasIssueGate(doc);
     const gate = issueGateNode(doc.nodes);
     let issueSignals: IssueGateSignals | null = null;
+    let issueItems: CheckionIssueItem[] = [];
     let scoresByKind: Record<string, number> | null = null;
     if (quality?.id) {
       if (useDomain) {
@@ -504,7 +507,10 @@ export async function executeCollectionFlowRun(input: {
         const issuesRes = await fetchCheckionScanIssues(quality.id);
         if (!issuesRes.ok) {
           if (hasIssues || hasCompare) blockers.push(issuesRes.error);
-        } else issueSignals = issuesRes.signals;
+        } else {
+          issueSignals = issuesRes.signals;
+          issueItems = issuesRes.items;
+        }
         if (quality.pageScanId) {
           const scoresRes = await fetchCheckionScanScores(quality.pageScanId);
           if (scoresRes.ok) scoresByKind = scoresRes.byKind;
@@ -526,6 +532,7 @@ export async function executeCollectionFlowRun(input: {
             overallScore: quality.overallScore,
             pageCount: null,
             issues: issueSignals,
+            issueItems,
           }),
           qualityNode?.id
         );
@@ -539,6 +546,7 @@ export async function executeCollectionFlowRun(input: {
             url: quality.url || scanUrl,
             scoresByKind,
             issues: issueSignals,
+            issueItems,
           }),
           qualityNode?.id
         );
@@ -585,7 +593,10 @@ export async function executeCollectionFlowRun(input: {
             geoNode?.id
           );
         }
-        const compareResults = evaluateAllCompares(doc.nodes, runContext).map((r) => ({
+        const compareResults = evaluateAllCompares(
+          doc.nodes,
+          applySetNodes(doc.nodes, runContext)
+        ).map((r) => ({
           nodeId: r.nodeId,
           path: r.path,
           passed: r.passed,
@@ -676,6 +687,7 @@ export async function executeCollectionFlowRun(input: {
       );
     }
 
+    runContext = applySetNodes(doc.nodes, runContext);
     const compareEvals = evaluateAllCompares(doc.nodes, runContext);
     const compareResults = compareEvals.map((r) => ({
       nodeId: r.nodeId,

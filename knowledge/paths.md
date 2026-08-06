@@ -56,6 +56,7 @@
     - Collision: `lib/collection-flow-collision.ts` on board drag-stop / place
     - Wave 16 Context menu: `@msqdx/ui` ContextMenu on CollectionFlowBoard (node + pane)
     - Wave 17 Run history: UI Testen → `collection_flow_runs` (`trigger: ui`); `GET …/flows/:flowId/runs` · helper `apiPlatformProjectFlowRuns`; Historie dock on board
+    - Wave 18–20 Open expressions: `lib/collection-flow-expression.ts`; JsonTree/ExpressionField (`@msqdx/ui`); `set` node aliases
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

@@ -96,6 +96,11 @@ export const NODE_IO_BY_KIND: Partial<Record<CollectionFlowNodeKind, NodeIoSchem
     controlOutputs: [WHEN_OUT('Pass'), OTHERWISE_OUT('Fail')],
     catalogOutputs: false,
   },
+  set: {
+    inputs: [FLOW_IN, COMPARE_VALUE_IN],
+    controlOutputs: [THEN_OUT],
+    catalogOutputs: false,
+  },
   score_gate: {
     inputs: [FLOW_IN],
     controlOutputs: [WHEN_OUT('Pass'), OTHERWISE_OUT('Fail')],

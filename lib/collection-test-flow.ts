@@ -37,6 +37,7 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'domain_scan',
   'geo_job',
   'compare',
+  'set',
   // Legacy quality gates (Wave 1–8B) — migrated to `compare` on load
   'score_gate',
   'issue_gate',
@@ -121,12 +122,14 @@ export type CollectionFlowNode = {
   /** Regex / substring for `issue_rule_match` (quality) or `url_match`/`title_match` (journey). */
   pattern?: string;
   gateCondition?: CollectionFlowGateCondition | AudionGateCondition;
-  /** Catalog path for `compare` (Wave 9), e.g. `scan.overallScore`. */
+  /** Catalog path / expression for `compare` or source for `set` (Wave 9 / 18 / 20). */
   path?: string;
   /** Compare op for `compare` (Wave 9). */
   op?: 'gte' | 'lte' | 'gt' | 'lt' | 'eq' | 'neq' | 'exists' | 'not_exists';
-  /** Expected value for `compare` (Wave 9). */
+  /** Expected value for `compare` (Wave 9) — literal or expression (Wave 18). */
   value?: string | number | boolean | null;
+  /** Output alias key for `set` nodes (Wave 20). */
+  alias?: string;
   /** Audion persona id on `persona` / `start` (Wave 11). */
   personaId?: string;
   /** Display name for persona picker. */
@@ -729,6 +732,7 @@ const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'domain_scan',
   'geo_job',
   'compare',
+  'set',
   'score_gate',
   'issue_gate',
   'geo_gate',

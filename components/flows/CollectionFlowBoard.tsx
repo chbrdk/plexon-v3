@@ -1850,6 +1850,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 bindSourceLabel={bindSourceLabel}
                 onClose={() => setSelectedId(null)}
                 onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+                onUpdate={onUpdateNode}
               />
             </CollectionFlowFloatingPanel>
           ) : null}

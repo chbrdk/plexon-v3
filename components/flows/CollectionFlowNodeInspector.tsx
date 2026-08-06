@@ -1,14 +1,24 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Button, FlowInspectorShell, type FlowInspectorSection } from '@msqdx/ui'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  Button,
+  ExpressionField,
+  FlowInspectorShell,
+  JsonTree,
+  type FlowInspectorSection,
+} from '@msqdx/ui'
 import type {
   CollectionFlowLastRun,
   CollectionFlowNode,
   CollectionFlowNodeKind,
   CollectionVerdict,
 } from '@/lib/collection-test-flow'
-import { flattenContextForInspector } from '@/lib/collection-flow-run-context'
+import {
+  flattenAllContextOutputs,
+  flattenContextForInspector,
+} from '@/lib/collection-flow-run-context'
+import { formatExpressionForPath } from '@/lib/collection-flow-expression'
 import type {
   FlowJobRunSummary,
   FlowNodeInspectorData,
@@ -38,6 +48,7 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   domain_scan: 'Domain Scan',
   geo_job: 'GEO Job',
   compare: 'Compare',
+  set: 'Set',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   geo_gate: 'GEO Gate',
@@ -161,6 +172,7 @@ export function CollectionFlowNodeInspector({
   bindSourceLabel,
   onClose,
   onAppendOutputToNote,
+  onUpdate,
 }: {
   node: CollectionFlowNode
   runState: FlowNodeRunState
@@ -172,9 +184,12 @@ export function CollectionFlowNodeInspector({
   bindSourceLabel?: string | null
   onClose: () => void
   onAppendOutputToNote?: () => void
+  /** Wave 19: patch node fields (path/value/alias/url). */
+  onUpdate?: (nodeId: string, patch: Partial<CollectionFlowNode>) => void
 }) {
   const steps = inspector?.steps ?? []
   const [expandedLatest, setExpandedLatest] = useState(true)
+  const [focusField, setFocusField] = useState<'path' | 'value' | 'alias' | 'url'>('path')
 
   useEffect(() => {
     setExpandedLatest(true)
@@ -187,10 +202,38 @@ export function CollectionFlowNodeInspector({
     node.kind === 'domain_scan' ||
     node.kind === 'geo_job' ||
     node.kind === 'compare' ||
+    node.kind === 'set' ||
     node.kind === 'score_gate' ||
     node.kind === 'issue_gate' ||
     node.kind === 'geo_gate' ||
     node.kind === 'quality_ok'
+
+  const contextLeaves = useMemo(() => {
+    const ctx = lastRun?.context
+    if (!ctx?.outputs) return []
+    return flattenAllContextOutputs(ctx)
+  }, [lastRun?.context])
+
+  const insertPath = useCallback(
+    (path: string) => {
+      if (!onUpdate) return
+      const expr = formatExpressionForPath(path)
+      if (focusField === 'value' && (node.kind === 'compare' || node.kind === 'set')) {
+        onUpdate(node.id, { value: expr })
+        return
+      }
+      if (focusField === 'url' && (node.kind === 'start' || node.kind === 'scan')) {
+        onUpdate(node.id, { url: expr })
+        return
+      }
+      if (focusField === 'alias' && node.kind === 'set') {
+        onUpdate(node.id, { alias: path.split('.').pop() || path })
+        return
+      }
+      onUpdate(node.id, { path: expr })
+    },
+    [focusField, node.id, node.kind, onUpdate]
+  )
 
   const gateBranchLabel = useMemo(() => {
     if (!verdict) return null
@@ -293,10 +336,42 @@ export function CollectionFlowNodeInspector({
           <>
             {node.kind === 'compare' ? (
               <div className="msqdx-flow-inspector-stats">
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Path</span>
-                  <strong>{node.path ?? '—'}</strong>
-                </div>
+                {onUpdate ? (
+                  <>
+                    <ExpressionField
+                      label="Path"
+                      value={node.path ?? ''}
+                      onChange={(v) => onUpdate(node.id, { path: v })}
+                      onFocusField={() => setFocusField('path')}
+                      hint="Catalog path oder {{ expression }}"
+                    />
+                    <ExpressionField
+                      label="Value"
+                      value={node.value != null ? String(node.value) : ''}
+                      onChange={(v) => {
+                        const n = Number(v)
+                        onUpdate(node.id, {
+                          value: v.trim() === '' ? null : Number.isFinite(n) && v.trim() !== '' && !v.includes('{')
+                            ? n
+                            : v,
+                        })
+                      }}
+                      onFocusField={() => setFocusField('value')}
+                      hint="Literal oder {{ expression }}"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div className="msqdx-flow-inspector-stat">
+                      <span>Path</span>
+                      <strong>{node.path ?? '—'}</strong>
+                    </div>
+                    <div className="msqdx-flow-inspector-stat">
+                      <span>Value</span>
+                      <strong>{node.value != null ? String(node.value) : '—'}</strong>
+                    </div>
+                  </>
+                )}
                 {bindSourceLabel ? (
                   <div className="msqdx-flow-inspector-stat">
                     <span>Bind from</span>
@@ -306,10 +381,6 @@ export function CollectionFlowNodeInspector({
                 <div className="msqdx-flow-inspector-stat">
                   <span>Op</span>
                   <strong>{node.op ?? 'gte'}</strong>
-                </div>
-                <div className="msqdx-flow-inspector-stat">
-                  <span>Value</span>
-                  <strong>{node.value != null ? String(node.value) : '—'}</strong>
                 </div>
                 <div className="msqdx-flow-inspector-stat">
                   <span>Actual</span>
@@ -329,6 +400,40 @@ export function CollectionFlowNodeInspector({
                       : '—'}
                   </strong>
                 </div>
+              </div>
+            ) : null}
+            {node.kind === 'set' ? (
+              <div className="msqdx-flow-inspector-stats">
+                {onUpdate ? (
+                  <>
+                    <ExpressionField
+                      label="Alias"
+                      value={node.alias ?? ''}
+                      onChange={(v) => onUpdate(node.id, { alias: v })}
+                      onFocusField={() => setFocusField('alias')}
+                      placeholder="score"
+                      hint="Key unter context.outputs"
+                    />
+                    <ExpressionField
+                      label="Source"
+                      value={node.path ?? ''}
+                      onChange={(v) => onUpdate(node.id, { path: v })}
+                      onFocusField={() => setFocusField('path')}
+                      hint="Pfad oder {{ expression }}"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div className="msqdx-flow-inspector-stat">
+                      <span>Alias</span>
+                      <strong>{node.alias ?? '—'}</strong>
+                    </div>
+                    <div className="msqdx-flow-inspector-stat">
+                      <span>Source</span>
+                      <strong>{node.path ?? '—'}</strong>
+                    </div>
+                  </>
+                )}
               </div>
             ) : null}
             {node.kind === 'score_gate' ? (
@@ -445,6 +550,37 @@ export function CollectionFlowNodeInspector({
       })
     }
 
+    out.push({
+      id: 'context',
+      title: 'Context',
+      defaultOpen: Boolean(onUpdate) && (node.kind === 'compare' || node.kind === 'set'),
+      children: (
+        <JsonTree
+          items={contextLeaves}
+          onSelectPath={onUpdate ? insertPath : undefined}
+          emptyLabel="Nach einem Testen erscheinen hier alle Outputs (inkl. Arrays)."
+        />
+      ),
+    })
+
+    if ((node.kind === 'start' || node.kind === 'scan') && onUpdate) {
+      out.push({
+        id: 'url-expr',
+        title: 'URL',
+        defaultOpen: false,
+        children: (
+          <ExpressionField
+            label="URL"
+            value={node.url ?? ''}
+            onChange={(v) => onUpdate(node.id, { url: v })}
+            onFocusField={() => setFocusField('url')}
+            placeholder="https://… oder {{ journey.finalUrl }}"
+            hint="Literal oder Expression"
+          />
+        ),
+      })
+    }
+
     if (jobSummary) {
       out.push({
         id: 'run',
@@ -557,14 +693,18 @@ export function CollectionFlowNodeInspector({
 
     return out
   }, [
+    bindSourceLabel,
     canAppend,
+    contextLeaves,
     expandedLatest,
     gateBranchLabel,
+    insertPath,
     inspector?.gateEvaluation,
     isQualityNode,
     jobSummary,
     node,
     onAppendOutputToNote,
+    onUpdate,
     outputRows,
     steps,
     verdict,

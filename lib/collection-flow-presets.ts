@@ -287,6 +287,18 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
       value: DEFAULT_SCORE_GATE_THRESHOLD,
     },
   },
+  {
+    id: 'set-alias',
+    group: 'vergleich',
+    label: 'Set (Alias)',
+    kind: 'set',
+    defaults: {
+      label: 'Set',
+      alias: 'score',
+      path: 'scan.overallScore',
+      presetId: 'set-alias',
+    },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{

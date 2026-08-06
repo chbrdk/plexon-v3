@@ -46,6 +46,7 @@ const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
   domain_scan: 'Domain Scan',
   geo_job: 'GEO Job',
   compare: 'Compare',
+  set: 'Set',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   geo_gate: 'GEO Gate',
@@ -426,6 +427,14 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
               />
             </label>
           ) : null}
+        </>
+      ) : null}
+
+      {kind === 'set' ? (
+        <>
+          <p className="msqdx-flow-io-hint">
+            Alias · {flowNode.alias || '—'} ← {flowNode.path || '—'}
+          </p>
         </>
       ) : null}
 
