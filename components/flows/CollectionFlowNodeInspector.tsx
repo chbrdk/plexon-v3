@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type DragEvent, type ReactNode } from 'react'
 import {
   Button,
   ExpressionField,
   FlowNodeEditorShell,
   Input,
+  SCHEMA_TREE_PATH_MIME,
   SchemaTree,
 } from '@msqdx/ui'
 import type {
@@ -148,6 +149,32 @@ function InspectorStepCard({
   )
 }
 
+type InspectorFocusField = 'path' | 'value' | 'alias' | 'url' | 'text' | 'note'
+
+function defaultFocusFieldForNode(kind: CollectionFlowNodeKind | string): InspectorFocusField {
+  if (
+    kind === 'prompt' ||
+    kind === 'action' ||
+    kind === 'message' ||
+    kind === 'measure' ||
+    kind === 'observe' ||
+    kind === 'success' ||
+    kind === 'abandon'
+  ) {
+    return 'text'
+  }
+  if (kind === 'compare') return 'path'
+  if (kind === 'set') return 'alias'
+  if (kind === 'start' || kind === 'scan' || kind === 'domain_scan' || kind === 'geo_job') return 'url'
+  return 'path'
+}
+
+function blockSchemaPathDrop(event: DragEvent) {
+  if (!Array.from(event.dataTransfer.types).includes(SCHEMA_TREE_PATH_MIME)) return
+  event.preventDefault()
+  event.stopPropagation()
+}
+
 export function CollectionFlowNodeInspector({
   open,
   node,
@@ -183,13 +210,13 @@ export function CollectionFlowNodeInspector({
   onUpdate?: (nodeId: string, patch: Partial<CollectionFlowNode>) => void
 }) {
   const steps = inspector?.steps ?? []
-  const [focusField, setFocusField] = useState<'path' | 'value' | 'alias' | 'url' | 'text' | 'note'>(
-    'path'
+  const [focusField, setFocusField] = useState<InspectorFocusField>(() =>
+    defaultFocusFieldForNode(node.kind)
   )
 
   useEffect(() => {
-    setFocusField('path')
-  }, [node.id])
+    setFocusField(defaultFocusFieldForNode(node.kind))
+  }, [node.id, node.kind])
 
   const isQualityNode =
     node.kind === 'scan' ||
@@ -327,7 +354,11 @@ export function CollectionFlowNodeInspector({
   const paramsColumn = (
     <>
       {onUpdate ? (
-        <label className="msqdx-flow-rf-field">
+        <label
+          className="msqdx-flow-rf-field"
+          onDragOver={blockSchemaPathDrop}
+          onDrop={blockSchemaPathDrop}
+        >
           <span className="msqdx-flow-inspector-field-label">Name</span>
           <Input
             block
