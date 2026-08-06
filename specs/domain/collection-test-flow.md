@@ -454,6 +454,8 @@ Do not place this on legacy `/board` Prismion island.
 
 - Node click opens **fullscreen** `FlowNodeEditorShell` (`@msqdx/ui`): **INPUT** (upstream edges + global context) | **Parameters** (all fields) | **OUTPUT** (node bundle + run steps).
 - Upstream scoping: `lib/collection-flow-inspector-inputs.ts` + `lib/collection-flow-output-schemas.ts`; **SchemaTree** (nested object shape + type badges) replaces flat JsonTree in INPUT/OUTPUT; click inserts path into focused ExpressionField.
+- **Per-kind OUTPUT schema:** journey steps (`text`/`note`/`label`), `start` config (`url`/`maxSteps`/persona), `compare`/`gate` verdict fields, catalog bundles for scan/domain/geo/journey actions; terminals (`abandon`, `quality_ok`) show no schema tree.
+- **Per-kind Parameters:** all model fields exposed in Inspector — `start.maxSteps`, `observe.observeSeconds`, `measure.measureKey`, `gate.pattern`, `geo_job.companyName`, `domain_scan.maxPages`; URL edits derive generic labels via `lib/collection-flow-url.ts`.
 - **Pre-run schema:** INPUT shows catalog paths per upstream node kind (e.g. `scan.overallScore`) before Testen; overlay sheet is opaque with heavy backdrop blur.
 - Right FloatingPanel inspector retired for Collection Flow boards.
 

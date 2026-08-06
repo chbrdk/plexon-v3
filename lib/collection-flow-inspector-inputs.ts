@@ -128,6 +128,16 @@ export function predictedItemsForSource(
     ) {
       add(`$('${sourceNodeId}').json.text`, 'string');
       add(`$('${sourceNodeId}').json.note`, 'string');
+    } else if (kind === 'start') {
+      add(`$('${sourceNodeId}').json.url`, 'string');
+      add(`$('${sourceNodeId}').json.urlKey`, 'string');
+      add(`$('${sourceNodeId}').json.maxSteps`, 'number');
+    } else if (kind === 'compare' || kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate') {
+      add(`$('${sourceNodeId}').json.passed`, 'boolean');
+      add(`$('${sourceNodeId}').json.actual`, 'any');
+    } else if (kind === 'gate') {
+      add(`$('${sourceNodeId}').json.matched`, 'boolean');
+      add(`$('${sourceNodeId}').json.evidence`, 'string');
     }
   }
 
@@ -236,8 +246,9 @@ export function nodeOutputSchema(
   kind: CollectionFlowNodeKind | string,
   ctx: CollectionFlowRunContext | null | undefined,
   alias?: string
-): SchemaTreeNode {
+): SchemaTreeNode | null {
   const predicted = predictedSchemaForNodeOutput(nodeId, kind, alias);
+  if (!predicted) return null;
   const flat = nodeOutputItems(nodeId, kind, ctx, alias);
   return mergeRunItemsIntoSchema(predicted, flat);
 }

@@ -18,6 +18,10 @@ import {
   nodeIoSchemaForKind,
   type NodePortSlot,
 } from '@/lib/collection-flow-node-ports'
+import {
+  patchLabelFromUrlIfGeneric,
+  summarizeFlowUrl,
+} from '@/lib/collection-flow-url'
 
 type CollectionFlowNodeType = Node<CollectionFlowRfNodeData, 'collectionFlow'>
 
@@ -57,33 +61,6 @@ function handleClassForSlot(slot: NodePortSlot, side: 'in' | 'out'): string {
   return parts.join(' ')
 }
 
-function summarizeStartUrl(input: string): string {
-  const raw = input.trim()
-  if (!raw) return 'URL setzen…'
-  try {
-    const url = new URL(raw)
-    const path = url.pathname && url.pathname !== '/' ? url.pathname : ''
-    return `${url.hostname}${path}`
-  } catch {
-    return raw.length > 56 ? `${raw.slice(0, 56)}…` : raw
-  }
-}
-
-function deriveStartLabelFromUrl(input: string): string | null {
-  const raw = input.trim()
-  if (!raw) return null
-  try {
-    const url = new URL(raw)
-    const host = url.hostname.replace(/^www\./, '')
-    if (!host) return null
-    return host
-  } catch {
-    const compact = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
-    return compact || null
-  }
-}
-
-/**
  * Compact n8n-like RF node: edge handles + title/preview on the card.
  * Full parameter editing lives in the Inspector (ExpressionField / Context tree).
  */
@@ -113,10 +90,8 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const onStartUrl = (e: ChangeEvent<HTMLInputElement>) => {
     const nextUrl = e.target.value
     const patchNext: Partial<CollectionFlowNodeModel> = { urlKey: nextUrl, url: nextUrl }
-    if (!flowNode.label.trim() || flowNode.label.trim() === KIND_LABEL.start) {
-      const nextLabel = deriveStartLabelFromUrl(nextUrl)
-      if (nextLabel) patchNext.label = nextLabel
-    }
+    const nextLabel = patchLabelFromUrlIfGeneric(flowNode.label, KIND_LABEL.start, nextUrl)
+    if (nextLabel) patchNext.label = nextLabel
     patch(patchNext)
   }
   const onJourneyGateCondition = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -158,13 +133,44 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
       return `${path} ${op}${val}`
     }
     if (kind === 'set') return `${flowNode.alias || 'alias'} ← ${flowNode.path || '—'}`
-    if (kind === 'start') return summarizeStartUrl(flowNode.urlKey || flowNode.url || '')
+    if (kind === 'start')
+      return summarizeFlowUrl(flowNode.urlKey || flowNode.url || '')
     if (kind === 'persona') return flowNode.personaName || flowNode.personaId || 'Persona wählen…'
     if (kind === 'zielgruppe')
       return flowNode.targetGroupName || flowNode.targetGroupId || 'Zielgruppe wählen…'
-    if (kind === 'scan' || kind === 'domain_scan' || kind === 'geo_job')
-      return flowNode.url || flowNode.companyName || 'URL optional'
-    if (kind === 'gate') return String(flowNode.gateCondition ?? 'goal_reached')
+    if (kind === 'scan') {
+      const urlLine = summarizeFlowUrl(flowNode.url || '', 'URL optional')
+      const mode = flowNode.scanMode ?? 'single'
+      return mode !== 'single' ? `${mode} · ${urlLine}` : urlLine
+    }
+    if (kind === 'domain_scan') {
+      const urlLine = summarizeFlowUrl(flowNode.url || '', 'URL optional')
+      const maxPages = flowNode.maxPages ?? 50
+      return maxPages !== 50 ? `${urlLine} · max ${maxPages}` : urlLine
+    }
+    if (kind === 'geo_job') {
+      const url = flowNode.url?.trim()
+      if (url) return summarizeFlowUrl(url, 'URL optional')
+      return flowNode.companyName?.trim() || 'URL oder Company Name'
+    }
+    if (kind === 'observe') {
+      const sec = flowNode.observeSeconds ?? 30
+      const text = flowNode.text?.trim()
+      return text ? `${sec}s · ${text.length > 48 ? `${text.slice(0, 48)}…` : text}` : `${sec}s beobachten`
+    }
+    if (kind === 'measure') {
+      const key = flowNode.measureKey ?? 'overall'
+      const text = flowNode.text?.trim()
+      return text ? `${key} · ${text.length > 48 ? `${text.slice(0, 48)}…` : text}` : `Frage · ${key}`
+    }
+    if (kind === 'gate') {
+      const cond = String(flowNode.gateCondition ?? 'goal_reached')
+      const pattern = flowNode.pattern?.trim()
+      if ((cond === 'url_match' || cond === 'title_match') && pattern) {
+        return `${cond} · ${pattern.length > 32 ? `${pattern.slice(0, 32)}…` : pattern}`
+      }
+      return cond
+    }
     if (showText && flowNode.text?.trim()) {
       const t = flowNode.text.trim()
       return t.length > 72 ? `${t.slice(0, 72)}…` : t

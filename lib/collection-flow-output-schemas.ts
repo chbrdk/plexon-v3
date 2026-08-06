@@ -177,15 +177,17 @@ const JOURNEY_STEP_FIELDS: Array<{ key: string; type: SchemaFieldType }> = [
   { key: 'label', type: 'string' },
 ];
 
-export function journeyStepSchemaTree(nodeId: string): SchemaTreeNode {
-  const base = `$('${nodeId}').json`;
+function schemaTreeFromFields(
+  base: string,
+  fields: Array<{ key: string; type: SchemaFieldType }>
+): SchemaTreeNode {
   return {
     id: base,
     key: base,
     path: base,
     type: 'object',
     schema: true,
-    children: JOURNEY_STEP_FIELDS.map((f) => ({
+    children: fields.map((f) => ({
       id: `${base}.${f.key}`,
       key: f.key,
       path: `${base}.${f.key}`,
@@ -193,6 +195,70 @@ export function journeyStepSchemaTree(nodeId: string): SchemaTreeNode {
       schema: true,
     })),
   };
+}
+
+export function journeyStepSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, JOURNEY_STEP_FIELDS);
+}
+
+export function observeNodeSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    ...JOURNEY_STEP_FIELDS,
+    { key: 'observeSeconds', type: 'number' },
+  ]);
+}
+
+export function measureNodeSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    ...JOURNEY_STEP_FIELDS,
+    { key: 'measureKey', type: 'string' },
+    { key: 'answer', type: 'string' },
+  ]);
+}
+
+export function startNodeSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    { key: 'url', type: 'string' },
+    { key: 'urlKey', type: 'string' },
+    { key: 'maxSteps', type: 'number' },
+    { key: 'personaId', type: 'string' },
+    { key: 'personaName', type: 'string' },
+    { key: 'segment', type: 'string' },
+  ]);
+}
+
+export function personaConfigSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    { key: 'personaId', type: 'string' },
+    { key: 'personaName', type: 'string' },
+  ]);
+}
+
+export function zielgruppeConfigSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    { key: 'targetGroupId', type: 'string' },
+    { key: 'targetGroupName', type: 'string' },
+    { key: 'segment', type: 'string' },
+  ]);
+}
+
+export function compareNodeSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    { key: 'passed', type: 'boolean' },
+    { key: 'actual', type: 'any' },
+    { key: 'path', type: 'string' },
+    { key: 'op', type: 'string' },
+    { key: 'value', type: 'any' },
+  ]);
+}
+
+export function gateNodeSchemaTree(nodeId: string): SchemaTreeNode {
+  return schemaTreeFromFields(`$('${nodeId}').json`, [
+    { key: 'matched', type: 'boolean' },
+    { key: 'evidence', type: 'string' },
+    { key: 'gateCondition', type: 'string' },
+    { key: 'pattern', type: 'string' },
+  ]);
 }
 
 export function setNodeSchemaTree(nodeId: string, alias?: string): SchemaTreeNode {
@@ -256,13 +322,16 @@ export function predictedSchemaForSource(
     return buildSchemaFromCatalogPaths(`$('${sourceNodeId}').json`, root, relPaths);
   }
 
-  if (
-    kind === 'prompt' ||
-    kind === 'action' ||
-    kind === 'observe' ||
-    kind === 'message' ||
-    kind === 'measure'
-  ) {
+  if (kind === 'start') return startNodeSchemaTree(sourceNodeId);
+  if (kind === 'persona') return personaConfigSchemaTree(sourceNodeId);
+  if (kind === 'zielgruppe') return zielgruppeConfigSchemaTree(sourceNodeId);
+  if (kind === 'compare' || kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate') {
+    return compareNodeSchemaTree(sourceNodeId);
+  }
+  if (kind === 'gate') return gateNodeSchemaTree(sourceNodeId);
+  if (kind === 'observe') return observeNodeSchemaTree(sourceNodeId);
+  if (kind === 'measure') return measureNodeSchemaTree(sourceNodeId);
+  if (kind === 'prompt' || kind === 'action' || kind === 'message') {
     return journeyStepSchemaTree(sourceNodeId);
   }
 
@@ -273,10 +342,20 @@ export function predictedSchemaForNodeOutput(
   nodeId: string,
   kind: CollectionFlowNodeKind | string,
   alias?: string
-): SchemaTreeNode {
+): SchemaTreeNode | null {
+  if (kind === 'abandon' || kind === 'quality_ok') return null;
   if (kind === 'set') return setNodeSchemaTree(nodeId, alias);
   const root = catalogRootForActionKind(kind);
   if (root) return buildSchemaFromCatalogPaths(`$('${nodeId}').json`, root, catalogRelativePaths(root));
+  if (kind === 'start') return startNodeSchemaTree(nodeId);
+  if (kind === 'persona') return personaConfigSchemaTree(nodeId);
+  if (kind === 'zielgruppe') return zielgruppeConfigSchemaTree(nodeId);
+  if (kind === 'compare' || kind === 'score_gate' || kind === 'issue_gate' || kind === 'geo_gate') {
+    return compareNodeSchemaTree(nodeId);
+  }
+  if (kind === 'gate') return gateNodeSchemaTree(nodeId);
+  if (kind === 'observe') return observeNodeSchemaTree(nodeId);
+  if (kind === 'measure') return measureNodeSchemaTree(nodeId);
   return journeyStepSchemaTree(nodeId);
 }
 

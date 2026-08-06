@@ -22,6 +22,11 @@ import {
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode,
 } from '@/lib/collection-flow-canvas'
+import { COLLECTION_MEASURE_KEY_OPTIONS } from '@/lib/collection-flow-presets'
+import {
+  patchLabelFromUrlIfGeneric,
+  summarizeFlowUrl,
+} from '@/lib/collection-flow-url'
 import {
   formatExpressionForPath,
   formatNodeJsonExpression,
@@ -175,6 +180,32 @@ function blockSchemaPathDrop(event: DragEvent) {
   event.stopPropagation()
 }
 
+function urlKindDefaultLabel(kind: CollectionFlowNodeKind | string): string | null {
+  if (kind === 'start') return KIND_LABEL.start
+  if (kind === 'scan') return KIND_LABEL.scan
+  if (kind === 'domain_scan') return KIND_LABEL.domain_scan
+  if (kind === 'geo_job') return KIND_LABEL.geo_job
+  return null
+}
+
+function patchFromUrlInput(
+  node: CollectionFlowNode,
+  url: string
+): Partial<CollectionFlowNode> {
+  const defaultLabel = urlKindDefaultLabel(node.kind)
+  const patch: Partial<CollectionFlowNode> =
+    node.kind === 'start' ? { urlKey: url, url } : { url }
+  if (defaultLabel) {
+    const nextLabel = patchLabelFromUrlIfGeneric(node.label, defaultLabel, url)
+    if (nextLabel) patch.label = nextLabel
+  }
+  return patch
+}
+
+function gateNeedsPattern(gateCondition: string | undefined): boolean {
+  return gateCondition === 'url_match' || gateCondition === 'title_match'
+}
+
 export function CollectionFlowNodeInspector({
   open,
   node,
@@ -266,7 +297,7 @@ export function CollectionFlowNodeInspector({
         return
       }
       if (focusField === 'url' && (node.kind === 'start' || node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job')) {
-        onUpdate(node.id, { url: expr })
+        onUpdate(node.id, node.kind === 'start' ? { urlKey: expr, url: expr } : { url: expr })
         return
       }
       if (focusField === 'alias' && node.kind === 'set') {
@@ -464,12 +495,90 @@ export function CollectionFlowNodeInspector({
         <ExpressionField
           label="URL"
           value={node.url ?? node.urlKey ?? ''}
-          onChange={(v) =>
-            onUpdate(node.id, node.kind === 'start' ? { urlKey: v, url: v } : { url: v })
-          }
+          onChange={(v) => onUpdate(node.id, patchFromUrlInput(node, v))}
           onFocusField={() => setFocusField('url')}
           placeholder="https://… oder {{ journey.finalUrl }}"
         />
+      ) : null}
+
+      {node.kind === 'start' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Max Steps</span>
+          <Input
+            block
+            size="sm"
+            type="number"
+            min={1}
+            max={64}
+            value={node.maxSteps ?? 8}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const n = Number(e.target.value)
+              onUpdate(node.id, { maxSteps: Number.isFinite(n) && n > 0 ? n : 8 })
+            }}
+          />
+        </label>
+      ) : null}
+
+      {node.kind === 'observe' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Beobachtungsdauer (s)</span>
+          <Input
+            block
+            size="sm"
+            type="number"
+            min={1}
+            max={300}
+            value={node.observeSeconds ?? 30}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const n = Number(e.target.value)
+              onUpdate(node.id, { observeSeconds: Number.isFinite(n) && n > 0 ? n : 30 })
+            }}
+          />
+        </label>
+      ) : null}
+
+      {node.kind === 'measure' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Measure Key</span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={node.measureKey ?? 'overall'}
+            onChange={(e) => onUpdate(node.id, { measureKey: e.target.value })}
+          >
+            {COLLECTION_MEASURE_KEY_OPTIONS.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {node.kind === 'geo_job' && onUpdate ? (
+        <ExpressionField
+          label="Company Name"
+          value={node.companyName ?? ''}
+          onChange={(v) => onUpdate(node.id, { companyName: v })}
+          hint="Brand-Hinweis wenn URL leer"
+        />
+      ) : null}
+
+      {node.kind === 'domain_scan' && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">Max Pages</span>
+          <Input
+            block
+            size="sm"
+            type="number"
+            min={1}
+            max={500}
+            value={node.maxPages ?? 50}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const n = Number(e.target.value)
+              onUpdate(node.id, { maxPages: Number.isFinite(n) && n > 0 ? n : 50 })
+            }}
+          />
+        </label>
       ) : null}
 
       {node.kind === 'scan' && onUpdate ? (
@@ -554,20 +663,34 @@ export function CollectionFlowNodeInspector({
       ) : null}
 
       {node.kind === 'gate' && onUpdate ? (
-        <label className="msqdx-flow-rf-field">
-          <span className="msqdx-flow-inspector-field-label">Condition</span>
-          <select
-            className="msqdx-flow-rf-select"
-            value={String(node.gateCondition ?? 'goal_reached')}
-            onChange={(e) => onUpdate(node.id, { gateCondition: e.target.value as CollectionFlowNode['gateCondition'] })}
-          >
-            {AUDION_GATE_OPTIONS.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-        </label>
+        <>
+          <label className="msqdx-flow-rf-field">
+            <span className="msqdx-flow-inspector-field-label">Condition</span>
+            <select
+              className="msqdx-flow-rf-select"
+              value={String(node.gateCondition ?? 'goal_reached')}
+              onChange={(e) =>
+                onUpdate(node.id, {
+                  gateCondition: e.target.value as CollectionFlowNode['gateCondition'],
+                })
+              }
+            >
+              {AUDION_GATE_OPTIONS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
+          </label>
+          {gateNeedsPattern(String(node.gateCondition ?? 'goal_reached')) ? (
+            <ExpressionField
+              label="Pattern"
+              value={node.pattern ?? ''}
+              onChange={(v) => onUpdate(node.id, { pattern: v })}
+              hint="Regex für url_match / title_match"
+            />
+          ) : null}
+        </>
       ) : null}
 
       {node.presetId ? (

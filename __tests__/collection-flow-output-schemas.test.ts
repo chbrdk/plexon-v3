@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildSchemaFromCatalogPaths,
+  compareNodeSchemaTree,
+  gateNodeSchemaTree,
   journeyStepSchemaTree,
+  measureNodeSchemaTree,
   mergeRunItemsIntoSchema,
   predictedSchemaForNodeOutput,
+  startNodeSchemaTree,
 } from '@/lib/collection-flow-output-schemas';
 
 function childKeys(node: { children?: Array<{ key: string }> }): string[] {
@@ -47,6 +51,37 @@ describe('journeyStepSchemaTree', () => {
     const tree = journeyStepSchemaTree('n-action');
     expect(childKeys(tree)).toEqual(['text', 'note', 'label']);
     expect(tree.children?.every((c) => c.type === 'string')).toBe(true);
+  });
+});
+
+describe('predictedSchemaForNodeOutput', () => {
+  it('uses start config fields for start nodes', () => {
+    const tree = startNodeSchemaTree('n-start');
+    expect(childKeys(tree)).toContain('url');
+    expect(childKeys(tree)).toContain('maxSteps');
+    expect(predictedSchemaForNodeOutput('n-start', 'start')?.children?.some((c) => c.key === 'urlKey')).toBe(
+      true
+    );
+  });
+
+  it('uses compare verdict fields for compare nodes', () => {
+    const tree = compareNodeSchemaTree('n-compare');
+    expect(childKeys(tree)).toEqual(['passed', 'actual', 'path', 'op', 'value']);
+  });
+
+  it('uses gate evaluation fields for gate nodes', () => {
+    const tree = gateNodeSchemaTree('n-gate');
+    expect(childKeys(tree)).toContain('matched');
+    expect(childKeys(tree)).toContain('pattern');
+  });
+
+  it('includes measureKey on measure nodes', () => {
+    const tree = measureNodeSchemaTree('n-measure');
+    expect(childKeys(tree)).toContain('measureKey');
+  });
+
+  it('returns null for terminal quality_ok nodes', () => {
+    expect(predictedSchemaForNodeOutput('n-ok', 'quality_ok')).toBeNull();
   });
 });
 
