@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { getBindingsForPlatformProject } from '@/lib/db/platform-project-bindings';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
+import { getOrCreateKnowledgePack } from '@/lib/db/collection-knowledge-packs';
+import { listCollectionTestFlows } from '@/lib/db/collection-test-flows';
 import {
   fetchAudionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
@@ -21,6 +23,18 @@ vi.mock('@/lib/db/platform-project-bindings', () => ({
   getBindingsForPlatformProject: vi.fn(),
 }));
 
+vi.mock('@/lib/db/collection-knowledge-packs', () => ({
+  getOrCreateKnowledgePack: vi.fn(),
+}));
+
+vi.mock('@/lib/db/collection-test-flows', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/db/collection-test-flows')>();
+  return {
+    ...actual,
+    listCollectionTestFlows: vi.fn(),
+  };
+});
+
 vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
   fetchCheckionPlatformProjectSummary: vi.fn(),
   fetchAudionPlatformProjectSummary: vi.fn(),
@@ -30,10 +44,26 @@ vi.mock('@/lib/platform-project-access', () => ({
   userCanViewPlatformProject: vi.fn(),
 }));
 
+function emptyPackRow(platformProjectId: string) {
+  return {
+    id: 'pack-1',
+    platformProjectId,
+    revision: 1,
+    schemaVersion: '2026-08-knowledge-pack-v1',
+    facets: {},
+    updatedAt: new Date('2026-08-01T00:00:00.000Z'),
+    updatedByUserId: null,
+  };
+}
+
 describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
+    vi.mocked(getOrCreateKnowledgePack).mockResolvedValue(
+      emptyPackRow('p1') as Awaited<ReturnType<typeof getOrCreateKnowledgePack>>,
+    );
+    vi.mocked(listCollectionTestFlows).mockResolvedValue([]);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -119,6 +149,33 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
       ],
       studies: [{ id: 's-1', name: 'Checkout study', status: 'active', waveCount: 2, targetUrlKey: null }],
     });
+    vi.mocked(listCollectionTestFlows).mockResolvedValue([
+      {
+        id: 'flow-1',
+        platformProjectId: 'p1',
+        name: 'Smoke flow',
+        templateId: null,
+        ownerId: null,
+        flow: {
+          schemaVersion: '2026-08-collection-flow-v1',
+          templateId: 'blank',
+          nodes: [],
+          edges: [],
+          lastRun: {
+            startedAt: '2026-08-01T00:00:00.000Z',
+            completedAt: '2026-08-01T00:01:00.000Z',
+            scanId: null,
+            url: 'https://acme.test/',
+            status: 'complete',
+            overallScore: 88,
+          },
+        },
+        webhookEnabled: false,
+        webhookSecretHint: null,
+        createdAt: new Date('2026-08-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-08-02T00:00:00.000Z'),
+      },
+    ] as Awaited<ReturnType<typeof listCollectionTestFlows>>);
 
     const { GET } = await import('@/app/api/platform/projects/[platformProjectId]/dashboard/route');
     const res = await GET(new Request('http://localhost/api/platform/projects/p1/dashboard'), {
@@ -140,6 +197,23 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.audion?.studies[0]?.name).toBe('Checkout study');
     expect(body.links.audionProject).toContain('platformCompanyId=c1');
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
+    expect(body.knowledge?.revision).toBe(1);
+    expect(body.knowledge?.facets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ facetId: 'profile', status: 'empty' }),
+        expect.objectContaining({ facetId: 'brand', status: 'reserved' }),
+      ]),
+    );
+    expect(body.flows).toEqual({
+      count: 1,
+      recent: [
+        expect.objectContaining({
+          id: 'flow-1',
+          name: 'Smoke flow',
+          lastRunStatus: 'complete',
+        }),
+      ],
+    });
   });
 
   it('marks AUDION linked from binding when live summary is null', async () => {
@@ -200,5 +274,7 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     });
     expect(body.checkion).toBeNull();
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
+    expect(body.knowledge?.facets).toBeDefined();
+    expect(body.flows).toEqual({ count: 0, recent: [] });
   });
 });

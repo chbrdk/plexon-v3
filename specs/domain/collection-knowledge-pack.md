@@ -232,19 +232,20 @@ Empty Collection → pack created lazily on first GET (all facets empty / `brand
 
 ## Plexon visual / IA (Collection Knowledge surface)
 
-Surface lives on Collection detail `/projects/[id]` (`PlatformProjectDashboard`), magazine composition — dash-band shell, **unified TOC** (shared knowledge facets + CHECKION / AUDION / Links), one active tile at a time, structured `plexon-edit-dialog` editors. **Not** a separate purple “AI knowledge hub” landing.
+Surface lives on Collection detail `/projects/[id]` (`PlatformProjectDashboard`). **Magazine vs report** (same rule as CHECKION scan Overview vs Issues): landing = narrative nutshell; TOC band = Arbeitstiefe. **Not** a separate purple “AI knowledge hub” landing and **not** a Checkion report dump onto Overview.
 
 ### Composition (structure first)
 
 1. **Masthead** — Collection name (Identity), domain chip (existing SectionChrome).
-2. **Unified magazine band** — shared knowledge + capability catalogs in one TOC (`magazineTitle`).
-3. **Header AI** — “Fill project with AI” drafts all suggestable facets (preview → merge apply); shown when a knowledge facet is active.
-4. **TOC** — knowledge facets | CHECKION | AUDION | Links (uppercase hairline).
-5. **Active tile** — either Shared facet body or Capability-local catalog; product deep-links.
-6. **Edit** — structured Field/Input dialog (not raw JSON). `sources` editable; `brand` reserved EmptyState.
-7. **SoT vs local labels** — Pack facets badge **Shared**; CHECKION/AUDION tiles badge **Capability**.
-8. **Empty states** — quiet magazine empty + AI suggest / manual edit CTAs. No fake Brandion copy.
-9. **Growth** — TOC is primary nav; one active tile (not Accordion card chrome).
+2. **Overview magazine** (`CollectionOverviewBand`, `data-section="collection-overview"`) — compact nutshell: CHECKION / AUDION / knowledge readiness / Flows / Links **teasers** only; CTAs jump into the work band, Flows route, or product deep-links. Faustregel: *was zählt und warum*.
+3. **Work band** (`CollectionKnowledgeBand`, `data-section="collection-magazine"`) — dash-band shell, **unified TOC** (shared knowledge facets + CHECKION / AUDION / Links), one active tile at a time, structured `plexon-edit-dialog` editors. Faustregel: *was genau, wo, was tun*.
+4. **Header AI** — “Fill project with AI” drafts all suggestable facets (preview → merge apply); shown when a knowledge facet is active in the work band.
+5. **TOC** — knowledge facets | CHECKION | AUDION | Links (uppercase hairline). Overview teasers may set `openNav` and scroll to this band.
+6. **Active tile** — either Shared facet body or Capability-local catalog; product deep-links.
+7. **Edit** — structured Field/Input dialog (not raw JSON). `sources` editable; `brand` reserved EmptyState.
+8. **SoT vs local labels** — Pack facets badge **Shared**; CHECKION/AUDION tiles badge **Capability**.
+9. **Empty states** — quiet magazine empty + AI suggest / manual edit CTAs. No fake Brandion copy.
+10. **Growth** — Overview is the landing spine; TOC is Arbeitstiefe nav (one active tile, not Accordion card chrome). No `/projects/[id]/overview` route.
 
 ### Permissions sketch
 

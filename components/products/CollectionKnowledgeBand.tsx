@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode, type RefObject } from 'react'
 import Link from 'next/link'
 import {
   Alert,
@@ -54,11 +54,11 @@ const EDITABLE_FACETS: KnowledgeFacetId[] = [
 ]
 
 type CapabilityNavId = 'checkion' | 'audion' | 'bindings'
-type MagazineNavId = KnowledgeFacetId | CapabilityNavId
+export type CollectionWorkNavId = KnowledgeFacetId | CapabilityNavId
 
 const CAPABILITY_NAV_IDS: CapabilityNavId[] = ['checkion', 'audion', 'bindings']
 
-function isKnowledgeFacetId(id: MagazineNavId): id is KnowledgeFacetId {
+function isKnowledgeFacetId(id: CollectionWorkNavId): id is KnowledgeFacetId {
   return (KNOWLEDGE_FACET_IDS as readonly string[]).includes(id)
 }
 
@@ -69,6 +69,10 @@ type Props = {
   checkion?: CheckionProjectSummary | null
   audion?: AudionProjectSummary | null
   bindings?: CollectionBinding[]
+  /** Controlled work-band TOC selection (Overview teasers jump here). */
+  openNav?: CollectionWorkNavId
+  onOpenNav?: (id: CollectionWorkNavId) => void
+  workBandRef?: RefObject<HTMLElement | null>
 }
 
 type SuggestResponse = {
@@ -324,12 +328,20 @@ export function CollectionKnowledgeBand({
   checkion = null,
   audion = null,
   bindings = [],
+  openNav: openNavProp,
+  onOpenNav,
+  workBandRef,
 }: Props) {
   const { t } = useI18n()
   const [pack, setPack] = useState<KnowledgePackResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [openNav, setOpenNav] = useState<MagazineNavId>('profile')
+  const [openNavInternal, setOpenNavInternal] = useState<CollectionWorkNavId>('profile')
+  const openNav = openNavProp ?? openNavInternal
+  const setOpenNav = (id: CollectionWorkNavId) => {
+    onOpenNav?.(id)
+    if (openNavProp === undefined) setOpenNavInternal(id)
+  }
   const [canEdit, setCanEdit] = useState(true)
 
   const [editing, setEditing] = useState<KnowledgeFacetId | null>(null)
@@ -602,7 +614,7 @@ export function CollectionKnowledgeBand({
   const toc = useMemo(() => {
     if (!pack) return []
     return KNOWLEDGE_FACET_IDS.map((id) => ({
-      id: id as MagazineNavId,
+      id: id as CollectionWorkNavId,
       empty: id === 'brand' ? false : isFacetContentEmpty(id, pack.facets[id].data),
       group: 'knowledge' as const,
     }))
@@ -611,7 +623,7 @@ export function CollectionKnowledgeBand({
   const capabilityToc = useMemo(
     () =>
       CAPABILITY_NAV_IDS.map((id) => ({
-        id: id as MagazineNavId,
+        id: id as CollectionWorkNavId,
         empty:
           id === 'checkion'
             ? !checkion
@@ -666,9 +678,11 @@ export function CollectionKnowledgeBand({
 
   return (
     <section
+      ref={workBandRef}
       className="plexon-dash-band plexon-knowledge-band"
       aria-label={t('projects.detail.magazineTitle')}
       data-section="collection-magazine"
+      id="collection-work"
     >
       <header className="plexon-dash-band-head plexon-knowledge-band-head">
         <div>

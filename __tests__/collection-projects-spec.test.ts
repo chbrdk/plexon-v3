@@ -48,13 +48,16 @@ describe('collection projects domain (phase 0)', () => {
       path.join(root, 'components/products/PlatformProjectDashboard.tsx'),
       'utf8',
     )
+    const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
     const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8')
     const chip = readFileSync(
       path.join(root, 'components/assistant/ProjectContextChip.tsx'),
       'utf8',
     )
     const chat = readFileSync(path.join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(spec).toContain('Overview magazine')
     expect(home).toContain('collection-project-home')
+    expect(home).toContain('CollectionOverviewBand')
     expect(home).toContain('pathAssistantWithProject')
     expect(constants).toContain('ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM')
     expect(chip).toContain("from '@msqdx/ui'")

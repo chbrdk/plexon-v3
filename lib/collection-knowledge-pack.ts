@@ -666,3 +666,23 @@ export function isFacetContentEmpty(facetId: KnowledgeFacetId, data: unknown): b
       return true;
   }
 }
+
+/** Overview teaser readiness — no facet bodies. */
+export type KnowledgeFacetReadinessStatus = 'filled' | 'empty' | 'reserved';
+
+export type KnowledgeFacetReadiness = {
+  facetId: KnowledgeFacetId;
+  status: KnowledgeFacetReadinessStatus;
+};
+
+export function buildKnowledgeFacetReadiness(
+  facets: KnowledgePackFacets
+): KnowledgeFacetReadiness[] {
+  return KNOWLEDGE_FACET_IDS.map((facetId) => {
+    if (facetId === 'brand') {
+      return { facetId, status: 'reserved' as const };
+    }
+    const empty = isFacetContentEmpty(facetId, facets[facetId].data);
+    return { facetId, status: empty ? ('empty' as const) : ('filled' as const) };
+  });
+}

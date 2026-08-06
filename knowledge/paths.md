@@ -67,7 +67,7 @@
   - `GET/PATCH /api/platform/projects/:id/knowledge/facets/:facetId` — `apiPlatformProjectKnowledgeFacet`
   - `POST /api/platform/projects/:id/knowledge/facets/:facetId/publish` — `apiPlatformProjectKnowledgeFacetPublish`
   - `POST /api/platform/projects/:id/knowledge/suggest` — `apiPlatformProjectKnowledgeSuggest` (AI drafts, no write)
-  - Collection detail UI band on `/projects/[id]` (`CollectionKnowledgeBand` in `PlatformProjectDashboard`)
+  - Collection detail `/projects/[id]` (`PlatformProjectDashboard`): Overview magazine (`CollectionOverviewBand`) then work band (`CollectionKnowledgeBand`); dashboard API also returns `flows` + `knowledge` facet readiness teasers
   - Table: `collection_knowledge_packs` (Drizzle `lib/db/schema.ts` · migration `0004_collection_knowledge_packs.sql` · `pnpm db:push`)
 - Companions: `audion-v3/specs/domain/knowledge-pack-publish.md` · `checkion-v3/specs/domain/geo-knowledge-consume.md`
 - UI rebuild progress: `knowledge/ui-rebuild-msqdx-ui.md`

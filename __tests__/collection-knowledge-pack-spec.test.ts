@@ -54,7 +54,22 @@ describe('collection knowledge pack (implementation)', () => {
       path.join(root, 'components/products/CollectionKnowledgeBand.tsx'),
       'utf8',
     )
+    const overview = readFileSync(
+      path.join(root, 'components/products/CollectionOverviewBand.tsx'),
+      'utf8',
+    )
+    const domain = readFileSync(
+      path.join(root, 'specs/domain/collection-knowledge-pack.md'),
+      'utf8',
+    )
     expect(dash).toContain('CollectionKnowledgeBand')
+    expect(dash).toContain('CollectionOverviewBand')
+    expect(overview).toContain('data-section="collection-overview"')
+    expect(overview).toContain('StatLede')
+    expect(overview).not.toMatch(/@mui\//)
+    expect(domain).toContain('Overview magazine')
+    expect(domain).toContain('Arbeitstiefe')
+    expect(domain).toContain('collection-overview')
     expect(band).toContain('plexon-knowledge-band')
     expect(band).toContain('plexon-knowledge-facet-tile')
     expect(band).toContain('apiPlatformProjectKnowledgeSuggest')
@@ -69,6 +84,7 @@ describe('collection knowledge pack (implementation)', () => {
     expect(band).toContain('AudionCapabilityView')
     expect(band).toContain('navCheckion')
     expect(dash).toContain('bindings={data.bindings}')
+    expect(dash).toContain('onOpenWork')
     expect(dash).not.toContain('plexon-project-capability-strip')
     expect(band).not.toMatch(/@mui\//)
     expect(dash).not.toMatch(/@mui\//)
@@ -91,8 +107,18 @@ describe('collection knowledge pack (implementation)', () => {
     expect(ownership).toContain('Collection Knowledge Pack')
     expect(paths).toContain('apiPlatformProjectKnowledge')
     expect(paths).toContain('apiPlatformProjectKnowledgeSuggest')
+    expect(paths).toContain('CollectionOverviewBand')
     expect(constants).toContain('apiPlatformProjectKnowledge')
     expect(constants).toContain('apiPlatformProjectKnowledgeSuggest')
+  })
+
+  it('buildKnowledgeFacetReadiness marks brand reserved and empties', async () => {
+    const { buildKnowledgeFacetReadiness, createEmptyFacets } = await import(
+      '../lib/collection-knowledge-pack'
+    )
+    const readiness = buildKnowledgeFacetReadiness(createEmptyFacets())
+    expect(readiness.find((r) => r.facetId === 'brand')?.status).toBe('reserved')
+    expect(readiness.find((r) => r.facetId === 'profile')?.status).toBe('empty')
   })
 
   it('suggestable facets never include brand', () => {

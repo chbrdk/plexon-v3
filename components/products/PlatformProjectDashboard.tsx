@@ -1,9 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import NextLink from 'next/link'
 import { Alert, Button, SectionChrome, Spinner, Text } from '@msqdx/ui'
-import { CollectionKnowledgeBand } from '@/components/products/CollectionKnowledgeBand'
+import {
+  CollectionKnowledgeBand,
+  type CollectionWorkNavId,
+} from '@/components/products/CollectionKnowledgeBand'
+import {
+  CollectionOverviewBand,
+  type DashboardFlowsSummary,
+  type DashboardKnowledgeSummary,
+} from '@/components/products/CollectionOverviewBand'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
 import type { AudionProjectSummary, CheckionProjectSummary } from '@/lib/platform-project-dashboard-fetch'
@@ -24,6 +32,8 @@ type DashboardPayload = {
   }>
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
+  knowledge?: DashboardKnowledgeSummary | null
+  flows?: DashboardFlowsSummary | null
   links: { checkionProject: string; audionProject: string }
 }
 
@@ -32,6 +42,15 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
   const [data, setData] = useState<DashboardPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [workNav, setWorkNav] = useState<CollectionWorkNavId>('profile')
+  const workBandRef = useRef<HTMLElement | null>(null)
+
+  const openWork = useCallback((id: CollectionWorkNavId) => {
+    setWorkNav(id)
+    requestAnimationFrame(() => {
+      workBandRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -102,14 +121,29 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
       {error ? <Alert tone="error">{error}</Alert> : null}
 
       {data && !loading ? (
-        <CollectionKnowledgeBand
-          platformProjectId={platformProjectId}
-          audionHref={data.links.audionProject}
-          checkionHref={data.links.checkionProject}
-          checkion={data.checkion}
-          audion={data.audion}
-          bindings={data.bindings}
-        />
+        <>
+          <CollectionOverviewBand
+            platformProjectId={platformProjectId}
+            domain={data.platformProject.domain}
+            checkion={data.checkion}
+            audion={data.audion}
+            bindings={data.bindings}
+            knowledge={data.knowledge ?? null}
+            flows={data.flows ?? null}
+            onOpenWork={openWork}
+          />
+          <CollectionKnowledgeBand
+            platformProjectId={platformProjectId}
+            audionHref={data.links.audionProject}
+            checkionHref={data.links.checkionProject}
+            checkion={data.checkion}
+            audion={data.audion}
+            bindings={data.bindings}
+            openNav={workNav}
+            onOpenNav={setWorkNav}
+            workBandRef={workBandRef}
+          />
+        </>
       ) : null}
     </div>
   )

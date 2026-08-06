@@ -40,6 +40,7 @@ describe('products ui rebuild (wave 3)', () => {
     expect(dashboard).toContain("from '@msqdx/ui'")
     expect(dashboard).toContain('SectionChrome')
     expect(dashboard).toContain('apiPlatformProjectDashboard')
+    expect(dashboard).toContain('CollectionOverviewBand')
     expect(dashboard).not.toContain("from '@msqdx/react'")
     expect(dashboard).not.toContain("from '@mui/material'")
   })

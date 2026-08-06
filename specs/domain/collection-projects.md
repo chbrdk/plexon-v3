@@ -62,7 +62,7 @@ Users see **one project** (a Collection). CHECKION and AUDION are **capabilities
 
 - Nav **Projekte** → `/projects`: create form + full Collection list (same card look as dashboard insights).
 - Home keeps a short preview (limit 6) with CTAs to the hub.
-- Detail stays `/projects/[id]` (`PlatformProjectDashboard`).
+- Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
 - Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync both).
 
 ## Collection Knowledge Pack
