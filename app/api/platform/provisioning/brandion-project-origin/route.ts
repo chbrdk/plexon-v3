@@ -30,13 +30,40 @@ function checkSecret(request: Request): boolean {
 }
 
 const bodySchema = z.object({
-  audionProjectId: z.string().min(1),
+  brandionProjectId: z.string().min(1),
   name: z.string().min(1),
   domain: z.string().nullable().optional(),
   /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
   ownerPlexonUserId: z.string().min(1).optional(),
   platformCompanyId: z.string().min(1).optional(),
 });
+
+async function bestEffortSiblingMirrors(
+  platformProjectId: string,
+  source: string
+): Promise<{ checkionProjectId: string | null; audionProjectId: string | null }> {
+  let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
+  let audionId = await getExternalProjectId(platformProjectId, 'audion');
+  const missing: Array<'checkion' | 'audion'> = [];
+  if (!checkionId) missing.push('checkion');
+  if (!audionId) missing.push('audion');
+  if (missing.length === 0) {
+    return { checkionProjectId: checkionId, audionProjectId: audionId };
+  }
+  try {
+    const results = await syncPlatformProjectToProducts(platformProjectId, {
+      source,
+      onlyProducts: missing,
+    });
+    const checkion = results.find((r) => r.productId === 'checkion');
+    const audion = results.find((r) => r.productId === 'audion');
+    if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
+    if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
+  } catch {
+    /* sibling mirrors can be repaired via sync later */
+  }
+  return { checkionProjectId: checkionId, audionProjectId: audionId };
+}
 
 export async function POST(request: Request) {
   if (!checkSecret(request)) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);
@@ -72,46 +99,23 @@ export async function POST(request: Request) {
     return apiError(msg, API_STATUS.BAD_REQUEST);
   }
 
-  const audionId = parsed.audionProjectId.trim();
+  const brandionId = parsed.brandionProjectId.trim();
 
-  const existingPlatformId = await findPlatformProjectIdByProductExternal('audion', audionId);
+  const existingPlatformId = await findPlatformProjectIdByProductExternal('brandion', brandionId);
   if (existingPlatformId) {
     const existingProject = await getPlatformProjectById(existingPlatformId);
     if (!existingProject) {
       return apiError('Inconsistent platform project binding', API_STATUS.INTERNAL_ERROR);
     }
-    // Phase 1: Collection must have sibling capabilities — repair missing CHECKION/BRANDION mirrors.
     await ensureBindingPlaceholders(existingPlatformId);
-    let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
-    let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
-    if (!checkionId) {
-      try {
-        const retry = await syncPlatformProjectToProducts(existingPlatformId, {
-          source: 'plexon-audion-project-origin-idempotent',
-          onlyProducts: ['checkion'],
-        });
-        const row = retry.find((r) => r.productId === 'checkion');
-        if (row?.ok && row.externalProjectId) checkionId = row.externalProjectId;
-      } catch {
-        /* fall through with null checkion */
-      }
-    }
-    if (!brandionId) {
-      try {
-        const retry = await syncPlatformProjectToProducts(existingPlatformId, {
-          source: 'plexon-audion-project-origin-idempotent',
-          onlyProducts: ['brandion'],
-        });
-        const row = retry.find((r) => r.productId === 'brandion');
-        if (row?.ok && row.externalProjectId) brandionId = row.externalProjectId;
-      } catch {
-        /* fall through with null brandion */
-      }
-    }
+    const siblings = await bestEffortSiblingMirrors(
+      existingPlatformId,
+      'plexon-brandion-project-origin-idempotent'
+    );
     return platformJson({
       platformProjectId: existingPlatformId,
-      checkionProjectId: checkionId,
-      brandionProjectId: brandionId,
+      checkionProjectId: siblings.checkionProjectId,
+      audionProjectId: siblings.audionProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -134,43 +138,23 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(platformProjectId);
     await upsertPlatformProjectBinding({
       platformProjectId,
-      productId: 'audion',
-      externalProjectId: audionId,
+      productId: 'brandion',
+      externalProjectId: brandionId,
       syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC,
       syncMessage: null,
       lastSyncAt: new Date(),
     });
 
-    // AUDION already bound; sync CHECKION so Collection end-state has both capabilities.
-    const results = await syncPlatformProjectToProducts(platformProjectId, {
-      source: 'plexon-audion-project-origin',
-      onlyProducts: ['checkion'],
-    });
-    const checkion = results.find((r) => r.productId === 'checkion');
-    if (!checkion?.ok || !checkion.externalProjectId) {
-      await deletePlatformProject(platformProjectId);
-      return apiError(checkion?.error ?? 'CHECKION project sync failed', 502);
-    }
-
-    let brandionProjectId: string | null = null;
-    try {
-      const brandionResults = await syncPlatformProjectToProducts(platformProjectId, {
-        source: 'plexon-audion-project-origin',
-        onlyProducts: ['brandion'],
-      });
-      const brandion = brandionResults.find((r) => r.productId === 'brandion');
-      if (brandion?.ok && brandion.externalProjectId) {
-        brandionProjectId = brandion.externalProjectId;
-      }
-    } catch {
-      /* BRANDION mirror can be repaired via sync later */
-    }
+    const siblings = await bestEffortSiblingMirrors(
+      platformProjectId,
+      'plexon-brandion-project-origin'
+    );
 
     return platformJson(
       {
         platformProjectId,
-        checkionProjectId: checkion.externalProjectId,
-        brandionProjectId,
+        checkionProjectId: siblings.checkionProjectId,
+        audionProjectId: siblings.audionProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },
@@ -182,6 +166,6 @@ export async function POST(request: Request) {
     } catch {
       /* best-effort cleanup */
     }
-    return handleApiError(e, { context: 'audion-project-origin' });
+    return handleApiError(e, { context: 'brandion-project-origin' });
   }
 }

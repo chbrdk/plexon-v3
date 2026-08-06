@@ -6,6 +6,7 @@ import {
 } from '@/lib/platform-contract';
 import {
   getAudionPlatformApiBase,
+  getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
 } from '@/lib/constants';
 
@@ -40,6 +41,11 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
     const base = getAudionPlatformApiBase();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/platform/provisioning/projects/${encoded}`;
+  }
+  if (productId === 'brandion') {
+    const base = getBrandionServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }
   return null;
 }

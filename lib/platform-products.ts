@@ -235,6 +235,12 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
       ],
       entryPoints: [
         { id: 'brandion-home', labelKey: 'dashboard.entry.home', href: brandionUrl ?? '#', openInNewTab: true },
+        {
+          id: 'brandion-projects',
+          labelKey: 'dashboard.entry.projects',
+          href: joinUrl(brandionUrl, '/projects') ?? brandionUrl ?? '#',
+          openInNewTab: true,
+        },
       ],
       defaultAccess: 'hidden',
     },

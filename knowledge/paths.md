@@ -12,6 +12,7 @@
 - Companion: `https://audion-v3.projects-a.plygrnd.tech`
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - BRANDION staging companion: `https://brandion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_BRANDION_URL` / `URL_BRANDION_V3`) — set after brandion-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4c
+- BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`
 - Federation contract: `2026-05-plexon-federation-v3`
 - Admin user edit: `/admin/users/[id]` · `pathAdminUser(id)` (legacy `/?editUser=` redirects here)
 - Rail dock storage key: `plexon.v3.railDock`

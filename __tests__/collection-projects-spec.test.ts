@@ -10,6 +10,7 @@ describe('collection projects domain (phase 0)', () => {
     expect(spec).toContain('1A')
     expect(spec).toContain('Fresh start')
     expect(spec).toContain('ensureBindingPlaceholders')
+    expect(spec).toContain('brandion')
     expect(spec).toContain('cancelled')
     expect(spec).toContain('Insights list Collections only')
     expect(spec).toContain('Canonical list + create hub')
@@ -31,6 +32,8 @@ describe('collection projects domain (phase 0)', () => {
     expect(knowledge).toContain('Create invariant (1A)')
     expect(knowledge).toContain('checkion')
     expect(knowledge).toContain('audion')
+    expect(knowledge).toContain('brandion')
+    expect(knowledge).toContain('brandion-project-origin')
   })
 
   it('user-facing copy uses Collection language', () => {

@@ -136,9 +136,19 @@ NEXT_PUBLIC_BRANDION_URL=https://brandion-v3.projects-a.plygrnd.tech
 
 Dann Redeploy plexon-v3. Wirkung:
 
-- `getBrandionUrl()` → Staging-FQDN
+- `getBrandionUrl()` / `getBrandionServiceApiUrl()` → Staging-FQDN
 - Products Registry: BRANDION `lifecycle: active` (sonst `planned`)
-- Deep-Links: home `/`, login `/login`, health `/api/health`
+- Deep-Links: home `/`, projects `/projects`, login `/login`, health `/api/health`
+- Collection create / sync upserts BRANDION mirrors via `PUT {BRANDION}/api/platform/provisioning/projects/{id}`
+- Product-first: `POST /api/platform/provisioning/brandion-project-origin`
+
+Auf **brandion-v3** für Live-Origin zusätzlich:
+
+```bash
+BRANDION_FEDERATION_MODE=live
+```
+
+(bereits `PLEXON_SERVICE_SECRET` + Plexon Auth URLs vom Shell-Attach)
 
 **Nie** Prod-`brandion` Coolify-URL hier eintragen.
 

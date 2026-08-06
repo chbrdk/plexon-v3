@@ -175,6 +175,12 @@ export const getBrandionUrl = (): string | null => {
   return process.env.NEXT_PUBLIC_BRANDION_URL?.trim() || null;
 };
 
+/** Service base for BRANDION project upsert (defaults to public web origin). */
+export const getBrandionServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getBrandionUrl();
+  return process.env.BRANDION_API_URL?.trim() || getBrandionUrl();
+};
+
 export const getAudionServiceApiUrl = (): string => {
   const explicit =
     typeof process !== 'undefined' ? process.env.AUDION_API_URL?.trim() : '';
@@ -294,6 +300,10 @@ export const API_PLATFORM_PROVISIONING_AUDION_PROJECT_ORIGIN =
 /** Service-authenticated: CHECKION created a project first; PLEXON registers platform row + AUDION mirror. */
 export const API_PLATFORM_PROVISIONING_CHECKION_PROJECT_ORIGIN =
   '/api/platform/provisioning/checkion-project-origin';
+
+/** Service-authenticated: BRANDION created a project first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
+  '/api/platform/provisioning/brandion-project-origin';
 
 /** Usage (tokens) for current user. */
 export const API_USAGE = '/api/usage';

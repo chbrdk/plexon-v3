@@ -149,7 +149,7 @@ export async function replaceUserPlatformProjectAssignments(
   });
 }
 
-const MANAGED_PRODUCTS: PlatformProductId[] = ['checkion', 'audion'];
+const MANAGED_PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion'];
 
 /**
  * Expands platform-project assignments + legacy per-product rows into provisioning payloads.
