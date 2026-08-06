@@ -21,6 +21,18 @@ describe('buildSchemaFromCatalogPaths', () => {
     expect(score?.path).toBe("$('n-scan').json.overallScore");
   });
 
+  it('nests lens scores under a scores object', () => {
+    const tree = buildSchemaFromCatalogPaths('scan', 'scan', [
+      'overallScore',
+      'scores.accessibility',
+      'scores.seo',
+    ]);
+    const scores = tree.children?.find((c) => c.key === 'scores');
+    expect(scores?.type).toBe('object');
+    expect(scores?.children?.some((c) => c.key === 'accessibility')).toBe(true);
+    expect(scores?.children?.some((c) => c.key === 'seo')).toBe(true);
+  });
+
   it('adds issues.items[item] shape for scan catalog', () => {
     const tree = buildSchemaFromCatalogPaths('scan', 'scan', ['issues.openCount']);
     const issues = tree.children?.find((c) => c.key === 'issues');

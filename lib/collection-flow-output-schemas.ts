@@ -104,6 +104,17 @@ function enrichIssuesArray(root: SchemaTreeNode): void {
   walk(root);
 }
 
+function sortSchemaChildren(node: SchemaTreeNode): void {
+  if (!node.children?.length) return;
+  node.children.sort((a, b) => {
+    const aBranch = Boolean(a.children?.length);
+    const bBranch = Boolean(b.children?.length);
+    if (aBranch !== bBranch) return aBranch ? -1 : 1;
+    return a.key.localeCompare(b.key);
+  });
+  node.children.forEach(sortSchemaChildren);
+}
+
 /** Build nested schema from catalog dot-paths under a base expression path. */
 export function buildSchemaFromCatalogPaths(
   basePath: string,
@@ -134,6 +145,8 @@ export function buildSchemaFromCatalogPaths(
   if (catalogGroup === 'scan' || catalogGroup === 'domain') {
     enrichIssuesArray(root);
   }
+
+  sortSchemaChildren(root);
 
   return root;
 }
