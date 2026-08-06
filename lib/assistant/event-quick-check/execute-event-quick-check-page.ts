@@ -25,6 +25,7 @@ import {
   EVENT_QUICK_CHECK_COMPETITORS_CHECKPOINT_KEY,
   EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY,
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
+  EVENT_QUICK_CHECK_FLOW_STATE_KEY,
 } from '@/lib/paths/event-quick-check-page';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID, resolveEventQuickCheckProfile, type EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
 import { buildEventQuickCheckInitialSteps } from '@/lib/assistant/ui-blocks/event-quick-check-steps';
@@ -53,6 +54,7 @@ import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-ch
 import type { EventQuickCheckResumeCheckpoint, EventQuickCheckCompetitorsCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { EventQuickCheckRunMode } from '@/lib/assistant/playbooks/run-event-quick-check';
+import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-quick-check';
 import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion-project-deep-scan-client';
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
 import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
@@ -379,6 +381,9 @@ export async function executeEventQuickCheckRun(
       depth: resolveEventQuickCheckDepth(stored),
       competitorsConfirmed: confirmedCompetitors,
       competitorsCheckpoint,
+      eqcFlowState: stored[EVENT_QUICK_CHECK_FLOW_STATE_KEY] as
+        | EventQuickCheckResult['eqcFlowState']
+        | undefined,
     }
   );
 
@@ -392,8 +397,12 @@ export async function executeEventQuickCheckRun(
         ...stored,
         url,
         projectName,
+        platformProjectId: quick.platformProjectId ?? platformProjectId,
         [EVENT_QUICK_CHECK_COMPANY_BRIEF_KEY]: quick.companyBrief,
         [EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY]: true,
+        ...(quick.eqcFlowState
+          ? { [EVENT_QUICK_CHECK_FLOW_STATE_KEY]: quick.eqcFlowState }
+          : {}),
       },
     });
     return {
@@ -402,6 +411,7 @@ export async function executeEventQuickCheckRun(
       steps,
       awaitingCompanyBrief: true,
       companyBrief: quick.companyBrief,
+      platformProjectId: quick.platformProjectId ?? platformProjectId,
     };
   }
 
@@ -419,6 +429,9 @@ export async function executeEventQuickCheckRun(
         [EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY]: quick.competitorsDraft ?? [],
         [EVENT_QUICK_CHECK_COMPETITORS_CHECKPOINT_KEY]: quick.competitorsCheckpoint,
         [EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY]: true,
+        ...(quick.eqcFlowState
+          ? { [EVENT_QUICK_CHECK_FLOW_STATE_KEY]: quick.eqcFlowState }
+          : {}),
       },
     });
     return {
@@ -429,6 +442,7 @@ export async function executeEventQuickCheckRun(
       competitors: quick.competitorsDraft ?? [],
       maxCompetitors: resolveEventQuickCheckProfile(resolveEventQuickCheckDepth(stored)).maxCompetitors,
       companyBrief: quick.companyBrief ?? confirmedBrief,
+      platformProjectId: quick.platformProjectId ?? platformProjectId,
     };
   }
 
@@ -448,6 +462,9 @@ export async function executeEventQuickCheckRun(
         [EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY]: true,
         [EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY]: started,
         [EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]: false,
+        ...(quick.eqcFlowState
+          ? { [EVENT_QUICK_CHECK_FLOW_STATE_KEY]: quick.eqcFlowState }
+          : {}),
       },
     });
     return {
@@ -457,6 +474,7 @@ export async function executeEventQuickCheckRun(
       awaitingDeepScan: true,
       deepScanProgress: quick.deepScanProgress,
       checkionProjectId: quick.checkionProjectId ?? quick.resumeCheckpoint.checkionProjectId,
+      platformProjectId: quick.platformProjectId ?? platformProjectId,
     };
   }
 
@@ -481,6 +499,9 @@ export async function executeEventQuickCheckRun(
               [EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY]: quick.resumeCheckpoint.deepScanStarted,
             }
           : {}),
+        ...(quick.eqcFlowState
+          ? { [EVENT_QUICK_CHECK_FLOW_STATE_KEY]: quick.eqcFlowState }
+          : {}),
       },
     });
     const deepScanStarted =
@@ -499,6 +520,7 @@ export async function executeEventQuickCheckRun(
       geoHasPersona: listPersonasFromPreview(quick.personaPreview).length > 0,
       geoCompetitors: quick.geoCompetitors,
       companyBrief: quick.companyBrief ?? confirmedBrief,
+      platformProjectId: quick.platformProjectId ?? platformProjectId,
       ...(deepScanStarted
         ? {
             deepScanProgress: quick.deepScanProgress ?? deepScanResolved?.progress,
@@ -580,6 +602,9 @@ export async function executeEventQuickCheckRun(
       [EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY]: false,
       [EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]: false,
       [EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY]: false,
+      ...(quick.eqcFlowState
+        ? { [EVENT_QUICK_CHECK_FLOW_STATE_KEY]: quick.eqcFlowState }
+        : {}),
       [EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY]: quick.geoQuestions ?? confirmedGeoQuestions,
       ...(quick.geoQuestionsByPersona?.length
         ? {

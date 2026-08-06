@@ -111,6 +111,10 @@ const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>([
   'geo_job',
   'success',
   'journey',
+  'research_brief',
+  'competitors_suggest',
+  'persona_bootstrap',
+  'suggest_queries',
 ]);
 
 function edgeKindFromDoc(e: CollectionFlowEdge): CollectionFlowEdgeKind {
@@ -535,6 +539,22 @@ export const PALETTE_QUALITY_KINDS: CollectionFlowNodeKind[] = [
   'quality_ok',
 ];
 
+/** Palette — Wave 23 EQC typed actions. */
+export const PALETTE_EQC_KINDS: CollectionFlowNodeKind[] = [
+  'research_brief',
+  'competitors_suggest',
+  'persona_bootstrap',
+  'suggest_queries',
+  'human_confirm',
+];
+
+export const COLLECTION_CONFIRM_KIND_OPTIONS = [
+  'brief',
+  'competitors',
+  'geo_queries',
+  'deep_scan',
+] as const;
+
 export const COLLECTION_SCAN_MODE_OPTIONS = ['single', 'deep'] as const;
 
 export const COLLECTION_SCORE_KIND_OPTIONS = [
@@ -674,6 +694,13 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
       text: '',
     };
   }
+  if (kind === 'human_confirm') {
+    return { ...base, label: 'Bestätigen', confirmKind: 'brief' };
+  }
+  if (kind === 'research_brief') return { ...base, label: 'Unternehmensprofil' };
+  if (kind === 'competitors_suggest') return { ...base, label: 'Wettbewerber' };
+  if (kind === 'persona_bootstrap') return { ...base, label: 'Persona erstellen' };
+  if (kind === 'suggest_queries') return { ...base, label: 'GEO-Fragen' };
   if (
     kind === 'prompt' ||
     kind === 'action' ||

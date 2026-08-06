@@ -21,6 +21,7 @@ import {
 } from '@/lib/integrations/audion-journey-client';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 import {
+  COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
@@ -411,6 +412,88 @@ describe('Collection Test Flow run API', () => {
     );
     const item = toCollectionTestFlowResponse(flowRow() as never);
     expect(item.flow.nodes[0].kind).toBe('start');
+  });
+
+  it('POST creates Event Quick Check template eqc-quality-v1', async () => {
+    vi.mocked(createCollectionTestFlow).mockImplementation(async (input) => {
+      const base = flowRow();
+      return {
+        ...base,
+        name: input.name,
+        templateId: input.templateId ?? null,
+        flow: input.flow as unknown as Record<string, unknown>,
+      };
+    });
+
+    const { POST } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/route'
+    );
+    const created = await POST(
+      new Request('http://local/flows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+          url: 'https://acme.test/',
+          depth: 'quick',
+        }),
+      }),
+      { params: Promise.resolve({ platformProjectId: 'pp-1' }) }
+    );
+    expect(created.status).toBe(201);
+    expect(createCollectionTestFlow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        templateId: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+        name: 'Event Quick Check',
+        flow: expect.objectContaining({
+          templateId: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+          nodes: expect.arrayContaining([
+            expect.objectContaining({ kind: 'research_brief' }),
+            expect.objectContaining({ kind: 'human_confirm', confirmKind: 'brief' }),
+            expect.objectContaining({ kind: 'persona_bootstrap' }),
+            expect.objectContaining({ kind: 'suggest_queries' }),
+            expect.objectContaining({ kind: 'geo_job' }),
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('POST eqc-quality-v1 complete depth includes competitors spine', async () => {
+    vi.mocked(createCollectionTestFlow).mockImplementation(async (input) => {
+      const base = flowRow();
+      return {
+        ...base,
+        name: input.name,
+        templateId: input.templateId ?? null,
+        flow: input.flow as unknown as Record<string, unknown>,
+      };
+    });
+
+    const { POST } = await import(
+      '@/app/api/platform/projects/[platformProjectId]/flows/route'
+    );
+    await POST(
+      new Request('http://local/flows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateId: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+          depth: 'complete',
+        }),
+      }),
+      { params: Promise.resolve({ platformProjectId: 'pp-1' }) }
+    );
+    expect(createCollectionTestFlow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        flow: expect.objectContaining({
+          nodes: expect.arrayContaining([
+            expect.objectContaining({ kind: 'competitors_suggest' }),
+            expect.objectContaining({ kind: 'human_confirm', confirmKind: 'competitors' }),
+          ]),
+        }),
+      })
+    );
   });
 
   it('POST run/journey starts a Study+Wave without polling (Wave 6)', async () => {

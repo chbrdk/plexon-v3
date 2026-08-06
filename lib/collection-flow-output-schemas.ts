@@ -166,9 +166,9 @@ export function catalogSchemaTree(catalogGroup: string, basePath?: string): Sche
 }
 
 export function globalCatalogSchemaForest(): SchemaTreeNode[] {
-  return (['scan', 'domain', 'geo', 'journey', 'run'] as const).map((g) =>
-    catalogSchemaTree(g)
-  );
+  return (
+    ['scan', 'domain', 'geo', 'journey', 'run', 'brief', 'competitors', 'persona', 'queries'] as const
+  ).map((g) => catalogSchemaTree(g));
 }
 
 const JOURNEY_STEP_FIELDS: Array<{ key: string; type: SchemaFieldType }> = [

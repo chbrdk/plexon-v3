@@ -78,6 +78,17 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
   { path: 'journey.allTaskCompleted', label: 'allTaskCompleted', group: 'journey' },
   { path: 'run.url', label: 'url', group: 'run' },
   { path: 'run.startedAt', label: 'startedAt', group: 'run' },
+  { path: 'brief.displayName', label: 'displayName', group: 'brief' },
+  { path: 'brief.industry', label: 'industry', group: 'brief' },
+  { path: 'brief.summary', label: 'summary', group: 'brief' },
+  { path: 'brief.targetAudienceHint', label: 'targetAudienceHint', group: 'brief' },
+  { path: 'brief.companyContext', label: 'companyContext', group: 'brief' },
+  { path: 'competitors.items', label: 'items', group: 'competitors' },
+  { path: 'persona.id', label: 'id', group: 'persona' },
+  { path: 'persona.name', label: 'name', group: 'persona' },
+  { path: 'persona.segment', label: 'segment', group: 'persona' },
+  { path: 'queries.items', label: 'items', group: 'queries' },
+  { path: 'queries.text', label: 'text', group: 'queries' },
 ];
 
 const CATALOG_PATH_SET = new Set(CATALOG_PATH_OPTIONS.map((o) => o.path));
@@ -98,6 +109,10 @@ const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
   geo_job: 'geo',
   success: 'journey',
   journey: 'journey',
+  research_brief: 'brief',
+  competitors_suggest: 'competitors',
+  persona_bootstrap: 'persona',
+  suggest_queries: 'queries',
 };
 
 const ROOT_TO_ACTION_KIND: Record<string, string> = {
@@ -105,6 +120,10 @@ const ROOT_TO_ACTION_KIND: Record<string, string> = {
   domain: 'domain_scan',
   geo: 'geo_job',
   journey: 'success',
+  brief: 'research_brief',
+  competitors: 'competitors_suggest',
+  persona: 'persona_bootstrap',
+  queries: 'suggest_queries',
 };
 
 export function catalogOutHandleId(path: string): string {
@@ -490,6 +509,46 @@ export function buildJourneyCatalogBundle(input: {
     studyId: input.studyId ?? null,
     waveId: input.waveId ?? null,
   };
+}
+
+/** Wave 23 — company brief catalog. */
+export function buildBriefCatalogBundle(
+  brief: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    displayName: typeof brief.displayName === 'string' ? brief.displayName : null,
+    industry: typeof brief.industry === 'string' ? brief.industry : null,
+    summary: typeof brief.summary === 'string' ? brief.summary : null,
+    targetAudienceHint:
+      typeof brief.targetAudienceHint === 'string' ? brief.targetAudienceHint : null,
+    companyContext: typeof brief.companyContext === 'string' ? brief.companyContext : null,
+    disambiguationNote:
+      typeof brief.disambiguationNote === 'string' ? brief.disambiguationNote : null,
+    generatedAt: typeof brief.generatedAt === 'string' ? brief.generatedAt : null,
+  };
+}
+
+export function buildCompetitorsCatalogBundle(items: string[]): Record<string, unknown> {
+  return { items: items.map((s) => String(s).trim()).filter(Boolean) };
+}
+
+export function buildPersonaCatalogBundle(input: {
+  id?: string | null;
+  name?: string | null;
+  segment?: string | null;
+  count?: number;
+}): Record<string, unknown> {
+  return {
+    id: input.id ?? null,
+    name: input.name ?? null,
+    segment: input.segment ?? null,
+    count: input.count ?? 1,
+  };
+}
+
+export function buildQueriesCatalogBundle(items: string[]): Record<string, unknown> {
+  const cleaned = items.map((s) => String(s).trim()).filter(Boolean);
+  return { items: cleaned, text: cleaned.join('\n') };
 }
 
 export function flattenContextForInspector(

@@ -7,6 +7,7 @@ import { API_STATUS } from '@/lib/api-error-handler';
 import {
   deriveCollectionVerdict,
   deriveJourneyErrorVerdict,
+  documentHasEqcSpine,
   documentHasGeoGate,
   documentHasGeoJob,
   documentHasIssueGate,
@@ -31,6 +32,9 @@ import {
   type GeoGateSignals,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
+import {
+  executeEqcCollectionFlowRun,
+} from '@/lib/collection-flow-eqc-execute';
 import {
   persistFlowRunResult,
   toCollectionTestFlowResponse,
@@ -112,6 +116,22 @@ export async function executeCollectionFlowRun(input: {
     const row = { name: input.flowName };
     const doc = input.doc;
     const body = input.body;
+
+    // Wave 23 — EQC spine uses dedicated linear executor (pause/resume).
+    if (documentHasEqcSpine(doc)) {
+      const historyRunId =
+        typeof body.historyRunId === 'string' && body.historyRunId.trim()
+          ? body.historyRunId.trim()
+          : null;
+      return executeEqcCollectionFlowRun({
+        platformProjectId: id,
+        flowId: fid,
+        flowName: row.name,
+        doc,
+        body,
+        historyRunId,
+      });
+    }
 
     const urlOverride =
       typeof body.url === 'string' && body.url.trim() ? body.url.trim() : null;

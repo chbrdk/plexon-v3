@@ -10,11 +10,14 @@ export const COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY = 'journey-quality' as con
 export const COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES = 'page-quality-issues' as const;
 export const COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES =
   'journey-quality-issues' as const;
+/** Wave 23 — Event Quick Check quality spine (no ECHON). */
+export const COLLECTION_FLOW_TEMPLATE_EQC_QUALITY = 'eqc-quality-v1' as const;
 
 /**
  * Wave 5: Audion journey kinds (closed set, semantics owned by AUDION) plus PLEXON/CHECKION
  * quality kinds and the legacy opaque `journey` kind (kept for back-compat documents).
  * @see specs/domain/collection-test-flow.md — Node families A/B/C
+ * @see specs/domain/eqc-as-collection-flow.md — Wave 23 EQC typed nodes
  */
 export const COLLECTION_FLOW_NODE_KINDS = [
   // Family A — AUDION journey (closed set, do not redefine semantics)
@@ -38,6 +41,12 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'geo_job',
   'compare',
   'set',
+  // Wave 23 — EQC typed actions (no generic agent)
+  'research_brief',
+  'competitors_suggest',
+  'persona_bootstrap',
+  'suggest_queries',
+  'human_confirm',
   // Legacy quality gates (Wave 1–8B) — migrated to `compare` on load
   'score_gate',
   'issue_gate',
@@ -46,6 +55,9 @@ export const COLLECTION_FLOW_NODE_KINDS = [
 ] as const;
 
 export type CollectionFlowNodeKind = (typeof COLLECTION_FLOW_NODE_KINDS)[number];
+
+/** Wave 23 — which draft `human_confirm` pauses on. */
+export type CollectionFlowConfirmKind = 'brief' | 'competitors' | 'geo_queries' | 'deep_scan';
 
 /** Page scan depth on `scan` nodes (CHECKION POST /api/scans mode). */
 export type CollectionFlowScanMode = 'single' | 'deep';
@@ -144,6 +156,8 @@ export type CollectionFlowNode = {
   measureKey?: string;
   /** Palette preset id for action/measure factories (Wave 11). */
   presetId?: string;
+  /** Wave 23 — `human_confirm` which draft to pause on. */
+  confirmKind?: CollectionFlowConfirmKind;
   position?: { x: number; y: number };
 };
 
@@ -251,6 +265,9 @@ export type CollectionFlowLastRun = {
   waveRollupOk?: boolean | null;
   /** Wave 4: Knowledge Pack research_brief distillate. */
   knowledgeDistillateOk?: boolean | null;
+  /** Wave 23 — paused on human_confirm. */
+  awaitingNodeId?: string | null;
+  awaitingConfirmKind?: CollectionFlowConfirmKind | null;
 };
 
 export type CollectionVerdict = {
@@ -674,6 +691,171 @@ export function createJourneyQualityIssuesTemplate(url: string): CollectionTestF
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
 }
 
+/**
+ * Wave 23 — Event Quick Check spine (quick depth; no ECHON).
+ * Competitors + deep_scan confirm nodes omitted; complete depth can insert them at bootstrap.
+ */
+export function createEqcQualityTemplate(
+  url: string,
+  opts?: { maxPages?: number; includeCompetitors?: boolean }
+): CollectionTestFlowDocument {
+  const pageUrl = url.trim() || 'https://example.com';
+  const maxPages = opts?.maxPages ?? 50;
+  const includeCompetitors = Boolean(opts?.includeCompetitors);
+
+  const nodes: CollectionFlowNode[] = [
+    { id: 'n-start', kind: 'start', label: 'Start', url: pageUrl, position: { x: 0, y: 80 } },
+    {
+      id: 'n-brief',
+      kind: 'research_brief',
+      label: 'Unternehmensprofil',
+      position: { x: 220, y: 80 },
+    },
+    {
+      id: 'n-confirm-brief',
+      kind: 'human_confirm',
+      label: 'Profil bestätigen',
+      confirmKind: 'brief',
+      position: { x: 440, y: 80 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e-start-brief', source: 'n-start', target: 'n-brief', edgeKind: 'then' },
+    { id: 'e-brief-confirm', source: 'n-brief', target: 'n-confirm-brief', edgeKind: 'then' },
+  ];
+
+  let prev = 'n-confirm-brief';
+  let x = 660;
+
+  if (includeCompetitors) {
+    nodes.push(
+      {
+        id: 'n-competitors',
+        kind: 'competitors_suggest',
+        label: 'Wettbewerber',
+        position: { x, y: 80 },
+      },
+      {
+        id: 'n-confirm-competitors',
+        kind: 'human_confirm',
+        label: 'Wettbewerber bestätigen',
+        confirmKind: 'competitors',
+        position: { x: x + 220, y: 80 },
+      }
+    );
+    edges.push(
+      { id: 'e-to-competitors', source: prev, target: 'n-competitors', edgeKind: 'then' },
+      {
+        id: 'e-competitors-confirm',
+        source: 'n-competitors',
+        target: 'n-confirm-competitors',
+        edgeKind: 'then',
+      }
+    );
+    prev = 'n-confirm-competitors';
+    x += 440;
+  }
+
+  nodes.push(
+    {
+      id: 'n-domain',
+      kind: 'domain_scan',
+      label: 'Domain-Scan',
+      url: pageUrl,
+      maxPages,
+      position: { x, y: 80 },
+    },
+    {
+      id: 'n-persona-boot',
+      kind: 'persona_bootstrap',
+      label: 'Persona erstellen',
+      position: { x: x + 220, y: 80 },
+    },
+    {
+      id: 'n-suggest-q',
+      kind: 'suggest_queries',
+      label: 'GEO-Fragen',
+      position: { x: x + 440, y: 80 },
+    },
+    {
+      id: 'n-confirm-geo',
+      kind: 'human_confirm',
+      label: 'GEO-Fragen bestätigen',
+      confirmKind: 'geo_queries',
+      position: { x: x + 660, y: 80 },
+    },
+    {
+      id: 'n-geo',
+      kind: 'geo_job',
+      label: 'GEO Analyse',
+      url: pageUrl,
+      text: "{{ $('n-suggest-q').json.text }}",
+      companyName: "{{ $('n-brief').json.displayName }}",
+      position: { x: x + 880, y: 80 },
+    },
+    {
+      id: 'n-score',
+      kind: 'compare',
+      label: 'Score ≥ 70',
+      path: 'domain.overallScore',
+      op: 'gte',
+      value: 70,
+      position: { x: x + 1100, y: 80 },
+    },
+    {
+      id: 'n-ok',
+      kind: 'quality_ok',
+      label: 'Bereit',
+      position: { x: x + 1320, y: 40 },
+    },
+    {
+      id: 'n-abandon',
+      kind: 'abandon',
+      label: 'Nicht bereit',
+      position: { x: x + 1320, y: 160 },
+    }
+  );
+
+  edges.push(
+    { id: 'e-to-domain', source: prev, target: 'n-domain', edgeKind: 'then' },
+    { id: 'e-domain-persona', source: 'n-domain', target: 'n-persona-boot', edgeKind: 'then' },
+    { id: 'e-persona-suggest', source: 'n-persona-boot', target: 'n-suggest-q', edgeKind: 'then' },
+    { id: 'e-suggest-confirm', source: 'n-suggest-q', target: 'n-confirm-geo', edgeKind: 'then' },
+    { id: 'e-confirm-geo', source: 'n-confirm-geo', target: 'n-geo', edgeKind: 'then' },
+    { id: 'e-geo-score', source: 'n-geo', target: 'n-score', edgeKind: 'then' },
+    { id: 'e-score-ok', source: 'n-score', target: 'n-ok', edgeKind: 'when', when: 'pass' },
+    {
+      id: 'e-score-abandon',
+      source: 'n-score',
+      target: 'n-abandon',
+      edgeKind: 'otherwise',
+      when: 'fail',
+    }
+  );
+
+  return {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+}
+
+export function documentHasEqcSpine(doc: CollectionTestFlowDocument): boolean {
+  if (doc.templateId === COLLECTION_FLOW_TEMPLATE_EQC_QUALITY) return true;
+  return doc.nodes.some(
+    (n) =>
+      n.kind === 'research_brief' ||
+      n.kind === 'human_confirm' ||
+      n.kind === 'persona_bootstrap' ||
+      n.kind === 'suggest_queries' ||
+      n.kind === 'competitors_suggest'
+  );
+}
+
 export function scoreGateThreshold(nodes: CollectionFlowNode[]): number {
   const gate =
     nodes.find((n) => n.kind === 'compare' && typeof n.value === 'number') ??
@@ -737,6 +919,11 @@ const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'issue_gate',
   'geo_gate',
   'quality_ok',
+  'research_brief',
+  'competitors_suggest',
+  'persona_bootstrap',
+  'suggest_queries',
+  'human_confirm',
 ]);
 
 const LEGACY_QUALITY_GATE_KINDS = new Set<CollectionFlowNodeKind>([

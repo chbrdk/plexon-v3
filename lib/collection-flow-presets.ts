@@ -16,7 +16,8 @@ export type CollectionFlowPresetGroup =
   | 'messung'
   | 'steuerung'
   | 'qualität'
-  | 'vergleich';
+  | 'vergleich'
+  | 'eqc';
 
 export type CollectionFlowPreset = {
   id: string;
@@ -299,6 +300,56 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
       presetId: 'set-alias',
     },
   },
+  {
+    id: 'eqc-research-brief',
+    group: 'eqc',
+    label: 'Unternehmensprofil',
+    kind: 'research_brief',
+    defaults: { label: 'Unternehmensprofil', presetId: 'eqc-research-brief' },
+  },
+  {
+    id: 'eqc-confirm-brief',
+    group: 'eqc',
+    label: 'Bestätigen: Profil',
+    kind: 'human_confirm',
+    defaults: {
+      label: 'Profil bestätigen',
+      confirmKind: 'brief',
+      presetId: 'eqc-confirm-brief',
+    },
+  },
+  {
+    id: 'eqc-competitors',
+    group: 'eqc',
+    label: 'Wettbewerber',
+    kind: 'competitors_suggest',
+    defaults: { label: 'Wettbewerber', presetId: 'eqc-competitors' },
+  },
+  {
+    id: 'eqc-persona-boot',
+    group: 'eqc',
+    label: 'Persona erstellen',
+    kind: 'persona_bootstrap',
+    defaults: { label: 'Persona erstellen', presetId: 'eqc-persona-boot' },
+  },
+  {
+    id: 'eqc-suggest-queries',
+    group: 'eqc',
+    label: 'GEO-Fragen',
+    kind: 'suggest_queries',
+    defaults: { label: 'GEO-Fragen', presetId: 'eqc-suggest-queries' },
+  },
+  {
+    id: 'eqc-confirm-geo',
+    group: 'eqc',
+    label: 'Bestätigen: GEO',
+    kind: 'human_confirm',
+    defaults: {
+      label: 'GEO-Fragen bestätigen',
+      confirmKind: 'geo_queries',
+      presetId: 'eqc-confirm-geo',
+    },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{
@@ -326,6 +377,7 @@ export const PALETTE_QUALITY_GROUPS: Array<{
   [
     { id: 'qualität' as const, title: 'Qualität' },
     { id: 'vergleich' as const, title: 'Vergleich' },
+    { id: 'eqc' as const, title: 'Quick Check' },
   ] as const
 ).map(({ id, title }) => ({
   id,

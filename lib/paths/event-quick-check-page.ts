@@ -48,6 +48,9 @@ export const EVENT_QUICK_CHECK_COMPETITORS_CHECKPOINT_KEY = 'competitorsCheckpoi
 export const EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY = 'deepScanStarted' as const;
 export const EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY = 'awaitingDeepScan' as const;
 
+/** Wave 23 — Collection Flow pause/resume handles on workflow run result. */
+export const EVENT_QUICK_CHECK_FLOW_STATE_KEY = 'eqcFlowState' as const;
+
 export const apiEventQuickCheckRunCompetitors = (runId: string): string =>
   `${apiEventQuickCheckRun(runId)}/competitors`;
 

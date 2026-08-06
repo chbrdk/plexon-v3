@@ -80,6 +80,23 @@ export async function POST(
       if (!existing || existing.trigger !== 'ui') {
         return apiError('history run not found', API_STATUS.NOT_FOUND);
       }
+      // Wave 23 — resume: seed prior context from paused run when client omits it.
+      if (body.resume === true) {
+        const prior = existing.lastRun as {
+          context?: unknown;
+          awaitingNodeId?: string | null;
+        } | null;
+        if (prior?.context != null && body.priorContext == null) {
+          body.priorContext = prior.context;
+        }
+        if (
+          typeof prior?.awaitingNodeId === 'string' &&
+          prior.awaitingNodeId &&
+          body.resumeFromNodeId == null
+        ) {
+          body.resumeFromNodeId = prior.awaitingNodeId;
+        }
+      }
       await patchCollectionFlowRun({
         runId: historyRunId,
         status: 'running',
@@ -101,7 +118,7 @@ export async function POST(
       flowId: fid,
       flowName: row.name,
       doc,
-      body,
+      body: { ...body, historyRunId },
       updatedByUserId: user.id,
     });
 
@@ -114,12 +131,19 @@ export async function POST(
       return apiError(result.message, result.status);
     }
 
+    const runStatus =
+      result.lastRun.status === 'awaiting_input'
+        ? 'awaiting_input'
+        : result.verdict.status === 'error' || result.lastRun.status === 'error'
+          ? 'error'
+          : 'complete';
+
     await patchCollectionFlowRun({
       runId: historyRunId,
-      status: 'complete',
+      status: runStatus,
       verdict: result.verdict,
       lastRun: result.lastRun,
-      error: null,
+      error: result.lastRun.error ?? null,
     });
 
     return platformJson({

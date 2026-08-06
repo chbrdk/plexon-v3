@@ -59,10 +59,16 @@ import type { EchonMarketContext } from '@/lib/integrations/echon-market-context
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import { researchCompanyBrief } from '@/lib/assistant/event-quick-check/research-company-brief';
 import {
+  isEqcFlowRuntimeEnabled,
+  runEqcViaCollectionFlow,
+} from '@/lib/assistant/event-quick-check/run-eqc-via-collection-flow';
+import type {
+  EventQuickCheckResumeCheckpoint,
+  EventQuickCheckCompetitorsCheckpoint,
+} from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
+import {
   buildEventQuickCheckCompetitorsCheckpoint,
   buildEventQuickCheckResumeCheckpoint,
-  type EventQuickCheckCompetitorsCheckpoint,
-  type EventQuickCheckResumeCheckpoint,
 } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import {
   mergeDeepScanIntoOutcomes,
@@ -124,6 +130,13 @@ export type EventQuickCheckResult = {
   awaitingDeepScanConfirmation?: boolean;
   deepScanProgress?: { complete: number; total: number; detail: string };
   error?: string;
+  /** Wave 23 — Collection Flow pause/resume handles. */
+  eqcFlowState?: {
+    flowId: string;
+    historyRunId: string;
+    awaitingNodeId?: string | null;
+    context?: { outputs: Record<string, Record<string, unknown>> };
+  };
 };
 
 export type EventQuickCheckRunOptions = {
@@ -139,6 +152,8 @@ export type EventQuickCheckRunOptions = {
   depth?: EventQuickCheckDepth;
   competitorsConfirmed?: string[];
   competitorsCheckpoint?: EventQuickCheckCompetitorsCheckpoint;
+  /** Wave 23 — prior Flow pause state for resume. */
+  eqcFlowState?: EventQuickCheckResult['eqcFlowState'];
 };
 
 function normalizeUrl(url: string): string {
@@ -248,6 +263,11 @@ export async function runEventQuickCheck(
   },
   options: EventQuickCheckRunOptions = {}
 ): Promise<EventQuickCheckResult> {
+  // Wave 23 — Collection Flow executor (default on unless explicitly disabled).
+  if (isEqcFlowRuntimeEnabled()) {
+    return runEqcViaCollectionFlow(input, options);
+  }
+
   const runId = options.workflowRunId;
   const emit = options.emit;
   const runMode = options.runMode ?? 'full_auto';

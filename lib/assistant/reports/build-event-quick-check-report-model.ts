@@ -15,6 +15,7 @@ import {
 } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
 import { buildEventQuickCheckDomainComparisonSection } from '@/lib/assistant/reports/map-event-quick-check-domain-comparison';
+import { mergeFlowContextIntoQuickResult } from '@/lib/assistant/reports/event-quick-check-from-flow-context';
 import { pathCheckionDomainScan, pathCheckionProject } from '@/lib/paths/checkion-api';
 import { echonDashboardResearchUrl } from '@/lib/paths/echon-api';
 import { pathPlatformProjectDashboard } from '@/lib/constants';
@@ -104,9 +105,10 @@ function mapWorkflowStatus(
 }
 
 export function buildEventQuickCheckReportModel(
-  quick: EventQuickCheckResult,
+  quickInput: EventQuickCheckResult,
   narrative?: WorkflowInsightNarrative
 ): EventQuickCheckReportModel {
+  const quick = mergeFlowContextIntoQuickResult(quickInput);
   const domain = domainFromUrl(quick.url);
   const geoOutcome = quick.outcomes.find((o) => o.stepId === 'geo_check');
   const geoFailed = geoOutcome?.status === 'error';

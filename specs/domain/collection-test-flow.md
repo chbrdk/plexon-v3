@@ -483,8 +483,20 @@ Do not place this on legacy `/board` Prismion island.
 3. **Historie Re-Run:** History dock action **Erneut ausführen** starts a fresh Testen on the **current** document (new run id; paint of the past run stays until the new run finishes).
 4. **Catalog hygiene:** SchemaTree already enriches `issues.items` for `scan`/`domain`; domain runtime must fill items.
 
-## Open questions (Wave 23+)
+## Open questions (Wave 24+)
 
 - Richer Soft-Q mapping from Checkion lenses — product later.
 - Multi-provider GEO models beyond OpenAI defaults — product later.
 - Intra-Audion step expression resolution — needs AUDION contract.
+- EQC Flow flag default-on cutover complete; archive legacy playbook path.
+
+## Wave 23 — Event Quick Check on Collection Flow
+
+@seealso [`eqc-as-collection-flow.md`](./eqc-as-collection-flow.md)
+
+- **Surface:** `/event-quick-check` UX kept; Flow = executor + graph SoT. Bootstrap (Collection + bindings) outside canvas.
+- **Typed nodes:** `research_brief`, `competitors_suggest`, `persona_bootstrap`, `suggest_queries`, `human_confirm` (`confirmKind`).
+- **Template:** `eqc-quality-v1` — creatable from Collection Flows gallery (`POST …/flows` with `templateId=eqc-quality-v1`, optional `depth=quick|complete`). Also upserted when Event Quick Check bootstraps.
+- **Pause/resume:** run status `awaiting_input`; resume via `POST …/run` with `resume` + payload.
+- **Out:** ECHON, generic agent/code nodes, replacing EQC UI with Board.
+- **Flag:** `EQC_FLOW_RUNTIME`.

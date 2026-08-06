@@ -7,7 +7,12 @@ import type { CollectionFlowLastRun, CollectionVerdict } from '@/lib/collection-
 export type CollectionFlowRunRow = typeof collectionFlowRuns.$inferSelect;
 
 export type CollectionFlowRunTrigger = 'webhook' | 'service' | 'ui';
-export type CollectionFlowRunStatus = 'queued' | 'running' | 'complete' | 'error';
+export type CollectionFlowRunStatus =
+  | 'queued'
+  | 'running'
+  | 'awaiting_input'
+  | 'complete'
+  | 'error';
 
 export type CollectionFlowRunResponse = {
   id: string;
@@ -59,6 +64,17 @@ export function closedUiRunRequest(body: Record<string, unknown>): Record<string
   }
   if (typeof body.audionJobId === 'string' && body.audionJobId.trim()) {
     out.audionJobId = body.audionJobId.trim();
+  }
+  if (body.resume === true) out.resume = true;
+  if (typeof body.confirmKind === 'string' && body.confirmKind.trim()) {
+    out.confirmKind = body.confirmKind.trim();
+  }
+  if (typeof body.resumeFromNodeId === 'string' && body.resumeFromNodeId.trim()) {
+    out.resumeFromNodeId = body.resumeFromNodeId.trim();
+  }
+  if (typeof body.depth === 'string' && body.depth.trim()) out.depth = body.depth.trim();
+  if (typeof body.projectName === 'string' && body.projectName.trim()) {
+    out.projectName = body.projectName.trim();
   }
   return out;
 }

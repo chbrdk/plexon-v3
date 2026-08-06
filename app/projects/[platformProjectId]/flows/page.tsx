@@ -10,6 +10,7 @@ import {
   pathPlatformProjectFlow,
 } from '@/lib/constants'
 import {
+  COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
@@ -17,7 +18,13 @@ import {
 } from '@/lib/collection-test-flow'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
 
-const CREATE_OPTIONS: Array<{ id: string; label: string }> = [
+const CREATE_OPTIONS: Array<{ id: string; label: string; depth?: 'quick' | 'complete' }> = [
+  { id: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY, label: 'Event Quick Check', depth: 'quick' },
+  {
+    id: COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+    label: 'Event Quick Check (complete)',
+    depth: 'complete',
+  },
   { id: COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY, label: 'Page quality' },
   { id: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY, label: 'Journey + quality' },
   { id: COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES, label: 'Page quality + issues' },
@@ -61,20 +68,20 @@ export default function CollectionFlowsGalleryPage() {
   }, [load])
 
   const create = useCallback(
-    async (templateId: string) => {
+    async (opt: { id: string; label: string; depth?: 'quick' | 'complete' }) => {
       if (!platformProjectId) return
-      setCreating(templateId)
+      const creatingKey = `${opt.id}:${opt.depth ?? 'default'}`
+      setCreating(creatingKey)
       setError(null)
-      const defaultName =
-        CREATE_OPTIONS.find((o) => o.id === templateId)?.label ?? 'Page quality'
       try {
         const res = await fetch(apiPlatformProjectFlows(platformProjectId), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            templateId,
-            name: name.trim() || defaultName,
+            templateId: opt.id,
+            name: name.trim() || opt.label,
             ...(url.trim() ? { url: url.trim() } : {}),
+            ...(opt.depth ? { depth: opt.depth } : {}),
           }),
         })
         const json = (await res.json().catch(() => null)) as
@@ -120,7 +127,7 @@ export default function CollectionFlowsGalleryPage() {
             Test Flows
           </Text>
           <Text role="meta" as="p">
-            Quality, journey, and issue-gate templates (Wave 3)
+            Event Quick Check, quality, journey, and issue-gate templates
           </Text>
         </div>
       </header>
@@ -141,23 +148,26 @@ export default function CollectionFlowsGalleryPage() {
           />
         </Field>
         <div className="plexon-flow-gallery-actions">
-          {CREATE_OPTIONS.map((opt, i) => (
-            <Button
-              key={opt.id}
-              variant={i === 0 ? 'primary' : 'ghost'}
-              size="md"
-              disabled={Boolean(creating)}
-              onClick={() => void create(opt.id)}
-            >
-              {creating === opt.id ? (
-                <>
-                  <Spinner size="sm" /> Creating…
-                </>
-              ) : (
-                `Create ${opt.label}`
-              )}
-            </Button>
-          ))}
+          {CREATE_OPTIONS.map((opt, i) => {
+            const creatingKey = `${opt.id}:${opt.depth ?? 'default'}`
+            return (
+              <Button
+                key={creatingKey}
+                variant={i === 0 ? 'primary' : 'ghost'}
+                size="md"
+                disabled={Boolean(creating)}
+                onClick={() => void create(opt)}
+              >
+                {creating === creatingKey ? (
+                  <>
+                    <Spinner size="sm" /> Creating…
+                  </>
+                ) : (
+                  `Create ${opt.label}`
+                )}
+              </Button>
+            )
+          })}
         </div>
       </section>
 

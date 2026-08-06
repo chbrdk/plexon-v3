@@ -20,7 +20,8 @@
 - Specs: `specs/domain/app-shell.md`
 - Specs index: `knowledge/specs-index.md`
 - Collection projects: `specs/domain/collection-projects.md`
-- Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
+  - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
+  - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`
