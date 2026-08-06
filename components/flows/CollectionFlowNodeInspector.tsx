@@ -278,8 +278,6 @@ export function CollectionFlowNodeInspector({
     [focusField, node.id, node.kind, onUpdate]
   )
 
-  const exprInsert = onUpdate ? { onDropPath: insertPath } : {}
-
   const insertUpstreamPath = useCallback(
     (sourceNodeId: string, relativePath: string) => {
       if (!onUpdate) return
@@ -389,7 +387,6 @@ export function CollectionFlowNodeInspector({
             onChange={(v) => onUpdate(node.id, { text: v })}
             onFocusField={() => setFocusField('text')}
             hint="Aufgabe / Prompt — Literal oder {{ expression }}"
-            {...exprInsert}
           />
           <ExpressionField
             label="Note"
@@ -397,7 +394,6 @@ export function CollectionFlowNodeInspector({
             onChange={(v) => onUpdate(node.id, { note: v })}
             onFocusField={() => setFocusField('note')}
             hint="Interne Notiz"
-            {...exprInsert}
           />
         </>
       ) : node.text || node.note ? (
@@ -473,7 +469,6 @@ export function CollectionFlowNodeInspector({
           }
           onFocusField={() => setFocusField('url')}
           placeholder="https://… oder {{ journey.finalUrl }}"
-          {...exprInsert}
         />
       ) : null}
 
@@ -502,7 +497,6 @@ export function CollectionFlowNodeInspector({
             onChange={(v) => onUpdate(node.id, { path: v })}
             onFocusField={() => setFocusField('path')}
             hint="Catalog path oder {{ expression }}"
-            {...exprInsert}
           />
           <label className="msqdx-flow-rf-field">
             <span className="msqdx-flow-inspector-field-label">Op</span>
@@ -533,7 +527,6 @@ export function CollectionFlowNodeInspector({
               })
             }}
             onFocusField={() => setFocusField('value')}
-            {...exprInsert}
           />
           {bindSourceLabel ? (
             <InspectorField label="Bind from" tone="meta">
@@ -550,14 +543,12 @@ export function CollectionFlowNodeInspector({
             value={node.alias ?? ''}
             onChange={(v) => onUpdate(node.id, { alias: v })}
             onFocusField={() => setFocusField('alias')}
-            {...exprInsert}
           />
           <ExpressionField
             label="Source"
             value={node.path ?? ''}
             onChange={(v) => onUpdate(node.id, { path: v })}
             onFocusField={() => setFocusField('path')}
-            {...exprInsert}
           />
         </>
       ) : null}
