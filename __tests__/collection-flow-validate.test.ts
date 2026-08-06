@@ -42,4 +42,29 @@ describe('validateCollectionFlowForRun', () => {
     expect(result.ok).toBe(false);
     expect(result.issues.some((i) => i.code === 'missing_url')).toBe(true);
   });
+
+  it('warns on broken URL expression syntax', () => {
+    const doc = createPageQualityTemplate('https://acme.test/');
+    const scan = doc.nodes.find((n) => n.kind === 'scan');
+    if (scan) scan.url = "{{ $('n-start').json.url";
+    const result = validateCollectionFlowForRun(doc);
+    expect(result.ok).toBe(true);
+    expect(result.issues.some((i) => i.code === 'url_bad_expression')).toBe(true);
+  });
+
+  it('warns on broken text expression syntax', () => {
+    const doc = createPageQualityTemplate('https://acme.test/');
+    const action = doc.nodes.find((n) => n.kind === 'action') ?? doc.nodes.find((n) => n.kind === 'prompt');
+    if (action) action.text = 'Click {{ incomplete';
+    else {
+      doc.nodes.push({
+        id: 'n-action',
+        kind: 'action',
+        label: 'Action',
+        text: 'Click {{ incomplete',
+      });
+    }
+    const result = validateCollectionFlowForRun(doc);
+    expect(result.issues.some((i) => i.code === 'text_bad_expression')).toBe(true);
+  });
 });

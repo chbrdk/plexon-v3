@@ -6,6 +6,7 @@ import {
   parsePathSegments,
   resolveExpression,
   resolveExpressionScalar,
+  resolveTemplateString,
 } from '@/lib/collection-flow-expression';
 import {
   applySetNodes,
@@ -46,8 +47,22 @@ describe('collection-flow-expression (Wave 18)', () => {
 
   it('flags broken expression syntax', () => {
     expect(expressionSyntaxIssue('{{ scan.x')).toMatch(/Klammern/);
-    expect(expressionSyntaxIssue('prefix {{ scan.x }}')).toMatch(/gesamte/);
+    expect(expressionSyntaxIssue('prefix {{  }}')).toMatch(/Leere/);
+    expect(expressionSyntaxIssue('prefix {{ scan.x }}')).toBeNull();
     expect(expressionSyntaxIssue('scan.overallScore')).toBeNull();
+  });
+
+  it('resolveTemplateString substitutes mixed literals and chips', () => {
+    let ctx = emptyRunContext();
+    ctx = setContextBundle(ctx, 'n-start', { url: 'https://acme.test/go' }, 'n-start');
+    expect(
+      resolveTemplateString(ctx, "Go to {{ $('n-start').json.url }} now")
+    ).toBe('Go to https://acme.test/go now');
+    expect(resolveTemplateString(ctx, "{{ $('n-start').json.url }}")).toBe(
+      'https://acme.test/go'
+    );
+    expect(resolveTemplateString(ctx, "{{ $('missing').json.url }}")).toBe('');
+    expect(resolveTemplateString(ctx, 'plain text')).toBe('plain text');
   });
 
   it('format helpers wrap paths', () => {

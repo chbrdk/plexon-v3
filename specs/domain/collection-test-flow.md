@@ -145,7 +145,7 @@ Actions write typed bundles into `lastRun.context.outputs` (also aliased by root
 | `run` | orchestration | `url`, `startedAt` |
 
 Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
-**Open path expressions (Wave 18+):** `compare.path` / `compare.value` (and later other params) accept bare catalog paths **or** `{{ … }}` expressions resolved against `lastRun.context.outputs` (dot + array index; `$('nodeId').json…`; `$json…`). **No JS `eval`.** Catalog list = recommended picker / port labels only — not a hard evaluate whitelist.
+**Open path expressions (Wave 18+):** `compare.path` / `compare.value` and **all ExpressionField params** (`start`/`scan`/`domain_scan`/`geo_job` URL, `text`, `note`, `pattern`, `companyName`, …) accept bare catalog paths **or** `{{ … }}` (whole-field or mixed with literals), resolved against `context.outputs` at segment start. **No JS `eval`.** Catalog list = recommended picker / port labels only — not a hard evaluate whitelist.
 
 ### Catalog ports (Wave 10)
 
@@ -432,7 +432,10 @@ Do not place this on legacy `/board` Prismion island.
 ## Wave 18 implementation notes
 
 - **Expressions:** `lib/collection-flow-expression.ts` — `{{ path }}`, `{{ $('nodeId').json.x }}`, `{{ $json.x }}`, bare paths; walker supports `a.b[0].c`. No `eval`.
+- **Templates:** `resolveTemplateString` substitutes embedded `{{ … }}` chips inside literals (ExpressionField mixed mode). Whole-field expressions still use `resolveExpression`.
 - Compare `path`/`value` resolve via expressions; validate warns on bad `{{` syntax; unknown catalog path is no longer a hard error.
+- **All string params at run:** Before each capability segment, `resolveDocumentStringParams` clones nodes with resolved `url`/`urlKey`/`text`/`note`/`pattern`/`companyName`/`path`/`value` (and expression-like `alias`/`measureKey`). Saved document stays unresolved. Journey extract/AUDION and GEO queries consume the resolved snapshot. Start config is seeded into `outputs[startId]` first so `$('n-start').json.url` works. Unresolved expressions become empty (not forwarded as placeholders). Empty quality URL still falls back to start URL. `run.url` is the resolved base URL.
+- **Journey limit:** Expressions inside Journey steps only see pre-journey context (`start`, `run`, prior quality). Mid-journey step outputs are not in Plexon context until the Audion segment finishes (`journey.*`).
 - Scan/domain bundles may include `issues.items[]` (`ruleId`, `severity`, …) for open paths.
 
 ## Wave 19 implementation notes

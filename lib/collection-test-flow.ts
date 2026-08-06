@@ -706,7 +706,7 @@ export function qualityScanNode(nodes: CollectionFlowNode[]): CollectionFlowNode
 
 export function startNodeUrl(nodes: CollectionFlowNode[]): string | null {
   const start = nodes.find((n) => n.kind === 'start');
-  return start?.url?.trim() || null;
+  return start?.url?.trim() || start?.urlKey?.trim() || null;
 }
 
 /** Kinds whose presence on the canvas implies a real journey segment (Wave 5). */

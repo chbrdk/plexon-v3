@@ -88,7 +88,8 @@ describe('predictedSchemaForNodeOutput', () => {
 describe('mergeRunItemsIntoSchema', () => {
   it('overlays run values onto predicted leaves', () => {
     const predicted = predictedSchemaForNodeOutput('n-scan', 'scan');
-    const merged = mergeRunItemsIntoSchema(predicted, [
+    expect(predicted).not.toBeNull();
+    const merged = mergeRunItemsIntoSchema(predicted!, [
       { path: "$('n-scan').json.overallScore", value: '72', predicted: false },
     ]);
     const score = merged.children?.find((c) => c.key === 'overallScore');

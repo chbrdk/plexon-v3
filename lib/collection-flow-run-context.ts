@@ -12,6 +12,7 @@ import {
   resolveContextPath,
   resolveExpression,
   resolveExpressionScalar,
+  resolveTemplateString,
   toCatalogScalar,
 } from '@/lib/collection-flow-expression';
 
@@ -162,6 +163,126 @@ export function setContextBundle(
   const outputs = { ...ctx.outputs, [root]: bundle };
   if (nodeId) outputs[nodeId] = bundle;
   return { outputs };
+}
+
+/**
+ * Resolve a node param (URL, companyName, text, …) against run context.
+ * Supports whole-field and mixed `{{ … }}` templates. Unresolved → null for URL-like
+ * callers that need a usable absolute value; empty string when template yields empty.
+ */
+export function resolveFlowParamString(
+  ctx: CollectionFlowRunContext,
+  raw: string | null | undefined
+): string | null {
+  const trimmed = typeof raw === 'string' ? raw.trim() : '';
+  if (!trimmed) return null;
+  const resolved = resolveTemplateString(ctx, trimmed).trim();
+  if (resolved) return resolved;
+  // Unresolved expression / empty template result
+  if (trimmed.includes('{{') || trimmed.includes('}}')) return null;
+  if (trimmed.includes('.') || trimmed.includes('[')) {
+    // Bare catalog path that did not resolve — do not treat as URL literal.
+    return null;
+  }
+  return trimmed;
+}
+
+function looksLikeExpressionField(raw: string): boolean {
+  return raw.includes('{{') || raw.includes('}}') || raw.includes('.') || raw.includes('[');
+}
+
+/**
+ * Clone a node with all string ExpressionField params resolved against run context.
+ * Does not mutate the saved document.
+ */
+export function resolveNodeStringParams(
+  node: CollectionFlowNode,
+  ctx: CollectionFlowRunContext
+): CollectionFlowNode {
+  const next: CollectionFlowNode = { ...node };
+
+  if (typeof node.url === 'string') next.url = resolveTemplateString(ctx, node.url);
+  if (typeof node.urlKey === 'string') next.urlKey = resolveTemplateString(ctx, node.urlKey);
+  if (typeof node.text === 'string') next.text = resolveTemplateString(ctx, node.text);
+  if (typeof node.note === 'string') next.note = resolveTemplateString(ctx, node.note);
+  if (typeof node.pattern === 'string') next.pattern = resolveTemplateString(ctx, node.pattern);
+  if (typeof node.companyName === 'string') {
+    next.companyName = resolveTemplateString(ctx, node.companyName);
+  }
+  if (typeof node.path === 'string') next.path = resolveTemplateString(ctx, node.path);
+  if (typeof node.value === 'string') next.value = resolveTemplateString(ctx, node.value);
+  if (typeof node.alias === 'string' && looksLikeExpressionField(node.alias)) {
+    next.alias = resolveTemplateString(ctx, node.alias);
+  }
+  if (typeof node.measureKey === 'string' && looksLikeExpressionField(node.measureKey)) {
+    next.measureKey = resolveTemplateString(ctx, node.measureKey);
+  }
+
+  return next;
+}
+
+/** Resolve string params on every node (run-time snapshot). */
+export function resolveDocumentStringParams(
+  nodes: CollectionFlowNode[],
+  ctx: CollectionFlowRunContext
+): CollectionFlowNode[] {
+  return nodes.map((n) => resolveNodeStringParams(n, ctx));
+}
+
+/** Authoring-time start config written into run context so `$('startId').json.url` works. */
+export function buildStartConfigBundle(
+  start: CollectionFlowNode,
+  resolvedUrl: string | null
+): Record<string, unknown> {
+  const url = resolvedUrl ?? '';
+  return {
+    url,
+    urlKey: url || (start.urlKey?.trim() ?? ''),
+    maxSteps: typeof start.maxSteps === 'number' ? start.maxSteps : 8,
+    personaId: start.personaId ?? null,
+    personaName: start.personaName ?? null,
+    segment: start.segment ?? null,
+    label: start.label ?? '',
+  };
+}
+
+/**
+ * Seed start node config under `outputs[startId]` (+ `outputs.start`) before resolving
+ * downstream URL expressions like `{{ $('n-start').json.url }}`.
+ */
+export function seedStartNodeIntoContext(
+  ctx: CollectionFlowRunContext,
+  nodes: CollectionFlowNode[]
+): { ctx: CollectionFlowRunContext; startUrl: string | null; start: CollectionFlowNode | null } {
+  const start = nodes.find((n) => n.kind === 'start') ?? null;
+  if (!start) return { ctx, startUrl: null, start: null };
+
+  const raw = (start.url ?? start.urlKey ?? '').trim();
+  const startUrl = resolveFlowParamString(ctx, raw);
+  const bundle = buildStartConfigBundle(start, startUrl);
+  let next = setContextBundle(ctx, 'start', bundle, start.id);
+  return { ctx: next, startUrl, start };
+}
+
+/**
+ * Resolve scan / domain / geo / start URL chain for a flow run (Wave 18+ URL params).
+ * Empty quality URL falls back to start (legacy behavior).
+ */
+export function resolveRunUrlChain(input: {
+  ctx: CollectionFlowRunContext;
+  urlOverride?: string | null;
+  qualityUrlRaw?: string | null;
+  geoUrlRaw?: string | null;
+  startUrl?: string | null;
+}): { baseUrl: string | null; qualityUrl: string | null; geoUrl: string | null } {
+  const qualityUrl = resolveFlowParamString(input.ctx, input.qualityUrlRaw);
+  const geoUrl = resolveFlowParamString(input.ctx, input.geoUrlRaw);
+  const override =
+    typeof input.urlOverride === 'string' && input.urlOverride.trim()
+      ? input.urlOverride.trim()
+      : null;
+  const baseUrl = override ?? qualityUrl ?? geoUrl ?? input.startUrl ?? null;
+  return { baseUrl, qualityUrl, geoUrl };
 }
 
 /**

@@ -20,10 +20,8 @@ import {
   qualityScanNode,
   resolveJourneyFlowForRun,
   resolveScoreForGate,
-  scanNodeUrl,
   scoreGateNode,
   scoreGateThreshold,
-  startNodeUrl,
   type CollectionFlowLastRun,
   type CollectionFlowNodeRunState,
   type CollectionFlowScanMode,
@@ -58,6 +56,10 @@ import {
   emptyRunContext,
   evaluateAllCompares,
   applySetNodes,
+  resolveFlowParamString,
+  resolveDocumentStringParams,
+  resolveRunUrlChain,
+  seedStartNodeIntoContext,
   setContextBundle,
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
@@ -102,17 +104,27 @@ export async function executeCollectionFlowRun(input: {
     const qualityNode = qualityScanNode(doc.nodes);
     const hasPageQuality = Boolean(qualityNode);
     const hasGeo = documentHasGeoJob(doc);
+
+    // Seed start config first so `$('startId').json.url` resolves for scan/geo URL params.
+    let runContext: CollectionFlowRunContext = emptyRunContext();
+    const seeded = seedStartNodeIntoContext(runContext, doc.nodes);
+    runContext = seeded.ctx;
+    const startUrlResolved = seeded.startUrl;
+
     const geoCompany =
       (typeof body.companyName === 'string' && body.companyName.trim()
         ? body.companyName.trim()
         : null) ||
-      geoNode?.companyName?.trim() ||
+      resolveFlowParamString(runContext, geoNode?.companyName) ||
       '';
-    const baseUrl =
-      urlOverride ??
-      scanNodeUrl(doc.nodes) ??
-      (geoNode?.url?.trim() || null) ??
-      startNodeUrl(doc.nodes);
+
+    const { baseUrl, geoUrl: geoUrlResolved } = resolveRunUrlChain({
+      ctx: runContext,
+      urlOverride,
+      qualityUrlRaw: qualityNode?.url,
+      geoUrlRaw: geoNode?.url,
+      startUrl: startUrlResolved,
+    });
 
     if (!hasPageQuality && !hasGeo) {
       return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Quality path missing — add scan, domain_scan, or geo_job' };
@@ -133,11 +145,28 @@ export async function executeCollectionFlowRun(input: {
     const startedAt = new Date().toISOString();
     const threshold = scoreGateThreshold(doc.nodes);
     const runUrl = baseUrl || '';
-    let runContext: CollectionFlowRunContext = setContextBundle(
-      emptyRunContext(),
-      'run',
-      { url: runUrl, startedAt }
-    );
+    runContext = setContextBundle(runContext, 'run', { url: runUrl, startedAt });
+    // Refresh start bundle urlKey/url if override won (keep $('start').json.url stable for later compares).
+    if (seeded.start && urlOverride) {
+      runContext = setContextBundle(
+        runContext,
+        'start',
+        {
+          ...((runContext.outputs.start as Record<string, unknown> | undefined) ?? {}),
+          url: urlOverride,
+          urlKey: urlOverride,
+        },
+        seeded.start.id
+      );
+    }
+
+    // Run-time snapshot: all ExpressionField params resolved against current context
+    // (start/run available; journey.* not yet). Document on disk stays unresolved.
+    const resolvedDoc: CollectionTestFlowDocument = {
+      ...doc,
+      nodes: resolveDocumentStringParams(doc.nodes, runContext),
+    };
+    const resolvedGeoNode = geoJobNode(resolvedDoc.nodes);
 
     let audionJobId: string | null = null;
     let audionStudyId: string | null = null;
@@ -206,7 +235,7 @@ export async function executeCollectionFlowRun(input: {
       let primaryStepUrl: string | null = null;
 
       for (const slot of runSlots) {
-        const journeyFlow = resolveJourneyFlowForRun(doc, runUrl, {
+        const journeyFlow = resolveJourneyFlowForRun(resolvedDoc, runUrl, {
           personaNodeId: slot.nodeId || null,
         });
         if (!journeyFlow) {
@@ -562,12 +591,18 @@ export async function executeCollectionFlowRun(input: {
     let geoUrl = quality?.url || scanUrl || runUrl;
 
     if (hasGeo) {
-      const queries = geoJobQueriesFromText(geoNode?.text);
+      const queries = geoJobQueriesFromText(resolvedGeoNode?.text ?? geoNode?.text);
       const geoResult = await runCheckionGeoJobV3({
         projectId: checkionProjectId,
         platformProjectId: id,
-        url: geoNode?.url?.trim() || scanUrl || runUrl || undefined,
-        companyName: geoCompany || undefined,
+        url: geoUrlResolved || scanUrl || runUrl || undefined,
+        companyName:
+          (typeof body.companyName === 'string' && body.companyName.trim()
+            ? body.companyName.trim()
+            : null) ||
+          resolvedGeoNode?.companyName?.trim() ||
+          geoCompany ||
+          undefined,
         queries: queries.length ? queries : undefined,
         includePageScan: needGeoFitness && !hasPageQuality,
       });

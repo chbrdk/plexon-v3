@@ -49,6 +49,36 @@ export function validateCollectionFlowForRun(
     });
   }
 
+  const warnExprField = (
+    nodeId: string,
+    label: string,
+    field: string,
+    value: string | null | undefined,
+    code: string
+  ) => {
+    const raw = typeof value === 'string' ? value : '';
+    if (!raw.trim() || !raw.includes('{')) return;
+    const syntax = expressionSyntaxIssue(raw);
+    if (!syntax) return;
+    issues.push({
+      level: 'warning',
+      code,
+      message: `${label} ${field}: ${syntax}`,
+      nodeId,
+    });
+  };
+
+  for (const n of doc.nodes) {
+    const label = `„${n.label || n.id}“`;
+    warnExprField(n.id, label, 'URL', n.url ?? (n.kind === 'start' ? n.urlKey : undefined), 'url_bad_expression');
+    warnExprField(n.id, label, 'Text', n.text, 'text_bad_expression');
+    warnExprField(n.id, label, 'Note', n.note, 'note_bad_expression');
+    warnExprField(n.id, label, 'Pattern', n.pattern, 'pattern_bad_expression');
+    if (n.kind === 'geo_job') {
+      warnExprField(n.id, `GEO ${label}`, 'companyName', n.companyName, 'company_bad_expression');
+    }
+  }
+
   for (const n of doc.nodes) {
     if (n.kind !== 'compare') continue;
     const path = n.path?.trim() ?? '';

@@ -15,6 +15,7 @@ export type ExpressionScope = {
 };
 
 const EXPR_WRAP = /^\{\{\s*([\s\S]*?)\s*\}\}$/;
+const EXPR_EMBEDDED = /\{\{\s*([\s\S]*?)\s*\}\}/g;
 const NODE_JSON = /^\$\(\s*['"]([^'"]+)['"]\s*\)\.json(?:\.(.+))?$/i;
 const DOLLAR_JSON = /^\$json(?:\.(.+))?$/i;
 
@@ -92,7 +93,7 @@ export function unwrapExpressionBody(input: string): { kind: 'literal' | 'expr';
   return { kind: 'literal', body: trimmed };
 }
 
-/** True when string looks like a broken or open `{{` expression. */
+/** True when string looks like a broken or open `{{` expression (whole-field or mixed). */
 export function expressionSyntaxIssue(input: string): string | null {
   const t = input.trim();
   if (!t.includes('{')) return null;
@@ -100,12 +101,55 @@ export function expressionSyntaxIssue(input: string): string | null {
   const close = (t.match(/\}\}/g) || []).length;
   if (open !== close) return 'Ungleichmäßige {{ }} Klammern';
   if (open === 0) return null;
-  if (!EXPR_WRAP.test(t) && open > 0) {
-    return 'Expression muss die gesamte Zeichenkette sein: {{ … }}';
+
+  let matched = 0;
+  const re = new RegExp(EXPR_EMBEDDED.source, 'g');
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(t)) != null) {
+    matched += 1;
+    if (!(m[1] ?? '').trim()) return 'Leere Expression';
   }
-  const body = unwrapExpressionBody(t).body;
-  if (!body) return 'Leere Expression';
+  if (matched !== open) return 'Ungleichmäßige {{ }} Klammern';
   return null;
+}
+
+function scalarToTemplateText(raw: unknown): string {
+  if (raw === undefined || raw === null) return '';
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'number' || typeof raw === 'boolean') return String(raw);
+  return '';
+}
+
+/**
+ * Resolve a field that may mix literals and `{{ … }}` chips (ExpressionField).
+ * Whole-field expressions use `resolveExpression`; embedded chips are substituted in place.
+ * Unresolved expressions become empty string (never forward the placeholder).
+ */
+export function resolveTemplateString(
+  ctx: ExpressionRunContext,
+  input: string | null | undefined,
+  scope?: ExpressionScope
+): string {
+  if (input == null) return '';
+  const raw = String(input);
+  if (!raw.includes('{{')) {
+    // Bare catalog path → resolve; plain literal stays.
+    const resolved = resolveExpression(ctx, raw, scope);
+    if (typeof resolved === 'string') return resolved;
+    if (typeof resolved === 'number' || typeof resolved === 'boolean') return String(resolved);
+    if (resolved === null) return '';
+    if (resolved !== undefined && (raw.includes('.') || raw.includes('['))) return '';
+    return raw;
+  }
+
+  const trimmed = raw.trim();
+  if (EXPR_WRAP.test(trimmed)) {
+    return scalarToTemplateText(resolveExpression(ctx, trimmed, scope));
+  }
+
+  return raw.replace(EXPR_EMBEDDED, (_full, body: string) =>
+    scalarToTemplateText(resolveInner(ctx, String(body).trim(), scope))
+  );
 }
 
 function resolveInner(ctx: ExpressionRunContext, body: string, scope?: ExpressionScope): unknown {

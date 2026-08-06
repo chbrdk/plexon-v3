@@ -80,8 +80,9 @@ describe('predictedGlobalContextLeaves', () => {
 describe('nodeOutputSchema', () => {
   it('returns nested schema for scan nodes', () => {
     const schema = nodeOutputSchema('n-scan', 'scan', null);
-    expect(schema.type).toBe('object');
-    expect(schema.children?.some((c) => c.key === 'overallScore')).toBe(true);
+    expect(schema).not.toBeNull();
+    expect(schema!.type).toBe('object');
+    expect(schema!.children?.some((c) => c.key === 'overallScore')).toBe(true);
   });
 });
 

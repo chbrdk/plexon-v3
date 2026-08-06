@@ -8,6 +8,10 @@ import {
   evaluateCompareOp,
   evaluateCompareNode,
   resolveCatalogPath,
+  resolveFlowParamString,
+  resolveNodeStringParams,
+  resolveRunUrlChain,
+  seedStartNodeIntoContext,
   setContextBundle,
 } from '@/lib/collection-flow-run-context';
 
@@ -72,5 +76,76 @@ describe('collection-flow-run-context', () => {
     expect(actionKindForCatalogRoot('domain')).toBe('domain_scan');
     expect(catalogPathFromOutHandle('out:scan.url')).toBe('scan.url');
     expect(catalogPathFromOutHandle('then')).toBe(null);
+  });
+});
+
+describe('resolveFlowParamString + start seed', () => {
+  it('seeds start config so scan URL expressions resolve', () => {
+    const start = {
+      id: 'n-start',
+      kind: 'start' as const,
+      label: 'Start',
+      url: 'https://acme.test/landing',
+      urlKey: 'https://acme.test/landing',
+      maxSteps: 8,
+    };
+    const seeded = seedStartNodeIntoContext(emptyRunContext(), [start]);
+    expect(seeded.startUrl).toBe('https://acme.test/landing');
+    expect(seeded.ctx.outputs['n-start']?.url).toBe('https://acme.test/landing');
+    expect(seeded.ctx.outputs.start?.url).toBe('https://acme.test/landing');
+
+    const chain = resolveRunUrlChain({
+      ctx: seeded.ctx,
+      qualityUrlRaw: "{{ $('n-start').json.url }}",
+      startUrl: seeded.startUrl,
+    });
+    expect(chain.qualityUrl).toBe('https://acme.test/landing');
+    expect(chain.baseUrl).toBe('https://acme.test/landing');
+  });
+
+  it('falls back to start when quality URL is empty', () => {
+    const start = {
+      id: 'n-start',
+      kind: 'start' as const,
+      label: 'Start',
+      url: 'https://fallback.test/',
+    };
+    const seeded = seedStartNodeIntoContext(emptyRunContext(), [start]);
+    const chain = resolveRunUrlChain({
+      ctx: seeded.ctx,
+      qualityUrlRaw: '',
+      startUrl: seeded.startUrl,
+    });
+    expect(chain.baseUrl).toBe('https://fallback.test/');
+  });
+
+  it('keeps literal quality URLs and does not forward unresolved placeholders', () => {
+    expect(resolveFlowParamString(emptyRunContext(), 'https://literal.test')).toBe(
+      'https://literal.test'
+    );
+    expect(resolveFlowParamString(emptyRunContext(), "{{ $('missing').json.url }}")).toBeNull();
+  });
+
+  it('resolveNodeStringParams replaces text and url templates', () => {
+    const seeded = seedStartNodeIntoContext(emptyRunContext(), [
+      {
+        id: 'n-start',
+        kind: 'start',
+        label: 'Start',
+        url: 'https://shop.test/',
+      },
+    ]);
+    const action = resolveNodeStringParams(
+      {
+        id: 'n-action',
+        kind: 'action',
+        label: 'Action',
+        text: "Open {{ $('n-start').json.url }} and continue",
+        note: '{{ run.url }}',
+      },
+      setContextBundle(seeded.ctx, 'run', { url: 'https://shop.test/', startedAt: 'x' })
+    );
+    expect(action.text).toBe('Open https://shop.test/ and continue');
+    expect(action.note).toBe('https://shop.test/');
   });
 });
