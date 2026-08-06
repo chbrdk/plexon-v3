@@ -57,6 +57,32 @@ function handleClassForSlot(slot: NodePortSlot, side: 'in' | 'out'): string {
   return parts.join(' ')
 }
 
+function summarizeStartUrl(input: string): string {
+  const raw = input.trim()
+  if (!raw) return 'URL setzen…'
+  try {
+    const url = new URL(raw)
+    const path = url.pathname && url.pathname !== '/' ? url.pathname : ''
+    return `${url.hostname}${path}`
+  } catch {
+    return raw.length > 56 ? `${raw.slice(0, 56)}…` : raw
+  }
+}
+
+function deriveStartLabelFromUrl(input: string): string | null {
+  const raw = input.trim()
+  if (!raw) return null
+  try {
+    const url = new URL(raw)
+    const host = url.hostname.replace(/^www\./, '')
+    if (!host) return null
+    return host
+  } catch {
+    const compact = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '')
+    return compact || null
+  }
+}
+
 /**
  * Compact n8n-like RF node: edge handles + title/preview on the card.
  * Full parameter editing lives in the Inspector (ExpressionField / Context tree).
@@ -84,8 +110,15 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   )
 
   const onLabel = (e: ChangeEvent<HTMLInputElement>) => patch({ label: e.target.value })
-  const onStartUrl = (e: ChangeEvent<HTMLInputElement>) =>
-    patch({ urlKey: e.target.value, url: e.target.value })
+  const onStartUrl = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextUrl = e.target.value
+    const patchNext: Partial<CollectionFlowNodeModel> = { urlKey: nextUrl, url: nextUrl }
+    if (!flowNode.label.trim() || flowNode.label.trim() === KIND_LABEL.start) {
+      const nextLabel = deriveStartLabelFromUrl(nextUrl)
+      if (nextLabel) patchNext.label = nextLabel
+    }
+    patch(patchNext)
+  }
   const onJourneyGateCondition = (e: ChangeEvent<HTMLSelectElement>) =>
     patch({ gateCondition: e.target.value as AudionGateCondition })
   const onCompareOp = (e: ChangeEvent<HTMLSelectElement>) =>
@@ -125,7 +158,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
       return `${path} ${op}${val}`
     }
     if (kind === 'set') return `${flowNode.alias || 'alias'} ← ${flowNode.path || '—'}`
-    if (kind === 'start') return flowNode.urlKey || flowNode.url || 'URL setzen…'
+    if (kind === 'start') return summarizeStartUrl(flowNode.urlKey || flowNode.url || '')
     if (kind === 'persona') return flowNode.personaName || flowNode.personaId || 'Persona wählen…'
     if (kind === 'zielgruppe')
       return flowNode.targetGroupName || flowNode.targetGroupId || 'Zielgruppe wählen…'
