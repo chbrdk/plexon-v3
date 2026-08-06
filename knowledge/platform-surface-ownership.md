@@ -35,9 +35,11 @@ Stand: Mai 2026
 - Chat- und Voice-Flows
 - Multi-Service-Runtimes (`api`, `chat-api`, `indexing-api`, Worker)
 
-### BRANDION (spaeter)
+### BRANDION (v3 Shell → Domain)
 
-- Guidelines, Tokens, Voice, Asset-Checks — produktlokal; Pack-Facet `brand` bleibt **reserviert**, bis Brandion an v3-Federation angebunden ist (nur Refs/Distillate, kein Voll-Dump)
+- **v3 Shell** (`chbrdk/brandion-v3`): AppShell, Plexon Auth, API-Tokens, Stub-Hubs Analysis/Guidelines — Registry via `NEXT_PUBLIC_BRANDION_URL`
+- Guidelines, Tokens, Voice, Asset-Checks — Domain nach Keep/Drop; Pack-Facet `brand` bleibt **reserviert** bis Publish-API (nur Refs/Distillate, kein Voll-Dump)
+- Attach: `brandion-v3/knowledge/staging-coolify.md`
 
 ## Selektive Surface-Konsolidierung
 

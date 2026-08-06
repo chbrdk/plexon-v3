@@ -126,6 +126,7 @@ Quelle: `PLEXON/.env.example` + `knowledge/coolify-env-variablen.md` (nur v3-rel
 | `MIGRATION_MSQDX_PLATFORM_PROJECTS` | einmalig, nie auto auf Staging-Blank |
 | `CHECKION_API_URL` / `AUDION_API_URL` + Tokens | erst wenn v3-Product-APIs existieren |
 | `NEXT_PUBLIC_AUDION_ADMIN_URL` / `NEXT_PUBLIC_CHECKION_URL` | Wave A: nicht setzen (oder nur wenn Product-App schon da). **Wave B:** nach checkion-v3 smoke auf `URL_CHECKION_V3` (`https://checkion-v3.projects-a.plygrnd.tech`) setzen — Registry / Collection deep-links auf v3, nie Prod-CHECKION |
+| `NEXT_PUBLIC_BRANDION_URL` | Wave A/B: leer lassen → BRANDION bleibt `planned`. **Wave C:** nach brandion-v3 smoke auf `URL_BRANDION_V3` (`https://brandion-v3.projects-a.plygrnd.tech`) — nie Prod-`brandion` |
 
 ### 4.4 Build (Dockerfile)
 

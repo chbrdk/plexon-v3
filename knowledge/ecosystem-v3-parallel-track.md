@@ -21,7 +21,7 @@ v3 ist **eine Plattform-Generation**, nicht „nur eine App“.
 | **AUDION** | `AUDION-v2` Coolify | `audion-v3` Repo | Wave 1 Federation + Magazine UI |
 | **CHECKION** | `CHECKION` Coolify | `checkion-v3` (Repo oder Branch-Track) | noch Prod-v2; Federation heute v2-Contract |
 | **ECHON** | `msqdx-echon/v2` | `msqdx-echon/v3` | Codepfad existiert; Coolify-v3 separat |
-| **BRANDION** | `brandion` Coolify | `brandion-v3` Track | später |
+| **BRANDION** | `brandion` Coolify | Repo **`chbrdk/brandion-v3`** → Coolify App `brandion-v3` (Staging) | Shell island shipped; Coolify attach + `NEXT_PUBLIC_BRANDION_URL` Wave C |
 | **VIDEON** | `videon` Coolify | `videon-v3` Track | später |
 | **CREATION** / andere | jeweiliges Prod | nur wenn explizit im v3-Board | optional |
 
@@ -36,7 +36,8 @@ Coolify Environment: msqdx-prod-v2     ← Freeze außer kritische Fixes
 Coolify Environment: msqdx-v3-staging  ← neue Insel
   plexon-v3
   audion-v3
-  checkion-v3   (wenn Track startet)
+  checkion-v3
+  brandion-v3   (Wave C — shell island; Domain später)
   echon-v3
   … (weitere wenn ready)
 ```

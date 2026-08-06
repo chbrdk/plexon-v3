@@ -126,6 +126,36 @@ Smoke: `knowledge/event-quick-check-staging-smoke.md` · Readiness: `GET /api/as
 
 ---
 
+## 4c. Wave C — BRANDION v3 Registry deep-link
+
+Sobald **brandion-v3** Staging-Smoke grün ist (`https://brandion-v3.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
+
+```bash
+NEXT_PUBLIC_BRANDION_URL=https://brandion-v3.projects-a.plygrnd.tech
+```
+
+Dann Redeploy plexon-v3. Wirkung:
+
+- `getBrandionUrl()` → Staging-FQDN
+- Products Registry: BRANDION `lifecycle: active` (sonst `planned`)
+- Deep-Links: home `/`, login `/login`, health `/api/health`
+
+**Nie** Prod-`brandion` Coolify-URL hier eintragen.
+
+Brandion-App Env + Attach: `brandion-v3/knowledge/staging-coolify.md` · Operator: `brandion-v3/knowledge/coolify-operator-handoff.md`.
+
+Optional Shared Variable:
+
+| Shared Name | Wert |
+|-------------|------|
+| `V3_BRANDION_PUBLIC_URL` | `https://brandion-v3.projects-a.plygrnd.tech` |
+
+```bash
+NEXT_PUBLIC_BRANDION_URL={{environment.V3_BRANDION_PUBLIC_URL}}
+```
+
+---
+
 ## 5. Passwort-Reset (Staging, optional)
 
 **Einfach:** nichts setzen → Reset-Link nur in Container-Logs.

@@ -15,9 +15,9 @@
 | `NEXT_PUBLIC_AUDION_ADMIN_URL` | `https://audion.projects-a.plygrnd.tech/admin/` |
 | `NEXT_PUBLIC_CHECKION_URL` | `https://checkion.projects-a.plygrnd.tech/` |
 | `NEXT_PUBLIC_VIDEON_URL` | leer (Produkt bleibt `planned`) |
-| `NEXT_PUBLIC_BRANDION_URL` | leer (Produkt bleibt `planned`) |
+| `NEXT_PUBLIC_BRANDION_URL` | leer → `planned`; Staging nach brandion-v3 smoke: `https://brandion-v3.projects-a.plygrnd.tech` → `active` |
 
-Siehe auch `.env.example`.
+Siehe auch `.env.example` und `knowledge/coolify-plexon-v3-env-cheatsheet.md` §4c.
 
 ## Öffnen der Links
 
