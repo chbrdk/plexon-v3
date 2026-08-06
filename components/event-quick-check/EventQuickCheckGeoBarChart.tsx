@@ -1,7 +1,6 @@
 'use client';
 
 import { Text } from '@msqdx/ui';
-import { MSQDX_COLORS } from '@msqdx/tokens';
 import {
   Bar,
   BarChart,
@@ -43,37 +42,51 @@ export function EventQuickCheckGeoBarChart({ model }: Props) {
               layout="vertical"
               margin={{ top: 4, right: 16, left: 4, bottom: 4 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke={MSQDX_COLORS.greyLight} horizontal={false} />
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" horizontal={false} />
+              <XAxis
+                type="number"
+                allowDecimals={false}
+                tick={{ fontSize: 11, fill: 'var(--muted)' }}
+              />
               <YAxis
                 type="category"
                 dataKey="label"
                 width={Math.min(280, 120 + Math.max(...rows.map((r) => r.label.length)) * 3)}
-                tick={{ fontSize: 11, fill: 'var(--color-text-on-light)' }}
+                tick={{ fontSize: 11, fill: 'var(--ink)' }}
               />
               <Tooltip
                 formatter={(value) => [value ?? 0, model.valueLabel]}
-                labelStyle={{ color: 'var(--color-text-on-light)' }}
+                contentStyle={{
+                  background: 'var(--bg, var(--surface, #fff))',
+                  border: '1px solid var(--line)',
+                  color: 'var(--ink)',
+                }}
+                labelStyle={{ color: 'var(--ink)' }}
               />
               <Bar
                 dataKey="value"
-                fill="var(--color-theme-accent, var(--color-secondary-dx-green))"
+                fill="var(--accent, var(--color-secondary-dx-green))"
                 radius={[0, 6, 6, 0]}
                 maxBarSize={22}
               />
             </BarChart>
           ) : (
             <BarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={MSQDX_COLORS.greyLight} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--color-text-on-light)' }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--ink)' }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'var(--muted)' }} />
               <Tooltip
                 formatter={(value) => [value ?? 0, model.valueLabel]}
-                labelStyle={{ color: 'var(--color-text-on-light)' }}
+                contentStyle={{
+                  background: 'var(--bg, var(--surface, #fff))',
+                  border: '1px solid var(--line)',
+                  color: 'var(--ink)',
+                }}
+                labelStyle={{ color: 'var(--ink)' }}
               />
               <Bar
                 dataKey="value"
-                fill="var(--color-theme-accent, var(--color-secondary-dx-green))"
+                fill="var(--accent, var(--color-secondary-dx-green))"
                 radius={[8, 8, 0, 0]}
                 maxBarSize={40}
               />

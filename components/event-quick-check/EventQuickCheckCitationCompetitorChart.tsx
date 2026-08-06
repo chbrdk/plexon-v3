@@ -1,7 +1,6 @@
 'use client';
 
 import { Text } from '@msqdx/ui';
-import { MSQDX_COLORS } from '@msqdx/tokens';
 import {
   Bar,
   BarChart,
@@ -41,12 +40,12 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
             layout="vertical"
             margin={{ top: 4, right: 16, left: 4, bottom: 4 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke={MSQDX_COLORS.greyLight} horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" horizontal={false} />
             <XAxis
               type="number"
               domain={[0, model.maxPosition]}
               allowDecimals={false}
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 11, fill: 'var(--muted)' }}
             />
             <YAxis
               type="category"
@@ -55,7 +54,7 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
                 280,
                 120 + Math.max(...model.rows.map((r) => String(r.queryLabel).length)) * 3
               )}
-              tick={{ fontSize: 11, fill: 'var(--color-text-on-light)' }}
+              tick={{ fontSize: 11, fill: 'var(--ink)' }}
             />
             <Tooltip
               formatter={(value, name) => {
@@ -67,9 +66,14 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
                 const row = payload?.[0]?.payload as { queryText?: string } | undefined;
                 return row?.queryText ?? '';
               }}
-              labelStyle={{ color: 'var(--color-text-on-light)' }}
+              contentStyle={{
+                background: 'var(--bg, var(--surface, #fff))',
+                border: '1px solid var(--line)',
+                color: 'var(--ink)',
+              }}
+              labelStyle={{ color: 'var(--ink)' }}
             />
-            <Legend wrapperStyle={{ fontSize: 11 }} iconType="square" />
+            <Legend wrapperStyle={{ fontSize: 11, color: 'var(--muted)' }} iconType="square" />
             {model.series.map((series, index) => {
               const fill = citationCompetitorChartColor(index);
               return (
@@ -86,7 +90,7 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
                     return (
                       <Cell
                         key={`${series.key}-${rowIndex}`}
-                        fill={num > 0 ? fill : MSQDX_COLORS.greyLight}
+                        fill={num > 0 ? fill : 'var(--line)'}
                         opacity={num > 0 ? 1 : 0.35}
                       />
                     );

@@ -50,7 +50,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(client).not.toContain('PlexonPageChrome')
   })
 
-  it('done results use magazine chrome without UiBlockSurface panel', () => {
+  it('done results use magazine DS primitives without Ui* / light-surface bridges', () => {
     const dash = readFileSync(
       path.join(root, 'components/event-quick-check/EventQuickCheckDashboardView.tsx'),
       'utf8'
@@ -63,9 +63,32 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('SectionChrome')
     expect(dash).toContain('StatLede')
+    expect(dash).toContain('RankedList')
+    expect(dash).toContain('Accordion')
+    expect(dash).not.toContain('assistant-ui')
+    expect(dash).not.toContain('UiMetricGrid')
+    expect(dash).not.toContain('UiBlockSurface')
+    expect(dash).not.toContain('EventQuickCheckReportSections')
+    expect(dash).not.toContain('--color-text-on-light')
     expect(panel).toContain('SectionChrome')
     expect(panel).not.toContain("from '@/components/assistant-ui/templates/UiBlockSurface'")
     expect(panel).not.toContain("from '@msqdx/react'")
+  })
+
+  it('EQC charts use theme tokens, not light-only text colors', () => {
+    const bar = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckGeoBarChart.tsx'),
+      'utf8'
+    )
+    const competitor = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckCitationCompetitorChart.tsx'),
+      'utf8'
+    )
+    for (const src of [bar, competitor]) {
+      expect(src).toContain("var(--ink)")
+      expect(src).not.toContain('--color-text-on-light')
+      expect(src).not.toContain("from '@msqdx/tokens'")
+    }
   })
 
   it('spec is Accepted for wave 6 / wave 7 results', () => {
