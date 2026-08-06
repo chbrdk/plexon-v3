@@ -2770,18 +2770,30 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(1.25rem, 3vw, 2.25rem);
+  row-gap: 0;
   border-top: 1px solid var(--line);
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-insights__ops {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plexon-eqc-insights__ops > li {
+  min-width: 0;
 }
 
 .plexon-eqc-insights__op {
   display: grid;
   gap: 0.35rem;
+  height: 100%;
   padding: 1.05rem 0 1.15rem;
   border-bottom: 1px solid var(--line);
   border-left: 3px solid transparent;
   padding-left: 0.85rem;
-  margin-left: -0.85rem;
 }
 
 .plexon-eqc-insights__op[data-tone='neg'] {
@@ -2836,7 +2848,7 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   font-size: var(--type-sm, 0.88rem);
   line-height: 1.45;
   color: var(--muted);
-  max-width: 42rem;
+  max-width: none;
 }
 
 .plexon-eqc-moves__gallery {
