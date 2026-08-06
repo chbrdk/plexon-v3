@@ -17,6 +17,7 @@ import {
 } from '@msqdx/ui'
 import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloadButton'
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
+import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-check/EventQuickCheckDomainMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
@@ -302,31 +303,7 @@ export function EventQuickCheckDashboardView({
 
       {layout.showDomain && domain ? (
         <Band title={EQC_REPORT_COPY.sectionDomain}>
-          <div className="plexon-eqc-mag-stack">
-            <StatLedeGroup>
-              <StatLede label="Score" value={String(domain.score)} tone={kpiTone(domain.score)} />
-              <StatLede label="Seiten" value={String(domain.totalPages)} />
-              <StatLede label="Fehler" value={String(domain.stats.errors)} tone={domain.stats.errors ? 'neg' : 'ok'} />
-              <StatLede label="Warnungen" value={String(domain.stats.warnings)} />
-            </StatLedeGroup>
-            {domain.topIssues.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionTopIssues}>
-                {domain.topIssues.map((issue, i) => (
-                  <RankedRow
-                    key={issue.title}
-                    index={i + 1}
-                    label={issue.title}
-                    value={String(issue.count)}
-                  />
-                ))}
-              </RankedList>
-            ) : null}
-            {domain.checkionHref ? (
-              <Button variant="link" size="sm" href={domain.checkionHref} target="_blank" rel="noopener noreferrer">
-                In CHECKION öffnen
-              </Button>
-            ) : null}
-          </div>
+          <EventQuickCheckDomainMagazineSection domain={domain} />
         </Band>
       ) : null}
 

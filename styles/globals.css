@@ -2443,6 +2443,116 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   color: var(--ink, var(--fg));
 }
 
+/* Domain spread — Checkion lab-tile metrics + issues */
+.plexon-eqc-domain-spread {
+  display: grid;
+  gap: 1rem;
+  color: inherit;
+}
+
+.plexon-eqc-domain-spread__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-domain-spread__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plexon-eqc-domain-spread__metrics,
+.plexon-eqc-domain-spread__issues {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.plexon-eqc-lab {
+  display: grid;
+  grid-template-columns: repeat(var(--notes-cols, 2), minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.plexon-eqc-lab-tile {
+  display: grid;
+  grid-template-areas:
+    'value'
+    'key'
+    'meta';
+  gap: 0.35rem;
+  padding: 1.15rem 0.85rem 1.25rem;
+  border-right: 1px solid var(--line);
+  min-width: 0;
+}
+
+.plexon-eqc-lab-tile:nth-child(2n) {
+  border-right: 0;
+}
+
+.plexon-eqc-lab-tile:nth-child(n + 3) {
+  border-top: 1px solid var(--line);
+}
+
+.plexon-eqc-lab-tile__v {
+  grid-area: value;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.85rem, 3.2vw, 2.55rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-lab-tile[data-tone='pos'] .plexon-eqc-lab-tile__v {
+  text-decoration: underline;
+  text-decoration-color: var(--ok, #7dcea0);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.plexon-eqc-lab-tile[data-tone='low'] .plexon-eqc-lab-tile__v {
+  text-decoration: underline;
+  text-decoration-color: var(--warn, #c9a227);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.plexon-eqc-lab-tile[data-tone='neg'] .plexon-eqc-lab-tile__v {
+  text-decoration: underline;
+  text-decoration-color: var(--danger, #d46a6a);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.18em;
+}
+
+.plexon-eqc-lab-tile__k {
+  grid-area: key;
+  font-size: var(--type-xs, 0.7rem);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-lab-tile__m {
+  grid-area: meta;
+  font-size: var(--type-xs, 0.75rem);
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.plexon-eqc-lab-tile__unit {
+  margin-left: 0.05em;
+  font-size: 0.45em;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  vertical-align: 0.35em;
+}
+
 /* EQC report sections (assistant / dashboard bodies) */
 .plexon-eqc-kpi-grid {
   display: grid;
