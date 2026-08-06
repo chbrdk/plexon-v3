@@ -73,6 +73,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('StatLede')
     expect(dash).toContain('EventQuickCheckGeoMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')
+    expect(dash).toContain('EventQuickCheckInsightsMagazineSection')
     expect(dash).not.toContain('assistant-ui')
     expect(dash).not.toContain('UiMetricGrid')
     expect(dash).not.toContain('UiBlockSurface')

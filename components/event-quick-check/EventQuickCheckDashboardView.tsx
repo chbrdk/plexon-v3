@@ -19,6 +19,7 @@ import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloa
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
 import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-check/EventQuickCheckDomainMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
+import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy'
@@ -411,36 +412,10 @@ export function EventQuickCheckDashboardView({
 
       {layout.showInsights && insights ? (
         <Band title={EQC_REPORT_COPY.sectionInsights}>
-          <div className="plexon-eqc-mag-stack">
-            {insights.fazit ? (
-              <Alert tone={alertTone(insights.fazitTone)}>{insights.fazit}</Alert>
-            ) : null}
-            {insights.assessment ? <Text role="body">{insights.assessment}</Text> : null}
-            {insights.findings.length > 0 ? (
-              <RankedList hint="Findings">
-                {insights.findings.map((f, i) => (
-                  <RankedRow
-                    key={i}
-                    index={i + 1}
-                    label={f.title}
-                    secondary={f.description}
-                  />
-                ))}
-              </RankedList>
-            ) : null}
-            {insights.recommendations.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionInsights}>
-                {insights.recommendations.map((r, i) => (
-                  <RankedRow
-                    key={i}
-                    index={i + 1}
-                    label={r.title}
-                    secondary={r.description}
-                  />
-                ))}
-              </RankedList>
-            ) : null}
-          </div>
+          <EventQuickCheckInsightsMagazineSection
+            insights={insights}
+            domainLabel={report.meta.domain || report.meta.url}
+          />
         </Band>
       ) : null}
 

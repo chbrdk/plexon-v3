@@ -2642,6 +2642,381 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   vertical-align: 0.35em;
 }
 
+/* Insights — Checkion verdict / opportunities / moves */
+.plexon-eqc-insights-spread {
+  display: grid;
+  gap: clamp(2rem, 4vw, 3rem);
+  color: inherit;
+}
+
+.plexon-eqc-spread-open {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(11rem, 0.75fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-spread-open {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plexon-eqc-spread-open__main {
+  min-width: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.plexon-eqc-spread-open__prose {
+  margin: 0;
+  max-width: 42rem;
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 84%, transparent);
+}
+
+.plexon-eqc-reading {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.plexon-eqc-reading__statement {
+  margin: 0;
+  max-width: 38rem;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+  font-weight: var(--weight-light, 300);
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-spread-callout {
+  position: sticky;
+  top: 1rem;
+  padding: 1.25rem 1.15rem 1.35rem;
+  border-left: 3px solid var(--line);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--line) 55%, transparent),
+    transparent 70%
+  );
+  display: grid;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-spread-callout[data-tone='neg'] {
+  border-left-color: var(--danger, #d46a6a);
+}
+
+.plexon-eqc-spread-callout[data-tone='low'] {
+  border-left-color: var(--warn, #c9a227);
+}
+
+.plexon-eqc-spread-callout[data-tone='pos'] {
+  border-left-color: var(--ok, #7dcea0);
+}
+
+.plexon-eqc-spread-callout__num {
+  margin: 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-spread-callout__label {
+  margin: 0;
+  font-size: var(--type-xs, 0.7rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-spread-callout__body {
+  margin: 0.25rem 0 0;
+  font-size: var(--type-sm, 0.88rem);
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 80%, transparent);
+}
+
+.plexon-eqc-insights,
+.plexon-eqc-moves {
+  display: grid;
+  gap: 1rem;
+}
+
+.plexon-eqc-insights__head {
+  max-width: 40rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-insights__lede {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  font-weight: var(--weight-light, 300);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 84%, transparent);
+}
+
+.plexon-eqc-insights__ops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.plexon-eqc-insights__op {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.05rem 0 1.15rem;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  padding-left: 0.85rem;
+  margin-left: -0.85rem;
+}
+
+.plexon-eqc-insights__op[data-tone='neg'] {
+  border-left-color: var(--danger, #d46a6a);
+}
+
+.plexon-eqc-insights__op[data-tone='low'] {
+  border-left-color: var(--warn, #c9a227);
+}
+
+.plexon-eqc-insights__op[data-tone='pos'] {
+  border-left-color: var(--ok, #7dcea0);
+}
+
+.plexon-eqc-insights__op-contrast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+  font-size: var(--type-xs, 0.7rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-insights__op-idx {
+  font-variant-numeric: tabular-nums;
+}
+
+.plexon-eqc-insights__op[data-tone='neg'] .plexon-eqc-insights__op-sev {
+  color: var(--danger, #b45555);
+}
+
+.plexon-eqc-insights__op[data-tone='low'] .plexon-eqc-insights__op-sev {
+  color: var(--warn, #a8871f);
+}
+
+.plexon-eqc-insights__op[data-tone='pos'] .plexon-eqc-insights__op-sev {
+  color: var(--ok, #4f9a6e);
+}
+
+.plexon-eqc-insights__op-q {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-insights__op-meta {
+  font-size: var(--type-sm, 0.88rem);
+  line-height: 1.45;
+  color: var(--muted);
+  max-width: 42rem;
+}
+
+.plexon-eqc-moves__gallery {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.plexon-eqc-moves__gallery:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  outline-offset: 6px;
+}
+
+.plexon-eqc-moves__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.plexon-eqc-moves__count {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--type-sm);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.plexon-eqc-moves__count-cur {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-moves__controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-moves__ctrl {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  background: transparent;
+  color: var(--ink, var(--fg));
+  font: inherit;
+  font-size: var(--type-md, 1.05rem);
+  line-height: 1;
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
+}
+
+.plexon-eqc-moves__ctrl:hover {
+  border-bottom-color: currentColor;
+}
+
+.plexon-eqc-moves__ctrl:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  outline-offset: 3px;
+}
+
+.plexon-eqc-moves__slide {
+  display: grid;
+  gap: 0.65rem;
+  min-height: 11.5rem;
+  padding: 1.15rem 0 0.35rem;
+  border-left: 3px solid transparent;
+  padding-left: 0.85rem;
+  margin-left: -0.85rem;
+}
+
+.plexon-eqc-moves__slide[data-tone='neg'] {
+  border-left-color: var(--danger, #d46a6a);
+}
+
+.plexon-eqc-moves__slide[data-tone='low'] {
+  border-left-color: var(--warn, #c9a227);
+}
+
+.plexon-eqc-moves__slide[data-tone='pos'] {
+  border-left-color: var(--ok, #7dcea0);
+}
+
+.plexon-eqc-moves__slide-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.65rem 1.1rem;
+}
+
+.plexon-eqc-moves__idx {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
+.plexon-eqc-moves__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.75rem;
+  font-size: var(--type-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-moves__slide[data-tone='neg'] .plexon-eqc-moves__sev {
+  color: var(--danger, #b45555);
+}
+
+.plexon-eqc-moves__slide[data-tone='low'] .plexon-eqc-moves__sev {
+  color: var(--warn, #a8871f);
+}
+
+.plexon-eqc-moves__slide[data-tone='pos'] .plexon-eqc-moves__sev {
+  color: var(--ok, #4f9a6e);
+}
+
+.plexon-eqc-moves__src {
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--muted) 75%, transparent);
+}
+
+.plexon-eqc-moves__lead {
+  margin: 0;
+  max-width: 36rem;
+}
+
+.plexon-eqc-moves__title {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-moves__copy {
+  margin: 0;
+  max-width: 42rem;
+  font-size: clamp(1.02rem, 1.5vw, 1.12rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 82%, transparent);
+}
+
+.plexon-eqc-moves__ticks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.plexon-eqc-moves__tick {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  width: 1.5rem;
+  height: 2px;
+  background: color-mix(in srgb, var(--line) 90%, transparent);
+  cursor: pointer;
+}
+
+.plexon-eqc-moves__tick[data-active='true'] {
+  background: var(--ink, var(--fg));
+}
+
 /* EQC report sections (assistant / dashboard bodies) */
 .plexon-eqc-kpi-grid {
   display: grid;
