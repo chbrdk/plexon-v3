@@ -180,7 +180,7 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | **Purpose** | Brandion tokens, voice, visual system **references** |
 | **Owner** | Future **BRANDION** |
 | **Consume** | Audion copy tone, Checkion creative QA (later) |
-| **Publish rules** | Facet exists in taxonomy with `status: reserved`. GET returns `{ status: 'reserved', guidelineRef: null, … }` until Brandion onboarding. **No stub fake colors/fonts.** |
+| **Publish rules** | Facet exists in taxonomy with `status: reserved`. GET returns `{ status: 'reserved', guidelineRef: null, … }` until Brandion onboarding. **No stub fake colors/fonts.** When Brandion Phase A guidelines are active, `guidelineRef` points at brandion-v3 (`/guidelines/:id`); DTCG/CSS exports stay product-local (`GET /api/guidelines/:id/export/dtcg|css`) — pack stores **refs only**. |
 
 **Reserved field sketch (for future schema_version):**
 
@@ -282,6 +282,6 @@ Exact role mapping follows existing `user_platform_project_assignments` + Plexon
 4. Companion Audion/Checkion specs linked.
 5. Collection-projects + ownership + paths + specs-index point here.
 
-## Related Brandion shapes (future)
+## Related Brandion shapes
 
-Brandion today models `BrandGuideline`, colors, fonts, organizations (see `brandion` repo). Pack stores **refs + short distillates**, never the full guideline graph — same rule as Audion TipTap / Checkion runs.
+Brandion v3 Phase A: Collection-scoped guidelines + design tokens (color / typography / spacing) with DTCG/CSS export (`brandion-v3` · `specs/domain/guidelines-hub.md` · `specs/domain/design-tokens.md`). Pack stores **refs + short distillates**, never the full token graph — same rule as Audion TipTap / Checkion runs. Legacy v2 models (`BrandGuideline`, colors, fonts, orgs) remain reference IP.
