@@ -96,4 +96,15 @@ describe('mergeRunItemsIntoSchema', () => {
     expect(score?.value).toBe('72');
     expect(score?.schema).toBe(false);
   });
+
+  it('overlays catalog-root flat paths onto node-json schema leaves', () => {
+    const predicted = predictedSchemaForNodeOutput('n-scan', 'scan');
+    expect(predicted).not.toBeNull();
+    const merged = mergeRunItemsIntoSchema(predicted!, [
+      { path: 'scan.overallScore', value: '88', predicted: false },
+    ]);
+    const score = merged.children?.find((c) => c.key === 'overallScore');
+    expect(score?.value).toBe('88');
+    expect(score?.schema).toBe(false);
+  });
 });

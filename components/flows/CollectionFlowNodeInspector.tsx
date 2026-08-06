@@ -34,6 +34,7 @@ import {
 import {
   nodeOutputSchema,
   nodeRefsFromRfNodes,
+  relativePathForInspectorInsert,
   upstreamInputsForNode,
 } from '@/lib/collection-flow-inspector-inputs'
 import type {
@@ -274,9 +275,7 @@ export function CollectionFlowNodeInspector({
   const insertPath = useCallback(
     (path: string) => {
       if (!onUpdate) return
-      const expr = path.includes("$('")
-        ? formatExpressionForPath(path)
-        : formatExpressionForPath(path)
+      const expr = formatExpressionForPath(path)
 
       if (focusField === 'text') {
         onUpdate(node.id, { text: expr })
@@ -298,7 +297,12 @@ export function CollectionFlowNodeInspector({
         onUpdate(node.id, { alias: path.split('.').pop() || path })
         return
       }
-      onUpdate(node.id, { path: expr })
+      // compare / set path: keep `$('id').json…` or catalog path resolvable without forcing braces
+      const bare =
+        path.startsWith("$('") || path.startsWith('{{')
+          ? path.replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '').trim()
+          : path.trim()
+      onUpdate(node.id, { path: bare })
     },
     [focusField, node.id, node.kind, onUpdate]
   )
@@ -307,15 +311,28 @@ export function CollectionFlowNodeInspector({
     (sourceNodeId: string, relativePath: string) => {
       if (!onUpdate) return
       const expr = formatNodeJsonExpression(sourceNodeId, relativePath)
+      const bare = expr.replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '').trim()
+      if (focusField === 'text') {
+        onUpdate(node.id, { text: expr })
+        return
+      }
+      if (focusField === 'note') {
+        onUpdate(node.id, { note: expr })
+        return
+      }
       if (focusField === 'value') {
         onUpdate(node.id, { value: expr })
         return
       }
       if (focusField === 'url') {
-        onUpdate(node.id, { url: expr })
+        onUpdate(node.id, node.kind === 'start' ? { urlKey: expr, url: expr } : { url: expr })
         return
       }
-      onUpdate(node.id, { path: expr })
+      if (focusField === 'alias' && node.kind === 'set') {
+        onUpdate(node.id, { alias: relativePath.split('.').pop() || relativePath || sourceNodeId })
+        return
+      }
+      onUpdate(node.id, { path: bare })
     },
     [focusField, node.id, node.kind, onUpdate]
   )
@@ -352,11 +369,8 @@ export function CollectionFlowNodeInspector({
                 onSelectPath={
                   onUpdate
                     ? (path) => {
-                        if (path.startsWith("$('")) {
-                          insertPath(path)
-                          return
-                        }
-                        insertUpstreamPath(group.sourceNodeId, path.replace(/^[^.]+\./, ''))
+                        const rel = relativePathForInspectorInsert(path, group.sourceNodeId)
+                        insertUpstreamPath(group.sourceNodeId, rel)
                       }
                     : undefined
                 }

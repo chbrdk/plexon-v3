@@ -5,6 +5,7 @@ import {
   nodeRefsFromRfNodes,
   predictedGlobalContextLeaves,
   predictedItemsForSource,
+  relativePathForInspectorInsert,
   upstreamInputsForNode,
 } from '@/lib/collection-flow-inspector-inputs';
 import { emptyRunContext, setContextBundle } from '@/lib/collection-flow-run-context';
@@ -113,6 +114,27 @@ describe('nodeOutputSchema', () => {
     expect(schema!.type).toBe('object');
     expect(schema!.children?.some((c) => c.key === 'overallScore')).toBe(true);
   });
+
+  it('overlays run values on schema leaves', () => {
+    let ctx = emptyRunContext();
+    ctx = setContextBundle(ctx, 'scan', { overallScore: 72, status: 'done' }, 'n-scan');
+    const schema = nodeOutputSchema('n-scan', 'scan', ctx);
+    const score = schema?.children?.find((c) => c.key === 'overallScore');
+    expect(score?.value).toBe('72');
+    expect(score?.schema).toBe(false);
+  });
+});
+
+describe('relativePathForInspectorInsert', () => {
+  it('strips node-json and catalog prefixes', () => {
+    expect(relativePathForInspectorInsert("$('n-scan').json.overallScore", 'n-scan')).toBe(
+      'overallScore'
+    );
+    expect(relativePathForInspectorInsert('scan.issues.criticalCount', 'n-scan')).toBe(
+      'issues.criticalCount'
+    );
+    expect(relativePathForInspectorInsert("$('n-scan').json", 'n-scan')).toBe('');
+  });
 });
 
 describe('nodeOutputItems', () => {
@@ -126,5 +148,13 @@ describe('nodeOutputItems', () => {
   it('falls back to schema when no run context', () => {
     const rows = nodeOutputItems('n-scan', 'scan', null);
     expect(rows.some((r) => r.predicted && r.path.includes('overallScore'))).toBe(true);
+  });
+
+  it('keeps predicted paths merged with run values', () => {
+    let ctx = emptyRunContext();
+    ctx = setContextBundle(ctx, 'scan', { overallScore: 70 }, 'n-scan');
+    const rows = nodeOutputItems('n-scan', 'scan', ctx);
+    expect(rows.some((r) => r.path.includes('overallScore') && !r.predicted)).toBe(true);
+    expect(rows.some((r) => r.path.includes('status') && r.predicted)).toBe(true);
   });
 });

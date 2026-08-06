@@ -326,29 +326,48 @@ export function nodeOutputItems(
   ctx: CollectionFlowRunContext | null | undefined,
   alias?: string
 ): UpstreamInputItem[] {
-  if (!ctx?.outputs) {
-    return predictedItemsForSource(nodeId, kind, {
-      alias: kind === 'set' ? alias : undefined,
-    });
-  }
+  const predicted = predictedItemsForSource(nodeId, kind, {
+    alias: kind === 'set' ? alias : undefined,
+  });
+  if (!ctx?.outputs) return predicted;
 
+  const run: UpstreamInputItem[] = [];
   if (ctx.outputs[nodeId]) {
-    return bundleToItems(`$('${nodeId}').json.`, ctx, nodeId);
+    run.push(...bundleToItems(`$('${nodeId}').json.`, ctx, nodeId));
   }
-
   const root = catalogRootForActionKind(kind);
   if (root && ctx.outputs[root]) {
-    return bundleToItems(`${root}.`, ctx, root);
+    run.push(...bundleToItems(`${root}.`, ctx, root));
   }
-
-  for (const [key, bundle] of Object.entries(ctx.outputs)) {
-    if (key === nodeId || key === root) continue;
-    if (bundle && typeof bundle === 'object' && 'value' in bundle) {
-      return [{ path: key, value: String((bundle as { value: unknown }).value), predicted: false }];
+  if (run.length === 0) {
+    for (const [key, bundle] of Object.entries(ctx.outputs)) {
+      if (key === nodeId || key === root) continue;
+      if (bundle && typeof bundle === 'object' && 'value' in bundle) {
+        run.push({
+          path: key,
+          value: String((bundle as { value: unknown }).value),
+          predicted: false,
+        });
+      }
     }
   }
+  if (run.length === 0) return predicted;
+  return mergePredictedWithRun(predicted, run);
+}
 
-  return predictedItemsForSource(nodeId, kind, { alias: kind === 'set' ? alias : undefined });
+/** Relative path under `$('nodeId').json` for inspector inserts. */
+export function relativePathForInspectorInsert(path: string, sourceNodeId: string): string {
+  const p = path.trim();
+  if (!p) return '';
+  const prefix = `$('${sourceNodeId}').json.`;
+  if (p.startsWith(prefix)) return p.slice(prefix.length);
+  if (p === `$('${sourceNodeId}').json`) return '';
+  const nodeJson = p.match(/^\$\(\s*['"]([^'"]+)['"]\s*\)\.json(?:\.(.+))?$/i);
+  if (nodeJson) return (nodeJson[2] ?? '').trim();
+  // Catalog `scan.overallScore` → `overallScore`
+  const dot = p.indexOf('.');
+  if (dot > 0 && !p.startsWith('$') && !p.includes('{{')) return p.slice(dot + 1);
+  return p.replace(/^\./, '');
 }
 
 export function globalContextSchemaForest(

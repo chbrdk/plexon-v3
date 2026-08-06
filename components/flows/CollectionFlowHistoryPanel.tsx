@@ -102,6 +102,12 @@ export function CollectionFlowHistoryPanel({
           </Button>
         ) : null}
       </div>
+      {onRerun && selectedRunId ? (
+        <Text role="meta" as="p">
+          Erneut ausführen startet einen frischen Lauf auf dem aktuellen Flow — kein Replay des alten
+          Verdicts.
+        </Text>
+      ) : null}
       {msg ? (
         <Text role="meta" as="p">
           {msg}
@@ -118,7 +124,7 @@ export function CollectionFlowHistoryPanel({
         </Text>
       ) : null}
       {items.length > 0 ? (
-        <RankedList hint="Neueste zuerst · Auswahl malt Verdict (ohne Re-Run)">
+        <RankedList hint="Neueste zuerst · Auswahl malt Verdict · Erneut ausführen = frischer Run am aktuellen Doc">
           {items.map((run, i) => (
             <RankedRow
               key={run.id}

@@ -199,6 +199,10 @@ export function resolveExpression(
 
   // Bare catalog-style path (contains `.` or `[`) → resolve; else treat as literal string.
   if (body.includes('.') || body.includes('[')) {
+    // Bare `$('node').json…` without {{ }} (inspector path field paste).
+    if (body.startsWith("$('") || body.startsWith('$("')) {
+      return resolveInner(ctx, body, scope);
+    }
     const fromCtx = resolveContextPath(ctx, body);
     if (fromCtx !== undefined) return fromCtx;
   }

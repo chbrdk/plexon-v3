@@ -364,14 +364,41 @@ export function mergeRunItemsIntoSchema(
   root: SchemaTreeNode,
   items: UpstreamInputItem[]
 ): SchemaTreeNode {
-  const byPath = new Map(items.map((i) => [i.path, i]));
+  const byPath = new Map<string, UpstreamInputItem>();
+  for (const item of items) {
+    byPath.set(item.path, item);
+    // Alias catalog ↔ node-json so either flat form can paint the tree.
+    const nodeJson = item.path.match(/^\$\(\s*['"]([^'"]+)['"]\s*\)\.json(?:\.(.+))?$/i);
+    if (nodeJson?.[2]) {
+      byPath.set(nodeJson[2], item);
+    }
+    const catalog = item.path.match(/^([a-zA-Z_][\w]*)\.(.+)$/);
+    if (catalog && !item.path.startsWith('$')) {
+      byPath.set(catalog[2]!, item);
+    }
+  }
+
+  const lookup = (node: SchemaTreeNode): UpstreamInputItem | undefined => {
+    const direct = byPath.get(node.path);
+    if (direct) return direct;
+    const nodeJson = node.path.match(/^\$\(\s*['"]([^'"]+)['"]\s*\)\.json(?:\.(.+))?$/i);
+    if (nodeJson?.[2]) {
+      const viaRel = byPath.get(nodeJson[2]);
+      if (viaRel) return viaRel;
+    }
+    // Forest children may be shown with key-only depth; also try key as relative leaf.
+    if (node.key && !node.key.startsWith('$') && !node.key.startsWith('[')) {
+      return byPath.get(node.key);
+    }
+    return undefined;
+  };
 
   const walk = (node: SchemaTreeNode): SchemaTreeNode => {
-    const hit = byPath.get(node.path);
+    const hit = lookup(node);
     const next: SchemaTreeNode = {
       ...node,
       value: hit && !hit.predicted ? hit.value : node.value,
-      schema: hit ? hit.predicted : node.schema,
+      schema: hit ? Boolean(hit.predicted) : node.schema,
     };
     if (node.children?.length) {
       next.children = node.children.map(walk);

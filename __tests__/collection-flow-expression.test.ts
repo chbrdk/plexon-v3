@@ -38,6 +38,8 @@ describe('collection-flow-expression (Wave 18)', () => {
 
     expect(resolveExpressionScalar(ctx, 'scan.overallScore')).toBe(81);
     expect(resolveExpressionScalar(ctx, '{{ scan.overallScore }}')).toBe(81);
+    expect(resolveExpressionScalar(ctx, "{{ $('n-scan').json.overallScore }}")).toBe(81);
+    expect(resolveExpressionScalar(ctx, "$('n-scan').json.overallScore")).toBe(81);
     expect(resolveExpressionScalar(ctx, '{{ scan.issues.items[0].ruleId }}')).toBe(
       'color-contrast'
     );
