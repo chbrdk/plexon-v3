@@ -112,4 +112,10 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(spec).toContain('Wave 7')
     expect(spec).toContain('plexon-magazine')
   })
+
+  it('curated @msqdx/ui barrel exports GEO magazine primitives', () => {
+    const barrel = readFileSync(path.join(root, 'lib/msqdx-ui.ts'), 'utf8')
+    expect(barrel).toContain('StatusMeterPanel')
+    expect(barrel).toContain('DataTable')
+  })
 })

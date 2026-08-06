@@ -10,6 +10,8 @@ export type { CardActionsProps } from '../../msqdx-ui/packages/ui/src/components
 export { Checkbox } from '../../msqdx-ui/packages/ui/src/components/Checkbox'
 export { Chip } from '../../msqdx-ui/packages/ui/src/components/Chip'
 export type { ChipProps, ChipSize } from '../../msqdx-ui/packages/ui/src/components/Chip'
+export { DataTable } from '../../msqdx-ui/packages/ui/src/components/DataTable'
+export type { DataTableColumn, DataTableProps } from '../../msqdx-ui/packages/ui/src/components/DataTable'
 export { Dialog } from '../../msqdx-ui/packages/ui/src/components/Dialog'
 export { EmptyState, LoadingText } from '../../msqdx-ui/packages/ui/src/components/LoadingText'
 export { Field } from '../../msqdx-ui/packages/ui/src/components/Field'
@@ -20,6 +22,12 @@ export { Panel } from '../../msqdx-ui/packages/ui/src/components/Panel'
 export { RankedList, RankedRow } from '../../msqdx-ui/packages/ui/src/components/RankedList'
 export { Select } from '../../msqdx-ui/packages/ui/src/components/Select'
 export { Spinner } from '../../msqdx-ui/packages/ui/src/components/Spinner'
+export { StatusMeterPanel } from '../../msqdx-ui/packages/ui/src/components/StatusMeterPanel'
+export type {
+  StatusMeterItem,
+  StatusMeterLevel,
+  StatusMeterPanelProps,
+} from '../../msqdx-ui/packages/ui/src/components/StatusMeterPanel'
 export { Switch } from '../../msqdx-ui/packages/ui/src/components/Switch'
 export { Text } from '../../msqdx-ui/packages/ui/src/components/Text'
 export { Textarea } from '../../msqdx-ui/packages/ui/src/components/Textarea'
