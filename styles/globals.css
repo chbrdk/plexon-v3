@@ -2705,10 +2705,107 @@ main {
   border-top-color: var(--danger, #c45c5c);
 }
 
-/* Wave 10 — n8n-like INPUT / Parameters / OUTPUT on RF nodes */
+/* Wave 10 — n8n-like INPUT / Parameters / OUTPUT on RF nodes (legacy bands) */
 .msqdx-flow-rf-node--io {
   width: 300px;
   overflow: visible;
+}
+
+/* Compact n8n-like cards: edge handles + title/preview (post Wave 18–20) */
+.msqdx-flow-rf-node.msqdx-flow-rf-node--compact {
+  width: 220px;
+  overflow: visible;
+}
+.msqdx-flow-rf-node.msqdx-flow-rf-node--compact.has-output {
+  width: 240px;
+}
+.msqdx-flow-rf-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.msqdx-flow-rf-field--title .ds-input,
+.msqdx-flow-rf-field--title input {
+  font-weight: 600;
+}
+.msqdx-flow-rf-preview {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.35rem 0.4rem;
+  border: 1px dashed color-mix(in srgb, var(--line, #333) 80%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.9;
+  word-break: break-word;
+}
+.msqdx-flow-rf-preview:hover,
+.msqdx-flow-rf-preview:focus-visible {
+  outline: none;
+  border-style: solid;
+  opacity: 1;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.msqdx-flow-rf-preview--muted {
+  opacity: 0.55;
+  font-style: italic;
+}
+.msqdx-flow-rf-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.msqdx-flow-handles {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.msqdx-flow-handles--in {
+  left: 0;
+}
+.msqdx-flow-handles--out {
+  right: 0;
+}
+.msqdx-flow-handle-slot {
+  position: absolute;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.msqdx-flow-handle-slot--in {
+  left: 0;
+  flex-direction: row;
+  transform: translate(-50%, -50%);
+}
+.msqdx-flow-handle-slot--out {
+  right: 0;
+  flex-direction: row-reverse;
+  transform: translate(50%, -50%);
+}
+.msqdx-flow-handle-caption {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0.55;
+  max-width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.msqdx-flow-handle-slot:hover .msqdx-flow-handle-caption {
+  opacity: 0.9;
 }
 .msqdx-flow-rf-node--scan.msqdx-flow-rf-node--io,
 .msqdx-flow-rf-node--domain_scan.msqdx-flow-rf-node--io,
@@ -2807,19 +2904,29 @@ main {
   border-width: 2px !important;
   z-index: 3;
 }
-.msqdx-flow-rf-handle--io-in {
+/* Legacy Wave-10 rows (if any remain) */
+.msqdx-flow-io-row .msqdx-flow-rf-handle--io-in {
   position: absolute !important;
   left: -6px !important;
   right: auto !important;
   top: 50% !important;
   transform: translate(-50%, -50%);
 }
-.msqdx-flow-rf-handle--io-out {
+.msqdx-flow-io-row .msqdx-flow-rf-handle--io-out {
   position: absolute !important;
   right: -6px !important;
   left: auto !important;
   top: 50% !important;
   transform: translate(50%, -50%);
+}
+/* Compact edge stacks: Handle sits in the slot; no extra absolute offsets */
+.msqdx-flow-rf-node--compact .msqdx-flow-rf-handle--io-in,
+.msqdx-flow-rf-node--compact .msqdx-flow-rf-handle--io-out {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none;
 }
 .msqdx-flow-rf-handle--bind {
   background: #5b8def;

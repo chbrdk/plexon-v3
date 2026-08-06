@@ -1,6 +1,6 @@
 # Collection Test Flow
 
-**Status:** Wave 20 set aliases + open path expressions  
+**Status:** Wave 20 set aliases + open path expressions; compact RF node chrome (post-20)  
 
 **Owner:** PLEXON v3 (orchestration SoT)  
 **Federation:** `2026-05-plexon-federation-v3`  
@@ -160,7 +160,7 @@ n8n-like I/O without open expressions:
 
 Connecting `out:<catalogPath>` → `bind:path` (UI label **Wert**) sets `compare.path` and upserts a dashed `bind` edge. Path select remains a fallback. Journey/`run` paths stay picker-only this wave.
 
-Node chrome (n8n-like): each kind declares a fixed I/O schema (`lib/collection-flow-node-ports.ts`) — **INPUT** strip at top (e.g. Compare = Ablauf + Wert), **Parameters** in the middle, **OUTPUT** at the bottom (Pass/Fail or Weiter + catalog Felder).
+Node chrome: each kind declares a fixed I/O schema (`lib/collection-flow-node-ports.ts`). **Canvas cards are compact** (edge handle stacks + title/preview; critical selects only for persona/start/compare/gate). Full parameter editing (text, expressions, Context tree) lives in the **Inspector**. Legacy Wave-10 INPUT / Parameters / OUTPUT bands on the card are retired.
 
 ### Legacy gate → compare (on `ensureFlowDocument`)
 
@@ -444,6 +444,11 @@ Do not place this on legacy `/board` Prismion island.
 
 - Node kind `set`: `path` = source expression, `alias` = output key under `outputs[alias]`; applied before compare eval.
 - JsonTree expands arrays; ports stay curated catalog leaves (no RF handle explosion).
+
+## Compact RF chrome (post Wave 20)
+
+- Canvas cards drop INPUT / Parameters / OUTPUT bands: edge handle stacks + title/preview; Inspector owns text/expressions/Context.
+- Collision fallback size `220×120` matches compact cards.
 
 ## Open questions (non-blocking)
 

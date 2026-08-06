@@ -300,10 +300,9 @@ describe('duplicateNodesInRfGraph', () => {
     expect(next.newIds).toHaveLength(1);
     expect(next.nodes).toHaveLength(nodes.length + 1);
     const clone = next.nodes.find((n) => n.id === next.newIds[0]);
-    expect(clone?.position).toEqual({
-      x: nodes[0]!.position.x + 10,
-      y: nodes[0]!.position.y + 20,
-    });
+    expect(clone?.position.x).toBe(nodes[0]!.position.x + 10);
+    // Compact card height + gap may push the clone down when the nudge still overlaps.
+    expect(clone?.position.y).toBeGreaterThanOrEqual(nodes[0]!.position.y + 20);
     expect(clone?.data.flowNode.label).toMatch(/Kopie/);
   });
 });

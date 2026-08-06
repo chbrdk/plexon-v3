@@ -12,8 +12,8 @@ export type FlowCollisionRect = {
   h: number;
 };
 
-/** Fallback card size matching CollectionFlowRfNode / FlowNodeCard. */
-export const DEFAULT_FLOW_NODE_SIZE = { w: 260, h: 140 } as const;
+/** Fallback card size matching compact CollectionFlowRfNode / FlowNodeCard. */
+export const DEFAULT_FLOW_NODE_SIZE = { w: 220, h: 120 } as const;
 export const DEFAULT_FLOW_NODE_GAP = 24;
 
 const MAX_ITERATIONS = 50;
