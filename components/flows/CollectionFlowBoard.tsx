@@ -144,6 +144,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const [saveBusy, setSaveBusy] = useState(false)
   const [saveMsg, setSaveMsg] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [inspectorId, setInspectorId] = useState<string | null>(null)
   const selectedIdRef = useRef<string | null>(null)
   selectedIdRef.current = selectedId
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -1041,6 +1042,12 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSelectedId(sel[0]?.id ?? null)
   }, [])
 
+  const onNodeClick = useCallback((_event: ReactMouseEvent, node: CollectionFlowRfNodeModel) => {
+    setSelectedId(node.id)
+    selectedIdRef.current = node.id
+    setInspectorId(node.id)
+  }, [])
+
   const addNode = useCallback(
     (kind: CollectionFlowNodeKind) => {
       pushHistory()
@@ -1061,6 +1068,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       }
       setNodes((nds) => [...nds, rfNode])
       setSelectedId(flowNode.id)
+      setInspectorId(flowNode.id)
       setDirty(true)
       setSaveMsg(null)
       setPaletteOpen(false)
@@ -1088,6 +1096,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       }
       setNodes((nds) => [...nds, rfNode])
       setSelectedId(flowNode.id)
+      setInspectorId(flowNode.id)
       setDirty(true)
       setSaveMsg(null)
       setPaletteOpen(false)
@@ -1112,6 +1121,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setNodes(next.nodes)
     setEdges(next.edges)
     setSelectedId(null)
+    setInspectorId((prev) => (prev && ids.has(prev) ? null : prev))
     selectedIdRef.current = null
     setDirty(true)
     setSaveMsg(null)
@@ -1133,6 +1143,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setNodes(next)
     if (newIds[0]) {
       setSelectedId(newIds[0])
+      setInspectorId(newIds[0])
       selectedIdRef.current = newIds[0]
     }
     setDirty(true)
@@ -1164,6 +1175,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setNodes(next.nodes)
     setEdges(next.edges)
     setSelectedId(next.newId)
+    setInspectorId(next.newId)
     selectedIdRef.current = next.newId
     setDirty(true)
     setSaveMsg(null)
@@ -1202,6 +1214,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
         onSelect: () => {
           if (nodeId) {
             setSelectedId(nodeId)
+              setInspectorId(nodeId)
             selectedIdRef.current = nodeId
           }
           duplicateSelected()
@@ -1216,6 +1229,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
         onSelect: () => {
           if (nodeId) {
             setSelectedId(nodeId)
+            setInspectorId(null)
             selectedIdRef.current = nodeId
           }
           deleteSelected()
@@ -1230,6 +1244,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
         onSelect: () => {
           if (nodeId) {
             setSelectedId(nodeId)
+            setInspectorId(nodeId)
             selectedIdRef.current = nodeId
           }
           addParallelPersona()
@@ -1243,6 +1258,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       onSelect: () => {
         if (nodeId) {
           setSelectedId(nodeId)
+          setInspectorId(nodeId)
           selectedIdRef.current = nodeId
         }
       },
@@ -1273,6 +1289,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       event.preventDefault()
       if (runBusy) return
       setSelectedId(node.id)
+      setInspectorId(node.id)
       selectedIdRef.current = node.id
       setContextMenu({
         x: event.clientX,
@@ -1290,6 +1307,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       setSelectedId(null)
       selectedIdRef.current = null
     }
+    setInspectorId((prev) => (prev && ids.has(prev) ? null : prev))
     setDirty(true)
     setSaveMsg(null)
   }, [])
@@ -1367,7 +1385,11 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onManualGate: (edgeKind: 'when' | 'otherwise') => void onManualGate(n.id, edgeKind),
           onPlaySegment: () => void onPlaySegment(n.id),
           onOutputToNote: () => onOutputToNote(n.id),
-          onOpenInspector: () => setSelectedId(n.id),
+          onOpenInspector: () => {
+            setSelectedId(n.id)
+            selectedIdRef.current = n.id
+            setInspectorId(n.id)
+          },
           audionCatalog,
         },
       })),
@@ -1385,22 +1407,22 @@ function BoardInner({ platformProjectId, initial }: Props) {
   )
 
   const selectedFlowNode = useMemo(() => {
-    if (!selectedId) return null
-    const rf = nodes.find((n) => n.id === selectedId) as CollectionFlowRfNodeModel | undefined
+    if (!inspectorId) return null
+    const rf = nodes.find((n) => n.id === inspectorId) as CollectionFlowRfNodeModel | undefined
     return rf?.data?.flowNode ?? null
-  }, [nodes, selectedId])
+  }, [nodes, inspectorId])
 
   const bindSourceLabel = useMemo(() => {
-    if (!selectedId || selectedFlowNode?.kind !== 'compare') return null
+    if (!inspectorId || selectedFlowNode?.kind !== 'compare') return null
     const bind = (edges as CollectionFlowRfEdge[]).find(
-      (e) => e.target === selectedId && e.data?.edgeKind === 'bind'
+      (e) => e.target === inspectorId && e.data?.edgeKind === 'bind'
     )
     if (!bind) return null
     const src = nodes.find((n) => n.id === bind.source) as CollectionFlowRfNodeModel | undefined
     const label = src?.data?.flowNode?.label ?? bind.source
     const path = bind.data?.bindPath ?? selectedFlowNode.path
     return path ? `${label} · ${path}` : label
-  }, [edges, nodes, selectedFlowNode, selectedId])
+  }, [edges, nodes, selectedFlowNode, inspectorId])
 
   const studyHref =
     runMeta?.studyId != null
@@ -1453,6 +1475,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
           onEdgesDelete={onEdgesDelete}
           onNodesDelete={onNodesDelete}
           onSelectionChange={onSelectionChange}
+          onNodeClick={onNodeClick}
           onNodeDragStop={onNodeDragStop}
           onSelectionDragStop={onSelectionDragStop}
           onPaneContextMenu={onPaneContextMenu}
@@ -1835,8 +1858,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
             <CollectionFlowNodeInspector
               open
               node={selectedFlowNode}
-              runState={runStates[selectedId!] ?? 'idle'}
-              inspector={inspectorByNode[selectedId!] ?? null}
+              runState={runStates[inspectorId!] ?? 'idle'}
+              inspector={inspectorByNode[inspectorId!] ?? null}
               jobSummary={jobSummary}
               verdict={verdict}
               lastRun={lastRun}
@@ -1844,8 +1867,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
               edges={edges as CollectionFlowRfEdge[]}
               rfNodes={nodes as CollectionFlowRfNodeModel[]}
               audionCatalog={audionCatalog}
-              onClose={() => setSelectedId(null)}
-              onAppendOutputToNote={() => onInspectorOutputToNote(selectedId!)}
+              onClose={() => setInspectorId(null)}
+              onAppendOutputToNote={() => onInspectorOutputToNote(inspectorId!)}
               onUpdate={onUpdateNode}
             />
           ) : null}
