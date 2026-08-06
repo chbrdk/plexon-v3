@@ -32,7 +32,6 @@ import {
   formatNodeJsonExpression,
 } from '@/lib/collection-flow-expression'
 import {
-  globalContextSchemaForest,
   nodeOutputSchema,
   nodeRefsFromRfNodes,
   upstreamInputsForNode,
@@ -267,11 +266,6 @@ export function CollectionFlowNodeInspector({
     [node.id, edges, nodeById, lastRun?.context]
   )
 
-  const globalContextSchema = useMemo(
-    () => globalContextSchemaForest(lastRun?.context ?? null),
-    [lastRun?.context]
-  )
-
   const outputSchema = useMemo(
     () => nodeOutputSchema(node.id, node.kind, lastRun?.context ?? null, node.alias),
     [node.alias, node.id, node.kind, lastRun?.context]
@@ -333,50 +327,45 @@ export function CollectionFlowNodeInspector({
           Keine eingehenden Kanten — verbinde einen vorherigen Schritt.
         </p>
       ) : (
-        upstreamGroups.map((group) => (
-          <div key={group.sourceNodeId} className="msqdx-flow-node-editor-upstream">
-            <div className="msqdx-flow-node-editor-upstream-head">
-              <span>{group.sourceLabel}</span>
-              <span className="msqdx-flow-node-editor-upstream-kind">{group.sourceKind}</span>
-              <span
-                className={`msqdx-flow-inspector-pill${group.hasRunData ? '' : ' msqdx-flow-inspector-pill--schema'}`}
-              >
-                {group.hasRunData ? 'Run' : 'Schema'}
-              </span>
-              {group.bindPath ? (
-                <span className="msqdx-flow-inspector-pill">{group.bindPath}</span>
-              ) : null}
-            </div>
-            <SchemaTree
-              root={group.schema}
-              onSelectPath={
-                onUpdate
-                  ? (path) => {
-                      if (path.startsWith("$('")) {
-                        insertPath(path)
-                        return
+        upstreamGroups.map((group) => {
+          // Show field forest directly (skip cryptic $('id').json root wrapper).
+          const treeRoot =
+            group.schema.children && group.schema.children.length > 0
+              ? group.schema.children
+              : group.schema
+          return (
+            <div key={group.sourceNodeId} className="msqdx-flow-node-editor-upstream">
+              <div className="msqdx-flow-node-editor-upstream-head">
+                <span>{group.sourceLabel}</span>
+                <span className="msqdx-flow-node-editor-upstream-kind">{group.sourceKind}</span>
+                <span
+                  className={`msqdx-flow-inspector-pill${group.hasRunData ? '' : ' msqdx-flow-inspector-pill--schema'}`}
+                >
+                  {group.hasRunData ? 'Output' : 'Schema'}
+                </span>
+                {group.bindPath ? (
+                  <span className="msqdx-flow-inspector-pill">{group.bindPath}</span>
+                ) : null}
+              </div>
+              <SchemaTree
+                root={treeRoot}
+                onSelectPath={
+                  onUpdate
+                    ? (path) => {
+                        if (path.startsWith("$('")) {
+                          insertPath(path)
+                          return
+                        }
+                        insertUpstreamPath(group.sourceNodeId, path.replace(/^[^.]+\./, ''))
                       }
-                      insertUpstreamPath(group.sourceNodeId, path.replace(/^[^.]+\./, ''))
-                    }
-                  : undefined
-              }
-              emptyLabel="Kein Schema für diese Node."
-            />
-          </div>
-        ))
+                    : undefined
+                }
+                emptyLabel="Kein Schema für diese Node."
+              />
+            </div>
+          )
+        })
       )}
-      {globalContextSchema.length > 0 ? (
-        <>
-          <p className="msqdx-flow-inspector-field-label">
-            {lastRun?.context?.outputs ? 'Gesamter Kontext' : 'Katalog (Schema)'}
-          </p>
-          <SchemaTree
-            root={globalContextSchema}
-            onSelectPath={onUpdate ? insertPath : undefined}
-            emptyLabel="Kein Katalog verfügbar."
-          />
-        </>
-      ) : null}
     </>
   )
 

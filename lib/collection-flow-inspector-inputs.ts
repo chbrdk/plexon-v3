@@ -188,6 +188,78 @@ function runItemsForSource(
   return dedupeItems(items);
 }
 
+function collectAncestorNodeIds(
+  nodeId: string,
+  edges: FlowInspectorEdgeRef[]
+): string[] {
+  const preds = new Map<string, Set<string>>();
+  for (const e of edges) {
+    const set = preds.get(e.target) ?? new Set<string>();
+    set.add(e.source);
+    preds.set(e.target, set);
+  }
+
+  const ancestors = new Set<string>();
+  const stack = [...(preds.get(nodeId) ?? [])];
+  while (stack.length) {
+    const id = stack.pop()!;
+    if (ancestors.has(id) || id === nodeId) continue;
+    ancestors.add(id);
+    for (const p of preds.get(id) ?? []) stack.push(p);
+  }
+
+  const ids = Array.from(ancestors);
+  if (ids.length <= 1) return ids;
+
+  // Topological order (sources first) so INPUT reads like the flow path.
+  const indeg = new Map(ids.map((id) => [id, 0]));
+  for (const id of ids) {
+    for (const p of preds.get(id) ?? []) {
+      if (ancestors.has(p)) indeg.set(id, (indeg.get(id) ?? 0) + 1);
+    }
+  }
+  const queue = ids.filter((id) => (indeg.get(id) ?? 0) === 0);
+  const ordered: string[] = [];
+  while (queue.length) {
+    const id = queue.shift()!;
+    ordered.push(id);
+    for (const [target, parents] of preds) {
+      if (!ancestors.has(target) || !parents.has(id)) continue;
+      const next = (indeg.get(target) ?? 1) - 1;
+      indeg.set(target, next);
+      if (next === 0) queue.push(target);
+    }
+  }
+  for (const id of ids) {
+    if (!ordered.includes(id)) ordered.push(id);
+  }
+  return ordered;
+}
+
+function directEdgeMeta(
+  nodeId: string,
+  sourceId: string,
+  edges: FlowInspectorEdgeRef[]
+): {
+  bindPath?: string;
+  catalogHandlePath?: string | null;
+  edgeKind: UpstreamInputGroup['edgeKind'];
+} {
+  const edge = edges.find((e) => e.source === sourceId && e.target === nodeId);
+  if (!edge) return { edgeKind: 'flow' };
+  const bindPath =
+    edge.data?.bindPath ??
+    catalogPathFromOutHandle(edge.sourceHandle ?? undefined) ??
+    undefined;
+  const isBind = edge.data?.edgeKind === 'bind' || edge.targetHandle === 'bind:path';
+  const isCatalogOut = Boolean(edge.sourceHandle?.startsWith('out:'));
+  return {
+    bindPath: isBind ? bindPath : undefined,
+    catalogHandlePath: catalogPathFromOutHandle(edge.sourceHandle ?? undefined),
+    edgeKind: isBind ? 'bind' : isCatalogOut ? 'catalog' : 'flow',
+  };
+}
+
 export function upstreamInputsForNode(
   nodeId: string,
   edges: FlowInspectorEdgeRef[],
@@ -195,43 +267,38 @@ export function upstreamInputsForNode(
   ctx: CollectionFlowRunContext | null | undefined
 ): UpstreamInputGroup[] {
   const groups: UpstreamInputGroup[] = [];
+  const ancestorIds = collectAncestorNodeIds(nodeId, edges);
 
-  for (const edge of edges.filter((e) => e.target === nodeId)) {
-    const src = nodeById.get(edge.source);
+  for (const sourceId of ancestorIds) {
+    const src = nodeById.get(sourceId);
     if (!src) continue;
 
-    const bindPath =
-      edge.data?.bindPath ??
-      catalogPathFromOutHandle(edge.sourceHandle ?? undefined) ??
-      undefined;
-    const isBind = edge.data?.edgeKind === 'bind' || edge.targetHandle === 'bind:path';
-    const isCatalogOut = Boolean(edge.sourceHandle?.startsWith('out:'));
-    const catalogHandlePath = catalogPathFromOutHandle(edge.sourceHandle ?? undefined);
-
+    const meta = directEdgeMeta(nodeId, sourceId, edges);
+    // Narrow bind/catalog ports only for a direct edge; transitive ancestors show full output.
     const opts = {
-      bindPath: isBind ? bindPath : undefined,
-      catalogHandlePath,
+      bindPath: meta.bindPath,
+      catalogHandlePath: meta.edgeKind === 'catalog' ? meta.catalogHandlePath : undefined,
       alias: src.alias,
     };
 
-    const predictedFlat = predictedItemsForSource(edge.source, src.kind, opts);
+    const predictedFlat = predictedItemsForSource(sourceId, src.kind, opts);
     const run =
       ctx?.outputs != null
-        ? runItemsForSource(edge.source, src.kind, ctx, isBind ? bindPath : undefined)
+        ? runItemsForSource(sourceId, src.kind, ctx, meta.bindPath)
         : [];
     const items = mergePredictedWithRun(predictedFlat, run);
 
-    const schema = mergeRunItemsIntoSchema(
-      predictedSchemaForSource(edge.source, src.kind, opts),
-      items
-    );
+    // Prefer the same schema the node would show in OUTPUT (shape + run overlay).
+    const schema =
+      nodeOutputSchema(sourceId, src.kind, ctx, src.alias) ??
+      mergeRunItemsIntoSchema(predictedSchemaForSource(sourceId, src.kind, opts), items);
 
     groups.push({
-      sourceNodeId: edge.source,
+      sourceNodeId: sourceId,
       sourceLabel: src.label || src.id,
       sourceKind: src.kind,
-      edgeKind: isBind ? 'bind' : isCatalogOut ? 'catalog' : 'flow',
-      bindPath: isBind ? bindPath : undefined,
+      edgeKind: meta.edgeKind,
+      bindPath: meta.bindPath,
       schema,
       items,
       hasRunData: run.length > 0,

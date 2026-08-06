@@ -290,121 +290,210 @@
   background: transparent;
 }
 
-.plexon-knowledge-band {
-  margin-block: 0;
-}
-
 .plexon-collection-overview {
-  margin-block: 0 2rem;
-  padding-bottom: 1.75rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
-}
-
-.plexon-collection-overview-head {
-  align-items: flex-end;
-}
-
-.plexon-collection-overview-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-}
-
-.plexon-collection-overview-spreads {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 1.75rem 2rem;
-  margin-top: 1.35rem;
-}
-
-.plexon-collection-overview-spread {
+  margin-block: 0 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  gap: 1.5rem;
 }
 
-.plexon-collection-overview-spread-head {
+.plexon-collection-overview-mast {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  gap: 1rem 1.5rem;
+}
+
+.plexon-collection-overview-mast-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 42rem;
 }
 
 .plexon-collection-overview-kicker {
   margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.plexon-collection-overview-teasers {
+.plexon-collection-overview-lede {
+  margin: 0;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 78%, var(--muted));
+  line-height: 1.45;
+}
+
+.plexon-collection-overview-pulse {
+  margin: 0;
+  padding-block: 0.35rem 0.15rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.plexon-collection-overview-folio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 0 2.5rem;
+  align-items: start;
+}
+
+.plexon-collection-overview-chapter {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  min-width: 0;
+}
+
+.plexon-collection-overview-chapter[data-chapter='capabilities'] {
+  padding-right: 2.5rem;
+  border-right: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.plexon-collection-overview-chapter-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.plexon-collection-overview-chapter-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.plexon-collection-overview-ledger {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
 }
 
-.plexon-collection-overview-teasers li {
+.plexon-collection-overview-ledger > li {
+  margin: 0;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.35rem 0.85rem;
-  padding-block: 0.2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  gap: 0.75rem 1rem;
 }
 
-.plexon-collection-overview-teasers li:last-child {
+.plexon-collection-overview-ledger > li:last-child {
   border-bottom: 0;
 }
 
-.plexon-collection-overview-facet-chips,
-.plexon-collection-overview-bindings {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.55rem;
-}
-
-.plexon-collection-overview-facet-btn {
+.plexon-collection-overview-ledger-btn {
   appearance: none;
   border: 0;
   background: transparent;
   padding: 0;
   margin: 0;
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
   cursor: pointer;
   font: inherit;
+  color: inherit;
+  text-align: left;
 }
 
-.plexon-collection-overview-facet-btn:disabled {
-  cursor: default;
-  opacity: 0.72;
-}
-
-.plexon-overview-chip--filled {
+.plexon-collection-overview-ledger-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--ink, var(--fg));
-  border-color: color-mix(in srgb, var(--accent, #00ca55) 40%, var(--line));
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
-.plexon-overview-chip--empty {
+.plexon-collection-overview-ledger-mark {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
-.plexon-overview-chip--reserved {
+.plexon-collection-overview-ledger-mark[data-tone='ok'] {
+  color: color-mix(in srgb, var(--accent, #00ca55) 85%, var(--ink, var(--fg)));
+}
+
+.plexon-collection-overview-ledger-mark[data-tone='err'] {
+  color: color-mix(in srgb, #e85d4c 90%, var(--ink, var(--fg)));
+}
+
+.plexon-collection-overview-aside {
+  margin: 0.15rem 0 0;
+}
+
+.plexon-collection-overview-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
+  font-size: 0.78rem;
   color: var(--muted);
-  opacity: 0.85;
+}
+
+.plexon-collection-overview-foot-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.plexon-collection-overview-foot-link:hover {
+  color: var(--ink, var(--fg));
+}
+
+.plexon-collection-overview-foot-sep {
+  opacity: 0.55;
+}
+
+.plexon-collection-overview-foot-chip {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 70%, var(--muted));
+}
+
+@media (max-width: 960px) {
+  .plexon-collection-overview-folio {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .plexon-collection-overview-chapter[data-chapter='capabilities'] {
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  }
+}
+
+.plexon-knowledge-band {
+  margin-block: 0;
 }
 
 .plexon-knowledge-band-head {

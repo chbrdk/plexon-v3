@@ -1,7 +1,7 @@
 'use client'
 
 import NextLink from 'next/link'
-import { Button, Chip, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
+import { Button, StatLede, StatLedeGroup, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import type { CollectionWorkNavId } from '@/components/products/CollectionKnowledgeBand'
 import type { CollectionBinding } from '@/components/products/CollectionCapabilityViews'
@@ -58,47 +58,42 @@ function facetLabelKey(id: KnowledgeFacetId): string {
   }
 }
 
-function readinessClass(status: KnowledgeFacetReadiness['status']): string {
-  if (status === 'filled') return 'plexon-overview-chip plexon-overview-chip--filled'
-  if (status === 'reserved') return 'plexon-overview-chip plexon-overview-chip--reserved'
-  return 'plexon-overview-chip plexon-overview-chip--empty'
-}
-
-function syncClass(status: string): string {
-  return `plexon-sync-chip plexon-sync-chip--${syncTone(status)}`
-}
-
 function topScans(checkion: CheckionProjectSummary | null) {
   if (!checkion) return []
   const domain = checkion.domainScans.map((s) => ({
     key: `d-${s.id}`,
     label: s.domain,
     score: s.score,
-    kind: 'domain' as const,
   }))
   const pages = checkion.standaloneScans.map((s) => ({
     key: `s-${s.id}`,
-    label: s.url,
+    label: s.url.replace(/^https?:\/\//, '').replace(/\/$/, ''),
     score: s.score,
-    kind: 'page' as const,
   }))
-  return [...domain, ...pages]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 2)
-}
-
-function syncTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
-  const s = status.toLowerCase()
-  if (s === 'synced' || s === 'ok' || s === 'healthy' || s === 'in_sync') return 'success'
-  if (s === 'pending' || s === 'syncing') return 'warning'
-  if (s === 'error' || s === 'failed') return 'danger'
-  return 'neutral'
+  return [...domain, ...pages].sort((a, b) => b.score - a.score).slice(0, 2)
 }
 
 function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
   return productId
+}
+
+function syncShort(status: string): string {
+  const s = status.toLowerCase()
+  if (s === 'synced' || s === 'ok' || s === 'healthy' || s === 'in_sync') return 'ok'
+  if (s === 'pending' || s === 'syncing') return '…'
+  if (s === 'error' || s === 'failed') return 'err'
+  return status
+}
+
+function flowStatusLabel(status: string | null, neverRun: string): { text: string; tone: 'ok' | 'err' | 'muted' } {
+  if (!status) return { text: neverRun, tone: 'muted' }
+  const s = status.toLowerCase()
+  if (s === 'complete' || s === 'completed') return { text: 'ok', tone: 'ok' }
+  if (s === 'error' || s === 'failed') return { text: 'err', tone: 'err' }
+  if (s === 'running' || s === 'pending') return { text: s, tone: 'muted' }
+  return { text: status, tone: 'muted' }
 }
 
 export function CollectionOverviewBand({
@@ -114,8 +109,14 @@ export function CollectionOverviewBand({
   const { t } = useI18n()
   const scans = topScans(checkion)
   const personas = (audion?.personas ?? []).slice(0, 3)
-  const filledCount = knowledge?.facets.filter((f) => f.status === 'filled').length ?? 0
-  const facetTotal = knowledge?.facets.filter((f) => f.status !== 'reserved').length ?? 0
+  const facets = (knowledge?.facets ?? []).filter((f) => f.status !== 'reserved')
+  const filledCount = facets.filter((f) => f.status === 'filled').length
+  const facetTotal = facets.length
+  const flowCount = flows?.count ?? 0
+  const bindingsOk = bindings.filter((b) => {
+    const s = b.syncStatus.toLowerCase()
+    return s === 'synced' || s === 'ok' || s === 'healthy' || s === 'in_sync'
+  }).length
 
   const lede = domain
     ? t('projects.detail.overviewLedeWithDomain', { domain })
@@ -127,221 +128,220 @@ export function CollectionOverviewBand({
       aria-label={t('projects.detail.overviewTitle')}
       data-section="collection-overview"
     >
-      <header className="plexon-dash-band-head plexon-collection-overview-head">
-        <div>
-          <Text role="title" as="h2" className="plexon-dash-band-title">
+      <header className="plexon-collection-overview-mast">
+        <div className="plexon-collection-overview-mast-copy">
+          <Text role="meta" as="p" className="plexon-collection-overview-kicker">
             {t('projects.detail.overviewTitle')}
           </Text>
-          <Text role="meta" as="p" className="plexon-dash-band-deck">
+          <Text role="body" as="p" className="plexon-collection-overview-lede">
             {lede}
           </Text>
         </div>
-        <div className="plexon-collection-overview-actions">
-          <Button variant="ghost" size="sm" onClick={() => onOpenWork('profile')}>
-            {t('projects.detail.overviewEditKnowledge')}
-          </Button>
-        </div>
+        <Button variant="ghost" size="sm" onClick={() => onOpenWork('profile')}>
+          {t('projects.detail.overviewEditKnowledge')}
+        </Button>
       </header>
 
-      <div className="plexon-collection-overview-spreads">
-        <article className="plexon-collection-overview-spread" data-spread="checkion">
-          <header className="plexon-collection-overview-spread-head">
-            <Text role="meta" as="p" className="plexon-collection-overview-kicker">
-              CHECKION
-            </Text>
-            <Button variant="link" size="sm" onClick={() => onOpenWork('checkion')}>
-              {t('projects.detail.overviewOpenCatalog')}
-            </Button>
-          </header>
-          {!checkion ? (
-            <Text role="meta">{t('projects.detail.overviewCheckionEmpty')}</Text>
-          ) : (
-            <>
-              <StatLedeGroup aria-label={t('projects.detail.overviewCheckionStats')}>
-                <StatLede
-                  label={t('projects.detail.scans')}
-                  value={String(checkion.scanCount)}
-                />
-                <StatLede
-                  label={t('projects.detail.domainScans')}
-                  value={String(checkion.domainScanCount)}
-                />
-                <StatLede
-                  label={t('projects.detail.standaloneScans')}
-                  value={String(checkion.standaloneScanCount)}
-                />
-              </StatLedeGroup>
-              {scans.length === 0 ? (
-                <Text role="meta">{t('projects.detail.overviewCheckionNoScans')}</Text>
-              ) : (
-                <ul className="plexon-collection-overview-teasers">
-                  {scans.map((s) => (
-                    <li key={s.key}>
-                      <Text role="body" as="span">
-                        {s.label}
-                      </Text>
-                      <Text role="meta" as="span">
-                        {s.score}
-                      </Text>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          )}
-        </article>
+      <StatLedeGroup
+        aria-label={t('projects.detail.overviewPulse')}
+        columns={4}
+        compact
+        className="plexon-collection-overview-pulse"
+      >
+        <StatLede
+          label={t('projects.detail.scans')}
+          value={checkion ? String(checkion.scanCount) : '—'}
+        />
+        <StatLede
+          label={t('projects.detail.personas')}
+          value={audion ? String(audion.personaCount) : '—'}
+        />
+        <StatLede
+          label={t('projects.detail.overviewKnowledgePulse')}
+          value={facetTotal > 0 ? `${filledCount}/${facetTotal}` : '—'}
+        />
+        <StatLede
+          label={t('projects.detail.overviewFlowsCount')}
+          value={String(flowCount)}
+        />
+      </StatLedeGroup>
 
-        <article className="plexon-collection-overview-spread" data-spread="audion">
-          <header className="plexon-collection-overview-spread-head">
-            <Text role="meta" as="p" className="plexon-collection-overview-kicker">
-              AUDION
-            </Text>
-            <Button variant="link" size="sm" onClick={() => onOpenWork('audion')}>
-              {t('projects.detail.overviewOpenCatalog')}
-            </Button>
-          </header>
-          {!audion ? (
-            <Text role="meta">{t('projects.detail.overviewAudionEmpty')}</Text>
-          ) : (
-            <>
-              <StatLedeGroup aria-label={t('projects.detail.overviewAudionStats')}>
-                <StatLede
-                  label={t('projects.detail.personas')}
-                  value={String(audion.personaCount)}
-                />
-                <StatLede
-                  label={t('projects.detail.targetGroups')}
-                  value={String(audion.targetGroupCount)}
-                />
-                <StatLede
-                  label={t('projects.detail.journeys')}
-                  value={String(audion.journeyCount)}
-                />
-                <StatLede
-                  label={t('projects.detail.studies')}
-                  value={String(audion.studyCount)}
-                />
-              </StatLedeGroup>
-              {personas.length === 0 ? (
-                <Text role="meta">{t('projects.detail.overviewAudionNoPersonas')}</Text>
-              ) : (
-                <ul className="plexon-collection-overview-teasers">
-                  {personas.map((p) => (
-                    <li key={p.id}>
-                      <Text role="body" as="span">
-                        {p.name}
-                      </Text>
-                      <Text role="meta" as="span">
-                        {p.role}
-                      </Text>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          )}
-        </article>
-
-        <article className="plexon-collection-overview-spread" data-spread="knowledge">
-          <header className="plexon-collection-overview-spread-head">
-            <Text role="meta" as="p" className="plexon-collection-overview-kicker">
-              {t('projects.detail.overviewKnowledgeTitle')}
-            </Text>
-            <Text role="meta" as="p">
-              {facetTotal > 0
-                ? t('projects.detail.overviewKnowledgeReady', {
-                    filled: filledCount,
-                    total: facetTotal,
-                  })
-                : t('projects.detail.overviewKnowledgePending')}
-            </Text>
-          </header>
-          {!knowledge?.facets.length ? (
-            <Text role="meta">{t('projects.detail.overviewKnowledgePending')}</Text>
-          ) : (
-            <ul className="plexon-collection-overview-facet-chips">
-              {knowledge.facets.map((f) => (
-                <li key={f.facetId}>
-                  <button
-                    type="button"
-                    className="plexon-collection-overview-facet-btn"
-                    onClick={() => onOpenWork(f.facetId)}
-                    disabled={f.status === 'reserved'}
-                  >
-                    <Chip static size="sm" className={readinessClass(f.status)}>
-                      {t(facetLabelKey(f.facetId))}
-                      {' · '}
-                      {f.status === 'filled'
-                        ? t('projects.detail.overviewFacetFilled')
-                        : f.status === 'reserved'
-                          ? t('projects.detail.overviewFacetReserved')
-                          : t('projects.detail.overviewFacetEmpty')}
-                    </Chip>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-
-        <article className="plexon-collection-overview-spread" data-spread="flows">
-          <header className="plexon-collection-overview-spread-head">
-            <Text role="meta" as="p" className="plexon-collection-overview-kicker">
-              {t('projects.detail.navFlows')}
-            </Text>
-            <NextLink href={pathPlatformProjectFlows(platformProjectId)}>
-              <Button variant="link" size="sm">
-                {t('projects.detail.overviewOpenFlows')}
+      <div className="plexon-collection-overview-folio">
+        <article className="plexon-collection-overview-chapter" data-chapter="capabilities">
+          <div className="plexon-collection-overview-chapter-block">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                CHECKION
+              </Text>
+              <Button variant="link" size="sm" onClick={() => onOpenWork('checkion')}>
+                {t('projects.detail.overviewOpenCatalog')}
               </Button>
-            </NextLink>
-          </header>
-          {!flows || flows.count === 0 ? (
-            <Text role="meta">{t('projects.detail.overviewFlowsEmpty')}</Text>
-          ) : (
-            <>
-              <StatLedeGroup aria-label={t('projects.detail.navFlows')}>
-                <StatLede label={t('projects.detail.overviewFlowsCount')} value={String(flows.count)} />
-              </StatLedeGroup>
-              <ul className="plexon-collection-overview-teasers">
-                {flows.recent.map((f) => (
-                  <li key={f.id}>
-                    <Text role="body" as="span">
-                      {f.name}
-                    </Text>
-                    <Text role="meta" as="span">
-                      {f.lastRunStatus ?? t('projects.detail.overviewFlowNeverRun')}
-                    </Text>
+            </header>
+            {!checkion ? (
+              <Text role="meta">{t('projects.detail.overviewCheckionEmpty')}</Text>
+            ) : scans.length === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewCheckionNoScans')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                {scans.map((s) => (
+                  <li key={s.key}>
+                    <span className="plexon-collection-overview-ledger-label">{s.label}</span>
+                    <span className="plexon-collection-overview-ledger-mark">{s.score}</span>
                   </li>
                 ))}
               </ul>
-            </>
-          )}
+            )}
+            {checkion ? (
+              <Text role="meta" as="p" className="plexon-collection-overview-aside">
+                {checkion.domainScanCount} {t('projects.detail.domainScans')} ·{' '}
+                {checkion.standaloneScanCount} {t('projects.detail.standaloneScans')}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="plexon-collection-overview-chapter-block">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                AUDION
+              </Text>
+              <Button variant="link" size="sm" onClick={() => onOpenWork('audion')}>
+                {t('projects.detail.overviewOpenCatalog')}
+              </Button>
+            </header>
+            {!audion ? (
+              <Text role="meta">{t('projects.detail.overviewAudionEmpty')}</Text>
+            ) : personas.length === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewAudionNoPersonas')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                {personas.map((p) => (
+                  <li key={p.id}>
+                    <span className="plexon-collection-overview-ledger-label">{p.name}</span>
+                    <span className="plexon-collection-overview-ledger-mark">{p.role}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {audion ? (
+              <Text role="meta" as="p" className="plexon-collection-overview-aside">
+                {audion.targetGroupCount} {t('projects.detail.targetGroups')} ·{' '}
+                {audion.journeyCount} {t('projects.detail.journeys')} ·{' '}
+                {audion.studyCount} {t('projects.detail.studies')}
+              </Text>
+            ) : null}
+          </div>
         </article>
 
-        <article className="plexon-collection-overview-spread" data-spread="links">
-          <header className="plexon-collection-overview-spread-head">
-            <Text role="meta" as="p" className="plexon-collection-overview-kicker">
-              {t('projects.detail.navBindings')}
-            </Text>
-            <Button variant="link" size="sm" onClick={() => onOpenWork('bindings')}>
-              {t('projects.detail.overviewOpenCatalog')}
-            </Button>
-          </header>
-          {bindings.length === 0 ? (
-            <Text role="meta">{t('projects.detail.bindingsEmpty')}</Text>
-          ) : (
-            <ul className="plexon-collection-overview-bindings">
-              {bindings.map((b) => (
-                <li key={b.productId}>
-                  <Chip static size="sm" className={syncClass(b.syncStatus)}>
-                    {productLabel(b.productId)} · {b.syncStatus}
-                  </Chip>
-                </li>
-              ))}
-            </ul>
-          )}
+        <article className="plexon-collection-overview-chapter" data-chapter="readiness">
+          <div className="plexon-collection-overview-chapter-block">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                {t('projects.detail.overviewKnowledgeTitle')}
+              </Text>
+              <Text role="meta" as="p">
+                {facetTotal > 0
+                  ? t('projects.detail.overviewKnowledgeReady', {
+                      filled: filledCount,
+                      total: facetTotal,
+                    })
+                  : t('projects.detail.overviewKnowledgePending')}
+              </Text>
+            </header>
+            {facets.length === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewKnowledgePending')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                {facets.map((f: KnowledgeFacetReadiness) => (
+                  <li key={f.facetId}>
+                    <button
+                      type="button"
+                      className="plexon-collection-overview-ledger-btn"
+                      onClick={() => onOpenWork(f.facetId)}
+                    >
+                      <span className="plexon-collection-overview-ledger-label">
+                        {t(facetLabelKey(f.facetId))}
+                      </span>
+                      <span
+                        className="plexon-collection-overview-ledger-mark"
+                        data-tone={f.status === 'filled' ? 'ok' : 'muted'}
+                      >
+                        {f.status === 'filled'
+                          ? t('projects.detail.overviewFacetFilled')
+                          : t('projects.detail.overviewFacetEmpty')}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="plexon-collection-overview-chapter-block">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                {t('projects.detail.navFlows')}
+              </Text>
+              <NextLink href={pathPlatformProjectFlows(platformProjectId)}>
+                <Button variant="link" size="sm">
+                  {t('projects.detail.overviewOpenFlows')}
+                </Button>
+              </NextLink>
+            </header>
+            {!flows || flows.count === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewFlowsEmpty')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                {flows.recent.map((f) => {
+                  const st = flowStatusLabel(
+                    f.lastRunStatus,
+                    t('projects.detail.overviewFlowNeverRun'),
+                  )
+                  return (
+                    <li key={f.id}>
+                      <span className="plexon-collection-overview-ledger-label">{f.name}</span>
+                      <span
+                        className="plexon-collection-overview-ledger-mark"
+                        data-tone={st.tone}
+                      >
+                        {st.text}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
         </article>
       </div>
+
+      <footer className="plexon-collection-overview-foot">
+        <button
+          type="button"
+          className="plexon-collection-overview-foot-link"
+          onClick={() => onOpenWork('bindings')}
+        >
+          {t('projects.detail.navBindings')}
+        </button>
+        <span className="plexon-collection-overview-foot-sep" aria-hidden>
+          ·
+        </span>
+        {bindings.length === 0 ? (
+          <Text role="meta" as="span">
+            {t('projects.detail.bindingsEmpty')}
+          </Text>
+        ) : (
+          <>
+            <Text role="meta" as="span">
+              {bindingsOk}/{bindings.length} {t('projects.detail.overviewLinksSynced')}
+            </Text>
+            {bindings.map((b) => (
+              <span key={b.productId} className="plexon-collection-overview-foot-chip">
+                {productLabel(b.productId)} {syncShort(b.syncStatus)}
+              </span>
+            ))}
+          </>
+        )}
+      </footer>
     </section>
   )
 }

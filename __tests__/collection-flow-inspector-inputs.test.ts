@@ -36,6 +36,35 @@ describe('upstreamInputsForNode', () => {
     expect(groups[0]?.schema.children?.some((c) => c.key === 'overallScore')).toBe(true);
   });
 
+  it('lists all transitive ancestors with schema', () => {
+    const nodes = nodeRefsFromRfNodes([
+      {
+        id: 'n-start',
+        data: { flowNode: { id: 'n-start', kind: 'start', label: 'Start' } },
+      },
+      {
+        id: 'n-scan',
+        data: { flowNode: { id: 'n-scan', kind: 'scan', label: 'Page scan' } },
+      },
+      {
+        id: 'n-compare',
+        data: { flowNode: { id: 'n-compare', kind: 'compare', label: 'Cmp' } },
+      },
+    ]);
+    const groups = upstreamInputsForNode(
+      'n-compare',
+      [
+        { source: 'n-start', target: 'n-scan', sourceHandle: 'then', targetHandle: 'in' },
+        { source: 'n-scan', target: 'n-compare', sourceHandle: 'then', targetHandle: 'in' },
+      ],
+      nodes,
+      null
+    );
+    expect(groups.map((g) => g.sourceNodeId)).toEqual(['n-start', 'n-scan']);
+    expect(groups[0]?.schema.children?.some((c) => c.key === 'url')).toBe(true);
+    expect(groups[1]?.schema.children?.some((c) => c.key === 'overallScore')).toBe(true);
+  });
+
   it('shows nested scan schema before any run', () => {
     const nodes = nodeRefsFromRfNodes([
       {
