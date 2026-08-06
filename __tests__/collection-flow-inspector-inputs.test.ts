@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   nodeOutputItems,
+  nodeOutputSchema,
   nodeRefsFromRfNodes,
   predictedGlobalContextLeaves,
   predictedItemsForSource,
@@ -32,9 +33,10 @@ describe('upstreamInputsForNode', () => {
     expect(groups[0]?.sourceLabel).toBe('Page scan');
     expect(groups[0]?.hasRunData).toBe(true);
     expect(groups[0]?.items.some((i) => i.path.includes('overallScore'))).toBe(true);
+    expect(groups[0]?.schema.children?.some((c) => c.key === 'overallScore')).toBe(true);
   });
 
-  it('shows scan catalog schema before any run', () => {
+  it('shows nested scan schema before any run', () => {
     const nodes = nodeRefsFromRfNodes([
       {
         id: 'n-scan',
@@ -53,6 +55,8 @@ describe('upstreamInputsForNode', () => {
     );
     expect(groups).toHaveLength(1);
     expect(groups[0]?.hasRunData).toBe(false);
+    expect(groups[0]?.schema.type).toBe('object');
+    expect(groups[0]?.schema.children?.some((c) => c.key === 'overallScore' && c.schema)).toBe(true);
     expect(groups[0]?.items.some((i) => i.path.includes('overallScore') && i.predicted)).toBe(true);
     expect(groups[0]?.items.some((i) => i.path === 'scan.overallScore')).toBe(true);
   });
@@ -70,6 +74,14 @@ describe('predictedGlobalContextLeaves', () => {
   it('returns catalog picker paths', () => {
     const leaves = predictedGlobalContextLeaves();
     expect(leaves.some((l) => l.path === 'scan.overallScore')).toBe(true);
+  });
+});
+
+describe('nodeOutputSchema', () => {
+  it('returns nested schema for scan nodes', () => {
+    const schema = nodeOutputSchema('n-scan', 'scan', null);
+    expect(schema.type).toBe('object');
+    expect(schema.children?.some((c) => c.key === 'overallScore')).toBe(true);
   });
 });
 

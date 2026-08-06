@@ -1,5 +1,5 @@
 /**
- * Upstream INPUT groups + node OUTPUT items for n8n-like node editor (Wave 21).
+ * Upstream INPUT groups + node OUTPUT schema for n8n-like node editor (Wave 21).
  * @see specs/domain/collection-test-flow.md
  */
 
@@ -9,9 +9,17 @@ import {
   catalogPathFromOutHandle,
   catalogPortsForActionKind,
   catalogRootForActionKind,
+  flattenAllContextOutputs,
   flattenContextForInspector,
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
+import {
+  globalCatalogSchemaForest,
+  mergeRunItemsIntoSchema,
+  predictedSchemaForNodeOutput,
+  predictedSchemaForSource,
+} from '@/lib/collection-flow-output-schemas';
+import type { SchemaTreeNode } from '../../msqdx-ui/packages/ui/src/components/SchemaTree';
 
 export type FlowInspectorEdgeRef = {
   source: string;
@@ -31,7 +39,6 @@ export type FlowInspectorNodeRef = {
 export type UpstreamInputItem = {
   path: string;
   value: string;
-  /** True when value is catalog/schema hint, not from a completed run. */
   predicted?: boolean;
 };
 
@@ -41,6 +48,9 @@ export type UpstreamInputGroup = {
   sourceKind: string;
   edgeKind: 'flow' | 'bind' | 'catalog';
   bindPath?: string;
+  /** Nested schema tree (primary UI). */
+  schema: SchemaTreeNode;
+  /** Flat merge for tests / legacy. */
   items: UpstreamInputItem[];
   hasRunData: boolean;
 };
@@ -70,7 +80,7 @@ function dedupeItems(items: UpstreamInputItem[]): UpstreamInputItem[] {
   return out;
 }
 
-/** Catalog / node schema rows shown before the first Testen run. */
+/** Flat catalog rows (legacy / tests). */
 export function predictedItemsForSource(
   sourceNodeId: string,
   kind: string,
@@ -85,7 +95,7 @@ export function predictedItemsForSource(
 
   if (kind === 'set' && opts.alias?.trim()) {
     add(`$('${sourceNodeId}').json.value`, 'any');
-    add(opts.alias.trim(), `alias`);
+    add(opts.alias.trim(), 'alias');
   }
 
   let ports = catalogPortsForActionKind(kind);
@@ -168,7 +178,6 @@ function runItemsForSource(
   return dedupeItems(items);
 }
 
-/** Incoming edges → scoped INPUT tree rows for the left editor column. */
 export function upstreamInputsForNode(
   nodeId: string,
   edges: FlowInspectorEdgeRef[],
@@ -189,16 +198,23 @@ export function upstreamInputsForNode(
     const isCatalogOut = Boolean(edge.sourceHandle?.startsWith('out:'));
     const catalogHandlePath = catalogPathFromOutHandle(edge.sourceHandle ?? undefined);
 
-    const predicted = predictedItemsForSource(edge.source, src.kind, {
+    const opts = {
       bindPath: isBind ? bindPath : undefined,
       catalogHandlePath,
       alias: src.alias,
-    });
+    };
 
+    const predictedFlat = predictedItemsForSource(edge.source, src.kind, opts);
     const run =
       ctx?.outputs != null
         ? runItemsForSource(edge.source, src.kind, ctx, isBind ? bindPath : undefined)
         : [];
+    const items = mergePredictedWithRun(predictedFlat, run);
+
+    const schema = mergeRunItemsIntoSchema(
+      predictedSchemaForSource(edge.source, src.kind, opts),
+      items
+    );
 
     groups.push({
       sourceNodeId: edge.source,
@@ -206,7 +222,8 @@ export function upstreamInputsForNode(
       sourceKind: src.kind,
       edgeKind: isBind ? 'bind' : isCatalogOut ? 'catalog' : 'flow',
       bindPath: isBind ? bindPath : undefined,
-      items: mergePredictedWithRun(predicted, run),
+      schema,
+      items,
       hasRunData: run.length > 0,
     });
   }
@@ -214,7 +231,17 @@ export function upstreamInputsForNode(
   return groups;
 }
 
-/** OUTPUT column rows for the selected node. */
+export function nodeOutputSchema(
+  nodeId: string,
+  kind: CollectionFlowNodeKind | string,
+  ctx: CollectionFlowRunContext | null | undefined,
+  alias?: string
+): SchemaTreeNode {
+  const predicted = predictedSchemaForNodeOutput(nodeId, kind, alias);
+  const flat = nodeOutputItems(nodeId, kind, ctx, alias);
+  return mergeRunItemsIntoSchema(predicted, flat);
+}
+
 export function nodeOutputItems(
   nodeId: string,
   kind: CollectionFlowNodeKind | string,
@@ -243,10 +270,22 @@ export function nodeOutputItems(
     }
   }
 
-  return predictedItemsForSource(nodeId, kind);
+  return predictedItemsForSource(nodeId, kind, { alias: kind === 'set' ? alias : undefined });
 }
 
-/** Full catalog picker rows when no run context exists yet. */
+export function globalContextSchemaForest(
+  ctx: CollectionFlowRunContext | null | undefined
+): SchemaTreeNode[] {
+  const forest = globalCatalogSchemaForest();
+  if (!ctx?.outputs || Object.keys(ctx.outputs).length === 0) return forest;
+  const leaves: UpstreamInputItem[] = flattenAllContextOutputs(ctx).map((o) => ({
+    path: o.path,
+    value: o.value,
+    predicted: false,
+  }));
+  return forest.map((tree) => mergeRunItemsIntoSchema(tree, leaves));
+}
+
 export function predictedGlobalContextLeaves(): UpstreamInputItem[] {
   return CATALOG_PATH_OPTIONS.map((o) => ({
     path: o.path,

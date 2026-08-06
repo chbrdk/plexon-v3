@@ -6,7 +6,7 @@ import {
   ExpressionField,
   FlowNodeEditorShell,
   Input,
-  JsonTree,
+  SchemaTree,
 } from '@msqdx/ui'
 import type {
   CollectionFlowLastRun,
@@ -26,12 +26,11 @@ import {
   formatNodeJsonExpression,
 } from '@/lib/collection-flow-expression'
 import {
-  nodeOutputItems,
+  globalContextSchemaForest,
+  nodeOutputSchema,
   nodeRefsFromRfNodes,
-  predictedGlobalContextLeaves,
   upstreamInputsForNode,
 } from '@/lib/collection-flow-inspector-inputs'
-import { flattenAllContextOutputs } from '@/lib/collection-flow-run-context'
 import type {
   FlowJobRunSummary,
   FlowNodeInspectorData,
@@ -210,16 +209,13 @@ export function CollectionFlowNodeInspector({
     [node.id, edges, nodeById, lastRun?.context]
   )
 
-  const globalContextLeaves = useMemo(() => {
-    const ctx = lastRun?.context
-    if (ctx?.outputs && Object.keys(ctx.outputs).length > 0) {
-      return flattenAllContextOutputs(ctx)
-    }
-    return predictedGlobalContextLeaves()
-  }, [lastRun?.context])
+  const globalContextSchema = useMemo(
+    () => globalContextSchemaForest(lastRun?.context ?? null),
+    [lastRun?.context]
+  )
 
-  const outputItems = useMemo(
-    () => nodeOutputItems(node.id, node.kind, lastRun?.context ?? null, node.alias),
+  const outputSchema = useMemo(
+    () => nodeOutputSchema(node.id, node.kind, lastRun?.context ?? null, node.alias),
     [node.alias, node.id, node.kind, lastRun?.context]
   )
 
@@ -293,11 +289,8 @@ export function CollectionFlowNodeInspector({
                 <span className="msqdx-flow-inspector-pill">{group.bindPath}</span>
               ) : null}
             </div>
-            <JsonTree
-              items={group.items.map((i) => ({
-                path: i.path,
-                value: i.predicted ? `${i.value} · Schema` : i.value,
-              }))}
+            <SchemaTree
+              root={group.schema}
               onSelectPath={
                 onUpdate
                   ? (path) => {
@@ -305,27 +298,22 @@ export function CollectionFlowNodeInspector({
                         insertPath(path)
                         return
                       }
-                      const rel = path.replace(/^[^.]+\./, '')
-                      insertUpstreamPath(group.sourceNodeId, rel)
+                      insertUpstreamPath(group.sourceNodeId, path.replace(/^[^.]+\./, ''))
                     }
                   : undefined
               }
-              emptyLabel="Noch kein Output vom Lauf."
+              emptyLabel="Kein Schema für diese Node."
             />
           </div>
         ))
       )}
-      {globalContextLeaves.length > 0 ? (
+      {globalContextSchema.length > 0 ? (
         <>
           <p className="msqdx-flow-inspector-field-label">
             {lastRun?.context?.outputs ? 'Gesamter Kontext' : 'Katalog (Schema)'}
           </p>
-          <JsonTree
-            items={globalContextLeaves.map((leaf) => ({
-              path: leaf.path,
-              value:
-                'predicted' in leaf && leaf.predicted ? `${leaf.value} · Schema` : String(leaf.value),
-            }))}
+          <SchemaTree
+            root={globalContextSchema}
             onSelectPath={onUpdate ? insertPath : undefined}
             emptyLabel="Kein Katalog verfügbar."
           />
@@ -561,14 +549,8 @@ export function CollectionFlowNodeInspector({
 
   const outputColumn = (
     <>
-      {outputItems.length > 0 ? (
-        <JsonTree
-          items={outputItems.map((i) => ({
-            path: i.path,
-            value: i.predicted ? `${i.value} · Schema` : i.value,
-          }))}
-          emptyLabel="Kein strukturierter Output."
-        />
+      {outputSchema ? (
+        <SchemaTree root={outputSchema} emptyLabel="Kein strukturierter Output." />
       ) : (
         <p className="msqdx-flow-inspector-empty">Kein Output-Schema für diese Node.</p>
       )}
