@@ -61,6 +61,7 @@ function handleClassForSlot(slot: NodePortSlot, side: 'in' | 'out'): string {
   return parts.join(' ')
 }
 
+/**
  * Compact n8n-like RF node: edge handles + title/preview on the card.
  * Full parameter editing lives in the Inspector (ExpressionField / Context tree).
  */
