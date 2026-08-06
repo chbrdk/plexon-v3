@@ -71,4 +71,29 @@ describe('mapGeoOverviewV3ToPreview', () => {
     expect(job.recommendations?.[0]?.title).toBe('Improve FAQ')
     expect(job.citationHighlightsByModel?.[0]?.citations.length).toBeGreaterThan(0)
   })
+
+  it('keeps separate model slices for LLM switcher', () => {
+    const job = mapGeoOverviewV3ToPreview(
+      {
+        job: { id: 'g2', url: 'https://brand.test', status: 'completed', overallScore: 50 },
+        queryRuns: [
+          {
+            query: 'Q1',
+            modelId: 'gpt-5.4-nano',
+            citations: [{ domain: 'brand.test', position: 1 }],
+          },
+          {
+            query: 'Q1',
+            modelId: 'gpt-5.5',
+            citations: [{ domain: 'rival.com', position: 1 }],
+          },
+        ],
+      },
+      'g2'
+    )
+    expect(job.citationHighlightsByModel?.map((s) => s.modelId).sort()).toEqual([
+      'gpt-5.4-nano',
+      'gpt-5.5',
+    ])
+  })
 })

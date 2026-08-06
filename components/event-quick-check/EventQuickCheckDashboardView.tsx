@@ -17,7 +17,7 @@ import {
 } from '@msqdx/ui'
 import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloadButton'
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
-import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
+import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy'
@@ -173,7 +173,6 @@ export function EventQuickCheckDashboardView({
   const [appendixOpen, setAppendixOpen] = useState<string | null>(null)
 
   const domain = report.domain
-  const geo = report.geo
   const insights = report.insights
   const market = report.market
 
@@ -422,72 +421,10 @@ export function EventQuickCheckDashboardView({
 
       {layout.geoSpan > 0 ? (
         <Band title={EQC_REPORT_COPY.sectionGeo}>
-          <div className="plexon-eqc-mag-stack">
-            {geo.status === 'failed' && geo.errorMessage ? (
-              <Alert tone="error">{geo.errorMessage}</Alert>
-            ) : null}
-            {(geo.overallScore != null || geo.geoFitnessScore != null) && (
-              <StatLedeGroup>
-                {geo.overallScore != null ? (
-                  <StatLede
-                    label="GEO Score"
-                    value={String(geo.overallScore)}
-                    tone={kpiTone(geo.overallScore)}
-                  />
-                ) : null}
-                {geo.geoFitnessScore != null ? (
-                  <StatLede
-                    label="GEO Fitness"
-                    value={String(geo.geoFitnessScore)}
-                    tone={kpiTone(geo.geoFitnessScore)}
-                  />
-                ) : null}
-              </StatLedeGroup>
-            )}
-            {geo.eeatDimensions.length > 0 ? (
-              <StatLedeGroup aria-label={EQC_REPORT_COPY.sectionGeoEeat}>
-                {geo.eeatDimensions.map((d) => (
-                  <StatLede
-                    key={d.key}
-                    label={d.label}
-                    value={String(d.score)}
-                    tone={kpiTone(d.score)}
-                  />
-                ))}
-              </StatLedeGroup>
-            ) : null}
-            {geo.competitors.length > 0 ? (
-              <MagTable
-                columns={[EQC_REPORT_COPY.colDomain, EQC_REPORT_COPY.colScore]}
-                rows={geo.competitors.map((c) => [c.name, c.score ?? '—'])}
-              />
-            ) : null}
-            <EventQuickCheckCitationSection
-              citationHighlights={geo.citationHighlights}
-              citationHighlightsByModel={geo.citationHighlightsByModel}
-              ownDomain={geo.url ?? report.meta.domain ?? report.meta.url}
-              knownCompetitors={geo.competitors.map((c) => c.name)}
-            />
-            {geo.recommendations.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionGeoRecommendations}>
-                {geo.recommendations.map((r, i) => (
-                  <RankedRow
-                    key={i}
-                    index={i + 1}
-                    label={r.title}
-                    secondary={r.description}
-                  />
-                ))}
-              </RankedList>
-            ) : null}
-            {!layout.showPersona && geo.questions.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionGeoQuestions}>
-                {geo.questions.map((q, i) => (
-                  <RankedRow key={i} index={i + 1} label={q} />
-                ))}
-              </RankedList>
-            ) : null}
-          </div>
+          <EventQuickCheckGeoMagazineSection
+            report={report}
+            showQuestions={!layout.showPersona}
+          />
         </Band>
       ) : null}
 

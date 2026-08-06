@@ -12,6 +12,7 @@ import {
   mapGeoOverviewV3ToPreview,
   type GeoOverviewV3Like,
 } from '@/lib/integrations/map-geo-overview-v3-preview';
+import { eqcGeoDefaultModels } from '@/lib/integrations/eqc-geo-default-models';
 
 export type CheckionGeoJobSummary = {
   id: string;
@@ -122,6 +123,7 @@ export async function startCheckionGeoJobV3(input: {
   companyName?: string;
   queries?: string[];
   competitors?: string[];
+  models?: string[];
   includePageScan?: boolean;
 }): Promise<
   | { ok: true; job: CheckionGeoJobSummary }
@@ -142,6 +144,8 @@ export async function startCheckionGeoJobV3(input: {
     input.queries && input.queries.length > 0
       ? input.queries
       : defaultGeoQueries({ url, companyName });
+  const models =
+    input.models && input.models.length > 0 ? input.models : eqcGeoDefaultModels();
 
   try {
     const res = await fetch(checkionApiGeoJobs(), {
@@ -153,6 +157,7 @@ export async function startCheckionGeoJobV3(input: {
         ...(url ? { url } : {}),
         ...(companyName ? { companyName } : {}),
         queries,
+        models,
         waitForCompletion: false,
         ...(input.includePageScan === true ? { includePageScan: true } : {}),
         ...(input.competitors?.length ? { competitors: input.competitors } : {}),

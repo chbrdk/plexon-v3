@@ -184,6 +184,82 @@ export function buildCitationPositionChart(
   };
 }
 
+/**
+ * CHECKION-style position diagram: own-domain rank per query × model (all models as series).
+ */
+export function buildOwnDomainMultiModelChart(
+  slices: Array<{
+    modelId: string;
+    modelLabel: string;
+    runs?: EventQuickCheckReportCitationQueryRun[];
+    citations: EventQuickCheckCitationHighlight[];
+  }>,
+  ownHost: string
+): CitationCompetitorChartModel | null {
+  if (slices.length < 2) return null;
+  const normalizedOwn = normalizeGeoDomain(ownHost);
+  if (!normalizedOwn) return null;
+
+  const queryOrder: string[] = [];
+  const seen = new Set<string>();
+  for (const slice of slices) {
+    const runs =
+      slice.runs?.length
+        ? slice.runs
+        : slice.citations.map((c) => ({
+            query: c.query,
+            citations: [{ domain: c.domain, position: c.position }],
+          }));
+    for (const run of runs) {
+      const q = run.query.trim();
+      if (!q || seen.has(q)) continue;
+      seen.add(q);
+      queryOrder.push(q);
+    }
+  }
+  if (queryOrder.length === 0) return null;
+
+  const series: CitationCompetitorChartSeries[] = slices.map((slice) => ({
+    key: slice.modelId,
+    label: slice.modelLabel || slice.modelId,
+    isOwn: false,
+  }));
+
+  let maxPosition = 6;
+  const rows = queryOrder.map((query, index) => {
+    const row: Record<string, string | number> = {
+      queryLabel: citationQueryChartLabel(query, index),
+      queryText: query,
+    };
+    for (const slice of slices) {
+      const runs =
+        slice.runs?.length
+          ? slice.runs
+          : slice.citations.map((c) => ({
+              query: c.query,
+              citations: [{ domain: c.domain, position: c.position }],
+            }));
+      const run = runs.find((r) => r.query === query);
+      const match = run?.citations.find(
+        (c) => normalizeGeoDomain(c.domain) === normalizedOwn
+      );
+      const position = match?.position ?? 0;
+      row[slice.modelId] = position;
+      if (position > maxPosition) maxPosition = position;
+    }
+    return row;
+  });
+
+  return {
+    title: EQC_REPORT_COPY.chartCitationPositions,
+    subtitle: EQC_REPORT_COPY.chartCitationPositionsHint,
+    rows,
+    series,
+    valueLabel: EQC_REPORT_COPY.colPosition,
+    maxPosition: Math.max(6, maxPosition),
+  };
+}
+
 export function buildCompetitorScoreChart(
   competitors: EventQuickCheckReportGeoCompetitor[]
 ): EventQuickCheckGeoBarChartModel | null {

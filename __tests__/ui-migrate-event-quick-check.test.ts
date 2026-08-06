@@ -59,17 +59,28 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       path.join(root, 'components/event-quick-check/EventQuickCheckDashboardPanel.tsx'),
       'utf8'
     )
+    const geoMag = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckGeoMagazineSection.tsx'),
+      'utf8'
+    )
+    const citation = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckCitationSection.tsx'),
+      'utf8'
+    )
     expect(dash).toContain('plexon-magazine')
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('SectionChrome')
     expect(dash).toContain('StatLede')
-    expect(dash).toContain('RankedList')
-    expect(dash).toContain('Accordion')
+    expect(dash).toContain('EventQuickCheckGeoMagazineSection')
     expect(dash).not.toContain('assistant-ui')
     expect(dash).not.toContain('UiMetricGrid')
     expect(dash).not.toContain('UiBlockSurface')
     expect(dash).not.toContain('EventQuickCheckReportSections')
     expect(dash).not.toContain('--color-text-on-light')
+    expect(geoMag).toContain('StatusMeterPanel')
+    expect(geoMag).toContain('EventQuickCheckCitationSection')
+    expect(citation).toContain('plexon-eqc-geo-models__strip')
+    expect(citation).toContain('buildOwnDomainMultiModelChart')
     expect(panel).toContain('SectionChrome')
     expect(panel).not.toContain("from '@/components/assistant-ui/templates/UiBlockSurface'")
     expect(panel).not.toContain("from '@msqdx/react'")
