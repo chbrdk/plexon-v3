@@ -1906,6 +1906,105 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   text-align: center;
 }
 
+.plexon-eqc-running {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.plexon-eqc-running__hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.plexon-eqc-running__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.plexon-eqc-running__copy h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.plexon-eqc-running__copy p {
+  margin: 0;
+}
+
+.plexon-eqc-running__count {
+  margin-top: 0.15rem;
+}
+
+.plexon-eqc-running__rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.plexon-eqc-running__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--line, currentColor) 70%, transparent);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted, inherit);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.plexon-eqc-running__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 35%, transparent);
+  flex-shrink: 0;
+}
+
+.plexon-eqc-running__chip[data-state='done'] {
+  color: var(--ink, var(--fg));
+  border-color: color-mix(in srgb, var(--line, currentColor) 45%, transparent);
+}
+
+.plexon-eqc-running__chip[data-state='done'] .plexon-eqc-running__dot {
+  background: var(--ok, #3d9a6a);
+}
+
+.plexon-eqc-running__chip[data-state='active'] {
+  color: var(--ink, var(--fg));
+  border-color: var(--accent, var(--color-theme-accent, #00ca55));
+}
+
+.plexon-eqc-running__chip[data-state='active'] .plexon-eqc-running__dot {
+  background: var(--accent, var(--color-theme-accent, #00ca55));
+}
+
+.plexon-eqc-running__chip[data-state='error'] {
+  color: var(--danger, #c45c5c);
+  border-color: color-mix(in srgb, var(--danger, #c45c5c) 55%, transparent);
+}
+
+.plexon-eqc-running__chip[data-state='error'] .plexon-eqc-running__dot {
+  background: var(--danger, #c45c5c);
+}
+
+.plexon-eqc-workspace[data-eqc-phase='running'] .plexon-eqc-header {
+  margin-bottom: 0.75rem;
+}
+
 .plexon-eqc-form .ds-field,
 .plexon-eqc-form .ds-input,
 .plexon-eqc-form .ds-textarea {
@@ -2043,7 +2142,8 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   flex-direction: column;
   gap: 1.75rem;
   min-width: 0;
-  padding-block: 1.35rem 1.6rem;
+  /* Extra air under persona hero before Ziele/Pain lists */
+  padding-block: 2.75rem 1.6rem;
 }
 
 .plexon-eqc-mag-persona-pair {
@@ -2516,6 +2616,19 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: 0.65rem;
 }
 
+.plexon-eqc-geo-voice__board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(12rem, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-geo-voice__board {
+    grid-template-columns: 1fr;
+  }
+}
+
 .plexon-eqc-geo-voice__head {
   max-width: 42rem;
   display: grid;
@@ -2607,6 +2720,68 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   white-space: nowrap;
 }
 
+.plexon-eqc-voice-radar {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+}
+
+.plexon-eqc-voice-radar__svg {
+  display: block;
+  width: min(100%, 17.5rem);
+  height: auto;
+  margin: 0 auto;
+}
+
+.plexon-eqc-voice-radar__ring {
+  stroke: var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  stroke-width: 1;
+}
+
+.plexon-eqc-voice-radar__axis {
+  stroke: var(--line, color-mix(in srgb, currentColor 16%, transparent));
+  stroke-width: 1;
+}
+
+.plexon-eqc-voice-radar__shape {
+  fill: color-mix(in srgb, var(--accent, var(--color-secondary-dx-green, #00ca55)) 28%, transparent);
+  stroke: var(--accent, var(--color-secondary-dx-green, #00ca55));
+  stroke-width: 1.5;
+}
+
+.plexon-eqc-voice-radar__dot {
+  fill: var(--accent, var(--color-secondary-dx-green, #00ca55));
+}
+
+.plexon-eqc-voice-radar__dot--own {
+  fill: var(--ink, var(--fg));
+  stroke: var(--accent, var(--color-secondary-dx-green, #00ca55));
+  stroke-width: 1.25;
+}
+
+.plexon-eqc-voice-radar__label {
+  fill: var(--muted);
+  font-size: 8.5px;
+  letter-spacing: 0.02em;
+}
+
+.plexon-eqc-voice-radar__label--own {
+  fill: var(--ink, var(--fg));
+  font-weight: 600;
+}
+
+.plexon-eqc-voice-radar__a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .plexon-eqc-geo-placement {
   display: grid;
   gap: clamp(1.75rem, 3.5vw, 2.75rem);
@@ -2614,7 +2789,8 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-eqc-geo-snapshot {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+  /* Dials first, then lede copy */
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr);
   gap: clamp(1.5rem, 4vw, 3rem);
   align-items: center;
 }

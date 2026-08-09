@@ -3,9 +3,11 @@
 import { Alert, RankedList, RankedRow, Text } from '@msqdx/ui'
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
 import { EventQuickCheckScoreRing } from '@/components/event-quick-check/EventQuickCheckScoreRing'
+import { EventQuickCheckVoiceRadar } from '@/components/event-quick-check/EventQuickCheckVoiceRadar'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { buildEqcEeatReadingFallback } from '@/lib/assistant/reports/event-quick-check/build-eqc-eeat-reading'
+import { buildEqcVoiceRadarPoints } from '@/lib/assistant/reports/event-quick-check/eqc-radar-geometry'
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 type Props = {
@@ -59,6 +61,7 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
   })()
 
   const maxVoice = Math.max(...voiceRows.map((r) => r.pct), 1)
+  const voiceRadarPoints = buildEqcVoiceRadarPoints(voiceRows)
   const eeatSorted = [...geo.eeatDimensions].sort((a, b) => a.score - b.score)
   const weakest = eeatSorted[0]
   const strongest = eeatSorted[eeatSorted.length - 1]
@@ -80,18 +83,6 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
           className="plexon-eqc-geo-snapshot"
           aria-label={EQC_REPORT_COPY.sectionGeoCheck}
         >
-          <header className="plexon-eqc-geo-voice__head">
-            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-              {EQC_REPORT_COPY.sectionGeoCheck}
-            </Text>
-            <p className="plexon-eqc-geo-snapshot__lede">
-              {score != null
-                ? `GEO Score ${score}/100 — so oft und wie stark Modelle deine Domain zitieren.`
-                : fitness != null
-                  ? `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten.`
-                  : `${queryCount} Prompts im Wettbewerbslauf.`}
-            </p>
-          </header>
           <div className="plexon-eqc-geo-snapshot__dials">
             {score != null ? (
               <EventQuickCheckScoreRing
@@ -119,6 +110,18 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
               />
             ) : null}
           </div>
+          <header className="plexon-eqc-geo-voice__head">
+            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+              {EQC_REPORT_COPY.sectionGeoCheck}
+            </Text>
+            <p className="plexon-eqc-geo-snapshot__lede">
+              {score != null
+                ? `GEO Score ${score}/100 — so oft und wie stark Modelle deine Domain zitieren.`
+                : fitness != null
+                  ? `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten.`
+                  : `${queryCount} Prompts im Wettbewerbslauf.`}
+            </p>
+          </header>
         </section>
       )}
 
@@ -132,45 +135,53 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
               {EQC_REPORT_COPY.competitors}
             </Text>
           </header>
-          <ol className="plexon-eqc-geo-voice__race" aria-label={EQC_REPORT_COPY.competitors}>
-            {voiceRows.map((row, i) => {
-              const width = Math.max(4, Math.round((100 * row.pct) / maxVoice))
-              const subParts = [
-                row.mentionCount != null ? `${row.mentionCount} Mentions` : null,
-                row.avgPosition != null
-                  ? `Ø #${Number(row.avgPosition).toFixed(1)}`
-                  : null,
-              ].filter(Boolean)
-              return (
-                <li
-                  key={row.domain}
-                  className="plexon-eqc-geo-voice__runner"
-                  data-target={row.isOwn ? 'true' : undefined}
-                  style={{ ['--voice-w' as string]: `${width}%` }}
-                >
-                  <div className="plexon-eqc-geo-voice__runner-meta">
-                    <span className="plexon-eqc-geo-voice__runner-idx" aria-hidden>
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <div className="plexon-eqc-geo-voice__runner-copy">
-                      <span className="plexon-eqc-geo-voice__runner-name">
-                        {row.isOwn ? `${row.domain} · du` : row.domain}
+          <div className="plexon-eqc-geo-voice__board">
+            <ol className="plexon-eqc-geo-voice__race" aria-label={EQC_REPORT_COPY.competitors}>
+              {voiceRows.map((row, i) => {
+                const width = Math.max(4, Math.round((100 * row.pct) / maxVoice))
+                const subParts = [
+                  row.mentionCount != null ? `${row.mentionCount} Mentions` : null,
+                  row.avgPosition != null
+                    ? `Ø #${Number(row.avgPosition).toFixed(1)}`
+                    : null,
+                ].filter(Boolean)
+                return (
+                  <li
+                    key={row.domain}
+                    className="plexon-eqc-geo-voice__runner"
+                    data-target={row.isOwn ? 'true' : undefined}
+                    style={{ ['--voice-w' as string]: `${width}%` }}
+                  >
+                    <div className="plexon-eqc-geo-voice__runner-meta">
+                      <span className="plexon-eqc-geo-voice__runner-idx" aria-hidden>
+                        {String(i + 1).padStart(2, '0')}
                       </span>
-                      {subParts.length > 0 ? (
-                        <span className="plexon-eqc-geo-voice__runner-sub">
-                          {subParts.join(' · ')}
+                      <div className="plexon-eqc-geo-voice__runner-copy">
+                        <span className="plexon-eqc-geo-voice__runner-name">
+                          {row.isOwn ? `${row.domain} · du` : row.domain}
                         </span>
-                      ) : null}
+                        {subParts.length > 0 ? (
+                          <span className="plexon-eqc-geo-voice__runner-sub">
+                            {subParts.join(' · ')}
+                          </span>
+                        ) : null}
+                      </div>
+                      <span className="plexon-eqc-geo-voice__runner-pct">{row.pct}%</span>
                     </div>
-                    <span className="plexon-eqc-geo-voice__runner-pct">{row.pct}%</span>
-                  </div>
-                  <div className="plexon-eqc-geo-voice__track" aria-hidden>
-                    <span className="plexon-eqc-geo-voice__fill" />
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+                    <div className="plexon-eqc-geo-voice__track" aria-hidden>
+                      <span className="plexon-eqc-geo-voice__fill" />
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+            {voiceRadarPoints ? (
+              <EventQuickCheckVoiceRadar
+                points={voiceRadarPoints}
+                ariaLabel={`${EQC_REPORT_COPY.competitors} — Share of voice Spider`}
+              />
+            ) : null}
+          </div>
         </section>
       ) : null}
 

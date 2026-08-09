@@ -71,6 +71,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('SectionChrome')
     expect(dash).toContain('StatLede')
+    expect(dash).toContain('plexon-eqc-mag-persona-lists')
     expect(dash).toContain('EventQuickCheckGeoMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')
     expect(dash).toContain('EventQuickCheckInsightsMagazineSection')
@@ -80,13 +81,26 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).not.toContain('EventQuickCheckReportSections')
     expect(dash).not.toContain('--color-text-on-light')
     expect(geoMag).toContain('EventQuickCheckScoreRing')
+    expect(geoMag).toContain('EventQuickCheckVoiceRadar')
+    expect(geoMag).toContain('plexon-eqc-geo-voice__board')
     expect(geoMag).not.toContain('StatusMeterPanel')
     expect(geoMag).toContain('EventQuickCheckCitationSection')
+    // Snapshot: dials (rings) before lede copy
+    expect(geoMag.indexOf('plexon-eqc-geo-snapshot__dials')).toBeLessThan(
+      geoMag.indexOf('plexon-eqc-geo-snapshot__lede'),
+    )
+    const globals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(globals).toContain('.plexon-eqc-voice-radar__shape')
+    expect(globals).toContain('.plexon-eqc-geo-voice__board')
     expect(citation).toContain('plexon-eqc-geo-models__strip')
     expect(citation).toContain('buildOwnDomainMultiModelChart')
     expect(panel).toContain('SectionChrome')
     expect(panel).not.toContain("from '@/components/assistant-ui/templates/UiBlockSurface'")
     expect(panel).not.toContain("from '@msqdx/react'")
+
+    expect(globals).toMatch(
+      /\.plexon-eqc-mag-persona-lists\s*\{[^}]*padding-block:\s*2\.75rem/s,
+    )
   })
 
   it('EQC charts use theme tokens, not light-only text colors', () => {
@@ -98,8 +112,13 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       path.join(root, 'components/event-quick-check/EventQuickCheckCitationCompetitorChart.tsx'),
       'utf8'
     )
+    const ticks = readFileSync(
+      path.join(root, 'components/event-quick-check/EqcChartTooltip.tsx'),
+      'utf8'
+    )
+    expect(ticks).toContain('var(--ink')
     for (const src of [bar, competitor]) {
-      expect(src).toContain("var(--ink)")
+      expect(src).toContain('EQC_CHART_TICK_INK')
       expect(src).not.toContain('--color-text-on-light')
       expect(src).not.toContain("from '@msqdx/tokens'")
     }

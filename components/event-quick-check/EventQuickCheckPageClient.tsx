@@ -19,7 +19,7 @@ import { EventQuickCheckGeoQuestionsPanel } from '@/components/event-quick-check
 import { EventQuickCheckDashboardView } from '@/components/event-quick-check/EventQuickCheckDashboardView';
 import { EventQuickCheckHistoryDialog } from '@/components/event-quick-check/EventQuickCheckHistoryDialog';
 import { EventQuickCheckReadinessBanner } from '@/components/event-quick-check/EventQuickCheckReadinessBanner';
-import { UiStepList } from '@/components/assistant-ui/organisms/UiStepList';
+import { EventQuickCheckRunningProgress } from '@/components/event-quick-check/EventQuickCheckRunningProgress';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
@@ -828,21 +828,25 @@ export function EventQuickCheckPageClient() {
 
   return (
     <>
-      <div className="plexon-eqc-scroll plexon-eqc-workspace" data-plexon-event-quick-check>
+      <div
+        className="plexon-eqc-scroll plexon-eqc-workspace"
+        data-plexon-event-quick-check
+        data-eqc-phase={phase}
+      >
         <div className="plexon-eqc-narrow">
           <div className="plexon-eqc-header">
             <div className="plexon-eqc-header-copy">
               <Text role="headline" as="h1">
                 {EQC_PAGE_COPY.pageTitle}
               </Text>
-              <Text role="body">{EQC_PAGE_COPY.pageLead}</Text>
+              {phase !== 'running' ? <Text role="body">{EQC_PAGE_COPY.pageLead}</Text> : null}
             </div>
             <Button variant="ghost" size="sm" onClick={openHistory}>
               {EQC_PAGE_COPY.historyOpenButton}
             </Button>
           </div>
 
-          <EventQuickCheckReadinessBanner />
+          {phase !== 'running' ? <EventQuickCheckReadinessBanner /> : null}
 
           {phase === 'loading-run' ? (
             <div className="plexon-eqc-center">
@@ -1029,20 +1033,7 @@ export function EventQuickCheckPageClient() {
             />
           ) : null}
 
-          {phase === 'running' ? (
-            <div className="plexon-eqc-center">
-              <Spinner size="md" />
-              <Text role="title" as="h2">
-                {EQC_PAGE_COPY.runningTitle}
-              </Text>
-              <Text role="body">{EQC_PAGE_COPY.runningHint}</Text>
-              {steps.length > 0 ? (
-                <div className="plexon-eqc-stack" style={{ width: '100%' }}>
-                  <UiStepList title="Fortschritt" steps={steps} />
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          {phase === 'running' ? <EventQuickCheckRunningProgress steps={steps} /> : null}
         </div>
       </div>
       {historyDialog}
