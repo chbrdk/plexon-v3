@@ -10,16 +10,14 @@ import {
   RankedList,
   RankedRow,
   SectionChrome,
-  StatLede,
-  StatLedeGroup,
   Text,
-  type LedeTone,
 } from '@msqdx/ui'
 import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloadButton'
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
 import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-check/EventQuickCheckDomainMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
 import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
+import { EventQuickCheckResultsMasthead } from '@/components/event-quick-check/EventQuickCheckResultsMasthead'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { syncKpiTilesFromDomain } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count'
@@ -70,13 +68,6 @@ function Band({
       <div className="plexon-eqc-mag-body">{children}</div>
     </section>
   )
-}
-
-function kpiTone(value: string | number | undefined): LedeTone | undefined {
-  if (typeof value !== 'number') return undefined
-  if (value >= 80) return 'ok'
-  if (value >= 50) return 'low'
-  return 'neg'
 }
 
 function TraitBars({
@@ -202,22 +193,15 @@ export function EventQuickCheckDashboardView({
       data-section="eqc-magazine-results"
       data-readonly={readOnly ? 'true' : 'false'}
     >
-      <SectionChrome
-        title={report.meta.title || EQC_PAGE_COPY.pageTitle}
-        meta={
-          <Text role="meta">
-            {[
-              report.meta.domain || report.meta.url,
-              generatedAt,
-              readOnly ? EQC_PAGE_COPY.sharePublicReadOnly : null,
-              !readOnly && platformProjectId ? EQC_PAGE_COPY.shareTeamHint : null,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Text>
-        }
-        action={
-          <div className="plexon-eqc-results-actions">
+      <EventQuickCheckResultsMasthead
+        report={report}
+        kpiTiles={kpiTiles}
+        generatedAt={generatedAt}
+        readOnly={readOnly}
+        platformProjectId={platformProjectId}
+        personaCount={personas.length}
+        actions={
+          <>
             {!readOnly && onNewCheck ? (
               <Button variant="ghost" size="sm" onClick={onNewCheck}>
                 {EQC_PAGE_COPY.newCheckButton}
@@ -269,29 +253,9 @@ export function EventQuickCheckDashboardView({
               label={EQC_PAGE_COPY.exportPptx}
               format="pptx"
             />
-          </div>
+          </>
         }
       />
-
-      {kpiTiles.length > 0 ? (
-        <Band title={EQC_REPORT_COPY.sectionKpi}>
-          <StatLedeGroup
-            aria-label={EQC_REPORT_COPY.sectionKpi}
-            columns={kpiTiles.length}
-            compact
-          >
-            {kpiTiles.map((tile, i) => (
-              <StatLede
-                key={`${tile.label}-${i}`}
-                label={tile.label}
-                value={String(tile.value ?? '—')}
-                unit={tile.unit}
-                tone={kpiTone(typeof tile.value === 'number' ? tile.value : undefined)}
-              />
-            ))}
-          </StatLedeGroup>
-        </Band>
-      ) : null}
 
       {layout.showMarket && market ? (
         <Band title={EQC_REPORT_COPY.sectionMarket}>
