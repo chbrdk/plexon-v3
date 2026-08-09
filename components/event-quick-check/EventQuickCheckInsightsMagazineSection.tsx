@@ -9,6 +9,7 @@ import type {
 } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { filterEqcMetaFindings } from '@/lib/assistant/insights/eqc-insight-quality'
+import { formatInsightProse } from '@/lib/assistant/insights/format-insight-prose'
 import type { UiTone } from '@/lib/assistant/ui-blocks/types'
 
 type Props = {
@@ -227,7 +228,13 @@ export function EventQuickCheckInsightsMagazineSection({ insights, domainLabel }
               <p className="plexon-eqc-reading__statement">{verdict}</p>
             </blockquote>
           ) : null}
-          {assessment ? <p className="plexon-eqc-spread-open__prose">{assessment}</p> : null}
+          {assessment ? (
+            <div className="plexon-eqc-spread-open__prose">
+              {formatInsightProse(assessment).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          ) : null}
         </div>
         <aside className="plexon-eqc-spread-callout" data-tone={tone}>
           <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">

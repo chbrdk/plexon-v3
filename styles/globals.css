@@ -3849,11 +3849,22 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-eqc-spread-open__prose {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.15rem 0 0;
+  max-width: 34rem;
+}
+
+.plexon-eqc-spread-open__prose p {
   margin: 0;
-  max-width: 42rem;
-  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
-  line-height: 1.55;
-  color: color-mix(in srgb, var(--ink, var(--fg)) 84%, transparent);
+  font-size: clamp(0.82rem, 1.15vw, 0.92rem);
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  color: var(--muted);
+}
+
+.plexon-eqc-spread-open__prose p:first-child {
+  color: color-mix(in srgb, var(--ink, var(--fg)) 78%, transparent);
 }
 
 .plexon-eqc-reading {

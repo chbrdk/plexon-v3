@@ -63,7 +63,10 @@ export function narrativeFromCrossSignals(
     forFindings.find((s) => s.severity === 'warning')
   return {
     assessment: forFindings.length
-      ? `Die ${workflowLabel}-Analyse liefert ${forFindings.length} bewertbare Signale. ${forFindings.map((s) => s.fact).join(' ')}`
+      ? [
+          `Die ${workflowLabel}-Analyse liefert ${forFindings.length} bewertbare Signale.`,
+          ...forFindings.slice(0, 2).map((s) => s.fact),
+        ].join(' ')
       : `Für ${workflowLabel} liegen Messdaten vor; eine vertiefte Einordnung erfordert mehr Kontext.`,
     fazit: worst
       ? `Priorität: ${worst.title} — ${worst.fact}`
