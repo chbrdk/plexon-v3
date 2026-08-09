@@ -3581,12 +3581,15 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-eqc-geo-eeat {
   display: grid;
-  gap: 1.35rem;
+  gap: clamp(2.25rem, 4vw, 3.25rem);
 }
 
 .plexon-eqc-geo-eeat > .plexon-eqc-geo-voice__head {
   max-width: none;
   width: 100%;
+  margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+  padding-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+  border-bottom: 1px solid var(--line);
 }
 
 .plexon-eqc-geo-eeat__reading {
