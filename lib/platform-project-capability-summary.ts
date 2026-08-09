@@ -1,5 +1,6 @@
 import type {
   AudionProjectSummary,
+  BrandionProjectSummary,
   CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 
@@ -46,5 +47,22 @@ export function resolveAudionCapability(
     personas: [],
     journeys: [],
     studies: [],
+  };
+}
+
+export function resolveBrandionCapability(
+  live: BrandionProjectSummary | null,
+  bindings: BindingLike[]
+): BrandionProjectSummary | null {
+  if (live?.externalProjectId) return live;
+  const binding = bindings.find((b) => b.productId === 'brandion');
+  const id = binding?.externalProjectId?.trim();
+  if (!id) return null;
+  return {
+    externalProjectId: id,
+    analysisCount: 0,
+    guidelineCount: 0,
+    analyses: [],
+    guidelines: [],
   };
 }

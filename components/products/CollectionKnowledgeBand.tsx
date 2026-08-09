@@ -36,11 +36,13 @@ import {
 import type { KnowledgePackDrafts } from '@/lib/assistant/knowledge-pack/research-knowledge-pack'
 import type {
   AudionProjectSummary,
+  BrandionProjectSummary,
   CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 import {
   AudionCapabilityView,
   BindingsCapabilityView,
+  BrandionCapabilityView,
   CheckionCapabilityView,
   type CollectionBinding,
 } from '@/components/products/CollectionCapabilityViews'
@@ -53,10 +55,10 @@ const EDITABLE_FACETS: KnowledgeFacetId[] = [
   'sources',
 ]
 
-type CapabilityNavId = 'checkion' | 'audion' | 'bindings'
+type CapabilityNavId = 'checkion' | 'audion' | 'brandion' | 'bindings'
 export type CollectionWorkNavId = KnowledgeFacetId | CapabilityNavId
 
-const CAPABILITY_NAV_IDS: CapabilityNavId[] = ['checkion', 'audion', 'bindings']
+const CAPABILITY_NAV_IDS: CapabilityNavId[] = ['checkion', 'audion', 'brandion', 'bindings']
 
 function isKnowledgeFacetId(id: CollectionWorkNavId): id is KnowledgeFacetId {
   return (KNOWLEDGE_FACET_IDS as readonly string[]).includes(id)
@@ -66,8 +68,10 @@ type Props = {
   platformProjectId: string
   audionHref?: string | null
   checkionHref?: string | null
+  brandionHref?: string | null
   checkion?: CheckionProjectSummary | null
   audion?: AudionProjectSummary | null
+  brandion?: BrandionProjectSummary | null
   bindings?: CollectionBinding[]
   /** Controlled work-band TOC selection (Overview teasers jump here). */
   openNav?: CollectionWorkNavId
@@ -316,6 +320,8 @@ function capabilityLabelKey(id: CapabilityNavId): string {
       return 'projects.detail.navCheckion'
     case 'audion':
       return 'projects.detail.navAudion'
+    case 'brandion':
+      return 'projects.detail.navBrandion'
     case 'bindings':
       return 'projects.detail.navBindings'
   }
@@ -325,8 +331,10 @@ export function CollectionKnowledgeBand({
   platformProjectId,
   audionHref,
   checkionHref,
+  brandionHref,
   checkion = null,
   audion = null,
+  brandion = null,
   bindings = [],
   openNav: openNavProp,
   onOpenNav,
@@ -629,10 +637,12 @@ export function CollectionKnowledgeBand({
             ? !checkion
             : id === 'audion'
               ? !audion
-              : bindings.length === 0,
+              : id === 'brandion'
+                ? !brandion
+                : bindings.length === 0,
         group: 'capability' as const,
       })),
-    [audion, bindings.length, checkion],
+    [audion, bindings.length, brandion, checkion],
   )
 
   const renderFacetBody = (id: KnowledgeFacetId): ReactNode => {
@@ -849,6 +859,15 @@ export function CollectionKnowledgeBand({
               hidden={openNav !== 'audion'}
             >
               <AudionCapabilityView audion={audion} href={audionHref ?? ''} />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'brandion' ? 'true' : 'false'}
+              data-empty={!brandion ? 'true' : 'false'}
+              hidden={openNav !== 'brandion'}
+            >
+              <BrandionCapabilityView brandion={brandion} href={brandionHref ?? ''} />
             </article>
 
             <article

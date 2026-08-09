@@ -142,13 +142,16 @@ Dann Redeploy plexon-v3. Wirkung:
 - Collection create / sync upserts BRANDION mirrors via `PUT {BRANDION}/api/platform/provisioning/projects/{id}`
 - Product-first: `POST /api/platform/provisioning/brandion-project-origin`
 
-Auf **brandion-v3** für Live-Origin zusätzlich:
+Auf **brandion-v3** für Live-Origin + durable mirrors zusätzlich:
 
 ```bash
 BRANDION_FEDERATION_MODE=live
+DATABASE_URL=<Postgres — strongly recommended>
 ```
 
 (bereits `PLEXON_SERVICE_SECRET` + Plexon Auth URLs vom Shell-Attach)
+
+Collection Dashboard Parity (2026-08-09): plexon BFF `fetchBrandionPlatformProjectSummary` + launch `{BRANDION}/projects?platformProjectId=`. KP facet `brand` remains reserved. See `brandion-v3/knowledge/plexon-dashboard-parity.md`.
 
 **Nie** Prod-`brandion` Coolify-URL hier eintragen.
 

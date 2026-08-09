@@ -1,5 +1,6 @@
 import {
   getAudionPlatformApiBase,
+  getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
 } from '@/lib/constants';
 import {
@@ -166,4 +167,70 @@ export async function fetchAudionPlatformProjectSummary(
   if (!response.ok) return null;
   const data = await readJson<AudionProjectSummary>(response);
   return data ? normalizeAudionSummary(data) : null;
+}
+
+export type BrandionCatalogGuideline = {
+  id: string;
+  name: string;
+  version: string;
+  status: string;
+  colorCount: number;
+  typographyCount: number;
+  spacingCount: number;
+  pendingCount: number;
+  updatedAt: string;
+};
+
+export type BrandionProjectSummary = {
+  externalProjectId: string;
+  platformProjectId?: string;
+  analysisCount: number;
+  guidelineCount: number;
+  analyses: unknown[];
+  guidelines: BrandionCatalogGuideline[];
+};
+
+function normalizeBrandionSummary(data: BrandionProjectSummary): BrandionProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  const guidelines = Array.isArray(data.guidelines) ? data.guidelines : [];
+  return {
+    externalProjectId: data.externalProjectId,
+    platformProjectId: data.platformProjectId,
+    analysisCount: Number(data.analysisCount) || 0,
+    guidelineCount: Number(data.guidelineCount) || guidelines.length,
+    analyses: Array.isArray(data.analyses) ? data.analyses : [],
+    guidelines: guidelines.map((g) => ({
+      id: String(g.id ?? ''),
+      name: String(g.name ?? ''),
+      version: String(g.version ?? ''),
+      status: String(g.status ?? ''),
+      colorCount: Number(g.colorCount) || 0,
+      typographyCount: Number(g.typographyCount) || 0,
+      spacingCount: Number(g.spacingCount) || 0,
+      pendingCount: Number(g.pendingCount) || 0,
+      updatedAt: String(g.updatedAt ?? ''),
+    })),
+  };
+}
+
+export async function fetchBrandionPlatformProjectSummary(
+  platformProjectId: string,
+  plexonUserId: string
+): Promise<BrandionProjectSummary | null> {
+  const base = getBrandionServiceApiUrl();
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!base?.trim() || !secret) return null;
+  const url = `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      [PLEXON_SERVICE_SECRET_HEADER]: secret,
+      [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+      'X-Plexon-User-Id': plexonUserId,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return null;
+  const data = await readJson<BrandionProjectSummary>(response);
+  return data ? normalizeBrandionSummary(data) : null;
 }

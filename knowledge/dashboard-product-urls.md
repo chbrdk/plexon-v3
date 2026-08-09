@@ -19,6 +19,16 @@
 
 Siehe auch `.env.example` und `knowledge/coolify-plexon-v3-env-cheatsheet.md` §4c.
 
+## Collection deep-links (Dashboard BFF)
+
+| Product | Launch URL |
+|---------|------------|
+| CHECKION | `{CHECKION}/?platformProjectHint={platformProjectId}` |
+| AUDION | `{AUDION_ADMIN}/?platformProjectHint=…&platformCompanyId=…` |
+| BRANDION | `{BRANDION}/projects?platformProjectId={platformProjectId}` (`lib/brandion-launch-url.ts`) |
+
+Guideline item: `{BRANDION}/guidelines/{guidelineId}` (`lib/paths/brandion-api.ts`).
+
 ## Öffnen der Links
 
 Die Registry liefert Einstiegspunkte und Runtime-Status. Foederierte Produkt-Links werden weiter in neuen Tabs geoeffnet, damit Session- und Cookie-Grenzen zwischen den Produkten sauber getrennt bleiben.

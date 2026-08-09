@@ -7,6 +7,7 @@ import { getOrCreateKnowledgePack } from '@/lib/db/collection-knowledge-packs';
 import { listCollectionTestFlows } from '@/lib/db/collection-test-flows';
 import {
   fetchAudionPlatformProjectSummary,
+  fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
@@ -38,6 +39,7 @@ vi.mock('@/lib/db/collection-test-flows', async (importOriginal) => {
 vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
   fetchCheckionPlatformProjectSummary: vi.fn(),
   fetchAudionPlatformProjectSummary: vi.fn(),
+  fetchBrandionPlatformProjectSummary: vi.fn(),
 }));
 
 vi.mock('@/lib/platform-project-access', () => ({
@@ -60,10 +62,12 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
+    vi.stubEnv('NEXT_PUBLIC_BRANDION_URL', 'https://brandion-v3.test');
     vi.mocked(getOrCreateKnowledgePack).mockResolvedValue(
       emptyPackRow('p1') as Awaited<ReturnType<typeof getOrCreateKnowledgePack>>,
     );
     vi.mocked(listCollectionTestFlows).mockResolvedValue([]);
+    vi.mocked(fetchBrandionPlatformProjectSummary).mockResolvedValue(null);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -149,6 +153,26 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
       ],
       studies: [{ id: 's-1', name: 'Checkout study', status: 'active', waveCount: 2, targetUrlKey: null }],
     });
+    vi.mocked(fetchBrandionPlatformProjectSummary).mockResolvedValue({
+      externalProjectId: 'br-1',
+      platformProjectId: 'p1',
+      analysisCount: 0,
+      guidelineCount: 1,
+      analyses: [],
+      guidelines: [
+        {
+          id: 'gl-1',
+          name: 'Corporate Design',
+          version: '1.0',
+          status: 'active',
+          colorCount: 4,
+          typographyCount: 2,
+          spacingCount: 1,
+          pendingCount: 0,
+          updatedAt: '2026-08-09T00:00:00.000Z',
+        },
+      ],
+    });
     vi.mocked(listCollectionTestFlows).mockResolvedValue([
       {
         id: 'flow-1',
@@ -197,6 +221,11 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.audion?.studies[0]?.name).toBe('Checkout study');
     expect(body.links.audionProject).toContain('platformCompanyId=c1');
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
+    expect(body.brandion?.guidelineCount).toBe(1);
+    expect(body.brandion?.guidelines[0]?.name).toBe('Corporate Design');
+    expect(body.links.brandionProject).toContain('platformProjectId=p1');
+    expect(body.links.brandionProject).toContain('/projects');
+    expect(body.links.brandionProject).not.toContain('platformProjectHint');
     expect(body.knowledge?.revision).toBe(1);
     expect(body.knowledge?.facets).toEqual(
       expect.arrayContaining([
@@ -254,6 +283,7 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     ]);
     vi.mocked(fetchCheckionPlatformProjectSummary).mockResolvedValue(null);
     vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue(null);
+    vi.mocked(fetchBrandionPlatformProjectSummary).mockResolvedValue(null);
 
     const { GET } = await import('@/app/api/platform/projects/[platformProjectId]/dashboard/route');
     const res = await GET(new Request('http://localhost/api/platform/projects/p1/dashboard'), {
@@ -272,6 +302,7 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
       journeys: [],
       studies: [],
     });
+    expect(body.brandion).toBeNull();
     expect(body.checkion).toBeNull();
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
     expect(body.knowledge?.facets).toBeDefined();

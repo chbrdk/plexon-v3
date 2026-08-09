@@ -11,8 +11,10 @@ import {
 } from '@/lib/audion-admin-launch-url'
 import { getAudionWebOrigin } from '@/lib/constants'
 import { pathCheckionDomainResult, pathCheckionScanResult } from '@/lib/paths/checkion-api'
+import { pathBrandionGuideline } from '@/lib/paths/brandion-api'
 import type {
   AudionProjectSummary,
+  BrandionProjectSummary,
   CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -32,6 +34,7 @@ function syncTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' 
 function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
+  if (productId === 'brandion') return 'BRANDION'
   return productId
 }
 
@@ -397,6 +400,99 @@ export function AudionCapabilityView({
       <div className="plexon-knowledge-facet-tile-actions">
         <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
           {t('projects.detail.openAudion')}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export function BrandionCapabilityView({
+  brandion,
+  href,
+}: {
+  brandion: BrandionProjectSummary | null
+  href: string
+}) {
+  const { t } = useI18n()
+  const guidelines = brandion?.guidelines ?? []
+  const empty = Boolean(brandion) && guidelines.length === 0
+
+  return (
+    <div className="plexon-capability-pane">
+      <header className="plexon-knowledge-facet-tile-head">
+        <div>
+          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+            {t('projects.detail.capabilityLocalBadge')}
+          </Text>
+          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+            BRANDION
+          </Text>
+          <Text role="meta" as="p">
+            {t('projects.detail.brandionCatalogSubtitle')}
+          </Text>
+        </div>
+        <Chip static size="sm">
+          {brandion ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+        </Chip>
+      </header>
+
+      {!brandion ? (
+        <Text role="meta">{t('projects.detail.brandionEmpty')}</Text>
+      ) : (
+        <>
+          <Text role="meta">
+            {brandion.guidelineCount} {t('projects.detail.guidelines')} ·{' '}
+            {brandion.analysisCount} {t('projects.detail.analyses')}
+            {brandion.externalProjectId
+              ? ` · ${t('projects.detail.localId')}: ${brandion.externalProjectId}`
+              : ''}
+          </Text>
+
+          {empty ? (
+            <Text role="meta">{t('projects.detail.brandionCatalogEmpty')}</Text>
+          ) : (
+            <div className="plexon-capability-catalog">
+              <div className="plexon-capability-catalog-block">
+                <Text role="title" as="h4">
+                  {t('projects.detail.guidelines')}
+                </Text>
+                <ul className="plexon-project-bindings">
+                  {guidelines.map((g) => (
+                    <li key={g.id} className="plexon-project-binding">
+                      <div className="plexon-project-binding__main">
+                        <Text role="title" as="h4">
+                          {g.name}
+                        </Text>
+                        <Text role="meta">
+                          {[
+                            g.status,
+                            g.version ? `v${g.version}` : null,
+                            `${g.colorCount} color`,
+                            g.pendingCount ? `${g.pendingCount} pending` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </Text>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openExternal(pathBrandionGuideline(g.id))}
+                      >
+                        {t('projects.detail.openInBrandion')}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="plexon-knowledge-facet-tile-actions">
+        <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
+          {t('projects.detail.openBrandion')}
         </Button>
       </div>
     </div>

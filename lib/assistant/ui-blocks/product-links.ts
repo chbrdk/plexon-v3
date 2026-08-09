@@ -1,10 +1,13 @@
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
+import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
 import {
   getAudionAdminUrl,
+  getBrandionUrl,
   getCheckionUrl,
   pathPlatformProjectDashboard,
 } from '@/lib/constants';
 import { pathAudionAdminProject } from '@/lib/paths/audion-api';
+import { pathBrandionProject } from '@/lib/paths/brandion-api';
 import { pathCheckionProject, pathCheckionScanResult } from '@/lib/paths/checkion-api';
 
 export type ProductLink = {
@@ -41,6 +44,18 @@ export function buildAudionProjectLink(
   };
 }
 
+export function buildBrandionProjectLink(
+  platformProjectId: string,
+  label = 'BRANDION öffnen'
+): ProductLink {
+  const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
+  return {
+    label,
+    href: buildBrandionProjectLaunchUrl(brandionBase, { platformProjectId }),
+    external: true,
+  };
+}
+
 export function buildPlatformDashboardLink(
   platformProjectId: string,
   label = 'PLEXON Dashboard'
@@ -73,6 +88,17 @@ export function buildAudionDirectProjectLink(
   };
 }
 
+export function buildBrandionDirectProjectLink(
+  projectId: string,
+  label = 'In BRANDION öffnen'
+): ProductLink {
+  return {
+    label,
+    href: pathBrandionProject(projectId),
+    external: true,
+  };
+}
+
 export function buildCheckionScanLink(scanId: string, label = 'Scan in CHECKION öffnen'): ProductLink {
   return {
     label,
@@ -98,6 +124,7 @@ export function buildProjectSummaryLinks(input: {
   platformCompanyId?: string;
   hasCheckion?: boolean;
   hasAudion?: boolean;
+  hasBrandion?: boolean;
 }): ProductLink[] {
   const links: ProductLink[] = [];
   if (input.hasCheckion) {
@@ -105,6 +132,9 @@ export function buildProjectSummaryLinks(input: {
   }
   if (input.hasAudion && input.platformCompanyId) {
     links.push(buildAudionProjectLink(input.platformProjectId, input.platformCompanyId));
+  }
+  if (input.hasBrandion) {
+    links.push(buildBrandionProjectLink(input.platformProjectId));
   }
   links.push(buildPlatformDashboardLink(input.platformProjectId));
   return links;

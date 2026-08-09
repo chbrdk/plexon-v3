@@ -12,6 +12,7 @@ import type {
 } from '@/lib/collection-knowledge-pack'
 import type {
   AudionProjectSummary,
+  BrandionProjectSummary,
   CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -35,6 +36,7 @@ type Props = {
   domain: string | null
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
+  brandion: BrandionProjectSummary | null
   bindings: CollectionBinding[]
   knowledge: DashboardKnowledgeSummary | null
   flows: DashboardFlowsSummary | null
@@ -76,6 +78,7 @@ function topScans(checkion: CheckionProjectSummary | null) {
 function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
+  if (productId === 'brandion') return 'BRANDION'
   return productId
 }
 
@@ -101,6 +104,7 @@ export function CollectionOverviewBand({
   domain,
   checkion,
   audion,
+  brandion,
   bindings,
   knowledge,
   flows,
@@ -109,6 +113,7 @@ export function CollectionOverviewBand({
   const { t } = useI18n()
   const scans = topScans(checkion)
   const personas = (audion?.personas ?? []).slice(0, 3)
+  const guidelines = (brandion?.guidelines ?? []).slice(0, 3)
   const facets = (knowledge?.facets ?? []).filter((f) => f.status !== 'reserved')
   const filledCount = facets.filter((f) => f.status === 'filled').length
   const facetTotal = facets.length
@@ -144,7 +149,7 @@ export function CollectionOverviewBand({
 
       <StatLedeGroup
         aria-label={t('projects.detail.overviewPulse')}
-        columns={4}
+        columns={5}
         compact
         className="plexon-collection-overview-pulse"
       >
@@ -155,6 +160,10 @@ export function CollectionOverviewBand({
         <StatLede
           label={t('projects.detail.personas')}
           value={audion ? String(audion.personaCount) : '—'}
+        />
+        <StatLede
+          label={t('projects.detail.guidelines')}
+          value={brandion ? String(brandion.guidelineCount) : '—'}
         />
         <StatLede
           label={t('projects.detail.overviewKnowledgePulse')}
@@ -227,6 +236,37 @@ export function CollectionOverviewBand({
                 {audion.targetGroupCount} {t('projects.detail.targetGroups')} ·{' '}
                 {audion.journeyCount} {t('projects.detail.journeys')} ·{' '}
                 {audion.studyCount} {t('projects.detail.studies')}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="plexon-collection-overview-chapter-block">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                BRANDION
+              </Text>
+              <Button variant="link" size="sm" onClick={() => onOpenWork('brandion')}>
+                {t('projects.detail.overviewOpenCatalog')}
+              </Button>
+            </header>
+            {!brandion ? (
+              <Text role="meta">{t('projects.detail.overviewBrandionEmpty')}</Text>
+            ) : guidelines.length === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewBrandionNoGuidelines')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                {guidelines.map((g) => (
+                  <li key={g.id}>
+                    <span className="plexon-collection-overview-ledger-label">{g.name}</span>
+                    <span className="plexon-collection-overview-ledger-mark">{g.status}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {brandion ? (
+              <Text role="meta" as="p" className="plexon-collection-overview-aside">
+                {brandion.guidelineCount} {t('projects.detail.guidelines')} ·{' '}
+                {brandion.analysisCount} {t('projects.detail.analyses')}
               </Text>
             ) : null}
           </div>

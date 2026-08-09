@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   resolveAudionCapability,
+  resolveBrandionCapability,
   resolveCheckionCapability,
 } from '@/lib/platform-project-capability-summary';
 
@@ -65,5 +66,44 @@ describe('platform-project-capability-summary', () => {
       domainScans: [],
       standaloneScans: [],
     });
+
+    const brandionBound = resolveBrandionCapability(null, [
+      { productId: 'brandion', externalProjectId: 'br-1', syncStatus: 'in_sync' },
+    ]);
+    expect(brandionBound).toEqual({
+      externalProjectId: 'br-1',
+      analysisCount: 0,
+      guidelineCount: 0,
+      analyses: [],
+      guidelines: [],
+    });
+  });
+
+  it('prefers live Brandion summary over binding', () => {
+    const brandion = resolveBrandionCapability(
+      {
+        externalProjectId: 'live-br',
+        analysisCount: 1,
+        guidelineCount: 2,
+        analyses: [],
+        guidelines: [
+          {
+            id: 'gl-1',
+            name: 'CD',
+            version: '1',
+            status: 'active',
+            colorCount: 3,
+            typographyCount: 1,
+            spacingCount: 0,
+            pendingCount: 0,
+            updatedAt: '2026-08-09T00:00:00.000Z',
+          },
+        ],
+      },
+      [{ productId: 'brandion', externalProjectId: 'bind-br', syncStatus: 'in_sync' }]
+    );
+    expect(brandion?.externalProjectId).toBe('live-br');
+    expect(brandion?.guidelineCount).toBe(2);
+    expect(brandion?.guidelines).toHaveLength(1);
   });
 });

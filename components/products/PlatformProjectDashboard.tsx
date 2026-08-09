@@ -14,7 +14,11 @@ import {
 } from '@/components/products/CollectionOverviewBand'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
-import type { AudionProjectSummary, CheckionProjectSummary } from '@/lib/platform-project-dashboard-fetch'
+import type {
+  AudionProjectSummary,
+  BrandionProjectSummary,
+  CheckionProjectSummary,
+} from '@/lib/platform-project-dashboard-fetch'
 
 type DashboardPayload = {
   platformProject: {
@@ -32,9 +36,10 @@ type DashboardPayload = {
   }>
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
+  brandion: BrandionProjectSummary | null
   knowledge?: DashboardKnowledgeSummary | null
   flows?: DashboardFlowsSummary | null
-  links: { checkionProject: string; audionProject: string }
+  links: { checkionProject: string; audionProject: string; brandionProject: string }
 }
 
 export function PlatformProjectDashboard({ platformProjectId }: { platformProjectId: string }) {
@@ -127,6 +132,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             domain={data.platformProject.domain}
             checkion={data.checkion}
             audion={data.audion}
+            brandion={data.brandion}
             bindings={data.bindings}
             knowledge={data.knowledge ?? null}
             flows={data.flows ?? null}
@@ -136,8 +142,10 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             platformProjectId={platformProjectId}
             audionHref={data.links.audionProject}
             checkionHref={data.links.checkionProject}
+            brandionHref={data.links.brandionProject}
             checkion={data.checkion}
             audion={data.audion}
+            brandion={data.brandion}
             bindings={data.bindings}
             openNav={workNav}
             onOpenNav={setWorkNav}

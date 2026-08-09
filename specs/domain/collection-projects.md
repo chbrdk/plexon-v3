@@ -24,7 +24,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, and BRANDION are **c
 1. Every **new** project is created as a PLEXON `platform_projects` Collection.
 2. Create always ensures bindings for **checkion**, **audion**, and **brandion**, then syncs all three (brandion upsert skipped while `NEXT_PUBLIC_BRANDION_URL` / service API is unset — placeholder stays `pending`). Missing/failing sync → `pending` / `failed`, not a product-only project.
 3. User copy never says “Audion project” / “Checkion project” / “Brandion project” as a type. Prefer “Projekt” + capability labels.
-4. Product UIs stay product-local (surface ownership unchanged); deep links always carry Collection context (`platformProjectId` / company hint) when available. Cross-product capability handoff (e.g. AUDION explore URL → CHECKION `mode: single` scan) stays product-local APIs + bindings — see audion-v3 `specs/domain/checkion-single-scan-trigger.md` / checkion-v3 `specs/domain/audion-journey-scan-trigger.md`.
+4. Product UIs stay product-local (surface ownership unchanged); deep links always carry Collection context (`platformProjectId` / company hint) when available. Includes BRANDION: `{BRANDION}/projects?platformProjectId={id}` (not Checkion’s `platformProjectHint`). Cross-product capability handoff (e.g. AUDION explore URL → CHECKION `mode: single` scan) stays product-local APIs + bindings — see audion-v3 `specs/domain/checkion-single-scan-trigger.md` / checkion-v3 `specs/domain/audion-journey-scan-trigger.md`.
 5. Access is Collection-scoped (`user_platform_project_assignments`), then expanded to product assignments via bindings.
 6. **Insights list Collections only** — no synthetic product-only cards (v3 fresh DB).
 
@@ -54,7 +54,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, and BRANDION are **c
 |-------|--------|
 | 0 Spec + UX language | done |
 | 1 Create always both (+ brandion mirror) | done — brandion added 2026-08-06 |
-| 2 Canonical project home UX | done |
+| 2 Canonical project home UX | done — Brandion capability summary + launch on Collection home (2026-08-09) |
 | 3 Legacy backfill | **cancelled** — fresh databases; no migration planned |
 | 4 Canonical list + create hub (`/projects`) | done — 2026-07-31 |
 
@@ -62,7 +62,8 @@ Users see **one project** (a Collection). CHECKION, AUDION, and BRANDION are **c
 
 - Nav **Projekte** → `/projects`: create form + full Collection list (same card look as dashboard insights).
 - Home keeps a short preview (limit 6) with CTAs to the hub.
-- Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
+- Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs for CHECKION / AUDION / **BRANDION** + bindings). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
+- Dashboard BFF fetches Brandion via `GET {BRANDION}/api/platform/provisioning/projects/{id}` → `brandion` + `links.brandionProject` (`lib/platform-project-dashboard-fetch.ts`).
 - Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync checkion/audion/brandion).
 - Product-first origins: `…/audion-project-origin`, `…/checkion-project-origin`, `…/brandion-project-origin`.
 

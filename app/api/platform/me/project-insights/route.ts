@@ -1,17 +1,21 @@
 import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
-import { getAudionAdminUrl, getCheckionUrl } from '@/lib/constants';
+import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl } from '@/lib/constants';
 import { getBindingsForPlatformProject } from '@/lib/db/platform-project-bindings';
 import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
 import {
   resolveAudionCapability,
+  resolveBrandionCapability,
   resolveCheckionCapability,
 } from '@/lib/platform-project-capability-summary';
 import {
   fetchAudionPlatformProjectSummary,
+  fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
   type AudionProjectSummary,
+  type BrandionProjectSummary,
   type CheckionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 
@@ -28,7 +32,8 @@ export type PlatformMeProjectInsightRow = {
   };
   checkion: CheckionProjectSummary | null;
   audion: AudionProjectSummary | null;
-  links: { checkionProject: string; audionProject: string };
+  brandion: BrandionProjectSummary | null;
+  links: { checkionProject: string; audionProject: string; brandionProject: string };
   /** Always true for v3 fresh-start insights (Collections only). */
   openPlatformProject: true;
 };
@@ -45,6 +50,7 @@ export async function GET(request: Request) {
 
   const checkionBase = getCheckionUrl().replace(/\/+$/, '');
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
+  const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
 
   const allPlatform = await listAccessiblePlatformProjectsForUser(user.id);
   const totalAccessible = allPlatform.length;
@@ -54,7 +60,8 @@ export async function GET(request: Request) {
     platformProjectId: string,
     platformCompanyId: string,
     checkion: CheckionProjectSummary | null,
-    audion: AudionProjectSummary | null
+    audion: AudionProjectSummary | null,
+    brandion: BrandionProjectSummary | null
   ) => ({
     checkionProject: checkion
       ? `${checkionBase}/?platformProjectHint=${encodeURIComponent(platformProjectId)}`
@@ -63,6 +70,11 @@ export async function GET(request: Request) {
       platformProjectHint: audion ? platformProjectId : null,
       platformCompanyId,
     }),
+    brandionProject: brandion
+      ? buildBrandionProjectLaunchUrl(brandionBase, { platformProjectId })
+      : brandionBase
+        ? `${brandionBase}/projects`
+        : '',
   });
 
   const platformSlice = allPlatform.slice(0, INSIGHTS_CAP);
@@ -73,13 +85,15 @@ export async function GET(request: Request) {
     const batch = await Promise.all(
       chunk.map(async (platformProject) => {
         const platformProjectId = platformProject.id;
-        const [checkionLive, audionLive, bindings] = await Promise.all([
+        const [checkionLive, audionLive, brandionLive, bindings] = await Promise.all([
           fetchCheckionPlatformProjectSummary(platformProjectId, user.id),
           fetchAudionPlatformProjectSummary(platformProjectId, user.id),
+          fetchBrandionPlatformProjectSummary(platformProjectId, user.id),
           getBindingsForPlatformProject(platformProjectId),
         ]);
         const checkion = resolveCheckionCapability(checkionLive, bindings);
         const audion = resolveAudionCapability(audionLive, bindings);
+        const brandion = resolveBrandionCapability(brandionLive, bindings);
         return {
           platformProject: {
             id: platformProject.id,
@@ -90,7 +104,14 @@ export async function GET(request: Request) {
           },
           checkion,
           audion,
-          links: buildLinks(platformProjectId, platformProject.companyId, checkion, audion),
+          brandion,
+          links: buildLinks(
+            platformProjectId,
+            platformProject.companyId,
+            checkion,
+            audion,
+            brandion
+          ),
           openPlatformProject: true as const,
         };
       })

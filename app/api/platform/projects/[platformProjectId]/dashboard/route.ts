@@ -15,15 +15,18 @@ import {
 } from '@/lib/collection-knowledge-pack';
 import {
   fetchAudionPlatformProjectSummary,
+  fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import {
   resolveAudionCapability,
+  resolveBrandionCapability,
   resolveCheckionCapability,
 } from '@/lib/platform-project-capability-summary';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
-import { getAudionAdminUrl, getCheckionUrl } from '@/lib/constants';
+import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl } from '@/lib/constants';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 
 const FLOW_TEASER_LIMIT = 3;
@@ -54,14 +57,16 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, packRow, flowRows] = await Promise.all([
+  const [checkionLive, audionLive, brandionLive, packRow, flowRows] = await Promise.all([
     fetchCheckionPlatformProjectSummary(ppid, user.id),
     fetchAudionPlatformProjectSummary(ppid, user.id),
+    fetchBrandionPlatformProjectSummary(ppid, user.id),
     getOrCreateKnowledgePack(ppid),
     listCollectionTestFlows(ppid),
   ]);
   const checkion = resolveCheckionCapability(checkionLive, bindings);
   const audion = resolveAudionCapability(audionLive, bindings);
+  const brandion = resolveBrandionCapability(brandionLive, bindings);
 
   const facets = ensureFacetsShape(packRow.facets, packRow.updatedAt.toISOString());
   const knowledge = {
@@ -85,6 +90,7 @@ export async function GET(
 
   const checkionBase = getCheckionUrl().replace(/\/+$/, '');
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
+  const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
   const companyId = project.companyId;
 
   return Response.json({
@@ -92,6 +98,7 @@ export async function GET(
     bindings,
     checkion,
     audion,
+    brandion,
     knowledge,
     flows,
     links: {
@@ -102,6 +109,11 @@ export async function GET(
         platformProjectHint: audion ? ppid : null,
         platformCompanyId: companyId,
       }),
+      brandionProject: brandion
+        ? buildBrandionProjectLaunchUrl(brandionBase, { platformProjectId: ppid })
+        : brandionBase
+          ? `${brandionBase}/projects`
+          : '',
     },
   });
 }
