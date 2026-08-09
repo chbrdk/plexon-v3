@@ -22,7 +22,7 @@ function checkSecret(request: Request): boolean {
 
 const eventBodySchema = z.object({
   user_id: z.string().min(1),
-  service: z.enum(['checkion', 'audion', 'videon']),
+  service: z.enum(['checkion', 'audion', 'videon', 'brandion']),
   event_type: z.string().min(1),
   raw_units: z.record(z.unknown()).default({}),
   idempotency_key: z.string().optional(),

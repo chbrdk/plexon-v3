@@ -44,8 +44,10 @@ export function formatUsageEventDetail(eventType: string, rawUnits: Raw): string
   if (eventType === 'llm_request' || eventType === 'chat') {
     const inp = rawUnits.input_tokens ?? rawUnits.prompt_tokens;
     const out = rawUnits.output_tokens ?? rawUnits.completion_tokens;
+    const model = typeof rawUnits.model === 'string' ? rawUnits.model.trim() : '';
+    const modelPart = model ? ` · ${trunc(model, 24)}` : '';
     if (typeof inp === 'number' || typeof out === 'number') {
-      return `in ${inp ?? '—'} · out ${out ?? '—'}`;
+      return `in ${inp ?? '—'} · out ${out ?? '—'}${modelPart}`;
     }
   }
 

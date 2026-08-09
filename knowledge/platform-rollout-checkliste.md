@@ -25,6 +25,8 @@ Detaillierte technische Notizen liegen u. a. in:
 | Admin-API-Pfade (User, Entitlements, Provisioning) | `PLEXON/lib/constants.ts` – `apiAdminUser`, `apiAdminUserEntitlements`, `apiAdminUserProvisioning` |
 | CHECKION API-Basis (Subpath-sicher) | `CHECKION/lib/constants.ts` – `APP_BASE_URL`, `API_HEALTH`, `API_SCAN`, `API_SCANS_DOMAIN`, … |
 | CHECKION → PLEXON Auth & Usage | `CHECKION/lib/plexon-auth.ts`, `CHECKION/lib/usage-report.ts` |
+| AUDION → PLEXON Usage | `audion-v3/apps/web/lib/usage-report.ts` |
+| BRANDION → PLEXON Usage | `brandion-v3/apps/web/lib/usage-report.ts` (Vision `llm_request`) |
 
 ## 3. Umgebungsvariablen – PLEXON
 

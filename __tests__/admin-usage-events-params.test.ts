@@ -36,4 +36,10 @@ describe('parseAdminUsageEventsParams', () => {
     const r = parseAdminUsageEventsParams(new URLSearchParams('service=other'));
     expect(r.ok).toBe(false);
   });
+
+  it('accepts brandion service', () => {
+    const r = parseAdminUsageEventsParams(new URLSearchParams('service=brandion'));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.service).toBe('brandion');
+  });
 });

@@ -38,4 +38,15 @@ describe('formatUsageEventDetail', () => {
       })
     ).toContain('reused');
   });
+
+  it('formats llm_request with in/out and model', () => {
+    const s = formatUsageEventDetail('llm_request', {
+      input_tokens: 100,
+      output_tokens: 20,
+      model: 'gpt-5.6-luna',
+    });
+    expect(s).toContain('in 100');
+    expect(s).toContain('out 20');
+    expect(s).toContain('gpt-5.6-luna');
+  });
 });
