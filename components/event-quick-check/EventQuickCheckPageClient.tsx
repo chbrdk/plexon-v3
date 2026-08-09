@@ -24,7 +24,13 @@ import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-q
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import { maxGeoQuestionsForProfile } from '@/lib/assistant/event-quick-check/apply-geo-question-edits';
-import { resolveEventQuickCheckProfile, type EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
+import {
+  EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX,
+  EVENT_QUICK_CHECK_PERSONA_COUNT_MAX,
+  EVENT_QUICK_CHECK_PERSONA_COUNT_MIN,
+  resolveEventQuickCheckProfile,
+  type EventQuickCheckDepth,
+} from '@/lib/paths/assistant-workflows';
 import type { EventQuickCheckHistoryItem } from '@/lib/assistant/event-quick-check/event-quick-check-history';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 import {
@@ -73,8 +79,20 @@ export function EventQuickCheckPageClient() {
   const [geoQuestionsByPersona, setGeoQuestionsByPersona] = useState<PersonaGeoQuestionGroup[]>();
   const [geoHasPersona, setGeoHasPersona] = useState(true);
   const [competitors, setCompetitors] = useState<string[]>([]);
-  const [maxCompetitors, setMaxCompetitors] = useState(3);
+  const [maxCompetitors, setMaxCompetitors] = useState(
+    () => resolveEventQuickCheckProfile('quick').maxCompetitors
+  );
+  const [personaCount, setPersonaCount] = useState(
+    () => resolveEventQuickCheckProfile('quick').personaCount
+  );
   const [depth, setDepth] = useState<EventQuickCheckDepth>('quick');
+
+  const applyDepthDefaults = useCallback((nextDepth: EventQuickCheckDepth) => {
+    const profile = resolveEventQuickCheckProfile(nextDepth);
+    setDepth(nextDepth);
+    setPersonaCount(profile.personaCount);
+    setMaxCompetitors(profile.maxCompetitors);
+  }, []);
   const [deepScanProgress, setDeepScanProgress] = useState<{
     complete: number;
     total: number;
@@ -165,12 +183,18 @@ export function EventQuickCheckPageClient() {
           awaitingCompetitors?: boolean;
           competitors?: string[];
           maxCompetitors?: number;
+          personaCount?: number;
+          depth?: EventQuickCheckDepth;
           awaitingDeepScan?: boolean;
           deepScanProgress?: { complete: number; total: number; detail: string };
           checkionProjectId?: string;
           canRerunGeo?: boolean;
           steps?: WorkflowStep[];
         };
+
+        if (typeof data.personaCount === 'number') setPersonaCount(data.personaCount);
+        if (typeof data.maxCompetitors === 'number') setMaxCompetitors(data.maxCompetitors);
+        if (data.depth === 'quick' || data.depth === 'complete') setDepth(data.depth);
 
         if (data.awaitingCompanyBrief && data.companyBrief) {
           setCompanyBrief(data.companyBrief);
@@ -644,6 +668,8 @@ export function EventQuickCheckPageClient() {
           url: trimmedUrl,
           projectName: projectName.trim() || undefined,
           depth,
+          personaCount,
+          maxCompetitors,
         }),
       });
 
@@ -741,7 +767,7 @@ export function EventQuickCheckPageClient() {
       setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
       void refreshHistory();
     }
-  }, [url, projectName, depth, router, refreshHistory]);
+  }, [url, projectName, depth, personaCount, maxCompetitors, router, refreshHistory]);
 
   const historyDialog = (
     <EventQuickCheckHistoryDialog
@@ -826,7 +852,7 @@ export function EventQuickCheckPageClient() {
               <Field label="Scan-Tiefe">
                 <ToggleGroup
                   value={depth}
-                  onChange={(value) => setDepth(value as EventQuickCheckDepth)}
+                  onChange={(value) => applyDepthDefaults(value as EventQuickCheckDepth)}
                   aria-label="Scan-Tiefe"
                   options={[
                     { value: 'quick', label: EQC_PAGE_COPY.depthQuickLabel },
@@ -837,6 +863,45 @@ export function EventQuickCheckPageClient() {
               <Text role="hint" className="plexon-eqc-depth-hint">
                 {depth === 'complete' ? EQC_PAGE_COPY.depthCompleteHint : EQC_PAGE_COPY.depthQuickHint}
               </Text>
+              <div className="plexon-eqc-split-grid">
+                <Field label={EQC_PAGE_COPY.personaCountLabel}>
+                  <Input
+                    type="number"
+                    min={EVENT_QUICK_CHECK_PERSONA_COUNT_MIN}
+                    max={EVENT_QUICK_CHECK_PERSONA_COUNT_MAX}
+                    value={String(personaCount)}
+                    onChange={(e) => {
+                      const n = Number.parseInt(e.target.value, 10);
+                      if (!Number.isFinite(n)) return;
+                      setPersonaCount(
+                        Math.max(
+                          EVENT_QUICK_CHECK_PERSONA_COUNT_MIN,
+                          Math.min(EVENT_QUICK_CHECK_PERSONA_COUNT_MAX, n)
+                        )
+                      );
+                    }}
+                    block
+                  />
+                  <Text role="hint">{EQC_PAGE_COPY.personaCountHint}</Text>
+                </Field>
+                <Field label={EQC_PAGE_COPY.competitorCountLabel}>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX}
+                    value={String(maxCompetitors)}
+                    onChange={(e) => {
+                      const n = Number.parseInt(e.target.value, 10);
+                      if (!Number.isFinite(n)) return;
+                      setMaxCompetitors(
+                        Math.max(0, Math.min(EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX, n))
+                      );
+                    }}
+                    block
+                  />
+                  <Text role="hint">{EQC_PAGE_COPY.competitorCountHint(maxCompetitors)}</Text>
+                </Field>
+              </div>
               {error ? <Alert tone="error">{error}</Alert> : null}
               <Button type="submit" variant="primary" size="lg">
                 {EQC_PAGE_COPY.startButton}
@@ -876,7 +941,7 @@ export function EventQuickCheckPageClient() {
                 groups={geoQuestionsByPersona}
                 hasPersona={geoHasPersona || Boolean(geoQuestionsByPersona?.length)}
                 maxQuestions={maxGeoQuestionsForProfile(
-                  resolveEventQuickCheckProfile(depth).personaCount,
+                  personaCount,
                   resolveEventQuickCheckProfile(depth).geoQuestionsPerPersona
                 )}
                 loading={confirmLoading}

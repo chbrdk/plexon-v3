@@ -10,9 +10,10 @@ export type BuyerSegmentDraft = {
   personaDescription: string;
 };
 
-const SYSTEM_PROMPT = `Du leitest aus einem Unternehmensprofil genau drei unterschiedliche Buyer-Segmente für B2B/B2C-Personas ab.
+const SYSTEM_PROMPT = `Du leitest aus einem Unternehmensprofil unterschiedlich viele Buyer-Segmente für B2B/B2C-Personas ab.
 Jedes Segment = eine eigene Zielgruppe mit anderer Rolle (z. B. Entscheider, Fachanwender, IT/Procurement).
 Die Personas sind KÄUFER/NUTZER — nicht der Beruf im Firmennamen.
+Erstelle genau die im User-Prompt genannte Anzahl an Segmenten.
 
 Antworte NUR mit gültigem JSON:
 {

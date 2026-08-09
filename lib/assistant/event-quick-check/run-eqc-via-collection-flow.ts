@@ -260,7 +260,7 @@ export async function runEqcViaCollectionFlow(
   const emit = options.emit;
   const runMode: EventQuickCheckRunMode = options.runMode ?? 'full_auto';
   const depth: EventQuickCheckDepth = options.depth ?? 'quick';
-  const profile = resolveEventQuickCheckProfile(depth);
+  const profile = resolveEventQuickCheckProfile(depth, options.profileOverrides);
   let steps = options.initialSteps ?? [...EVENT_QUICK_CHECK_INITIAL_STEPS];
   const outcomes: EventQuickCheckStepOutcome[] = [];
 
@@ -311,6 +311,7 @@ export async function runEqcViaCollectionFlow(
     url,
     platformProjectId: input.platformProjectId,
     depth,
+    profileOverrides: options.profileOverrides,
   });
   if (!boot.ok || !boot.platformProjectId || !boot.flowId) {
     steps = await patchStep('create_project', {
@@ -379,6 +380,8 @@ export async function runEqcViaCollectionFlow(
     depth,
     projectName: options.companyBrief?.displayName?.trim() || projectName,
     historyRunId,
+    personaCount: profile.personaCount,
+    maxCompetitors: profile.maxCompetitors,
   };
 
   const resumeFrom = options.eqcFlowState?.awaitingNodeId ?? null;

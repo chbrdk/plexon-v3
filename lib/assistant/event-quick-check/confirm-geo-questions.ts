@@ -11,13 +11,12 @@ import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-
 import {
   EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY,
   EVENT_QUICK_CHECK_CHECKPOINT_KEY,
-  EVENT_QUICK_CHECK_DEPTH_KEY,
   EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_DRAFT_KEY,
 } from '@/lib/paths/event-quick-check-page';
-import { resolveEventQuickCheckProfile } from '@/lib/paths/assistant-workflows';
+import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 import type { WorkflowStepEmitter } from '@/lib/assistant/workflows/workflow-step-stream';
 
 export type ConfirmGeoQuestionsInput = {
@@ -46,8 +45,7 @@ export async function confirmEventQuickCheckGeoQuestions(
     throw new Error('GEO_NOT_AWAITING');
   }
 
-  const depth = stored[EVENT_QUICK_CHECK_DEPTH_KEY] === 'complete' ? 'complete' : 'quick';
-  const profile = resolveEventQuickCheckProfile(depth);
+  const profile = resolveEventQuickCheckProfileFromStored(stored);
   const confirmedQuestions = applyGeoQuestionEdits(draft, { questions: input.questions }, {
     maxQuestions: maxGeoQuestionsForProfile(profile.personaCount, profile.geoQuestionsPerPersona),
   });

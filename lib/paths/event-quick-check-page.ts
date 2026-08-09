@@ -39,6 +39,10 @@ export const EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY = 'geoCompetitorsDraft'
 export const EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY = 'geoQuestionsConfirmed' as const;
 
 export const EVENT_QUICK_CHECK_DEPTH_KEY = 'depth' as const;
+/** Per-run override: buyer segments / personas (1:1). */
+export const EVENT_QUICK_CHECK_PERSONA_COUNT_KEY = 'personaCount' as const;
+/** Per-run override: competitor domains to scan (own domain always included). */
+export const EVENT_QUICK_CHECK_MAX_COMPETITORS_KEY = 'maxCompetitors' as const;
 
 export const EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY = 'competitorsDraft' as const;
 export const EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY = 'awaitingCompetitors' as const;

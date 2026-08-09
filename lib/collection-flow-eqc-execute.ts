@@ -55,6 +55,7 @@ import {
 import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
 import { suggestCheckionProjectCompetitors } from '@/lib/integrations/checkion-project-competitors-client';
 import {
+  parseEventQuickCheckProfileOverrides,
   resolveEventQuickCheckProfile,
   type EventQuickCheckDepth,
 } from '@/lib/paths/assistant-workflows';
@@ -139,7 +140,7 @@ export async function executeEqcCollectionFlowRun(input: {
 
   const depthRaw = typeof body.depth === 'string' ? body.depth.trim() : 'quick';
   const depth = (depthRaw === 'complete' ? 'complete' : 'quick') as EventQuickCheckDepth;
-  const profile = resolveEventQuickCheckProfile(depth);
+  const profile = resolveEventQuickCheckProfile(depth, parseEventQuickCheckProfileOverrides(body));
   const projectName =
     (typeof body.projectName === 'string' && body.projectName.trim()) || input.flowName || 'Quick Check';
 

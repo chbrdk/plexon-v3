@@ -14,7 +14,7 @@ import {
   EVENT_QUICK_CHECK_COMPETITORS_CONFIRMED_KEY,
   EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY,
 } from '@/lib/paths/event-quick-check-page';
-import { resolveEventQuickCheckProfile } from '@/lib/paths/assistant-workflows';
+import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 import type { WorkflowStepEmitter } from '@/lib/assistant/workflows/workflow-step-stream';
 
 export type ConfirmCompetitorsInput = {
@@ -42,7 +42,7 @@ export async function confirmEventQuickCheckCompetitors(
     throw new Error('COMPETITORS_NOT_AWAITING');
   }
 
-  const profile = resolveEventQuickCheckProfile(checkpoint.depth);
+  const profile = resolveEventQuickCheckProfileFromStored(stored);
   const confirmed = applyCompetitorEdits(draft, { competitors: input.competitors }, profile.maxCompetitors);
 
   const patched = await updateCheckionProject({

@@ -26,6 +26,7 @@ import {
   EVENT_QUICK_CHECK_BINDING_SOURCE,
   resolveEventQuickCheckProfile,
   type EventQuickCheckDepth,
+  type EventQuickCheckProfileOverrides,
 } from '@/lib/paths/assistant-workflows';
 
 function normalizeUrl(url: string): string {
@@ -63,10 +64,11 @@ export async function bootstrapEqcCollection(input: {
   url: string;
   platformProjectId?: string | null;
   depth?: EventQuickCheckDepth;
+  profileOverrides?: EventQuickCheckProfileOverrides;
 }): Promise<BootstrapEqcCollectionResult> {
   const url = normalizeUrl(input.url);
   const projectName = input.projectName.trim() || domainFromUrl(url) || 'Quick Check';
-  const profile = resolveEventQuickCheckProfile(input.depth ?? 'quick');
+  const profile = resolveEventQuickCheckProfile(input.depth ?? 'quick', input.profileOverrides);
   let platformProjectId = input.platformProjectId?.trim() || undefined;
   let dashboardPath: string | undefined;
 
@@ -116,6 +118,7 @@ export async function bootstrapEqcCollection(input: {
     platformProjectId,
     url,
     depth: profile.depth,
+    profileOverrides: input.profileOverrides,
     ownerId: input.user.id,
   });
 
@@ -134,9 +137,10 @@ export async function ensureEqcFlowDocument(input: {
   platformProjectId: string;
   url: string;
   depth: EventQuickCheckDepth;
+  profileOverrides?: EventQuickCheckProfileOverrides;
   ownerId?: string | null;
 }): Promise<string> {
-  const profile = resolveEventQuickCheckProfile(input.depth);
+  const profile = resolveEventQuickCheckProfile(input.depth, input.profileOverrides);
   const template = createEqcQualityTemplate(input.url, {
     maxPages: profile.scanMaxPages,
     includeCompetitors: profile.scanCompetitors,

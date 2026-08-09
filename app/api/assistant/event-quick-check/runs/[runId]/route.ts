@@ -30,6 +30,7 @@ import {
 } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
+import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 
 function seedDomainFromCheckpoint(
   report: EventQuickCheckReportModel | null,
@@ -72,6 +73,7 @@ export async function GET(
   }
 
   const stored = (run.result ?? {}) as Record<string, unknown>;
+  const profile = resolveEventQuickCheckProfileFromStored(stored);
   const awaitingGeoQuestions = Boolean(stored[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]);
   const checkpoint = stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as
     | EventQuickCheckResumeCheckpoint
@@ -121,6 +123,9 @@ export async function GET(
     geoCompetitors: stored[EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY] ?? undefined,
     awaitingCompetitors: Boolean(stored[EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY]),
     competitors: stored[EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY] ?? undefined,
+    maxCompetitors: profile.maxCompetitors,
+    personaCount: profile.personaCount,
+    depth: profile.depth,
     awaitingDeepScan: Boolean(stored[EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY]),
     deepScanStarted: stored[EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY] ?? undefined,
     canRerunGeo: canReopenEventQuickCheckGeo(stored),

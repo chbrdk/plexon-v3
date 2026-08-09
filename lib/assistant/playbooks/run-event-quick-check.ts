@@ -39,6 +39,7 @@ import {
   resolveEventQuickCheckProfile,
   type EventQuickCheckDepth,
   type EventQuickCheckProfile,
+  type EventQuickCheckProfileOverrides,
 } from '@/lib/paths/assistant-workflows';
 import { pathPlatformProjectDashboard } from '@/lib/constants';
 import type { PersonaBootstrapPreview } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
@@ -150,6 +151,8 @@ export type EventQuickCheckRunOptions = {
   resumeCheckpoint?: EventQuickCheckResumeCheckpoint;
   runMode?: EventQuickCheckRunMode;
   depth?: EventQuickCheckDepth;
+  /** Per-run count overrides (personaCount / maxCompetitors). */
+  profileOverrides?: EventQuickCheckProfileOverrides;
   competitorsConfirmed?: string[];
   competitorsCheckpoint?: EventQuickCheckCompetitorsCheckpoint;
   /** Wave 23 — prior Flow pause state for resume. */
@@ -271,7 +274,7 @@ export async function runEventQuickCheck(
   const runId = options.workflowRunId;
   const emit = options.emit;
   const runMode = options.runMode ?? 'full_auto';
-  const profile = resolveEventQuickCheckProfile(options.depth ?? 'quick');
+  const profile = resolveEventQuickCheckProfile(options.depth ?? 'quick', options.profileOverrides);
   let steps = options.initialSteps ?? [...EVENT_QUICK_CHECK_INITIAL_STEPS];
   let companyBrief = options.companyBrief;
 
@@ -428,7 +431,7 @@ export async function runEventQuickCheck(
       emit,
       steps,
       outcomes: [...cp.outcomes],
-      profile: resolveEventQuickCheckProfile(cp.depth),
+      profile: resolveEventQuickCheckProfile(cp.depth, options.profileOverrides),
       projectName: cp.projectName,
       url: cp.url,
       platformProjectId: cp.platformProjectId,

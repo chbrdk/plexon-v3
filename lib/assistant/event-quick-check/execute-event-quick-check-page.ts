@@ -19,6 +19,8 @@ import {
   EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
   EVENT_QUICK_CHECK_DEPTH_KEY,
+  EVENT_QUICK_CHECK_PERSONA_COUNT_KEY,
+  EVENT_QUICK_CHECK_MAX_COMPETITORS_KEY,
   EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY,
   EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_COMPETITORS_CONFIRMED_KEY,
@@ -27,7 +29,7 @@ import {
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
   EVENT_QUICK_CHECK_FLOW_STATE_KEY,
 } from '@/lib/paths/event-quick-check-page';
-import { EVENT_QUICK_CHECK_PLAYBOOK_ID, resolveEventQuickCheckProfile, type EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
+import { EVENT_QUICK_CHECK_PLAYBOOK_ID, resolveEventQuickCheckProfile, resolveEventQuickCheckProfileFromStored, type EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
 import { buildEventQuickCheckInitialSteps } from '@/lib/assistant/ui-blocks/event-quick-check-steps';
 import {
   createAssistantWorkflowRun,
@@ -78,6 +80,8 @@ export type CreateEventQuickCheckRunInput = {
   projectName?: string;
   platformProjectId?: string;
   depth?: EventQuickCheckDepth;
+  personaCount?: number;
+  maxCompetitors?: number;
 };
 
 export type CreateEventQuickCheckRunResult = {
@@ -196,6 +200,10 @@ export async function createEventQuickCheckRun(
 
   const projectName = input.projectName?.trim() || domain;
   const depth = input.depth ?? 'quick';
+  const profile = resolveEventQuickCheckProfile(depth, {
+    personaCount: input.personaCount,
+    maxCompetitors: input.maxCompetitors,
+  });
   const conversationId = randomUUID();
   const workflowRunId = randomUUID();
 
@@ -220,6 +228,8 @@ export async function createEventQuickCheckRun(
       url,
       projectName,
       [EVENT_QUICK_CHECK_DEPTH_KEY]: depth,
+      [EVENT_QUICK_CHECK_PERSONA_COUNT_KEY]: profile.personaCount,
+      [EVENT_QUICK_CHECK_MAX_COMPETITORS_KEY]: profile.maxCompetitors,
       ...(input.platformProjectId ? { platformProjectId: input.platformProjectId } : {}),
     },
   });
@@ -323,14 +333,14 @@ export async function executeEventQuickCheckRun(
   }
 
   if (stored[EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY] && !input.competitorsConfirmed) {
-    const depth = resolveEventQuickCheckDepth(stored);
+    const profile = resolveEventQuickCheckProfileFromStored(stored);
     return {
       ok: true,
       workflowRunId: run.id,
       steps: run.steps,
       awaitingCompetitors: true,
       competitors: stored[EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY] as string[],
-      maxCompetitors: resolveEventQuickCheckProfile(depth).maxCompetitors,
+      maxCompetitors: profile.maxCompetitors,
       companyBrief: stored[EVENT_QUICK_CHECK_COMPANY_BRIEF_CONFIRMED_KEY] as
         | EventQuickCheckCompanyBrief
         | undefined,
@@ -376,6 +386,8 @@ export async function executeEventQuickCheckRun(
     input.competitorsConfirmed ??
     (stored[EVENT_QUICK_CHECK_COMPETITORS_CONFIRMED_KEY] as string[] | undefined);
 
+  const profile = resolveEventQuickCheckProfileFromStored(stored);
+
   const quick = await runEventQuickCheck(
     {
       user: input.user,
@@ -397,7 +409,11 @@ export async function executeEventQuickCheckRun(
         (stored[EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY] as string[] | undefined),
       resumeCheckpoint: checkpoint,
       runMode,
-      depth: resolveEventQuickCheckDepth(stored),
+      depth: profile.depth,
+      profileOverrides: {
+        personaCount: profile.personaCount,
+        maxCompetitors: profile.maxCompetitors,
+      },
       competitorsConfirmed: confirmedCompetitors,
       competitorsCheckpoint,
       eqcFlowState: stored[EVENT_QUICK_CHECK_FLOW_STATE_KEY] as
@@ -463,7 +479,7 @@ export async function executeEventQuickCheckRun(
       steps,
       awaitingCompetitors: true,
       competitors: quick.competitorsDraft ?? [],
-      maxCompetitors: resolveEventQuickCheckProfile(resolveEventQuickCheckDepth(stored)).maxCompetitors,
+      maxCompetitors: resolveEventQuickCheckProfileFromStored(stored).maxCompetitors,
       companyBrief: quick.companyBrief ?? confirmedBrief,
       platformProjectId: quick.platformProjectId ?? platformProjectId,
     };

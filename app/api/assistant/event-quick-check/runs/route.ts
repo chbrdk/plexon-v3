@@ -38,7 +38,14 @@ export async function POST(request: Request) {
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);
 
-  let body: { url?: string; projectName?: string; platformProjectId?: string; depth?: EventQuickCheckDepth };
+  let body: {
+    url?: string;
+    projectName?: string;
+    platformProjectId?: string;
+    depth?: EventQuickCheckDepth;
+    personaCount?: number;
+    maxCompetitors?: number;
+  };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -55,6 +62,8 @@ export async function POST(request: Request) {
       projectName: body.projectName,
       platformProjectId: body.platformProjectId,
       depth: body.depth === 'complete' ? 'complete' : 'quick',
+      personaCount: body.personaCount,
+      maxCompetitors: body.maxCompetitors,
     });
     return Response.json(run);
   } catch (e) {

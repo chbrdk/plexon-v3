@@ -65,10 +65,17 @@ export const EQC_PAGE_COPY = {
   geoReviewMultiPersonaHint: 'Pro Persona drei Fragen — gruppiert nach Buyer-Segment.',
   geoReviewPersonaGroupLabel: (name: string, segment: string) => `${name} · ${segment}`,
   depthQuickLabel: 'Quick Check (Demo)',
-  depthQuickHint: '50 Seiten, 1 Persona — ca. 5–10 Minuten',
+  depthQuickHint: 'Schneller Demo-Scan — Anzahlen unten anpassen.',
   depthCompleteLabel: 'Komplettscan',
   depthCompleteHint:
-    'Deep Scan (bis 1000 Seiten × 4 Domains) läuft in CHECKION im Hintergrund — kann mehrere Stunden dauern. Personas & GEO können parallel geprüft werden.',
+    'Deep Scan (bis 1000 Seiten pro Domain) läuft in CHECKION im Hintergrund — kann mehrere Stunden dauern. Personas & GEO können parallel geprüft werden.',
+  personaCountLabel: 'Zielgruppen / Personas',
+  personaCountHint: 'Je Zielgruppe wird eine Persona erzeugt (1–5).',
+  competitorCountLabel: 'Wettbewerber-Domains',
+  competitorCountHint: (n: number) =>
+    n === 0
+      ? 'Nur die eigene Domain wird gescannt.'
+      : `Eigene Domain + ${n} Wettbewerber = ${n + 1} Domains gesamt.`,
   competitorsReviewTitle: 'Wettbewerber prüfen',
   competitorsReviewLead:
     'CHECKION schlägt direkte Wettbewerber vor — wie im Projekt. Diese Domains werden auf dem CHECKION-Projekt gespeichert und per Deep Scan gecrawlt.',
