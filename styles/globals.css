@@ -3584,19 +3584,26 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: 1.35rem;
 }
 
+.plexon-eqc-geo-eeat > .plexon-eqc-geo-voice__head {
+  max-width: none;
+  width: 100%;
+}
+
 .plexon-eqc-geo-eeat__reading {
   display: grid;
   gap: 0.45rem;
-  max-width: 52rem;
+  width: 100%;
+  max-width: none;
   margin-top: 0.35rem;
 }
 
 .plexon-eqc-geo-eeat__reading-body {
   margin: 0;
+  width: 100%;
+  max-width: none;
   font-size: clamp(1.05rem, 1.55vw, 1.2rem);
   line-height: 1.55;
   color: var(--ink, var(--fg));
-  max-width: 48ch;
 }
 
 .plexon-eqc-geo-eeat__layout {
