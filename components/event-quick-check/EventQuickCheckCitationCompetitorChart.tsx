@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { Text } from '@msqdx/ui';
+import { Text } from '@msqdx/ui'
 import {
   Bar,
   BarChart,
@@ -11,17 +11,23 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
-import type { CitationCompetitorChartModel } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
-import { citationCompetitorChartColor } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts';
-import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
+} from 'recharts'
+import type { CitationCompetitorChartModel } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts'
+import { citationCompetitorChartColor } from '@/lib/assistant/reports/event-quick-check/build-event-quick-check-geo-charts'
+import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
+import {
+  EQC_CHART_CURSOR,
+  EQC_CHART_TICK,
+  EQC_CHART_TICK_INK,
+  EqcChartTooltip,
+} from '@/components/event-quick-check/EqcChartTooltip'
 
 type Props = {
-  model: CitationCompetitorChartModel;
-};
+  model: CitationCompetitorChartModel
+}
 
 export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
-  const barHeight = Math.min(480, 56 + model.rows.length * 44);
+  const barHeight = Math.min(420, 64 + model.rows.length * 40)
 
   return (
     <div className="plexon-eqc-chart-block">
@@ -33,74 +39,104 @@ export function EventQuickCheckCitationCompetitorChart({ model }: Props) {
           {model.subtitle}
         </Text>
       ) : null}
-      <div className="plexon-eqc-chart" style={{ height: barHeight }}>
+      <div className="plexon-eqc-chart plexon-eqc-chart--ranked" style={{ height: barHeight }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={model.rows}
             layout="vertical"
-            margin={{ top: 4, right: 16, left: 4, bottom: 4 }}
+            margin={{ top: 8, right: 12, left: 0, bottom: 4 }}
+            barCategoryGap="28%"
+            barGap={3}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" horizontal={false} />
+            <CartesianGrid
+              strokeDasharray="0"
+              stroke="var(--line)"
+              strokeOpacity={0.7}
+              horizontal={false}
+              vertical
+            />
             <XAxis
               type="number"
               domain={[0, model.maxPosition]}
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: 'var(--muted)' }}
+              tick={EQC_CHART_TICK}
+              axisLine={{ stroke: 'var(--line)' }}
+              tickLine={false}
             />
             <YAxis
               type="category"
               dataKey="queryLabel"
               width={Math.min(
-                280,
-                120 + Math.max(...model.rows.map((r) => String(r.queryLabel).length)) * 3
+                220,
+                96 + Math.max(...model.rows.map((r) => String(r.queryLabel).length)) * 4,
               )}
-              tick={{ fontSize: 11, fill: 'var(--ink)' }}
+              tick={EQC_CHART_TICK_INK}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip
-              formatter={(value, name) => {
-                const num = typeof value === 'number' ? value : 0;
-                if (!num) return [EQC_REPORT_COPY.geoPositionNotCited, name];
-                return [num, name];
+              cursor={EQC_CHART_CURSOR}
+              content={({ active, payload, label }) => {
+                const row = payload?.[0]?.payload as { queryText?: string } | undefined
+                const tipLabel =
+                  row?.queryText || (typeof label === 'string' ? label : undefined)
+                const rows = (payload ?? []).map((entry) => {
+                  const num = typeof entry.value === 'number' ? entry.value : 0
+                  return {
+                    name: String(entry.name ?? ''),
+                    value: num
+                      ? String(num)
+                      : EQC_REPORT_COPY.geoPositionNotCited,
+                  }
+                })
+                return <EqcChartTooltip active={active} label={tipLabel} rows={rows} />
               }}
-              labelFormatter={(_label, payload) => {
-                const row = payload?.[0]?.payload as { queryText?: string } | undefined;
-                return row?.queryText ?? '';
-              }}
-              contentStyle={{
-                background: 'var(--bg, var(--surface, #fff))',
-                border: '1px solid var(--line)',
-                color: 'var(--ink)',
-              }}
-              labelStyle={{ color: 'var(--ink)' }}
             />
-            <Legend wrapperStyle={{ fontSize: 11, color: 'var(--muted)' }} iconType="square" />
+            <Legend
+              verticalAlign="top"
+              align="left"
+              iconType="square"
+              iconSize={8}
+              wrapperStyle={{
+                fontSize: 11,
+                color: 'var(--muted)',
+                fontFamily: 'var(--font-body, inherit)',
+                paddingBottom: 8,
+              }}
+            />
             {model.series.map((series, index) => {
-              const fill = citationCompetitorChartColor(index);
+              const fill = citationCompetitorChartColor(index, series.isOwn)
               return (
                 <Bar
                   key={series.key}
                   dataKey={series.key}
                   name={series.label}
                   fill={fill}
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={14}
+                  radius={0}
+                  maxBarSize={12}
+                  isAnimationActive={false}
                 >
                   {model.rows.map((row, rowIndex) => {
-                    const num = typeof row[series.key] === 'number' ? (row[series.key] as number) : 0;
+                    const num =
+                      typeof row[series.key] === 'number' ? (row[series.key] as number) : 0
                     return (
                       <Cell
                         key={`${series.key}-${rowIndex}`}
-                        fill={num > 0 ? fill : 'var(--line)'}
-                        opacity={num > 0 ? 1 : 0.35}
+                        fill={
+                          num > 0
+                            ? fill
+                            : 'color-mix(in srgb, var(--ink) 10%, transparent)'
+                        }
+                        opacity={num > 0 ? 1 : 0.45}
                       />
-                    );
+                    )
                   })}
                 </Bar>
-              );
+              )
             })}
           </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
-  );
+  )
 }

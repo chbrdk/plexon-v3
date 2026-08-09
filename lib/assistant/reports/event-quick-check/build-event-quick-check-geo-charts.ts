@@ -37,17 +37,21 @@ export type CitationCompetitorChartModel = {
   maxPosition: number;
 };
 
+/** MSQ DX brand series — own domain typically index 0 → accent green. */
 const COMPETITOR_CHART_COLORS = [
-  'var(--color-theme-accent, var(--color-secondary-dx-green))',
-  '#6366f1',
-  '#f59e0b',
-  '#ec4899',
-  '#14b8a6',
-  '#8b5cf6',
-];
+  'var(--accent, var(--color-secondary-dx-green, #00ca55))',
+  'var(--color-secondary-dx-blue, #3080ff)',
+  'var(--color-secondary-dx-orange, #ff6a3b)',
+  'var(--color-secondary-dx-pink, #f256b6)',
+  'var(--color-secondary-dx-purple, #b638ff)',
+  'color-mix(in srgb, var(--ink, #0f172a) 55%, var(--muted, #64748b))',
+]
 
-export function citationCompetitorChartColor(index: number): string {
-  return COMPETITOR_CHART_COLORS[index % COMPETITOR_CHART_COLORS.length] ?? COMPETITOR_CHART_COLORS[0];
+export function citationCompetitorChartColor(index: number, isOwn = false): string {
+  if (isOwn) return COMPETITOR_CHART_COLORS[0]!
+  const palette = COMPETITOR_CHART_COLORS
+  if (index === 0) return palette[0]!
+  return palette[index % palette.length]!
 }
 
 function truncateDomainLabel(domain: string, maxLength = 20): string {

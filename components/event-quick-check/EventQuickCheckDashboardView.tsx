@@ -79,12 +79,6 @@ function kpiTone(value: string | number | undefined): LedeTone | undefined {
   return 'neg'
 }
 
-function alertTone(tone?: string): 'error' | 'ok' | 'info' {
-  if (tone === 'success' || tone === 'ok' || tone === 'positive') return 'ok'
-  if (tone === 'error' || tone === 'danger' || tone === 'critical') return 'error'
-  return 'info'
-}
-
 function TraitBars({
   traits,
 }: {
@@ -279,30 +273,6 @@ export function EventQuickCheckDashboardView({
         }
       />
 
-      <Band title="Überblick" meta={EQC_PAGE_COPY.pageTitle}>
-        <div className="plexon-eqc-mag-stack">
-          <div className="plexon-eqc-mag-chips">
-            <Chip static size="sm">
-              {report.meta.playbookLabel}
-            </Chip>
-            {report.meta.url ? (
-              <Chip static size="sm">
-                {report.meta.url}
-              </Chip>
-            ) : null}
-            {report.meta.checkionOnly ? (
-              <Chip static size="sm">
-                CHECKION
-              </Chip>
-            ) : null}
-          </div>
-          {report.executive.summary ? <Text role="body">{report.executive.summary}</Text> : null}
-          {layout.showExecutiveFazit && report.executive.fazit ? (
-            <Alert tone={alertTone(report.executive.fazitTone)}>{report.executive.fazit}</Alert>
-          ) : null}
-        </div>
-      </Band>
-
       {kpiTiles.length > 0 ? (
         <Band title={EQC_REPORT_COPY.sectionKpi}>
           <StatLedeGroup
@@ -405,57 +375,64 @@ export function EventQuickCheckDashboardView({
                 ))}
               </div>
             ) : null}
-            <Text role="title" as="h3">
-              {persona.name}
-            </Text>
-            <div className="plexon-eqc-mag-chips">
-              {persona.segment ? (
-                <Chip static size="sm">
-                  {persona.segment}
-                </Chip>
-              ) : null}
-              <Chip static size="sm">
-                {Math.round(persona.confidence <= 1 ? persona.confidence * 100 : persona.confidence)}%{' '}
-                {EQC_REPORT_COPY.personaConfidence}
-              </Chip>
-            </div>
-            {persona.headline ? <Text role="body">{persona.headline}</Text> : null}
-            {persona.bio && persona.bio !== persona.headline ? (
-              <Text role="meta">{persona.bio}</Text>
-            ) : null}
-            {persona.traits.length > 0 ? (
-              <div className="plexon-eqc-mag-stack">
-                <Text role="meta" as="h4">
-                  {EQC_REPORT_COPY.sectionPersonaTraits}
+            <div className="plexon-eqc-mag-persona-hero">
+              <div className="plexon-eqc-mag-persona-hero__identity">
+                <Text role="title" as="h3" className="plexon-eqc-mag-persona-name">
+                  {persona.name}
                 </Text>
-                <TraitBars traits={persona.traits} />
+                <div className="plexon-eqc-mag-chips">
+                  {persona.segment ? (
+                    <Chip static size="sm">
+                      {persona.segment}
+                    </Chip>
+                  ) : null}
+                  <Chip static size="sm">
+                    {Math.round(
+                      persona.confidence <= 1 ? persona.confidence * 100 : persona.confidence,
+                    )}
+                    % {EQC_REPORT_COPY.personaConfidence}
+                  </Chip>
+                </div>
               </div>
-            ) : null}
+              <div className="plexon-eqc-mag-persona-hero__copy">
+                {persona.bio || persona.headline ? (
+                  <Text role="meta">{persona.bio || persona.headline}</Text>
+                ) : null}
+                {persona.traits.length > 0 ? <TraitBars traits={persona.traits} /> : null}
+              </div>
+            </div>
             {persona.goals.length > 0 ||
             persona.painPoints.length > 0 ||
             persona.interests.length > 0 ? (
               <div className="plexon-eqc-mag-persona-lists">
-                {persona.goals.length > 0 ? (
-                  <RankedList hint={EQC_REPORT_COPY.sectionGoals} className="plexon-eqc-mag-persona-list">
-                    {persona.goals.map((g, i) => (
-                      <RankedRow key={i} index={i + 1} label={g} />
-                    ))}
-                  </RankedList>
-                ) : null}
-                {persona.painPoints.length > 0 ? (
-                  <RankedList
-                    hint={EQC_REPORT_COPY.sectionPainPoints}
-                    className="plexon-eqc-mag-persona-list"
-                  >
-                    {persona.painPoints.map((g, i) => (
-                      <RankedRow key={i} index={i + 1} label={g} />
-                    ))}
-                  </RankedList>
+                {persona.goals.length > 0 || persona.painPoints.length > 0 ? (
+                  <div className="plexon-eqc-mag-persona-pair">
+                    {persona.goals.length > 0 ? (
+                      <RankedList
+                        hint={EQC_REPORT_COPY.sectionGoals}
+                        className="plexon-eqc-mag-persona-list"
+                      >
+                        {persona.goals.map((g, i) => (
+                          <RankedRow key={i} index={i + 1} label={g} />
+                        ))}
+                      </RankedList>
+                    ) : null}
+                    {persona.painPoints.length > 0 ? (
+                      <RankedList
+                        hint={EQC_REPORT_COPY.sectionPainPoints}
+                        className="plexon-eqc-mag-persona-list"
+                      >
+                        {persona.painPoints.map((g, i) => (
+                          <RankedRow key={i} index={i + 1} label={g} />
+                        ))}
+                      </RankedList>
+                    ) : null}
+                  </div>
                 ) : null}
                 {persona.interests.length > 0 ? (
                   <RankedList
                     hint={EQC_REPORT_COPY.sectionInterests}
-                    className="plexon-eqc-mag-persona-list"
+                    className="plexon-eqc-mag-persona-list plexon-eqc-mag-persona-list--interests"
                   >
                     {persona.interests.map((interest, i) => (
                       <RankedRow key={i} index={i + 1} label={interest} />
@@ -463,13 +440,6 @@ export function EventQuickCheckDashboardView({
                   </RankedList>
                 ) : null}
               </div>
-            ) : null}
-            {(persona.geoQuestions?.length ?? 0) > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionGeoQuestions}>
-                {(persona.geoQuestions ?? []).map((q, i) => (
-                  <RankedRow key={i} index={i + 1} label={q} />
-                ))}
-              </RankedList>
             ) : null}
           </div>
         </Band>

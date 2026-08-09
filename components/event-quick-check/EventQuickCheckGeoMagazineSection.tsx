@@ -135,6 +135,12 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
           <ol className="plexon-eqc-geo-voice__race" aria-label={EQC_REPORT_COPY.competitors}>
             {voiceRows.map((row, i) => {
               const width = Math.max(4, Math.round((100 * row.pct) / maxVoice))
+              const subParts = [
+                row.mentionCount != null ? `${row.mentionCount} Mentions` : null,
+                row.avgPosition != null
+                  ? `Ø #${Number(row.avgPosition).toFixed(1)}`
+                  : null,
+              ].filter(Boolean)
               return (
                 <li
                   key={row.domain}
@@ -146,23 +152,21 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
                     <span className="plexon-eqc-geo-voice__runner-idx" aria-hidden>
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span className="plexon-eqc-geo-voice__runner-name">
-                      {row.isOwn ? `${row.domain} · du` : row.domain}
-                    </span>
+                    <div className="plexon-eqc-geo-voice__runner-copy">
+                      <span className="plexon-eqc-geo-voice__runner-name">
+                        {row.isOwn ? `${row.domain} · du` : row.domain}
+                      </span>
+                      {subParts.length > 0 ? (
+                        <span className="plexon-eqc-geo-voice__runner-sub">
+                          {subParts.join(' · ')}
+                        </span>
+                      ) : null}
+                    </div>
                     <span className="plexon-eqc-geo-voice__runner-pct">{row.pct}%</span>
                   </div>
                   <div className="plexon-eqc-geo-voice__track" aria-hidden>
                     <span className="plexon-eqc-geo-voice__fill" />
                   </div>
-                  {(row.mentionCount != null || row.avgPosition != null) && (
-                    <p className="plexon-eqc-geo-voice__runner-sub">
-                      {row.mentionCount != null ? `${row.mentionCount} Mentions` : null}
-                      {row.mentionCount != null && row.avgPosition != null ? ' · ' : null}
-                      {row.avgPosition != null
-                        ? `Ø Position #${Number(row.avgPosition).toFixed(1)}`
-                        : null}
-                    </p>
-                  )}
                 </li>
               )
             })}
