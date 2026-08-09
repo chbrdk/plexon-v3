@@ -1,7 +1,8 @@
 'use client'
 
-import { Alert, RankedList, RankedRow, StatusMeterPanel, Text } from '@msqdx/ui'
+import { Alert, RankedList, RankedRow, Text } from '@msqdx/ui'
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
+import { EventQuickCheckScoreRing } from '@/components/event-quick-check/EventQuickCheckScoreRing'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { buildEqcEeatReadingFallback } from '@/lib/assistant/reports/event-quick-check/build-eqc-eeat-reading'
@@ -17,16 +18,16 @@ function sharePct(value: number | null | undefined): number | null {
   return value <= 1 ? Math.round(value * 100) : Math.round(value)
 }
 
-function meterLevel(score: number | null | undefined): 'ok' | 'warn' | 'critical' {
-  if (score == null) return 'warn'
-  if (score >= 70) return 'ok'
-  if (score >= 45) return 'warn'
-  return 'critical'
+function scoreTone(score: number | null | undefined): 'pos' | 'low' | 'neg' | undefined {
+  if (score == null) return undefined
+  if (score >= 70) return 'pos'
+  if (score >= 45) return 'low'
+  return 'neg'
 }
 
 /**
  * GEO magazine chapter — Checkion overview pattern:
- * snapshot meters → share-of-voice race → model strip + ranking → E-E-A-T ledger → moves.
+ * score rings → share-of-voice race → model strip + ranking → E-E-A-T ledger → moves.
  */
 export function EventQuickCheckGeoMagazineSection({ report, showQuestions = false }: Props) {
   const geo = report.geo
@@ -74,45 +75,51 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
         <Alert tone="error">{geo.errorMessage}</Alert>
       ) : null}
 
-      {(score != null || fitness != null) && (
-        <StatusMeterPanel
-          title={EQC_REPORT_COPY.sectionGeoCheck}
-          meta={ownHost || undefined}
-          level={meterLevel(score ?? fitness)}
-          banner={
-            score != null
-              ? `GEO Score ${score}/100 — so oft und wie stark Modelle deine Domain zitieren.`
-              : `GEO Fitness ${fitness}/100`
-          }
-          meters={[
-            ...(score != null
-              ? [
-                  {
-                    id: 'geo-score',
-                    label: 'GEO Score',
-                    value: String(score),
-                    fillPct: Math.max(0, Math.min(100, score)),
-                  },
-                ]
-              : []),
-            ...(fitness != null
-              ? [
-                  {
-                    id: 'geo-fitness',
-                    label: 'GEO Fitness',
-                    value: String(fitness),
-                    fillPct: Math.max(0, Math.min(100, fitness)),
-                  },
-                ]
-              : []),
-            {
-              id: 'queries',
-              label: 'Prompts',
-              value: String(queryCount || '—'),
-              fillPct: queryCount ? Math.min(100, queryCount * 12) : 0,
-            },
-          ]}
-        />
+      {(score != null || fitness != null || queryCount > 0) && (
+        <section className="plexon-eqc-geo-snapshot" aria-labelledby="eqc-geo-snapshot-heading">
+          <header className="plexon-eqc-geo-voice__head">
+            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+              {EQC_REPORT_COPY.sectionGeoCheck}
+            </Text>
+            <Text role="display" as="h3" id="eqc-geo-snapshot-heading">
+              {ownHost || EQC_REPORT_COPY.sectionGeo}
+            </Text>
+            <p className="plexon-eqc-geo-snapshot__lede">
+              {score != null
+                ? `GEO Score ${score}/100 — so oft und wie stark Modelle deine Domain zitieren.`
+                : fitness != null
+                  ? `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten.`
+                  : `${queryCount} Prompts im Wettbewerbslauf.`}
+            </p>
+          </header>
+          <div className="plexon-eqc-geo-snapshot__dials">
+            {score != null ? (
+              <EventQuickCheckScoreRing
+                value={score}
+                label="GEO Score"
+                meta="Zitierstärke"
+                tone={scoreTone(score)}
+                size="lg"
+              />
+            ) : null}
+            {fitness != null ? (
+              <EventQuickCheckScoreRing
+                value={fitness}
+                label="GEO Fitness"
+                meta="On-page"
+                tone={scoreTone(fitness)}
+              />
+            ) : null}
+            {queryCount > 0 ? (
+              <EventQuickCheckScoreRing
+                value={queryCount}
+                max={Math.max(queryCount, 12)}
+                label="Prompts"
+                meta="im Lauf"
+              />
+            ) : null}
+          </div>
+        </section>
       )}
 
       {voiceRows.length > 0 ? (

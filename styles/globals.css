@@ -2403,6 +2403,121 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: clamp(1.75rem, 3.5vw, 2.75rem);
 }
 
+.plexon-eqc-geo-snapshot {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-geo-snapshot {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plexon-eqc-geo-snapshot__lede {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  line-height: 1.55;
+  max-width: 36ch;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 86%, transparent);
+}
+
+.plexon-eqc-geo-snapshot__dials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.plexon-eqc-score-ring {
+  --ring-fill: var(--accent, var(--ink));
+  --ring-track: color-mix(in srgb, var(--ink) 12%, transparent);
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  text-align: center;
+  min-width: 6.5rem;
+}
+
+.plexon-eqc-score-ring[data-tone='pos'] {
+  --ring-fill: var(--ok, #7dcea0);
+}
+
+.plexon-eqc-score-ring[data-tone='low'] {
+  --ring-fill: var(--warn, #c9a227);
+}
+
+.plexon-eqc-score-ring[data-tone='neg'] {
+  --ring-fill: var(--danger, #d46a6a);
+}
+
+.plexon-eqc-score-ring__chart {
+  width: 7.25rem;
+  height: 7.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.plexon-eqc-score-ring[data-size='lg'] .plexon-eqc-score-ring__chart {
+  width: 10.5rem;
+  height: 10.5rem;
+}
+
+.plexon-eqc-score-ring__hole {
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  background: var(--bg, var(--surface, #fff));
+  display: grid;
+  place-content: center;
+  gap: 0.1rem;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.plexon-eqc-score-ring__v {
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.55rem, 2.8vw, 2rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-score-ring[data-size='lg'] .plexon-eqc-score-ring__v {
+  font-size: clamp(2.2rem, 4vw, 3rem);
+}
+
+.plexon-eqc-score-ring__unit {
+  font-size: var(--type-xs, 0.7rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-score-ring__cap {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.plexon-eqc-score-ring__k {
+  font-size: clamp(0.9rem, 1.2vw, 1.02rem);
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-score-ring__m {
+  font-size: var(--type-xs, 0.75rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 .plexon-eqc-geo-models {
   display: grid;
   gap: 0.85rem;
