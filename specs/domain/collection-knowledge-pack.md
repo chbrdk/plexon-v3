@@ -181,6 +181,7 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | **Owner** | Future **BRANDION** |
 | **Consume** | Audion copy tone, Checkion creative QA (later) |
 | **Publish rules** | Facet exists in taxonomy with `status: reserved`. GET returns `{ status: 'reserved', guidelineRef: null, … }` until Brandion onboarding. **No stub fake colors/fonts.** When Brandion Phase A guidelines are active, `guidelineRef` points at brandion-v3 (`/guidelines/:id`); DTCG/CSS exports stay product-local (`GET /api/guidelines/:id/export/dtcg|css`) — pack stores **refs only**. |
+| **UI bridge (pre–Phase 4)** | Collection magazine **Brand** tile may teaser the capability-local guideline catalog from dashboard `brandion.guidelines[]` and deep-link to the **BRANDION** TOC pane. That is not KP publish — full dossier stays in Brandion. |
 
 **Reserved field sketch (for future schema_version):**
 

@@ -649,13 +649,34 @@ export function CollectionKnowledgeBand({
     if (!pack) return null
     const facet = pack.facets[id]
     if (id === 'brand') {
+      /** Pack `brand` stays reserved for distillates; catalog is capability-local via Brandion. */
+      const guidelines = brandion?.guidelines ?? []
       return (
         <>
-          <EmptyState>{t('projects.detail.knowledgeBrandReserved')}</EmptyState>
+          {guidelines.length === 0 ? (
+            <EmptyState>{t('projects.detail.knowledgeBrandBridgeEmpty')}</EmptyState>
+          ) : (
+            <ul className="plexon-project-bindings">
+              {guidelines.slice(0, 8).map((g) => (
+                <li key={g.id} className="plexon-project-binding">
+                  <div className="plexon-project-binding__main">
+                    <Text role="title" as="h4">
+                      {g.name}
+                    </Text>
+                    <Text role="meta">
+                      {[g.status, g.version ? `v${g.version}` : null, `${g.colorCount} color`]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </Text>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
           <ProvenanceLine
             productId="brandion"
             updatedAt={facet.updatedAt}
-            note="reserved"
+            note={guidelines.length > 0 ? 'catalog' : 'bridge'}
             sharedLabel={t('projects.detail.knowledgeSharedBadge')}
           />
         </>
@@ -773,8 +794,18 @@ export function CollectionKnowledgeBand({
             {pack
               ? KNOWLEDGE_FACET_IDS.map((id) => {
                   const facet = pack.facets[id]
-                  const empty = id !== 'brand' && isFacetContentEmpty(id, facet.data)
+                  const brandGuidelines = brandion?.guidelines ?? []
+                  const empty =
+                    id === 'brand'
+                      ? brandGuidelines.length === 0
+                      : isFacetContentEmpty(id, facet.data)
                   const active = openNav === id
+                  const brandChip =
+                    id === 'brand'
+                      ? brandGuidelines.length > 0
+                        ? String(brandGuidelines.length)
+                        : '—'
+                      : null
                   return (
                     <article
                       key={id}
@@ -787,7 +818,11 @@ export function CollectionKnowledgeBand({
                         <div>
                           <Text role="meta" as="p" className="plexon-collection-card-kicker">
                             {t('projects.detail.knowledgeSharedBadge')}
-                            {id === 'brand' ? ' · reserved' : ''}
+                            {id === 'brand'
+                              ? brandGuidelines.length > 0
+                                ? ' · brandion'
+                                : ' · bridge'
+                              : ''}
                           </Text>
                           <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
                             {t(facetLabelKey(id))}
@@ -797,7 +832,7 @@ export function CollectionKnowledgeBand({
                           </Text>
                         </div>
                         <Chip static size="sm">
-                          {facetPreview(id, facet.data) || (empty ? '—' : '·')}
+                          {brandChip ?? (facetPreview(id, facet.data) || (empty ? '—' : '·'))}
                         </Chip>
                       </header>
 
@@ -818,6 +853,11 @@ export function CollectionKnowledgeBand({
                               {t('projects.detail.knowledgeEdit')}
                             </Button>
                           </>
+                        ) : null}
+                        {id === 'brand' ? (
+                          <Button variant="ghost" size="md" onClick={() => setOpenNav('brandion')}>
+                            {t('projects.detail.knowledgeOpenBrandionCatalog')}
+                          </Button>
                         ) : null}
                         {id === 'research_brief' && audionHref ? (
                           <Button
