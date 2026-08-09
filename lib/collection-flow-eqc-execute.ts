@@ -352,6 +352,8 @@ export async function executeEqcCollectionFlowRun(input: {
           status: domainResult.scan.status,
           overallScore: domainResult.scan.overallScore,
           pageCount: domainResult.scan.pageCount ?? null,
+          scanId: domainResult.scan.id,
+          url: domainResult.scan.url || scanUrl,
           issues: issuesRes.ok ? issuesRes.signals : null,
           issueItems: issuesRes.ok
             ? issuesRes.items.map((o) => ({

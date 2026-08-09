@@ -443,6 +443,8 @@ export function buildDomainCatalogBundle(input: {
   issueCount?: number | null;
   issues?: IssueGateSignals | null;
   issueItems?: CatalogIssueItem[] | null;
+  scanId?: string | null;
+  url?: string | null;
 }): Record<string, unknown> {
   const issues = input.issues ?? {
     criticalCount: 0,
@@ -459,6 +461,8 @@ export function buildDomainCatalogBundle(input: {
     status: input.status,
     overallScore: input.overallScore,
     pageCount: input.pageCount ?? null,
+    scanId: input.scanId ?? null,
+    url: input.url ?? null,
     issueCount: issues.issueCount,
     issues: {
       criticalCount: issues.criticalCount,

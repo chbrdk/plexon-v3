@@ -640,6 +640,8 @@ export async function executeCollectionFlowRun(input: {
             status: quality.status,
             overallScore: quality.overallScore,
             pageCount: quality.pageCount ?? null,
+            scanId: quality.domainScanId ?? quality.id,
+            url: quality.url,
             issues: issueSignals,
             issueItems,
           }),

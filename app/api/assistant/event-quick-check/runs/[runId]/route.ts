@@ -18,12 +18,44 @@ import {
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
   EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY,
   EVENT_QUICK_CHECK_CHECKPOINT_KEY,
+  EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY,
 } from '@/lib/paths/event-quick-check-page';
-import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
+import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
 import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { canReopenEventQuickCheckGeo } from '@/lib/assistant/event-quick-check/resolve-geo-questions-reopen-draft';
-import { hydrateEventQuickCheckReportDomainPages } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
+import {
+  hydrateEventQuickCheckReportDomainPages,
+  resolveEqcDomainScanIdFromStored,
+} from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
+import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
+import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
+
+function seedDomainFromCheckpoint(
+  report: EventQuickCheckReportModel | null,
+  checkpoint: EventQuickCheckResumeCheckpoint | undefined
+): EventQuickCheckReportModel | null {
+  if (!report || report.domain || !checkpoint?.domainScan) return report;
+  const scan = checkpoint.domainScan;
+  return {
+    ...report,
+    domain: {
+      scanId: scan.id,
+      domain: scan.domain,
+      url: scan.url,
+      status: scan.status,
+      score: scan.score,
+      totalPages: scan.totalPages,
+      stats: scan.stats,
+      topIssues: scan.topIssues,
+      checkionHref: pathCheckionDomainScan({ url: scan.url, scanId: scan.id }),
+    },
+    appendix: {
+      ...report.appendix,
+      scanId: report.appendix.scanId || scan.id,
+    },
+  };
+}
 
 export async function GET(
   request: Request,
@@ -39,7 +71,7 @@ export async function GET(
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 
-  const stored = run.result ?? {};
+  const stored = (run.result ?? {}) as Record<string, unknown>;
   const awaitingGeoQuestions = Boolean(stored[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]);
   const checkpoint = stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as
     | EventQuickCheckResumeCheckpoint
@@ -49,6 +81,27 @@ export async function GET(
       ? await resolveEventQuickCheckDeepScanStatus(stored)
       : { deepScanStarted: false as const };
 
+  const seeded = seedDomainFromCheckpoint(reportFromWorkflowRun(run), checkpoint);
+  const fallbackScanId = resolveEqcDomainScanIdFromStored(stored);
+  const report = await hydrateEventQuickCheckReportDomainPages(seeded, fallbackScanId);
+
+  const before = seeded?.domain;
+  const after = report?.domain;
+  const improved =
+    Boolean(report) &&
+    Boolean(after) &&
+    (before?.totalPages !== after?.totalPages ||
+      before?.stats?.errors !== after?.stats?.errors ||
+      before?.scanId !== after?.scanId);
+  if (improved && report) {
+    await updateAssistantWorkflowRun(run.id, {
+      result: {
+        ...stored,
+        [EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY]: report,
+      },
+    });
+  }
+
   return Response.json({
     workflowRunId: run.id,
     status: run.status,
@@ -56,7 +109,7 @@ export async function GET(
     url: stored.url,
     projectName: stored.projectName,
     platformProjectId: stored.platformProjectId,
-    report: await hydrateEventQuickCheckReportDomainPages(reportFromWorkflowRun(run)),
+    report,
     error: typeof stored.error === 'string' ? stored.error : undefined,
     awaitingCompanyBrief: Boolean(stored[EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY]),
     companyBrief: stored[EVENT_QUICK_CHECK_COMPANY_BRIEF_KEY] ?? undefined,

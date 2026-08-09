@@ -99,15 +99,39 @@ function domainScanFromContext(
       : typeof lastRun.overallScore === 'number'
         ? lastRun.overallScore
         : 0;
+  const issues =
+    d?.issues && typeof d.issues === 'object' ? (d.issues as Record<string, unknown>) : null;
+  const items = Array.isArray(issues?.items) ? issues.items : [];
+  const errors = Number(issues?.criticalCount ?? 0) + Number(issues?.seriousCount ?? 0);
+  const warnings = 0;
+  const notices = 0;
+  const issueCount = Number(issues?.issueCount ?? items.length ?? 0);
+  const topIssues = items
+    .map((row) => {
+      if (!row || typeof row !== 'object') return null;
+      const o = row as Record<string, unknown>;
+      const title = typeof o.title === 'string' ? o.title : typeof o.ruleId === 'string' ? o.ruleId : null;
+      if (!title) return null;
+      return { title, count: 1 };
+    })
+    .filter((x): x is { title: string; count: number } => Boolean(x))
+    .slice(0, 10);
+  const scanId =
+    (typeof d?.scanId === 'string' && d.scanId) || lastRun.domainScanId || 'unknown';
   return {
-    id: lastRun.domainScanId || 'unknown',
+    id: scanId,
     domain,
     url,
     status: typeof d?.status === 'string' ? d.status : 'completed',
     score,
     totalPages: typeof d?.pageCount === 'number' ? d.pageCount : 0,
-    stats: { errors: 0, warnings: 0, notices: 0, total: 0 },
-    topIssues: [],
+    stats: {
+      errors,
+      warnings,
+      notices,
+      total: issueCount || errors + warnings + notices,
+    },
+    topIssues,
   };
 }
 
