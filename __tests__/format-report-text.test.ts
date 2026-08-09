@@ -15,7 +15,10 @@ describe('format-report-text', () => {
 
   it('humanizes trait keys in German', () => {
     expect(humanizeTraitKey('detail_oriented')).toBe('Detail-orientiert');
+    expect(humanizeTraitKey('DetailOriented')).toBe('Detail-orientiert');
     expect(humanizeTraitKey('pragmatic')).toBe('Pragmatisch');
+    expect(humanizeTraitKey('Skeptical')).toBe('Skeptisch');
+    expect(humanizeTraitKey('TimePressed')).toBe('Zeitgedrückt');
   });
 
   it('extracts labels from object arrays', () => {

@@ -41,12 +41,17 @@ export type WorkflowInsightNarrative = {
 };
 
 export type CrossSignal = {
-  id: string;
-  category: string;
-  severity: UiTone;
-  title: string;
-  fact: string;
-};
+  id: string
+  category: string
+  severity: UiTone
+  title: string
+  fact: string
+  /**
+   * `context` = LLM input only (never map to findings).
+   * Default / omitted = eligible for fallback findings.
+   */
+  role?: 'context' | 'insight'
+}
 
 export type CrossBenchmarks = {
   pageSpeed?: PageSpeedPreview;

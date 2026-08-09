@@ -439,17 +439,95 @@ export function buildLaunchReadinessCrossSignals(launch: LaunchReadinessResult):
 }
 
 export function buildEventQuickCheckCrossSignals(quick: EventQuickCheckResult): CrossSignal[] {
-  const signals: CrossSignal[] = [];
+  const signals: CrossSignal[] = []
 
   if (quick.domainScan) {
-    signals.push(...buildDomainScanCrossSignals(quick.domainScan).slice(0, 3));
+    signals.push(...buildDomainScanCrossSignals(quick.domainScan).slice(0, 3))
   }
 
   if (quick.geoJob) {
-    signals.push(...buildGeoCrossSignals(quick.geoJob).slice(0, 4));
+    signals.push(...buildGeoCrossSignals(quick.geoJob).slice(0, 5))
+
+    const eeat = quick.geoJob.eeatScores
+    if (eeat) {
+      const dims = (
+        [
+          ['Trust', eeat.trust?.score],
+          ['Experience', eeat.experience?.score],
+          ['Expertise', eeat.expertise?.score],
+          ['Authoritativeness', eeat.authoritativeness?.score],
+        ] as const
+      ).filter((d): d is [string, number] => typeof d[1] === 'number' && !Number.isNaN(d[1]))
+      if (dims.length > 0) {
+        const sorted = [...dims].sort((a, b) => a[1] - b[1])
+        const weak = sorted[0]!
+        const strong = sorted[sorted.length - 1]!
+        signals.push({
+          id: 'quick-eeat-spread',
+          category: 'E-E-A-T',
+          severity: weak[1] < 50 ? 'error' : weak[1] < 70 ? 'warning' : 'info',
+          title: 'E-E-A-T-Schwachstelle',
+          fact: `Schwächste Dimension ${weak[0]} (${weak[1]}/100), stärkste ${strong[0]} (${strong[1]}/100).`,
+        })
+      }
+    }
+
+    const missing = quick.geoJob.missingGeoElements?.filter(Boolean) ?? []
+    if (missing.length > 0) {
+      signals.push({
+        id: 'quick-geo-gaps',
+        category: 'GEO',
+        severity: 'warning',
+        title: 'Fehlende GEO-Elemente',
+        fact: `On-Page-Lücken für generative Antworten: ${missing.slice(0, 5).join(', ')}.`,
+      })
+    }
+
+    const withSov = (quick.geoJob.competitors ?? [])
+      .map((c) => ({
+        name: c.name,
+        sov:
+          typeof c.shareOfVoice === 'number' && !Number.isNaN(c.shareOfVoice)
+            ? c.shareOfVoice <= 1
+              ? Math.round(c.shareOfVoice * 100)
+              : Math.round(c.shareOfVoice)
+            : null,
+      }))
+      .filter((c) => c.sov != null) as Array<{ name: string; sov: number }>
+    if (withSov.length >= 2) {
+      const ranked = [...withSov].sort((a, b) => b.sov - a.sov)
+      const leader = ranked[0]!
+      const ownGuess =
+        ranked.find((c) => /du|own|self/i.test(c.name)) ??
+        ranked.find((c) =>
+          quick.geoJob?.url
+            ? c.name.replace(/^www\./, '').includes(
+                quick.geoJob.url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] ??
+                  '',
+              )
+            : false,
+        )
+      if (ownGuess && leader.name !== ownGuess.name) {
+        signals.push({
+          id: 'quick-sov-gap',
+          category: 'Wettbewerb',
+          severity: ownGuess.sov + 15 < leader.sov ? 'error' : 'warning',
+          title: 'Share-of-Voice-Abstand',
+          fact: `${ownGuess.name} bei ${ownGuess.sov}% SoV vs. ${leader.name} bei ${leader.sov}% — Zitierstärke im Modell-Lauf.`,
+        })
+      } else if (!ownGuess) {
+        signals.push({
+          id: 'quick-sov-leader',
+          category: 'Wettbewerb',
+          severity: 'info',
+          title: 'Share-of-Voice-Leader',
+          fact: `${leader.name} führt mit ${leader.sov}% Share of Voice unter den gemessenen Domains.`,
+        })
+      }
+    }
   }
 
-  const persona = quick.personaPreview?.persona;
+  const persona = quick.personaPreview?.persona
   if (persona) {
     signals.push({
       id: 'quick-persona',
@@ -457,16 +535,35 @@ export function buildEventQuickCheckCrossSignals(quick: EventQuickCheckResult): 
       severity: 'success',
       title: 'AUDION Persona',
       fact: `${persona.name} (${persona.segment}) — Confidence ${Math.round(persona.confidence * 100)}%.`,
-    });
-    const topTraits = persona.profile?.traits?.slice(0, 3) ?? [];
+      role: 'context',
+    })
+    const topTraits = persona.profile?.traits?.slice(0, 3) ?? []
     if (topTraits.length > 0) {
       signals.push({
         id: 'quick-persona-traits',
         category: 'Persona',
         severity: 'info',
         title: 'Top-Traits',
-        fact: topTraits.map((t) => `${t.name} ${Math.round(t.score * 100)}%`).join(', '),
-      });
+        fact: topTraits.map((t) => `${t.displayName || t.name} ${Math.round(t.score * 100)}%`).join(', '),
+        role: 'context',
+      })
+    }
+    const goals = persona.profile?.goals?.slice(0, 3) ?? []
+    const pains = persona.profile?.painPoints?.slice(0, 3) ?? []
+    if (goals.length || pains.length) {
+      signals.push({
+        id: 'quick-persona-needs',
+        category: 'Persona',
+        severity: 'info',
+        title: 'Persona-Bedarf',
+        fact: [
+          goals.length ? `Ziele: ${goals.join('; ')}` : null,
+          pains.length ? `Schmerzpunkte: ${pains.join('; ')}` : null,
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        role: 'context',
+      })
     }
   }
 
@@ -477,21 +574,22 @@ export function buildEventQuickCheckCrossSignals(quick: EventQuickCheckResult): 
       severity: 'info',
       title: 'GEO-Fragen',
       fact: `${quick.geoQuestions.length} persona-bezogene Suchanfragen: „${quick.geoQuestions[0]?.slice(0, 80) ?? ''}"`,
-    });
+      role: 'context',
+    })
   }
 
   if (quick.domainScan && quick.geoJob?.overallScore != null) {
-    const gap = quick.geoJob.overallScore - quick.domainScan.score;
+    const gap = quick.geoJob.overallScore - quick.domainScan.score
     signals.push({
       id: 'quick-domain-geo',
       category: 'Quervergleich',
       severity: Math.abs(gap) <= 15 ? 'info' : 'warning',
       title: 'Domain-Score vs. GEO',
       fact: `Domain ${quick.domainScan.score}/100 vs. GEO ${quick.geoJob.overallScore}/100 (Delta ${gap >= 0 ? '+' : ''}${gap}).`,
-    });
+    })
   }
 
-  return signals;
+  return signals
 }
 
 export function buildWorkflowCrossSignals(

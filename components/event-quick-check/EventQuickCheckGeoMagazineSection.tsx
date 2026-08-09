@@ -76,13 +76,13 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
       ) : null}
 
       {(score != null || fitness != null || queryCount > 0) && (
-        <section className="plexon-eqc-geo-snapshot" aria-labelledby="eqc-geo-snapshot-heading">
+        <section
+          className="plexon-eqc-geo-snapshot"
+          aria-label={EQC_REPORT_COPY.sectionGeoCheck}
+        >
           <header className="plexon-eqc-geo-voice__head">
             <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
               {EQC_REPORT_COPY.sectionGeoCheck}
-            </Text>
-            <Text role="display" as="h3" id="eqc-geo-snapshot-heading">
-              {ownHost || EQC_REPORT_COPY.sectionGeo}
             </Text>
             <p className="plexon-eqc-geo-snapshot__lede">
               {score != null

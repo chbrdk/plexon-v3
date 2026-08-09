@@ -1,15 +1,24 @@
-import { describe, expect, it } from 'vitest';
-import { buildWorkflowFollowUps } from '@/lib/assistant/insights/follow-up-suggestions';
+import { describe, expect, it } from 'vitest'
+import { buildWorkflowFollowUps } from '@/lib/assistant/insights/follow-up-suggestions'
 import {
   buildDomainScanCrossSignals,
+  buildEventQuickCheckCrossSignals,
   buildGeoCrossSignals,
   buildPlaybookCrossSignals,
   buildReadabilityCrossSignals,
   buildSslCrossSignals,
-} from '@/lib/assistant/insights/cross-signals';
-import { appendInsightBlocksToLayout } from '@/lib/assistant/insights/append-insight-blocks';
-import { narrativeFromCrossSignals } from '@/lib/assistant/insights/generate-workflow-insights';
-import { UI_LAYOUT_VERSION } from '@/lib/assistant/ui-blocks/types';
+} from '@/lib/assistant/insights/cross-signals'
+import { appendInsightBlocksToLayout } from '@/lib/assistant/insights/append-insight-blocks'
+import {
+  narrativeFromCrossSignals,
+  narrativeFromEqcCrossSignals,
+} from '@/lib/assistant/insights/generate-workflow-insights'
+import {
+  filterEqcMetaFindings,
+  isEqcMetaFindingTitle,
+  isEqcMetaSignal,
+} from '@/lib/assistant/insights/eqc-insight-quality'
+import { UI_LAYOUT_VERSION } from '@/lib/assistant/ui-blocks/types'
 
 describe('workflow cross-signals', () => {
   it('builds GEO competitor and benchmark comparisons', () => {
@@ -136,7 +145,7 @@ describe('appendInsightBlocksToLayout', () => {
           props: { title: 'Scan', items: [{ label: 'Score', value: 80 }] },
         },
       ],
-    };
+    }
     const narrative = narrativeFromCrossSignals(
       [
         {
@@ -147,11 +156,96 @@ describe('appendInsightBlocksToLayout', () => {
           fact: 'Fact line',
         },
       ],
-      'GEO'
-    );
-    const out = appendInsightBlocksToLayout(dataLayout, narrative);
-    expect(out.blocks.length).toBeGreaterThan(dataLayout.blocks.length);
-    expect(out.blocks.some((b) => b.type === 'finding_list')).toBe(true);
-    expect(out.blocks.some((b) => b.type === 'recommendation_list' || b.type === 'alert')).toBe(true);
-  });
-});
+      'GEO',
+    )
+    const out = appendInsightBlocksToLayout(dataLayout, narrative)
+    expect(out.blocks.length).toBeGreaterThan(dataLayout.blocks.length)
+    expect(out.blocks.some((b) => b.type === 'finding_list')).toBe(true)
+    expect(out.blocks.some((b) => b.type === 'recommendation_list' || b.type === 'alert')).toBe(
+      true,
+    )
+  })
+})
+
+describe('EQC insight quality', () => {
+  it('marks persona/traits/questions as context and keeps competitive signals as findings', () => {
+    const signals = buildEventQuickCheckCrossSignals({
+      ok: true,
+      url: 'https://www.muenchener-verein.de/',
+      playbookId: 'event_quick_check',
+      playbookLabel: 'Quick Check',
+      projectName: 'Demo',
+      outcomes: [],
+      steps: [],
+      domainScan: {
+        id: 'd1',
+        domain: 'muenchener-verein.de',
+        url: 'https://www.muenchener-verein.de/',
+        status: 'complete',
+        totalPages: 20,
+        score: 70,
+        stats: { errors: 1, warnings: 2, notices: 0, total: 3 },
+        topIssues: [{ title: 'Alt text', count: 4 }],
+      },
+      geoJob: {
+        jobId: 'g1',
+        url: 'https://www.muenchener-verein.de/',
+        status: 'complete',
+        overallScore: 62,
+        geoFitnessScore: 55,
+        eeatScores: {
+          trust: { score: 40 },
+          experience: { score: 70 },
+          expertise: { score: 65 },
+          authoritativeness: { score: 60 },
+        },
+        missingGeoElements: ['FAQs', 'Author'],
+        competitors: [
+          { name: 'muenchener-verein.de', score: 62, shareOfVoice: 0.46 },
+          { name: 'allianz.de', score: 80, shareOfVoice: 0.62 },
+        ],
+      },
+      personaPreview: {
+        projectId: 'p1',
+        projectName: 'Demo',
+        targetGroupId: 'tg1',
+        targetGroupName: 'TG',
+        persona: {
+          id: 'per1',
+          name: 'Svenja',
+          segment: 'Vergleicherin',
+          confidence: 0.75,
+          headline: 'Kurz',
+          profile: {
+            traits: [{ name: 'pragmatic', displayName: 'Pragmatisch', score: 0.82 }],
+            goals: ['Zahnschutz planen'],
+            painPoints: ['Unklare Tarife'],
+          },
+        },
+      },
+      geoQuestions: ['Welche Zahnzusatzversicherung lohnt sich?'],
+    })
+
+    expect(signals.some((s) => s.id === 'quick-persona' && isEqcMetaSignal(s))).toBe(true)
+    expect(signals.some((s) => s.id === 'quick-persona-traits' && isEqcMetaSignal(s))).toBe(true)
+    expect(signals.some((s) => s.id === 'quick-geo-questions' && isEqcMetaSignal(s))).toBe(true)
+    expect(signals.some((s) => s.id === 'quick-eeat-spread')).toBe(true)
+    expect(signals.some((s) => s.id === 'quick-domain-geo')).toBe(true)
+
+    const narrative = narrativeFromEqcCrossSignals(signals, 'Quick Check')
+    expect(narrative.findings.every((f) => !isEqcMetaFindingTitle(f.title))).toBe(true)
+    expect(narrative.findings.some((f) => f.title === 'AUDION Persona')).toBe(false)
+    expect(narrative.findings.some((f) => f.title === 'Top-Traits')).toBe(false)
+    expect(narrative.findings.length).toBeGreaterThan(0)
+  })
+
+  it('filters legacy meta finding titles', () => {
+    expect(
+      filterEqcMetaFindings([
+        { title: 'Top-Traits', description: 'x' },
+        { title: 'Share-of-Voice-Abstand', description: 'y' },
+        { title: 'AUDION Persona Svenja', description: 'z' },
+      ]).map((f) => f.title),
+    ).toEqual(['Share-of-Voice-Abstand'])
+  })
+})

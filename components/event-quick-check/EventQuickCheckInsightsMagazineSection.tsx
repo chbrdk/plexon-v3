@@ -8,6 +8,7 @@ import type {
   EventQuickCheckReportRecommendation,
 } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
+import { filterEqcMetaFindings } from '@/lib/assistant/insights/eqc-insight-quality'
 import type { UiTone } from '@/lib/assistant/ui-blocks/types'
 
 type Props = {
@@ -160,10 +161,11 @@ function MovesGallery({
 }
 
 function FindingOps({ findings }: { findings: EventQuickCheckReportInsightFinding[] }) {
-  if (!findings.length) return null
+  const visible = filterEqcMetaFindings(findings)
+  if (!visible.length) return null
   return (
     <ol className="plexon-eqc-insights__ops" aria-label={EQC_REPORT_COPY.sectionFindings}>
-      {findings.map((f, i) => {
+      {visible.map((f, i) => {
         const tone = toneFromUi(f.severity)
         return (
           <li key={`${f.title}-${i}`}>
@@ -199,9 +201,11 @@ export function EventQuickCheckInsightsMagazineSection({ insights, domainLabel }
         ? insights.assessment
         : undefined
   const tone = toneFromUi(insights.fazitTone)
-  const findingCount = insights.findings.length
+  const findingCount = filterEqcMetaFindings(insights.findings).length
   const moveCount = insights.recommendations.length
-  const criticalCount = insights.findings.filter((f) => f.severity === 'error').length
+  const criticalCount = filterEqcMetaFindings(insights.findings).filter(
+    (f) => f.severity === 'error',
+  ).length
 
   return (
     <div className="plexon-eqc-insights-spread" data-section="eqc-insights-spread">

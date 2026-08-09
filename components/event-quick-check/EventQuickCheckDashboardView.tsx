@@ -430,14 +430,21 @@ export function EventQuickCheckDashboardView({
                   </div>
                 ) : null}
                 {persona.interests.length > 0 ? (
-                  <RankedList
-                    hint={EQC_REPORT_COPY.sectionInterests}
-                    className="plexon-eqc-mag-persona-list plexon-eqc-mag-persona-list--interests"
+                  <div
+                    className="plexon-eqc-mag-interests"
+                    aria-label={EQC_REPORT_COPY.sectionInterests}
                   >
-                    {persona.interests.map((interest, i) => (
-                      <RankedRow key={i} index={i + 1} label={interest} />
-                    ))}
-                  </RankedList>
+                    <Text role="meta" as="p" className="plexon-eqc-mag-interests__eyebrow">
+                      {EQC_REPORT_COPY.sectionInterests}
+                    </Text>
+                    <ul className="plexon-eqc-mag-interests__flow">
+                      {persona.interests.map((interest, i) => (
+                        <li key={i} className="plexon-eqc-mag-interests__item">
+                          {interest}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
               </div>
             ) : null}

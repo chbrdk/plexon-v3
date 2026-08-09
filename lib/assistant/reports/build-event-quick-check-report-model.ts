@@ -5,8 +5,9 @@ import {
 } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import type { PersonaPreviewItem } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
 import { EVENT_QUICK_CHECK_ECHON_RESEARCH_ENABLED } from '@/lib/paths/assistant-workflows';
-import type { WorkflowInsightNarrative } from '@/lib/assistant/insights/types';
-import type { UiTone } from '@/lib/assistant/ui-blocks/types';
+import type { WorkflowInsightNarrative } from '@/lib/assistant/insights/types'
+import { filterEqcMetaFindings } from '@/lib/assistant/insights/eqc-insight-quality'
+import type { UiTone } from '@/lib/assistant/ui-blocks/types'
 import { truncateReportText, asLabelList, humanizeTraitKey } from '@/lib/assistant/reports/format-report-text';
 import {
   EVENT_QUICK_CHECK_REPORT_TEMPLATE_ID,
@@ -385,11 +386,12 @@ export function buildEventQuickCheckReportModel(
   }
 
   if (narrative && (narrative.findings.length > 0 || narrative.recommendations.length > 0 || narrative.fazit)) {
+    const findings = filterEqcMetaFindings(narrative.findings)
     model.insights = {
       assessment: narrative.assessment,
       fazit: narrative.fazit,
       fazitTone: narrative.fazitTone,
-      findings: narrative.findings.map((f) => ({
+      findings: findings.map((f) => ({
         title: f.title,
         description: f.description,
         severity: f.severity ?? 'info',
@@ -400,7 +402,7 @@ export function buildEventQuickCheckReportModel(
         priority: r.priority,
         category: r.category,
       })),
-    };
+    }
   }
 
   return model;
