@@ -3,8 +3,9 @@ import { formatGeoModelLabel, sortGeoModelIds } from '@/lib/integrations/format-
 
 describe('format-geo-model-label', () => {
   it('formats known model prefixes', () => {
-    expect(formatGeoModelLabel('gpt-5.4-nano')).toBe('GPT 5.4 nano');
-    expect(formatGeoModelLabel('claude-sonnet-4')).toContain('Claude');
+    expect(formatGeoModelLabel('gpt-5.6-luna')).toBe('GPT 5.6 luna');
+    expect(formatGeoModelLabel('claude-sonnet-5')).toContain('Claude');
+    expect(formatGeoModelLabel('gemini-3.6-flash')).toContain('Gemini');
   });
 
   it('sorts model ids alphabetically', () => {
