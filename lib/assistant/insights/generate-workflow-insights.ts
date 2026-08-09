@@ -99,14 +99,23 @@ export function narrativeFromCrossSignals(
 export function narrativeFromEqcCrossSignals(
   signals: CrossSignal[],
   workflowLabel: string,
+  geoRecommendations?: Array<{ title: string; description: string; priority?: number }>,
 ): WorkflowInsightNarrative {
   const base = narrativeFromCrossSignals(signals, workflowLabel)
+  const fromGeo =
+    geoRecommendations?.slice(0, 4).map((r, i) => ({
+      title: r.title,
+      description: r.description,
+      priority: r.priority ?? i + 1,
+      category: 'GEO' as const,
+    })) ?? []
   return {
     ...base,
     findings: filterEqcMetaFindings(base.findings),
     assessment: insightEligibleSignals(signals).length
       ? base.assessment
       : `Für ${workflowLabel} liegen Persona-/GEO-Kontextdaten vor, aber noch zu wenige vergleichende Messsignale für eine belastbare Einschätzung.`,
+    recommendations: fromGeo.length > 0 ? fromGeo : base.recommendations,
   }
 }
 
@@ -146,6 +155,14 @@ export function buildEqcInsightSnapshot(quick: EqcResult): string {
     if (quick.geoJob.missingGeoElements?.length) {
       lines.push(`GEO-Lücken: ${quick.geoJob.missingGeoElements.slice(0, 6).join(', ')}`)
     }
+    if (quick.geoJob.recommendations?.length) {
+      lines.push(
+        `GEO-Moves: ${quick.geoJob.recommendations
+          .slice(0, 5)
+          .map((r) => `${r.title} — ${r.description}`)
+          .join(' | ')}`,
+      )
+    }
   }
   const persona = quick.personaPreview?.persona
   if (persona) {
@@ -180,7 +197,11 @@ export async function generateWorkflowInsights(options: {
 }): Promise<WorkflowInsightNarrative> {
   const isEqc = isEqcSource(options.input.source)
   const fallback = isEqc
-    ? narrativeFromEqcCrossSignals(options.input.crossSignals, options.workflowLabel)
+    ? narrativeFromEqcCrossSignals(
+        options.input.crossSignals,
+        options.workflowLabel,
+        options.input.source.quick.geoJob?.recommendations,
+      )
     : narrativeFromCrossSignals(options.input.crossSignals, options.workflowLabel)
 
   const dataText = uiLayoutToPlainText(options.input.dataLayout).slice(0, 10_000)

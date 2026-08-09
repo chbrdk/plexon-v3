@@ -63,6 +63,10 @@ import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
 import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
+import {
+  rewriteEqcGeoRecommendations,
+  withRewrittenGeoRecommendations,
+} from '@/lib/assistant/event-quick-check/rewrite-eqc-geo-recommendations';
 import { updateAssistantConversation } from '@/lib/db/assistant-conversations';
 
 export { domainFromEventQuickCheckUrl, normalizeEventQuickCheckUrl };
@@ -619,7 +623,7 @@ export async function executeEventQuickCheckRun(
     };
   }
 
-  const quickForReport = {
+  const quickBase = {
     ...quick,
     personaPreview: quick.personaPreview ?? checkpoint?.personaPreview,
     geoQuestionsByPersona:
@@ -627,6 +631,20 @@ export async function executeEventQuickCheckRun(
       (stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] as
         | PersonaGeoQuestionGroup[]
         | undefined),
+  };
+  const rewrittenGeoRecs =
+    quickBase.geoJob != null
+      ? await rewriteEqcGeoRecommendations({
+          apiKey: process.env.ANTHROPIC_API_KEY,
+          preview: quickBase.geoJob,
+        })
+      : [];
+  const quickForReport = {
+    ...quickBase,
+    geoJob:
+      quickBase.geoJob != null
+        ? withRewrittenGeoRecommendations(quickBase.geoJob, rewrittenGeoRecs)
+        : quickBase.geoJob,
   };
   const dataLayout = resolveEventQuickCheckReportLayout(quickForReport);
   const enriched = await enrichWorkflowLayout(
