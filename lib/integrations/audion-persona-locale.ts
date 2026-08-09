@@ -11,17 +11,19 @@ export function normalizeAudionPersonaOutputLocale(
 }
 
 /**
- * AUDION `POST …/personas/generate` stores English strings in `profile` and mirrors German in
- * `profile_de` when `output_locale` is omitted. Sending `output_locale: "de"` breaks that mirror.
+ * audion-v3 native generate uses `output_locale` for LLM language (no `profile_de` mirror).
+ * Pass the UI locale so magazine personas match EQC copy language.
  */
 export function buildAudionPersonaGenerateRequestBody(input: {
   segment: string;
   description: string;
   filterMode?: string;
+  outputLocale?: AudionPersonaOutputLocale;
 }): Record<string, string> {
   return {
     segment: input.segment,
     description: input.description,
     filter_mode: input.filterMode ?? 'auto',
+    output_locale: input.outputLocale ?? PLEXON_DEFAULT_AUDION_PERSONA_OUTPUT_LOCALE,
   };
 }

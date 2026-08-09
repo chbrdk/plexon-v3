@@ -119,6 +119,7 @@ async function generatePersonaForTargetGroup(input: {
       ...buildAudionPersonaGenerateRequestBody({
         segment: input.segment.segment.slice(0, 120),
         description: input.segment.personaDescription.slice(0, 2000),
+        outputLocale: input.outputLocale,
       }),
       count: 1,
     }),

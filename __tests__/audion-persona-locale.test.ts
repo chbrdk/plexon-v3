@@ -12,7 +12,7 @@ describe('audion-persona-locale', () => {
     expect(normalizeAudionPersonaOutputLocale('en')).toBe('en');
   });
 
-  it('omits output_locale on AUDION generate so profile_de mirror is populated', () => {
+  it('sends output_locale for native audion-v3 generate language', () => {
     const body = buildAudionPersonaGenerateRequestBody({
       segment: 'Handwerk',
       description: 'Zielgruppe für Messe',
@@ -21,7 +21,14 @@ describe('audion-persona-locale', () => {
       segment: 'Handwerk',
       description: 'Zielgruppe für Messe',
       filter_mode: 'auto',
+      output_locale: 'de',
     });
-    expect(body).not.toHaveProperty('output_locale');
+
+    const en = buildAudionPersonaGenerateRequestBody({
+      segment: 'Trade',
+      description: 'Trade buyers',
+      outputLocale: 'en',
+    });
+    expect(en.output_locale).toBe('en');
   });
 });

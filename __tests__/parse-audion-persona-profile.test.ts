@@ -76,6 +76,34 @@ describe('parseAudionPersonaResponse', () => {
     expect(parsed.headline).toBe('Privatkunden');
   });
 
+  it('unwraps rich audion-v3 generate batch fields into profile', () => {
+    const parsed = parseAudionPersonaResponse({
+      stubbed: false,
+      workflowId: 'generatePersonas',
+      personas: [
+        {
+          id: 'persona-rich-1',
+          name: 'Clara',
+          role: 'Entscheiderin',
+          archetype: 'B2B Buyer',
+          headline: 'Skeptische Einkäuferin',
+          bio: 'Clara vergleicht Angebote gründlich und braucht klare Nachweise.',
+          interests: ['Compliance', 'Kostenkontrolle'],
+          goals: [{ label: 'Risiko senken', priority: 1 }, { label: 'Anbieter vergleichen', priority: 2 }],
+          frustrations: [{ label: 'Unklare Preise', evidenceCount: 2 }],
+          traits: { Pragmatic: 0.84, Analytical: 0.78 },
+        },
+      ],
+    });
+    expect(parsed.id).toBe('persona-rich-1');
+    expect(parsed.headline).toBe('Skeptische Einkäuferin');
+    expect(parsed.profile?.bio).toContain('vergleicht Angebote');
+    expect(parsed.profile?.goals).toEqual(['Risiko senken', 'Anbieter vergleichen']);
+    expect(parsed.profile?.painPoints).toEqual(['Unklare Preise']);
+    expect(parsed.profile?.interests).toEqual(['Compliance', 'Kostenkontrolle']);
+    expect(parsed.profile?.traits[0]?.name).toBe('Pragmatic');
+  });
+
   it('prefers German profile_de and headline_de when output locale is de', () => {
     const parsed = parseAudionPersonaResponse(
       {

@@ -17,6 +17,8 @@ export const EQC_REPORT_COPY = {
   sectionPersonaTraits: 'Eigenschaften',
   sectionGoals: 'Ziele',
   sectionPainPoints: 'Schmerzpunkte',
+  sectionInterests: 'Interessen',
+  personaConfidence: 'Konfidenz',
   sectionGeo: 'GEO & Wettbewerb',
   sectionGeoCheck: 'GEO-Wettbewerbsanalyse',
   sectionGeoQuestions: 'GEO-Fragen (Persona-bezogen)',

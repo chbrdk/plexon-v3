@@ -59,7 +59,7 @@ function resolveProfileForLocale(
 }
 
 /**
- * audion-v3 `POST …/personas/generate` returns `{ personas: [{ id, name, role }] }`.
+ * audion-v3 `POST …/personas/generate` returns `{ personas: [{ id, name, role, … }] }`.
  * Older FastAPI / single PersonaResponse stay as-is.
  */
 export function unwrapAudionPersonaGeneratePayload(
@@ -70,13 +70,29 @@ export function unwrapAudionPersonaGeneratePayload(
   const first = asRecord(list[0]);
   if (!first) return json;
   const role = typeof first.role === 'string' ? first.role.trim() : '';
+  const bio = typeof first.bio === 'string' ? first.bio.trim() : undefined;
+  const headline =
+    typeof first.headline === 'string' && first.headline.trim()
+      ? first.headline.trim()
+      : role || (typeof first.name === 'string' ? first.name : undefined);
+  const archetype =
+    typeof first.archetype === 'string' && first.archetype.trim()
+      ? first.archetype.trim()
+      : undefined;
+  const frustrations = first.frustrations ?? first.pain_points ?? first.painPoints;
   return {
     ...json,
     id: first.id ?? json.id,
     name: first.name ?? json.name,
     role: role || undefined,
-    segment: first.segment ?? (role || json.segment),
-    headline: first.headline ?? (role || first.name),
+    segment: first.segment ?? archetype ?? (role || json.segment),
+    headline: headline ?? json.headline,
+    ...(bio ? { bio } : {}),
+    ...(archetype ? { archetype } : {}),
+    ...(first.interests !== undefined ? { interests: first.interests } : {}),
+    ...(first.goals !== undefined ? { goals: first.goals } : {}),
+    ...(first.traits !== undefined ? { traits: first.traits } : {}),
+    ...(frustrations !== undefined ? { pain_points: frustrations, frustrations } : {}),
   };
 }
 
@@ -115,13 +131,17 @@ export function parseAudionPersonaResponse(
   const goals = asLabelList(profile.goals).length
     ? asLabelList(profile.goals)
     : asStringList(profile.goals);
-  const painPoints = asLabelList(profile.pain_points ?? profile.painPoints).length
-    ? asLabelList(profile.pain_points ?? profile.painPoints)
-    : asStringList(profile.pain_points ?? profile.painPoints);
+  const painRaw = profile.pain_points ?? profile.painPoints ?? profile.frustrations;
+  const painPoints = asLabelList(painRaw).length ? asLabelList(painRaw) : asStringList(painRaw);
   const interests = asStringList(profile.interests);
   const bio = typeof profile.bio === 'string' ? profile.bio.trim() : undefined;
 
-  const hasProfile = traits.length > 0 || goals.length > 0 || painPoints.length > 0 || Boolean(bio);
+  const hasProfile =
+    traits.length > 0 ||
+    goals.length > 0 ||
+    painPoints.length > 0 ||
+    interests.length > 0 ||
+    Boolean(bio);
 
   return {
     id,

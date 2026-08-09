@@ -270,8 +270,17 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
           },
         ]}
       />
-      {persona.bio ? <Text role="body">{persona.bio}</Text> : null}
-      <TraitBars traits={persona.traits} />
+      {persona.bio && persona.bio !== persona.headline ? (
+        <Text role="body">{persona.bio}</Text>
+      ) : null}
+      {persona.traits.length > 0 ? (
+        <div className="plexon-eqc-stack-sm">
+          <Text role="meta" as="h4">
+            {EQC_REPORT_COPY.sectionPersonaTraits}
+          </Text>
+          <TraitBars traits={persona.traits} />
+        </div>
+      ) : null}
       {geoQuestions.length > 0 ? (
         <UiRecommendationList
           title={EQC_REPORT_COPY.sectionGeoQuestions}
@@ -304,6 +313,14 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
           />
         ) : null}
       </div>
+      {persona.interests.length > 0 ? (
+        <UiRecommendationList
+          title={EQC_REPORT_COPY.sectionInterests}
+          items={persona.interests.map((interest, i) => ({
+            title: `${i + 1}. ${interest}`,
+          }))}
+        />
+      ) : null}
     </div>
   );
 }

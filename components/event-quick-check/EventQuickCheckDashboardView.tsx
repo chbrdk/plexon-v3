@@ -415,12 +415,22 @@ export function EventQuickCheckDashboardView({
                 </Chip>
               ) : null}
               <Chip static size="sm">
-                {Math.round(persona.confidence <= 1 ? persona.confidence * 100 : persona.confidence)}%
+                {Math.round(persona.confidence <= 1 ? persona.confidence * 100 : persona.confidence)}%{' '}
+                {EQC_REPORT_COPY.personaConfidence}
               </Chip>
             </div>
             {persona.headline ? <Text role="body">{persona.headline}</Text> : null}
-            {persona.bio ? <Text role="meta">{persona.bio}</Text> : null}
-            <TraitBars traits={persona.traits} />
+            {persona.bio && persona.bio !== persona.headline ? (
+              <Text role="meta">{persona.bio}</Text>
+            ) : null}
+            {persona.traits.length > 0 ? (
+              <div className="plexon-eqc-mag-stack">
+                <Text role="meta" as="h4">
+                  {EQC_REPORT_COPY.sectionPersonaTraits}
+                </Text>
+                <TraitBars traits={persona.traits} />
+              </div>
+            ) : null}
             {persona.goals.length > 0 ? (
               <RankedList hint={EQC_REPORT_COPY.sectionGoals}>
                 {persona.goals.map((g, i) => (
@@ -432,6 +442,13 @@ export function EventQuickCheckDashboardView({
               <RankedList hint={EQC_REPORT_COPY.sectionPainPoints}>
                 {persona.painPoints.map((g, i) => (
                   <RankedRow key={i} index={i + 1} label={g} />
+                ))}
+              </RankedList>
+            ) : null}
+            {persona.interests.length > 0 ? (
+              <RankedList hint={EQC_REPORT_COPY.sectionInterests}>
+                {persona.interests.map((interest, i) => (
+                  <RankedRow key={i} index={i + 1} label={interest} />
                 ))}
               </RankedList>
             ) : null}

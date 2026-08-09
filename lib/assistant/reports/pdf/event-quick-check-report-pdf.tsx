@@ -285,10 +285,13 @@ export function buildEventQuickCheckReportPages(report: EventQuickCheckReportMod
               <View style={pdfStyles.cardBox}>
                 <Text style={pdfStyles.subsectionTitle}>{persona.name}</Text>
                 <Text style={pdfStyles.metaText}>
-                  {persona.segment} · {Math.round(persona.confidence * 100)} % Confidence
+                  {persona.segment} · {Math.round(persona.confidence * 100)} %{' '}
+                  {EQC_REPORT_COPY.personaConfidence}
                 </Text>
                 <Text style={pdfStyles.bodyText}>{persona.headline}</Text>
-                {persona.bio ? <Text style={pdfStyles.bodyText}>{persona.bio}</Text> : null}
+                {persona.bio && persona.bio !== persona.headline ? (
+                  <Text style={pdfStyles.bodyText}>{persona.bio}</Text>
+                ) : null}
               </View>
               {persona.traits.length > 0 ? (
                 <>
@@ -309,6 +312,14 @@ export function buildEventQuickCheckReportPages(report: EventQuickCheckReportMod
                   <PdfSectionHeader title={EQC_REPORT_COPY.sectionPainPoints} />
                   {persona.painPoints.map((p, i) => (
                     <TintedListItem key={`p-${personaIndex}-${i}`} text={p} tint="pain" />
+                  ))}
+                </>
+              ) : null}
+              {persona.interests.length > 0 ? (
+                <>
+                  <PdfSectionHeader title={EQC_REPORT_COPY.sectionInterests} />
+                  {persona.interests.map((interest, i) => (
+                    <TintedListItem key={`i-${personaIndex}-${i}`} text={interest} tint="goal" />
                   ))}
                 </>
               ) : null}
