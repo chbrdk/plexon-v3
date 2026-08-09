@@ -1,6 +1,7 @@
 import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import {
   buildWorkflowStreamPayload,
   emitWorkflowStreamEvents,
@@ -16,7 +17,14 @@ export async function GET(
 
   const { runId } = await ctx.params;
   const run = await getAssistantWorkflowRunById(runId);
-  if (!run || run.userId !== user.id) {
+  if (!run) {
+    return apiError('Not found', API_STATUS.NOT_FOUND);
+  }
+  const allowed =
+    run.type === 'event_quick_check'
+      ? await userCanAccessEventQuickCheckRun(user, run)
+      : run.userId === user.id;
+  if (!allowed) {
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 

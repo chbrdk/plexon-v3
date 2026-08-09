@@ -17,6 +17,10 @@ export type EventQuickCheckHistoryItem = {
   hasReport: boolean;
   domainScore?: number;
   platformProjectId?: string;
+  ownerUserId: string;
+  ownerLabel?: string;
+  /** True when the viewer did not start this run. */
+  shared: boolean;
 };
 
 export function reportFromRunResult(
@@ -28,7 +32,12 @@ export function reportFromRunResult(
 }
 
 export function mapEventQuickCheckRunToHistoryItem(
-  run: StoredAssistantWorkflowRun
+  run: StoredAssistantWorkflowRun,
+  options?: {
+    viewerUserId?: string;
+    ownerName?: string | null;
+    ownerEmail?: string | null;
+  }
 ): EventQuickCheckHistoryItem | null {
   const stored = run.result ?? {};
   const url = typeof stored.url === 'string' ? stored.url : undefined;
@@ -41,6 +50,10 @@ export function mapEventQuickCheckRunToHistoryItem(
 
   const report = reportFromRunResult(run.result);
   const domain = report?.meta.domain ?? domainFromEventQuickCheckUrl(url) ?? projectName;
+  const ownerLabel =
+    options?.ownerName?.trim() ||
+    options?.ownerEmail?.trim() ||
+    undefined;
 
   return {
     workflowRunId: run.id,
@@ -56,6 +69,9 @@ export function mapEventQuickCheckRunToHistoryItem(
       typeof stored.platformProjectId === 'string'
         ? stored.platformProjectId
         : report?.meta.platformProjectId,
+    ownerUserId: run.userId,
+    ownerLabel,
+    shared: Boolean(options?.viewerUserId && options.viewerUserId !== run.userId),
   };
 }
 

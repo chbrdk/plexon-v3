@@ -36,6 +36,7 @@ import {
   apiEventQuickCheckRunDeepScan,
   apiEventQuickCheckRunGeoQuestions,
   apiEventQuickCheckRunGeoQuestionsReopen,
+  apiEventQuickCheckRunShare,
   pathEventQuickCheckRun,
 } from '@/lib/paths/event-quick-check-page';
 import {
@@ -83,6 +84,8 @@ export function EventQuickCheckPageClient() {
   const [canRerunGeo, setCanRerunGeo] = useState(false);
   const [geoRerunMode, setGeoRerunMode] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [shareLinkBusy, setShareLinkBusy] = useState(false);
+  const [shareLinkFeedback, setShareLinkFeedback] = useState<string | null>(null);
   const [historyItems, setHistoryItems] = useState<EventQuickCheckHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -547,6 +550,36 @@ export function EventQuickCheckPageClient() {
     setPhase('done');
   }, [workflowRunId, report]);
 
+  const sharePublicLink = useCallback(async () => {
+    if (!workflowRunId) return;
+    setShareLinkBusy(true);
+    setShareLinkFeedback(null);
+    try {
+      const res = await fetch(apiEventQuickCheckRunShare(workflowRunId), {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ?? EQC_PAGE_COPY.shareLinkError);
+      }
+      const absolute =
+        typeof window !== 'undefined'
+          ? new URL(data.url, window.location.origin).toString()
+          : data.url;
+      await navigator.clipboard.writeText(absolute);
+      setShareLinkFeedback(EQC_PAGE_COPY.shareLinkCopied);
+      window.setTimeout(() => setShareLinkFeedback(null), 2500);
+    } catch (e) {
+      setShareLinkFeedback(
+        e instanceof Error ? e.message : EQC_PAGE_COPY.shareLinkError
+      );
+      window.setTimeout(() => setShareLinkFeedback(null), 3500);
+    } finally {
+      setShareLinkBusy(false);
+    }
+  }, [workflowRunId]);
+
   const continueAfterDeepScan = useCallback(async () => {
     if (!workflowRunId) return;
     setConfirmLoading(true);
@@ -734,6 +767,9 @@ export function EventQuickCheckPageClient() {
             onNewCheck={reset}
             onOpenHistory={openHistory}
             onRerunGeo={() => void reopenGeoQuestions()}
+            onShareLink={() => void sharePublicLink()}
+            shareLinkBusy={shareLinkBusy}
+            shareLinkFeedback={shareLinkFeedback}
           />
         </div>
         {historyDialog}

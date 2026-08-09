@@ -6,6 +6,7 @@ import {
   type ExecuteEventQuickCheckRunResult,
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import {
   EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY,
   EVENT_QUICK_CHECK_COMPANY_BRIEF_CONFIRMED_KEY,
@@ -28,7 +29,7 @@ export async function confirmEventQuickCheckCompanyBrief(
   input: ConfirmCompanyBriefInput
 ): Promise<ExecuteEventQuickCheckRunResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
-  if (!run || run.userId !== input.user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
   }
 

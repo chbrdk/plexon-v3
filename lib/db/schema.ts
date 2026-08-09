@@ -428,3 +428,24 @@ export const assistantWorkflowRuns = pgTable(
     conversationIdx: index('assistant_workflow_runs_conversation_id_idx').on(t.conversationId),
   })
 );
+
+/** Public read-only share links for Event Quick Check magazine reports. */
+export const eventQuickCheckShares = pgTable(
+  'event_quick_check_shares',
+  {
+    id: text('id').primaryKey(),
+    runId: text('run_id')
+      .notNull()
+      .references(() => assistantWorkflowRuns.id, { onDelete: 'cascade' }),
+    createdByUserId: text('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    shareTokenHash: text('share_token_hash').notNull(),
+    reportSnapshot: jsonb('report_snapshot').$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    runIdx: index('event_quick_check_shares_run_id_idx').on(t.runId),
+    tokenHashIdx: uniqueIndex('event_quick_check_shares_token_hash_uidx').on(t.shareTokenHash),
+  })
+);

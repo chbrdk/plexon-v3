@@ -58,8 +58,19 @@ import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-
 import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion-project-deep-scan-client';
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
 import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
+import { updateAssistantConversation } from '@/lib/db/assistant-conversations';
 
 export { domainFromEventQuickCheckUrl, normalizeEventQuickCheckUrl };
+
+async function syncEqcConversationPlatformProject(
+  conversationId: string,
+  platformProjectId: string | undefined | null
+): Promise<void> {
+  const id = platformProjectId?.trim();
+  if (!id) return;
+  await updateAssistantConversation(conversationId, { platformProjectId: id });
+}
 
 export type CreateEventQuickCheckRunInput = {
   user: RequestUser;
@@ -221,7 +232,7 @@ export async function executeEventQuickCheckRun(
   input: ExecuteEventQuickCheckRunInput
 ): Promise<ExecuteEventQuickCheckRunResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
-  if (!run || run.userId !== input.user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
   }
   if (run.type !== 'event_quick_check') {
@@ -326,6 +337,8 @@ export async function executeEventQuickCheckRun(
   const platformProjectId =
     typeof stored.platformProjectId === 'string' ? stored.platformProjectId : undefined;
 
+  await syncEqcConversationPlatformProject(run.conversationId, platformProjectId);
+
   const bindingIds = platformProjectId ? await getProjectBindingIds(platformProjectId) : null;
 
   const ctx = buildMinimalEnrichContext({
@@ -388,6 +401,10 @@ export async function executeEventQuickCheckRun(
   );
 
   const steps = quick.steps;
+  await syncEqcConversationPlatformProject(
+    run.conversationId,
+    quick.platformProjectId ?? platformProjectId
+  );
 
   if (quick.awaitingCompanyBriefConfirmation && quick.companyBrief) {
     await updateAssistantWorkflowRun(run.id, {
@@ -587,6 +604,9 @@ export async function executeEventQuickCheckRun(
     (reportBlock?.props.report as EventQuickCheckReportModel | undefined) ??
     buildEventQuickCheckReportModel(quickForReport, enriched.narrative);
 
+  const resolvedPlatformProjectId = quick.platformProjectId ?? platformProjectId;
+  await syncEqcConversationPlatformProject(run.conversationId, resolvedPlatformProjectId);
+
   await updateAssistantWorkflowRun(run.id, {
     status: quick.ok ? 'completed' : 'failed',
     steps,
@@ -594,7 +614,7 @@ export async function executeEventQuickCheckRun(
       ...stored,
       url,
       projectName: quick.companyBrief?.displayName ?? projectName,
-      platformProjectId: quick.platformProjectId ?? platformProjectId,
+      platformProjectId: resolvedPlatformProjectId,
       outcomes: quick.outcomes.length,
       geoQuestions: quick.geoQuestions?.length ?? 0,
       [EVENT_QUICK_CHECK_COMPANY_BRIEF_CONFIRMED_KEY]: quick.companyBrief ?? confirmedBrief,
@@ -657,7 +677,7 @@ export async function executeEventQuickCheckRun(
     workflowRunId: run.id,
     report,
     steps,
-    platformProjectId: quick.platformProjectId,
+    platformProjectId: resolvedPlatformProjectId,
     error: quick.error,
   };
 }

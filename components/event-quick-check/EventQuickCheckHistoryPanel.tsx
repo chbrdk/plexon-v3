@@ -68,15 +68,27 @@ export function EventQuickCheckHistoryPanel({
                 >
                   <div className="plexon-eqc-history-item-head">
                     <span className="plexon-eqc-history-item-domain">{item.domain}</span>
-                    <Chip static size="sm">
-                      {eventQuickCheckHistoryStatusLabel(item.status)}
-                    </Chip>
+                    <div className="plexon-eqc-mag-chips">
+                      {item.shared ? (
+                        <Chip static size="sm">
+                          {EQC_PAGE_COPY.historySharedBadge}
+                        </Chip>
+                      ) : null}
+                      <Chip static size="sm">
+                        {eventQuickCheckHistoryStatusLabel(item.status)}
+                      </Chip>
+                    </div>
                   </div>
                   <Text role="hint" className="plexon-eqc-history-item-url">
                     {item.url}
                   </Text>
                   <div className="plexon-eqc-history-item-meta">
                     <Text role="hint">{formatConversationUpdatedAt(item.updatedAt, locale)}</Text>
+                    {item.shared && item.ownerLabel ? (
+                      <Text role="hint">
+                        · {EQC_PAGE_COPY.historyOwnerLabel(item.ownerLabel)}
+                      </Text>
+                    ) : null}
                     {item.domainScore != null ? (
                       <Text role="hint">
                         · {EQC_PAGE_COPY.historyDomainScore} {item.domainScore}

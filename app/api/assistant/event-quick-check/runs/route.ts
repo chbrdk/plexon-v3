@@ -2,10 +2,8 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { createEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import type { EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
-import {
-  mapEventQuickCheckRunToHistoryItem,
-} from '@/lib/assistant/event-quick-check/event-quick-check-history';
-import { listAssistantWorkflowRunsForUser } from '@/lib/db/assistant-workflow-runs';
+import { mapEventQuickCheckRunToHistoryItem } from '@/lib/assistant/event-quick-check/event-quick-check-history';
+import { listEventQuickCheckRunsForViewer } from '@/lib/assistant/event-quick-check/list-event-quick-check-runs-for-viewer';
 
 export async function GET(request: Request) {
   const user = await getRequestUser(request);
@@ -16,14 +14,20 @@ export async function GET(request: Request) {
   const limitParam = url.searchParams.get('limit');
   const limit = limitParam ? Number.parseInt(limitParam, 10) : 50;
 
-  const runs = await listAssistantWorkflowRunsForUser({
+  const runs = await listEventQuickCheckRunsForViewer({
     userId: user.id,
-    type: 'event_quick_check',
+    userRole: user.role,
     limit: Number.isFinite(limit) ? limit : 50,
   });
 
   const items = runs
-    .map(mapEventQuickCheckRunToHistoryItem)
+    .map((run) =>
+      mapEventQuickCheckRunToHistoryItem(run, {
+        viewerUserId: user.id,
+        ownerName: run.ownerName,
+        ownerEmail: run.ownerEmail,
+      })
+    )
     .filter((item): item is NonNullable<typeof item> => item != null);
 
   return Response.json({ items });

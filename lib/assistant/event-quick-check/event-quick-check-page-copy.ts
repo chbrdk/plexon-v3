@@ -32,6 +32,13 @@ export const EQC_PAGE_COPY = {
   historyOpenRun: 'Ergebnis öffnen',
   historyNoReport: 'Kein Report',
   historyDomainScore: 'Domain-Score',
+  historySharedBadge: 'Team',
+  historyOwnerLabel: (name: string) => `von ${name}`,
+  shareLinkButton: 'Link teilen',
+  shareLinkCopied: 'Link kopiert',
+  shareLinkError: 'Link konnte nicht erstellt werden.',
+  shareTeamHint: 'Sichtbar für Team im Collection-Projekt.',
+  sharePublicReadOnly: 'Öffentlicher Link — nur Lesen',
   reviewTitle: 'Unternehmensprofil prüfen',
   reviewLead:
     'Kurzrecherche aus der Website. Bitte Inhalt prüfen oder anpassen — erst danach starten Scan, Persona und GEO.',

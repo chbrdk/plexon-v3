@@ -20,6 +20,7 @@ import {
   EVENT_QUICK_CHECK_CHECKPOINT_KEY,
 } from '@/lib/paths/event-quick-check-page';
 import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { canReopenEventQuickCheckGeo } from '@/lib/assistant/event-quick-check/resolve-geo-questions-reopen-draft';
 
@@ -33,7 +34,7 @@ export async function GET(
 
   const { runId } = await ctx.params;
   const run = await getAssistantWorkflowRunById(runId);
-  if (!run || run.userId !== user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(user, run))) {
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 

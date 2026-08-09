@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS } from '@/lib/constants';
+import { PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK } from '@/lib/constants';
 
 const authPaths = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD];
 
@@ -11,7 +11,12 @@ function isAuthPath(pathname: string): boolean {
 }
 
 function isPublicSharePath(pathname: string): boolean {
-  return pathname === PATH_SHARE_REPORTS || pathname.startsWith(`${PATH_SHARE_REPORTS}/`);
+  return (
+    pathname === PATH_SHARE_REPORTS ||
+    pathname.startsWith(`${PATH_SHARE_REPORTS}/`) ||
+    pathname === PATH_SHARE_QUICK_CHECK ||
+    pathname.startsWith(`${PATH_SHARE_QUICK_CHECK}/`)
+  );
 }
 
 function hasSessionCookie(req: NextRequest): boolean {

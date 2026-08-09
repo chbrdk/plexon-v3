@@ -37,9 +37,17 @@ type Props = {
   workflowRunId: string
   platformProjectId?: string
   canRerunGeo?: boolean
-  onNewCheck: () => void
-  onOpenHistory: () => void
+  /** Public share view: no team actions, only export. */
+  readOnly?: boolean
+  /** Absolute/relative PDF/PPTX URLs override (public share). */
+  pdfUrl?: string
+  pptxUrl?: string
+  onNewCheck?: () => void
+  onOpenHistory?: () => void
   onRerunGeo?: () => void
+  onShareLink?: () => void
+  shareLinkBusy?: boolean
+  shareLinkFeedback?: string | null
 }
 
 function Band({
@@ -157,14 +165,20 @@ export function EventQuickCheckDashboardView({
   workflowRunId,
   platformProjectId,
   canRerunGeo = false,
+  readOnly = false,
+  pdfUrl: pdfUrlProp,
+  pptxUrl: pptxUrlProp,
   onNewCheck,
   onOpenHistory,
   onRerunGeo,
+  onShareLink,
+  shareLinkBusy = false,
+  shareLinkFeedback = null,
 }: Props) {
   const router = useRouter()
   const layout = resolveEventQuickCheckDashboardLayout(report)
-  const pdfUrl = apiEventQuickCheckRunPdf(workflowRunId)
-  const pptxUrl = apiEventQuickCheckRunPptx(workflowRunId)
+  const pdfUrl = pdfUrlProp ?? apiEventQuickCheckRunPdf(workflowRunId)
+  const pptxUrl = pptxUrlProp ?? apiEventQuickCheckRunPptx(workflowRunId)
   const generatedAt = formatReportGeneratedAt(report.meta.generatedAt)
 
   const personas = useMemo(() => resolveReportPersonas(report), [report])
@@ -183,28 +197,50 @@ export function EventQuickCheckDashboardView({
       className="plexon-magazine plexon-eqc-results"
       data-plexon-event-quick-check-dashboard
       data-section="eqc-magazine-results"
+      data-readonly={readOnly ? 'true' : 'false'}
     >
       <SectionChrome
         title={report.meta.title || EQC_PAGE_COPY.pageTitle}
         meta={
           <Text role="meta">
-            {[report.meta.domain || report.meta.url, generatedAt].filter(Boolean).join(' · ')}
+            {[
+              report.meta.domain || report.meta.url,
+              generatedAt,
+              readOnly ? EQC_PAGE_COPY.sharePublicReadOnly : null,
+              !readOnly && platformProjectId ? EQC_PAGE_COPY.shareTeamHint : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           </Text>
         }
         action={
           <div className="plexon-eqc-results-actions">
-            <Button variant="ghost" size="sm" onClick={onNewCheck}>
-              {EQC_PAGE_COPY.newCheckButton}
-            </Button>
-            {canRerunGeo && onRerunGeo ? (
+            {!readOnly && onNewCheck ? (
+              <Button variant="ghost" size="sm" onClick={onNewCheck}>
+                {EQC_PAGE_COPY.newCheckButton}
+              </Button>
+            ) : null}
+            {!readOnly && canRerunGeo && onRerunGeo ? (
               <Button variant="ghost" size="sm" onClick={onRerunGeo}>
                 {EQC_PAGE_COPY.geoRerunButton}
               </Button>
             ) : null}
-            <Button variant="ghost" size="sm" onClick={onOpenHistory}>
-              {EQC_PAGE_COPY.historyOpenButton}
-            </Button>
-            {platformProjectId ? (
+            {!readOnly && onOpenHistory ? (
+              <Button variant="ghost" size="sm" onClick={onOpenHistory}>
+                {EQC_PAGE_COPY.historyOpenButton}
+              </Button>
+            ) : null}
+            {!readOnly && onShareLink ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onShareLink}
+                disabled={shareLinkBusy}
+              >
+                {shareLinkFeedback ?? EQC_PAGE_COPY.shareLinkButton}
+              </Button>
+            ) : null}
+            {!readOnly && platformProjectId ? (
               <Button
                 variant="link"
                 size="sm"
@@ -213,7 +249,7 @@ export function EventQuickCheckDashboardView({
                 {EQC_PAGE_COPY.openProjectButton}
               </Button>
             ) : null}
-            {report.domainComparison?.checkionProjectHref ? (
+            {!readOnly && report.domainComparison?.checkionProjectHref ? (
               <Button
                 variant="link"
                 size="sm"

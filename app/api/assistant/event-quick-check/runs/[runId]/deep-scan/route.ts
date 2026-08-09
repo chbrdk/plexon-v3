@@ -4,6 +4,7 @@ import { continueEventQuickCheckAfterDeepScan } from '@/lib/assistant/event-quic
 import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion-project-deep-scan-client';
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
 import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import type { EventQuickCheckResumeCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import {
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
@@ -21,7 +22,7 @@ export async function GET(
 
   const { runId } = await ctx.params;
   const run = await getAssistantWorkflowRunById(runId);
-  if (!run || run.userId !== user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(user, run))) {
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 

@@ -4,6 +4,7 @@ import {
   type ExecuteEventQuickCheckRunResult,
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import {
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
   EVENT_QUICK_CHECK_CHECKPOINT_KEY,
@@ -22,7 +23,7 @@ export async function continueEventQuickCheckAfterDeepScan(
   input: ContinueAfterDeepScanInput
 ): Promise<ExecuteEventQuickCheckRunResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
-  if (!run || run.userId !== input.user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
   }
 

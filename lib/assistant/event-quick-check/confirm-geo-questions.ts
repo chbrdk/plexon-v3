@@ -5,6 +5,7 @@ import {
   type ExecuteEventQuickCheckRunResult,
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import type { EventQuickCheckResumeCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import {
@@ -31,7 +32,7 @@ export async function confirmEventQuickCheckGeoQuestions(
   input: ConfirmGeoQuestionsInput
 ): Promise<ExecuteEventQuickCheckRunResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
-  if (!run || run.userId !== input.user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
   }
 

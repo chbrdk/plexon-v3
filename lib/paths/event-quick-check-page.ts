@@ -65,3 +65,6 @@ export const apiEventQuickCheckRunGeoQuestionsReopen = (runId: string): string =
 
 export const apiEventQuickCheckRunDeepScan = (runId: string): string =>
   `${apiEventQuickCheckRun(runId)}/deep-scan`;
+
+export const apiEventQuickCheckRunShare = (runId: string): string =>
+  `${apiEventQuickCheckRun(runId)}/share`;

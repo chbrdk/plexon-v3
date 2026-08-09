@@ -49,6 +49,16 @@ export const pathAssistantWithProject = (platformProjectId: string): string => {
 export const PATH_SHARE_REPORTS = '/share/reports';
 export const pathShareReport = (token: string) =>
   `${PATH_SHARE_REPORTS}/${encodeURIComponent(token)}`;
+/** Public shared Event Quick Check magazine (read-only, no login). */
+export const PATH_SHARE_QUICK_CHECK = '/share/quick-check';
+export const pathShareQuickCheck = (token: string) =>
+  `${PATH_SHARE_QUICK_CHECK}/${encodeURIComponent(token)}`;
+export const apiPublicQuickCheck = (token: string) =>
+  `/api/public/quick-check/${encodeURIComponent(token)}`;
+export const apiPublicQuickCheckPdf = (token: string) =>
+  `${apiPublicQuickCheck(token)}/pdf`;
+export const apiPublicQuickCheckPptx = (token: string) =>
+  `${apiPublicQuickCheck(token)}/pptx`;
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;

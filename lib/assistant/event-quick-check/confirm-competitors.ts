@@ -6,6 +6,7 @@ import {
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import { updateCheckionProject } from '@/lib/integrations/checkion-project-competitors-client';
 import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
+import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import type { EventQuickCheckCompetitorsCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import {
   EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY,
@@ -27,7 +28,7 @@ export async function confirmEventQuickCheckCompetitors(
   input: ConfirmCompetitorsInput
 ): Promise<ExecuteEventQuickCheckRunResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
-  if (!run || run.userId !== input.user.id) {
+  if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
   }
 
