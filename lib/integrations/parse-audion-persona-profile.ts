@@ -162,3 +162,22 @@ export function parseAudionPersonaResponse(
       : {}),
   };
 }
+
+/** Parse all personas from an AUDION generate batch response. */
+export function parseAudionPersonaGenerateBatch(
+  json: Record<string, unknown>,
+  options?: { outputLocale?: AudionPersonaOutputLocale }
+): AudionPersonaPreview[] {
+  const list = json.personas;
+  if (!Array.isArray(list) || list.length === 0) {
+    const single = parseAudionPersonaResponse(json, options);
+    return single?.id ? [single] : [];
+  }
+  return list
+    .map((item) => {
+      const record = asRecord(item);
+      if (!record) return null;
+      return parseAudionPersonaResponse({ ...json, personas: [record] }, options);
+    })
+    .filter((p): p is AudionPersonaPreview => Boolean(p?.id));
+}

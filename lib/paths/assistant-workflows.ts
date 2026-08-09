@@ -8,9 +8,11 @@ export type EventQuickCheckDepth = 'quick' | 'complete';
 
 export type EventQuickCheckProfile = {
   depth: EventQuickCheckDepth;
-  /** Domain scan page limit (own domain; complete also applies to competitor scans via domain-scan-all). */
+  /** Domain scan page limit (own domain; also applies to competitor scans via domain-scan-all). */
   scanMaxPages: number;
-  /** Buyer segments / target groups — one AUDION persona each. */
+  /** Distinct buyer segments / AUDION target groups. */
+  targetGroupCount: number;
+  /** Total AUDION personas to generate (distributed across target groups). */
   personaCount: number;
   geoQuestionsPerPersona: number;
   /** When true, competitors are stored on the CHECKION project and scanned via domain-scan-all. */
@@ -25,19 +27,26 @@ export type EventQuickCheckProfile = {
 
 /** Optional per-run overrides (start form / create API). */
 export type EventQuickCheckProfileOverrides = {
+  scanMaxPages?: number;
+  targetGroupCount?: number;
   personaCount?: number;
   maxCompetitors?: number;
 };
 
 export const EVENT_QUICK_CHECK_PERSONA_COUNT_MIN = 1;
 export const EVENT_QUICK_CHECK_PERSONA_COUNT_MAX = 5;
+export const EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN = 1;
+export const EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX = 5;
 export const EVENT_QUICK_CHECK_COMPETITOR_COUNT_MIN = 0;
 export const EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX = 5;
+export const EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN = 10;
+export const EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX = 2000;
 
 export const EVENT_QUICK_CHECK_PROFILES: Record<EventQuickCheckDepth, EventQuickCheckProfile> = {
   quick: {
     depth: 'quick',
     scanMaxPages: 50,
+    targetGroupCount: 1,
     personaCount: 1,
     geoQuestionsPerPersona: 3,
     scanCompetitors: false,
@@ -48,6 +57,7 @@ export const EVENT_QUICK_CHECK_PROFILES: Record<EventQuickCheckDepth, EventQuick
   complete: {
     depth: 'complete',
     scanMaxPages: 1000,
+    targetGroupCount: 3,
     personaCount: 3,
     geoQuestionsPerPersona: 3,
     scanCompetitors: true,
@@ -71,6 +81,13 @@ export function clampEventQuickCheckPersonaCount(value: number): number {
   );
 }
 
+export function clampEventQuickCheckTargetGroupCount(value: number): number {
+  return Math.max(
+    EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN,
+    Math.min(EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX, Math.floor(value))
+  );
+}
+
 export function clampEventQuickCheckCompetitorCount(value: number): number {
   return Math.max(
     EVENT_QUICK_CHECK_COMPETITOR_COUNT_MIN,
@@ -78,26 +95,65 @@ export function clampEventQuickCheckCompetitorCount(value: number): number {
   );
 }
 
+export function clampEventQuickCheckScanMaxPages(value: number): number {
+  return Math.max(
+    EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN,
+    Math.min(EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX, Math.floor(value))
+  );
+}
+
+function parseOptionalInt(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const n = Number.parseInt(value, 10);
+    if (Number.isFinite(n)) return n;
+  }
+  return undefined;
+}
+
 export function parseEventQuickCheckProfileOverrides(
   raw: Record<string, unknown> | null | undefined
 ): EventQuickCheckProfileOverrides {
   if (!raw) return {};
-  const personaRaw = raw.personaCount ?? raw.persona_count;
-  const competitorsRaw = raw.maxCompetitors ?? raw.max_competitors ?? raw.competitorCount;
   const overrides: EventQuickCheckProfileOverrides = {};
-  if (typeof personaRaw === 'number' && Number.isFinite(personaRaw)) {
-    overrides.personaCount = clampEventQuickCheckPersonaCount(personaRaw);
-  } else if (typeof personaRaw === 'string' && personaRaw.trim()) {
-    const n = Number.parseInt(personaRaw, 10);
-    if (Number.isFinite(n)) overrides.personaCount = clampEventQuickCheckPersonaCount(n);
+
+  const pages = parseOptionalInt(raw.scanMaxPages ?? raw.scan_max_pages);
+  if (pages != null) overrides.scanMaxPages = clampEventQuickCheckScanMaxPages(pages);
+
+  const personas = parseOptionalInt(raw.personaCount ?? raw.persona_count);
+  if (personas != null) overrides.personaCount = clampEventQuickCheckPersonaCount(personas);
+
+  const targetGroups = parseOptionalInt(raw.targetGroupCount ?? raw.target_group_count);
+  if (targetGroups != null) {
+    overrides.targetGroupCount = clampEventQuickCheckTargetGroupCount(targetGroups);
+  } else if (personas != null && raw.targetGroupCount == null && raw.target_group_count == null) {
+    // Legacy runs stored only personaCount as 1:1 TG↔persona.
+    overrides.targetGroupCount = clampEventQuickCheckTargetGroupCount(personas);
   }
-  if (typeof competitorsRaw === 'number' && Number.isFinite(competitorsRaw)) {
-    overrides.maxCompetitors = clampEventQuickCheckCompetitorCount(competitorsRaw);
-  } else if (typeof competitorsRaw === 'string' && competitorsRaw.trim()) {
-    const n = Number.parseInt(competitorsRaw, 10);
-    if (Number.isFinite(n)) overrides.maxCompetitors = clampEventQuickCheckCompetitorCount(n);
-  }
+
+  const competitors = parseOptionalInt(
+    raw.maxCompetitors ?? raw.max_competitors ?? raw.competitorCount
+  );
+  if (competitors != null) overrides.maxCompetitors = clampEventQuickCheckCompetitorCount(competitors);
+
   return overrides;
+}
+
+/**
+ * Distribute total personas across target groups (round-robin).
+ * Example: 3 TGs + 5 personas → [2, 2, 1]
+ */
+export function allocatePersonasPerTargetGroup(
+  targetGroupCount: number,
+  personaCount: number
+): number[] {
+  const tg = clampEventQuickCheckTargetGroupCount(targetGroupCount);
+  const personas = clampEventQuickCheckPersonaCount(personaCount);
+  const out = Array.from({ length: tg }, () => 0);
+  for (let i = 0; i < personas; i += 1) {
+    out[i % tg] += 1;
+  }
+  return out;
 }
 
 export function resolveEventQuickCheckProfile(
@@ -106,16 +162,28 @@ export function resolveEventQuickCheckProfile(
 ): EventQuickCheckProfile {
   const base =
     depth === 'complete' ? EVENT_QUICK_CHECK_PROFILES.complete : EVENT_QUICK_CHECK_PROFILES.quick;
+  const scanMaxPages =
+    overrides?.scanMaxPages != null
+      ? clampEventQuickCheckScanMaxPages(overrides.scanMaxPages)
+      : base.scanMaxPages;
   const personaCount =
     overrides?.personaCount != null
       ? clampEventQuickCheckPersonaCount(overrides.personaCount)
       : base.personaCount;
+  const targetGroupCount =
+    overrides?.targetGroupCount != null
+      ? clampEventQuickCheckTargetGroupCount(overrides.targetGroupCount)
+      : overrides?.personaCount != null && overrides.targetGroupCount == null
+        ? clampEventQuickCheckTargetGroupCount(overrides.personaCount)
+        : base.targetGroupCount;
   const maxCompetitors =
     overrides?.maxCompetitors != null
       ? clampEventQuickCheckCompetitorCount(overrides.maxCompetitors)
       : base.maxCompetitors;
   return {
     ...base,
+    scanMaxPages,
+    targetGroupCount,
     personaCount,
     maxCompetitors,
     scanCompetitors: maxCompetitors > 0,

@@ -28,6 +28,10 @@ import {
   EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX,
   EVENT_QUICK_CHECK_PERSONA_COUNT_MAX,
   EVENT_QUICK_CHECK_PERSONA_COUNT_MIN,
+  EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX,
+  EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN,
+  EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX,
+  EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN,
   resolveEventQuickCheckProfile,
   type EventQuickCheckDepth,
 } from '@/lib/paths/assistant-workflows';
@@ -82,15 +86,23 @@ export function EventQuickCheckPageClient() {
   const [maxCompetitors, setMaxCompetitors] = useState(
     () => resolveEventQuickCheckProfile('quick').maxCompetitors
   );
+  const [targetGroupCount, setTargetGroupCount] = useState(
+    () => resolveEventQuickCheckProfile('quick').targetGroupCount
+  );
   const [personaCount, setPersonaCount] = useState(
     () => resolveEventQuickCheckProfile('quick').personaCount
+  );
+  const [scanMaxPages, setScanMaxPages] = useState(
+    () => resolveEventQuickCheckProfile('quick').scanMaxPages
   );
   const [depth, setDepth] = useState<EventQuickCheckDepth>('quick');
 
   const applyDepthDefaults = useCallback((nextDepth: EventQuickCheckDepth) => {
     const profile = resolveEventQuickCheckProfile(nextDepth);
     setDepth(nextDepth);
+    setTargetGroupCount(profile.targetGroupCount);
     setPersonaCount(profile.personaCount);
+    setScanMaxPages(profile.scanMaxPages);
     setMaxCompetitors(profile.maxCompetitors);
   }, []);
   const [deepScanProgress, setDeepScanProgress] = useState<{
@@ -184,6 +196,8 @@ export function EventQuickCheckPageClient() {
           competitors?: string[];
           maxCompetitors?: number;
           personaCount?: number;
+          targetGroupCount?: number;
+          scanMaxPages?: number;
           depth?: EventQuickCheckDepth;
           awaitingDeepScan?: boolean;
           deepScanProgress?: { complete: number; total: number; detail: string };
@@ -193,6 +207,8 @@ export function EventQuickCheckPageClient() {
         };
 
         if (typeof data.personaCount === 'number') setPersonaCount(data.personaCount);
+        if (typeof data.targetGroupCount === 'number') setTargetGroupCount(data.targetGroupCount);
+        if (typeof data.scanMaxPages === 'number') setScanMaxPages(data.scanMaxPages);
         if (typeof data.maxCompetitors === 'number') setMaxCompetitors(data.maxCompetitors);
         if (data.depth === 'quick' || data.depth === 'complete') setDepth(data.depth);
 
@@ -668,6 +684,8 @@ export function EventQuickCheckPageClient() {
           url: trimmedUrl,
           projectName: projectName.trim() || undefined,
           depth,
+          scanMaxPages,
+          targetGroupCount,
           personaCount,
           maxCompetitors,
         }),
@@ -767,7 +785,7 @@ export function EventQuickCheckPageClient() {
       setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
       void refreshHistory();
     }
-  }, [url, projectName, depth, personaCount, maxCompetitors, router, refreshHistory]);
+  }, [url, projectName, depth, scanMaxPages, targetGroupCount, personaCount, maxCompetitors, router, refreshHistory]);
 
   const historyDialog = (
     <EventQuickCheckHistoryDialog
@@ -864,6 +882,26 @@ export function EventQuickCheckPageClient() {
                 {depth === 'complete' ? EQC_PAGE_COPY.depthCompleteHint : EQC_PAGE_COPY.depthQuickHint}
               </Text>
               <div className="plexon-eqc-split-grid">
+                <Field label={EQC_PAGE_COPY.targetGroupCountLabel}>
+                  <Input
+                    type="number"
+                    min={EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN}
+                    max={EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX}
+                    value={String(targetGroupCount)}
+                    onChange={(e) => {
+                      const n = Number.parseInt(e.target.value, 10);
+                      if (!Number.isFinite(n)) return;
+                      setTargetGroupCount(
+                        Math.max(
+                          EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN,
+                          Math.min(EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX, n)
+                        )
+                      );
+                    }}
+                    block
+                  />
+                  <Text role="hint">{EQC_PAGE_COPY.targetGroupCountHint}</Text>
+                </Field>
                 <Field label={EQC_PAGE_COPY.personaCountLabel}>
                   <Input
                     type="number"
@@ -883,6 +921,27 @@ export function EventQuickCheckPageClient() {
                     block
                   />
                   <Text role="hint">{EQC_PAGE_COPY.personaCountHint}</Text>
+                </Field>
+                <Field label={EQC_PAGE_COPY.scanMaxPagesLabel}>
+                  <Input
+                    type="number"
+                    min={EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN}
+                    max={EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX}
+                    step={10}
+                    value={String(scanMaxPages)}
+                    onChange={(e) => {
+                      const n = Number.parseInt(e.target.value, 10);
+                      if (!Number.isFinite(n)) return;
+                      setScanMaxPages(
+                        Math.max(
+                          EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN,
+                          Math.min(EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX, n)
+                        )
+                      );
+                    }}
+                    block
+                  />
+                  <Text role="hint">{EQC_PAGE_COPY.scanMaxPagesHint}</Text>
                 </Field>
                 <Field label={EQC_PAGE_COPY.competitorCountLabel}>
                   <Input

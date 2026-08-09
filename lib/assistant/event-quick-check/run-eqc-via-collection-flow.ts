@@ -382,6 +382,8 @@ export async function runEqcViaCollectionFlow(
     historyRunId,
     personaCount: profile.personaCount,
     maxCompetitors: profile.maxCompetitors,
+    targetGroupCount: profile.targetGroupCount,
+    scanMaxPages: profile.scanMaxPages,
   };
 
   const resumeFrom = options.eqcFlowState?.awaitingNodeId ?? null;

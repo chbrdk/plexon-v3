@@ -885,11 +885,11 @@ export async function runEventQuickCheck(
 
   if (url) {
     const personaStepDetail =
-      profile.personaCount > 1 ? 'Zielgruppen & Personas…' : 'Zielgruppe & Persona…';
+      (profile.targetGroupCount > 1 || profile.personaCount > 1) ? 'Zielgruppen & Personas…' : 'Zielgruppe & Persona…';
     steps = await patchStep('persona_bootstrap', { status: 'running', detail: personaStepDetail });
     streamPhase(
       emit,
-      profile.personaCount > 1 ? 'AUDION Personas werden erstellt…' : 'AUDION Persona wird erstellt…'
+      (profile.targetGroupCount > 1 || profile.personaCount > 1) ? 'AUDION Personas werden erstellt…' : 'AUDION Persona wird erstellt…'
     );
     steps = await patchStep('geo_questions', { status: 'running' });
 
@@ -966,7 +966,7 @@ export async function runEventQuickCheck(
 
     streamPhase(
       emit,
-      profile.personaCount > 1
+      (profile.targetGroupCount > 1 || profile.personaCount > 1)
         ? 'GEO-Fragen pro Persona ableiten…'
         : 'GEO-Fragen aus Persona ableiten…'
     );
@@ -1300,11 +1300,11 @@ async function runEventQuickCheckFromCompetitors(
   });
 
   const personaStepDetail =
-    profile.personaCount > 1 ? 'Zielgruppen & Personas…' : 'Zielgruppe & Persona…';
+    (profile.targetGroupCount > 1 || profile.personaCount > 1) ? 'Zielgruppen & Personas…' : 'Zielgruppe & Persona…';
   steps = await patchStep('persona_bootstrap', { status: 'running', detail: personaStepDetail });
   streamPhase(
     emit,
-    profile.personaCount > 1 ? 'AUDION Personas werden erstellt…' : 'AUDION Persona wird erstellt…'
+    (profile.targetGroupCount > 1 || profile.personaCount > 1) ? 'AUDION Personas werden erstellt…' : 'AUDION Persona wird erstellt…'
   );
   steps = await patchStep('geo_questions', { status: 'running' });
 
@@ -1377,7 +1377,7 @@ async function runEventQuickCheckFromCompetitors(
 
   streamPhase(
     emit,
-    profile.personaCount > 1
+    (profile.targetGroupCount > 1 || profile.personaCount > 1)
       ? 'GEO-Fragen pro Persona ableiten…'
       : 'GEO-Fragen aus Persona ableiten…'
   );

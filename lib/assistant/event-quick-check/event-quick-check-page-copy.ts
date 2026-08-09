@@ -65,12 +65,16 @@ export const EQC_PAGE_COPY = {
   geoReviewMultiPersonaHint: 'Pro Persona drei Fragen — gruppiert nach Buyer-Segment.',
   geoReviewPersonaGroupLabel: (name: string, segment: string) => `${name} · ${segment}`,
   depthQuickLabel: 'Quick Check (Demo)',
-  depthQuickHint: 'Schneller Demo-Scan — Anzahlen unten anpassen.',
+  depthQuickHint: 'Schneller Demo-Scan — Anzahlen und Domaintiefe unten anpassen.',
   depthCompleteLabel: 'Komplettscan',
   depthCompleteHint:
-    'Deep Scan (bis 1000 Seiten pro Domain) läuft in CHECKION im Hintergrund — kann mehrere Stunden dauern. Personas & GEO können parallel geprüft werden.',
-  personaCountLabel: 'Zielgruppen / Personas',
-  personaCountHint: 'Je Zielgruppe wird eine Persona erzeugt (1–5).',
+    'Deep Scan läuft in CHECKION im Hintergrund — kann mehrere Stunden dauern. Personas & GEO können parallel geprüft werden.',
+  targetGroupCountLabel: 'Zielgruppen',
+  targetGroupCountHint: 'Unterschiedliche Buyer-Segmente in AUDION (1–5).',
+  personaCountLabel: 'Personas',
+  personaCountHint: 'Gesamtzahl Personas, verteilt auf die Zielgruppen (1–5).',
+  scanMaxPagesLabel: 'Domaintiefe (Seiten)',
+  scanMaxPagesHint: 'Maximale Seiten pro Domain-Scan (10–2000).',
   competitorCountLabel: 'Wettbewerber-Domains',
   competitorCountHint: (n: number) =>
     n === 0

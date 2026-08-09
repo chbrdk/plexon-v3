@@ -43,6 +43,8 @@ export async function POST(request: Request) {
     projectName?: string;
     platformProjectId?: string;
     depth?: EventQuickCheckDepth;
+    scanMaxPages?: number;
+    targetGroupCount?: number;
     personaCount?: number;
     maxCompetitors?: number;
   };
@@ -62,6 +64,8 @@ export async function POST(request: Request) {
       projectName: body.projectName,
       platformProjectId: body.platformProjectId,
       depth: body.depth === 'complete' ? 'complete' : 'quick',
+      scanMaxPages: body.scanMaxPages,
+      targetGroupCount: body.targetGroupCount,
       personaCount: body.personaCount,
       maxCompetitors: body.maxCompetitors,
     });

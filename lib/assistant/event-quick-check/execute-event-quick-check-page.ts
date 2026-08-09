@@ -19,7 +19,9 @@ import {
   EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
   EVENT_QUICK_CHECK_DEPTH_KEY,
+  EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_KEY,
   EVENT_QUICK_CHECK_PERSONA_COUNT_KEY,
+  EVENT_QUICK_CHECK_SCAN_MAX_PAGES_KEY,
   EVENT_QUICK_CHECK_MAX_COMPETITORS_KEY,
   EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY,
   EVENT_QUICK_CHECK_COMPETITORS_DRAFT_KEY,
@@ -80,6 +82,8 @@ export type CreateEventQuickCheckRunInput = {
   projectName?: string;
   platformProjectId?: string;
   depth?: EventQuickCheckDepth;
+  scanMaxPages?: number;
+  targetGroupCount?: number;
   personaCount?: number;
   maxCompetitors?: number;
 };
@@ -201,6 +205,8 @@ export async function createEventQuickCheckRun(
   const projectName = input.projectName?.trim() || domain;
   const depth = input.depth ?? 'quick';
   const profile = resolveEventQuickCheckProfile(depth, {
+    scanMaxPages: input.scanMaxPages,
+    targetGroupCount: input.targetGroupCount,
     personaCount: input.personaCount,
     maxCompetitors: input.maxCompetitors,
   });
@@ -228,6 +234,8 @@ export async function createEventQuickCheckRun(
       url,
       projectName,
       [EVENT_QUICK_CHECK_DEPTH_KEY]: depth,
+      [EVENT_QUICK_CHECK_SCAN_MAX_PAGES_KEY]: profile.scanMaxPages,
+      [EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_KEY]: profile.targetGroupCount,
       [EVENT_QUICK_CHECK_PERSONA_COUNT_KEY]: profile.personaCount,
       [EVENT_QUICK_CHECK_MAX_COMPETITORS_KEY]: profile.maxCompetitors,
       ...(input.platformProjectId ? { platformProjectId: input.platformProjectId } : {}),
@@ -411,6 +419,8 @@ export async function executeEventQuickCheckRun(
       runMode,
       depth: profile.depth,
       profileOverrides: {
+        scanMaxPages: profile.scanMaxPages,
+        targetGroupCount: profile.targetGroupCount,
         personaCount: profile.personaCount,
         maxCompetitors: profile.maxCompetitors,
       },

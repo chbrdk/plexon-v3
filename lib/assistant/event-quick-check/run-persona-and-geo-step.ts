@@ -75,13 +75,15 @@ export async function runPersonaAndGeoQuestionsStep(input: {
   let geoCompetitors = [...input.geoCompetitors];
 
   const useMultiPersona =
-    input.profile.personaCount > 1 && Boolean(input.companyBrief);
+    (input.profile.targetGroupCount > 1 || input.profile.personaCount > 1) &&
+    Boolean(input.companyBrief);
 
   if (useMultiPersona && input.companyBrief) {
     const persona = await runMultiPersonaBootstrap({
       projectName: input.projectName,
       existingAudionProjectId: audionProjectId,
       companyBrief: input.companyBrief,
+      targetGroupCount: input.profile.targetGroupCount,
       personaCount: input.profile.personaCount,
     });
     if (!persona.ok) {
