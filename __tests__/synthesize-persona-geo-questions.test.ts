@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildPersonaGeoQuestionContext,
+  collectForbiddenBrandTerms,
   isNaturalPersonaGeoQuestion,
   sanitizePersonaGeoQuestions,
 } from '@/lib/assistant/geo/synthesize-persona-geo-questions';
@@ -19,21 +20,35 @@ describe('synthesize-persona-geo-questions', () => {
     ).toBe(true);
   });
 
-  it('sanitizes and deduplicates questions', () => {
+  it('sanitizes and deduplicates questions and drops brand mentions', () => {
+    const forbidden = collectForbiddenBrandTerms('https://www.schreiner-group.com', {
+      displayName: 'Schreiner Group',
+      industry: 'Etiketten',
+      summary: '…',
+      targetAudienceHint: '…',
+      disambiguationNote: '…',
+      companyContext: '…',
+      sources: { url: 'https://www.schreiner-group.com', domain: 'schreiner-group.com', h1: [] },
+      generatedAt: new Date().toISOString(),
+    });
+
     const result = sanitizePersonaGeoQuestions(
       [
         'Ist Schreiner Group eine gute Wahl für RFID-Etiketten?',
         'Ist Schreiner Group eine gute Wahl für RFID-Etiketten?',
         'Branche: Test — Zielgruppe: Test',
         'Wer sind Alternativen zu Schreiner für Pharma-Etiketten?',
+        'Welche Anbieter für Pharma-Etiketten sollte ich vergleichen?',
       ],
-      3
+      3,
+      { forbiddenBrandTerms: forbidden }
     );
-    expect(result).toHaveLength(2);
-    expect(result[0]).toContain('Schreiner');
+    expect(result).toHaveLength(1);
+    expect(result[0]).toContain('Pharma-Etiketten');
+    expect(result[0].toLowerCase()).not.toContain('schreiner');
   });
 
-  it('builds rich persona context for LLM', () => {
+  it('builds persona context without prompting to name the brand', () => {
     const context = buildPersonaGeoQuestionContext({
       url: 'https://www.schreiner-group.com',
       persona: {
@@ -64,6 +79,8 @@ describe('synthesize-persona-geo-questions', () => {
     expect(context).toContain('Lisa');
     expect(context).toContain('Hohe Mindestbestellmengen');
     expect(context).toContain('NICHT übernehmen');
+    expect(context).toContain('Verbotene Namen');
     expect(context).not.toContain('Branche:');
+    expect(context).not.toContain('Bewertetes Unternehmen:');
   });
 });

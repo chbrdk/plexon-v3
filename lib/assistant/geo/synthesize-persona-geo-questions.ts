@@ -14,17 +14,18 @@ const BANNED_QUESTION_PATTERNS = [
   /\bcontext\s*:/i,
 ];
 
-const SYSTEM_PROMPT = `Du formulierst authentische Fragen auf Deutsch, die eine konkrete Buyer-Persona an eine KI stellen würde (z. B. ChatGPT), um Anbieter zu recherchieren oder zu vergleichen.
+const SYSTEM_PROMPT = `Du formulierst authentische Fragen auf Deutsch, die eine konkrete Buyer-Persona an eine KI stellen würde (z. B. ChatGPT), um Anbieter in einer Kategorie zu recherchieren oder zu vergleichen.
 
 Regeln:
 - Schreibe wie eine echte Person: Ich-Form oder natürliche Such-/Chatfrage
 - Nutze Rolle, Ziele und Pain Points der Persona — nicht generische SEO-Keywords
-- Beziehe dich auf das Angebot des bewerteten Unternehmens (nicht auf zufällige Website-Themen)
+- Formuliere bedarfs- und kategorienbasiert (Angebot, Branche, Use-Case) — ohne Marken-Bias
+- Nenne NIEMALS den Namen, die Domain oder Marke des bewerteten Unternehmens
+- Nenne auch keine konkreten Wettbewerber-Domains aus dem Kontext
 - KEINE Meta-Labels oder Anhänge wie "Branche:", "Zielgruppe:", "Bezug:"
 - KEINE Keyword-Stapel oder Agentur-Jargon
 - Maximal 160 Zeichen pro Frage
-- Mindestens eine Frage nennt das bewertete Unternehmen
-- Mindestens eine Frage fragt nach Alternativen oder einem Vergleich
+- Mindestens eine Frage fragt nach Alternativen, Vergleich oder Empfehlungen in der Kategorie
 
 Antworte NUR mit gültigem JSON: { "questions": ["...", "..."] }`;
 
@@ -34,24 +35,73 @@ export function isNaturalPersonaGeoQuestion(text: string): boolean {
   return !BANNED_QUESTION_PATTERNS.some((pattern) => pattern.test(q));
 }
 
-export function sanitizePersonaGeoQuestions(questions: string[], count: number): string[] {
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Brand/domain tokens that must not appear in GEO questions (bias the AI search). */
+export function collectForbiddenBrandTerms(
+  url: string,
+  companyBrief?: EventQuickCheckCompanyBrief
+): string[] {
+  const terms = new Set<string>();
+  const add = (raw?: string | null) => {
+    const value = raw?.trim();
+    if (!value) return;
+    terms.add(value);
+    for (const part of value.split(/[\s./_-]+/)) {
+      const cleaned = part.trim();
+      if (cleaned.length >= 4) terms.add(cleaned);
+    }
+  };
+
+  add(companyBrief?.displayName);
+  try {
+    const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(
+      /^www\./i,
+      ''
+    );
+    add(host);
+    add(host.split('.')[0]);
+  } catch {
+    add(url);
+  }
+
+  return [...terms];
+}
+
+export function questionMentionsForbiddenBrand(
+  text: string,
+  forbiddenBrandTerms: string[]
+): boolean {
+  if (!forbiddenBrandTerms.length) return false;
+  const lower = text.toLowerCase();
+  return forbiddenBrandTerms.some((term) => {
+    const t = term.trim().toLowerCase();
+    if (t.length < 3) return false;
+    if (t.includes(' ') || t.includes('-') || t.includes('.')) {
+      return lower.includes(t);
+    }
+    return new RegExp(`\\b${escapeRegExp(t)}\\b`, 'i').test(text);
+  });
+}
+
+export function sanitizePersonaGeoQuestions(
+  questions: string[],
+  count: number,
+  options?: { forbiddenBrandTerms?: string[] }
+): string[] {
+  const forbidden = options?.forbiddenBrandTerms ?? [];
   const unique: string[] = [];
   for (const raw of questions) {
     const q = raw.trim().replace(/\s+/g, ' ');
     if (!isNaturalPersonaGeoQuestion(q)) continue;
+    if (questionMentionsForbiddenBrand(q, forbidden)) continue;
     if (unique.some((existing) => existing.toLowerCase() === q.toLowerCase())) continue;
     unique.push(q);
     if (unique.length >= count) break;
   }
   return unique;
-}
-
-function hostFromUrl(url: string): string {
-  try {
-    return new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
-  } catch {
-    return url;
-  }
 }
 
 export function buildPersonaGeoQuestionContext(input: {
@@ -61,13 +111,17 @@ export function buildPersonaGeoQuestionContext(input: {
   checkionQueryHints?: string[];
   checkionCompetitors?: string[];
 }): string {
-  const brand = input.companyBrief?.displayName?.trim() || hostFromUrl(input.url);
+  const forbidden = collectForbiddenBrandTerms(input.url, input.companyBrief);
   const profile = input.persona.profile;
   const lines = [
-    `Bewertetes Unternehmen: ${brand}`,
-    `Website: ${input.url}`,
-    input.companyBrief?.industry ? `Angebot: ${input.companyBrief.industry}` : null,
-    input.companyBrief?.summary ? `Kurzprofil: ${input.companyBrief.summary}` : null,
+    'Aufgabe: Formuliere neutrale Recherchefragen zur Kategorie/zum Bedarf — OHNE Marken- oder Domainnamen.',
+    forbidden.length
+      ? `Verbotene Namen/Domains (dürfen in keiner Frage vorkommen): ${forbidden.join(', ')}`
+      : null,
+    input.companyBrief?.industry ? `Kategorie/Angebot: ${input.companyBrief.industry}` : null,
+    input.companyBrief?.summary
+      ? `Kontext zum Angebot (nur thematisch nutzen, keine Markennamen übernehmen): ${input.companyBrief.summary}`
+      : null,
     '',
     `Persona: ${input.persona.name}`,
     `Rolle/Segment: ${input.persona.segment}`,
@@ -80,7 +134,7 @@ export function buildPersonaGeoQuestionContext(input: {
       ? `Einkäufer-Kontext: ${input.companyBrief.targetAudienceHint}`
       : null,
     input.checkionCompetitors?.length
-      ? `Bekannte Wettbewerber-Domains (optional einbeziehen): ${input.checkionCompetitors.join(', ')}`
+      ? `Hinweis: Wettbewerber-Domains existieren — NICHT in Fragen nennen: ${input.checkionCompetitors.join(', ')}`
       : null,
     input.checkionQueryHints?.length
       ? `\nDiese automatischen SEO-Vorschläge sind oft themenfremd — NICHT übernehmen, nur als Negativbeispiel:\n${input.checkionQueryHints.map((q) => `- ${q}`).join('\n')}`
@@ -95,15 +149,17 @@ export function buildCompanyBriefGeoQuestionContext(input: {
   checkionQueryHints?: string[];
   checkionCompetitors?: string[];
 }): string {
-  const brand = input.companyBrief.displayName.trim() || hostFromUrl(input.url);
+  const forbidden = collectForbiddenBrandTerms(input.url, input.companyBrief);
   const lines = [
-    `Bewertetes Unternehmen: ${brand}`,
-    `Website: ${input.url}`,
-    `Angebot: ${input.companyBrief.industry}`,
-    `Kurzprofil: ${input.companyBrief.summary}`,
+    'Aufgabe: Formuliere neutrale Recherchefragen zur Kategorie/zum Bedarf — OHNE Marken- oder Domainnamen.',
+    forbidden.length
+      ? `Verbotene Namen/Domains (dürfen in keiner Frage vorkommen): ${forbidden.join(', ')}`
+      : null,
+    `Kategorie/Angebot: ${input.companyBrief.industry}`,
+    `Kontext zum Angebot (nur thematisch nutzen, keine Markennamen übernehmen): ${input.companyBrief.summary}`,
     `Typische Käufer: ${input.companyBrief.targetAudienceHint}`,
     input.checkionCompetitors?.length
-      ? `Bekannte Wettbewerber-Domains: ${input.checkionCompetitors.join(', ')}`
+      ? `Wettbewerber-Domains — NICHT in Fragen nennen: ${input.checkionCompetitors.join(', ')}`
       : null,
     input.checkionQueryHints?.length
       ? `\nSEO-Vorschläge (nicht kopieren): ${input.checkionQueryHints.join(' | ')}`
@@ -162,7 +218,9 @@ export async function synthesizePersonaGeoQuestions(input: {
   const context = buildPersonaGeoQuestionContext(input);
   const raw = await callLlm(context, input.count);
   if (!raw?.length) return null;
-  const sanitized = sanitizePersonaGeoQuestions(raw, input.count);
+  const sanitized = sanitizePersonaGeoQuestions(raw, input.count, {
+    forbiddenBrandTerms: collectForbiddenBrandTerms(input.url, input.companyBrief),
+  });
   return sanitized.length >= 1 ? sanitized : null;
 }
 
@@ -176,6 +234,8 @@ export async function synthesizeCompanyBriefGeoQuestions(input: {
   const context = buildCompanyBriefGeoQuestionContext(input);
   const raw = await callLlm(context, input.count);
   if (!raw?.length) return null;
-  const sanitized = sanitizePersonaGeoQuestions(raw, input.count);
+  const sanitized = sanitizePersonaGeoQuestions(raw, input.count, {
+    forbiddenBrandTerms: collectForbiddenBrandTerms(input.url, input.companyBrief),
+  });
   return sanitized.length >= 1 ? sanitized : null;
 }

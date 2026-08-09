@@ -11,11 +11,14 @@ vi.mock('@/lib/integrations/audion-persona-geo-questions-client', () => ({
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id),
 }));
 
-vi.mock('@/lib/assistant/geo/synthesize-persona-geo-questions', () => ({
-  synthesizePersonaGeoQuestions: vi.fn(),
-  synthesizeCompanyBriefGeoQuestions: vi.fn(),
-  sanitizePersonaGeoQuestions: (questions: string[], count: number) => questions.slice(0, count),
-}));
+vi.mock('@/lib/assistant/geo/synthesize-persona-geo-questions', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/assistant/geo/synthesize-persona-geo-questions')>();
+  return {
+    ...actual,
+    synthesizePersonaGeoQuestions: vi.fn(),
+    synthesizeCompanyBriefGeoQuestions: vi.fn(),
+  };
+});
 
 import { suggestCheckionGeoQueries } from '@/lib/integrations/checkion-geo-client';
 import { fetchAudionPersonaGeoQuestions } from '@/lib/integrations/audion-persona-geo-questions-client';
@@ -46,8 +49,8 @@ describe('buildPersonaGeoQuestions', () => {
     vi.mocked(fetchAudionPersonaGeoQuestions).mockResolvedValue({
       ok: true,
       questions: [
-        'Ich brauche temperaturbeständige Etiketten für Automotive — lohnt sich Schreiner Group?',
-        'Welche Alternativen zu Schreiner Group gibt es für Pharma-Kennzeichnung?',
+        'Ich brauche temperaturbeständige Etiketten für Automotive — wen soll ich vergleichen?',
+        'Welche Anbieter für Pharma-Kennzeichnung empfiehlst du?',
         'Wer liefert kleinere Losgrößen bei Funktionsetiketten in Deutschland?',
       ],
     });
@@ -63,6 +66,9 @@ describe('buildPersonaGeoQuestions', () => {
     expect(fetchAudionPersonaGeoQuestions).toHaveBeenCalledWith(
       expect.objectContaining({ personaId: persona.id })
     );
+    expect(fetchAudionPersonaGeoQuestions).toHaveBeenCalledWith(
+      expect.not.objectContaining({ brandName: expect.anything() })
+    );
     expect(synthesizePersonaGeoQuestions).not.toHaveBeenCalled();
   });
 
@@ -77,8 +83,8 @@ describe('buildPersonaGeoQuestions', () => {
       error: 'HTTP 503',
     });
     vi.mocked(synthesizePersonaGeoQuestions).mockResolvedValue([
-      'Ich brauche temperaturbeständige Etiketten für Automotive — lohnt sich Schreiner Group?',
-      'Welche Alternativen zu Schreiner Group gibt es für Pharma-Kennzeichnung?',
+      'Ich brauche temperaturbeständige Etiketten für Automotive — wen soll ich vergleichen?',
+      'Welche Anbieter für Pharma-Kennzeichnung empfiehlst du?',
       'Wer liefert kleinere Losgrößen bei Funktionsetiketten in Deutschland?',
     ]);
 
@@ -127,7 +133,8 @@ describe('buildPersonaGeoQuestions', () => {
     });
 
     expect(result.source).toBe('persona_fallback');
-    expect(result.questions.join(' ')).toContain('Schreiner Group');
+    expect(result.questions.join(' ').toLowerCase()).not.toContain('schreiner');
+    expect(result.questions.join(' ')).toContain('Etiketten');
     expect(result.questions.join(' ')).not.toContain('Branche:');
     expect(result.suggestError).toBe('HTTP 503');
   });

@@ -7,6 +7,7 @@ import {
 } from '@/lib/integrations/audion-persona-geo-questions-client';
 import { EVENT_QUICK_CHECK_GEO_QUESTION_COUNT } from '@/lib/paths/assistant-workflows';
 import {
+  collectForbiddenBrandTerms,
   sanitizePersonaGeoQuestions,
   synthesizeCompanyBriefGeoQuestions,
   synthesizePersonaGeoQuestions,
@@ -24,18 +25,6 @@ export type PersonaGeoQuestionsResult = {
   suggestError?: string;
 };
 
-function hostFromUrl(url: string): string {
-  try {
-    return new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
-  } catch {
-    return url;
-  }
-}
-
-function brandLabel(url: string, companyBrief?: EventQuickCheckCompanyBrief): string {
-  return companyBrief?.displayName?.trim() || hostFromUrl(url);
-}
-
 function industryLabel(
   persona: NonNullable<PersonaBootstrapPreview['persona']>,
   companyBrief?: EventQuickCheckCompanyBrief
@@ -51,26 +40,26 @@ function personaFallbackQuestions(
   count: number,
   companyBrief?: EventQuickCheckCompanyBrief
 ): string[] {
-  const brand = brandLabel(url, companyBrief);
   const industry = industryLabel(persona, companyBrief);
   const profile = persona.profile;
   const pain = profile?.painPoints?.[0];
   const goal = profile?.goals?.[0];
   const role = persona.segment.trim() || persona.name;
+  const forbiddenBrandTerms = collectForbiddenBrandTerms(url, companyBrief);
 
   const templates = [
     pain
       ? `Ich habe folgendes Problem: ${pain} — welche Anbieter für ${industry} sollte ich mir ansehen?`
       : `Als ${role}: welche Anbieter für ${industry} gelten aktuell als die besten?`,
-    `Lohnt sich ${brand} für jemanden wie mich, der ${persona.headline.toLowerCase()}?`,
+    `Worauf sollte ich als ${role} achten, wenn ich ${industry} vergleiche?`,
     goal
-      ? `Ich will ${goal} — wie schneidet ${brand} im Vergleich zu Alternativen ab?`
-      : `Welche Alternativen zu ${brand} empfehlen sich für ${role}?`,
-    `Was sagen andere Einkäufer über ${brand} im Bereich ${industry}?`,
-    `Wen würdest du neben ${brand} noch für ${industry} in Deutschland vergleichen?`,
+      ? `Ich will ${goal} — welche Anbieter für ${industry} empfiehlst du zum Vergleich?`
+      : `Welche Alternativen und Anbieter empfehlen sich für ${role} im Bereich ${industry}?`,
+    `Was sagen andere Einkäufer über Anbieter für ${industry}?`,
+    `Wen würdest du für ${industry} in Deutschland zuerst vergleichen?`,
   ];
 
-  return sanitizePersonaGeoQuestions(templates, count);
+  return sanitizePersonaGeoQuestions(templates, count, { forbiddenBrandTerms });
 }
 
 function companyBriefFallbackQuestions(
@@ -78,18 +67,18 @@ function companyBriefFallbackQuestions(
   count: number,
   companyBrief: EventQuickCheckCompanyBrief
 ): string[] {
-  const brand = brandLabel(url, companyBrief);
   const industry = companyBrief.industry.trim() || 'dieses Angebot';
   const buyer = companyBrief.targetAudienceHint.trim() || 'Einkäufer';
+  const forbiddenBrandTerms = collectForbiddenBrandTerms(url, companyBrief);
 
   const templates = [
     `Welche Anbieter für ${industry} sollte ich als ${buyer} zuerst vergleichen?`,
-    `Ist ${brand} ein seriöser Partner für ${industry} — was spricht dafür oder dagegen?`,
-    `Welche Alternativen zu ${brand} gibt es für ${industry} in Europa?`,
-    `Wer sind die drei stärksten Wettbewerber von ${brand}?`,
+    `Worauf achten ${buyer} bei der Auswahl von Partnern für ${industry}?`,
+    `Welche Alternativen gibt es für ${industry} in Europa?`,
+    `Wer sind die drei stärksten Anbieter für ${industry}?`,
   ];
 
-  return sanitizePersonaGeoQuestions(templates, count);
+  return sanitizePersonaGeoQuestions(templates, count, { forbiddenBrandTerms });
 }
 
 export type PersonaGeoQuestionGroup = {
@@ -154,17 +143,17 @@ export async function buildPersonaGeoQuestions(input: {
   const suggested = await suggestCheckionGeoQueries(input.url);
   const competitors = suggested.ok ? suggested.competitors.slice(0, 5) : [];
   const queryHints = suggested.ok ? suggested.queries.slice(0, 6) : [];
-  const brandName = brandLabel(input.url, input.companyBrief);
+  const forbiddenBrandTerms = collectForbiddenBrandTerms(input.url, input.companyBrief);
 
   if (isAudionPersonaUuid(input.persona.id)) {
     const audion = await fetchAudionPersonaGeoQuestions({
       personaId: input.persona.id,
-      brandName,
-      brandUrl: input.url,
       count,
     });
     if (audion.ok) {
-      const questions = sanitizePersonaGeoQuestions(audion.questions, count);
+      const questions = sanitizePersonaGeoQuestions(audion.questions, count, {
+        forbiddenBrandTerms,
+      });
       if (questions.length) {
         return {
           questions,
