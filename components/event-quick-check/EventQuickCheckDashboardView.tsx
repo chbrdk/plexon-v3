@@ -22,6 +22,7 @@ import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-chec
 import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
+import { syncKpiTilesFromDomain } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count'
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { formatReportGeneratedAt } from '@/lib/assistant/reports/format-report-text'
@@ -191,6 +192,14 @@ export function EventQuickCheckDashboardView({
   const domain = report.domain
   const insights = report.insights
   const market = report.market
+  const kpiTiles = useMemo(() => {
+    if (!domain) return report.executive.kpiTiles
+    return syncKpiTilesFromDomain(report.executive.kpiTiles, {
+      totalPages: domain.totalPages,
+      errors: domain.stats.errors,
+      score: domain.score,
+    })
+  }, [domain, report.executive.kpiTiles])
 
   return (
     <div
@@ -294,14 +303,14 @@ export function EventQuickCheckDashboardView({
         </div>
       </Band>
 
-      {report.executive.kpiTiles.length > 0 ? (
+      {kpiTiles.length > 0 ? (
         <Band title={EQC_REPORT_COPY.sectionKpi}>
           <StatLedeGroup
             aria-label={EQC_REPORT_COPY.sectionKpi}
-            columns={report.executive.kpiTiles.length}
+            columns={kpiTiles.length}
             compact
           >
-            {report.executive.kpiTiles.map((tile, i) => (
+            {kpiTiles.map((tile, i) => (
               <StatLede
                 key={`${tile.label}-${i}`}
                 label={tile.label}

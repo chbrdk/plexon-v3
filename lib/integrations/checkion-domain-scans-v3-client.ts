@@ -82,6 +82,75 @@ function parseDomain(body: unknown): CheckionDomainScanSummary | null {
   };
 }
 
+export async function listCheckionDomainScansV3(projectId?: string): Promise<
+  | { ok: true; scans: CheckionDomainScanSummary[] }
+  | { ok: false; error: string }
+> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return { ok: false, error: auth.error };
+  try {
+    const url = new URL(checkionApiDomainScans());
+    if (projectId?.trim()) url.searchParams.set('projectId', projectId.trim());
+    const res = await fetch(url.toString(), {
+      headers: auth.headers,
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `CHECKION domain-scans list: HTTP ${res.status}` };
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: 'CHECKION domain-scans list: ungültiges JSON' };
+    }
+    const rawItems = Array.isArray(json)
+      ? json
+      : json && typeof json === 'object' && Array.isArray((json as { items?: unknown }).items)
+        ? ((json as { items: unknown[] }).items)
+        : [];
+    const scans = rawItems
+      .map((row) => parseDomain(row))
+      .filter((s): s is CheckionDomainScanSummary => Boolean(s));
+    return { ok: true, scans };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+function hostKey(raw: string): string {
+  try {
+    const u = new URL(raw.startsWith('http') ? raw : `https://${raw}`);
+    return u.hostname.replace(/^www\./i, '').toLowerCase();
+  } catch {
+    return raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0]?.toLowerCase() ?? '';
+  }
+}
+
+/** Best-effort match when EQC stored scanId is missing/unknown. */
+export async function findCheckionDomainScanIdByUrl(input: {
+  url?: string | null;
+  domain?: string | null;
+  score?: number | null;
+}): Promise<string | null> {
+  const want = hostKey(input.url || input.domain || '');
+  if (!want) return null;
+  const listed = await listCheckionDomainScansV3();
+  if (!listed.ok || !listed.scans.length) return null;
+  const sameHost = listed.scans.filter((s) => hostKey(s.url) === want);
+  if (!sameHost.length) return null;
+  const score = typeof input.score === 'number' && Number.isFinite(input.score) ? input.score : null;
+  if (score != null) {
+    const scored = sameHost.find(
+      (s) => s.overallScore != null && Math.round(s.overallScore) === Math.round(score)
+    );
+    if (scored) return scored.id;
+  }
+  const withPages = sameHost.find((s) => (s.pageCount ?? 0) > 0);
+  return (withPages ?? sameHost[0])?.id ?? null;
+}
+
 export async function startCheckionDomainScanV3(input: {
   projectId: string;
   url: string;

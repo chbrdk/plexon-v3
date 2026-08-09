@@ -1,5 +1,8 @@
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
-import { fetchCheckionDomainScanV3Preview } from '@/lib/integrations/checkion-domain-scans-v3-client';
+import {
+  fetchCheckionDomainScanV3Preview,
+  findCheckionDomainScanIdByUrl,
+} from '@/lib/integrations/checkion-domain-scans-v3-client';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 
 function isRealScanId(id: string | null | undefined): id is string {
@@ -49,19 +52,97 @@ export async function hydrateDomainScanPageCount(
   };
 }
 
+function applyHydratedDomainToReport(
+  report: EventQuickCheckReportModel,
+  scanId: string,
+  hydrated: DomainScanPreview
+): EventQuickCheckReportModel {
+  return {
+    ...report,
+    domain: {
+      ...report.domain!,
+      scanId,
+      totalPages: hydrated.totalPages || report.domain!.totalPages,
+      score: report.domain!.score || hydrated.score,
+      stats:
+        hydrated.stats.total > 0 || hydrated.stats.errors > 0
+          ? hydrated.stats
+          : report.domain!.stats,
+      topIssues: hydrated.topIssues.length ? hydrated.topIssues : report.domain!.topIssues,
+      url: report.domain!.url || hydrated.url,
+      domain: report.domain!.domain || hydrated.domain,
+    },
+    appendix: {
+      ...report.appendix,
+      scanId: report.appendix.scanId || scanId,
+    },
+    executive: {
+      ...report.executive,
+      kpiTiles: syncKpiTilesFromDomain(report.executive.kpiTiles, {
+        totalPages: hydrated.totalPages || report.domain!.totalPages,
+        errors: hydrated.stats.errors || report.domain!.stats.errors,
+        score: report.domain!.score || hydrated.score,
+      }),
+    },
+  };
+}
+
+/** Keep KPI strip aligned with domain magazine fields. */
+export function syncKpiTilesFromDomain(
+  kpiTiles: EventQuickCheckReportModel['executive']['kpiTiles'],
+  domain: { totalPages: number; errors: number; score: number }
+): EventQuickCheckReportModel['executive']['kpiTiles'] {
+  return kpiTiles.map((kpi) => {
+    const label = kpi.label.toLowerCase();
+    if (label.includes('seiten') && domain.totalPages > 0) {
+      return { ...kpi, value: domain.totalPages };
+    }
+    if ((label.includes('a11y') || label.includes('fehler')) && domain.errors > 0) {
+      return { ...kpi, value: domain.errors, tone: 'error' };
+    }
+    if (label.includes('domain') && label.includes('score') && domain.score > 0) {
+      if (kpi.value === 0 || kpi.value === '—' || kpi.value === '0') {
+        return { ...kpi, value: domain.score, unit: kpi.unit ?? '/100' };
+      }
+    }
+    return kpi;
+  });
+}
+
 export async function hydrateEventQuickCheckReportDomainPages(
   report: EventQuickCheckReportModel | null,
   fallbackScanId?: string | null
 ): Promise<EventQuickCheckReportModel | null> {
   if (!report?.domain) return report;
-  if (!needsCheckionHydration(report.domain)) return report;
+  if (!needsCheckionHydration(report.domain)) {
+    // Still sync KPI strip if domain already has data but tiles stayed at 0.
+    if (report.domain.totalPages > 0 || report.domain.stats.errors > 0) {
+      return {
+        ...report,
+        executive: {
+          ...report.executive,
+          kpiTiles: syncKpiTilesFromDomain(report.executive.kpiTiles, {
+            totalPages: report.domain.totalPages,
+            errors: report.domain.stats.errors,
+            score: report.domain.score,
+          }),
+        },
+      };
+    }
+    return report;
+  }
 
-  const candidates = [
-    report.domain.scanId,
-    report.appendix?.scanId,
-    fallbackScanId,
-  ];
-  const scanId = candidates.map((c) => c?.trim()).find(isRealScanId);
+  let scanId = [report.domain.scanId, report.appendix?.scanId, fallbackScanId]
+    .map((c) => c?.trim())
+    .find(isRealScanId);
+
+  if (!scanId) {
+    scanId = await findCheckionDomainScanIdByUrl({
+      url: report.domain.url || report.meta.url,
+      domain: report.domain.domain || report.meta.domain,
+      score: report.domain.score,
+    });
+  }
   if (!scanId) return report;
 
   const hydrated = await hydrateDomainScanPageCount({
@@ -79,45 +160,7 @@ export async function hydrateEventQuickCheckReportDomainPages(
     return report;
   }
 
-  return {
-    ...report,
-    domain: {
-      ...report.domain,
-      scanId,
-      totalPages: hydrated.totalPages || report.domain.totalPages,
-      score: report.domain.score || hydrated.score,
-      stats:
-        hydrated.stats.total > 0 || hydrated.stats.errors > 0
-          ? hydrated.stats
-          : report.domain.stats,
-      topIssues: hydrated.topIssues.length ? hydrated.topIssues : report.domain.topIssues,
-      url: report.domain.url || hydrated.url,
-      domain: report.domain.domain || hydrated.domain,
-    },
-    appendix: {
-      ...report.appendix,
-      scanId: report.appendix.scanId || scanId,
-    },
-    executive: {
-      ...report.executive,
-      kpiTiles: report.executive.kpiTiles.map((kpi) => {
-        if (kpi.label === 'Seiten gescannt' && hydrated.totalPages > 0) {
-          return { ...kpi, value: hydrated.totalPages };
-        }
-        if (kpi.label === 'A11y-Fehler' && (hydrated.stats.errors > 0 || hydrated.stats.total > 0)) {
-          return {
-            ...kpi,
-            value: hydrated.stats.errors,
-            tone: hydrated.stats.errors > 0 ? 'error' : 'success',
-          };
-        }
-        if (kpi.label === 'Domain-Score' && hydrated.score > 0 && (kpi.value === 0 || kpi.value === '—')) {
-          return { ...kpi, value: hydrated.score, unit: '/100', tone: 'neutral' };
-        }
-        return kpi;
-      }),
-    },
-  };
+  return applyHydratedDomainToReport(report, scanId, hydrated);
 }
 
 /** Pull scan id from common EQC result blobs when report.domain.scanId is missing/unknown. */
@@ -134,8 +177,7 @@ export function resolveEqcDomainScanIdFromStored(stored: Record<string, unknown>
 
   const checkpoint = stored.checkpoint;
   if (checkpoint && typeof checkpoint === 'object') {
-    const ds = (checkpoint as { domainScan?: { id?: string }; outcomes?: Array<{ stepId?: string; data?: { scanId?: string } }> })
-      .domainScan;
+    const ds = (checkpoint as { domainScan?: { id?: string } }).domainScan;
     if (isRealScanId(ds?.id)) return ds!.id!.trim();
     const outcomes = (checkpoint as { outcomes?: Array<{ stepId?: string; data?: { scanId?: string } }> }).outcomes;
     if (Array.isArray(outcomes)) {
@@ -144,6 +186,16 @@ export function resolveEqcDomainScanIdFromStored(stored: Record<string, unknown>
           return o.data!.scanId!.trim();
         }
       }
+    }
+  }
+
+  const flow = stored.eqcFlowState;
+  if (flow && typeof flow === 'object') {
+    const outputs = (flow as { context?: { outputs?: Record<string, Record<string, unknown>> } }).context
+      ?.outputs;
+    const domain = outputs?.domain;
+    if (domain && isRealScanId(typeof domain.scanId === 'string' ? domain.scanId : null)) {
+      return String(domain.scanId).trim();
     }
   }
 
