@@ -415,6 +415,27 @@ export async function executeEqcCollectionFlowRun(input: {
           name: primary?.name ?? null,
           segment: primary?.segment ?? null,
           count: personas.length || 1,
+          personas: personas.map((p) => ({
+            id: p.id,
+            name: p.name,
+            segment: p.segment,
+            confidence: p.confidence,
+            headline: p.headline,
+            ...(p.profile ? { profile: p.profile } : {}),
+            ...(p.targetGroupId ? { targetGroupId: p.targetGroupId } : {}),
+            ...(p.targetGroupName ? { targetGroupName: p.targetGroupName } : {}),
+          })),
+          targetGroups: step.personaPreview?.targetGroups?.map((g) => ({
+            id: g.id,
+            name: g.name,
+            segment: g.segment,
+          })),
+          geoByPersona: step.geoQuestionsByPersona?.map((g) => ({
+            personaId: g.personaId,
+            personaName: g.personaName,
+            segment: g.segment,
+            questions: g.questions,
+          })),
         }),
         node.id
       );

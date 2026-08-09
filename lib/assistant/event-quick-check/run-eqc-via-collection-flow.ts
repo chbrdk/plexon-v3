@@ -42,6 +42,10 @@ import {
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import type { PersonaBootstrapPreview } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
+import {
+  geoQuestionsByPersonaFromCatalogBundle,
+  personaPreviewFromCatalogBundle,
+} from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 
 const WORKFLOW_TYPE = 'event_quick_check';
 
@@ -161,21 +165,7 @@ function geoJobFromContext(
 function personaPreviewFromContext(
   outputs: Record<string, Record<string, unknown>> | undefined
 ): PersonaBootstrapPreview | undefined {
-  const p = outputs?.persona;
-  if (!p || typeof p.name !== 'string' || !p.name.trim()) return undefined;
-  return {
-    projectId: typeof p.id === 'string' ? p.id : '',
-    projectName: String(p.name),
-    targetGroupId: '',
-    targetGroupName: typeof p.segment === 'string' ? p.segment : '',
-    persona: {
-      id: typeof p.id === 'string' ? p.id : 'persona',
-      name: String(p.name),
-      segment: typeof p.segment === 'string' ? p.segment : '',
-      confidence: 0.8,
-      headline: String(p.name),
-    },
-  };
+  return personaPreviewFromCatalogBundle(outputs?.persona);
 }
 
 /** Map flow node progress onto legacy EQC step ids for ReviewGate/Progress. */
@@ -469,6 +459,7 @@ export async function runEqcViaCollectionFlow(
   );
   const geoJob = geoJobFromContext(outputs, result.lastRun);
   const personaPreview = personaPreviewFromContext(outputs);
+  const geoQuestionsByPersona = geoQuestionsByPersonaFromCatalogBundle(outputs.persona);
 
   const eqcFlowState: EqcFlowRuntimeState = {
     flowId: boot.flowId,
@@ -612,6 +603,7 @@ export async function runEqcViaCollectionFlow(
         personaPreview,
         domainScan,
         geoQuestions,
+        geoQuestionsByPersona,
         geoCompetitors: resumeCheckpoint.geoCompetitors,
         awaitingGeoQuestionsConfirmation: true,
         resumeCheckpoint,
@@ -698,6 +690,7 @@ export async function runEqcViaCollectionFlow(
     domainScan,
     geoJob,
     geoQuestions,
+    geoQuestionsByPersona,
     personaPreview,
     checkionProjectId: boot.checkionProjectId,
     audionProjectId: boot.audionProjectId,

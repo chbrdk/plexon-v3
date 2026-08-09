@@ -8,6 +8,11 @@ import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import type { PersonaBootstrapPreview } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
+import {
+  geoQuestionsByPersonaFromCatalogBundle,
+  personaPreviewFromCatalogBundle,
+  preferRicherPersonaPreview,
+} from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
 import { QUICK_CHECK_LABEL } from '@/lib/assistant/event-quick-check/quick-check-label';
 import type { CollectionFlowLastRun } from '@/lib/collection-test-flow';
@@ -105,21 +110,7 @@ function geoFromOutputs(
 function personaFromOutputs(
   outputs: Record<string, Record<string, unknown>>
 ): PersonaBootstrapPreview | undefined {
-  const p = outputs.persona;
-  if (!p || typeof p.name !== 'string' || !String(p.name).trim()) return undefined;
-  return {
-    projectId: typeof p.id === 'string' ? p.id : '',
-    projectName: String(p.name),
-    targetGroupId: '',
-    targetGroupName: typeof p.segment === 'string' ? p.segment : '',
-    persona: {
-      id: typeof p.id === 'string' ? p.id : 'persona',
-      name: String(p.name),
-      segment: typeof p.segment === 'string' ? p.segment : '',
-      confidence: 0.8,
-      headline: String(p.name),
-    },
-  };
+  return personaPreviewFromCatalogBundle(outputs.persona);
 }
 
 /**
@@ -158,6 +149,7 @@ export function eventQuickCheckResultFromFlowLastRun(input: {
     domainScan: domainFromOutputs(outputs, input.lastRun),
     geoJob: geoFromOutputs(outputs, input.lastRun),
     geoQuestions,
+    geoQuestionsByPersona: geoQuestionsByPersonaFromCatalogBundle(outputs.persona),
     personaPreview: personaFromOutputs(outputs),
     checkionProjectId: input.checkionProjectId,
     audionProjectId: input.audionProjectId,
@@ -207,6 +199,9 @@ export function mergeFlowContextIntoQuickResult(
     domainScan: quick.domainScan ?? synthetic.domainScan,
     geoJob: quick.geoJob ?? synthetic.geoJob,
     geoQuestions: quick.geoQuestions?.length ? quick.geoQuestions : synthetic.geoQuestions,
-    personaPreview: quick.personaPreview ?? synthetic.personaPreview,
+    geoQuestionsByPersona: quick.geoQuestionsByPersona?.length
+      ? quick.geoQuestionsByPersona
+      : synthetic.geoQuestionsByPersona,
+    personaPreview: preferRicherPersonaPreview(quick.personaPreview, synthetic.personaPreview),
   };
 }

@@ -75,6 +75,34 @@ describe('Wave 23 catalog bundles', () => {
     expect(buildPersonaCatalogBundle({ id: 'p1', name: 'Alex', segment: 'Buyer' }).name).toBe(
       'Alex'
     );
+    const rich = buildPersonaCatalogBundle({
+      personas: [
+        {
+          id: 'p1',
+          name: 'Alex',
+          segment: 'Buyer',
+          confidence: 0.9,
+          headline: 'Kauft SaaS',
+          profile: {
+            traits: [{ name: 'Pragmatic', displayName: 'Pragmatic', score: 0.8 }],
+            goals: ['Schneller einkaufen'],
+            painPoints: ['Lange Angebote'],
+            interests: ['Automation'],
+          },
+        },
+        {
+          id: 'p2',
+          name: 'Sam',
+          segment: 'Ops',
+          confidence: 0.8,
+          headline: 'Betriebsprozesse',
+          profile: { traits: [], goals: ['Stabilität'], painPoints: ['Ausfälle'] },
+        },
+      ],
+    });
+    expect(rich.count).toBe(2);
+    expect(Array.isArray(rich.personas)).toBe(true);
+    expect((rich.personas as unknown[]).length).toBe(2);
     const q = buildQueriesCatalogBundle(['Q1', 'Q2']);
     expect(q.items).toEqual(['Q1', 'Q2']);
     expect(q.text).toBe('Q1\nQ2');
@@ -143,6 +171,64 @@ describe('Wave 23 report adapter from flow context', () => {
     expect(result.geoJob?.jobId).toBe('geo-1');
     expect(result.geoQuestions).toEqual(['Was ist Acme?', 'Acme Preis']);
     expect(result.personaPreview?.persona?.name).toBe('Alex');
+  });
+
+  it('hydrates multiple personas with profiles from catalog bundle', () => {
+    const result = eventQuickCheckResultFromFlowLastRun({
+      projectName: 'Acme',
+      lastRun: {
+        startedAt: '2026-01-01T00:00:00.000Z',
+        completedAt: '2026-01-01T00:10:00.000Z',
+        scanId: null,
+        domainScanId: null,
+        geoJobId: null,
+        url: 'https://acme.test',
+        status: 'complete',
+        overallScore: null,
+        citedShare: null,
+        geoFitness: null,
+        context: {
+          outputs: {
+            persona: {
+              id: 'p1',
+              name: 'Alex',
+              segment: 'Buyer',
+              count: 2,
+              personas: [
+                {
+                  id: 'p1',
+                  name: 'Alex',
+                  segment: 'Buyer',
+                  confidence: 0.9,
+                  headline: 'Kauft SaaS',
+                  profile: {
+                    traits: [{ name: 'Pragmatic', displayName: 'Pragmatic', score: 0.82 }],
+                    goals: ['ROI belegen'],
+                    painPoints: ['Lange Sales-Cycles'],
+                    interests: ['Benchmarking'],
+                  },
+                },
+                {
+                  id: 'p2',
+                  name: 'Sam',
+                  segment: 'Ops',
+                  confidence: 0.85,
+                  headline: 'Stabilität',
+                  profile: {
+                    traits: [{ name: 'Careful', displayName: 'Careful', score: 0.7 }],
+                    goals: ['Weniger Incidents'],
+                    painPoints: ['Tool-Chaos'],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+    expect(result.personaPreview?.personas).toHaveLength(2);
+    expect(result.personaPreview?.persona?.profile?.goals).toContain('ROI belegen');
+    expect(result.personaPreview?.personas?.[1]?.profile?.painPoints).toContain('Tool-Chaos');
   });
 
   it('mergeFlowContextIntoQuickResult fills gaps', () => {

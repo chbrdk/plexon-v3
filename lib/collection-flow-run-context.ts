@@ -541,12 +541,34 @@ export function buildPersonaCatalogBundle(input: {
   name?: string | null;
   segment?: string | null;
   count?: number;
+  /** Full persona cards (id/name/segment/headline/profile/…) for magazine restore. */
+  personas?: Array<Record<string, unknown>>;
+  targetGroups?: Array<Record<string, unknown>>;
+  geoByPersona?: Array<Record<string, unknown>>;
 }): Record<string, unknown> {
+  const personas = Array.isArray(input.personas)
+    ? input.personas.filter((p) => p && typeof p === 'object')
+    : [];
+  const primary = personas[0];
+  const primaryName =
+    (typeof primary?.name === 'string' && primary.name.trim()) ||
+    (typeof input.name === 'string' ? input.name.trim() : '') ||
+    null;
+  const primaryId =
+    (typeof primary?.id === 'string' && primary.id.trim()) || input.id || null;
+  const primarySegment =
+    (typeof primary?.segment === 'string' && primary.segment.trim()) ||
+    input.segment ||
+    null;
+
   return {
-    id: input.id ?? null,
-    name: input.name ?? null,
-    segment: input.segment ?? null,
-    count: input.count ?? 1,
+    id: primaryId,
+    name: primaryName,
+    segment: primarySegment,
+    count: Math.max(input.count ?? 0, personas.length, primaryName ? 1 : 0) || 1,
+    ...(personas.length ? { personas } : {}),
+    ...(input.targetGroups?.length ? { targetGroups: input.targetGroups } : {}),
+    ...(input.geoByPersona?.length ? { geoByPersona: input.geoByPersona } : {}),
   };
 }
 
