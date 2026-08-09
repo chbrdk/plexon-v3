@@ -7,6 +7,7 @@ import { API_STATUS } from '@/lib/api-error-handler';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import { researchCompanyBrief } from '@/lib/assistant/event-quick-check/research-company-brief';
 import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
+import { geoPreviewForCatalogBundle } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import { runPersonaAndGeoQuestionsStep } from '@/lib/assistant/event-quick-check/run-persona-and-geo-step';
 import {
   buildBriefCatalogBundle,
@@ -538,6 +539,9 @@ export async function executeEqcCollectionFlowRun(input: {
           geoFitness,
           overallScore: geoResult.job.overallScore ?? null,
           url: geoResult.job.url || scanUrl || startUrl,
+          preview: geoResult.preview
+            ? geoPreviewForCatalogBundle(geoResult.preview)
+            : null,
         }),
         node.id
       );

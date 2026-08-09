@@ -480,6 +480,8 @@ export function buildGeoCatalogBundle(input: {
   geoFitness: number | null;
   overallScore: number | null;
   url: string;
+  /** Full CHECKION GEO preview for magazine restore (models, answers, EEAT, …). */
+  preview?: Record<string, unknown> | null;
 }): Record<string, unknown> {
   return {
     status: input.status,
@@ -487,6 +489,7 @@ export function buildGeoCatalogBundle(input: {
     geoFitness: input.geoFitness,
     overallScore: input.overallScore,
     url: input.url,
+    ...(input.preview && typeof input.preview === 'object' ? { preview: input.preview } : {}),
   };
 }
 

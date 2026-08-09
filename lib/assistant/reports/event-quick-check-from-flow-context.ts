@@ -8,6 +8,7 @@ import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import type { PersonaBootstrapPreview } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
+import { geoJobFromCatalogBundle } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import {
   geoQuestionsByPersonaFromCatalogBundle,
   personaPreviewFromCatalogBundle,
@@ -95,16 +96,7 @@ function geoFromOutputs(
   outputs: Record<string, Record<string, unknown>>,
   lastRun: CollectionFlowLastRun
 ): GeoEeatJobPreview | undefined {
-  const g = outputs.geo;
-  if (!g && !lastRun.geoJobId) return undefined;
-  return {
-    jobId: lastRun.geoJobId || 'unknown',
-    url: typeof g?.url === 'string' ? g.url : lastRun.url || '',
-    status: typeof g?.status === 'string' ? g.status : 'completed',
-    overallScore: typeof g?.overallScore === 'number' ? g.overallScore : null,
-    geoFitnessScore:
-      typeof g?.geoFitness === 'number' ? g.geoFitness : lastRun.geoFitness ?? null,
-  };
+  return geoJobFromCatalogBundle(outputs.geo, lastRun.geoJobId);
 }
 
 function personaFromOutputs(

@@ -33,6 +33,11 @@ export const EQC_REPORT_COPY = {
   chartQueryFallback: 'Frage',
   geoModelSwitcherLabel: 'LLM-Modell',
   geoModelAllLabel: 'Alle Modelle',
+  geoPromptsLabel: 'Prompts',
+  geoAnswerLabel: 'Antwort',
+  geoCiteStackLabel: 'Cite-Stack',
+  geoNoCitationsInAnswer: 'Keine Zitierungen in dieser Antwort.',
+  geoCiteYouCount: 'zitieren dich',
   chartCitationCompetitorsHint:
     'Position pro Suchanfrage — eigene Domain und Wettbewerber (1 = zuerst genannt, leer = nicht zitiert)',
   geoOwnDomainLabel: 'Eigene Domain',

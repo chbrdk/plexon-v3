@@ -28,6 +28,7 @@ import {
   hydrateEventQuickCheckReportDomainPages,
   resolveEqcDomainScanIdFromStored,
 } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
+import { hydrateEventQuickCheckReportGeo } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
 import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
@@ -85,17 +86,29 @@ export async function GET(
 
   const seeded = seedDomainFromCheckpoint(reportFromWorkflowRun(run), checkpoint);
   const fallbackScanId = resolveEqcDomainScanIdFromStored(stored);
-  const report = await hydrateEventQuickCheckReportDomainPages(seeded, fallbackScanId);
+  const withDomain = await hydrateEventQuickCheckReportDomainPages(seeded, fallbackScanId);
+  const report = await hydrateEventQuickCheckReportGeo(withDomain);
 
-  const before = seeded?.domain;
-  const after = report?.domain;
-  const improved =
+  const beforeDomain = seeded?.domain;
+  const afterDomain = report?.domain;
+  const beforeGeoRuns =
+    seeded?.geo?.citationHighlightsByModel?.reduce(
+      (n, s) => n + (s.runs?.length ?? 0),
+      0
+    ) ?? 0;
+  const afterGeoRuns =
+    report?.geo?.citationHighlightsByModel?.reduce(
+      (n, s) => n + (s.runs?.length ?? 0),
+      0
+    ) ?? 0;
+  const domainImproved =
     Boolean(report) &&
-    Boolean(after) &&
-    (before?.totalPages !== after?.totalPages ||
-      before?.stats?.errors !== after?.stats?.errors ||
-      before?.scanId !== after?.scanId);
-  if (improved && report) {
+    Boolean(afterDomain) &&
+    (beforeDomain?.totalPages !== afterDomain?.totalPages ||
+      beforeDomain?.stats?.errors !== afterDomain?.stats?.errors ||
+      beforeDomain?.scanId !== afterDomain?.scanId);
+  const geoImproved = Boolean(report) && afterGeoRuns > beforeGeoRuns;
+  if ((domainImproved || geoImproved) && report) {
     await updateAssistantWorkflowRun(run.id, {
       result: {
         ...stored,

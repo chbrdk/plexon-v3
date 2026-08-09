@@ -286,19 +286,26 @@ export async function runCheckionGeoJobV3(input: {
   queries?: string[];
   includePageScan?: boolean;
 }): Promise<
-  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals }
+  | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals; preview?: GeoEeatJobPreview }
   | { ok: false; error: string; job?: CheckionGeoJobSummary }
 > {
   const started = await startCheckionGeoJobV3(input);
   if (!started.ok) return started;
   if (TERMINAL.has(started.job.status.toLowerCase())) {
+    const previewRes = await fetchCheckionGeoJobV3Preview(started.job.id);
     return {
       ok: true,
       job: started.job,
       signals: { citedShare: started.job.citedShare, geoFitness: started.job.geoFitness },
+      ...(previewRes.ok ? { preview: previewRes.job } : {}),
     };
   }
   const polled = await pollCheckionGeoJobV3(started.job.id);
   if (!polled.ok) return { ok: false, error: polled.error, job: started.job };
-  return { ok: true, job: polled.job, signals: polled.signals };
+  return {
+    ok: true,
+    job: polled.job,
+    signals: polled.signals,
+    preview: polled.preview,
+  };
 }

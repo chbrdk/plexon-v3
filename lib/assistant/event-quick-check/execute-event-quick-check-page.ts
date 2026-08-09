@@ -305,10 +305,14 @@ export async function executeEventQuickCheckRun(
   if (run.status === 'completed' && stored[EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY]) {
     const { hydrateEventQuickCheckReportDomainPages, resolveEqcDomainScanIdFromStored } =
       await import('@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count');
-    const report = await hydrateEventQuickCheckReportDomainPages(
+    const { hydrateEventQuickCheckReportGeo } = await import(
+      '@/lib/assistant/event-quick-check/hydrate-geo-job-preview'
+    );
+    const withDomain = await hydrateEventQuickCheckReportDomainPages(
       stored[EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY] as EventQuickCheckReportModel,
       resolveEqcDomainScanIdFromStored(stored as Record<string, unknown>)
     );
+    const report = (await hydrateEventQuickCheckReportGeo(withDomain)) ?? withDomain;
     return {
       ok: true,
       workflowRunId: run.id,

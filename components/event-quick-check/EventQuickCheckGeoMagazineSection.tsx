@@ -120,7 +120,7 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
             <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
               Share of voice
             </Text>
-            <Text role="title" as="h3" id="eqc-geo-voice-heading">
+            <Text role="display" as="h3" id="eqc-geo-voice-heading">
               {EQC_REPORT_COPY.competitors}
             </Text>
           </header>

@@ -52,6 +52,7 @@ import {
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
 import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import { geoPreviewForCatalogBundle } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import {
   buildDomainCatalogBundle,
   buildGeoCatalogBundle,
@@ -706,6 +707,9 @@ export async function executeCollectionFlowRun(input: {
               geoFitness: geoFitnessVal,
               overallScore: geoOverall,
               url: geoUrl,
+              preview: geoResult.preview
+                ? geoPreviewForCatalogBundle(geoResult.preview)
+                : null,
             }),
             geoNode?.id
           );
@@ -799,6 +803,9 @@ export async function executeCollectionFlowRun(input: {
           geoFitness: geoFitnessVal,
           overallScore: geoOverall,
           url: geoUrl,
+          preview: geoResult.preview
+            ? geoPreviewForCatalogBundle(geoResult.preview)
+            : null,
         }),
         geoNode?.id
       );

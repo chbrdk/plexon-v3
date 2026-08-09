@@ -9,6 +9,10 @@ import { bootstrapEqcCollection } from '@/lib/assistant/event-quick-check/bootst
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import { hydrateDomainScanPageCount } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import {
+  geoJobFromCatalogBundle,
+  hydrateGeoJobPreview,
+} from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
+import {
   EVENT_QUICK_CHECK_INITIAL_STEPS,
   EVENT_QUICK_CHECK_STREAM_TITLE,
 } from '@/lib/assistant/ui-blocks/event-quick-check-steps';
@@ -150,16 +154,7 @@ function geoJobFromContext(
   outputs: Record<string, Record<string, unknown>> | undefined,
   lastRun: { geoJobId?: string | null; citedShare?: number | null; geoFitness?: number | null }
 ): GeoEeatJobPreview | undefined {
-  const g = outputs?.geo;
-  if (!g && !lastRun.geoJobId) return undefined;
-  return {
-    jobId: lastRun.geoJobId || 'unknown',
-    url: typeof g?.url === 'string' ? g.url : '',
-    status: typeof g?.status === 'string' ? g.status : 'completed',
-    overallScore: typeof g?.overallScore === 'number' ? g.overallScore : null,
-    geoFitnessScore:
-      typeof g?.geoFitness === 'number' ? g.geoFitness : lastRun.geoFitness ?? null,
-  };
+  return geoJobFromCatalogBundle(outputs?.geo, lastRun.geoJobId);
 }
 
 function personaPreviewFromContext(
@@ -457,7 +452,9 @@ export async function runEqcViaCollectionFlow(
   const domainScan = await hydrateDomainScanPageCount(
     domainScanFromContext(outputs, result.lastRun)
   );
-  const geoJob = geoJobFromContext(outputs, result.lastRun);
+  const geoJob = await hydrateGeoJobPreview(
+    geoJobFromContext(outputs, result.lastRun)
+  );
   const personaPreview = personaPreviewFromContext(outputs);
   const geoQuestionsByPersona = geoQuestionsByPersonaFromCatalogBundle(outputs.persona);
 
