@@ -1992,6 +1992,43 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: 0.55rem;
 }
 
+.plexon-eqc-mag-persona-lists {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+  min-width: 0;
+}
+
+.plexon-eqc-mag-persona-list.ds-rank-block {
+  min-width: 0;
+}
+
+.plexon-eqc-mag-persona-list .ds-rank-hint {
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plexon-eqc-mag-persona-list .ds-rank-row,
+.plexon-eqc-mag-persona-list .category-rank-row {
+  padding-block: 0.28rem;
+  gap: 0.4rem;
+}
+
+.plexon-eqc-mag-persona-list .ds-rank-label,
+.plexon-eqc-mag-persona-list .category-rank-label {
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 900px) {
+  .plexon-eqc-mag-persona-lists {
+    grid-template-columns: 1fr;
+  }
+}
+
 .plexon-eqc-mag-trait {
   display: grid;
   gap: 0.25rem;

@@ -431,26 +431,38 @@ export function EventQuickCheckDashboardView({
                 <TraitBars traits={persona.traits} />
               </div>
             ) : null}
-            {persona.goals.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionGoals}>
-                {persona.goals.map((g, i) => (
-                  <RankedRow key={i} index={i + 1} label={g} />
-                ))}
-              </RankedList>
-            ) : null}
-            {persona.painPoints.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionPainPoints}>
-                {persona.painPoints.map((g, i) => (
-                  <RankedRow key={i} index={i + 1} label={g} />
-                ))}
-              </RankedList>
-            ) : null}
-            {persona.interests.length > 0 ? (
-              <RankedList hint={EQC_REPORT_COPY.sectionInterests}>
-                {persona.interests.map((interest, i) => (
-                  <RankedRow key={i} index={i + 1} label={interest} />
-                ))}
-              </RankedList>
+            {persona.goals.length > 0 ||
+            persona.painPoints.length > 0 ||
+            persona.interests.length > 0 ? (
+              <div className="plexon-eqc-mag-persona-lists">
+                {persona.goals.length > 0 ? (
+                  <RankedList hint={EQC_REPORT_COPY.sectionGoals} className="plexon-eqc-mag-persona-list">
+                    {persona.goals.map((g, i) => (
+                      <RankedRow key={i} index={i + 1} label={g} />
+                    ))}
+                  </RankedList>
+                ) : null}
+                {persona.painPoints.length > 0 ? (
+                  <RankedList
+                    hint={EQC_REPORT_COPY.sectionPainPoints}
+                    className="plexon-eqc-mag-persona-list"
+                  >
+                    {persona.painPoints.map((g, i) => (
+                      <RankedRow key={i} index={i + 1} label={g} />
+                    ))}
+                  </RankedList>
+                ) : null}
+                {persona.interests.length > 0 ? (
+                  <RankedList
+                    hint={EQC_REPORT_COPY.sectionInterests}
+                    className="plexon-eqc-mag-persona-list"
+                  >
+                    {persona.interests.map((interest, i) => (
+                      <RankedRow key={i} index={i + 1} label={interest} />
+                    ))}
+                  </RankedList>
+                ) : null}
+              </div>
             ) : null}
             {(persona.geoQuestions?.length ?? 0) > 0 ? (
               <RankedList hint={EQC_REPORT_COPY.sectionGeoQuestions}>
