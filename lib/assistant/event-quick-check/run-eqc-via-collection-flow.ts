@@ -58,18 +58,25 @@ function briefFromContext(
   outputs: Record<string, Record<string, unknown>> | undefined
 ): EventQuickCheckCompanyBrief | undefined {
   const b = outputs?.brief;
-  if (!b || typeof b.displayName !== 'string') return undefined;
+  if (!b) return undefined;
+  const displayName =
+    typeof b.displayName === 'string' && b.displayName.trim()
+      ? b.displayName.trim()
+      : typeof b.name === 'string' && b.name.trim()
+        ? b.name.trim()
+        : '';
+  if (!displayName) return undefined;
   return {
-    displayName: String(b.displayName),
+    displayName,
     industry: typeof b.industry === 'string' ? b.industry : '',
     summary: typeof b.summary === 'string' ? b.summary : '',
     targetAudienceHint: typeof b.targetAudienceHint === 'string' ? b.targetAudienceHint : '',
     disambiguationNote: typeof b.disambiguationNote === 'string' ? b.disambiguationNote : '',
     companyContext: typeof b.companyContext === 'string' ? b.companyContext : '',
     sources: {
-      url: '',
-      domain: '',
-      h1: [],
+      url: typeof b.url === 'string' ? b.url : '',
+      domain: typeof b.domain === 'string' ? b.domain : '',
+      h1: Array.isArray(b.h1) ? b.h1.map((x) => String(x)) : [],
     },
     generatedAt: typeof b.generatedAt === 'string' ? b.generatedAt : new Date().toISOString(),
   };
@@ -476,24 +483,36 @@ export async function runEqcViaCollectionFlow(
     const kind = result.lastRun.awaitingConfirmKind;
     steps = await syncStepsFromFlow({ patchStep, awaitingKind: kind });
 
-    if (kind === 'brief' && companyBrief) {
+    if (kind === 'brief') {
+      const brief =
+        companyBrief ??
+        ({
+          displayName: projectName,
+          industry: '',
+          summary: `Unternehmensprofil für ${projectName}`,
+          targetAudienceHint: '',
+          disambiguationNote: '',
+          companyContext: '',
+          sources: { url, domain: '', h1: [] },
+          generatedAt: new Date().toISOString(),
+        } satisfies EventQuickCheckCompanyBrief);
       outcomes.push({
         stepId: 'company_research',
         label: 'Unternehmen recherchieren',
         status: 'done',
-        data: { displayName: companyBrief.displayName, industry: companyBrief.industry },
+        data: { displayName: brief.displayName, industry: brief.industry },
       });
       return {
         ok: true,
         playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
         playbookLabel: QUICK_CHECK_LABEL,
-        projectName: companyBrief.displayName || projectName,
+        projectName: brief.displayName || projectName,
         url,
         platformProjectId: boot.platformProjectId,
         dashboardPath: boot.dashboardPath,
         outcomes,
         steps,
-        companyBrief,
+        companyBrief: brief,
         awaitingCompanyBriefConfirmation: true,
         checkionProjectId: boot.checkionProjectId,
         audionProjectId: boot.audionProjectId,
@@ -503,15 +522,43 @@ export async function runEqcViaCollectionFlow(
     }
 
     if (kind === 'competitors') {
+      const briefForCompetitors =
+        companyBrief ??
+        ({
+          displayName: projectName,
+          industry: '',
+          summary: '',
+          targetAudienceHint: '',
+          disambiguationNote: '',
+          companyContext: '',
+          sources: { url, domain: '', h1: [] },
+          generatedAt: new Date().toISOString(),
+        } satisfies EventQuickCheckCompanyBrief);
+      if (!boot.checkionProjectId) {
+        return {
+          ok: false,
+          playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
+          playbookLabel: QUICK_CHECK_LABEL,
+          projectName,
+          url,
+          platformProjectId: boot.platformProjectId,
+          outcomes,
+          steps,
+          companyBrief: briefForCompetitors,
+          error:
+            'CHECKION-Projekt fehlt — Wettbewerber können nicht gespeichert werden. Bitte Integration prüfen.',
+          eqcFlowState,
+        };
+      }
       const competitorsCheckpoint = buildEventQuickCheckCompetitorsCheckpoint({
         projectName,
         url,
         platformProjectId: boot.platformProjectId,
         dashboardPath: boot.dashboardPath,
-        checkionProjectId: boot.checkionProjectId || '',
+        checkionProjectId: boot.checkionProjectId,
         audionProjectId: boot.audionProjectId,
         audionSetupRequired: Boolean(boot.audionSetupRequired),
-        companyBrief: companyBrief!,
+        companyBrief: briefForCompetitors,
         outcomes,
         depth,
       });
@@ -525,7 +572,7 @@ export async function runEqcViaCollectionFlow(
         dashboardPath: boot.dashboardPath,
         outcomes,
         steps,
-        companyBrief,
+        companyBrief: briefForCompetitors,
         awaitingCompetitorsConfirmation: true,
         competitorsDraft: competitors,
         competitorsCheckpoint,
@@ -573,6 +620,20 @@ export async function runEqcViaCollectionFlow(
         eqcFlowState,
       };
     }
+
+    return {
+      ok: false,
+      playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
+      playbookLabel: QUICK_CHECK_LABEL,
+      projectName,
+      url,
+      platformProjectId: boot.platformProjectId,
+      outcomes,
+      steps,
+      companyBrief,
+      error: `Unerwarteter Pause-Zustand: ${kind ?? 'unbekannt'}`,
+      eqcFlowState,
+    };
   }
 
   if (result.verdict.status === 'error' || result.lastRun.status === 'error') {

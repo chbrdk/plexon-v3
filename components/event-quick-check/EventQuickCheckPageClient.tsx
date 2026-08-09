@@ -718,12 +718,13 @@ export function EventQuickCheckPageClient() {
         credentials: 'same-origin',
       });
 
-      const result = (await executeRes.json()) as {
-        ok: boolean;
+      const result = (await executeRes.json().catch(() => ({}))) as {
+        ok?: boolean;
         report?: EventQuickCheckReportModel;
         steps?: WorkflowStep[];
         platformProjectId?: string;
         error?: string;
+        message?: string;
         awaitingCompanyBrief?: boolean;
         companyBrief?: EventQuickCheckCompanyBrief;
         awaitingCompetitors?: boolean;
@@ -773,7 +774,11 @@ export function EventQuickCheckPageClient() {
       if (result.steps?.length) setSteps(result.steps);
 
       if (!executeRes.ok || !result.ok || !result.report) {
-        throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
+        const detail =
+          (typeof result.error === 'string' && result.error.trim()) ||
+          (typeof result.message === 'string' && result.message.trim()) ||
+          (!executeRes.ok ? `HTTP ${executeRes.status}` : null);
+        throw new Error(detail ? `${EQC_PAGE_COPY.errorRunFailed} ${detail}` : EQC_PAGE_COPY.errorRunFailed);
       }
 
       setReport(result.report);

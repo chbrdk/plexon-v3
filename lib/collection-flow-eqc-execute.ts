@@ -200,13 +200,20 @@ export async function executeEqcCollectionFlowRun(input: {
 
   const checkionProjectId = await getExternalProjectId(id, 'checkion');
   const audionProjectId = await getExternalProjectId(id, 'audion');
-  if (!checkionProjectId) {
-    return {
-      ok: false,
-      status: API_STATUS.BAD_REQUEST,
-      message: 'CHECKION binding missing — bootstrap Collection first',
-    };
-  }
+
+  const requireCheckion = async (reason: string) => {
+    if (checkionProjectId) return checkionProjectId;
+    return failEqc({
+      id,
+      fid,
+      doc,
+      startedAt,
+      startUrl,
+      runContext,
+      error: `CHECKION-Bindung fehlt (${reason}) — Collection-Bootstrap prüfen.`,
+      historyRunId: input.historyRunId,
+    });
+  };
 
   let domainScanId: string | null = null;
   let geoJobId: string | null = null;
@@ -237,8 +244,10 @@ export async function executeEqcCollectionFlowRun(input: {
     }
 
     if (node.kind === 'competitors_suggest') {
+      const boundCheckion = await requireCheckion('Wettbewerber');
+      if (typeof boundCheckion !== 'string') return boundCheckion;
       const suggested = await suggestCheckionProjectCompetitors({
-        projectId: checkionProjectId,
+        projectId: boundCheckion,
         url: startUrl,
       });
       const items = suggested.ok ? suggested.competitors ?? [] : [];
@@ -315,6 +324,8 @@ export async function executeEqcCollectionFlowRun(input: {
     }
 
     if (node.kind === 'domain_scan') {
+      const boundCheckion = await requireCheckion('Domain-Scan');
+      if (typeof boundCheckion !== 'string') return boundCheckion;
       const qualityNode = qualityScanNode(resolvedNodes) ?? resolved;
       const chain = resolveRunUrlChain({
         ctx: runContext,
@@ -326,7 +337,7 @@ export async function executeEqcCollectionFlowRun(input: {
       const url = chain.qualityUrl || chain.baseUrl || startUrl;
       scanUrl = url || startUrl;
       const domainResult = await runCheckionDomainScanV3({
-        projectId: checkionProjectId,
+        projectId: boundCheckion,
         url: scanUrl,
         maxPages:
           typeof qualityNode.maxPages === 'number' ? qualityNode.maxPages : profile.scanMaxPages,
@@ -452,6 +463,8 @@ export async function executeEqcCollectionFlowRun(input: {
     }
 
     if (node.kind === 'geo_job') {
+      const boundCheckion = await requireCheckion('GEO');
+      if (typeof boundCheckion !== 'string') return boundCheckion;
       const geoNode = geoJobNode(resolvedNodes) ?? resolved;
       const queries = geoJobQueriesFromText(
         resolveFlowParamString(runContext, geoNode.text) ||
@@ -472,7 +485,7 @@ export async function executeEqcCollectionFlowRun(input: {
         startUrl: scanUrl || startUrl,
       });
       const geoResult = await runCheckionGeoJobV3({
-        projectId: checkionProjectId,
+        projectId: boundCheckion,
         platformProjectId: id,
         url: chain.geoUrl || scanUrl || startUrl || undefined,
         companyName: companyName || undefined,
