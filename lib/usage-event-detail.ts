@@ -41,6 +41,24 @@ export function formatUsageEventDetail(eventType: string, rawUnits: Raw): string
     return typeof q === 'number' ? `queries: ${q}` : '';
   }
 
+  if (eventType === 'brandion_detect') {
+    const kind = typeof rawUnits.kind === 'string' ? rawUnits.kind : 'detect';
+    const pages = rawUnits.pages;
+    const runs = rawUnits.runs;
+    const obs = rawUnits.observations;
+    const parts = [kind];
+    if (typeof pages === 'number' && !Number.isNaN(pages)) parts.push(`pages:${pages}`);
+    if (typeof runs === 'number' && !Number.isNaN(runs)) parts.push(`runs:${runs}`);
+    if (typeof obs === 'number' && !Number.isNaN(obs)) parts.push(`obs:${obs}`);
+    return parts.join(' · ');
+  }
+
+  if (eventType === 'brandion_measure') {
+    const kind = typeof rawUnits.kind === 'string' ? rawUnits.kind : 'measure';
+    const runs = rawUnits.runs;
+    return typeof runs === 'number' ? `${kind} · runs:${runs}` : kind;
+  }
+
   if (eventType === 'llm_request' || eventType === 'chat') {
     const inp = rawUnits.input_tokens ?? rawUnits.prompt_tokens;
     const out = rawUnits.output_tokens ?? rawUnits.completion_tokens;

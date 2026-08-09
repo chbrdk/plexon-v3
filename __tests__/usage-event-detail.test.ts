@@ -49,4 +49,13 @@ describe('formatUsageEventDetail', () => {
     expect(s).toContain('out 20');
     expect(s).toContain('gpt-5.6-luna');
   });
+
+  it('formats brandion_detect', () => {
+    expect(
+      formatUsageEventDetail('brandion_detect', { kind: 'pdf', pages: 3, observations: 40 }),
+    ).toContain('pdf');
+    expect(
+      formatUsageEventDetail('brandion_detect', { kind: 'pdf', pages: 3, observations: 40 }),
+    ).toContain('pages:3');
+  });
 });

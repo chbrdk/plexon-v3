@@ -84,6 +84,17 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
       return 75 * (num(r.runs, 1) || 1);
     case 'retrieval_query':
       return 18 * (num(r.queries, 1) || 1);
+    /** BRANDION Lab detect — scripts/PDF/image inventory (no OpenAI required). */
+    case 'brandion_detect': {
+      const kind = typeof r.kind === 'string' ? r.kind : 'image';
+      if (kind === 'pdf') {
+        return 40 * (num(r.pages, 1) || 1);
+      }
+      return 25 * (num(r.runs, 1) || 1);
+    }
+    /** BRANDION Measured evaluate / analysis-run (scripts + optional Vision). */
+    case 'brandion_measure':
+      return 30 * (num(r.runs, 1) || 1);
     default:
       return DEFAULT_UNKNOWN_TOKENS;
   }

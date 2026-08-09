@@ -80,6 +80,18 @@ describe('usage-conversion', () => {
       expect(tokensFromEvent('retrieval_query', { queries: 4 })).toBe(72);
     });
 
+    it('brandion_detect: pdf pages / image runs', () => {
+      expect(tokensFromEvent('brandion_detect', { kind: 'pdf', pages: 2 })).toBe(80);
+      expect(tokensFromEvent('brandion_detect', { kind: 'pdf' })).toBe(40);
+      expect(tokensFromEvent('brandion_detect', { kind: 'image', runs: 1 })).toBe(25);
+      expect(tokensFromEvent('brandion_detect', { kind: 'image', runs: 2 })).toBe(50);
+    });
+
+    it('brandion_measure: 30 tokens per run', () => {
+      expect(tokensFromEvent('brandion_measure', { runs: 1 })).toBe(30);
+      expect(tokensFromEvent('brandion_measure', { runs: 3 })).toBe(90);
+    });
+
     it('journey_validate: 35 tokens per persona slot', () => {
       expect(tokensFromEvent('journey_validate', { personas: 1 })).toBe(35);
       expect(tokensFromEvent('journey_validate', { personas: 3 })).toBe(105);
