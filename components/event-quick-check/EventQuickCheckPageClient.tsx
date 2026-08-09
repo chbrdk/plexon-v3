@@ -338,9 +338,9 @@ export function EventQuickCheckPageClient() {
 
         if (result.steps?.length) setSteps(result.steps);
 
-        if (result.awaitingCompetitors && result.competitors?.length) {
+        if (result.awaitingCompetitors) {
           setCompanyBrief(null);
-          setCompetitors(result.competitors);
+          setCompetitors(result.competitors?.length ? result.competitors : ['']);
           setMaxCompetitors(result.maxCompetitors ?? 3);
           setPhase('competitorsReview');
           void refreshHistory();
@@ -746,10 +746,10 @@ export function EventQuickCheckPageClient() {
         return;
       }
 
-      if (result.awaitingCompetitors && result.competitors?.length) {
+      if (result.awaitingCompetitors) {
         streamRef.current?.close();
         streamRef.current = null;
-        setCompetitors(result.competitors);
+        setCompetitors(result.competitors?.length ? result.competitors : ['']);
         setMaxCompetitors(result.maxCompetitors ?? 3);
         setPhase('competitorsReview');
         void refreshHistory();

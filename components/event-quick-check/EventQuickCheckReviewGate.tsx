@@ -107,10 +107,10 @@ export function EventQuickCheckReviewGate({
           throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
         }
 
-        if (result.awaitingCompetitors && result.competitors?.length) {
+        if (result.awaitingCompetitors) {
           setSnapshot({
             awaitingCompetitors: true,
-            competitors: result.competitors,
+            competitors: result.competitors?.length ? result.competitors : [''],
             maxCompetitors: result.maxCompetitors,
             status: 'running',
           });
