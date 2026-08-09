@@ -2618,7 +2618,7 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-eqc-geo-voice__board {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(12rem, 0.85fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 1fr);
   gap: clamp(1.25rem, 3vw, 2.25rem);
   align-items: center;
 }
@@ -2724,13 +2724,17 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   position: relative;
   margin: 0;
   min-width: 0;
+  width: min(100%, 26rem);
+  justify-self: end;
 }
 
 .plexon-eqc-voice-radar__svg {
   display: block;
-  width: min(100%, 17.5rem);
+  width: 100%;
+  max-width: 26rem;
   height: auto;
   margin: 0 auto;
+  overflow: visible;
 }
 
 .plexon-eqc-voice-radar__ring {
@@ -2747,10 +2751,27 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   fill: color-mix(in srgb, var(--accent, var(--color-secondary-dx-green, #00ca55)) 28%, transparent);
   stroke: var(--accent, var(--color-secondary-dx-green, #00ca55));
   stroke-width: 1.5;
+  pointer-events: none;
+}
+
+.plexon-eqc-voice-radar__hit {
+  cursor: pointer;
+}
+
+.plexon-eqc-voice-radar__hit-area {
+  fill: transparent;
+  stroke: none;
+  outline: none;
+}
+
+.plexon-eqc-voice-radar__hit[data-active='true'] .plexon-eqc-voice-radar__dot {
+  r: 5.5;
 }
 
 .plexon-eqc-voice-radar__dot {
   fill: var(--accent, var(--color-secondary-dx-green, #00ca55));
+  pointer-events: none;
+  transition: r 120ms ease;
 }
 
 .plexon-eqc-voice-radar__dot--own {
@@ -2761,13 +2782,26 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-eqc-voice-radar__label {
   fill: var(--muted);
-  font-size: 8.5px;
+  font-size: 10px;
   letter-spacing: 0.02em;
+  pointer-events: none;
 }
 
 .plexon-eqc-voice-radar__label--own {
   fill: var(--ink, var(--fg));
   font-weight: 600;
+}
+
+.plexon-eqc-voice-radar__tooltip {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, calc(-100% - 0.65rem));
+  pointer-events: none;
+  min-width: 11rem;
+}
+
+.plexon-eqc-voice-radar__tooltip .plexon-eqc-chart-tooltip {
+  min-width: 11rem;
 }
 
 .plexon-eqc-voice-radar__a11y {
@@ -2780,6 +2814,13 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+@media (max-width: 860px) {
+  .plexon-eqc-voice-radar {
+    justify-self: center;
+    width: min(100%, 22rem);
+  }
 }
 
 .plexon-eqc-geo-placement {

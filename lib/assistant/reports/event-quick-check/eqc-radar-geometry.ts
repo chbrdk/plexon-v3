@@ -6,9 +6,13 @@
 export type EqcRadarPoint = {
   key: string
   label: string
+  /** Full domain for tooltips (label may be shortened). */
+  domain?: string
   /** 0..1 */
   value: number
   highlight?: boolean
+  mentionCount?: number | null
+  avgPosition?: number | null
 }
 
 export const EQC_VOICE_RADAR_MIN_AXES = 3
@@ -81,6 +85,8 @@ export type VoiceRadarRow = {
   domain: string
   pct: number
   isOwn?: boolean
+  mentionCount?: number | null
+  avgPosition?: number | null
 }
 
 /** Top-N share-of-voice → radar axes (pct 0..100 → 0..1). */
@@ -94,8 +100,11 @@ export function buildEqcVoiceRadarPoints(
   if (sliced.length < minAxes) return null
   return sliced.map((r) => ({
     key: r.domain,
+    domain: r.domain,
     label: eqcRadarShortLabel(r.domain, r.isOwn),
     value: clamp01(r.pct / 100),
     highlight: Boolean(r.isOwn),
+    mentionCount: r.mentionCount ?? null,
+    avgPosition: r.avgPosition ?? null,
   }))
 }
