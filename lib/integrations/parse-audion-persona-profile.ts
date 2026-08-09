@@ -58,6 +58,28 @@ function resolveProfileForLocale(
   return { ...base, ...profileDe };
 }
 
+/**
+ * audion-v3 `POST …/personas/generate` returns `{ personas: [{ id, name, role }] }`.
+ * Older FastAPI / single PersonaResponse stay as-is.
+ */
+export function unwrapAudionPersonaGeneratePayload(
+  json: Record<string, unknown>
+): Record<string, unknown> {
+  const list = json.personas;
+  if (!Array.isArray(list) || list.length === 0) return json;
+  const first = asRecord(list[0]);
+  if (!first) return json;
+  const role = typeof first.role === 'string' ? first.role.trim() : '';
+  return {
+    ...json,
+    id: first.id ?? json.id,
+    name: first.name ?? json.name,
+    role: role || undefined,
+    segment: first.segment ?? (role || json.segment),
+    headline: first.headline ?? (role || first.name),
+  };
+}
+
 /** Normalize AUDION PersonaResponse (or legacy flat JSON) for assistant UI. */
 export function parseAudionPersonaResponse(
   json: Record<string, unknown>,
@@ -66,24 +88,27 @@ export function parseAudionPersonaResponse(
   const outputLocale = normalizeAudionPersonaOutputLocale(
     options?.outputLocale ?? PLEXON_DEFAULT_AUDION_PERSONA_OUTPUT_LOCALE
   );
-  const profile = resolveProfileForLocale(json, outputLocale);
-  const metadata = asRecord(json.metadata);
+  const payload = unwrapAudionPersonaGeneratePayload(json);
+  const profile = resolveProfileForLocale(payload, outputLocale);
+  const metadata = asRecord(payload.metadata);
 
   const id = String(
-    metadata?.personaId ?? profile.id ?? json.id ?? `persona-${Date.now()}`
+    metadata?.personaId ?? profile.id ?? payload.id ?? `persona-${Date.now()}`
   );
-  const name = String(profile.name ?? json.name ?? 'Persona');
-  const segment = String(profile.segment ?? json.segment ?? name);
+  const name = String(profile.name ?? payload.name ?? 'Persona');
+  const segment = String(profile.segment ?? payload.segment ?? payload.role ?? name);
   const headlineDe =
-    typeof json.headline_de === 'string' && json.headline_de.trim()
-      ? json.headline_de.trim()
+    typeof payload.headline_de === 'string' && payload.headline_de.trim()
+      ? payload.headline_de.trim()
       : typeof profile.headline_de === 'string' && profile.headline_de.trim()
         ? String(profile.headline_de).trim()
         : '';
-  const headlineEn = String(profile.headline ?? json.headline ?? profile.bio ?? 'Generierte Persona');
+  const headlineEn = String(
+    profile.headline ?? payload.headline ?? profile.bio ?? 'Generierte Persona'
+  );
   const headline = outputLocale === 'de' && headlineDe ? headlineDe : headlineEn;
   const confidence = Number(
-    metadata?.confidence ?? profile.confidence ?? json.confidence ?? 0.75
+    metadata?.confidence ?? profile.confidence ?? payload.confidence ?? 0.75
   );
 
   const traits = parseTraits(profile.traits);

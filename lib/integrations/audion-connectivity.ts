@@ -79,7 +79,10 @@ export function formatAudionHttpFailure(
   context: string
 ): string {
   if (isAudionHtmlOrLoginRedirect(contentType, body)) {
-    return `${context}: Login-Redirect/HTML (${status}) – AUDION_API_URL vermutlich falsch (Web statt FastAPI). Coolify: AUDION_API_URL=http://audion-api:8000 und AUDION_API_TOKEN=audion_…`;
+    if (status === 404) {
+      return `${context}: Route fehlt (404 HTML) – bei audion-v3 muss POST …/target-groups/{id}/personas/generate existieren (Deploy audion-v3). Coolify: AUDION_API_URL=https://audion-v3…/api + AUDION_API_TOKEN=audion_…`;
+    }
+    return `${context}: Login-Redirect/HTML (${status}) – AUDION_API_URL zeigt vermutlich auf die Web-App ohne /api. Coolify: AUDION_API_URL=https://audion-v3…/api und AUDION_API_TOKEN=audion_… (gleicher Wert auf Audion-Web)`;
   }
   const snippet = body.trim().slice(0, 120).replace(/\s+/g, ' ');
   return snippet

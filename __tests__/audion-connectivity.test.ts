@@ -44,14 +44,25 @@ describe('audion-connectivity', () => {
     expect(diag.apiUrlPrefix).toContain('/api');
   });
 
-  it('formats login redirect errors clearly', () => {
+  it('formats 404 HTML as missing route (audion-v3)', () => {
     const msg = formatAudionHttpFailure(
       404,
       'text/html',
       '<!doctype html><a href="/login">',
       'AUDION Zielgruppen'
     );
+    expect(msg).toContain('Route fehlt');
+    expect(msg).toContain('personas/generate');
+  });
+
+  it('formats non-404 HTML as web-app URL misconfig', () => {
+    const msg = formatAudionHttpFailure(
+      302,
+      'text/html',
+      '<!doctype html><a href="/login">',
+      'AUDION Zielgruppen'
+    );
     expect(msg).toContain('Login-Redirect');
-    expect(msg).toContain('FastAPI');
+    expect(msg).toContain('/api');
   });
 });

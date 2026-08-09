@@ -115,12 +115,13 @@ async function generatePersonaForTargetGroup(input: {
 }): Promise<{ persona?: PersonaPreviewItem; error?: string }> {
   const personaRes = await audionFetch(audionApiTargetGroupPersonasGenerate(input.targetGroupId), {
     method: 'POST',
-    body: JSON.stringify(
-      buildAudionPersonaGenerateRequestBody({
+    body: JSON.stringify({
+      ...buildAudionPersonaGenerateRequestBody({
         segment: input.segment.segment.slice(0, 120),
         description: input.segment.personaDescription.slice(0, 2000),
-      })
-    ),
+      }),
+      count: 1,
+    }),
   });
 
   if (!personaRes.ok) {

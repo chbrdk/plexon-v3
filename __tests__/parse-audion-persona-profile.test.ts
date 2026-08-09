@@ -64,6 +64,18 @@ describe('parseAudionPersonaResponse', () => {
     expect(parsed.name).toBe('Legacy');
   });
 
+  it('unwraps audion-v3 generatePersonas batch response', () => {
+    const parsed = parseAudionPersonaResponse({
+      stubbed: false,
+      workflowId: 'generatePersonas',
+      personas: [{ id: 'persona-anna-abc', name: 'Anna', role: 'Privatkunden' }],
+    });
+    expect(parsed.id).toBe('persona-anna-abc');
+    expect(parsed.name).toBe('Anna');
+    expect(parsed.segment).toBe('Privatkunden');
+    expect(parsed.headline).toBe('Privatkunden');
+  });
+
   it('prefers German profile_de and headline_de when output locale is de', () => {
     const parsed = parseAudionPersonaResponse(
       {
