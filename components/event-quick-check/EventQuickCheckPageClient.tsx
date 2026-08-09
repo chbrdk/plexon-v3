@@ -833,13 +833,17 @@ export function EventQuickCheckPageClient() {
         data-plexon-event-quick-check
         data-eqc-phase={phase}
       >
-        <div className="plexon-eqc-narrow">
+        <div className="plexon-eqc-narrow" data-eqc-compose={phase === 'idle' || phase === 'error' ? 'true' : undefined}>
           <div className="plexon-eqc-header">
             <div className="plexon-eqc-header-copy">
-              <Text role="headline" as="h1">
+              <Text role="display" as="h1" className="plexon-eqc-header-title">
                 {EQC_PAGE_COPY.pageTitle}
               </Text>
-              {phase !== 'running' ? <Text role="body">{EQC_PAGE_COPY.pageLead}</Text> : null}
+              {phase !== 'running' ? (
+                <Text role="body" className="plexon-eqc-header-lead">
+                  {EQC_PAGE_COPY.pageLead}
+                </Text>
+              ) : null}
             </div>
             <Button variant="ghost" size="sm" onClick={openHistory}>
               {EQC_PAGE_COPY.historyOpenButton}
@@ -857,26 +861,34 @@ export function EventQuickCheckPageClient() {
 
           {phase === 'idle' || phase === 'error' ? (
             <form
-              className="plexon-eqc-stack plexon-eqc-form"
+              className="plexon-eqc-compose plexon-eqc-form"
               onSubmit={(e) => {
                 e.preventDefault();
                 void startAnalysis();
               }}
             >
-              <Field label={EQC_PAGE_COPY.urlLabel}>
-                <Input
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder={EQC_PAGE_COPY.urlPlaceholder}
-                  required
-                  autoFocus
-                  block
-                />
-              </Field>
-              <Field label={EQC_PAGE_COPY.projectNameLabel}>
-                <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} block />
-              </Field>
-              <Field label="Scan-Tiefe">
+              <div className="plexon-eqc-compose__lead">
+                <Field label={EQC_PAGE_COPY.urlLabel} className="plexon-eqc-compose__field">
+                  <Input
+                    size="md"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder={EQC_PAGE_COPY.urlPlaceholder}
+                    required
+                    autoFocus
+                    block
+                  />
+                </Field>
+                <Field label={EQC_PAGE_COPY.projectNameLabel} className="plexon-eqc-compose__field">
+                  <Input
+                    size="md"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    block
+                  />
+                </Field>
+              </div>
+              <Field label="Scan-Tiefe" className="plexon-eqc-compose__field">
                 <ToggleGroup
                   value={depth}
                   onChange={(value) => applyDepthDefaults(value as EventQuickCheckDepth)}
@@ -890,9 +902,10 @@ export function EventQuickCheckPageClient() {
               <Text role="hint" className="plexon-eqc-depth-hint">
                 {depth === 'complete' ? EQC_PAGE_COPY.depthCompleteHint : EQC_PAGE_COPY.depthQuickHint}
               </Text>
-              <div className="plexon-eqc-split-grid">
+              <div className="plexon-eqc-split-grid plexon-eqc-compose__metrics">
                 <Field label={EQC_PAGE_COPY.targetGroupCountLabel}>
                   <Input
+                    size="md"
                     type="number"
                     min={EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MIN}
                     max={EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_MAX}
@@ -913,6 +926,7 @@ export function EventQuickCheckPageClient() {
                 </Field>
                 <Field label={EQC_PAGE_COPY.personaCountLabel}>
                   <Input
+                    size="md"
                     type="number"
                     min={EVENT_QUICK_CHECK_PERSONA_COUNT_MIN}
                     max={EVENT_QUICK_CHECK_PERSONA_COUNT_MAX}
@@ -933,6 +947,7 @@ export function EventQuickCheckPageClient() {
                 </Field>
                 <Field label={EQC_PAGE_COPY.scanMaxPagesLabel}>
                   <Input
+                    size="md"
                     type="number"
                     min={EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MIN}
                     max={EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX}
@@ -954,6 +969,7 @@ export function EventQuickCheckPageClient() {
                 </Field>
                 <Field label={EQC_PAGE_COPY.competitorCountLabel}>
                   <Input
+                    size="md"
                     type="number"
                     min={0}
                     max={EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX}
@@ -971,9 +987,11 @@ export function EventQuickCheckPageClient() {
                 </Field>
               </div>
               {error ? <Alert tone="error">{error}</Alert> : null}
-              <Button type="submit" variant="primary" size="lg">
-                {EQC_PAGE_COPY.startButton}
-              </Button>
+              <div className="plexon-eqc-compose__footer">
+                <Button type="submit" variant="primary" size="lg">
+                  {EQC_PAGE_COPY.startButton}
+                </Button>
+              </div>
             </form>
           ) : null}
 

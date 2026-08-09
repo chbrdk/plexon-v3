@@ -47,7 +47,10 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(client).toContain("from '@msqdx/ui'")
     expect(client).toContain('Field')
     expect(client).toContain('ToggleGroup')
+    expect(client).toContain('plexon-eqc-compose')
     expect(client).not.toContain('PlexonPageChrome')
+    const globals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(globals).toContain('.plexon-eqc-compose__lead .ds-input')
   })
 
   it('done results use magazine DS primitives without Ui* / light-surface bridges', () => {

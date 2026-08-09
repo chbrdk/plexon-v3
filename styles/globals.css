@@ -1837,29 +1837,52 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-eqc-workspace {
-  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.75rem, 4vw, 3rem) clamp(1.25rem, 4vw, 2.5rem);
 }
 
 .plexon-eqc-narrow {
-  max-width: 35rem;
+  max-width: 42rem;
   margin: 0 auto;
   width: 100%;
+}
+
+.plexon-eqc-narrow[data-eqc-compose='true'] {
+  max-width: 48rem;
 }
 
 .plexon-eqc-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: 1.25rem;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem);
 }
 
 .plexon-eqc-header-copy {
   min-width: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.plexon-eqc-header-title {
+  margin: 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.plexon-eqc-header-lead {
+  margin: 0;
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.6vw, 1.125rem);
+  line-height: 1.45;
 }
 
 .plexon-eqc-readiness {
-  margin-bottom: 1.25rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
 }
 
 .plexon-eqc-readiness-list {
@@ -2011,8 +2034,86 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   width: 100%;
 }
 
-.plexon-eqc-depth-hint {
+/* Magazine launch compose — Checkion launch spacing + large type inputs */
+.plexon-eqc-compose {
+  display: grid;
+  gap: clamp(1.35rem, 2.8vw, 1.85rem);
   margin-top: 0.15rem;
+  padding-top: clamp(0.5rem, 1.5vw, 1rem);
+  border-top: 1px solid var(--line);
+}
+
+.plexon-eqc-compose__lead {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.plexon-eqc-compose__field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 0.55rem;
+}
+
+.plexon-eqc-compose .ds-field-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.plexon-eqc-compose__lead .ds-input {
+  width: 100%;
+  min-height: 3.65rem;
+  padding: 0.95rem 1.05rem;
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  font-weight: var(--weight-regular, 400);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  background: transparent;
+}
+
+.plexon-eqc-compose__metrics {
+  gap: 1.25rem 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.plexon-eqc-compose__metrics .ds-input {
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  font-size: 1.125rem;
+  letter-spacing: -0.015em;
+  background: transparent;
+}
+
+.plexon-eqc-compose .ds-toggle-group {
+  width: 100%;
+}
+
+.plexon-eqc-compose .ds-toggle-group button,
+.plexon-eqc-compose .ds-toggle-btn {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  font-size: 0.95rem;
+}
+
+.plexon-eqc-compose__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.35rem;
+}
+
+.plexon-eqc-compose__footer .ds-btn {
+  min-height: 3rem;
+  padding-inline: 1.35rem;
+}
+
+.plexon-eqc-depth-hint {
+  margin-top: -0.35rem;
+  max-width: 40rem;
 }
 
 .plexon-eqc-progress {
@@ -4167,6 +4268,10 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 @media (min-width: 768px) {
   .plexon-eqc-split-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .plexon-eqc-compose__metrics {
+    gap: 1.35rem 1.75rem;
   }
 }
 
