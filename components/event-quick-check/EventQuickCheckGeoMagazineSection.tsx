@@ -2,6 +2,7 @@
 
 import { Alert, RankedList, RankedRow, Text } from '@msqdx/ui'
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
+import { EventQuickCheckMovesGallery } from '@/components/event-quick-check/EventQuickCheckMovesGallery'
 import { EventQuickCheckScoreRing } from '@/components/event-quick-check/EventQuickCheckScoreRing'
 import { EventQuickCheckVoiceRadar } from '@/components/event-quick-check/EventQuickCheckVoiceRadar'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
@@ -270,11 +271,25 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
       ) : null}
 
       {geo.recommendations.length > 0 ? (
-        <RankedList hint={EQC_REPORT_COPY.sectionGeoRecommendations}>
-          {geo.recommendations.map((r, i) => (
-            <RankedRow key={i} index={i + 1} label={r.title} secondary={r.description} />
-          ))}
-        </RankedList>
+        <section className="plexon-eqc-moves" aria-labelledby="eqc-geo-recs-heading">
+          <header className="plexon-eqc-insights__head">
+            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+              Next moves
+            </Text>
+            <Text role="title" as="h3" id="eqc-geo-recs-heading">
+              {EQC_REPORT_COPY.sectionGeoRecommendations}
+            </Text>
+          </header>
+          <EventQuickCheckMovesGallery
+            label={EQC_REPORT_COPY.sectionGeoRecommendations}
+            recommendations={geo.recommendations.map((r, i) => ({
+              title: r.title,
+              description: r.description,
+              priority: r.priority ?? i + 1,
+              category: 'GEO',
+            }))}
+          />
+        </section>
       ) : null}
 
       {showQuestions && geo.questions.length > 0 ? (

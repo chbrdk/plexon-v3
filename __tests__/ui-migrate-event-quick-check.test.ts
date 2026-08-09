@@ -86,6 +86,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).not.toContain('--color-text-on-light')
     expect(geoMag).toContain('EventQuickCheckScoreRing')
     expect(geoMag).toContain('EventQuickCheckVoiceRadar')
+    expect(geoMag).toContain('EventQuickCheckMovesGallery')
     expect(geoMag).toContain('plexon-eqc-geo-voice__board')
     expect(geoMag).not.toContain('StatusMeterPanel')
     expect(geoMag).toContain('EventQuickCheckCitationSection')
