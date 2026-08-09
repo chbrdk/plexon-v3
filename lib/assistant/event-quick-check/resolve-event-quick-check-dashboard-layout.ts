@@ -35,11 +35,12 @@ export function resolveEventQuickCheckDashboardLayout(
     report.geo.citationHighlights.length > 0 ||
     (report.geo.citationHighlightsByModel?.length ?? 0) > 0;
   const showGeoRecommendations = report.geo.recommendations.length > 0;
+  // Insights magazine shows verdict + findings; GEO owns the moves slideshow.
   const showInsights = Boolean(
     report.insights &&
       (report.insights.fazit ||
-        report.insights.findings.length > 0 ||
-        report.insights.recommendations.length > 0)
+        report.insights.assessment ||
+        report.insights.findings.length > 0)
   );
   const showExecutiveFazit = Boolean(report.executive.fazit);
   const showMarket = Boolean(

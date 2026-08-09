@@ -1,7 +1,6 @@
 'use client'
 
 import { Text } from '@msqdx/ui'
-import { EventQuickCheckMovesGallery } from '@/components/event-quick-check/EventQuickCheckMovesGallery'
 import type {
   EventQuickCheckReportInsightFinding,
   EventQuickCheckReportInsightsSection,
@@ -74,7 +73,6 @@ export function EventQuickCheckInsightsMagazineSection({ insights, domainLabel }
         : undefined
   const tone = toneFromUi(insights.fazitTone)
   const findingCount = filterEqcMetaFindings(insights.findings).length
-  const moveCount = insights.recommendations.length
   const criticalCount = filterEqcMetaFindings(insights.findings).filter(
     (f) => f.severity === 'error',
   ).length
@@ -117,9 +115,9 @@ export function EventQuickCheckInsightsMagazineSection({ insights, domainLabel }
           </p>
           <p className="plexon-eqc-spread-callout__body">
             {criticalCount > 0
-              ? `${criticalCount} kritisch · ${moveCount} nächste Schritte`
-              : moveCount > 0
-                ? `${moveCount} nächste Schritte priorisiert`
+              ? `${criticalCount} kritisch — Details in den Erkenntnissen unten.`
+              : findingCount > 0
+                ? 'Priorisiert nach Schwere; konkrete Moves stehen bei GEO.'
                 : 'Keine kritischen Signale in diesem Quick Check.'}
           </p>
         </aside>
@@ -139,20 +137,6 @@ export function EventQuickCheckInsightsMagazineSection({ insights, domainLabel }
             </p>
           </header>
           <FindingOps findings={insights.findings} />
-        </section>
-      ) : null}
-
-      {moveCount > 0 ? (
-        <section className="plexon-eqc-moves" aria-labelledby="eqc-insights-moves-heading">
-          <header className="plexon-eqc-insights__head">
-            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-              Next moves
-            </Text>
-            <Text role="title" as="h3" id="eqc-insights-moves-heading">
-              Was zuerst ändern
-            </Text>
-          </header>
-          <EventQuickCheckMovesGallery recommendations={insights.recommendations} />
         </section>
       ) : null}
     </div>
