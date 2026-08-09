@@ -7,6 +7,7 @@ import type { RequestUser } from '@/lib/auth-request-user';
 import { QUICK_CHECK_LABEL } from '@/lib/assistant/event-quick-check/quick-check-label';
 import { bootstrapEqcCollection } from '@/lib/assistant/event-quick-check/bootstrap-eqc-collection';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
+import { hydrateDomainScanPageCount } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import {
   EVENT_QUICK_CHECK_INITIAL_STEPS,
   EVENT_QUICK_CHECK_STREAM_TITLE,
@@ -427,7 +428,9 @@ export async function runEqcViaCollectionFlow(
   const companyBrief = briefFromContext(outputs) ?? options.companyBrief;
   const competitors = stringList(outputs.competitors?.items);
   const geoQuestions = stringList(outputs.queries?.items);
-  const domainScan = domainScanFromContext(outputs, result.lastRun);
+  const domainScan = await hydrateDomainScanPageCount(
+    domainScanFromContext(outputs, result.lastRun)
+  );
   const geoJob = geoJobFromContext(outputs, result.lastRun);
   const personaPreview = personaPreviewFromContext(outputs);
 

@@ -23,6 +23,7 @@ import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
 import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { canReopenEventQuickCheckGeo } from '@/lib/assistant/event-quick-check/resolve-geo-questions-reopen-draft';
+import { hydrateEventQuickCheckReportDomainPages } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 
 export async function GET(
   request: Request,
@@ -55,7 +56,7 @@ export async function GET(
     url: stored.url,
     projectName: stored.projectName,
     platformProjectId: stored.platformProjectId,
-    report: reportFromWorkflowRun(run),
+    report: await hydrateEventQuickCheckReportDomainPages(reportFromWorkflowRun(run)),
     error: typeof stored.error === 'string' ? stored.error : undefined,
     awaitingCompanyBrief: Boolean(stored[EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY]),
     companyBrief: stored[EVENT_QUICK_CHECK_COMPANY_BRIEF_KEY] ?? undefined,

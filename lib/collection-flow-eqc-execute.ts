@@ -351,7 +351,7 @@ export async function executeEqcCollectionFlowRun(input: {
         buildDomainCatalogBundle({
           status: domainResult.scan.status,
           overallScore: domainResult.scan.overallScore,
-          pageCount: null,
+          pageCount: domainResult.scan.pageCount ?? null,
           issues: issuesRes.ok ? issuesRes.signals : null,
           issueItems: issuesRes.ok
             ? issuesRes.items.map((o) => ({

@@ -462,6 +462,7 @@ export async function executeCollectionFlowRun(input: {
       domainScanId?: string | null;
       scanMode: CollectionFlowScanMode | 'domain' | null;
       pageScanId?: string | null;
+      pageCount?: number | null;
     };
 
     const blockers: string[] = [];
@@ -487,6 +488,7 @@ export async function executeCollectionFlowRun(input: {
             domainScanId: domainResult.scan?.id ?? null,
             scanMode: 'domain',
             pageScanId: null,
+            pageCount: domainResult.scan?.pageCount ?? null,
           };
         } else {
           quality = {
@@ -499,6 +501,7 @@ export async function executeCollectionFlowRun(input: {
             domainScanId: domainResult.scan.id,
             scanMode: 'domain',
             pageScanId: null,
+            pageCount: domainResult.scan.pageCount ?? null,
           };
         }
       } else {
@@ -636,7 +639,7 @@ export async function executeCollectionFlowRun(input: {
           buildDomainCatalogBundle({
             status: quality.status,
             overallScore: quality.overallScore,
-            pageCount: null,
+            pageCount: quality.pageCount ?? null,
             issues: issueSignals,
             issueItems,
           }),
