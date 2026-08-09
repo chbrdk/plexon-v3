@@ -25,6 +25,12 @@ type V3GeoEeat = {
   authoritativeness?: number
   trustworthiness?: number
   geoFitness?: number
+  experienceReasoning?: string
+  expertiseReasoning?: string
+  authoritativenessReasoning?: string
+  trustworthinessReasoning?: string
+  geoFitnessReasoning?: string
+  missingElements?: string[]
 }
 
 export type GeoOverviewV3Like = {
@@ -48,9 +54,13 @@ export type GeoOverviewV3Like = {
   queryRuns?: V3GeoQueryRun[]
 }
 
-function dim(score: number | undefined): { score: number } | undefined {
+function dim(
+  score: number | undefined,
+  reasoning?: string
+): { score: number; reasoning?: string } | undefined {
   if (typeof score !== 'number' || !Number.isFinite(score)) return undefined
-  return { score }
+  const why = reasoning?.trim()
+  return why ? { score, reasoning: why.slice(0, 420) } : { score }
 }
 
 /** Map CHECKION v3 GeoOverview JSON → assistant GeoEeatJobPreview. */
@@ -174,12 +184,14 @@ export function mapGeoOverviewV3ToPreview(
     geoFitnessScore,
     eeatScores: eeat
       ? {
-          experience: dim(eeat.experience),
-          expertise: dim(eeat.expertise),
-          authoritativeness: dim(eeat.authoritativeness),
-          trust: dim(eeat.trustworthiness),
+          experience: dim(eeat.experience, eeat.experienceReasoning),
+          expertise: dim(eeat.expertise, eeat.expertiseReasoning),
+          authoritativeness: dim(eeat.authoritativeness, eeat.authoritativenessReasoning),
+          trust: dim(eeat.trustworthiness, eeat.trustworthinessReasoning),
         }
       : undefined,
+    geoFitnessReasoning: eeat?.geoFitnessReasoning?.trim() || undefined,
+    missingGeoElements: eeat?.missingElements?.map((x) => String(x).trim()).filter(Boolean),
     competitors: competitors.length > 0 ? competitors : undefined,
     keywords: overview.queries?.length ? overview.queries : undefined,
     queries: overview.queries,

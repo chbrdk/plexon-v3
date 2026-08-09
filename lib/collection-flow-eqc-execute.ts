@@ -512,7 +512,7 @@ export async function executeEqcCollectionFlowRun(input: {
         url: chain.geoUrl || scanUrl || startUrl || undefined,
         companyName: companyName || undefined,
         queries: queries.length ? queries : undefined,
-        includePageScan: false,
+        includePageScan: true,
       });
       if (!geoResult.ok) {
         return failEqc({

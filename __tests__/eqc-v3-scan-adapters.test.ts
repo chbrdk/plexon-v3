@@ -44,6 +44,12 @@ describe('mapGeoOverviewV3ToPreview', () => {
           authoritativeness: 60,
           trustworthiness: 75,
           geoFitness: 72,
+          experienceReasoning: 'Case studies are thin.',
+          expertiseReasoning: 'Strong product depth.',
+          authoritativenessReasoning: 'Few third-party proofs.',
+          trustworthinessReasoning: 'Legal pages present.',
+          geoFitnessReasoning: 'Missing FAQ blocks hurt citeability.',
+          missingElements: ['FAQs', 'Author'],
         },
         queries: ['What is brand?'],
         shareOfVoice: [
@@ -67,6 +73,9 @@ describe('mapGeoOverviewV3ToPreview', () => {
     expect(job.status).toBe('complete')
     expect(job.geoFitnessScore).toBe(72)
     expect(job.eeatScores?.expertise?.score).toBe(80)
+    expect(job.eeatScores?.expertise?.reasoning).toMatch(/product depth/)
+    expect(job.geoFitnessReasoning).toMatch(/FAQ/)
+    expect(job.missingGeoElements).toEqual(['FAQs', 'Author'])
     expect(job.competitors?.[0]?.name).toBe('rival.com')
     expect(job.recommendations?.[0]?.title).toBe('Improve FAQ')
     expect(job.citationHighlightsByModel?.[0]?.citations.length).toBeGreaterThan(0)

@@ -26,6 +26,8 @@ export function geoPreviewForCatalogBundle(
     overallScore: preview.overallScore ?? null,
     geoFitnessScore: preview.geoFitnessScore ?? null,
     eeatScores: preview.eeatScores,
+    geoFitnessReasoning: preview.geoFitnessReasoning,
+    missingGeoElements: preview.missingGeoElements,
     competitors: preview.competitors,
     keywords: preview.keywords,
     queries: preview.queries,
@@ -48,6 +50,10 @@ export function mergeGeoPreviewIntoJob(
     overallScore: preview.overallScore ?? base?.overallScore ?? null,
     geoFitnessScore: preview.geoFitnessScore ?? base?.geoFitnessScore ?? null,
     eeatScores: preview.eeatScores ?? base?.eeatScores,
+    geoFitnessReasoning: preview.geoFitnessReasoning ?? base?.geoFitnessReasoning,
+    missingGeoElements: preview.missingGeoElements?.length
+      ? preview.missingGeoElements
+      : base?.missingGeoElements,
     competitors: preview.competitors?.length ? preview.competitors : base?.competitors,
     keywords: preview.keywords?.length ? preview.keywords : base?.keywords,
     queries: preview.queries?.length ? preview.queries : base?.queries,
@@ -93,6 +99,13 @@ export function geoJobFromCatalogBundle(
               ? previewRaw.geoFitness
               : null,
         eeatScores: previewRaw.eeatScores as GeoEeatJobPreview['eeatScores'],
+        geoFitnessReasoning:
+          typeof previewRaw.geoFitnessReasoning === 'string'
+            ? previewRaw.geoFitnessReasoning
+            : undefined,
+        missingGeoElements: Array.isArray(previewRaw.missingGeoElements)
+          ? (previewRaw.missingGeoElements as string[])
+          : undefined,
         competitors: previewRaw.competitors as GeoEeatJobPreview['competitors'],
         keywords: previewRaw.keywords as string[] | undefined,
         queries: previewRaw.queries as string[] | undefined,
@@ -181,9 +194,13 @@ export async function hydrateEventQuickCheckReportGeo(
           ? merged.citationHighlightsByModel
           : report.geo.citationHighlightsByModel,
       questions: merged.queries?.length ? merged.queries : report.geo.questions,
-      eeatDimensions: report.geo.eeatDimensions.length
-        ? report.geo.eeatDimensions
-        : merged.eeatScores
+      eeatMissingElements: merged.missingGeoElements?.length
+        ? merged.missingGeoElements
+        : report.geo.eeatMissingElements,
+      geoFitnessReasoning:
+        merged.geoFitnessReasoning || report.geo.geoFitnessReasoning,
+      eeatDimensions: (() => {
+        const fromPreview = merged.eeatScores
           ? (
               [
                 ['trust', 'Trust'],
@@ -198,7 +215,19 @@ export async function hydrateEventQuickCheckReportGeo(
                 return { key, label, score: dim.score, reasoning: dim.reasoning };
               })
               .filter((d): d is NonNullable<typeof d> => Boolean(d))
-          : report.geo.eeatDimensions,
+          : [];
+        if (!report.geo.eeatDimensions.length) return fromPreview;
+        if (!fromPreview.length) return report.geo.eeatDimensions;
+        return report.geo.eeatDimensions.map((d) => {
+          const richer = fromPreview.find((p) => p.key === d.key);
+          if (!richer) return d;
+          return {
+            ...d,
+            score: richer.score ?? d.score,
+            reasoning: richer.reasoning || d.reasoning,
+          };
+        });
+      })(),
     },
   };
 }

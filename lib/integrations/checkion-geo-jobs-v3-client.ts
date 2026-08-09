@@ -159,7 +159,9 @@ export async function startCheckionGeoJobV3(input: {
         queries,
         models,
         waitForCompletion: false,
-        ...(input.includePageScan === true ? { includePageScan: true } : {}),
+        ...(typeof input.includePageScan === 'boolean'
+          ? { includePageScan: input.includePageScan }
+          : {}),
         ...(input.competitors?.length ? { competitors: input.competitors } : {}),
       }),
       cache: 'no-store',

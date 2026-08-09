@@ -4,6 +4,7 @@ import { Alert, RankedList, RankedRow, StatusMeterPanel, Text } from '@msqdx/ui'
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
+import { buildEqcEeatReadingFallback } from '@/lib/assistant/reports/event-quick-check/build-eqc-eeat-reading'
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 type Props = {
@@ -175,9 +176,23 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
             <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
               On-page
             </Text>
-            <Text role="title" as="h3" id="eqc-geo-eeat-heading">
+            <Text role="display" as="h3" id="eqc-geo-eeat-heading">
               {EQC_REPORT_COPY.sectionGeoEeat}
             </Text>
+            <div className="plexon-eqc-geo-eeat__reading">
+              <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+                {EQC_REPORT_COPY.geoEeatReadingLabel}
+              </Text>
+              <p className="plexon-eqc-geo-eeat__reading-body">
+                {buildEqcEeatReadingFallback({
+                  dimensions: eeatSorted,
+                  missingElements: geo.eeatMissingElements,
+                  geoFitnessReasoning: geo.geoFitnessReasoning,
+                  weakest,
+                  strongest,
+                }) || EQC_REPORT_COPY.geoEeatWhyFallback}
+              </p>
+            </div>
           </header>
           <div className="plexon-eqc-geo-eeat__layout">
             <div className="plexon-eqc-geo-score-ledger" aria-label={EQC_REPORT_COPY.sectionGeoEeat}>
@@ -193,21 +208,41 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
                   <span className="plexon-eqc-geo-score-ledger__label">{d.label}</span>
                   <span className="plexon-eqc-geo-score-ledger__value">{d.score}</span>
                   <span className="plexon-eqc-geo-score-ledger__bar" aria-hidden />
+                  {d.reasoning ? (
+                    <p className="plexon-eqc-geo-score-ledger__why">{d.reasoning}</p>
+                  ) : null}
                 </div>
               ))}
             </div>
-            {eeatSpan != null && weakest && strongest ? (
-              <aside className="plexon-eqc-geo-callout">
-                <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-                  Spanne
-                </Text>
-                <p className="plexon-eqc-geo-callout__num">{eeatSpan}</p>
-                <Text role="hint" as="p">
-                  Punkte zwischen {weakest.label} ({weakest.score}) und {strongest.label} (
-                  {strongest.score}).
-                </Text>
-              </aside>
-            ) : null}
+            <div className="plexon-eqc-geo-eeat__side">
+              {eeatSpan != null && weakest && strongest ? (
+                <aside className="plexon-eqc-geo-callout">
+                  <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+                    Spanne
+                  </Text>
+                  <p className="plexon-eqc-geo-callout__num">{eeatSpan}</p>
+                  <Text role="hint" as="p">
+                    Punkte zwischen {weakest.label} ({weakest.score}) und {strongest.label} (
+                    {strongest.score}).
+                  </Text>
+                </aside>
+              ) : null}
+              {(geo.eeatMissingElements?.length ?? 0) > 0 ? (
+                <div
+                  className="plexon-eqc-geo-eeat-gaps"
+                  aria-label={EQC_REPORT_COPY.geoEeatGapsLabel}
+                >
+                  <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
+                    {EQC_REPORT_COPY.geoEeatGapsLabel}
+                  </Text>
+                  <ul className="plexon-eqc-geo-eeat-gaps__list">
+                    {geo.eeatMissingElements!.map((el) => (
+                      <li key={el}>{el}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           </div>
         </section>
       ) : null}

@@ -38,6 +38,10 @@ export const EQC_REPORT_COPY = {
   geoCiteStackLabel: 'Cite-Stack',
   geoNoCitationsInAnswer: 'Keine Zitierungen in dieser Antwort.',
   geoCiteYouCount: 'zitieren dich',
+  geoEeatGapsLabel: 'Fehlende / schwache Signale',
+  geoEeatReadingLabel: 'Lesart',
+  geoEeatWhyFallback:
+    'Keine detaillierte Seiten-Begründung gespeichert — Scores stammen aus dem On-Page-Reading.',
   chartCitationCompetitorsHint:
     'Position pro Suchanfrage — eigene Domain und Wettbewerber (1 = zuerst genannt, leer = nicht zitiert)',
   geoOwnDomainLabel: 'Eigene Domain',

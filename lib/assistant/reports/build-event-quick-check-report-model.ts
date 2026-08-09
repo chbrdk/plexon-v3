@@ -279,6 +279,8 @@ export function buildEventQuickCheckReportModel(
         mentionCount: c.mentionCount,
       })),
       eeatDimensions,
+      eeatMissingElements: quick.geoJob?.missingGeoElements,
+      geoFitnessReasoning: quick.geoJob?.geoFitnessReasoning,
       recommendations: (quick.geoJob?.recommendations ?? []).map((r) => ({
         title: r.title,
         description: r.description,

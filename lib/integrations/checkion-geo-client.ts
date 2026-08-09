@@ -31,6 +31,10 @@ export type GeoEeatJobPreview = {
     expertise?: GeoEeatEeatDimension;
     authoritativeness?: GeoEeatEeatDimension;
   };
+  /** GEO fitness narrative from intensive page reading. */
+  geoFitnessReasoning?: string;
+  /** Gaps called out by GEO fitness (e.g. FAQs, Author, llms.txt). */
+  missingGeoElements?: string[];
   competitors?: Array<{
     name: string;
     score?: number | null;

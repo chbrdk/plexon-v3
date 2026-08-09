@@ -132,6 +132,9 @@ export type EventQuickCheckReportGeoSection = {
   url?: string;
   competitors: EventQuickCheckReportGeoCompetitor[];
   eeatDimensions: EventQuickCheckReportGeoEeatDimension[];
+  /** Gaps from GEO fitness reading (FAQs, Author, …). */
+  eeatMissingElements?: string[];
+  geoFitnessReasoning?: string;
   recommendations: Array<{ title: string; description: string; priority?: number }>;
   citationHighlights: Array<{ query: string; domain: string; position: number }>;
   citationHighlightsByModel?: EventQuickCheckReportCitationModelSlice[];
