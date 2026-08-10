@@ -1,39 +1,24 @@
-'use client';
+'use client'
 
-import { Box } from '@mui/material';
-import { MsqdxTypography } from '@msqdx/react';
-import { MSQDX_COLORS, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
+import { Text } from '@msqdx/ui'
 
 type UiLinkProps = {
-  href: string;
-  label: string;
-  external?: boolean;
-};
+  href: string
+  label: string
+  external?: boolean
+}
 
 export function UiLink({ href, label, external }: UiLinkProps) {
   return (
-    <Box
-      component="a"
+    <a
+      className="plexon-assistant-link"
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      sx={{
-        textDecoration: 'none',
-        '&:hover .ui-link-label': { color: 'var(--color-theme-accent)' },
-      }}
     >
-      <MsqdxTypography
-        className="ui-link-label"
-        variant="body2"
-        sx={{
-          fontFamily: MSQDX_TYPOGRAPHY.fontFamily.primary,
-          color: MSQDX_COLORS.brand.green,
-          textDecoration: 'underline',
-          textUnderlineOffset: '3px',
-        }}
-      >
+      <Text role="body" as="span" className="plexon-assistant-link-label">
         {label}
-      </MsqdxTypography>
-    </Box>
-  );
+      </Text>
+    </a>
+  )
 }

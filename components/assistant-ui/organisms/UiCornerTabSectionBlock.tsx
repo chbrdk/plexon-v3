@@ -1,17 +1,11 @@
-'use client';
+'use client'
 
-import {
-  MarkdownContent,
-  MsqdxCornerTabSection,
-  MsqdxCornerTabSectionTab,
-  MsqdxTypography,
-} from '@msqdx/react';
-import { Box } from '@mui/material';
-import { MSQDX_SPACING } from '@msqdx/tokens';
-import type { cornerTabSectionPropsSchema } from '@/lib/assistant/ui-blocks/schemas';
-import type { z } from 'zod';
+import { Panel, Text } from '@msqdx/ui'
+import type { cornerTabSectionPropsSchema } from '@/lib/assistant/ui-blocks/schemas'
+import type { z } from 'zod'
+import { AssistantChatAnswer } from '@/components/assistant/AssistantChatAnswer'
 
-type Props = z.infer<typeof cornerTabSectionPropsSchema>;
+type Props = z.infer<typeof cornerTabSectionPropsSchema>
 
 export function UiCornerTabSectionBlock({
   tabLabel,
@@ -20,29 +14,24 @@ export function UiCornerTabSectionBlock({
   placement = 'top-right',
 }: Props) {
   return (
-    <Box data-msqdx-surface="light" data-plexon-assistant-ui sx={{ borderRadius: `${MSQDX_SPACING.borderRadius.lg}px`, overflow: 'hidden' }}>
-      <MsqdxCornerTabSection
-        placement={placement}
-        tab={
-          <MsqdxCornerTabSectionTab
-            heading={
-              <MsqdxTypography variant="subtitle2" weight="semibold">
-                {tabLabel}
-              </MsqdxTypography>
-            }
-          />
-        }
-        tabAriaLabel={tabLabel}
-      >
-        <Box sx={{ p: 1.5 }}>
-          {title ? (
-            <MsqdxTypography variant="h6" sx={{ mb: 1 }}>
-              {title}
-            </MsqdxTypography>
-          ) : null}
-          <MarkdownContent content={markdown} />
-        </Box>
-      </MsqdxCornerTabSection>
-    </Box>
-  );
+    <Panel
+      variant="default"
+      data-plexon-assistant-ui
+      className={`plexon-assistant-corner-tab is-${placement}`}
+    >
+      <div className="plexon-assistant-corner-tab-label">
+        <Text role="label" as="span">
+          {tabLabel}
+        </Text>
+      </div>
+      <div className="plexon-assistant-corner-tab-body">
+        {title ? (
+          <Text role="title" as="h3" className="plexon-assistant-corner-tab-title">
+            {title}
+          </Text>
+        ) : null}
+        <AssistantChatAnswer answer={markdown} />
+      </div>
+    </Panel>
+  )
 }

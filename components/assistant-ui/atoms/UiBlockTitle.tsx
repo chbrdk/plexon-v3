@@ -1,26 +1,18 @@
-'use client';
+'use client'
 
-import { MsqdxTypography } from '@msqdx/react';
-import { MSQDX_SPACING } from '@msqdx/tokens';
-import { uiSansTitleSx } from '@/lib/assistant/ui-typography';
+import { Text } from '@msqdx/ui'
 
 type UiBlockTitleProps = {
-  children: string;
-  sx?: Record<string, unknown>;
-};
+  children: string
+  /** @deprecated Ignored — MUI sx dropped in Wave 7. Prefer className. */
+  sx?: Record<string, unknown>
+  className?: string
+}
 
-export function UiBlockTitle({ children, sx }: UiBlockTitleProps) {
+export function UiBlockTitle({ children, className }: UiBlockTitleProps) {
   return (
-    <MsqdxTypography
-      variant="h6"
-      sx={{
-        ...uiSansTitleSx,
-        fontSize: MSQDX_SPACING.scale.md,
-        mb: `${MSQDX_SPACING.scale.sm}px`,
-        ...sx,
-      }}
-    >
+    <Text role="title" as="h3" className={['plexon-assistant-block-title', className].filter(Boolean).join(' ')}>
       {children}
-    </MsqdxTypography>
-  );
+    </Text>
+  )
 }

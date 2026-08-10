@@ -60,10 +60,12 @@ describe('assistant ui rebuild (wave 5 shell)', () => {
     expect(history).toContain('SectionChrome')
   })
 
-  it('spec is Accepted for wave 5 shell', () => {
+  it('spec is Accepted for wave 5 shell and Wave 7 generative UI', () => {
     const spec = readFileSync(path.join(root, 'specs/domain/ui-migrate-assistant.md'), 'utf8')
     expect(spec).toContain('Accepted')
     expect(spec).toContain('chat-panel')
     expect(spec).toContain('Flyout')
+    expect(spec).toContain('Wave 7')
+    expect(spec).toContain('plexon-assistant-steps')
   })
 })

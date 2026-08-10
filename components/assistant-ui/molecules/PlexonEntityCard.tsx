@@ -1,34 +1,32 @@
-'use client';
+'use client'
 
-import type { KeyboardEvent } from 'react';
-import { Box } from '@mui/material';
-import { MsqdxIcon, MsqdxTypography } from '@msqdx/react';
-import { MSQDX_SPACING, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
-import type { BrandColor } from '@msqdx/react';
-import { uiEntityCardSx, uiIconCircleSx, uiStatPillSx, type UiAccent } from '@/lib/assistant/ui-visual';
-import { uiMonoLabelSx, uiSansBodySx, uiSansTitleSx } from '@/lib/assistant/ui-typography';
+import type { KeyboardEvent } from 'react'
+import { Chip, Panel, Text } from '@msqdx/ui'
+
+export type PlexonEntityAccent = 'green' | 'pink' | 'orange' | 'purple' | 'yellow' | 'neutral'
 
 export type PlexonEntityStat = {
-  icon: string;
-  label: string;
-  brand?: BrandColor;
-};
+  /** @deprecated Ignored — Material icon ligatures dropped in Wave 7. */
+  icon?: string
+  label: string
+  brand?: PlexonEntityAccent
+}
 
 type PlexonEntityCardProps = {
-  brandColor?: UiAccent;
-  icon: string;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  badge?: string;
-  stats?: PlexonEntityStat[];
-  onClick?: () => void;
-};
+  brandColor?: PlexonEntityAccent
+  /** @deprecated Ignored — Material icon ligatures dropped in Wave 7. */
+  icon?: string
+  title: string
+  subtitle?: string
+  description?: string
+  badge?: string
+  stats?: PlexonEntityStat[]
+  onClick?: () => void
+}
 
-/** Rounded entity card — Noto Sans titles, mono labels, Material icons, no blur. */
+/** Entity card — Panel + Text/Chip (no Material icons / cream paper). */
 export function PlexonEntityCard({
   brandColor = 'neutral',
-  icon,
   title,
   subtitle,
   description,
@@ -36,76 +34,71 @@ export function PlexonEntityCard({
   stats = [],
   onClick,
 }: PlexonEntityCardProps) {
-  const interactive = Boolean(onClick);
+  const interactive = Boolean(onClick)
 
   return (
-    <Box
-      data-msqdx-surface="light"
+    <Panel
+      variant="card"
       data-plexon-assistant-ui
+      className={[
+        'plexon-assistant-entity-card',
+        `is-${brandColor}`,
+        interactive ? 'is-interactive' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       onClick={onClick}
       onKeyDown={
         interactive
-          ? (e: KeyboardEvent<HTMLDivElement>) => {
+          ? (e: KeyboardEvent<HTMLElement>) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick?.();
+                e.preventDefault()
+                onClick?.()
               }
             }
           : undefined
       }
-      sx={{
-        ...uiEntityCardSx(brandColor, interactive),
-        p: `${MSQDX_SPACING.scale.md}px`,
-        pt: `${MSQDX_SPACING.scale.sm + 6}px`,
-      }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: description ? 1 : 0.5 }}>
-        <Box sx={uiIconCircleSx(brandColor)}>
-          <MsqdxIcon name={icon as 'groups'} customSize={22} />
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <MsqdxTypography variant="subtitle1" sx={{ ...uiSansTitleSx, fontSize: MSQDX_TYPOGRAPHY.fontSize.xl }}>
+      <div className="plexon-assistant-entity-head">
+        <div className="plexon-assistant-entity-copy">
+          <div className="plexon-assistant-entity-title-row">
+            <Text role="title" as="h4" className="plexon-assistant-entity-title">
               {title}
-            </MsqdxTypography>
+            </Text>
             {badge ? (
-              <Box component="span" sx={{ ...uiStatPillSx(brandColor), py: 0.25, px: 1, fontSize: '0.65rem' }}>
+              <Chip static size="sm" className={`plexon-assistant-entity-badge is-${brandColor}`}>
                 {badge}
-              </Box>
+              </Chip>
             ) : null}
-          </Box>
+          </div>
           {subtitle ? (
-            <Box component="span" sx={{ ...uiMonoLabelSx, display: 'block', mt: 0.5 }}>
+            <Text role="meta" as="span" className="plexon-assistant-entity-subtitle">
               {subtitle}
-            </Box>
+            </Text>
           ) : null}
-        </Box>
-      </Box>
+        </div>
+      </div>
       {description ? (
-        <MsqdxTypography
-          variant="body2"
-          sx={{
-            ...uiSansBodySx,
-            opacity: 0.92,
-            mb: stats.length ? 1.25 : 0,
-            pl: 0.5,
-          }}
-        >
+        <Text role="body" as="p" className="plexon-assistant-entity-description">
           {description}
-        </MsqdxTypography>
+        </Text>
       ) : null}
       {stats.length > 0 ? (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+        <div className="plexon-assistant-entity-stats">
           {stats.map((stat) => (
-            <Box key={stat.label} component="span" sx={uiStatPillSx(stat.brand ?? brandColor)}>
-              <MsqdxIcon name={stat.icon as 'person'} customSize={14} />
+            <Chip
+              key={stat.label}
+              static
+              size="sm"
+              className={`plexon-assistant-entity-stat is-${stat.brand ?? brandColor}`}
+            >
               {stat.label}
-            </Box>
+            </Chip>
           ))}
-        </Box>
+        </div>
       ) : null}
-    </Box>
-  );
+    </Panel>
+  )
 }

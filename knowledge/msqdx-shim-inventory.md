@@ -25,15 +25,13 @@ Rough consumer count (app/components/lib, excluding `__tests__`): **~30+ `@msqdx
 
 | Area | Why still shimmed |
 |------|-------------------|
-| `components/assistant-ui/**` generative blocks | Progressive Wave-7; heavy MUI layout/`@msqdx/react` cards |
-| `AssistantSurfaceIconButton`, `ReportPinButton`, phase indicators | Icon/button bridge |
 | `components/board/ReactFlowBoard.tsx` | Prismion / canvas island |
 | `Sidebar`, layout chrome leftovers | Low priority |
-| `lib/assistant/ui-visual.ts`, typography helpers | Types from bridge |
+| Some `lib/assistant/ui-visual.ts` helpers | May still type bridge accents until callers drop |
+
+**Cleared Wave 7 (2026-08-10):** `components/assistant-ui/**`, `ReportPinButton`, assistant capabilities overview — target `@msqdx/ui` only.
 
 ## Next cut order (suggested)
 
-1. Assistant generative atoms (`UiText`, `UiBadge`, …) → `@msqdx/ui` Text/Chip  
-2. `UiBlockSurface` / metric tiles  
-3. Board: document as permanent island **or** rewrite  
-4. Re-run `tsc --noEmit`; if clean, set `ignoreBuildErrors: false`
+1. Board: document as permanent island **or** rewrite  
+2. Re-run `tsc --noEmit`; if clean, set `ignoreBuildErrors: false`

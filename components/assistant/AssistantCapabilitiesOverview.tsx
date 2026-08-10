@@ -1,103 +1,87 @@
-'use client';
+'use client'
 
-import { Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import { MsqdxTypography } from '@msqdx/react';
+import { Panel, Text } from '@msqdx/ui'
 import {
   ASSISTANT_CAPABILITIES_EXAMPLES,
   ASSISTANT_CAPABILITIES_FOOTER,
   ASSISTANT_CAPABILITIES_INTRO,
   ASSISTANT_CAPABILITIES_SECTIONS,
   ASSISTANT_CAPABILITIES_TITLE,
-} from '@/lib/assistant/capabilities-overview';
+} from '@/lib/assistant/capabilities-overview'
 
 export function AssistantCapabilitiesOverview() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box>
-        <MsqdxTypography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+    <div className="plexon-assistant-capabilities">
+      <header className="plexon-assistant-capabilities-intro">
+        <Text role="title" as="h3">
           {ASSISTANT_CAPABILITIES_TITLE}
-        </MsqdxTypography>
-        <MsqdxTypography variant="body2" sx={{ lineHeight: 1.6 }}>
+        </Text>
+        <Text role="body" as="p">
           {ASSISTANT_CAPABILITIES_INTRO}
-        </MsqdxTypography>
-      </Box>
+        </Text>
+      </header>
 
       {ASSISTANT_CAPABILITIES_SECTIONS.map((section) => (
-        <Box key={section.id}>
-          <MsqdxTypography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+        <section key={section.id} className="plexon-assistant-capabilities-section">
+          <Text role="title" as="h4" className="plexon-assistant-capabilities-section-title">
             {section.title}
-          </MsqdxTypography>
+          </Text>
 
-          {section.rows && section.rows.length > 0 && (
-            <Box
-              sx={{
-                border: '1px solid var(--color-secondary-dx-grey-light-tint)',
-                borderRadius: 'var(--msqdx-radius-sm)',
-                overflow: 'hidden',
-              }}
-            >
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'var(--color-secondary-dx-grey-light-tint, rgba(0,0,0,0.04))' }}>
-                    <TableCell sx={{ fontWeight: 600, width: '32%' }}>Funktion</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Beschreibung</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+          {section.rows && section.rows.length > 0 ? (
+            <div className="plexon-assistant-capabilities-table-wrap">
+              <table className="plexon-assistant-capabilities-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Funktion</th>
+                    <th scope="col">Beschreibung</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {section.rows.map((row) => (
-                    <TableRow key={row.name} hover>
-                      <TableCell sx={{ fontWeight: 500, verticalAlign: 'top' }}>{row.name}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary', verticalAlign: 'top' }}>
-                        {row.description}
-                      </TableCell>
-                    </TableRow>
+                    <tr key={row.name}>
+                      <th scope="row">{row.name}</th>
+                      <td>{row.description}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            </Box>
-          )}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
 
-          {section.bullets && (
-            <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+          {section.bullets ? (
+            <ul className="plexon-assistant-capabilities-bullets">
               {section.bullets.map((item) => (
-                <Box component="li" key={item} sx={{ mb: 0.5 }}>
-                  <MsqdxTypography variant="body2" sx={{ lineHeight: 1.55 }}>
+                <li key={item}>
+                  <Text role="body" as="span">
                     {item}
-                  </MsqdxTypography>
-                </Box>
+                  </Text>
+                </li>
               ))}
-            </Box>
-          )}
-        </Box>
+            </ul>
+          ) : null}
+        </section>
       ))}
 
-      <Box>
-        <MsqdxTypography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+      <section className="plexon-assistant-capabilities-examples">
+        <Text role="title" as="h4">
           Beispiele
-        </MsqdxTypography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        </Text>
+        <ul className="plexon-assistant-capabilities-example-list">
           {ASSISTANT_CAPABILITIES_EXAMPLES.map((example) => (
-            <Box
-              key={example}
-              sx={{
-                px: 1.25,
-                py: 0.75,
-                borderLeft: '3px solid var(--color-primary-main, #1976d2)',
-                bgcolor: 'rgba(25, 118, 210, 0.06)',
-                borderRadius: '0 var(--msqdx-radius-sm) var(--msqdx-radius-sm) 0',
-              }}
-            >
-              <MsqdxTypography variant="body2" sx={{ fontStyle: 'italic', lineHeight: 1.5 }}>
-                „{example}"
-              </MsqdxTypography>
-            </Box>
+            <li key={example}>
+              <Panel variant="flush" className="plexon-assistant-capabilities-example">
+                <Text role="body" as="p">
+                  „{example}"
+                </Text>
+              </Panel>
+            </li>
           ))}
-        </Box>
-      </Box>
+        </ul>
+      </section>
 
-      <MsqdxTypography variant="body2" sx={{ fontWeight: 600 }}>
+      <Text role="body" as="p" className="plexon-assistant-capabilities-footer">
         {ASSISTANT_CAPABILITIES_FOOTER}
-      </MsqdxTypography>
-    </Box>
-  );
+      </Text>
+    </div>
+  )
 }

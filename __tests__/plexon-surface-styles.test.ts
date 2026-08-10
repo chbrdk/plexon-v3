@@ -22,10 +22,8 @@ describe('plexon-surface-styles', () => {
     expect(plexonAssistantChatShellSx.backgroundColor).toBe('var(--color-bg-subtle)');
   });
 
-  it('forces active stepper labels to black on-light text token', () => {
-    const active =
-      plexonAssistantStepperSx['& .MuiStep-root .MuiStepLabel-root .MuiStepLabel-label.Mui-active'];
-    expect(active).toMatchObject({ color: 'var(--color-text-on-light) !important' });
+  it('drops MUI stepper sx after Wave 7 (CSS steps instead)', () => {
+    expect(Object.keys(plexonAssistantStepperSx)).toHaveLength(0);
   });
 
   it('styles assistant drawer with theme accent border', () => {

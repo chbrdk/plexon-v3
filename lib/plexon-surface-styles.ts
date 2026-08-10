@@ -7,8 +7,8 @@ export const PLEXON_OFFWHITE = MSQDX_NEUTRAL.neutral;
 export const PLEXON_SURFACE_OFFWHITE_CSS = 'var(--color-bg-subtle)';
 
 /**
- * Override MUI dark `palette.paper` on MsqdxCard / content surfaces inside PLEXON.
- * App shell is off-white; cards must not inherit dark theme paper (#1a1a1a).
+ * Override MUI dark `palette.paper` on remaining legacy surfaces (board / drawers).
+ * Assistant generative UI no longer uses this — Wave 7 uses Panel + CSS tokens.
  */
 export const plexonLightCardSx = {
   bgcolor: `${PLEXON_SURFACE_OFFWHITE_CSS} !important`,
@@ -22,37 +22,10 @@ export const plexonLightCardSx = {
   '& .MuiTypography-colorTextSecondary': {
     color: 'var(--color-text-muted-on-light) !important',
   },
-  '& .MuiStepLabel-label': {
-    color: 'var(--color-text-muted-on-light)',
-  },
-  '& .MuiStepLabel-label.Mui-active': {
-    color: 'var(--color-text-on-light)',
-  },
-  '& .MuiStepLabel-label.Mui-completed': {
-    color: 'var(--color-text-on-light)',
-  },
 } as const;
 
-/**
- * MsqdxStepper inside assistant UI — DS styled stepper uses `theme.palette.text.primary`
- * (dark theme = light/purple). Force readable black labels on off-white surfaces.
- */
-export const plexonAssistantStepperSx = {
-  '& .MuiStep-root .MuiStepLabel-root .MuiStepLabel-label': {
-    color: 'var(--color-text-muted-on-light) !important',
-  },
-  '& .MuiStep-root .MuiStepLabel-root .MuiStepLabel-label.Mui-active': {
-    color: 'var(--color-text-on-light) !important',
-    fontWeight: 600,
-  },
-  '& .MuiStep-root .MuiStepLabel-root .MuiStepLabel-label.Mui-completed': {
-    color: 'var(--color-text-on-light) !important',
-  },
-  '& .MuiStepContent-root .MuiTypography-root': {
-    color: 'var(--color-text-muted-on-light) !important',
-    opacity: '1 !important',
-  },
-} as const;
+/** @deprecated Wave 7 — step_list uses `.plexon-assistant-steps`; kept empty for import safety. */
+export const plexonAssistantStepperSx = {} as const;
 
 /** Assistant chat shell — never use `--color-neutral` (#0f0f0f in dark mode). */
 export const plexonAssistantChatShellSx = {

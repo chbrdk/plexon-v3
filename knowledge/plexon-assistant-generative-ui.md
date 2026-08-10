@@ -1,13 +1,104 @@
 # PLEXON Assistant – Generative UI (Atomic Design)
 
-Stand: Juni 2026  
-Status: **Phase 0–4 + Live-Workflow + deterministische Workflow-UI** — alle Kern-Workflows mit `uiLayout`
+Stand: 2026-08-10  
+Status: **Wave 7** — generative UI on `@msqdx/ui` (Audion/DS chat editorial look). Capability Phase 0–4 + live workflows remain.
 
 ## Ziel
 
-Der PLEXON-Assistent soll Antworten nicht nur als Markdown liefern, sondern **live strukturierte UI** aus dem MSQDX Design System aufbauen — sicher, testbar und erweiterbar.
+Der PLEXON-Assistent soll Antworten nicht nur als Markdown liefern, sondern **live strukturierte UI** aus dem zentralen Design System aufbauen — sicher, testbar und erweiterbar.
 
-**Kernprinzip:** Das Modell ruft **Output-Tools** auf, die **JSON-Blöcke** erzeugen. PLEXON validiert und rendert sie über eine **Block-Registry** → echte `@msqdx/react`-Komponenten. Kein beliebiges React/HTML vom Modell.
+**Kernprinzip:** Das Modell ruft **Output-Tools** auf, die **JSON-Blöcke** erzeugen. PLEXON validiert und rendert sie über eine **Block-Registry** → echte **`@msqdx/ui`**-Primitives. Kein beliebiges React/HTML vom Modell. **Kein** neues MUI / **kein** Expand von `@msqdx/react` Bridge.
+
+---
+
+## Architektur-Überblick
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Claude (Orchestrator)                                           │
+│  ├─ MCP: checkion.* / audion.*     → Daten holen                │
+│  └─ Lokal: plexon_ui.*             → Darstellung steuern        │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+              runOrchestratorComplete (intercept plexon_ui.*)
+                            │
+         ┌──────────────────┼──────────────────┐
+         ▼                  ▼                  ▼
+   UiBlockAccumulator   SSE ui_block      metadata.uiBlocks
+         │                  │                  │
+         └──────────────────┴──────────────────┘
+                            │
+              AssistantBlockRenderer (Client)
+                            │
+         Atomic layers → @msqdx/ui (Panel, Text, Spinner, Chip, Alert, …)
+```
+
+### Trennung der Verantwortlichkeiten
+
+| Schicht | Ort | Aufgabe |
+|---------|-----|---------|
+| **Tool-API** | `lib/assistant/ui-tools/` | Anthropic-Tool-Definitionen, lokale Ausführung |
+| **Schema/Registry** | `lib/assistant/ui-blocks/` | Zod-Schemas, Parsing, Whitelist, Fallback-Text |
+| **Server-State** | `UiBlockAccumulator` | Sammelt Blöcke pro Turn, serialisiert für DB |
+| **Transport** | `assistant-sse.ts` | `ui_block`, `ui_layout`, `ui_panel` Events |
+| **UI Atoms** | `components/assistant-ui/atoms/` | Token-nah auf `@msqdx/ui` |
+| **UI Molecules** | `components/assistant-ui/molecules/` | MetricTile, Alert, BlockHeader, … |
+| **UI Organisms** | `components/assistant-ui/organisms/` | Agent-Blöcke (DataTable, MetricGrid, StepList, …) |
+| **UI Templates** | `components/assistant-ui/templates/` | `UiBlockSurface` (`Panel`), Split |
+| **Composer** | `components/assistant-ui/` | `AssistantBlockRenderer`, `AssistantPanel` |
+
+---
+
+## Atomic Design – Schichten & Mapping auf MSQDX UI
+
+### Atoms (`components/assistant-ui/atoms/`)
+
+| PLEXON Atom | `@msqdx/ui` Basis | Agent-Props |
+|-------------|-------------------|-------------|
+| `UiText` | `Text` | `variant` → role, `children`, `tone?` |
+| `UiBadge` | `Chip` | `label`, `tone: success\|warning\|error\|neutral` |
+| `UiMetricValue` | `Text` | `value`, `unit?`, `size?` |
+| `UiLink` | `<a>` + token classes | `href`, `label`, `external?` |
+| `UiBlockTitle` | `Text` role title | `children` |
+
+### Molecules
+
+| Molecule | Zusammensetzung |
+|----------|-----------------|
+| `UiMetricTile` | `UiText` + `UiMetricValue` + optional `UiBadge` |
+| `UiKeyValueRow` | zwei `UiText` |
+| `UiAlert` | `@msqdx/ui` `Alert` + copy |
+| `UiBlockHeader` | `Text` title (+ optional eyebrow); no Material icon ligatures |
+| `PlexonEntityCard` | `Panel` + entity fields |
+
+### Organisms (Block-Typen)
+
+| Block `type` | Organism | Render |
+|--------------|----------|--------|
+| `text` | `UiMarkdownBlock` | `AssistantChatAnswer` |
+| `metric_grid` | `UiMetricGrid` | `UiBlockSurface` + tiles |
+| `data_table` | `UiDataTable` | semantic table + token CSS |
+| `key_value_list` | `UiKeyValueList` | rows |
+| `alert` | `UiAlertBlock` | `UiAlert` |
+| `link_list` | `UiLinkList` | link rows |
+| `step_list` | `UiStepList` | **`.plexon-assistant-steps`** + `Spinner` (not MUI Stepper) |
+| `summary_card` | `UiSummaryCard` | Panel + Text |
+| `corner_tab_section` | `UiCornerTabSectionBlock` | Panel sections |
+| `persona_card` / `target_group_card` | entity panels | `@msqdx/ui` composition |
+| `chart` | `UiChartBlock` | recharts inside Panel |
+| `collapsible` | `UiCollapsibleBlock` | details/summary + answer |
+
+**Theme:** `--ink` / `--panel` / `--line` / `--muted` / `--accent`. Never force `data-msqdx-surface="light"` inside `[data-plexon-assistant-chat]`.
+
+**CSS SoT:** `styles/globals.css` — classes under `.plexon-assistant-*` (block surface, steps, list rows, entity cards, tables, split, side panel, capabilities, phase). Smoke: `__tests__/ui-migrate-assistant-wave7.test.ts`.
+
+See also: `specs/domain/ui-migrate-assistant.md` Wave 7 · `knowledge/central-assistant-flyout.md`.
+
+---
+
+## Legacy note
+
+Older sections below that still mention `@msqdx/react` / `MsqdxStepper` are **historical**. Runtime SoT is Wave 7 above.
 
 ---
 
