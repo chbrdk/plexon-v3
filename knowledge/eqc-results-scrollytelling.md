@@ -12,6 +12,7 @@ Done Event Quick Check results read as **magazine chapters**: each top-level ban
 | Selector | Role |
 |----------|------|
 | `.app-frame:has(.plexon-eqc-stage)` → `.app-main` → `.page-body` → `.plexon-stage` → `.plexon-eqc-stage` | Height chain (`100dvh`, `overflow: hidden`) so the inner scrollport can move |
+| `.plexon-eqc-results` | Flex column; `gap: 50vh` between chapters |
 | `.plexon-eqc-results-scroll` | Snap + scroll container (`overflow-y: auto`) |
 | `.plexon-eqc-results > .plexon-eqc-masthead-shell` | Cover chapter ≥ one scrollport / `100svh` |
 | `.plexon-eqc-results > .plexon-dash-band` | Content chapters ≥ one scrollport / `100svh` |

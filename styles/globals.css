@@ -2921,7 +2921,8 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 .plexon-eqc-results {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  /* Wave 8 — breathing room between scrollytelling chapters */
+  gap: 50vh;
   width: min(100%, 72rem);
   margin: 0 auto;
   padding: 0 1rem 0;

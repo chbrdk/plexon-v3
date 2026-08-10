@@ -101,6 +101,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(globals).toMatch(
       /\.plexon-eqc-results > \.plexon-dash-band \{[\s\S]*?min-height:\s*100svh/,
     )
+    expect(globals).toMatch(/\.plexon-eqc-results \{[\s\S]*?gap:\s*50vh/)
     expect(globals).toMatch(/\.app-frame:has\(\.plexon-eqc-stage\) \{[\s\S]*?height:\s*100dvh/)
     expect(globals).toMatch(/\.plexon-eqc-scroll \{[\s\S]*?overflow-y:\s*auto/)
     expect(globals).toContain('.plexon-eqc-voice-radar__shape')
