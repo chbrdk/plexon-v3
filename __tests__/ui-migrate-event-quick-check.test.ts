@@ -95,6 +95,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       geoMag.indexOf('plexon-eqc-geo-snapshot__lede'),
     )
     const globals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(globals).toMatch(/\.plexon-eqc-results \{[\s\S]*?gap: clamp\(4\.5rem, 8vw, 7rem\)/)
     expect(globals).toContain('.plexon-eqc-voice-radar__shape')
     expect(globals).toContain('.plexon-eqc-geo-voice__board')
     expect(globals).toContain('.plexon-eqc-masthead__hero')
