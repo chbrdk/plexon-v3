@@ -3,6 +3,7 @@
 import { Text } from '@msqdx/ui'
 import { ASSISTANT_MESSAGE_CONTENT_TYPE } from '@/lib/assistant/capabilities-overview'
 import { AssistantCapabilitiesOverview } from '@/components/assistant/AssistantCapabilitiesOverview'
+import { AssistantChatAnswer } from '@/components/assistant/AssistantChatAnswer'
 
 type AssistantMessageContentProps = {
   role: 'user' | 'assistant' | 'system'
@@ -10,7 +11,7 @@ type AssistantMessageContentProps = {
   contentType?: string | null
 }
 
-/** Message body — plain text for user; markdown-ish pre-wrap for assistant (bridge Markdown was identity). */
+/** Message body — plain text for user; DS chat-answer blocks for assistant. */
 export function AssistantMessageContent({ role, content, contentType }: AssistantMessageContentProps) {
   const isUser = role === 'user'
 
@@ -26,9 +27,5 @@ export function AssistantMessageContent({ role, content, contentType }: Assistan
     return <AssistantCapabilitiesOverview />
   }
 
-  return (
-    <div className="plexon-assistant-markdown">
-      {content}
-    </div>
-  )
+  return <AssistantChatAnswer answer={content} />
 }

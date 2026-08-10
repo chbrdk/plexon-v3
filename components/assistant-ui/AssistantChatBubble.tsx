@@ -22,7 +22,7 @@ export function AssistantChatBubble({
   return (
     <article className={turnClass} data-role={role} data-status={status}>
       {senderLabel ? <span className="chat-role">{senderLabel}</span> : null}
-      <div className={role === 'user' ? 'chat-text' : 'chat-answer'}>{children}</div>
+      <div className={role === 'user' ? 'chat-text' : 'plexon-assistant-bubble-body'}>{children}</div>
       {status === 'sending' ? <span className="chat-turn-status" aria-hidden>…</span> : null}
     </article>
   )

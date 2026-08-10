@@ -65,7 +65,7 @@ export function AgentActivityTrace({ trace, active }: AgentActivityTraceProps) {
     : null
 
   return (
-    <Panel className="plexon-assistant-activity" data-msqdx-surface="light">
+    <Panel className="plexon-assistant-activity" variant="default">
       <div className="plexon-assistant-activity-head">
         <div className="plexon-assistant-activity-phase">
           <Text role="label" as="span">

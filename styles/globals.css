@@ -1488,10 +1488,25 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   white-space: pre-wrap;
 }
 
+.plexon-assistant-bubble-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  color: var(--ink);
+}
+
 .plexon-assistant-markdown {
-  white-space: pre-wrap;
+  white-space: normal;
+  color: var(--ink);
   font-size: var(--type-sm, 0.875rem);
   line-height: 1.5;
+}
+
+.plexon-assistant-markdown .chat-answer-p,
+.plexon-assistant-markdown .chat-answer-h,
+.plexon-assistant-markdown li {
+  color: var(--ink);
 }
 
 .plexon-assistant-planner {
@@ -1527,6 +1542,9 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   max-height: 280px;
   overflow: auto;
   margin-bottom: 0.75rem;
+  background: var(--panel, var(--bg1));
+  color: var(--ink);
+  border-color: var(--line);
 }
 
 .plexon-assistant-activity-head {
@@ -4852,16 +4870,24 @@ main {
   color: var(--color-text-on-light) !important;
 }
 
-/* MsqdxCard / GlassCard: light paper surfaces stay readable on dark page chrome */
-[data-plexon-content] [data-msqdx-surface='light'],
-[data-plexon-assistant-chat] [data-msqdx-surface='light'] {
+/* Light paper surfaces: keep cream only on magazine content stages — not assistant flyout. */
+[data-plexon-content] [data-msqdx-surface='light'] {
   background-color: var(--color-bg-subtle) !important;
   color: var(--color-text-on-light);
 }
 
-[data-plexon-content] [data-msqdx-surface='light']:hover,
-[data-plexon-assistant-chat] [data-msqdx-surface='light']:hover {
+[data-plexon-content] [data-msqdx-surface='light']:hover {
   background-color: var(--color-bg-subtle) !important;
+}
+
+/* Assistant chat: theme tokens only (dark flyout must not paint cream paper). */
+[data-plexon-assistant-chat] [data-msqdx-surface='light'] {
+  background-color: var(--panel, var(--bg1)) !important;
+  color: var(--ink) !important;
+}
+
+[data-plexon-assistant-chat] [data-msqdx-surface='light']:hover {
+  background-color: var(--panel, var(--bg1)) !important;
 }
 
 /* Assistant chat follows host data-theme — do not force light paper (breaks dark flyout). */

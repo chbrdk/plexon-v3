@@ -48,7 +48,7 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
   const modeLabel = modeKey ? t(modeKey) : planner.mode ?? '—'
 
   return (
-    <Panel className="plexon-assistant-planner" data-msqdx-surface="light">
+    <Panel className="plexon-assistant-planner" variant="default">
       <div className="plexon-assistant-planner-head">
         <Text role="label" as="span" className="plexon-assistant-planner-kicker">
           {t('assistant.plannerTitle')}

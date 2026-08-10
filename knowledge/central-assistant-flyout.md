@@ -62,3 +62,9 @@ Chrome: `ChatOverlay` owns title / expand / close. Overlay chat keeps compact to
 Do **not** force `--color-bg-subtle` / `--color-text-on-light` on `[data-plexon-assistant-chat]` — that paints a cream paper panel under dark `data-theme` and makes empty-state / composer unreadable. Overlay uses transparent + `var(--ink)`; suggestion chip cloud is hidden in `presentation=overlay`.
 
 Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps users out of the flyout onto the expand page (and hides the FAB). URL sync is expand-only; flyout keeps `conversationId` in React state + `onConversationChange`.
+
+### Activity + answer chrome (follow-up)
+
+- `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.
+- Cream paper override stays scoped to `[data-plexon-content]` only; assistant chat remaps any residual light surfaces to `var(--panel)` / `var(--ink)`.
+- Assistant answers render via `AssistantChatAnswer` + `lib/assistant/format-chat-answer.ts` (Audion SoT) into DS `.chat-answer-*` blocks — not raw pre-wrap markdown.

@@ -19,7 +19,7 @@ export function ConfirmActionCard({ pending, onConfirm, onCancel }: ConfirmActio
   const { t } = useI18n()
 
   return (
-    <Panel className="plexon-assistant-confirm-card" data-msqdx-surface="light">
+    <Panel className="plexon-assistant-confirm-card" variant="default">
       <Text role="title" as="h3">
         {t('assistant.confirmAction')}
       </Text>
