@@ -6,7 +6,11 @@ import {
   EmptyState,
   Field,
   Flyout,
+  IconCheck,
+  IconClose,
+  IconEdit,
   IconHistory,
+  IconTrash,
   Input,
   SectionChrome,
   Spinner,
@@ -89,12 +93,26 @@ function ConversationRow({
           />
         </Field>
         <div className="plexon-chat-history-item-actions">
-          <Button size="sm" variant="primary" disabled={saving} onClick={() => void saveTitle()}>
-            {t('assistant.history.renameSave')}
-          </Button>
-          <Button size="sm" variant="ghost" disabled={saving} onClick={() => setEditing(false)}>
-            {t('assistant.history.renameCancel')}
-          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            shape="square"
+            icon={<IconCheck />}
+            disabled={saving}
+            aria-label={t('assistant.history.renameSave')}
+            title={t('assistant.history.renameSave')}
+            onClick={() => void saveTitle()}
+          />
+          <Button
+            size="sm"
+            variant="ghost"
+            shape="square"
+            icon={<IconClose />}
+            disabled={saving}
+            aria-label={t('assistant.history.renameCancel')}
+            title={t('assistant.history.renameCancel')}
+            onClick={() => setEditing(false)}
+          />
         </div>
       </li>
     )
@@ -117,22 +135,24 @@ function ConversationRow({
         <Button
           size="sm"
           variant="ghost"
+          shape="square"
+          icon={<IconEdit />}
           aria-label={t('assistant.history.rename')}
+          title={t('assistant.history.rename')}
           onClick={() => {
             setDraftTitle(conversation.title?.trim() ?? '')
             setEditing(true)
           }}
-        >
-          {t('assistant.history.rename')}
-        </Button>
+        />
         <Button
           size="sm"
           variant="danger"
+          shape="square"
+          icon={<IconTrash />}
           aria-label={t('assistant.history.delete')}
+          title={t('assistant.history.delete')}
           onClick={() => void handleDelete()}
-        >
-          {t('assistant.history.delete')}
-        </Button>
+        />
       </div>
     </li>
   )
@@ -161,6 +181,7 @@ export function AssistantConversationHistory({
     <Flyout
       label={t('assistant.history.open')}
       icon={<IconHistory />}
+      surface="glass"
       resetKey={activeConversationId}
       triggerClassName="plexon-chat-topbar-icon"
       panelClassName="plexon-chat-history-flyover"

@@ -2200,6 +2200,17 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   max-width: min(28rem, 94vw);
   max-height: min(70vh, 32rem);
   overflow: auto;
+  background: color-mix(in srgb, var(--surface, var(--bg1, var(--bg0))) 72%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  backdrop-filter: blur(20px) saturate(1.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plexon-chat-history-flyover {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--surface, var(--bg1, var(--bg0)));
+  }
 }
 
 .plexon-chat-history-toolbar {
@@ -2218,10 +2229,16 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-chat-history-item {
   display: grid;
-  gap: 0.35rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 0.5rem;
+  align-items: start;
   padding: 0.45rem 0.5rem;
   border-radius: var(--radius-control, 8px);
   border: 1px solid transparent;
+}
+
+.plexon-chat-history-item.is-editing {
+  grid-template-columns: 1fr;
 }
 
 .plexon-chat-history-item.is-active {
@@ -2239,6 +2256,7 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   cursor: pointer;
   color: inherit;
   padding: 0;
+  min-width: 0;
 }
 
 .plexon-chat-history-item-title {
@@ -2253,9 +2271,10 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-chat-history-item-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
+  align-items: center;
 }
 
 .plexon-chat-history-empty {

@@ -57,7 +57,12 @@ describe('assistant ui rebuild (wave 5 shell)', () => {
     expect(bubble).toContain('chat-turn')
     expect(history).toContain('Flyout')
     expect(history).toContain('IconHistory')
+    expect(history).toContain('surface="glass"')
+    expect(history).toContain('IconEdit')
+    expect(history).toContain('IconTrash')
     expect(history).toContain('SectionChrome')
+    const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(css).toMatch(/\.plexon-chat-history-flyover \{[\s\S]*?backdrop-filter: blur\(/)
   })
 
   it('spec is Accepted for wave 5 shell and Wave 7 generative UI', () => {
