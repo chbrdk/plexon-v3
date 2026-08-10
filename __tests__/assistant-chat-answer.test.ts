@@ -76,6 +76,7 @@ describe('assistant chat answer formatting', () => {
     )
     expect(renderer).toContain('plexon-assistant-block-main')
     expect(css).toContain('grid-template: 1fr / 1fr')
+    expect(css).toMatch(/\.plexon-assistant-blocks \{[\s\S]*?gap: 1\.75rem/)
     expect(css).toMatch(/\.plexon-assistant-corner-tab \{[\s\S]*?border-radius: 0/)
     expect(corner).toContain('stripChatEmoticons')
   })

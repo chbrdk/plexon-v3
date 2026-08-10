@@ -1734,7 +1734,7 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 
 .plexon-assistant-blocks {
   display: grid;
-  gap: 0.85rem;
+  gap: 1.75rem;
   width: 100%;
 }
 
