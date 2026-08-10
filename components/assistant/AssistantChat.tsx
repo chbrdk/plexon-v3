@@ -54,7 +54,14 @@ const SUGGESTIONS = [
   'assistant.suggestUiShowcase',
 ] as const;
 
-export function AssistantChat({ presentation = 'expand' }: { presentation?: 'overlay' | 'expand' }) {
+export function AssistantChat({
+  presentation = 'expand',
+  onConversationChange,
+}: {
+  presentation?: 'overlay' | 'expand'
+  /** Host flyout expand deep-link (native hybrid mount). */
+  onConversationChange?: (conversationId: string | null) => void
+}) {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -135,6 +142,10 @@ export function AssistantChat({ presentation = 'expand' }: { presentation?: 'ove
       conversationId: conversationId ?? undefined,
     })
   }, [presentation, conversationId])
+
+  useEffect(() => {
+    onConversationChange?.(conversationId)
+  }, [conversationId, onConversationChange])
 
   useEffect(() => {
     if (presentation !== 'overlay' || !conversationId) return
@@ -238,7 +249,6 @@ export function AssistantChat({ presentation = 'expand' }: { presentation?: 'ove
     setAgentTrace(emptyAgentActivityTrace());
     setShowActivityTrace(false);
     router.replace(PATH_ASSISTANT, { scroll: false });
-    setHistoryMobileOpen(false);
   }, [loading, router]);
 
   const renameConversation = useCallback(async (id: string, title: string): Promise<boolean> => {
@@ -712,7 +722,14 @@ export function AssistantChat({ presentation = 'expand' }: { presentation?: 'ove
         ].join(' ')}
         aria-label={t('nav.assistant')}
       >
-        <header className="plexon-assistant-topbar">
+        <header
+          className={[
+            'plexon-assistant-topbar',
+            presentation === 'overlay' ? 'plexon-assistant-topbar-overlay' : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <AssistantConversationHistory
             conversations={conversations}
             activeConversationId={conversationId}
@@ -729,45 +746,6 @@ export function AssistantChat({ presentation = 'expand' }: { presentation?: 'ove
               onChange={setPlatformProjectId}
             />
           </div>
-          {presentation === 'overlay' ? (
-            <Button
-              variant="subtle"
-              size="sm"
-              className="plexon-assistant-expand"
-              onClick={() => {
-                const href = conversationId
-                  ? pathAssistantChat(conversationId)
-                  : platformProjectId
-                    ? `${PATH_ASSISTANT}?${ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM}=${encodeURIComponent(platformProjectId)}`
-                    : PATH_ASSISTANT
-                if (typeof window !== 'undefined' && window.parent !== window) {
-                  let targetOrigin = '*'
-                  try {
-                    if (document.referrer) targetOrigin = new URL(document.referrer).origin
-                  } catch {
-                    /* keep * only as last resort — prefer referrer */
-                  }
-                  if (targetOrigin === '*') {
-                    /* Host must listen; origin unknown in some embeds */
-                  } else {
-                    postAssistantEmbedMessage(window.parent, targetOrigin, {
-                      type: 'assistant:expand',
-                      conversationId: conversationId ?? undefined,
-                      project: platformProjectId ?? undefined,
-                    })
-                  }
-                }
-                if (typeof window !== 'undefined' && window.parent === window) {
-                  router.push(href)
-                } else if (typeof window !== 'undefined') {
-                  window.open(href, '_top')
-                }
-              }}
-              disabled={loading}
-            >
-              {t('assistant.openWorkspace')}
-            </Button>
-          ) : null}
           <Button
             variant="subtle"
             size="sm"

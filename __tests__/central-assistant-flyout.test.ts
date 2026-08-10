@@ -9,8 +9,10 @@ describe('central assistant flyout specs + mounts', () => {
     const domain = readFileSync(join(root, 'specs/domain/central-assistant-flyout.md'), 'utf8')
     const api = readFileSync(join(root, 'specs/api/assistant-embed.md'), 'utf8')
     expect(domain).toContain('ChatOverlay')
+    expect(domain).toContain('Hybrid')
     expect(domain).toContain('PATH_ASSISTANT_EMBED')
     expect(api).toContain('assistant:expand')
+    expect(api).toContain('assistant:theme')
     expect(api).toContain('postMessage')
   })
 
@@ -21,22 +23,36 @@ describe('central assistant flyout specs + mounts', () => {
     expect(shell).toContain('isEmbedPage')
   })
 
-  it('embed page uses overlay presentation', () => {
+  it('host uses native AssistantChat same-origin and iframe cross-origin', () => {
+    const host = readFileSync(join(root, 'components/PlatformAssistantHost.tsx'), 'utf8')
+    expect(host).toContain('useSameOriginNative')
+    expect(host).toContain('<AssistantChat')
+    expect(host).toContain('presentation="overlay"')
+    expect(host).toContain('plexon-assistant-embed-frame')
+    expect(host).toContain('assistant:theme')
+    expect(host).toContain('headerActions')
+  })
+
+  it('embed page uses overlay presentation and theme sync', () => {
     const page = readFileSync(join(root, 'app/assistant/embed/page.tsx'), 'utf8')
     expect(page).toContain("presentation=\"overlay\"")
     expect(page).toContain('assistant:auth-required')
+    expect(page).toContain('EmbedThemeSync')
+    expect(page).toContain('applyAssistantEmbedTheme')
   })
 
-  it('AssistantChat supports presentation modes', () => {
+  it('AssistantChat supports presentation modes and conversation callback', () => {
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     expect(chat).toContain("presentation = 'expand'")
     expect(chat).toContain('chat-panel-compact')
-    expect(chat).toContain('assistant:expand')
+    expect(chat).toContain('onConversationChange')
+    expect(chat).toContain('plexon-assistant-topbar-overlay')
   })
 
-  it('constants export embed helpers', () => {
+  it('constants export embed helpers including theme', () => {
     const constants = readFileSync(join(root, 'lib/constants.ts'), 'utf8')
     expect(constants).toContain('PATH_ASSISTANT_EMBED')
     expect(constants).toContain('pathAssistantEmbed')
+    expect(constants).toContain('ASSISTANT_EMBED_THEME_QUERY_PARAM')
   })
 })

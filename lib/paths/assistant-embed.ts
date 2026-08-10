@@ -12,6 +12,7 @@ const ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM = 'project'
 export const ASSISTANT_EMBED_PRODUCT_QUERY_PARAM = 'product'
 export const ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM = 'capability'
 export const ASSISTANT_EMBED_PATHNAME_QUERY_PARAM = 'pathname'
+export const ASSISTANT_EMBED_THEME_QUERY_PARAM = 'theme'
 
 export type AssistantEmbedProduct = 'plexon' | 'audion' | 'checkion' | 'brandion' | 'unknown'
 
@@ -21,6 +22,7 @@ export type AssistantEmbedQuery = {
   conversationId?: string | null
   capability?: string | null
   pathname?: string | null
+  theme?: string | null
 }
 
 export function normalizeAssistantEmbedProduct(raw: string | null | undefined): AssistantEmbedProduct {
@@ -42,6 +44,8 @@ export function pathAssistantEmbed(query: AssistantEmbedQuery): string {
   if (capability) params.set(ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM, capability)
   const pathname = query.pathname?.trim()
   if (pathname) params.set(ASSISTANT_EMBED_PATHNAME_QUERY_PARAM, pathname)
+  const theme = query.theme?.trim()
+  if (theme) params.set(ASSISTANT_EMBED_THEME_QUERY_PARAM, theme)
   const qs = params.toString()
   return qs ? `${PATH_ASSISTANT_EMBED}?${qs}` : PATH_ASSISTANT_EMBED
 }

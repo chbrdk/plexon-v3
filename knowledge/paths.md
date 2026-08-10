@@ -23,8 +23,8 @@
 - Specs index: `knowledge/specs-index.md`
 - Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md`
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
-  - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed`
-  - Hosts mount `PlatformAssistantHost` → `@msqdx/ui` `ChatOverlay` + iframe (never hardcode Plexon URL)
+  - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed` (+ `theme` via `ASSISTANT_EMBED_THEME_QUERY_PARAM`)
+  - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)
 - Collection projects: `specs/domain/collection-projects.md`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`

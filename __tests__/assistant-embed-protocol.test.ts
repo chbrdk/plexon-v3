@@ -24,19 +24,21 @@ describe('assistant embed paths', () => {
     expect(normalizeAssistantEmbedProduct('AUDION')).toBe('audion')
   })
 
-  it('includes project conversation capability pathname', () => {
+  it('includes project conversation capability pathname theme', () => {
     const href = pathAssistantEmbed({
       product: 'brandion',
       platformProjectId: 'proj-1',
       conversationId: 'c-9',
       capability: 'guidelines',
       pathname: '/guidelines',
+      theme: 'msqdx-dark',
     })
     expect(href).toContain('product=brandion')
     expect(href).toContain('project=proj-1')
     expect(href).toContain('c=c-9')
     expect(href).toContain('capability=guidelines')
     expect(href).toContain('pathname=%2Fguidelines')
+    expect(href).toContain('theme=msqdx-dark')
   })
 
   it('builds absolute embed url without double slash', () => {
@@ -66,8 +68,23 @@ describe('assistant embed protocol', () => {
         product: 'checkion',
       }),
     ).toBe(true)
+    expect(
+      isAssistantHostMessage({
+        source: ASSISTANT_HOST_SOURCE,
+        type: 'assistant:theme',
+        themeId: 'msqdx-dark',
+      }),
+    ).toBe(true)
     expect(isAssistantHostMessage({ source: ASSISTANT_EMBED_SOURCE, type: 'assistant:close' })).toBe(
       false,
     )
+  })
+})
+
+describe('assistant embed theme allowlist', () => {
+  it('accepts known themes and rejects unknown', async () => {
+    const { normalizeAssistantEmbedTheme } = await import('@/lib/assistant/embed-theme')
+    expect(normalizeAssistantEmbedTheme('msqdx-dark')).toBe('msqdx-dark')
+    expect(normalizeAssistantEmbedTheme('not-a-theme')).toBeNull()
   })
 })

@@ -13,7 +13,10 @@ export type AssistantEmbedToHostType =
   | 'assistant:auth-required'
   | 'assistant:conversation'
 
-export type AssistantHostToEmbedType = 'assistant:context' | 'assistant:close'
+export type AssistantHostToEmbedType =
+  | 'assistant:context'
+  | 'assistant:theme'
+  | 'assistant:close'
 
 export type AssistantEmbedMessage = {
   source: typeof ASSISTANT_EMBED_SOURCE
@@ -30,6 +33,7 @@ export type AssistantHostMessage = {
   platformProjectId?: string
   capability?: string
   pathname?: string
+  themeId?: string
 }
 
 export function isAssistantEmbedMessage(data: unknown): data is AssistantEmbedMessage {
@@ -51,7 +55,11 @@ export function isAssistantHostMessage(data: unknown): data is AssistantHostMess
   const row = data as Record<string, unknown>
   if (row.source !== ASSISTANT_HOST_SOURCE) return false
   if (typeof row.type !== 'string') return false
-  return row.type === 'assistant:context' || row.type === 'assistant:close'
+  return (
+    row.type === 'assistant:context' ||
+    row.type === 'assistant:theme' ||
+    row.type === 'assistant:close'
+  )
 }
 
 export function postAssistantEmbedMessage(

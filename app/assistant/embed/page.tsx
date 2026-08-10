@@ -2,11 +2,13 @@
 
 import { Suspense, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import { EmptyState, Spinner, Text, Button } from '@msqdx/ui'
 import { AssistantChat } from '@/components/assistant/AssistantChat'
 import { useI18n } from '@/components/i18n/I18nProvider'
-import { PATH_LOGIN } from '@/lib/constants'
-import { postAssistantEmbedMessage } from '@/lib/assistant/embed-protocol'
+import { ASSISTANT_EMBED_THEME_QUERY_PARAM, PATH_LOGIN } from '@/lib/constants'
+import { postAssistantEmbedMessage, isAssistantHostMessage } from '@/lib/assistant/embed-protocol'
+import { applyAssistantEmbedTheme } from '@/lib/assistant/embed-theme'
 
 function EmbedAuthGate({ children }: { children: React.ReactNode }) {
   const { status } = useSession()
@@ -61,6 +63,26 @@ function EmbedAuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function EmbedThemeSync() {
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    applyAssistantEmbedTheme(searchParams.get(ASSISTANT_EMBED_THEME_QUERY_PARAM))
+  }, [searchParams])
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (!isAssistantHostMessage(event.data)) return
+      if (event.data.type !== 'assistant:theme') return
+      applyAssistantEmbedTheme(event.data.themeId)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
+  return null
+}
+
 export default function AssistantEmbedPage() {
   const { t } = useI18n()
 
@@ -73,6 +95,7 @@ export default function AssistantEmbedPage() {
           </EmptyState>
         }
       >
+        <EmbedThemeSync />
         <EmbedAuthGate>
           <AssistantChat presentation="overlay" />
         </EmbedAuthGate>
