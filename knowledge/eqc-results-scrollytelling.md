@@ -11,11 +11,14 @@ Done Event Quick Check results read as **magazine chapters**: each top-level ban
 
 | Selector | Role |
 |----------|------|
-| `.plexon-eqc-results-scroll` | Snap container |
-| `.plexon-eqc-results > .plexon-eqc-masthead-shell` | Cover chapter ≥ `100svh` |
-| `.plexon-eqc-results > .plexon-dash-band` | Content chapters ≥ `100svh` |
+| `.app-frame:has(.plexon-eqc-stage)` → `.app-main` → `.page-body` → `.plexon-stage` → `.plexon-eqc-stage` | Height chain (`100dvh`, `overflow: hidden`) so the inner scrollport can move |
+| `.plexon-eqc-results-scroll` | Snap + scroll container (`overflow-y: auto`) |
+| `.plexon-eqc-results > .plexon-eqc-masthead-shell` | Cover chapter ≥ one scrollport / `100svh` |
+| `.plexon-eqc-results > .plexon-dash-band` | Content chapters ≥ one scrollport / `100svh` |
 
 `prefers-reduced-motion: reduce` disables snap + smooth scroll.
+
+**Bug note (2026-08-10):** Without the height chain, `.plexon-eqc-stage { overflow: hidden }` clipped content and the scroll child never became a bounded scrollport — wheel did nothing.
 
 ## Non-goals
 
