@@ -8,7 +8,8 @@
 - Shell config: `lib/shell-paths.ts` (`shellPaths` / `paths`)
 - Route constants: `lib/constants.ts` · `lib/paths/*`
 - Default app port: `3334` (local) · Coolify/Docker: `3000`
-- Public staging URL: `https://plexon-v3.projects-a.plygrnd.tech`
+- Coolify deploy API (force rebuild): `knowledge/coolify-deploy-api.md` — MCP is read-only; use `POST https://coolify.plygrnd.tech/api/v1/deploy`
+
 - Companion: `https://audion-v3.projects-a.plygrnd.tech`
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - BRANDION staging companion: `https://brandion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_BRANDION_URL` / `URL_BRANDION_V3`) — set after brandion-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4c
