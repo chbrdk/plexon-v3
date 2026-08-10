@@ -1561,32 +1561,53 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-assistant-planner {
-  padding: 0.65rem 0.85rem;
+  padding: 0.3rem 0.5rem;
+  font-size: var(--type-xs, 0.75rem);
+  line-height: 1.3;
 }
 
 .plexon-assistant-planner-head {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  min-height: 1.35rem;
 }
 
 .plexon-assistant-planner-kicker {
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.65rem;
+  color: var(--muted);
+  flex-shrink: 0;
 }
 
 .plexon-assistant-planner-summary {
   flex: 1;
-  min-width: 8rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.plexon-assistant-planner-toggle {
+  flex-shrink: 0;
+  font-size: 0.7rem !important;
+  padding: 0 !important;
+  min-height: 0 !important;
 }
 
 .plexon-assistant-planner-details {
   display: grid;
-  gap: 0.35rem;
-  margin-top: 0.65rem;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.72rem;
 }
 
 .plexon-assistant-activity {

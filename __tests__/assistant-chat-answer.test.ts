@@ -77,4 +77,13 @@ describe('assistant chat answer formatting', () => {
     expect(confirm).not.toContain("data-msqdx-surface=\"light\"")
     expect(activity).toContain('variant="default"')
   })
+
+  it('planner card uses compact meta chrome', () => {
+    const planner = readFileSync(path.join(root, 'components/assistant/PlannerStepCard.tsx'), 'utf8')
+    const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(planner).toContain('plexon-assistant-planner-toggle')
+    expect(planner).toContain('role="meta"')
+    expect(css).toContain('.plexon-assistant-planner-toggle')
+    expect(css).toMatch(/\.plexon-assistant-planner \{[\s\S]*?padding: 0\.3rem 0\.5rem/)
+  })
 })

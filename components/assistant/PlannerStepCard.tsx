@@ -50,10 +50,10 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
   return (
     <Panel className="plexon-assistant-planner" variant="default">
       <div className="plexon-assistant-planner-head">
-        <Text role="label" as="span" className="plexon-assistant-planner-kicker">
+        <Text role="meta" as="span" className="plexon-assistant-planner-kicker">
           {t('assistant.plannerTitle')}
         </Text>
-        <Text role="body" as="span" className="plexon-assistant-planner-summary">
+        <Text role="meta" as="span" className="plexon-assistant-planner-summary">
           {intentLabel} · {modeLabel}
           {typeof planner.toolsOffered === 'number' && planner.toolsOffered > 0
             ? ` · ${planner.toolsOffered} ${t('assistant.plannerTools')}`
@@ -65,14 +65,19 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
             ? ` · ${planner.retrievalVectorHits} vector`
             : ''}
         </Text>
-        <Button size="sm" variant="link" onClick={() => setOpen((v) => !v)}>
+        <Button
+          size="sm"
+          variant="link"
+          className="plexon-assistant-planner-toggle"
+          onClick={() => setOpen((v) => !v)}
+        >
           {open ? t('assistant.plannerHide') : t('assistant.plannerDetails')}
         </Button>
       </div>
       {open ? (
         <div className="plexon-assistant-planner-details">
           {planner.reasoning ? (
-            <Text role="body" as="p">
+            <Text role="meta" as="p">
               {planner.reasoning}
             </Text>
           ) : null}
