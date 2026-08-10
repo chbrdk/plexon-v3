@@ -63,9 +63,11 @@ Channel marker: every message is a JSON-serializable object with `source: 'plexo
 
 | `type` | Payload | When |
 |--------|---------|------|
-| `assistant:context` | `{ product; platformProjectId?; capability?; pathname? }` | Host context changed while open |
+| `assistant:context` | `{ product; platformProjectId?; capability?; pathname?; entityType?; entityId? }` | Host context changed while open |
 | `assistant:theme` | `{ themeId: string }` | Host theme changed / initial sync |
 | `assistant:close` | `{}` | Host requests embed to shut down UI (optional) |
+
+`pageContext` on `POST /api/assistant/complete` (and stream) mirrors the same fields — see `specs/domain/assistant-page-context.md`.
 
 `targetOrigin` MUST be the configured Plexon origin (embed) / host origin (host) — never `*`.
 

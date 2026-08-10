@@ -40,6 +40,7 @@ import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-che
 import {
   API_EVENT_QUICK_CHECK_RUNS,
   EVENT_QUICK_CHECK_RUN_QUERY_PARAM,
+  PATH_EVENT_QUICK_CHECK,
   apiEventQuickCheckRun,
   apiEventQuickCheckRunCompanyBrief,
   apiEventQuickCheckRunCompetitors,
@@ -53,6 +54,11 @@ import {
   subscribeAssistantWorkflowStream,
   type WorkflowStep,
 } from '@/lib/assistant/workflow-stream-client';
+import { useSetAssistantPageContext } from '@/components/assistant/AssistantPageContext';
+import {
+  ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
+  ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN,
+} from '@/lib/assistant/page-context';
 
 type Phase =
   | 'idle'
@@ -69,6 +75,7 @@ export function EventQuickCheckPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const runFromUrl = searchParams.get(EVENT_QUICK_CHECK_RUN_QUERY_PARAM);
+  const setAssistantPageContext = useSetAssistantPageContext();
 
   const [phase, setPhase] = useState<Phase>('idle');
   const [url, setUrl] = useState('');
@@ -122,6 +129,19 @@ export function EventQuickCheckPageClient() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const streamRef = useRef<EventSource | null>(null);
   const loadedUrlRunRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const runId = workflowRunId ?? runFromUrl ?? null
+    setAssistantPageContext({
+      product: 'plexon',
+      pathname: PATH_EVENT_QUICK_CHECK,
+      capability: ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
+      platformProjectId: platformProjectId,
+      entityType: runId ? ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN : undefined,
+      entityId: runId ?? undefined,
+    })
+    return () => setAssistantPageContext(null)
+  }, [workflowRunId, runFromUrl, platformProjectId, setAssistantPageContext])
 
   const refreshHistory = useCallback(async () => {
     setHistoryLoading(true);

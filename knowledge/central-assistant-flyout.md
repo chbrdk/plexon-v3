@@ -73,3 +73,7 @@ Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps u
 ### Wave 7 generative UI (2026-08-10)
 
 Block chrome in the flyout/expand turns uses `@msqdx/ui` only: `UiBlockSurface` → `Panel`, `step_list` → `.plexon-assistant-steps` + `Spinner`, pin shell → `.plexon-assistant-block`. Spec: `specs/domain/ui-migrate-assistant.md`.
+
+### Page context (2026-08-10)
+
+EQC pages publish `AssistantPageContext` (capability + `workflowRunId`) into the flyout; complete hydrates an authorized run into the system prompt. Spec: `specs/domain/assistant-page-context.md`.

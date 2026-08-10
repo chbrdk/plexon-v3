@@ -5,7 +5,7 @@
 **DS:** `@msqdx/ui` `ChatOverlay` · `chat.css` (`.chat-overlay`, `.chat-overlay-sheet`, `.chat-panel-compact`, dock-end `min(32rem)`)  
 **API:** `specs/api/assistant-embed.md`  
 **Knowledge:** `knowledge/central-assistant-flyout.md` · `knowledge/paths.md`  
-**Product model:** `specs/domain/collection-projects.md` — Collections only (`platformProjectId`)
+**Page context:** `specs/domain/assistant-page-context.md` — host publishes structured page/entity context (EQC first)
 
 ## Goals
 
@@ -27,6 +27,7 @@
 | Sheet width | Dock-end `min(32rem, 100%)`, token surfaces (`--panel` / `--bg1` / `--ink` / `--line`) |
 | Chrome | **Single header:** `ChatOverlay` owns title / expand / close; overlay `AssistantChat` keeps compact toolbar (history + project) only |
 | Theme | Host `data-theme` → embed query `theme` + postMessage `assistant:theme` |
+| Page context | Host publishes `AssistantPageContext` (pathname + capability + entity ids); complete hydrates EQC runs into system prompt (`assistant-page-context.md`) |
 | Audion `/chat` | Remains product-local persona/TG chat — **not** merged |
 
 ## Information architecture

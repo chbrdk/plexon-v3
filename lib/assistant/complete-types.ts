@@ -1,9 +1,13 @@
+import type { AssistantPageContext } from '@/lib/assistant/page-context'
+
 export type AssistantCompleteBody = {
-  prompt?: string;
-  conversationId?: string;
-  platformProjectId?: string;
-  confirmToolCall?: { toolName: string; input: Record<string, unknown> };
-};
+  prompt?: string
+  conversationId?: string
+  platformProjectId?: string
+  /** Host page/entity context — specs/domain/assistant-page-context.md */
+  pageContext?: AssistantPageContext
+  confirmToolCall?: { toolName: string; input: Record<string, unknown> }
+}
 
 export type AssistantCompleteResult = {
   conversationId: string;

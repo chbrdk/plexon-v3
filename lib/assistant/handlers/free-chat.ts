@@ -51,6 +51,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       useCheckionMcp,
       useAudionMcp,
       useEchonMcp,
+      pageContext: ctx.body.pageContext ?? null,
       onProgress: (ev) => {
         ctx.emit?.(ev);
         if (ev.type === 'phase' && ev.phase === 'tools') {

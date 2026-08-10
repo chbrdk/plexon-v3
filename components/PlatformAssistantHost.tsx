@@ -6,6 +6,7 @@ import { Button, ChatOverlay } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { NavIconAssistant } from '@/components/nav-icons'
 import { AssistantChat } from '@/components/assistant/AssistantChat'
+import { useAssistantPageContext } from '@/components/assistant/AssistantPageContext'
 import {
   PATH_ASSISTANT,
   PATH_ASSISTANT_EMBED,
@@ -20,6 +21,11 @@ import {
   postAssistantHostMessage,
 } from '@/lib/assistant/embed-protocol'
 import { readDocumentThemeId } from '@/lib/assistant/embed-theme'
+import {
+  derivePageContextFromLocation,
+  mergeAssistantPageContext,
+  type AssistantPageContext,
+} from '@/lib/assistant/page-context'
 
 export type PlatformAssistantHostProps = {
   product: AssistantEmbedProduct
@@ -82,11 +88,37 @@ export function PlatformAssistantHost({
   const { t } = useI18n()
   const pathname = usePathname()
   const router = useRouter()
+  const publishedPageContext = useAssistantPageContext()
   const [open, setOpen] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [themeId, setThemeId] = useState<string | null>(null)
   const useNative = useSameOriginNative(plexonPublicBase)
+
+  const pageContext = useMemo((): AssistantPageContext | null => {
+    const fromUrl = derivePageContextFromLocation({
+      product: product === 'unknown' ? 'plexon' : product,
+      pathname,
+      search: typeof window !== 'undefined' ? window.location.search : '',
+    })
+    const fromProps: AssistantPageContext | null =
+      pathname && product !== 'unknown'
+        ? {
+            product,
+            pathname,
+            capability: capability ?? undefined,
+            platformProjectId: platformProjectId ?? undefined,
+          }
+        : null
+    return mergeAssistantPageContext(
+      mergeAssistantPageContext(fromUrl, fromProps),
+      publishedPageContext
+    )
+  }, [product, pathname, capability, platformProjectId, publishedPageContext])
+
+  const effectivePlatformProjectId =
+    pageContext?.platformProjectId ?? platformProjectId ?? null
+  const effectiveCapability = pageContext?.capability ?? capability ?? null
 
   const onExpandRoute =
     hideOnAssistantExpand &&
@@ -118,17 +150,26 @@ export function PlatformAssistantHost({
     return resolveEmbedSrc(
       plexonPublicBase,
       product,
-      platformProjectId,
-      capability,
+      effectivePlatformProjectId,
+      effectiveCapability,
       pathname,
       themeId,
     )
-  }, [plexonPublicBase, product, platformProjectId, capability, pathname, themeId, useNative, open])
+  }, [
+    plexonPublicBase,
+    product,
+    effectivePlatformProjectId,
+    effectiveCapability,
+    pathname,
+    themeId,
+    useNative,
+    open,
+  ])
 
   const navigateExpand = useCallback(() => {
     setOpen(false)
     const id = conversationId
-    const project = platformProjectId
+    const project = effectivePlatformProjectId
     if (product === 'plexon' || useNative) {
       if (id) router.push(pathAssistantChat(id))
       else if (project) router.push(pathAssistantWithProject(project))
@@ -181,7 +222,7 @@ export function PlatformAssistantHost({
         window.open(`${base}${path}`, '_blank', 'noopener,noreferrer')
       }
     },
-    [useNative, plexonOrigin, conversationId, platformProjectId, product, plexonPublicBase, router],
+    [useNative, plexonOrigin, conversationId, effectivePlatformProjectId, product, plexonPublicBase, router],
   )
 
   useEffect(() => {
@@ -196,9 +237,11 @@ export function PlatformAssistantHost({
     postAssistantHostMessage(frame, plexonOrigin, {
       type: 'assistant:context',
       product,
-      platformProjectId: platformProjectId ?? undefined,
-      capability: capability ?? undefined,
-      pathname: pathname ?? undefined,
+      platformProjectId: effectivePlatformProjectId ?? undefined,
+      capability: effectiveCapability ?? undefined,
+      pathname: pageContext?.pathname ?? pathname ?? undefined,
+      entityType: pageContext?.entityType,
+      entityId: pageContext?.entityId,
     })
     if (themeId) {
       postAssistantHostMessage(frame, plexonOrigin, {
@@ -206,7 +249,17 @@ export function PlatformAssistantHost({
         themeId,
       })
     }
-  }, [open, useNative, product, platformProjectId, capability, pathname, plexonOrigin, themeId])
+  }, [
+    open,
+    useNative,
+    product,
+    effectivePlatformProjectId,
+    effectiveCapability,
+    pathname,
+    pageContext,
+    plexonOrigin,
+    themeId,
+  ])
 
   if (onExpandRoute) return null
 
@@ -236,6 +289,7 @@ export function PlatformAssistantHost({
         {open && useNative ? (
           <AssistantChat
             presentation="overlay"
+            pageContext={pageContext}
             onConversationChange={(id) => setConversationId(id)}
           />
         ) : open && embedSrc ? (

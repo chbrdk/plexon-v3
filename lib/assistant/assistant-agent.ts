@@ -22,6 +22,8 @@ import { buildPlanningPromptFromConversation } from '@/lib/assistant/audience-wr
 import { buildAssistantSystemPrompt } from '@/lib/assistant/system-prompt';
 import type { AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
+import type { AssistantPageContext } from '@/lib/assistant/page-context';
+import { buildAssistantPageContextBlock } from '@/lib/assistant/page-context/hydrate-event-quick-check';
 
 export type AgentProgressCallback = (event: {
   type: 'phase';
@@ -55,6 +57,7 @@ export type RunAssistantAgentInput = {
   onUiBlockUpdate?: (block: UiBlock, index: number) => void;
   onUiPanel?: (panel: UiPanelState) => void;
   onUiReset?: () => void;
+  pageContext?: AssistantPageContext | null;
 };
 
 export type RunAssistantAgentResult = OrchestratorCompleteResult & {
@@ -74,6 +77,8 @@ export async function runAssistantAgent(
 ): Promise<RunAssistantAgentResult> {
   input.onProgress?.({ type: 'phase', phase: 'planning' });
 
+  const pageContextBlock = await buildAssistantPageContextBlock(input.user, input.pageContext);
+
   const baseSystemPrompt = await buildAssistantSystemPrompt(input.user, {
     userName: input.userName,
     userEmail: input.userEmail,
@@ -82,6 +87,7 @@ export async function runAssistantAgent(
     checkionProjectId: input.checkionProjectId,
     audionProjectId: input.audionProjectId,
     plexonUserId: input.user.id,
+    pageContextBlock,
   });
 
   const audionIntegrationBlock = await buildAudionIntegrationContextBlock({

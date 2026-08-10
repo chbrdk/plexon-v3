@@ -27,6 +27,7 @@ import type { AssistantHandlerContext } from '@/lib/assistant/handlers/context';
 import { dispatchAssistantIntent } from '@/lib/assistant/workflow-registry';
 import { attachRecommendationsToMetadata } from '@/lib/assistant/insights/conversation-recommendations';
 import { normalizeAssistantTargetUrl } from '@/lib/assistant/project-target-url';
+import { parseAssistantPageContext } from '@/lib/assistant/page-context';
 
 export type { AssistantCompleteBody, AssistantCompleteResult } from '@/lib/assistant/complete-types';
 
@@ -51,9 +52,10 @@ function emitPhase(
 
 export async function handleAssistantComplete(
   user: RequestUser,
-  body: AssistantCompleteBody,
+  bodyInput: AssistantCompleteBody,
   emit?: (event: AssistantStreamEvent) => void
 ): Promise<AssistantCompleteResult> {
+  let body = bodyInput;
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
   if (!prompt && !body.confirmToolCall) {
     const err = new Error('Missing or empty prompt') as Error & { status?: number };
@@ -78,8 +80,14 @@ export async function handleAssistantComplete(
     conversationId = conversation.id;
   }
 
+  const pageContext = parseAssistantPageContext(body.pageContext);
+  if (pageContext) {
+    body = { ...body, pageContext };
+  }
+
   const platformProjectId =
     (typeof body.platformProjectId === 'string' ? body.platformProjectId.trim() : null) ||
+    pageContext?.platformProjectId ||
     conversation.platformProjectId ||
     undefined;
 

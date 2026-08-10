@@ -33,6 +33,8 @@ export type AssistantHostMessage = {
   platformProjectId?: string
   capability?: string
   pathname?: string
+  entityType?: string
+  entityId?: string
   themeId?: string
 }
 

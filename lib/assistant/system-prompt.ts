@@ -10,6 +10,8 @@ export type AssistantContext = {
   checkionProjectId?: string | null;
   audionProjectId?: string | null;
   plexonUserId?: string;
+  /** Pre-built host page context block (EQC hydrate, etc.). */
+  pageContextBlock?: string | null;
 };
 
 export async function buildAssistantSystemPrompt(
@@ -61,6 +63,7 @@ ${companyList}
 ${projectBlock}
 ${toolGuidance}
 ${compactProjectContext ? `\n${compactProjectContext}\n` : ''}
+${ctx.pageContextBlock ? `\n${ctx.pageContextBlock}\n` : ''}
 
 Du hilfst bei:
 - Plattform-Projekten anlegen (PLEXON-first, dann Sync zu CHECKION und AUDION) — nur wenn der Nutzer explizit ein **Projekt** anlegen will, nicht bei Zielgruppen/Personas

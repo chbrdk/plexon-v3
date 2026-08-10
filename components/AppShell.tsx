@@ -26,6 +26,7 @@ import {
 } from '@/components/nav-icons'
 import { BrandColorInitializer } from '@/components/settings/BrandColorInitializer'
 import { PlatformAssistantHost } from '@/components/PlatformAssistantHost'
+import { AssistantPageContextProvider } from '@/components/assistant/AssistantPageContext'
 import { shellPaths } from '@/lib/shell-paths'
 import {
   PATH_ADMIN,
@@ -198,7 +199,7 @@ export function AppShell({
     ))
 
   return (
-    <>
+    <AssistantPageContextProvider>
       <BrandColorInitializer />
       <AppFrame
         railEdge={railEdge}
@@ -242,6 +243,6 @@ export function AppShell({
         </div>
       </AppFrame>
       <PlatformAssistantHost product="plexon" plexonPublicBase="" />
-    </>
+    </AssistantPageContextProvider>
   )
 }

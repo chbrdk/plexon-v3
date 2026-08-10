@@ -46,6 +46,7 @@ import { pinKey } from '@/lib/assistant/reports/block-pin-label';
 import { extractPendingProjectNameFromHistory } from '@/lib/assistant/conversation-context';
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url';
 import { postAssistantEmbedMessage } from '@/lib/assistant/embed-protocol';
+import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 const SUGGESTIONS = [
   'assistant.suggestCreateProject',
@@ -57,10 +58,13 @@ const SUGGESTIONS = [
 export function AssistantChat({
   presentation = 'expand',
   onConversationChange,
+  pageContext = null,
 }: {
   presentation?: 'overlay' | 'expand'
   /** Host flyout expand deep-link (native hybrid mount). */
   onConversationChange?: (conversationId: string | null) => void
+  /** Host page/entity context — specs/domain/assistant-page-context.md */
+  pageContext?: AssistantPageContext | null
 }) {
   const { t } = useI18n();
   const router = useRouter();
@@ -201,6 +205,13 @@ export function AssistantChat({
   useEffect(() => {
     void refreshConversations();
   }, [refreshConversations]);
+
+  /** Seed Collection picker from host page when conversation has no project yet. */
+  useEffect(() => {
+    const fromPage = pageContext?.platformProjectId?.trim()
+    if (!fromPage) return
+    setPlatformProjectId((prev) => prev ?? fromPage)
+  }, [pageContext?.platformProjectId])
 
   const loadConversation = useCallback(async (id: string) => {
     const res = await fetch(apiAssistantConversationMessages(id), { credentials: 'same-origin' });
@@ -515,7 +526,8 @@ export function AssistantChat({
           {
             prompt: trimmed,
             conversationId: cid,
-            platformProjectId,
+            platformProjectId: platformProjectId ?? pageContext?.platformProjectId ?? undefined,
+            ...(pageContext ? { pageContext } : {}),
             ...(confirmToolCall ? { confirmToolCall } : {}),
           },
           {
@@ -687,7 +699,7 @@ export function AssistantChat({
         setInput('');
       }
     },
-    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, platformProjectId, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, pageContext, platformProjectId, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const showEmpty = messages.length === 0 && !loading;
