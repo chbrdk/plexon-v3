@@ -23,10 +23,6 @@ import { applyWorkflowStepsToMessages } from '@/lib/assistant/workflow-ui-client
 import { AssistantMessageList, type AssistantChatMessage } from '@/components/assistant/AssistantMessageList';
 import { AssistantConversationHistory } from '@/components/assistant/AssistantConversationHistory';
 import {
-  ProjectContextChip,
-  type ProjectInsightOption,
-} from '@/components/assistant/ProjectContextChip';
-import {
   AgentActivityTrace,
   emptyAgentActivityTrace,
   type AgentActivityTraceState,
@@ -54,6 +50,12 @@ const SUGGESTIONS = [
   'assistant.suggestCapabilities',
   'assistant.suggestUiShowcase',
 ] as const;
+
+type ProjectInsightOption = {
+  platformProjectId: string
+  name: string
+  domain?: string | null
+}
 
 export function AssistantChat({
   presentation = 'expand',
@@ -761,13 +763,6 @@ export function AssistantChat({
             onRename={renameConversation}
             onDelete={deleteConversation}
           />
-          <div className="plexon-assistant-topbar-project">
-            <ProjectContextChip
-              projects={projects}
-              value={platformProjectId}
-              onChange={setPlatformProjectId}
-            />
-          </div>
           <Button
             variant="subtle"
             size="sm"

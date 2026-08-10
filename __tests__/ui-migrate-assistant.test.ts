@@ -50,6 +50,8 @@ describe('assistant ui rebuild (wave 5 shell)', () => {
     expect(page).toContain("from '@msqdx/ui'")
     expect(chat).toContain('chat-panel')
     expect(chat).toContain('chat-turns')
+    expect(chat).not.toContain('ProjectContextChip')
+    expect(chat).not.toContain('plexon-assistant-topbar-project')
     expect(composer).toContain('chat-form')
     expect(composer).toContain('chat-composer')
     expect(composer).toContain('chat-send')

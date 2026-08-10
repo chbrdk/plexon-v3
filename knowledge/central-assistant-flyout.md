@@ -32,7 +32,7 @@ See `knowledge/paths.md`.
 | Plexon (empty / same-origin base) | Native `<AssistantChat presentation="overlay" />` |
 | Audion / Checkion / Brandion | iframe → `{NEXT_PUBLIC_PLEXON_URL}/assistant/embed?…&theme=` |
 
-Chrome: `ChatOverlay` owns title / expand / close. Overlay chat keeps compact toolbar (history + project) only.
+Chrome: `ChatOverlay` owns title / expand / close. Overlay chat keeps compact toolbar (history + new chat) only — Collection binding comes from page context / conversation / query, not a topbar picker.
 
 ## Theme sync
 

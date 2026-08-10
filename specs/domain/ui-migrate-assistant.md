@@ -13,7 +13,7 @@
 | Conversations / send / stream | **keep** | Orchestrator + APIs stay |
 | Chat chrome (turns, composer, send) | **reshape** | DS `.chat-panel` / `.chat-turns` / `.chat-form` / `.chat-composer` / `.chat-send` |
 | History | **reshape** | `Flyout` + `IconHistory` + `SectionChrome` (Audion pattern); drop MUI Drawer sidebar |
-| Project context picker | **keep** | Already `@msqdx/ui` Select |
+| Project context picker | **drop** (UI) | Binding remains via page context / conversation / query; no topbar Select |
 | Generative UI blocks / reports | **reshape** (Wave 7) | All `components/assistant-ui/**` on `@msqdx/ui`; **drop** MUI / `@msqdx/react` in message path |
 | Glass bubbles / MsqdxTypography chat | **drop** | `.chat-turn` + Text |
 | PlexonPageChrome / AppHeaderV2 on assistant | **drop** | AppShell title is enough |
@@ -31,7 +31,7 @@
 | Composer | `Field` + `Textarea` + `Button` + `IconSend` |
 | History | `Flyout` + `IconHistory` + `SectionChrome` |
 | Empty | `EmptyState` |
-| Project picker | existing `ProjectContextChip` |
+| Collection binding | pageContext / conversation / `?platformProjectId=` (no topbar picker) |
 | Block chrome | `Panel` + `Text` + `.plexon-assistant-block*` |
 | Step progress | `.plexon-assistant-steps` + `Spinner` (Audion-like status rows) |
 | Markdown blocks | `AssistantChatAnswer` / `format-chat-answer` |
