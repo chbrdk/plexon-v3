@@ -826,6 +826,7 @@ export function AssistantChat({
           }}
           targetUrl={conversationTargetUrl}
           projectName={conversationProjectName}
+          compact={presentation === 'overlay'}
         />
         <ReportCollectionBar
           conversationId={conversationId}

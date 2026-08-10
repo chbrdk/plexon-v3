@@ -17,6 +17,8 @@ type AssistantChatComposerProps = {
   onSuggestion?: (prompt: string) => void
   targetUrl?: string | null
   projectName?: string | null
+  /** Hide capability chip cloud (overlay flyout). */
+  compact?: boolean
 }
 
 /** DS chat composer — Audion `.chat-form` / `.chat-composer` / `.chat-send`. */
@@ -28,6 +30,7 @@ export function AssistantChatComposer({
   onSuggestion,
   targetUrl,
   projectName,
+  compact = false,
 }: AssistantChatComposerProps) {
   const router = useRouter()
   const { t, locale } = useI18n()
@@ -53,7 +56,7 @@ export function AssistantChatComposer({
         onSubmit()
       }}
     >
-      {onSuggestion ? (
+      {!compact && onSuggestion ? (
         <div className="plexon-assistant-suggestions" role="list">
           {suggestedPrompts.map((s) => (
             <Chip
@@ -73,7 +76,7 @@ export function AssistantChatComposer({
           ))}
         </div>
       ) : null}
-      <Field label="Message" htmlFor="plexon-chat-composer">
+      <Field htmlFor="plexon-chat-composer">
         <Textarea
           id="plexon-chat-composer"
           size="md"

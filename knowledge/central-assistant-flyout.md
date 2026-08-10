@@ -57,11 +57,6 @@ Chrome: `ChatOverlay` owns title / expand / close. Overlay chat keeps compact to
 - [x] Expand opens Plexon `/assistant?c=…`
 - [x] No hardcoded URLs
 
-## Smoke
+## Visual notes (2026-08-10)
 
-1. Plexon FAB → native overlay (no iframe in DOM).
-2. Product FAB → embed loads with matching theme.
-3. Send a short message → stream responds.
-4. “Open workspace” / header expand → same conversation on `/assistant?c=`.
-5. With Collection id in host → embed query includes `project=`.
-6. Toggle host light/dark → iframe theme updates.
+Do **not** force `--color-bg-subtle` / `--color-text-on-light` on `[data-plexon-assistant-chat]` — that paints a cream paper panel under dark `data-theme` and makes empty-state / composer unreadable. Overlay uses transparent + `var(--ink)`; suggestion chip cloud is hidden in `presentation=overlay`.

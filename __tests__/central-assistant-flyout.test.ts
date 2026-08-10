@@ -49,6 +49,23 @@ describe('central assistant flyout specs + mounts', () => {
     expect(chat).toContain('plexon-assistant-topbar-overlay')
   })
 
+  it('overlay flyout uses theme ink instead of forced light paper', () => {
+    const css = readFileSync(join(root, 'styles/globals.css'), 'utf8')
+    expect(css).toContain("[data-plexon-assistant-chat][data-presentation='overlay']")
+    expect(css).toMatch(
+      /\[data-plexon-assistant-chat\]\s*\{\s*background-color:\s*transparent;\s*color:\s*var\(--ink\);/s,
+    )
+    expect(css).toContain("[data-presentation='overlay'] .plexon-assistant-suggestions")
+  })
+
+  it('overlay composer is compact without Message label', () => {
+    const composer = readFileSync(join(root, 'components/assistant/AssistantChatComposer.tsx'), 'utf8')
+    const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(composer).toContain('compact = false')
+    expect(composer).not.toContain('label="Message"')
+    expect(chat).toContain('compact={presentation === \'overlay\'}')
+  })
+
   it('constants export embed helpers including theme', () => {
     const constants = readFileSync(join(root, 'lib/constants.ts'), 'utf8')
     expect(constants).toContain('PATH_ASSISTANT_EMBED')

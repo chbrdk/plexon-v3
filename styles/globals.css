@@ -1290,6 +1290,84 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   padding-block: 0.15rem;
 }
 
+/* Overlay flyout: theme-aware compact chrome (not expand “light paper”) */
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-panel {
+  padding: 0.35rem 0.85rem 0.85rem;
+  color: var(--ink);
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-empty {
+  max-width: 100%;
+  color: var(--ink);
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-empty .ds-text,
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-empty h2,
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-empty p {
+  color: var(--ink);
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-empty p {
+  color: var(--muted);
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-suggestions {
+  display: none;
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  max-width: none;
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form > .ds-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form > .ds-field > .ds-field-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-composer.ds-textarea,
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-composer {
+  width: 100%;
+  min-height: 2.75rem;
+  max-height: 8rem;
+  border-radius: var(--radius-pill, 999px);
+  border: 1px solid var(--line);
+  background: var(--field, var(--bg1));
+  color: var(--ink);
+  padding: 0.65rem 0.9rem;
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-send.ds-btn,
+[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-send {
+  align-self: flex-end;
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: 999px;
+}
+
 .plexon-assistant-workspace {
   display: flex;
   flex: 1;
@@ -4774,7 +4852,7 @@ main {
   color: var(--color-text-on-light) !important;
 }
 
-/* MsqdxCard / GlassCard: dark MUI theme must not paint surfaces black inside content */
+/* MsqdxCard / GlassCard: light paper surfaces stay readable on dark page chrome */
 [data-plexon-content] [data-msqdx-surface='light'],
 [data-plexon-assistant-chat] [data-msqdx-surface='light'] {
   background-color: var(--color-bg-subtle) !important;
@@ -4786,23 +4864,28 @@ main {
   background-color: var(--color-bg-subtle) !important;
 }
 
+/* Assistant chat follows host data-theme — do not force light paper (breaks dark flyout). */
 [data-plexon-assistant-chat] {
-  background-color: var(--color-bg-subtle);
-  color: var(--color-text-on-light);
+  background-color: transparent;
+  color: var(--ink);
+}
+
+[data-plexon-assistant-chat][data-presentation='overlay'] {
+  background: transparent;
 }
 
 [data-plexon-assistant-chat] .msqdx-corner-tab-card__body {
-  background-color: var(--color-bg-subtle);
-  color: var(--color-text-on-light);
+  background-color: var(--panel, var(--bg1));
+  color: var(--ink);
 }
 
 [data-plexon-assistant-chat] .MuiOutlinedInput-root {
-  background-color: var(--color-card-bg) !important;
-  color: var(--color-text-on-light) !important;
+  background-color: var(--field, var(--bg1)) !important;
+  color: var(--ink) !important;
 }
 
 [data-plexon-assistant-chat] .MuiSelect-select {
-  color: var(--color-text-on-light) !important;
+  color: var(--ink) !important;
 }
 
 [data-plexon-assistant-chat] .msqdx-input-wrapper {
@@ -4811,29 +4894,29 @@ main {
 }
 
 [data-plexon-assistant-chat] .MuiChip-root {
-  background-color: var(--color-card-bg) !important;
-  color: var(--color-text-on-light) !important;
+  background-color: var(--field, var(--bg1)) !important;
+  color: var(--ink) !important;
 }
 
 [data-plexon-assistant-chat] .MuiChip-outlined {
-  border-color: var(--color-theme-accent) !important;
+  border-color: var(--color-theme-accent, var(--accent)) !important;
 }
 
 [data-plexon-assistant-chat] .MuiChip-label {
-  color: var(--color-text-on-light) !important;
+  color: var(--ink) !important;
 }
 
 [data-plexon-assistant-prompts] .MuiButton-outlined,
 [data-plexon-assistant-chat] .MuiButton-outlined.MuiButton-sizeSmall {
-  border-color: var(--color-theme-accent) !important;
-  color: var(--color-text-on-light) !important;
-  background-color: var(--color-card-bg) !important;
+  border-color: var(--color-theme-accent, var(--accent)) !important;
+  color: var(--ink) !important;
+  background-color: var(--field, var(--bg1)) !important;
 }
 
 [data-plexon-assistant-prompts] .MuiButton-outlined:hover,
 [data-plexon-assistant-chat] .MuiButton-outlined.MuiButton-sizeSmall:hover {
-  border-color: var(--color-theme-accent) !important;
-  background-color: var(--color-theme-accent-tint) !important;
+  border-color: var(--color-theme-accent, var(--accent)) !important;
+  background-color: var(--color-theme-accent-tint, color-mix(in srgb, var(--accent) 16%, transparent)) !important;
 }
 
 [data-plexon-assistant-ui] .MuiIconButton-root,
