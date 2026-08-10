@@ -96,4 +96,9 @@ export {
   IconMic,
   IconVideo,
   IconSend,
+  IconEdit,
+  IconTrash,
+  IconCheck,
+  IconClose,
+  IconInfo,
 } from '../../msqdx-ui/packages/ui/src/components/icons'
