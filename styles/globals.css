@@ -1743,19 +1743,48 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-assistant-block {
-  position: relative;
+  display: grid;
+  grid-template: 1fr / 1fr;
   width: 100%;
+  position: relative;
+}
+
+.plexon-assistant-block-main {
+  grid-area: 1 / 1;
+  min-width: 0;
 }
 
 .plexon-assistant-block-pin {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
-  z-index: 1;
+  grid-area: 1 / 1;
+  justify-self: end;
+  align-self: start;
+  z-index: 2;
+  margin: 0.45rem 0.45rem 0 0;
+  pointer-events: none;
+}
+
+.plexon-assistant-block-pin > * {
+  pointer-events: auto;
+}
+
+.plexon-assistant-pin {
+  font-size: 0.7rem !important;
+  min-height: 1.5rem !important;
+  padding: 0.15rem 0.45rem !important;
+  background: color-mix(in srgb, var(--panel, var(--bg1)) 88%, transparent) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--muted) !important;
 }
 
 .plexon-assistant-pin.is-pinned {
-  color: var(--accent, #00ca55);
+  color: var(--accent, #00ca55) !important;
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 45%, var(--line)) !important;
+}
+
+.plexon-assistant-block .ds-panel,
+.plexon-assistant-block .plexon-assistant-block-panel,
+.plexon-assistant-corner-tab {
+  border-radius: 0 !important;
 }
 
 .plexon-assistant-steps {
@@ -2015,6 +2044,7 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 .plexon-assistant-corner-tab {
   overflow: hidden;
   position: relative;
+  border-radius: 0 !important;
 }
 
 .plexon-assistant-corner-tab-label {

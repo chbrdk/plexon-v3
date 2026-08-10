@@ -60,6 +60,24 @@ describe('assistant chat answer formatting', () => {
     const src = readFileSync(path.join(root, 'components/assistant/ReportPinButton.tsx'), 'utf8')
     expect(src).not.toContain('★')
     expect(src).not.toContain('☆')
+    expect(src).toContain('pinShort')
+    expect(src).toContain('shape="rounded"')
+  })
+
+  it('block pin sits inside card grid and corner tabs are square', () => {
+    const renderer = readFileSync(
+      path.join(root, 'components/assistant-ui/AssistantBlockRenderer.tsx'),
+      'utf8'
+    )
+    const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    const corner = readFileSync(
+      path.join(root, 'components/assistant-ui/organisms/UiCornerTabSectionBlock.tsx'),
+      'utf8'
+    )
+    expect(renderer).toContain('plexon-assistant-block-main')
+    expect(css).toContain('grid-template: 1fr / 1fr')
+    expect(css).toMatch(/\.plexon-assistant-corner-tab \{[\s\S]*?border-radius: 0/)
+    expect(corner).toContain('stripChatEmoticons')
   })
 
   it('AssistantMessageContent uses DS chat-answer renderer', () => {

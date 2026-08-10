@@ -122,6 +122,7 @@ function PinnableBlockShell({
 
   return (
     <div className="plexon-assistant-block">
+      <div className="plexon-assistant-block-main">{children}</div>
       {showPin ? (
         <div className="plexon-assistant-block-pin">
           <ReportPinButton
@@ -132,7 +133,6 @@ function PinnableBlockShell({
           />
         </div>
       ) : null}
-      {children}
     </div>
   )
 }

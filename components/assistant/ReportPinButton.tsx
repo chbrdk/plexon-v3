@@ -10,6 +10,7 @@ type ReportPinButtonProps = {
   onToggle: () => void
 }
 
+/** Compact text control — no emoji / Material ligature glyphs. */
 export function ReportPinButton({ pinned, disabled, disabledReason, onToggle }: ReportPinButtonProps) {
   const { t } = useI18n()
   const label = disabled
@@ -23,6 +24,7 @@ export function ReportPinButton({ pinned, disabled, disabledReason, onToggle }: 
       type="button"
       size="sm"
       variant="ghost"
+      shape="rounded"
       className={`plexon-assistant-pin${pinned ? ' is-pinned' : ''}`}
       aria-label={label}
       title={label}
@@ -32,7 +34,7 @@ export function ReportPinButton({ pinned, disabled, disabledReason, onToggle }: 
         onToggle()
       }}
     >
-      {pinned ? t('assistant.report.unpin') : t('assistant.report.pin')}
+      {pinned ? t('assistant.report.unpinShort') : t('assistant.report.pinShort')}
     </Button>
   )
 }
