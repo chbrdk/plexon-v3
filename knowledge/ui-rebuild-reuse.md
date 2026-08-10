@@ -13,18 +13,18 @@ Plexon v3 must **compose** shared chrome, not fork a second design language.
 | Magazine | `SectionChrome`, `Panel`, `Text`, `Lede`, `RankedList` |
 | Forms | `Field`, `Input`, `Textarea`, `Select`, `Switch`, `ToggleGroup`, `Checkbox` |
 | Actions / feedback | `Button`, `Chip`, `Alert`, `Dialog`, `Spinner`, `EmptyState`, `LoadingText` |
-| Overlays | `Flyout`, `useFlyout` |
+| Overlays | `Flyout`, `useFlyout`, **`ChatOverlay`** (dock-end / center flyout shell) |
 | Chat icons | `IconSend`, `IconShare`, `IconHistory`, … |
-| Chat CSS | classes in `styles.css` / `chat.css` — `.chat-panel-open`, `.chat-turns`, `.chat-composer`, `.chat-send`, … |
+| Chat CSS | classes in `styles.css` / `chat.css` — `.chat-overlay`, `.chat-panel-compact`, `.chat-panel-open`, `.chat-turns`, `.chat-composer`, `.chat-send`, … |
 
-There is **no** React `ChatPanel` package yet — compose with CSS chrome + primitives (same as Audion).
+`ChatOverlay` is the shared React shell for the **central assistant flyout** (domain-free slots). Turn/composer **domain** logic stays product-owned (Plexon orchestrator). Primary Assistant IA = flyout; `/assistant` = expand — see `specs/domain/central-assistant-flyout.md`.
 
 ## Mirror from `audion-v3` (pattern, not npm import)
 
 | Pattern | Audion path | Plexon use |
 |---------|-------------|------------|
-| App shell composition | `apps/web/components/app-shell.tsx` | Already aligned |
-| Chat workspace | `components/audion-chat-workspace.tsx` | Assistant Wave 5 |
+| App shell composition | `apps/web/components/app-shell.tsx` | Already aligned + `PlatformAssistantHost` |
+| Chat workspace | `components/audion-chat-workspace.tsx` | Assistant Wave 5 / expand |
 | Chat panel (turns + composer) | `components/audion-chat-panel.tsx` | Assistant Wave 5 |
 | Chat history / share flyouts | `chat-*-flyout.tsx` | Assistant |
 | Settings page | `settings-page.tsx` / `app/settings` | Settings Wave 2 |
@@ -33,6 +33,8 @@ There is **no** React `ChatPanel` package yet — compose with CSS chrome + prim
 ## Do not
 
 - Invent a second chat layout for Plexon Assistant.
+- Merge Audion persona `/chat` into the platform Assistant flyout.
 - Reintroduce MUI or grow the bridge for convenience.
 - Port legacy “glass chat” / `@msqdx/react` bubbles when Audion chat chrome exists.
 - Copy Audion product CSS blindly (`.audion-magazine*`) — reuse **structure + DS classes**, brand as Plexon.
+- Hardcode Plexon/product URLs in host mounts.

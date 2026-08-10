@@ -46,6 +46,11 @@ export type { StatLedeTone } from '../../msqdx-ui/packages/ui/src/components/Sta
 export { StatusDot } from '../../msqdx-ui/packages/ui/src/components/StatusDot'
 export { Flyout, useFlyout } from '../../msqdx-ui/packages/ui/src/components/Flyout'
 export type { FlyoutProps } from '../../msqdx-ui/packages/ui/src/components/Flyout'
+export { ChatOverlay } from '../../msqdx-ui/packages/ui/src/components/ChatOverlay'
+export type {
+  ChatOverlayPlacement,
+  ChatOverlayProps,
+} from '../../msqdx-ui/packages/ui/src/components/ChatOverlay'
 export { FloatingPanel } from '../../msqdx-ui/packages/ui/src/components/FloatingPanel'
 export type {
   FloatingPanelProps,

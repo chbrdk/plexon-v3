@@ -13,6 +13,7 @@ Stand: Mai 2026
 - Produktstatus und Health
 - Einstiegspunkte / Deep Links
 - **Collection Knowledge Pack** (facetierte Shared Briefs: Profile, Competitive, Research-Distillate, GEO-Kontext, reservierte Brandion-Facet) — SoT unter der Collection; siehe `specs/domain/collection-knowledge-pack.md`
+- **Central Assistant Flyout** (plattformweiter Orchestrator-Chat als Dock-End-Overlay in allen v3-Apps; Embed `/assistant/embed`; Expand `/assistant`) — siehe `specs/domain/central-assistant-flyout.md` · `knowledge/central-assistant-flyout.md`
 - spaeter: globale Suche, zentrale Boards, letzte Aktivitaeten, Read-only-Summaries
 
 ## Was bleibt produktlokal
@@ -32,7 +33,7 @@ Stand: Mai 2026
 - Projekte, Target Groups, Journeys
 - Reiches Knowledge-Dossier / Research (TipTap) — Distillate → Pack-Facet `research_brief` (`audion-v3/specs/domain/knowledge-pack-publish.md`)
 - BFF-/Proxy-Schicht im Next-Web
-- Chat- und Voice-Flows
+- **Persona-/TG-Chat und Voice-Flows** (produktlokal — nicht der Plexon Central Assistant)
 - Multi-Service-Runtimes (`api`, `chat-api`, `indexing-api`, Worker)
 
 ### BRANDION (v3 Shell → Domain)

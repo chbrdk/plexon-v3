@@ -25,10 +25,12 @@ import {
   NavIconProjects,
 } from '@/components/nav-icons'
 import { BrandColorInitializer } from '@/components/settings/BrandColorInitializer'
+import { PlatformAssistantHost } from '@/components/PlatformAssistantHost'
 import { shellPaths } from '@/lib/shell-paths'
 import {
   PATH_ADMIN,
   PATH_ASSISTANT,
+  PATH_ASSISTANT_EMBED,
   PATH_BOARD,
   PATH_EVENT_QUICK_CHECK,
   PATH_FORGOT_PASSWORD,
@@ -44,6 +46,10 @@ import { USER_ROLE } from '@/lib/db/schema'
 import { useI18n } from '@/components/i18n/I18nProvider'
 
 const AUTH_PATHS = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD]
+
+function isAssistantEmbedPath(pathname: string | null): boolean {
+  return Boolean(pathname === PATH_ASSISTANT_EMBED || pathname?.startsWith(`${PATH_ASSISTANT_EMBED}/`))
+}
 
 const TITLE_BY_PREFIX: Array<{ prefix: string; titleKey: string }> = [
   { prefix: PATH_ADMIN, titleKey: 'nav.adminConsole' },
@@ -87,6 +93,7 @@ export function AppShell({
     shellPaths.defaultDisplayName
 
   const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
+  const isEmbedPage = isAssistantEmbedPath(pathname)
 
   const frameStyle = useMemo(
     () =>
@@ -118,7 +125,7 @@ export function AppShell({
         ? t(resolvedTitle)
         : resolvedTitle
 
-  if (isAuthPage) {
+  if (isAuthPage || isEmbedPage) {
     return <>{children}</>
   }
 
@@ -234,6 +241,7 @@ export function AppShell({
           {children}
         </div>
       </AppFrame>
+      <PlatformAssistantHost product="plexon" plexonPublicBase="" />
     </>
   )
 }

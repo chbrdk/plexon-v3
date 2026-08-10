@@ -19,8 +19,19 @@ export const PATH_PROJECTS = '/projects';
 export const PATH_SETTINGS = '/settings';
 export const PATH_DESIGN_SYSTEM = '/design-system';
 export const PATH_BOARD = '/board';
-/** User-facing orchestrator chat (all authenticated users). */
+/** User-facing orchestrator chat (all authenticated users). Expand / deep-link. */
 export const PATH_ASSISTANT = '/assistant';
+export {
+  PATH_ASSISTANT_EMBED,
+  ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM,
+  ASSISTANT_EMBED_PATHNAME_QUERY_PARAM,
+  ASSISTANT_EMBED_PRODUCT_QUERY_PARAM,
+  buildAssistantEmbedUrl,
+  normalizeAssistantEmbedProduct,
+  pathAssistantEmbed,
+  type AssistantEmbedProduct,
+  type AssistantEmbedQuery,
+} from '@/lib/paths/assistant-embed';
 /** Standalone Quick Check — URL input + full dashboard report (no chat). */
 export { PATH_EVENT_QUICK_CHECK } from '@/lib/paths/event-quick-check-page';
 export {
@@ -45,6 +56,7 @@ export const pathAssistantWithProject = (platformProjectId: string): string => {
   if (!id) return PATH_ASSISTANT;
   return `${PATH_ASSISTANT}?${ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM}=${encodeURIComponent(id)}`;
 };
+
 /** Public shared assistant report (no login required). */
 export const PATH_SHARE_REPORTS = '/share/reports';
 export const pathShareReport = (token: string) =>

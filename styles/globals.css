@@ -1241,6 +1241,42 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   height: 100%;
 }
 
+.plexon-assistant-embed {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg0, var(--bg));
+}
+
+.plexon-assistant-embed .plexon-assistant-workspace,
+.plexon-assistant-embed .plexon-assistant-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.plexon-assistant-fab.ds-btn {
+  position: fixed;
+  inset-inline-end: 1.25rem;
+  inset-block-end: 1.25rem;
+  z-index: 70;
+  border-radius: 999px;
+  width: 3rem;
+  min-width: 3rem;
+  height: 3rem;
+  padding: 0;
+}
+
+.plexon-assistant-embed-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
 .plexon-assistant-workspace {
   display: flex;
   flex: 1;

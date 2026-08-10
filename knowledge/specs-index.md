@@ -13,6 +13,7 @@
 | UI migrate — admin | `specs/domain/ui-migrate-admin.md` |
 | UI migrate — settings | `specs/domain/ui-migrate-settings.md` |
 | UI migrate — assistant | `specs/domain/ui-migrate-assistant.md` |
+| Central Assistant Flyout | `specs/domain/central-assistant-flyout.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 
@@ -20,12 +21,14 @@
 | Spec | Path |
 |------|------|
 | Collection Knowledge Pack | `specs/api/collection-knowledge-pack.md` |
+| Assistant embed protocol | `specs/api/assistant-embed.md` |
 
 ## Knowledge (related)
 | Doc | Path |
 |-----|------|
 | Paths | `knowledge/paths.md` |
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
+| Central Assistant Flyout | `knowledge/central-assistant-flyout.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |

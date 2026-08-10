@@ -4,7 +4,7 @@ Stand: Juni 2026
 
 ## Übersicht
 
-Der **Assistent** (`/assistant`) ist der user-facing Orchestrator-Chat in PLEXON. Er ermöglicht:
+Der **Assistent** ist der user-facing Orchestrator-Chat in PLEXON. **Primäreinstieg** ist das Cross-App-Flyout (`/assistant/embed` in `ChatOverlay`); **`/assistant`** ist Expand derselben Conversation. Er ermöglicht:
 
 - Konversation mit Claude (Anthropic)
 - PLEXON-first Projektanlage + Sync zu CHECKION/AUDION
@@ -12,12 +12,16 @@ Der **Assistent** (`/assistant`) ist der user-facing Orchestrator-Chat in PLEXON
 - MCP-Steuerung von CHECKION/AUDION (wenn Entitlements aktiv)
 - Projektstatus / Dashboard-Zusammenfassungen
 
+Siehe `specs/domain/central-assistant-flyout.md` · `knowledge/central-assistant-flyout.md`.
+
 ## Routen & Konstanten
 
 | Pfad | Konstante |
 |------|-----------|
-| `/assistant` | `PATH_ASSISTANT` |
+| `/assistant` | `PATH_ASSISTANT` (expand) |
+| `/assistant/embed` | `PATH_ASSISTANT_EMBED` (flyout iframe) |
 | `/assistant?c=<conversationId>` | `pathAssistantChat(id)` — Deep-Link zum Fortsetzen |
+| `pathAssistantEmbed(query)` | Embed + product/project/context query |
 | `POST /api/assistant/complete` | `API_ASSISTANT_COMPLETE` |
 | `GET/POST /api/assistant/conversations` | `API_ASSISTANT_CONVERSATIONS` |
 | `GET /api/assistant/conversations/:id` | `apiAssistantConversation(id)` |

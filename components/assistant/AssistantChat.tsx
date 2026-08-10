@@ -45,6 +45,7 @@ import { ReportCollectionBar, type ReportPinItem } from '@/components/assistant/
 import { pinKey } from '@/lib/assistant/reports/block-pin-label';
 import { extractPendingProjectNameFromHistory } from '@/lib/assistant/conversation-context';
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url';
+import { postAssistantEmbedMessage } from '@/lib/assistant/embed-protocol';
 
 const SUGGESTIONS = [
   'assistant.suggestCreateProject',
@@ -53,7 +54,7 @@ const SUGGESTIONS = [
   'assistant.suggestUiShowcase',
 ] as const;
 
-export function AssistantChat() {
+export function AssistantChat({ presentation = 'expand' }: { presentation?: 'overlay' | 'expand' }) {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,6 +119,38 @@ export function AssistantChat() {
       workflowStreamRef.current?.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (presentation !== 'overlay') return
+    if (typeof window === 'undefined' || window.parent === window) return
+    let targetOrigin = ''
+    try {
+      if (document.referrer) targetOrigin = new URL(document.referrer).origin
+    } catch {
+      return
+    }
+    if (!targetOrigin) return
+    postAssistantEmbedMessage(window.parent, targetOrigin, {
+      type: 'assistant:ready',
+      conversationId: conversationId ?? undefined,
+    })
+  }, [presentation, conversationId])
+
+  useEffect(() => {
+    if (presentation !== 'overlay' || !conversationId) return
+    if (typeof window === 'undefined' || window.parent === window) return
+    let targetOrigin = ''
+    try {
+      if (document.referrer) targetOrigin = new URL(document.referrer).origin
+    } catch {
+      return
+    }
+    if (!targetOrigin) return
+    postAssistantEmbedMessage(window.parent, targetOrigin, {
+      type: 'assistant:conversation',
+      conversationId,
+    })
+  }, [presentation, conversationId])
 
   useEffect(() => {
     (async () => {
@@ -666,8 +699,19 @@ export function AssistantChat() {
   }, [messages, input, selectedProject?.name]);
 
   return (
-    <div className="plexon-assistant-workspace" data-plexon-assistant-chat>
-      <section className="chat-panel chat-panel-open plexon-assistant-panel" aria-label={t('nav.assistant')}>
+    <div
+      className="plexon-assistant-workspace"
+      data-plexon-assistant-chat
+      data-presentation={presentation}
+    >
+      <section
+        className={[
+          'chat-panel',
+          presentation === 'overlay' ? 'chat-panel-compact' : 'chat-panel-open',
+          'plexon-assistant-panel',
+        ].join(' ')}
+        aria-label={t('nav.assistant')}
+      >
         <header className="plexon-assistant-topbar">
           <AssistantConversationHistory
             conversations={conversations}
@@ -685,6 +729,45 @@ export function AssistantChat() {
               onChange={setPlatformProjectId}
             />
           </div>
+          {presentation === 'overlay' ? (
+            <Button
+              variant="subtle"
+              size="sm"
+              className="plexon-assistant-expand"
+              onClick={() => {
+                const href = conversationId
+                  ? pathAssistantChat(conversationId)
+                  : platformProjectId
+                    ? `${PATH_ASSISTANT}?${ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM}=${encodeURIComponent(platformProjectId)}`
+                    : PATH_ASSISTANT
+                if (typeof window !== 'undefined' && window.parent !== window) {
+                  let targetOrigin = '*'
+                  try {
+                    if (document.referrer) targetOrigin = new URL(document.referrer).origin
+                  } catch {
+                    /* keep * only as last resort — prefer referrer */
+                  }
+                  if (targetOrigin === '*') {
+                    /* Host must listen; origin unknown in some embeds */
+                  } else {
+                    postAssistantEmbedMessage(window.parent, targetOrigin, {
+                      type: 'assistant:expand',
+                      conversationId: conversationId ?? undefined,
+                      project: platformProjectId ?? undefined,
+                    })
+                  }
+                }
+                if (typeof window !== 'undefined' && window.parent === window) {
+                  router.push(href)
+                } else if (typeof window !== 'undefined') {
+                  window.open(href, '_top')
+                }
+              }}
+              disabled={loading}
+            >
+              {t('assistant.openWorkspace')}
+            </Button>
+          ) : null}
           <Button
             variant="subtle"
             size="sm"

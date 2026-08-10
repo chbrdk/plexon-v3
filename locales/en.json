@@ -591,6 +591,11 @@
     "suggestUiShowcase": "Show all UI components",
     "newConversation": "New chat",
     "openWorkspace": "Open workspace",
+    "embedSignInTitle": "Sign in to continue",
+    "embedSignInHint": "The platform assistant needs your PLEXON session.",
+    "embedSignInCta": "Sign in",
+    "fabOpen": "Open assistant",
+    "fabClose": "Close assistant",
     "history": {
       "title": "Chat history",
       "empty": "No saved chats yet. Start a conversation — it will appear here automatically.",

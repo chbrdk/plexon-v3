@@ -591,6 +591,11 @@
     "suggestUiShowcase": "Zeig alle UI-Komponenten",
     "newConversation": "Neuer Chat",
     "openWorkspace": "Workspace öffnen",
+    "embedSignInTitle": "Anmelden, um fortzufahren",
+    "embedSignInHint": "Der Plattform-Assistent braucht deine PLEXON-Session.",
+    "embedSignInCta": "Anmelden",
+    "fabOpen": "Assistent öffnen",
+    "fabClose": "Assistent schließen",
     "history": {
       "title": "Chat-Verlauf",
       "empty": "Noch keine gespeicherten Chats. Starte eine Unterhaltung — sie erscheint hier automatisch.",
