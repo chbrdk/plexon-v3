@@ -68,6 +68,7 @@ Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps u
 - `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.
 - Cream paper override stays scoped to `[data-plexon-content]` only; assistant chat remaps any residual light surfaces to `var(--panel)` / `var(--ink)`.
 - Assistant answers render via `AssistantChatAnswer` + `lib/assistant/format-chat-answer.ts` (Audion SoT) into DS `.chat-answer-*` blocks — not raw pre-wrap markdown.
+- Formatter supports headings, lists, bold/italic, inline+fenced code, links, quotes; strips emoji/emoticons from assistant copy. Pin control uses text labels (no star glyphs).
 
 ### Wave 7 generative UI (2026-08-10)
 

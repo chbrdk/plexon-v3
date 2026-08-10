@@ -1509,6 +1509,57 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   color: var(--ink);
 }
 
+.plexon-assistant-markdown strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.plexon-assistant-markdown em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+.plexon-assistant-markdown .chat-answer-code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  color: var(--ink);
+}
+
+.plexon-assistant-markdown .chat-answer-link {
+  color: var(--accent, #00ca55);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.plexon-assistant-markdown .chat-answer-quote {
+  margin: 0;
+  padding: 0.35rem 0 0.35rem 0.75rem;
+  border-left: 2px solid var(--accent, #00ca55);
+  color: var(--muted);
+}
+
+.plexon-assistant-markdown .chat-answer-pre {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  overflow: auto;
+  border-radius: var(--radius-control, 8px);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.plexon-assistant-markdown .chat-answer-cite {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
 .plexon-assistant-planner {
   padding: 0.65rem 0.85rem;
 }

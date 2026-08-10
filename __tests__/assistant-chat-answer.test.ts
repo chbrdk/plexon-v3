@@ -19,6 +19,49 @@ describe('assistant chat answer formatting', () => {
     expect(normalizeChatMarkdown('**Title:** body').startsWith('## Title')).toBe(true)
   })
 
+  it('parses code, links, quotes and strips emoticons', () => {
+    const blocks = parseChatBlocks(
+      [
+        'Use `platformProjectId` and [docs](https://example.com/x).',
+        '',
+        '> Keep it short',
+        '',
+        '```ts',
+        'const x = 1',
+        '```',
+        '',
+        'Hello :-) world 🚀 done',
+      ].join('\n')
+    )
+    expect(blocks.some((b) => b.type === 'quote')).toBe(true)
+    expect(blocks.some((b) => b.type === 'code' && 'value' in b && b.value.includes('const x'))).toBe(
+      true
+    )
+    const para = blocks.find((b) => b.type === 'p')
+    expect(para?.type).toBe('p')
+    if (para?.type === 'p') {
+      expect(para.inlines.some((s) => s.type === 'code' && s.value === 'platformProjectId')).toBe(true)
+      expect(
+        para.inlines.some((s) => s.type === 'link' && s.href === 'https://example.com/x')
+      ).toBe(true)
+    }
+    const last = blocks[blocks.length - 1]
+    expect(last?.type).toBe('p')
+    if (last?.type === 'p') {
+      const text = last.inlines.map((s) => (s.type === 'text' ? s.value : '')).join('')
+      expect(text).not.toContain('🚀')
+      expect(text).not.toContain(':-)')
+      expect(text).toContain('Hello')
+      expect(text).toContain('world')
+    }
+  })
+
+  it('pin button has no star emoticons', () => {
+    const src = readFileSync(path.join(root, 'components/assistant/ReportPinButton.tsx'), 'utf8')
+    expect(src).not.toContain('★')
+    expect(src).not.toContain('☆')
+  })
+
   it('AssistantMessageContent uses DS chat-answer renderer', () => {
     const src = readFileSync(path.join(root, 'components/assistant/AssistantMessageContent.tsx'), 'utf8')
     expect(src).toContain('AssistantChatAnswer')

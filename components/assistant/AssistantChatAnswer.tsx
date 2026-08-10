@@ -13,7 +13,31 @@ function renderInlines(inlines: ChatInline[], keyPrefix: string): ReactNode[] {
     if (seg.type === 'text') return <span key={key}>{seg.value}</span>
     if (seg.type === 'strong') return <strong key={key}>{seg.value}</strong>
     if (seg.type === 'em') return <em key={key}>{seg.value}</em>
-    return <span key={key}>[{seg.n}]</span>
+    if (seg.type === 'code') {
+      return (
+        <code key={key} className="chat-answer-code">
+          {seg.value}
+        </code>
+      )
+    }
+    if (seg.type === 'link') {
+      return (
+        <a
+          key={key}
+          className="chat-answer-link"
+          href={seg.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {seg.label}
+        </a>
+      )
+    }
+    return (
+      <span key={key} className="chat-answer-cite">
+        [{seg.n}]
+      </span>
+    )
   })
 }
 
@@ -43,6 +67,20 @@ function BlockView({ block, index }: { block: ChatBlock; index: number }) {
           <li key={`${prefix}-li-${j}`}>{renderInlines(item, `${prefix}-li-${j}`)}</li>
         ))}
       </ul>
+    )
+  }
+  if (block.type === 'quote') {
+    return (
+      <blockquote className="chat-answer-quote">
+        {renderInlines(block.inlines, prefix)}
+      </blockquote>
+    )
+  }
+  if (block.type === 'code') {
+    return (
+      <pre className="chat-answer-pre" data-lang={block.lang || undefined}>
+        <code>{block.value}</code>
+      </pre>
     )
   }
   return <p className="chat-answer-p">{renderInlines(block.inlines, prefix)}</p>

@@ -32,7 +32,7 @@ export function ReportPinButton({ pinned, disabled, disabledReason, onToggle }: 
         onToggle()
       }}
     >
-      {pinned ? '★' : '☆'}
+      {pinned ? t('assistant.report.unpin') : t('assistant.report.pin')}
     </Button>
   )
 }
