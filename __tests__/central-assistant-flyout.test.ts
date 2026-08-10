@@ -10,6 +10,7 @@ describe('central assistant flyout specs + mounts', () => {
     const api = readFileSync(join(root, 'specs/api/assistant-embed.md'), 'utf8')
     expect(domain).toContain('ChatOverlay')
     expect(domain).toContain('Hybrid')
+    expect(domain).toContain('drag-resizable')
     expect(domain).toContain('PATH_ASSISTANT_EMBED')
     expect(api).toContain('assistant:expand')
     expect(api).toContain('assistant:theme')

@@ -2,7 +2,7 @@
 
 **Status:** Accepted — 2026-08-10 (hybrid restyle)  
 **Implements:** `components/PlatformAssistantHost.tsx` · `app/assistant/embed/page.tsx` · `components/assistant/AssistantChat.tsx` (`presentation`)  
-**DS:** `@msqdx/ui` `ChatOverlay` · `chat.css` (`.chat-overlay`, `.chat-overlay-sheet`, `.chat-panel-compact`, dock-end `min(32rem)`)  
+**DS:** `@msqdx/ui` `ChatOverlay` · `chat.css` (`.chat-overlay`, `.chat-overlay-sheet`, `.chat-panel-compact`, dock-end resizable)  
 **API:** `specs/api/assistant-embed.md`  
 **Knowledge:** `knowledge/central-assistant-flyout.md` · `knowledge/paths.md`  
 **Page context:** `specs/domain/assistant-page-context.md` — host publishes structured page/entity context (EQC first)
@@ -24,7 +24,7 @@
 | Primary IA | Flyout (`ChatOverlay` dock-end) |
 | Full page | Expand / deep-link of the same `conversationId` |
 | Delivery | **Hybrid:** same-origin Plexon → in-process `AssistantChat`; cross-app → iframe `/assistant/embed` |
-| Sheet width | Dock-end `min(32rem, 100%)`, token surfaces (`--panel` / `--bg1` / `--ink` / `--line`) |
+| Sheet width | Dock-end default `min(32rem, 100%)`, drag-resizable (persisted); token surfaces (`--panel` / `--bg1` / `--ink` / `--line`) |
 | Chrome | **Single header:** `ChatOverlay` owns title / expand / close; overlay `AssistantChat` keeps compact toolbar (history + project) only |
 | Theme | Host `data-theme` → embed query `theme` + postMessage `assistant:theme` |
 | Page context | Host publishes `AssistantPageContext` (pathname + capability + entity ids); complete hydrates EQC runs into system prompt (`assistant-page-context.md`) |
