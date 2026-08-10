@@ -1,6 +1,7 @@
 import type { RequestUser } from '@/lib/auth-request-user';
 import { listUserCompanies } from '@/lib/assistant/user-eligibility';
 import { buildCompactProjectContextBlock } from '@/lib/assistant/project-context';
+import { buildPlatformNavigationPromptBlock } from '@/lib/assistant/platform-navigation';
 
 export type AssistantContext = {
   userName: string | null;
@@ -44,6 +45,8 @@ ${ctx.audionProjectId ? `- audionProjectId: ${ctx.audionProjectId}` : ''}
         })
       : null;
 
+  const platformNavigation = buildPlatformNavigationPromptBlock();
+
   const toolGuidance = `
 MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - Nutze zuerst die eingebettete Projektkurzinfo unten, bevor du große Daten lädst.
@@ -62,6 +65,7 @@ Organisationen:
 ${companyList}
 ${projectBlock}
 ${toolGuidance}
+${platformNavigation}
 ${compactProjectContext ? `\n${compactProjectContext}\n` : ''}
 ${ctx.pageContextBlock ? `\n${ctx.pageContextBlock}\n` : ''}
 
@@ -78,5 +82,6 @@ Antworte klar und auf Deutsch, es sei denn der Nutzer schreibt auf Englisch.
 Formatiere Antworten mit **Markdown**: Überschriften (##), Listen, **Fett**, Links und kurze Absätze — keine langen Textwände.
 Bei Projektanlage: frage nach fehlendem Projektnamen, Domain und Company (wenn mehrere).
 Halluziniere keine Projekt-IDs – nutze nur IDs aus dem Kontext oder Workflow-Ergebnissen.
+Halluziniere keine Links – nutze nur die Plattform-Navigation oben, Kontext, Tools oder UI-Linkblöcke.
 Destruktive Aktionen (Löschen) nur nach expliziter Bestätigung des Nutzers.`;
 }

@@ -15,6 +15,7 @@
 | UI migrate — assistant | `specs/domain/ui-migrate-assistant.md` |
 | Central Assistant Flyout | `specs/domain/central-assistant-flyout.md` |
 | Assistant page context | `specs/domain/assistant-page-context.md` |
+| Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 

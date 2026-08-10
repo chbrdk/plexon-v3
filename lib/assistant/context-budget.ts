@@ -12,6 +12,9 @@ export const ASSISTANT_MAX_HISTORY_MESSAGES = 20;
 /** Injected project context block in system prompt. */
 export const ASSISTANT_MAX_PROJECT_CONTEXT_CHARS = 24_000;
 
+/** Compact platform navigation map in system prompt. */
+export const ASSISTANT_MAX_PLATFORM_NAV_CHARS = 2_000;
+
 /** Rough chars budget before we trim older tool rounds (safety net). */
 export const ASSISTANT_MAX_PROMPT_CHARS = 2_000_000;
 

@@ -77,3 +77,5 @@ Block chrome in the flyout/expand turns uses `@msqdx/ui` only: `UiBlockSurface` 
 ### Page context (2026-08-10)
 
 EQC pages publish `AssistantPageContext` (capability + `workflowRunId`) into the flyout; complete hydrates an authorized run into the system prompt. Spec: `specs/domain/assistant-page-context.md`.
+
+System prompt includes a compact **Plattform-Navigation** block from `lib/assistant/platform-navigation.ts` (constants only; no invented links). Spec: `specs/domain/assistant-platform-navigation.md`.

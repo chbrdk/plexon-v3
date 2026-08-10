@@ -27,6 +27,7 @@
   - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed` (+ `theme` via `ASSISTANT_EMBED_THEME_QUERY_PARAM`)
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)
   - Page context: `specs/domain/assistant-page-context.md` · `lib/assistant/page-context.ts` (`ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK`, `ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN`) · EQC URL `PATH_EVENT_QUICK_CHECK` + `EVENT_QUICK_CHECK_RUN_QUERY_PARAM`
+  - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
 - Collection projects: `specs/domain/collection-projects.md`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
