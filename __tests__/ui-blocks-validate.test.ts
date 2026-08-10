@@ -63,4 +63,27 @@ describe('ui-blocks validate', () => {
       expect(created.block.type).toBe('alert');
     }
   });
+
+  it('strips emoticons from data_table cells', () => {
+    const created = createUiBlock(
+      'data_table',
+      {
+        title: 'Befunde 🚀',
+        columns: ['Befund', 'Priorität'],
+        rows: [['Domain-Score', '⚡ Mittel'], ['A11y', '🔴 Hoch']],
+      },
+      'table-1'
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+    const props = created.block.props as {
+      title?: string
+      columns: string[]
+      rows: Array<Array<string | number | null>>
+    };
+    expect(props.title).toBe('Befunde');
+    expect(props.rows[0]?.[1]).toBe('Mittel');
+    expect(props.rows[1]?.[1]).toBe('Hoch');
+    expect(JSON.stringify(props)).not.toMatch(/⚡|🔴|🚀/);
+  });
 });

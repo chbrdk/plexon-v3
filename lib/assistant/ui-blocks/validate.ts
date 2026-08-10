@@ -1,6 +1,7 @@
 import { UI_BLOCK_SCHEMAS } from '@/lib/assistant/ui-blocks/schemas';
 import type { UiBlock, UiBlockType } from '@/lib/assistant/ui-blocks/types';
 import { UI_BLOCK_TYPES } from '@/lib/assistant/ui-blocks/types';
+import { sanitizeUiBlockProps } from '@/lib/assistant/ui-blocks/sanitize-props';
 
 export function isUiBlockType(value: string): value is UiBlockType {
   return (UI_BLOCK_TYPES as readonly string[]).includes(value);
@@ -16,7 +17,10 @@ export function parseUiBlockProps(
     const msg = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     return { ok: false, error: msg || 'Invalid props' };
   }
-  return { ok: true, props: parsed.data as Record<string, unknown> };
+  return {
+    ok: true,
+    props: sanitizeUiBlockProps(parsed.data) as Record<string, unknown>,
+  };
 }
 
 export function createUiBlock(

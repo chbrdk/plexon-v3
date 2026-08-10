@@ -5,6 +5,7 @@ export function buildUiToolsPromptBlock(): string {
 
 Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst per MCP/REST holen, dann Blöcke bauen.
 - Kein HTML/JSX im Freitext erfinden.
+- Keine Emojis/Emoticons in Block-Props (Priorität als Text, z. B. „Mittel“, nicht „⚡ Mittel“).
 - Tabellen > 3 Zeilen → \`data_table\`, nicht Markdown-Tabelle.
 - Metriken/Scores → \`metric_grid\`.
 - Personas → \`persona_card\`; Zielgruppen → \`target_group_card\`.

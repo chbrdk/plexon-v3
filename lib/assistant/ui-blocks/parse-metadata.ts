@@ -2,6 +2,7 @@ import type { WorkflowStep } from '@/lib/db/assistant-workflow-runs';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
 import { UI_LAYOUT_VERSION } from '@/lib/assistant/ui-blocks/types';
 import { isUiBlockType } from '@/lib/assistant/ui-blocks/validate';
+import { sanitizeUiBlockProps } from '@/lib/assistant/ui-blocks/sanitize-props';
 import { ASSISTANT_WORKFLOW_STEP_LIST_BLOCK_ID } from '@/lib/assistant/ui-constants';
 import {
   buildStepListBlock,
@@ -18,7 +19,9 @@ function parseUiBlock(raw: unknown): UiBlock | null {
   const type = typeof raw.type === 'string' ? raw.type : '';
   const id = typeof raw.id === 'string' ? raw.id : '';
   if (!id || !isUiBlockType(type)) return null;
-  const props = isRecord(raw.props) ? raw.props : {};
+  const props = isRecord(raw.props)
+    ? (sanitizeUiBlockProps(raw.props) as Record<string, unknown>)
+    : {};
   return { id, type, props, meta: isRecord(raw.meta) ? (raw.meta as UiBlock['meta']) : undefined };
 }
 
