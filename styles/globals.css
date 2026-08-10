@@ -4476,8 +4476,8 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 .plexon-eqc-geo-score-ledger__why {
   grid-column: 2 / -1;
   margin: 0;
-  font-size: clamp(0.95rem, 1.25vw, 1.05rem);
-  line-height: 1.5;
+  font-size: clamp(0.78rem, 1vw, 0.875rem);
+  line-height: 1.45;
   color: var(--muted);
   max-width: 46ch;
 }
