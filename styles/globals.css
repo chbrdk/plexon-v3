@@ -1315,59 +1315,6 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   display: none;
 }
 
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-  padding-top: 0.65rem;
-  border-top: 1px solid var(--line);
-  width: 100%;
-  max-width: none;
-}
-
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form > .ds-field {
-  flex: 1 1 auto;
-  min-width: 0;
-  margin: 0;
-}
-
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form > .ds-field > .ds-field-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-composer.ds-textarea,
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-composer {
-  width: 100%;
-  min-height: 2.75rem;
-  max-height: 8rem;
-  border-radius: var(--radius-pill, 999px);
-  border: 1px solid var(--line);
-  background: var(--field, var(--bg1));
-  color: var(--ink);
-  padding: 0.65rem 0.9rem;
-}
-
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-send.ds-btn,
-[data-plexon-assistant-chat][data-presentation='overlay'] .chat-form .chat-send {
-  align-self: flex-end;
-  flex: 0 0 auto;
-  min-width: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  border-radius: 999px;
-}
-
 .plexon-assistant-workspace {
   display: flex;
   flex: 1;
@@ -1434,6 +1381,12 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-bottom: 0.5rem;
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+.plexon-assistant-panel .chat-form {
+  flex-wrap: wrap;
 }
 
 .plexon-assistant-turn-body {

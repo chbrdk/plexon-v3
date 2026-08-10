@@ -21,7 +21,10 @@ type AssistantChatComposerProps = {
   compact?: boolean
 }
 
-/** DS chat composer — Audion `.chat-form` / `.chat-composer` / `.chat-send`. */
+/**
+ * DS chat composer — Field + Textarea.chat-composer + icon send.
+ * Spec: @msqdx/ui chat chrome · Audion chat-panel pattern.
+ */
 export function AssistantChatComposer({
   value,
   loading,
@@ -76,12 +79,12 @@ export function AssistantChatComposer({
           ))}
         </div>
       ) : null}
-      <Field htmlFor="plexon-chat-composer">
+      <Field label={t('assistant.messageLabel')} htmlFor="plexon-chat-composer" size="md">
         <Textarea
           id="plexon-chat-composer"
           size="md"
           block
-          rows={2}
+          rows={1}
           className="chat-composer"
           placeholder={t('assistant.placeholder')}
           value={value}

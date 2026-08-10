@@ -59,11 +59,13 @@ describe('central assistant flyout specs + mounts', () => {
     expect(css).toContain("[data-presentation='overlay'] .plexon-assistant-suggestions")
   })
 
-  it('overlay composer is compact without Message label', () => {
+  it('composer uses DS Field label + icon send (Audion chat chrome)', () => {
     const composer = readFileSync(join(root, 'components/assistant/AssistantChatComposer.tsx'), 'utf8')
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     expect(composer).toContain('compact = false')
-    expect(composer).not.toContain('label="Message"')
+    expect(composer).toContain("label={t('assistant.messageLabel')}")
+    expect(composer).toContain('chat-send chat-send-icon')
+    expect(composer).toContain('rows={1}')
     expect(chat).toContain('compact={presentation === \'overlay\'}')
   })
 

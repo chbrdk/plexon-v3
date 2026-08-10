@@ -576,6 +576,7 @@
     "title": "Assistant",
     "subtitle": "Create projects and orchestrate CHECKION and AUDION from one place.",
     "placeholder": "Message the assistant…",
+    "messageLabel": "Message",
     "send": "Send",
     "chat": {
       "you": "You",
