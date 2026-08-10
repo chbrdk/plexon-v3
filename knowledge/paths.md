@@ -32,6 +32,7 @@
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
   - EQC GEO voice spider: `knowledge/eqc-geo-voice-radar.md` · `components/event-quick-check/EventQuickCheckVoiceRadar.tsx` · `lib/assistant/reports/event-quick-check/eqc-radar-geometry.ts`
+  - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · CSS `.plexon-eqc-results-scroll` + chapter `min-height: 100svh`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`

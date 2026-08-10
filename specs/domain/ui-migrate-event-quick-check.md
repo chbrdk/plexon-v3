@@ -1,6 +1,6 @@
 # UI migrate — Event Quick Check
 
-**Status:** Accepted — Wave 6 done — 2026-07-31 · **Wave 7 Results** accepted — 2026-08-06  
+**Status:** Accepted — Wave 6 done — 2026-07-31 · **Wave 7 Results** accepted — 2026-08-06 · **Wave 8 scrollytelling** — 2026-08-10  
 **Route:** `/event-quick-check*`  
 **Implements:** `app/event-quick-check/**` · `components/event-quick-check/**`  
 **Layout:** workflow = full-height workstation; **done results = magazine**
@@ -13,7 +13,7 @@
 | URL / project / depth form | **reshape** | `Field` + `Input` + `ToggleGroup` (Wave 6) |
 | Review panels (brief, competitors, geo) | **reshape** | DS forms; logic unchanged |
 | Deep scan poll + progress | **reshape** | CSS progress + `Spinner` |
-| **Done results / dashboard** | **reshape** (Wave 7) | `plexon-magazine plexon-eqc-results` + DS-only bands (`SectionChrome`, `StatLede`, `RankedList`, `Accordion`, `Alert`, `Chip`, `Button`, `Text`); no `Ui*` / `UiBlockSurface` |
+| **Done results / dashboard** | **reshape** (Wave 7 + Wave 8 scrolly) | `plexon-magazine plexon-eqc-results` + DS-only bands; **Wave 8:** each top-level results chapter ≥ `100svh` with vertical scroll-snap (`proximity`) for scrollytelling |
 | Domain-Scan + GEO HTTP | **reshape** (Wave 7) | CHECKION v3 `/api/domain-scans` + `/api/geo-jobs` via adapters |
 | Recharts charts | **keep** | Magazine chart chrome (no bridge card) |
 | History | **reshape** | `@msqdx/ui` `Dialog` |
@@ -38,6 +38,7 @@
 3. Done view uses `plexon-magazine` + DS primitives only (`SectionChrome`, `StatLede`, `RankedList`, …); no `assistant-ui` / `Ui*` imports on the dashboard path. ✅  
 4. Domain/GEO workflows call v3 clients (not legacy `/api/scan/domain` / `/api/scan/geo-eeat`). ✅  
 5. Results theming uses `--ink` / `--muted` / `--line` (not `--color-text-on-light` / `--color-card-bg`). ✅  
+6. Results scrollytelling: `.plexon-eqc-results-scroll` uses vertical scroll-snap; each direct child chapter (masthead shell + `.plexon-dash-band`) is ≥ `100svh`. ✅  
 
 ## Progressive (not blockers)
 
