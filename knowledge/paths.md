@@ -33,6 +33,7 @@
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
   - EQC GEO voice spider: `knowledge/eqc-geo-voice-radar.md` · `components/event-quick-check/EventQuickCheckVoiceRadar.tsx` · `lib/assistant/reports/event-quick-check/eqc-radar-geometry.ts`
   - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · cover `70svh` · bands `100svh` · adaptive gap via `data-eqc-chapter` (`lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`)
+  - EQC E-E-A-T + GEO-Empfehlungen as own bands: `knowledge/eqc-magazine-eeat-recs-bands.md`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`

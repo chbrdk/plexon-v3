@@ -2,12 +2,10 @@
 
 import { Alert, RankedList, RankedRow, Text } from '@msqdx/ui'
 import { EventQuickCheckCitationSection } from '@/components/event-quick-check/EventQuickCheckCitationSection'
-import { EventQuickCheckMovesGallery } from '@/components/event-quick-check/EventQuickCheckMovesGallery'
 import { EventQuickCheckScoreRing } from '@/components/event-quick-check/EventQuickCheckScoreRing'
 import { EventQuickCheckVoiceRadar } from '@/components/event-quick-check/EventQuickCheckVoiceRadar'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
-import { buildEqcEeatReadingFallback } from '@/lib/assistant/reports/event-quick-check/build-eqc-eeat-reading'
 import { buildEqcVoiceRadarPoints } from '@/lib/assistant/reports/event-quick-check/eqc-radar-geometry'
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
@@ -30,7 +28,8 @@ function scoreTone(score: number | null | undefined): 'pos' | 'low' | 'neg' | un
 
 /**
  * GEO magazine chapter — Checkion overview pattern:
- * score rings → share-of-voice race → model strip + ranking → E-E-A-T ledger → moves.
+ * score rings → share-of-voice race → model strip + ranking.
+ * E-E-A-T and GEO recommendations live in their own bands.
  */
 export function EventQuickCheckGeoMagazineSection({ report, showQuestions = false }: Props) {
   const geo = report.geo
@@ -63,11 +62,6 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
 
   const maxVoice = Math.max(...voiceRows.map((r) => r.pct), 1)
   const voiceRadarPoints = buildEqcVoiceRadarPoints(voiceRows)
-  const eeatSorted = [...geo.eeatDimensions].sort((a, b) => a.score - b.score)
-  const weakest = eeatSorted[0]
-  const strongest = eeatSorted[eeatSorted.length - 1]
-  const eeatSpan =
-    weakest && strongest ? Math.max(0, strongest.score - weakest.score) : null
 
   const score = geo.overallScore
   const fitness = geo.geoFitnessScore
@@ -192,105 +186,6 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = fals
         ownDomain={geo.url ?? report.meta.domain ?? report.meta.url}
         knownCompetitors={geo.competitors.map((c) => c.name)}
       />
-
-      {eeatSorted.length > 0 ? (
-        <section className="plexon-eqc-geo-eeat" aria-labelledby="eqc-geo-eeat-heading">
-          <header className="plexon-eqc-geo-voice__head">
-            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-              On-page
-            </Text>
-            <Text role="display" as="h3" id="eqc-geo-eeat-heading">
-              {EQC_REPORT_COPY.sectionGeoEeat}
-            </Text>
-            <div className="plexon-eqc-geo-eeat__reading">
-              <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-                {EQC_REPORT_COPY.geoEeatReadingLabel}
-              </Text>
-              <p className="plexon-eqc-geo-eeat__reading-body">
-                {buildEqcEeatReadingFallback({
-                  dimensions: eeatSorted,
-                  missingElements: geo.eeatMissingElements,
-                  geoFitnessReasoning: geo.geoFitnessReasoning,
-                  weakest,
-                  strongest,
-                }) || EQC_REPORT_COPY.geoEeatWhyFallback}
-              </p>
-            </div>
-          </header>
-          <div className="plexon-eqc-geo-eeat__layout">
-            <div className="plexon-eqc-geo-score-ledger" aria-label={EQC_REPORT_COPY.sectionGeoEeat}>
-              {eeatSorted.map((d, index) => (
-                <div
-                  key={d.key}
-                  className="plexon-eqc-geo-score-ledger__cell"
-                  style={{ ['--bar' as string]: `${Math.max(0, Math.min(100, d.score))}%` }}
-                >
-                  <span className="plexon-eqc-geo-score-ledger__idx">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <span className="plexon-eqc-geo-score-ledger__label">{d.label}</span>
-                  <span className="plexon-eqc-geo-score-ledger__value">{d.score}</span>
-                  <span className="plexon-eqc-geo-score-ledger__bar" aria-hidden />
-                  {d.reasoning ? (
-                    <p className="plexon-eqc-geo-score-ledger__why">{d.reasoning}</p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <div className="plexon-eqc-geo-eeat__side">
-              {eeatSpan != null && weakest && strongest ? (
-                <aside className="plexon-eqc-geo-callout">
-                  <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-                    Spanne
-                  </Text>
-                  <p className="plexon-eqc-geo-callout__num">{eeatSpan}</p>
-                  <Text role="hint" as="p">
-                    Punkte zwischen {weakest.label} ({weakest.score}) und {strongest.label} (
-                    {strongest.score}).
-                  </Text>
-                </aside>
-              ) : null}
-              {(geo.eeatMissingElements?.length ?? 0) > 0 ? (
-                <div
-                  className="plexon-eqc-geo-eeat-gaps"
-                  aria-label={EQC_REPORT_COPY.geoEeatGapsLabel}
-                >
-                  <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-                    {EQC_REPORT_COPY.geoEeatGapsLabel}
-                  </Text>
-                  <ul className="plexon-eqc-geo-eeat-gaps__list">
-                    {geo.eeatMissingElements!.map((el) => (
-                      <li key={el}>{el}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {geo.recommendations.length > 0 ? (
-        <section className="plexon-eqc-moves" aria-labelledby="eqc-geo-recs-heading">
-          <header className="plexon-eqc-insights__head">
-            <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
-              Next moves
-            </Text>
-            <Text role="title" as="h3" id="eqc-geo-recs-heading">
-              {EQC_REPORT_COPY.sectionGeoRecommendations}
-            </Text>
-          </header>
-          <EventQuickCheckMovesGallery
-            label={EQC_REPORT_COPY.sectionGeoRecommendations}
-            recommendations={geo.recommendations.map((r, i) => ({
-              title: r.title,
-              description: r.description,
-              priority: r.priority ?? i + 1,
-              category: 'GEO',
-            }))}
-          />
-        </section>
-      ) : null}
 
       {showQuestions && geo.questions.length > 0 ? (
         <RankedList hint={EQC_REPORT_COPY.sectionGeoQuestions}>

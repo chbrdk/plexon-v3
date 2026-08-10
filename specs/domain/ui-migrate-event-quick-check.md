@@ -26,7 +26,7 @@
 |------|-----------|
 | Workflow shell | `plexon-eqc-stage` + Suspense `EmptyState` / `Spinner` |
 | Done shell | `plexon-magazine plexon-eqc-results` |
-| Results sections | `plexon-dash-band` + `SectionChrome` + DS body (`StatLede`, `RankedList`, `Alert`, …) |
+| Results sections | `plexon-dash-band` + `SectionChrome` + DS body (`StatLede`, `RankedList`, `Alert`, …); GEO core, **E-E-A-T**, and **GEO-Empfehlungen** are separate scrolly chapters |
 | KPIs | `StatLede` / `StatLedeGroup` |
 | Forms | `Field` / `Input` / `Textarea` / `ToggleGroup` |
 | Charts | Recharts with theme ticks (`--ink` / `--muted` / `--line`) |
@@ -39,6 +39,7 @@
 4. Domain/GEO workflows call v3 clients (not legacy `/api/scan/domain` / `/api/scan/geo-eeat`). ✅  
 5. Results theming uses `--ink` / `--muted` / `--line` (not `--color-text-on-light` / `--color-card-bg`). ✅  
 6. Results scrollytelling: cover `.plexon-eqc-masthead-shell` ≥ `70svh`; content `.plexon-dash-band` ≥ `100svh`; scroll-snap on `.plexon-eqc-results-scroll`; adaptive gap (`50vh` / `20vh` via `data-eqc-chapter`). ✅  
+7. E-E-A-T and GEO-Empfehlungen are own magazine bands (not nested inside the GEO spread). ✅  
 
 ## Progressive (not blockers)
 

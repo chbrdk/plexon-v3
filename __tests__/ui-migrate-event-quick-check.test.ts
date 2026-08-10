@@ -81,6 +81,8 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).not.toContain('StatLede')
     expect(dash).toContain('plexon-eqc-mag-persona-lists')
     expect(dash).toContain('EventQuickCheckGeoMagazineSection')
+    expect(dash).toContain('EventQuickCheckEeatMagazineSection')
+    expect(dash).toContain('EventQuickCheckGeoRecommendationsMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')
     expect(dash).toContain('EventQuickCheckInsightsMagazineSection')
     expect(dash).not.toContain('assistant-ui')
@@ -90,10 +92,26 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).not.toContain('--color-text-on-light')
     expect(geoMag).toContain('EventQuickCheckScoreRing')
     expect(geoMag).toContain('EventQuickCheckVoiceRadar')
-    expect(geoMag).toContain('EventQuickCheckMovesGallery')
+    expect(geoMag).not.toContain('EventQuickCheckMovesGallery')
+    expect(geoMag).not.toContain('plexon-eqc-geo-eeat')
     expect(geoMag).toContain('plexon-eqc-geo-voice__board')
     expect(geoMag).not.toContain('StatusMeterPanel')
     expect(geoMag).toContain('EventQuickCheckCitationSection')
+    const eeatMag = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckEeatMagazineSection.tsx'),
+      'utf8',
+    )
+    const geoRecsMag = readFileSync(
+      path.join(
+        root,
+        'components/event-quick-check/EventQuickCheckGeoRecommendationsMagazineSection.tsx',
+      ),
+      'utf8',
+    )
+    expect(eeatMag).toContain('plexon-eqc-geo-eeat')
+    expect(eeatMag).toContain('buildEqcEeatReadingFallback')
+    expect(geoRecsMag).toContain('EventQuickCheckMovesGallery')
+    expect(geoRecsMag).toContain('eqc-geo-recs-spread')
     // Snapshot: dials (rings) before lede copy
     expect(geoMag.indexOf('plexon-eqc-geo-snapshot__dials')).toBeLessThan(
       geoMag.indexOf('plexon-eqc-geo-snapshot__lede'),

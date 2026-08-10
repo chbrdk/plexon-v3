@@ -52,12 +52,12 @@ export function resolveEventQuickCheckDashboardLayout(
         report.market.keyFindings.length > 0)
   );
 
-  const hasGeoContent =
+  // Core GEO chapter excludes E-E-A-T + recommendations (own scrolly bands).
+  const hasGeoCore =
     showGeoQuestionsInGeo ||
     showGeoMetrics ||
-    showGeoEeat ||
     showGeoCitations ||
-    showGeoRecommendations ||
+    report.geo.competitors.length > 0 ||
     report.geo.status === 'failed' ||
     report.geo.status === 'partial';
 
@@ -76,8 +76,8 @@ export function resolveEventQuickCheckDashboardLayout(
       showExecutiveFazit,
       showMarket,
       domainSpan: 12,
-      personaSpan: hasGeoContent ? 5 : 12,
-      geoSpan: hasGeoContent ? 7 : 0,
+      personaSpan: hasGeoCore ? 5 : 12,
+      geoSpan: hasGeoCore ? 7 : 0,
     };
   }
 
@@ -96,6 +96,6 @@ export function resolveEventQuickCheckDashboardLayout(
     showMarket,
     domainSpan: 12,
     personaSpan: 12,
-    geoSpan: hasGeoContent ? 12 : 0,
+    geoSpan: hasGeoCore ? 12 : 0,
   };
 }

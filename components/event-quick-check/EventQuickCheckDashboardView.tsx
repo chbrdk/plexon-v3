@@ -15,7 +15,9 @@ import {
 import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloadButton'
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
 import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-check/EventQuickCheckDomainMagazineSection'
+import { EventQuickCheckEeatMagazineSection } from '@/components/event-quick-check/EventQuickCheckEeatMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
+import { EventQuickCheckGeoRecommendationsMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoRecommendationsMagazineSection'
 import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
 import { EventQuickCheckResultsMasthead } from '@/components/event-quick-check/EventQuickCheckResultsMasthead'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
@@ -444,6 +446,18 @@ export function EventQuickCheckDashboardView({
             report={report}
             showQuestions={!layout.showPersona}
           />
+        </Band>
+      ) : null}
+
+      {layout.showGeoEeat ? (
+        <Band title={EQC_REPORT_COPY.sectionGeoEeat}>
+          <EventQuickCheckEeatMagazineSection report={report} />
+        </Band>
+      ) : null}
+
+      {layout.showGeoRecommendations ? (
+        <Band title={EQC_REPORT_COPY.sectionGeoRecommendations}>
+          <EventQuickCheckGeoRecommendationsMagazineSection report={report} />
         </Band>
       ) : null}
 
