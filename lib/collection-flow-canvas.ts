@@ -57,6 +57,10 @@ export type CollectionFlowRfNodeData = {
     personas: Array<{ id: string; name: string }>;
     targetGroups: Array<{ id: string; name: string; segment: string }>;
   } | null;
+  /** Wave 24: Collection Brandion guidelines for Guideline / Brand Measure pickers. */
+  brandionCatalog?: {
+    guidelines: Array<{ id: string; name: string }>;
+  } | null;
 };
 
 export type CollectionFlowRfEdgeData = {
@@ -109,6 +113,7 @@ const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>([
   'scan',
   'domain_scan',
   'geo_job',
+  'brand_measure',
   'success',
   'journey',
   'research_brief',
@@ -683,6 +688,15 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
   if (kind === 'start') return { ...base, url: '', urlKey: '', maxSteps: 8 };
   if (kind === 'persona') return { ...base, label: 'Persona' };
   if (kind === 'zielgruppe') return { ...base, label: 'Zielgruppe' };
+  if (kind === 'guideline') return { ...base, label: 'Guideline' };
+  if (kind === 'brand_measure') {
+    return {
+      ...base,
+      label: 'Brand Measure',
+      adapter: 'fixture',
+      fixtureId: 'demo-landing-pass',
+    };
+  }
   if (kind === 'measure') return { ...base, text: '', measureKey: 'overall' };
   if (kind === 'scan') return { ...base, url: '', scanMode: 'single' };
   if (kind === 'domain_scan') return { ...base, url: '', maxPages: 50 };

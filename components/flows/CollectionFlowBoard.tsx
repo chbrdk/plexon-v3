@@ -40,6 +40,7 @@ import {
 } from '@/lib/constants'
 import { buildAudionStudyUrl, buildAudionStudyWaveUrl } from '@/lib/audion-admin-launch-url'
 import { pathCheckionGeoOverview, pathCheckionScanIssues, pathCheckionScanResult } from '@/lib/paths/checkion-api'
+import { pathBrandionGuidelineEvaluate } from '@/lib/paths/brandion-api'
 import {
   documentHasJourneySegment,
   ensureFlowDocument,
@@ -70,7 +71,7 @@ import {
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
-import { PALETTE_JOURNEY_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
+import { PALETTE_BRAND_GROUPS, PALETTE_JOURNEY_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
 import {
   DEFAULT_FLOW_NODE_SIZE,
   findNonOverlappingFlowPosition,
@@ -162,6 +163,9 @@ function BoardInner({ platformProjectId, initial }: Props) {
     personas: Array<{ id: string; name: string }>
     targetGroups: Array<{ id: string; name: string; segment: string }>
   } | null>(null)
+  const [brandionCatalog, setBrandionCatalog] = useState<{
+    guidelines: Array<{ id: string; name: string }>
+  } | null>(null)
   const [runDockOpen, setRunDockOpen] = useState(() => {
     try {
       const raw = localStorage.getItem(`plexon.flow.run.open.${initial.id}`)
@@ -246,16 +250,29 @@ function BoardInner({ platformProjectId, initial }: Props) {
             personas?: Array<{ id: string; name: string }>
             targetGroups?: Array<{ id: string; name: string; segment?: string }>
           } | null
+          brandion?: {
+            guidelines?: Array<{ id: string; name: string }>
+          } | null
         } | null
-        if (cancelled || !json?.audion) return
-        setAudionCatalog({
-          personas: (json.audion.personas ?? []).map((p) => ({ id: p.id, name: p.name })),
-          targetGroups: (json.audion.targetGroups ?? []).map((t) => ({
-            id: t.id,
-            name: t.name,
-            segment: t.segment ?? '',
-          })),
-        })
+        if (cancelled) return
+        if (json?.audion) {
+          setAudionCatalog({
+            personas: (json.audion.personas ?? []).map((p) => ({ id: p.id, name: p.name })),
+            targetGroups: (json.audion.targetGroups ?? []).map((t) => ({
+              id: t.id,
+              name: t.name,
+              segment: t.segment ?? '',
+            })),
+          })
+        }
+        if (json?.brandion) {
+          setBrandionCatalog({
+            guidelines: (json.brandion.guidelines ?? []).map((g) => ({
+              id: g.id,
+              name: g.name,
+            })),
+          })
+        }
       } catch {
         /* ignore — pickers stay empty */
       }
@@ -1392,6 +1409,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
             setInspectorId(n.id)
           },
           audionCatalog,
+          brandionCatalog,
         },
       })),
     [
@@ -1404,6 +1422,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       runOutputs,
       runStates,
       audionCatalog,
+      brandionCatalog,
     ]
   )
 
@@ -1440,6 +1459,15 @@ function BoardInner({ platformProjectId, initial }: Props) {
   const scanHref = lastRun?.scanId ? pathCheckionScanResult(lastRun.scanId) : null
   const issuesHref = lastRun?.scanId ? pathCheckionScanIssues(lastRun.scanId) : null
   const geoHref = lastRun?.geoJobId ? pathCheckionGeoOverview(lastRun.geoJobId) : null
+  const brandGuidelineId =
+    typeof lastRun?.context?.outputs?.brand === 'object' &&
+    lastRun?.context?.outputs?.brand &&
+    typeof (lastRun.context.outputs.brand as { guidelineId?: unknown }).guidelineId === 'string'
+      ? (lastRun.context.outputs.brand as { guidelineId: string }).guidelineId.trim()
+      : ''
+  const brandHref = brandGuidelineId
+    ? pathBrandionGuidelineEvaluate(brandGuidelineId, { adapter: 'fixture' })
+    : null
 
   return (
     <FlowBoardStage
@@ -1719,6 +1747,26 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   </div>
                 </div>
               ))}
+              {PALETTE_BRAND_GROUPS.map((group) => (
+                <div key={group.id}>
+                  <p className="msqdx-flow-canvas-hint">{group.title}</p>
+                  <div className="msqdx-flow-palette-row">
+                    {group.presets.map((preset) => (
+                      <Button
+                        key={preset.id}
+                        type="button"
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => addPreset(preset.id)}
+                        disabled={runBusy}
+                        data-testid={`flow-palette-${preset.id}`}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </FlowBoardPalette>
           </CollectionFlowFloatingPanel>
 
@@ -1812,6 +1860,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                       scanHref ||
                       issuesHref ||
                       geoHref ||
+                      brandHref ||
                       softQSummary ? (
                         <>
                           {studyHref ? (
@@ -1845,6 +1894,11 @@ function BoardInner({ platformProjectId, initial }: Props) {
                               GEO Overview
                             </a>
                           ) : null}
+                          {brandHref ? (
+                            <a href={brandHref} target="_blank" rel="noreferrer">
+                              BRANDION Evaluate
+                            </a>
+                          ) : null}
                         </>
                       ) : undefined
                     }
@@ -1867,7 +1921,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
               bindSourceLabel={bindSourceLabel}
               edges={edges as CollectionFlowRfEdge[]}
               rfNodes={nodes as CollectionFlowRfNodeModel[]}
-              audionCatalog={audionCatalog}
+              audionCatalog={audionCatalog ?? undefined}
+              brandionCatalog={brandionCatalog ?? undefined}
               onClose={() => setInspectorId(null)}
               onAppendOutputToNote={() => onInspectorOutputToNote(inspectorId!)}
               onUpdate={onUpdateNode}

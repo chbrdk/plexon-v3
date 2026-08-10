@@ -119,6 +119,8 @@ export const NODE_IO_BY_KIND: Partial<Record<CollectionFlowNodeKind, NodeIoSchem
   scan: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   domain_scan: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   geo_job: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
+  guideline: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  brand_measure: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   research_brief: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   competitors_suggest: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   persona_bootstrap: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },

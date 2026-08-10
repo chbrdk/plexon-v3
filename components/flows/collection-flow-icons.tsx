@@ -144,3 +144,27 @@ export function IconDuplicate({ size = 16 }: { size?: number }) {
     </svg>
   )
 }
+
+/** Wave 24 — Brandion guideline / brand measure glyphs. */
+export function IconGuideline({ size = 18 }: { size?: number }) {
+  return (
+    <FlowSvg size={size}>
+      <path d="M8 4h8a2 2 0 0 1 2 2v14l-6-3-6 3V6a2 2 0 0 1 2-2Z" />
+      <path d="M10 9h4M10 12h4" />
+    </FlowSvg>
+  )
+}
+
+export function IconBrandMeasure({ size = 18 }: { size?: number }) {
+  return (
+    <FlowSvg size={size}>
+      <path d="M4 19h16" />
+      <path d="M7 16V9" />
+      <path d="M12 16V6" />
+      <path d="M17 16v-4" />
+      <circle cx="7" cy="7" r="1.5" />
+      <circle cx="12" cy="4" r="1.5" />
+      <circle cx="17" cy="10" r="1.5" />
+    </FlowSvg>
+  )
+}

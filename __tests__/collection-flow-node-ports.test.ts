@@ -20,6 +20,8 @@ describe('collection-flow-node-ports', () => {
   it('marks action kinds as catalog output writers', () => {
     expect(nodeIoSchemaForKind('scan').catalogOutputs).toBe(true);
     expect(nodeIoSchemaForKind('geo_job').catalogOutputs).toBe(true);
+    expect(nodeIoSchemaForKind('brand_measure').catalogOutputs).toBe(true);
+    expect(nodeIoSchemaForKind('guideline').catalogOutputs).toBe(false);
     expect(nodeIoSchemaForKind('success').catalogOutputs).toBe(true);
     expect(nodeIoSchemaForKind('compare').catalogOutputs).toBe(false);
     expect(nodeIoSchemaForKind('persona').inputs[0]?.label).toBe('Ablauf');

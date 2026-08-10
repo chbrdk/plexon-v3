@@ -17,7 +17,8 @@ export type CollectionFlowPresetGroup =
   | 'steuerung'
   | 'qualität'
   | 'vergleich'
-  | 'eqc';
+  | 'eqc'
+  | 'marke';
 
 export type CollectionFlowPreset = {
   id: string;
@@ -350,6 +351,52 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
       presetId: 'eqc-confirm-geo',
     },
   },
+  // Wave 24 — Brandion Marke
+  {
+    id: 'guideline',
+    group: 'marke',
+    label: 'Guideline',
+    kind: 'guideline',
+    defaults: { label: 'Guideline', presetId: 'guideline' },
+  },
+  {
+    id: 'brand_measure',
+    group: 'marke',
+    label: 'Brand Measure',
+    kind: 'brand_measure',
+    defaults: {
+      label: 'Brand Measure',
+      presetId: 'brand_measure',
+      adapter: 'fixture',
+      fixtureId: 'demo-landing-pass',
+    },
+  },
+  {
+    id: 'compare-brand-pass-rate',
+    group: 'marke',
+    label: 'Compare: Brand pass ≥ 80%',
+    kind: 'compare',
+    defaults: {
+      label: 'Brand pass ≥ 80%',
+      presetId: 'compare-brand-pass-rate',
+      path: 'brand.passRate',
+      op: 'gte',
+      value: 0.8,
+    },
+  },
+  {
+    id: 'compare-brand-no-fails',
+    group: 'marke',
+    label: 'Compare: Brand keine Fails',
+    kind: 'compare',
+    defaults: {
+      label: 'Brand keine Fails',
+      presetId: 'compare-brand-no-fails',
+      path: 'brand.failCount',
+      op: 'eq',
+      value: 0,
+    },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{
@@ -380,6 +427,16 @@ export const PALETTE_QUALITY_GROUPS: Array<{
     { id: 'eqc' as const, title: 'Quick Check' },
   ] as const
 ).map(({ id, title }) => ({
+  id,
+  title,
+  presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),
+}));
+
+export const PALETTE_BRAND_GROUPS: Array<{
+  id: CollectionFlowPresetGroup;
+  title: string;
+  presets: CollectionFlowPreset[];
+}> = [{ id: 'marke' as const, title: 'Marke' }].map(({ id, title }) => ({
   id,
   title,
   presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),

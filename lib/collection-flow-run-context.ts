@@ -78,6 +78,14 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
   { path: 'journey.allTaskCompleted', label: 'allTaskCompleted', group: 'journey' },
   { path: 'run.url', label: 'url', group: 'run' },
   { path: 'run.startedAt', label: 'startedAt', group: 'run' },
+  { path: 'brand.status', label: 'status', group: 'brand' },
+  { path: 'brand.guidelineId', label: 'guidelineId', group: 'brand' },
+  { path: 'brand.runId', label: 'runId', group: 'brand' },
+  { path: 'brand.adapter', label: 'adapter', group: 'brand' },
+  { path: 'brand.passCount', label: 'passCount', group: 'brand' },
+  { path: 'brand.failCount', label: 'failCount', group: 'brand' },
+  { path: 'brand.observationCount', label: 'observationCount', group: 'brand' },
+  { path: 'brand.passRate', label: 'passRate', group: 'brand' },
   { path: 'brief.displayName', label: 'displayName', group: 'brief' },
   { path: 'brief.industry', label: 'industry', group: 'brief' },
   { path: 'brief.summary', label: 'summary', group: 'brief' },
@@ -107,6 +115,7 @@ const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
   scan: 'scan',
   domain_scan: 'domain',
   geo_job: 'geo',
+  brand_measure: 'brand',
   success: 'journey',
   journey: 'journey',
   research_brief: 'brief',
@@ -119,6 +128,7 @@ const ROOT_TO_ACTION_KIND: Record<string, string> = {
   scan: 'scan',
   domain: 'domain_scan',
   geo: 'geo_job',
+  brand: 'brand_measure',
   journey: 'success',
   brief: 'research_brief',
   competitors: 'competitors_suggest',
@@ -490,6 +500,32 @@ export function buildGeoCatalogBundle(input: {
     overallScore: input.overallScore,
     url: input.url,
     ...(input.preview && typeof input.preview === 'object' ? { preview: input.preview } : {}),
+  };
+}
+
+/** Wave 24 — Brandion Measured evaluate catalog root `brand.*`. */
+export function buildBrandCatalogBundle(input: {
+  status: string;
+  guidelineId: string;
+  runId: string | null;
+  adapter: string;
+  passCount: number;
+  failCount: number;
+  observationCount: number;
+}): Record<string, unknown> {
+  const passCount = Math.max(0, Math.floor(input.passCount));
+  const failCount = Math.max(0, Math.floor(input.failCount));
+  const denom = passCount + failCount;
+  const passRate = denom > 0 ? passCount / denom : 0;
+  return {
+    status: input.status,
+    guidelineId: input.guidelineId,
+    runId: input.runId,
+    adapter: input.adapter,
+    passCount,
+    failCount,
+    observationCount: Math.max(0, Math.floor(input.observationCount)),
+    passRate,
   };
 }
 

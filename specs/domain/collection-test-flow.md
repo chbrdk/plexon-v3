@@ -113,6 +113,33 @@ Node fields (quality):
 | `value` | `compare` | Expected literal or expression (ignored for exists ops) |
 | `alias` | `set` | Output key under `context.outputs[alias]` (Wave 20) |
 
+### D — Brand (BRANDION capability) — Wave 24
+
+Orchestration nodes only — config + sync Measured evaluate → catalog. Guideline studio / findings stay in BRANDION via deep links. Knowledge Pack facet `brand` activation remains separate (Phase 4).
+
+| Kind | Role | Wave |
+|------|------|------|
+| `guideline` | **Config** — pick Collection Brandion guideline → `guidelineId` on extract/merge | **24** |
+| `brand_measure` | BRANDION Measured evaluate (sync `POST …/analysis-runs`) — writes `brand.*` | **24** |
+
+#### Keep / reshape / drop (brand)
+
+| Decision | Item |
+|----------|------|
+| **Keep** | `guideline` config + `brand_measure` action; Collection deep link to Brandion evaluate |
+| **Reshape** | Reuse `compare` over `brand.*` (no brand-specific gate kinds) |
+| **Drop as nodes** | Launch-only Brandion chrome, KP distillate publish, PDF upload from the board |
+
+Node fields (brand):
+
+| Field | On | Notes |
+|-------|-----|-------|
+| `guidelineId` | `guideline`, `brand_measure` | Empty on measure → merge from upstream `guideline` config |
+| `fixtureId` | `brand_measure` | Named Brandion fixture input (v1; default CD/demo kit) |
+| `adapter` | `brand_measure` | `fixture` (default) — PDF/URL board upload deferred |
+
+**Extract rule:** `guideline` is authoring-only for the Audion agent graph; before Brandion execute, merge `guidelineId` onto `brand_measure` when the measure node omits it.
+
 ### C — Orchestration (PLEXON)
 
 | Kind | Role | Status |
@@ -144,6 +171,7 @@ Actions write typed bundles into `lastRun.context.outputs` (also aliased by root
 | `geo` | `geo_job` | `status`, `citedShare`, `geoFitness`, `overallScore`, `url` |
 | `journey` | Audion segment | `taskCompleted`, `validEvidence`, `finalUrl` |
 | `run` | orchestration | `url`, `startedAt` |
+| `brand` | `brand_measure` | `status`, `guidelineId`, `runId`, `adapter`, `passCount`, `failCount`, `observationCount`, `passRate` |
 
 Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
 **Open path expressions (Wave 18+):** `compare.path` / `compare.value` and **all ExpressionField params** (`start`/`scan`/`domain_scan`/`geo_job` URL, `text`, `note`, `pattern`, `companyName`, …) accept bare catalog paths **or** `{{ … }}` (whole-field or mixed with literals), resolved against `context.outputs` at segment start. **No JS `eval`.** Catalog list = recommended picker / port labels only — not a hard evaluate whitelist.
@@ -154,10 +182,10 @@ n8n-like I/O without open expressions:
 
 | Side | Node | Ports |
 |------|------|--------|
-| **Out** | `scan` / `domain_scan` / `geo_job` / `success` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, `out:journey.taskCompleted`, …) |
+| **Out** | `scan` / `domain_scan` / `geo_job` / `success` / `brand_measure` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, `out:journey.taskCompleted`, `out:brand.passRate`, …) |
 | **In** | `compare` | Control `in` (Ablauf) + bind target `bind:path` (Wert) |
 | **Out** | `compare` | Control `when` / `otherwise` (Pass/Fail) |
-| **Config** | `persona` / `zielgruppe` | Ablauf in + Weiter out only (no catalog dump) |
+| **Config** | `persona` / `zielgruppe` / `guideline` | Ablauf in + Weiter out only (no catalog dump) |
 
 Connecting `out:<catalogPath>` → `bind:path` (UI label **Wert**) sets `compare.path` and upserts a dashed `bind` edge. Path select remains a fallback. Journey/`run` paths stay picker-only this wave.
 
@@ -291,7 +319,9 @@ Do not place this on legacy `/board` Prismion island.
 | **18 — Open path expressions** | Safe `{{ }}` dialect (no eval); compare path/value resolve against full context JSON; richer issue/score bundles; catalog = picker hint | Staging: `{{ scan.issues[0].ruleId }}` / bare path still works |
 | **19 — Expression UI** | `@msqdx/ui` JsonTree + ExpressionField; inspector Context Tree insert into params | Staging: click leaf → inserts `{{ path }}` into Compare path |
 | **20 — set + arrays** | `set` node aliases into `outputs`; array expand/insert in tree; catalog ports stay curated leaves | Staging: set alias → compare `$('alias')` / path |
-| **Later** | Canvas `trigger`/cron nodes; concurrent multi-job live; Brandion; multi-user live; saliency; re-run from history; purge UI; free JS Code-Node | Out of MVP |
+| **23 — EQC as Collection flow** | Typed EQC nodes (`research_brief` … `human_confirm`); no generic agent | Staging: EQC path pauses on confirms |
+| **24 — Brandion brand nodes** | Family D: `guideline` config + `brand_measure` (sync fixture evaluate); catalog `brand.*`; palette group Marke; Compare presets passRate / failCount | Staging: Guideline → Brand Measure → Compare `brand.failCount eq 0`; deep link Brandion evaluate |
+| **Later** | Canvas `trigger`/cron nodes; concurrent multi-job live; multi-user live; saliency; re-run from history; purge UI; free JS Code-Node; board PDF upload for brand_measure | Out of MVP |
 
 ## Acceptance (Wave 0)
 

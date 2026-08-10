@@ -13,6 +13,7 @@ import {
   COLLECTION_COMPARE_OP_OPTIONS,
   type CollectionFlowRfNodeData,
 } from '@/lib/collection-flow-canvas'
+import { COLLECTION_FLOW_KIND_LABEL as KIND_LABEL } from '@/lib/collection-flow-kind-labels'
 import {
   catalogOutputSlotsForKind,
   nodeIoSchemaForKind,
@@ -24,30 +25,6 @@ import {
 } from '@/lib/collection-flow-url'
 
 type CollectionFlowNodeType = Node<CollectionFlowRfNodeData, 'collectionFlow'>
-
-const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
-  start: 'Start',
-  prompt: 'Aufgabe',
-  observe: 'Beobachten',
-  action: 'Action',
-  gate: 'Gate',
-  message: 'Nachricht',
-  success: 'Success',
-  abandon: 'Abandon',
-  measure: 'Frage',
-  persona: 'Persona',
-  zielgruppe: 'Zielgruppe',
-  journey: 'Journey',
-  scan: 'Scan',
-  domain_scan: 'Domain Scan',
-  geo_job: 'GEO Job',
-  compare: 'Compare',
-  set: 'Set',
-  score_gate: 'Score Gate',
-  issue_gate: 'Issue Gate',
-  geo_gate: 'GEO Gate',
-  quality_ok: 'Quality OK',
-}
 
 function stopDrag(e: MouseEvent) {
   e.stopPropagation()
@@ -76,6 +53,7 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
   const onOutputToNote = data.onOutputToNote
   const onOpenInspector = data.onOpenInspector
   const audionCatalog = data.audionCatalog
+  const brandionCatalog = data.brandionCatalog
   const kind = flowNode.kind
   const io = nodeIoSchemaForKind(kind)
   const catalogOutPorts = catalogOutputSlotsForKind(kind)
@@ -139,6 +117,13 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
     if (kind === 'persona') return flowNode.personaName || flowNode.personaId || 'Persona wählen…'
     if (kind === 'zielgruppe')
       return flowNode.targetGroupName || flowNode.targetGroupId || 'Zielgruppe wählen…'
+    if (kind === 'guideline')
+      return flowNode.guidelineId?.trim() || 'Guideline wählen…'
+    if (kind === 'brand_measure') {
+      const gl = flowNode.guidelineId?.trim() || 'Guideline…'
+      const fx = flowNode.fixtureId?.trim() || 'demo-landing-pass'
+      return `${gl} · ${fx}`
+    }
     if (kind === 'scan') {
       const urlLine = summarizeFlowUrl(flowNode.url || '', 'URL optional')
       const mode = flowNode.scanMode ?? 'single'
@@ -257,6 +242,38 @@ function CollectionFlowRfNodeInner({ id, data, selected }: NodeProps<CollectionF
             </option>
           ))}
         </select>
+      ) : null}
+
+      {kind === 'guideline' || kind === 'brand_measure' ? (
+        <select
+          className="msqdx-flow-rf-select"
+          value={flowNode.guidelineId ?? ''}
+          onChange={(e) => {
+            const gid = e.target.value
+            patch({ guidelineId: gid || undefined })
+          }}
+          aria-label="Guideline"
+        >
+          <option value="">— Guideline —</option>
+          {(brandionCatalog?.guidelines ?? []).map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+      ) : null}
+
+      {kind === 'brand_measure' ? (
+        <Input
+          block
+          size="sm"
+          value={flowNode.fixtureId ?? 'demo-landing-pass'}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            patch({ fixtureId: e.target.value.trim() || 'demo-landing-pass' })
+          }
+          placeholder="fixtureId"
+          aria-label="Fixture ID"
+        />
       ) : null}
 
       {kind === 'start' ? (

@@ -22,6 +22,7 @@ import {
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode,
 } from '@/lib/collection-flow-canvas'
+import { COLLECTION_FLOW_KIND_LABEL as KIND_LABEL } from '@/lib/collection-flow-kind-labels'
 import { COLLECTION_MEASURE_KEY_OPTIONS } from '@/lib/collection-flow-presets'
 import {
   patchLabelFromUrlIfGeneric,
@@ -43,30 +44,7 @@ import type {
   FlowNodeInspectorStep,
   FlowNodeRunState,
 } from '@/lib/collection-flow-run-progress'
-
-const KIND_LABEL: Record<CollectionFlowNodeKind, string> = {
-  start: 'Start',
-  prompt: 'Aufgabe',
-  observe: 'Beobachten',
-  action: 'Action',
-  gate: 'Gate',
-  message: 'Nachricht',
-  success: 'Success',
-  abandon: 'Abandon',
-  measure: 'Frage',
-  persona: 'Persona',
-  zielgruppe: 'Zielgruppe',
-  journey: 'Journey',
-  scan: 'Scan',
-  domain_scan: 'Domain Scan',
-  geo_job: 'GEO Job',
-  compare: 'Compare',
-  set: 'Set',
-  score_gate: 'Score Gate',
-  issue_gate: 'Issue Gate',
-  geo_gate: 'GEO Gate',
-  quality_ok: 'Quality OK',
-}
+import { useI18n } from '@/components/i18n/I18nProvider'
 
 function formatSec(sec?: number | null): string {
   if (sec == null || !Number.isFinite(sec)) return '—'
@@ -218,6 +196,7 @@ export function CollectionFlowNodeInspector({
   edges = [],
   rfNodes = [],
   audionCatalog,
+  brandionCatalog,
   onClose,
   onAppendOutputToNote,
   onUpdate,
@@ -236,10 +215,14 @@ export function CollectionFlowNodeInspector({
     personas: Array<{ id: string; name: string }>
     targetGroups: Array<{ id: string; name: string; segment?: string }>
   }
+  brandionCatalog?: {
+    guidelines: Array<{ id: string; name: string }>
+  }
   onClose: () => void
   onAppendOutputToNote?: () => void
   onUpdate?: (nodeId: string, patch: Partial<CollectionFlowNode>) => void
 }) {
+  const { t } = useI18n()
   const steps = inspector?.steps ?? []
   const [focusField, setFocusField] = useState<InspectorFocusField>(() =>
     defaultFocusFieldForNode(node.kind)
@@ -253,6 +236,8 @@ export function CollectionFlowNodeInspector({
     node.kind === 'scan' ||
     node.kind === 'domain_scan' ||
     node.kind === 'geo_job' ||
+    node.kind === 'brand_measure' ||
+    node.kind === 'guideline' ||
     node.kind === 'compare' ||
     node.kind === 'set' ||
     node.kind === 'score_gate' ||
@@ -469,7 +454,9 @@ export function CollectionFlowNodeInspector({
 
       {node.kind === 'zielgruppe' && onUpdate ? (
         <label className="msqdx-flow-rf-field">
-          <span className="msqdx-flow-inspector-field-label">Zielgruppe</span>
+          <span className="msqdx-flow-inspector-field-label">
+            {t('projects.detail.flowZielgruppe')}
+          </span>
           <select
             className="msqdx-flow-rf-select"
             value={node.targetGroupId ?? ''}
@@ -483,7 +470,7 @@ export function CollectionFlowNodeInspector({
               })
             }}
           >
-            <option value="">— Zielgruppe —</option>
+            <option value="">— {t('projects.detail.flowZielgruppe')} —</option>
             {(audionCatalog?.targetGroups ?? []).map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
@@ -491,6 +478,62 @@ export function CollectionFlowNodeInspector({
             ))}
           </select>
         </label>
+      ) : null}
+
+      {(node.kind === 'guideline' || node.kind === 'brand_measure') && onUpdate ? (
+        <label className="msqdx-flow-rf-field">
+          <span className="msqdx-flow-inspector-field-label">
+            {t('projects.detail.flowGuideline')}
+          </span>
+          <select
+            className="msqdx-flow-rf-select"
+            value={node.guidelineId ?? ''}
+            onChange={(e) => {
+              const gid = e.target.value
+              onUpdate(node.id, { guidelineId: gid || undefined })
+            }}
+          >
+            <option value="">— {t('projects.detail.flowGuideline')} —</option>
+            {(brandionCatalog?.guidelines ?? []).map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      {node.kind === 'brand_measure' && onUpdate ? (
+        <>
+          <label className="msqdx-flow-rf-field">
+            <span className="msqdx-flow-inspector-field-label">
+              {t('projects.detail.flowFixtureId')}
+            </span>
+            <Input
+              block
+              size="sm"
+              value={node.fixtureId ?? 'demo-landing-pass'}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onUpdate(node.id, {
+                  fixtureId: e.target.value.trim() || 'demo-landing-pass',
+                })
+              }
+              placeholder="demo-landing-pass"
+            />
+          </label>
+          <label className="msqdx-flow-rf-field">
+            <span className="msqdx-flow-inspector-field-label">
+              {t('projects.detail.flowAdapter')}
+            </span>
+            <select
+              className="msqdx-flow-rf-select"
+              value={node.adapter ?? 'fixture'}
+              onChange={(e) => onUpdate(node.id, { adapter: e.target.value || 'fixture' })}
+            >
+              <option value="fixture">fixture</option>
+            </select>
+          </label>
+        </>
       ) : null}
 
       {(node.kind === 'start' || node.kind === 'scan' || node.kind === 'domain_scan' || node.kind === 'geo_job') &&

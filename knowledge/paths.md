@@ -13,13 +13,18 @@
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - BRANDION staging companion: `https://brandion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_BRANDION_URL` / `URL_BRANDION_V3`) — set after brandion-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4c
 - BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`
-- BRANDION Collection launch: `{BRANDION}/projects?platformProjectId={id}` · guideline `{BRANDION}/guidelines/{id}` — `lib/brandion-launch-url.ts` · `lib/paths/brandion-api.ts` · `dashboard-product-urls.md`
+- BRANDION Collection launch: `{BRANDION}/projects?platformProjectId={id}` · guideline `{BRANDION}/guidelines/{id}` · evaluate `{BRANDION}/guidelines/{id}/evaluate` — `lib/brandion-launch-url.ts` · `lib/paths/brandion-api.ts` (`pathBrandionGuideline` / `pathBrandionGuidelineEvaluate` / `apiBrandionGuidelineAnalysisRuns`) · `dashboard-product-urls.md`
+- Collection Flow Wave 24 (Brandion Marke): `knowledge/collection-flow-brandion.md` · client `lib/integrations/brandion-analysis-runs-client.ts` · execute `lib/collection-flow-brand-execute.ts` / `lib/collection-flow-brand-segment.ts`
 - Federation contract: `2026-05-plexon-federation-v3`
 - Admin user edit: `/admin/users/[id]` · `pathAdminUser(id)` (legacy `/?editUser=` redirects here)
 - Rail dock storage key: `plexon.v3.railDock`
 - Default theme: `msqdx-dark` (`data-theme` on `<html>`)
 - Specs: `specs/domain/app-shell.md`
 - Specs index: `knowledge/specs-index.md`
+- Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md`
+  - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
+  - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed`
+  - Hosts mount `PlatformAssistantHost` → `@msqdx/ui` `ChatOverlay` + iframe (never hardcode Plexon URL)
 - Collection projects: `specs/domain/collection-projects.md`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`

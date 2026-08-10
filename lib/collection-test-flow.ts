@@ -41,6 +41,9 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'geo_job',
   'compare',
   'set',
+  // Family D — BRANDION brand (Wave 24)
+  'guideline',
+  'brand_measure',
   // Wave 23 — EQC typed actions (no generic agent)
   'research_brief',
   'competitors_suggest',
@@ -154,6 +157,12 @@ export type CollectionFlowNode = {
   targetGroupName?: string;
   /** Soft-Q / SEQ key on `measure` (Wave 11). */
   measureKey?: string;
+  /** Brandion guideline id on `guideline` / `brand_measure` (Wave 24). */
+  guidelineId?: string;
+  /** Brandion analysis fixture id on `brand_measure` (Wave 24). */
+  fixtureId?: string;
+  /** Brandion measure adapter on `brand_measure` — `fixture` default (Wave 24). */
+  adapter?: 'fixture' | (string & {});
   /** Palette preset id for action/measure factories (Wave 11). */
   presetId?: string;
   /** Wave 23 — `human_confirm` which draft to pause on. */
@@ -913,6 +922,7 @@ const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'scan',
   'domain_scan',
   'geo_job',
+  'brand_measure',
   'compare',
   'set',
   'score_gate',
@@ -925,6 +935,27 @@ const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'suggest_queries',
   'human_confirm',
 ]);
+
+/** Brandion Family D action kinds (Wave 24). */
+export const BRAND_FAMILY_KINDS = new Set<CollectionFlowNodeKind>(['brand_measure']);
+
+export function documentHasBrandMeasure(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => n.kind === 'brand_measure');
+}
+
+/** Merge upstream `guideline` config onto `brand_measure` nodes missing guidelineId. */
+export function mergeGuidelineConfigOntoBrandMeasure(
+  nodes: CollectionFlowNode[]
+): CollectionFlowNode[] {
+  const guidelineCfg = [...nodes].reverse().find((n) => n.kind === 'guideline');
+  const guidelineId = guidelineCfg?.guidelineId?.trim() || null;
+  if (!guidelineId) return nodes;
+  return nodes.map((n) => {
+    if (n.kind !== 'brand_measure') return n;
+    if (n.guidelineId?.trim()) return n;
+    return { ...n, guidelineId };
+  });
+}
 
 const LEGACY_QUALITY_GATE_KINDS = new Set<CollectionFlowNodeKind>([
   'score_gate',
@@ -1195,7 +1226,7 @@ export function extractJourneyFlowFromDocument(
     return null;
   }
 
-  const configKinds = new Set<CollectionFlowNodeKind>(['persona', 'zielgruppe']);
+  const configKinds = new Set<CollectionFlowNodeKind>(['persona', 'zielgruppe', 'guideline']);
   const agentNodes = candidateNodes.filter((n) => !configKinds.has(n.kind));
   const start = agentNodes.find((n) => n.kind === 'start');
   if (!start) {

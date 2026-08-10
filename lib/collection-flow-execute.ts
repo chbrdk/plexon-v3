@@ -7,6 +7,7 @@ import { API_STATUS } from '@/lib/api-error-handler';
 import {
   deriveCollectionVerdict,
   deriveJourneyErrorVerdict,
+  documentHasBrandMeasure,
   documentHasEqcSpine,
   documentHasGeoGate,
   documentHasGeoJob,
@@ -35,6 +36,10 @@ import {
 import {
   executeEqcCollectionFlowRun,
 } from '@/lib/collection-flow-eqc-execute';
+import {
+  executeBrandCollectionFlowRun,
+} from '@/lib/collection-flow-brand-execute';
+import { runBrandMeasureSegment } from '@/lib/collection-flow-brand-segment';
 import {
   persistFlowRunResult,
   toCollectionTestFlowResponse,
@@ -140,6 +145,19 @@ export async function executeCollectionFlowRun(input: {
     const qualityNode = qualityScanNode(doc.nodes);
     const hasPageQuality = Boolean(qualityNode);
     const hasGeo = documentHasGeoJob(doc);
+    const hasBrand = documentHasBrandMeasure(doc);
+
+    // Wave 24 — Brand-only path (no Checkion quality).
+    if (hasBrand && !hasPageQuality && !hasGeo) {
+      return executeBrandCollectionFlowRun({
+        platformProjectId: id,
+        flowId: fid,
+        flowName: row.name,
+        doc,
+        body,
+        updatedByUserId: input.updatedByUserId ?? null,
+      });
+    }
 
     // Seed start config first so `$('startId').json.url` resolves for scan/geo URL params.
     let runContext: CollectionFlowRunContext = emptyRunContext();
@@ -163,7 +181,7 @@ export async function executeCollectionFlowRun(input: {
     });
 
     if (!hasPageQuality && !hasGeo) {
-      return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Quality path missing — add scan, domain_scan, or geo_job' };
+      return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Quality path missing — add scan, domain_scan, geo_job, or brand_measure' };
     }
     if (!baseUrl && !geoCompany) {
       return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Scan URL missing — set domain, geo url/companyName, or pass url' };
@@ -809,6 +827,20 @@ export async function executeCollectionFlowRun(input: {
         }),
         geoNode?.id
       );
+    }
+
+    // Wave 24 — optional Brandion measure after Checkion quality (before compares).
+    if (hasBrand) {
+      const brand = await runBrandMeasureSegment({
+        platformProjectId: id,
+        doc: resolvedDoc,
+        ctx: runContext,
+        plexonUserId: input.updatedByUserId ?? null,
+      });
+      runContext = brand.ctx;
+      if (!brand.ok) {
+        blockers.push(brand.message);
+      }
     }
 
     runContext = applySetNodes(doc.nodes, runContext);
