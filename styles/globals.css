@@ -2919,10 +2919,12 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
 }
 
 .plexon-eqc-results {
+  --eqc-chapter-gap-tall: 50vh;
+  --eqc-chapter-gap-short: 20vh;
   display: flex;
   flex-direction: column;
-  /* Wave 8 — breathing room between scrollytelling chapters */
-  gap: 50vh;
+  /* Gaps via margin so short/tall neighbors can differ (see data-eqc-chapter) */
+  gap: 0;
   width: min(100%, 72rem);
   margin: 0 auto;
   padding: 0 1rem 0;
@@ -2942,21 +2944,37 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   overscroll-behavior-y: contain;
 }
 
-/* Wave 8 — scrollytelling chapters (cover + each magazine band) */
+/* Wave 8 — scrollytelling chapters */
 .plexon-eqc-results > .plexon-eqc-masthead-shell,
 .plexon-eqc-results > .plexon-dash-band {
-  /* At least one scrollport tall; % resolves against the EQC scroll container once height-chained */
-  min-height: 100%;
-  min-height: 100svh;
   scroll-snap-align: start;
   box-sizing: border-box;
 }
 
+/* Cover: shorter first chapter (70svh), not a full viewport */
+.plexon-eqc-results > .plexon-eqc-masthead-shell {
+  min-height: 70svh;
+}
+
+/* Magazine bands: at least one viewport tall */
 .plexon-eqc-results > .plexon-dash-band {
+  min-height: 100%;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-block: clamp(2rem, 6vh, 4rem);
+}
+
+/* Tall↔tall default gap */
+.plexon-eqc-results > * + * {
+  margin-top: var(--eqc-chapter-gap-tall);
+}
+
+/* Either neighbor short → less gap */
+.plexon-eqc-results > [data-eqc-chapter='short'] + *,
+.plexon-eqc-results > * + [data-eqc-chapter='short'] {
+  margin-top: var(--eqc-chapter-gap-short);
 }
 
 @media (prefers-reduced-motion: reduce) {

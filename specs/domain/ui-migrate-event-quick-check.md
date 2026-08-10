@@ -13,7 +13,7 @@
 | URL / project / depth form | **reshape** | `Field` + `Input` + `ToggleGroup` (Wave 6) |
 | Review panels (brief, competitors, geo) | **reshape** | DS forms; logic unchanged |
 | Deep scan poll + progress | **reshape** | CSS progress + `Spinner` |
-| **Done results / dashboard** | **reshape** (Wave 7 + Wave 8 scrolly) | `plexon-magazine plexon-eqc-results` + DS-only bands; **Wave 8:** each top-level results chapter ≥ `100svh` with vertical scroll-snap (`proximity`) and ≥ `50vh` gap between chapters |
+| **Done results / dashboard** | **reshape** (Wave 7 + Wave 8 scrolly) | `plexon-magazine plexon-eqc-results` + DS-only bands; **Wave 8:** cover `70svh`; content bands ≥ `100svh`; scroll-snap `proximity`; gap `50vh` tall↔tall / `20vh` if either neighbor is short |
 | Domain-Scan + GEO HTTP | **reshape** (Wave 7) | CHECKION v3 `/api/domain-scans` + `/api/geo-jobs` via adapters |
 | Recharts charts | **keep** | Magazine chart chrome (no bridge card) |
 | History | **reshape** | `@msqdx/ui` `Dialog` |
@@ -38,7 +38,7 @@
 3. Done view uses `plexon-magazine` + DS primitives only (`SectionChrome`, `StatLede`, `RankedList`, …); no `assistant-ui` / `Ui*` imports on the dashboard path. ✅  
 4. Domain/GEO workflows call v3 clients (not legacy `/api/scan/domain` / `/api/scan/geo-eeat`). ✅  
 5. Results theming uses `--ink` / `--muted` / `--line` (not `--color-text-on-light` / `--color-card-bg`). ✅  
-6. Results scrollytelling: `.plexon-eqc-results-scroll` uses vertical scroll-snap; each direct child chapter (masthead shell + `.plexon-dash-band`) is ≥ `100svh`; chapter gap ≥ `50vh`. ✅  
+6. Results scrollytelling: cover `.plexon-eqc-masthead-shell` ≥ `70svh`; content `.plexon-dash-band` ≥ `100svh`; scroll-snap on `.plexon-eqc-results-scroll`; adaptive gap (`50vh` / `20vh` via `data-eqc-chapter`). ✅  
 
 ## Progressive (not blockers)
 

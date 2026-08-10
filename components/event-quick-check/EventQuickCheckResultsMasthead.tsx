@@ -121,7 +121,11 @@ export function EventQuickCheckResultsMasthead({
   }
 
   return (
-    <div className="plexon-eqc-masthead-shell" data-section="eqc-results-masthead">
+    <div
+      className="plexon-eqc-masthead-shell"
+      data-section="eqc-results-masthead"
+      data-eqc-chapter="short"
+    >
       <div className="plexon-eqc-masthead-topbar">
         <p className="plexon-eqc-masthead-topbar__hint">{hint || EQC_PAGE_COPY.pageTitle}</p>
         {actions ? <div className="plexon-eqc-results-actions">{actions}</div> : null}

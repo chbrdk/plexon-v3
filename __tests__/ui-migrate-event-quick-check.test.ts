@@ -70,6 +70,10 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       path.join(root, 'components/event-quick-check/EventQuickCheckCitationSection.tsx'),
       'utf8'
     )
+    const masthead = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckResultsMasthead.tsx'),
+      'utf8'
+    )
     expect(dash).toContain('plexon-magazine')
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('EventQuickCheckResultsMasthead')
@@ -101,7 +105,14 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(globals).toMatch(
       /\.plexon-eqc-results > \.plexon-dash-band \{[\s\S]*?min-height:\s*100svh/,
     )
-    expect(globals).toMatch(/\.plexon-eqc-results \{[\s\S]*?gap:\s*50vh/)
+    expect(globals).toMatch(
+      /\.plexon-eqc-results > \.plexon-eqc-masthead-shell \{[\s\S]*?min-height:\s*70svh/,
+    )
+    expect(globals).toMatch(/--eqc-chapter-gap-tall:\s*50vh/)
+    expect(globals).toMatch(/--eqc-chapter-gap-short:\s*20vh/)
+    expect(globals).toMatch(/\[data-eqc-chapter='short'\]/)
+    expect(dash).toContain('syncEqcResultsChapterHeights')
+    expect(masthead).toContain('data-eqc-chapter="short"')
     expect(globals).toMatch(/\.app-frame:has\(\.plexon-eqc-stage\) \{[\s\S]*?height:\s*100dvh/)
     expect(globals).toMatch(/\.plexon-eqc-scroll \{[\s\S]*?overflow-y:\s*auto/)
     expect(globals).toContain('.plexon-eqc-voice-radar__shape')

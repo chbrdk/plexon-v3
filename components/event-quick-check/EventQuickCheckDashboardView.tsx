@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Accordion,
@@ -30,6 +30,7 @@ import {
   apiEventQuickCheckRunPptx,
 } from '@/lib/paths/event-quick-check-page'
 import { pathPlatformProjectDashboard } from '@/lib/constants'
+import { syncEqcResultsChapterHeights } from '@/lib/assistant/event-quick-check/eqc-results-chapter-heights'
 
 type Props = {
   report: EventQuickCheckReportModel
@@ -173,6 +174,7 @@ export function EventQuickCheckDashboardView({
     personas.find((p) => p.id === (personaId ?? personas[0]?.id)) ?? personas[0] ?? null
 
   const [appendixOpen, setAppendixOpen] = useState<string | null>(null)
+  const resultsRootRef = useRef<HTMLDivElement>(null)
 
   const domain = report.domain
   const insights = report.insights
@@ -186,8 +188,28 @@ export function EventQuickCheckDashboardView({
     })
   }, [domain, report.executive.kpiTiles])
 
+  useLayoutEffect(() => {
+    const root = resultsRootRef.current
+    if (!root || typeof ResizeObserver === 'undefined') return
+
+    const sync = () => syncEqcResultsChapterHeights(root)
+    sync()
+
+    const ro = new ResizeObserver(sync)
+    ro.observe(root)
+    for (const child of root.children) {
+      if (child instanceof HTMLElement) ro.observe(child)
+    }
+    window.addEventListener('resize', sync)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', sync)
+    }
+  }, [report, layout, personaId, appendixOpen])
+
   return (
     <div
+      ref={resultsRootRef}
       className="plexon-magazine plexon-eqc-results"
       data-plexon-event-quick-check-dashboard
       data-section="eqc-magazine-results"
