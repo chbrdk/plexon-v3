@@ -209,12 +209,22 @@ export function AssistantChat({
     setMessages(data.items);
   }, []);
 
+  const syncConversationToUrl = useCallback(
+    (id: string | null) => {
+      // Flyout must stay on the host route — URL sync is expand-workspace only.
+      if (presentation === 'overlay') return
+      if (id) router.replace(pathAssistantChat(id), { scroll: false })
+      else router.replace(PATH_ASSISTANT, { scroll: false })
+    },
+    [presentation, router],
+  )
+
   const openConversation = useCallback(
     async (id: string, meta?: AssistantConversationSummary) => {
       if (loading) return;
       workflowStreamRef.current?.close();
       setConversationId(id);
-      router.replace(pathAssistantChat(id), { scroll: false });
+      syncConversationToUrl(id);
       setLivePanel(null);
       setAgentTrace(emptyAgentActivityTrace());
       setShowActivityTrace(false);
@@ -235,7 +245,7 @@ export function AssistantChat({
 
       await loadConversation(id);
     },
-    [loadConversation, loading, router]
+    [loadConversation, loading, syncConversationToUrl]
   );
 
   const startNewChat = useCallback(() => {
@@ -248,8 +258,8 @@ export function AssistantChat({
     setInput('');
     setAgentTrace(emptyAgentActivityTrace());
     setShowActivityTrace(false);
-    router.replace(PATH_ASSISTANT, { scroll: false });
-  }, [loading, router]);
+    syncConversationToUrl(null);
+  }, [loading, syncConversationToUrl]);
 
   const renameConversation = useCallback(async (id: string, title: string): Promise<boolean> => {
     try {
@@ -378,10 +388,10 @@ export function AssistantChat({
     if (!res.ok) throw new Error('Failed to create conversation');
     const row = (await res.json()) as { id: string };
     setConversationId(row.id);
-    router.replace(pathAssistantChat(row.id), { scroll: false });
+    syncConversationToUrl(row.id);
     void refreshConversations();
     return row.id;
-  }, [conversationId, platformProjectId, refreshConversations, router]);
+  }, [conversationId, platformProjectId, refreshConversations, syncConversationToUrl]);
 
   const watchWorkflow = useCallback((runId: string) => {
     workflowStreamRef.current?.close();
@@ -650,7 +660,7 @@ export function AssistantChat({
         if (!done) throw new Error(t('common.error'));
 
         setConversationId(done.conversationId);
-        router.replace(pathAssistantChat(done.conversationId), { scroll: false });
+        syncConversationToUrl(done.conversationId);
         streamingMessageIdRef.current = null;
         await loadConversation(done.conversationId);
         void refreshConversations();
@@ -677,7 +687,7 @@ export function AssistantChat({
         setInput('');
       }
     },
-    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, platformProjectId, refreshConversations, router, scrollToBottom, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, platformProjectId, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const showEmpty = messages.length === 0 && !loading;

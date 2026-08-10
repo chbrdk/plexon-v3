@@ -66,10 +66,9 @@ describe('central assistant flyout specs + mounts', () => {
     expect(chat).toContain('compact={presentation === \'overlay\'}')
   })
 
-  it('constants export embed helpers including theme', () => {
-    const constants = readFileSync(join(root, 'lib/constants.ts'), 'utf8')
-    expect(constants).toContain('PATH_ASSISTANT_EMBED')
-    expect(constants).toContain('pathAssistantEmbed')
-    expect(constants).toContain('ASSISTANT_EMBED_THEME_QUERY_PARAM')
+  it('overlay chat does not navigate to expand URL', () => {
+    const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(chat).toContain('syncConversationToUrl')
+    expect(chat).toContain("if (presentation === 'overlay') return")
   })
 })
