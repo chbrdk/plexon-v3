@@ -2949,6 +2949,8 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
   gap: clamp(1.5rem, 3.5vw, 2.75rem);
   align-items: end;
+  min-height: 90vh;
+  box-sizing: border-box;
   padding-block: clamp(1.75rem, 3.5vw, 2.75rem) clamp(2.5rem, 5vw, 3.75rem);
   border-bottom: 1px solid var(--line);
 }

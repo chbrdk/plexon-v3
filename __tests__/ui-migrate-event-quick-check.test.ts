@@ -99,6 +99,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(globals).toContain('.plexon-eqc-voice-radar__shape')
     expect(globals).toContain('.plexon-eqc-geo-voice__board')
     expect(globals).toContain('.plexon-eqc-masthead__hero')
+    expect(globals).toMatch(/\.plexon-eqc-masthead__hero \{[\s\S]*?min-height: 90vh/)
     expect(globals).toContain('.plexon-eqc-cover__score-num')
     expect(citation).toContain('plexon-eqc-geo-models__strip')
     expect(citation).toContain('buildOwnDomainMultiModelChart')
