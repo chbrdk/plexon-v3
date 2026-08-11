@@ -26,12 +26,14 @@ import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quic
 import { canReopenEventQuickCheckGeo } from '@/lib/assistant/event-quick-check/resolve-geo-questions-reopen-draft';
 import {
   hydrateEventQuickCheckReportDomainPages,
+  hydrateEventQuickCheckReportDistributions,
   resolveEqcDomainScanIdFromStored,
 } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import { hydrateEventQuickCheckReportGeo } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
 import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
+import { hasDomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
 
 function seedDomainFromCheckpoint(
   report: EventQuickCheckReportModel | null,
@@ -52,6 +54,7 @@ function seedDomainFromCheckpoint(
       topIssues: scan.topIssues,
       checkionHref: pathCheckionDomainScan({ url: scan.url, scanId: scan.id }),
     },
+    distributions: scan.distributions ?? report.distributions,
     appendix: {
       ...report.appendix,
       scanId: report.appendix.scanId || scan.id,
@@ -87,7 +90,8 @@ export async function GET(
   const seeded = seedDomainFromCheckpoint(reportFromWorkflowRun(run), checkpoint);
   const fallbackScanId = resolveEqcDomainScanIdFromStored(stored);
   const withDomain = await hydrateEventQuickCheckReportDomainPages(seeded, fallbackScanId);
-  const report = await hydrateEventQuickCheckReportGeo(withDomain);
+  const withDist = await hydrateEventQuickCheckReportDistributions(withDomain, fallbackScanId);
+  const report = await hydrateEventQuickCheckReportGeo(withDist);
 
   const beforeDomain = seeded?.domain;
   const afterDomain = report?.domain;
@@ -108,7 +112,11 @@ export async function GET(
       beforeDomain?.stats?.errors !== afterDomain?.stats?.errors ||
       beforeDomain?.scanId !== afterDomain?.scanId);
   const geoImproved = Boolean(report) && afterGeoRuns > beforeGeoRuns;
-  if ((domainImproved || geoImproved) && report) {
+  const distributionsImproved =
+    Boolean(report) &&
+    !hasDomainScanDistributions(seeded?.distributions) &&
+    hasDomainScanDistributions(report?.distributions);
+  if ((domainImproved || geoImproved || distributionsImproved) && report) {
     await updateAssistantWorkflowRun(run.id, {
       result: {
         ...stored,

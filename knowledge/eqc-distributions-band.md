@@ -9,8 +9,4 @@ Data: `GET` Checkion `checkionApiDomainScanOverview` → `DomainScanPreview.dist
 
 Own magazine band **after Domain & Barrierefreiheit** mirroring Checkion Overview “Distributions / Share across the corpus” (Readability, Eco grades, Link mix). Visual language ports Checkion donut/grid CSS under `plexon-eqc-dist*` / `plexon-eqc-donut*`.
 
-## Out of scope
-
-- WCAG findings donut  
-- Promoting donut to `@msqdx/ui`  
-- PDF/PPTX export of this band  
+- Distributions appear on **reload of existing runs** via `hydrateEventQuickCheckReportDistributions` (Checkion overview backfill) — not only on newly completed scans.

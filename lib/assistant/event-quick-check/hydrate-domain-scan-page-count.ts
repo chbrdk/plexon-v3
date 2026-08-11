@@ -1,8 +1,13 @@
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import {
+  fetchCheckionDomainScanV3Overview,
   fetchCheckionDomainScanV3Preview,
   findCheckionDomainScanIdByUrl,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
+import {
+  hasDomainScanDistributions,
+  mapDomainOverviewToDistributions,
+} from '@/lib/integrations/map-domain-scan-distributions';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 
 function isRealScanId(id: string | null | undefined): id is string {
@@ -31,7 +36,17 @@ export async function hydrateDomainScanPageCount(
   scan: DomainScanPreview | undefined | null
 ): Promise<DomainScanPreview | undefined> {
   if (!scan) return undefined;
-  if (!needsCheckionHydration(scan)) return scan;
+  if (!needsCheckionHydration(scan)) {
+    // Still backfill corpus distributions when missing on an otherwise complete scan.
+    if (!hasDomainScanDistributions(scan.distributions) && isRealScanId(scan.id)) {
+      const overviewRes = await fetchCheckionDomainScanV3Overview(scan.id);
+      if (overviewRes.ok) {
+        const distributions = mapDomainOverviewToDistributions(overviewRes.overview);
+        if (distributions) return { ...scan, distributions };
+      }
+    }
+    return scan;
+  }
   if (!isRealScanId(scan.id)) return scan;
 
   const preview = await fetchCheckionDomainScanV3Preview(scan.id);
@@ -49,6 +64,7 @@ export async function hydrateDomainScanPageCount(
     status: preview.preview.status || scan.status,
     url: scan.url || preview.preview.url,
     domain: scan.domain || preview.preview.domain,
+    distributions: preview.preview.distributions ?? scan.distributions,
   };
 }
 
@@ -72,6 +88,7 @@ function applyHydratedDomainToReport(
       url: report.domain!.url || hydrated.url,
       domain: report.domain!.domain || hydrated.domain,
     },
+    distributions: hydrated.distributions ?? report.distributions,
     appendix: {
       ...report.appendix,
       scanId: report.appendix.scanId || scanId,
@@ -109,6 +126,24 @@ export function syncKpiTilesFromDomain(
   });
 }
 
+async function resolveReportDomainScanId(
+  report: EventQuickCheckReportModel,
+  fallbackScanId?: string | null
+): Promise<string | undefined> {
+  let scanId = [report.domain?.scanId, report.appendix?.scanId, fallbackScanId]
+    .map((c) => c?.trim())
+    .find(isRealScanId);
+
+  if (!scanId && report.domain) {
+    scanId = await findCheckionDomainScanIdByUrl({
+      url: report.domain.url || report.meta.url,
+      domain: report.domain.domain || report.meta.domain,
+      score: report.domain.score,
+    });
+  }
+  return scanId;
+}
+
 export async function hydrateEventQuickCheckReportDomainPages(
   report: EventQuickCheckReportModel | null,
   fallbackScanId?: string | null
@@ -132,17 +167,7 @@ export async function hydrateEventQuickCheckReportDomainPages(
     return report;
   }
 
-  let scanId = [report.domain.scanId, report.appendix?.scanId, fallbackScanId]
-    .map((c) => c?.trim())
-    .find(isRealScanId);
-
-  if (!scanId) {
-    scanId = await findCheckionDomainScanIdByUrl({
-      url: report.domain.url || report.meta.url,
-      domain: report.domain.domain || report.meta.domain,
-      score: report.domain.score,
-    });
-  }
+  const scanId = await resolveReportDomainScanId(report, fallbackScanId);
   if (!scanId) return report;
 
   const hydrated = await hydrateDomainScanPageCount({
@@ -154,6 +179,7 @@ export async function hydrateEventQuickCheckReportDomainPages(
     totalPages: report.domain.totalPages,
     stats: report.domain.stats,
     topIssues: report.domain.topIssues,
+    distributions: report.distributions,
   });
   if (!hydrated) return report;
   if (hydrated.totalPages <= 0 && hydrated.stats.total <= 0 && hydrated.stats.errors <= 0) {
@@ -161,6 +187,28 @@ export async function hydrateEventQuickCheckReportDomainPages(
   }
 
   return applyHydratedDomainToReport(report, scanId, hydrated);
+}
+
+/**
+ * Backfill Checkion corpus donuts onto stored EQC reports that predate the Distributions band.
+ * Runs even when domain pages/stats are already complete (common completed-run path).
+ */
+export async function hydrateEventQuickCheckReportDistributions(
+  report: EventQuickCheckReportModel | null,
+  fallbackScanId?: string | null
+): Promise<EventQuickCheckReportModel | null> {
+  if (!report?.domain) return report;
+  if (hasDomainScanDistributions(report.distributions)) return report;
+
+  const scanId = await resolveReportDomainScanId(report, fallbackScanId);
+  if (!scanId) return report;
+
+  const overviewRes = await fetchCheckionDomainScanV3Overview(scanId);
+  if (!overviewRes.ok) return report;
+  const distributions = mapDomainOverviewToDistributions(overviewRes.overview);
+  if (!distributions) return report;
+
+  return { ...report, distributions };
 }
 
 /** Pull scan id from common EQC result blobs when report.domain.scanId is missing/unknown. */
