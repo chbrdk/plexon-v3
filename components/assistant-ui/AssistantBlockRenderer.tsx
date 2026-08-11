@@ -22,6 +22,8 @@ import { UiTargetGroupCardBlock } from '@/components/assistant-ui/organisms/UiTa
 import { UiCollapsibleBlock } from '@/components/assistant-ui/organisms/UiCollapsibleBlock'
 import { UiFindingList } from '@/components/assistant-ui/organisms/UiFindingList'
 import { UiRecommendationList } from '@/components/assistant-ui/organisms/UiRecommendationList'
+import { UiPhaseStrip } from '@/components/assistant-ui/organisms/UiPhaseStrip'
+import { UiMomentList } from '@/components/assistant-ui/organisms/UiMomentList'
 import { UiEventQuickCheckReviewGateBlock } from '@/components/assistant-ui/organisms/UiEventQuickCheckReviewGateBlock'
 import { EventQuickCheckReportView } from '@/components/assistant/reports/EventQuickCheckReportView'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
@@ -68,6 +70,10 @@ export function AssistantBlockRenderer({ block }: AssistantBlockRendererProps) {
       return <UiFindingList {...(props as Parameters<typeof UiFindingList>[0])} />
     case 'recommendation_list':
       return <UiRecommendationList {...(props as Parameters<typeof UiRecommendationList>[0])} />
+    case 'phase_strip':
+      return <UiPhaseStrip {...(props as Parameters<typeof UiPhaseStrip>[0])} />
+    case 'moment_list':
+      return <UiMomentList {...(props as Parameters<typeof UiMomentList>[0])} />
     case 'event_quick_check_report': {
       const report = (props as { report: EventQuickCheckReportModel }).report
       return <EventQuickCheckReportView report={report} />

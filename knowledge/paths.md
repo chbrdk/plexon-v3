@@ -25,6 +25,7 @@
 - Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md`
   - Block typography density: `knowledge/assistant-block-typography.md` · `components/assistant-ui/atoms/UiText.tsx`
   - Shared chat blocks (metric / kv / steps): `knowledge/assistant-chat-blocks-msqdx-ui.md` · Storybook `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chatcatalog--inventory`
+  - Journey outline blocks: `phase_strip` / `moment_list` · builder `lib/assistant/ui-blocks/build-journey-outline-ui.ts`
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
   - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed` (+ `theme` via `ASSISTANT_EMBED_THEME_QUERY_PARAM`)
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)

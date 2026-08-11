@@ -16,6 +16,8 @@ const wired: Array<[string, string]> = [
   ['UiCollapsibleBlock.tsx', 'ChatCollapsible'],
   ['UiPersonaCardBlock.tsx', 'ChatEntityGrid'],
   ['UiTargetGroupCardBlock.tsx', 'ChatEntityGrid'],
+  ['UiPhaseStrip.tsx', 'ChatPhaseStrip'],
+  ['UiMomentList.tsx', 'ChatMomentList'],
 ]
 
 describe('assistant chat blocks use @msqdx/ui primitives', () => {

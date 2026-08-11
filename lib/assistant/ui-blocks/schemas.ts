@@ -222,6 +222,36 @@ export const recommendationListPropsSchema = z.object({
     .max(UI_BLOCK_LIMITS.maxRecommendations),
 });
 
+export const phaseStripPropsSchema = z.object({
+  title: medium.optional(),
+  phases: z
+    .array(
+      z.object({
+        id: short,
+        label: short,
+        summary: medium.optional(),
+        active: z.boolean().optional(),
+        status: z.enum(['upcoming', 'current', 'done']).optional(),
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxPhases),
+});
+
+export const momentListPropsSchema = z.object({
+  title: medium.optional(),
+  items: z
+    .array(
+      z.object({
+        id: short.optional(),
+        kind: z.enum(['action', 'thought', 'feeling', 'pain', 'opportunity', 'other']),
+        label: short,
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxMoments),
+});
+
 export const eventQuickCheckReportPropsSchema = z.object({
   report: z
     .object({
@@ -264,6 +294,8 @@ export const UI_BLOCK_SCHEMAS = {
   collapsible: collapsiblePropsSchema,
   finding_list: findingListPropsSchema,
   recommendation_list: recommendationListPropsSchema,
+  phase_strip: phaseStripPropsSchema,
+  moment_list: momentListPropsSchema,
   event_quick_check_report: eventQuickCheckReportPropsSchema,
   event_quick_check_review_gate: eventQuickCheckReviewGatePropsSchema,
 } as const;

@@ -85,6 +85,21 @@ export function blockToPlainText(block: UiBlock): string {
           .join('\n')
       );
     }
+    case 'phase_strip': {
+      const phases = (p.phases as Array<{ label: string; summary?: string; status?: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      return (
+        title +
+        phases
+          .map((phase) => `- ${phase.label}${phase.summary ? `: ${phase.summary}` : ''}`)
+          .join('\n')
+      );
+    }
+    case 'moment_list': {
+      const items = (p.items as Array<{ kind: string; label: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      return title + items.map((i) => `- [${i.kind}] ${i.label}`).join('\n');
+    }
     case 'event_quick_check_report': {
       const report = p.report as {
         meta?: { title?: string; url?: string };

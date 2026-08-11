@@ -187,6 +187,8 @@ Das sind die **Block-Typen**, die Tools direkt ansprechen.
 | `target_group_card` | `UiTargetGroupCard` | `@msqdx/ui` `ChatEntityGrid` |
 | `chart` | `UiChartBlock` | recharts (bar/line) |
 | `collapsible` | `UiCollapsibleBlock` | `@msqdx/ui` `ChatCollapsible` |
+| `phase_strip` | `UiPhaseStrip` | `@msqdx/ui` `ChatPhaseStrip` |
+| `moment_list` | `UiMomentList` | `@msqdx/ui` `ChatMomentList` |
 
 **Phase 1 MVP:** `text`, `metric_grid`, `data_table`, `alert`, `key_value_list`, `link_list`  
 **Phase 2:** `step_list`, `summary_card`, `corner_tab_section`  

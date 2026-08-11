@@ -34,6 +34,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | \`target_group_card\` | \`title?\`, \`targetGroups: [{ id, name, segment, personaCount, knowledgeEntryCount, ... }]\` |
 | \`summary_card\` | \`title\`, \`checkionScanCount?\`, \`audionPersonaCount?\`, \`links?\` |
 | \`step_list\` | \`title?\`, \`steps: [{ id, label, status, detail?, progress? }]\` |
+| \`phase_strip\` | \`title?\`, \`phases: [{ id, label, summary?, active?, status?: upcoming\\|current\\|done }]\` |
+| \`moment_list\` | \`title?\`, \`items: [{ id?, kind: action\\|thought\\|feeling\\|pain\\|opportunity\\|other, label }]\` |
 | \`corner_tab_section\` | \`tabLabel\`, \`title?\`, \`markdown\`, \`placement?\` |
 | \`chart\` | \`chartType: bar\\|line\`, \`labels[]\`, \`datasets: [{ label, values[] }]\`, \`xAxisLabel?\`, \`yAxisLabel?\` |
 
@@ -52,6 +54,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | PageSpeed | \`metric_grid\` + \`chart\` (bar) |
 | GEO/E-E-A-T | \`metric_grid\` + \`data_table\` + \`chart\` |
 | Persona-Bootstrap | \`target_group_card\` + \`persona_card\` |
+| Journey outline (AUDION) | \`phase_strip\` + \`moment_list\` (+ \`link_list\` deep link) |
 | Sync-Diagnose | \`key_value_list\` + \`alert\` |`;
 }
 

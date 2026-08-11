@@ -111,6 +111,28 @@ export function buildAssistantUiShowcaseLayout(): UiLayout {
       markdown: 'Zusatzinfos in einer **MsqdxCornerTabSection** — z. B. Methodik oder Quellen.',
       placement: 'top-right',
     }),
+    block('phase_strip', {
+      title: 'Journey outline',
+      phases: [
+        { id: 'ph1', label: 'Awareness', summary: 'Erste Berührung', status: 'done' },
+        {
+          id: 'ph2',
+          label: 'Consideration',
+          summary: 'Vergleicht Anbieter',
+          active: true,
+          status: 'current',
+        },
+        { id: 'ph3', label: 'Decision', status: 'upcoming' },
+      ],
+    }),
+    block('moment_list', {
+      title: 'Consideration · Moments',
+      items: [
+        { id: 'm1', kind: 'thought', label: 'Passt das zu unserem Stack?' },
+        { id: 'm2', kind: 'pain', label: 'Zu viele Formularfelder' },
+        { id: 'm3', kind: 'opportunity', label: 'FAQ mit Citations' },
+      ],
+    }),
   ];
 
   return { version: UI_LAYOUT_VERSION, blocks };

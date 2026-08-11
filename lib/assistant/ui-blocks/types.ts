@@ -17,6 +17,8 @@ export const UI_BLOCK_LIMITS = {
   maxChartSeries: 4,
   maxFindings: 12,
   maxRecommendations: 16,
+  maxPhases: 16,
+  maxMoments: 32,
   maxString: 2000,
   maxShort: 256,
 } as const;
@@ -37,6 +39,8 @@ export const UI_BLOCK_TYPES = [
   'collapsible',
   'finding_list',
   'recommendation_list',
+  'phase_strip',
+  'moment_list',
   'event_quick_check_report',
   'event_quick_check_review_gate',
 ] as const;
