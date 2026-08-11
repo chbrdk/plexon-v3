@@ -17,6 +17,7 @@ import {
   startNodeUrl,
 } from '@/lib/collection-test-flow';
 import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
+import { isSessionOwnedFlowTrigger } from '@/lib/collection-flow-run-triggers';
 import {
   closedUiRunRequest,
   createCollectionFlowRun,
@@ -75,7 +76,7 @@ export async function POST(
     let historyRunId = historyRunIdIn;
     if (historyRunId) {
       const existing = await getCollectionFlowRun(id, fid, historyRunId);
-      if (!existing || existing.trigger !== 'ui') {
+      if (!existing || !isSessionOwnedFlowTrigger(existing.trigger)) {
         return apiError('history run not found', API_STATUS.NOT_FOUND);
       }
       await patchCollectionFlowRun({

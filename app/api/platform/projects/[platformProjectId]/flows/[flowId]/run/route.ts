@@ -4,6 +4,7 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 import { executeCollectionFlowRun } from '@/lib/collection-flow-execute';
 import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
+import { isSessionOwnedFlowTrigger } from '@/lib/collection-flow-run-triggers';
 import {
   closedUiRunRequest,
   createCollectionFlowRun,
@@ -56,7 +57,7 @@ export async function POST(
         return apiError('historyRunId required for abort', API_STATUS.BAD_REQUEST);
       }
       const existing = await getCollectionFlowRun(id, fid, historyRunIdIn);
-      if (!existing || existing.trigger !== 'ui') {
+      if (!existing || !isSessionOwnedFlowTrigger(existing.trigger)) {
         return apiError('Not found', API_STATUS.NOT_FOUND);
       }
       const errMsg =
@@ -77,7 +78,7 @@ export async function POST(
     let historyRunId = historyRunIdIn;
     if (historyRunId) {
       const existing = await getCollectionFlowRun(id, fid, historyRunId);
-      if (!existing || existing.trigger !== 'ui') {
+      if (!existing || !isSessionOwnedFlowTrigger(existing.trigger)) {
         return apiError('history run not found', API_STATUS.NOT_FOUND);
       }
       // Wave 23 — resume: seed prior context from paused run when client omits it.

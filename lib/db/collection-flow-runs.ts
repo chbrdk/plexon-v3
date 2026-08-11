@@ -6,7 +6,7 @@ import type { CollectionFlowLastRun, CollectionVerdict } from '@/lib/collection-
 
 export type CollectionFlowRunRow = typeof collectionFlowRuns.$inferSelect;
 
-export type CollectionFlowRunTrigger = 'webhook' | 'service' | 'ui';
+export type CollectionFlowRunTrigger = 'webhook' | 'service' | 'ui' | 'assistant';
 export type CollectionFlowRunStatus =
   | 'queued'
   | 'running'

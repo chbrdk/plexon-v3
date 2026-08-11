@@ -100,6 +100,21 @@ const LAZY_HANDLERS: Record<AssistantIntent['type'], () => Promise<IntentDispatc
     const { handleProjectStatusIntent } = await import('@/lib/assistant/handlers/project-status');
     return (ctx, intent) => handleProjectStatusIntent(ctx, intent as Extract<AssistantIntent, { type: 'project_status' }>);
   },
+  run_collection_flow: async () => {
+    const { handleRunCollectionFlowIntent } = await import('@/lib/assistant/handlers/run-collection-flow');
+    return (ctx, intent) =>
+      handleRunCollectionFlowIntent(ctx, intent as Extract<AssistantIntent, { type: 'run_collection_flow' }>);
+  },
+  promote_capability_sequence: async () => {
+    const { handlePromoteCapabilitySequenceIntent } = await import(
+      '@/lib/assistant/handlers/promote-capability-sequence'
+    );
+    return (ctx, intent) =>
+      handlePromoteCapabilitySequenceIntent(
+        ctx,
+        intent as Extract<AssistantIntent, { type: 'promote_capability_sequence' }>
+      );
+  },
   free_chat: async () => {
     const { handleFreeChatIntent } = await import('@/lib/assistant/handlers/free-chat');
     return (ctx, intent) => handleFreeChatIntent(ctx, intent as Extract<AssistantIntent, { type: 'free_chat' }>);

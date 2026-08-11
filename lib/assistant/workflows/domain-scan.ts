@@ -6,6 +6,8 @@ import {
   pollCheckionDomainScanV3,
   startCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client'
+import { executeCheckionDomainScanCapability } from '@/lib/capabilities/executors/checkion-domain-scan'
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag'
 import { DOMAIN_SCAN_INITIAL_STEPS } from '@/lib/assistant/ui-blocks/workflow-ui'
 import { tryAutoAssignCheckionResource } from '@/lib/assistant/auto-assign-checkion'
 
@@ -34,6 +36,7 @@ function parseMaxPages(override?: number): number {
 /**
  * Domain crawl via CHECKION v3 `/api/domain-scans`.
  * Requires `checkionProjectId` (v3 contract).
+ * Wave C4: when `CAPABILITY_CATALOG_RUNTIME` is on, uses shared catalog executor.
  */
 export async function runDomainScanWorkflow(
   input: { url: string; checkionProjectId?: string | null; maxPages?: number },
@@ -66,6 +69,38 @@ export async function runDomainScanWorkflow(
     return { ok: false, error: 'CHECKION-Projekt-ID fehlt für Domain-Scan (v3)', steps }
   }
   steps = await setStep(runId, steps, 'validate_url', { status: 'done' })
+
+  if (isCapabilityCatalogRuntimeEnabled()) {
+    steps = await setStep(runId, steps, 'start_scan', { status: 'running' })
+    steps = await setStep(runId, steps, 'poll_scan', { status: 'running', progress: 20 })
+    const cap = await executeCheckionDomainScanCapability(
+      { url: input.url, maxPages: parseMaxPages(input.maxPages) },
+      { source: 'agent', checkionProjectId: projectId }
+    )
+    if (!cap.ok || cap.agentPayload?.variant !== 'agent') {
+      const err = cap.error ?? 'Domain-Scan fehlgeschlagen'
+      steps = await setStep(runId, steps, 'start_scan', { status: 'error', detail: err })
+      steps = await setStep(runId, steps, 'poll_scan', { status: 'error', detail: err })
+      steps = await setStep(runId, steps, 'aggregate', { status: 'error' })
+      return { ok: false, error: err, steps }
+    }
+    const scanId = cap.agentPayload.summary.id
+    steps = await setStep(runId, steps, 'start_scan', { status: 'done', detail: scanId })
+    const assign = await tryAutoAssignCheckionResource({
+      kind: 'domain_scan',
+      resourceId: scanId,
+      checkionProjectId: projectId,
+    })
+    if (assign.error) {
+      steps = await setStep(runId, steps, 'start_scan', {
+        status: 'done',
+        detail: `${scanId} · Assign: ${assign.error}`,
+      })
+    }
+    steps = await setStep(runId, steps, 'poll_scan', { status: 'done', progress: 100 })
+    steps = await setStep(runId, steps, 'aggregate', { status: 'done' })
+    return { ok: true, scan: cap.agentPayload.scan, scanId, steps }
+  }
 
   steps = await setStep(runId, steps, 'start_scan', { status: 'running' })
   const started = await startCheckionDomainScanV3({

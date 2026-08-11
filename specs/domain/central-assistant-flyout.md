@@ -5,7 +5,8 @@
 **DS:** `@msqdx/ui` `ChatOverlay` · `chat.css` (`.chat-overlay`, `.chat-overlay-sheet`, `.chat-panel-compact`, dock-end resizable)  
 **API:** `specs/api/assistant-embed.md`  
 **Knowledge:** `knowledge/central-assistant-flyout.md` · `knowledge/paths.md`  
-**Page context:** `specs/domain/assistant-page-context.md` — host publishes structured page/entity context (EQC first)
+**Page context:** `specs/domain/assistant-page-context.md` — host publishes structured page/entity context (EQC first)  
+**Capability Catalog (planned):** `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md` — shared Agent↔Flow executors; not “all nodes as tools”
 
 ## Goals
 

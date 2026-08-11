@@ -2,11 +2,16 @@ import { randomUUID } from 'crypto';
 import { createAssistantWorkflowRun, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
 import type { WorkflowStep } from '@/lib/db/assistant-workflow-runs';
 import { ASSISTANT_MESSAGE_CONTENT_TYPE } from '@/lib/assistant/capabilities-overview';
-import { buildPersonaBootstrapLayout } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
+import {
+  buildPersonaBootstrapLayout,
+  type PersonaBootstrapPreview,
+} from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
 import {
   metadataWithWorkflowSteps,
   PERSONA_BOOTSTRAP_INITIAL_STEPS,
 } from '@/lib/assistant/ui-blocks/build-workflow-ui';
+import { executeAudionPersonaBootstrapCapability } from '@/lib/capabilities/executors/audion-persona-bootstrap';
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import { runPersonaBootstrap } from '@/lib/integrations/audion-persona-bootstrap-client';
 import { recordAssistantUsageEvent } from '@/lib/assistant/usage';
 import {
@@ -25,11 +30,32 @@ export const handlePersonaBootstrapIntent: IntentHandler<'persona_bootstrap'> = 
     steps: PERSONA_BOOTSTRAP_INITIAL_STEPS,
   });
   const workflowRunId = workflowRun.id;
-  const bootstrap = await runPersonaBootstrap({
-    projectName: ctx.resolvedName(intent.name),
-    targetGroupName: ctx.resolvedName(intent.targetGroupName),
-    existingAudionProjectId: ctx.bindingIds?.audionProjectId,
-  });
+
+  let bootstrap: { ok: true; preview: PersonaBootstrapPreview } | { ok: false; error?: string };
+  if (isCapabilityCatalogRuntimeEnabled()) {
+    const cap = await executeAudionPersonaBootstrapCapability(
+      {
+        name: ctx.resolvedName(intent.name),
+        targetGroupName: ctx.resolvedName(intent.targetGroupName),
+      },
+      {
+        source: 'agent',
+        audionProjectId: ctx.bindingIds?.audionProjectId,
+      }
+    );
+    if (cap.ok && cap.agentPayload?.preview) {
+      bootstrap = { ok: true, preview: cap.agentPayload.preview };
+    } else {
+      bootstrap = { ok: false, error: cap.error ?? 'Bootstrap fehlgeschlagen' };
+    }
+  } else {
+    bootstrap = await runPersonaBootstrap({
+      projectName: ctx.resolvedName(intent.name),
+      targetGroupName: ctx.resolvedName(intent.targetGroupName),
+      existingAudionProjectId: ctx.bindingIds?.audionProjectId,
+    });
+  }
+
   const steps = PERSONA_BOOTSTRAP_INITIAL_STEPS.map((s, i) => ({
     ...s,
     status: (bootstrap.ok ? 'done' : i === 0 ? 'error' : 'pending') as WorkflowStep['status'],

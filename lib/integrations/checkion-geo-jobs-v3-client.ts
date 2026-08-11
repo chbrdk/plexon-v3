@@ -286,6 +286,7 @@ export async function runCheckionGeoJobV3(input: {
   url?: string;
   companyName?: string;
   queries?: string[];
+  competitors?: string[];
   includePageScan?: boolean;
 }): Promise<
   | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals; preview?: GeoEeatJobPreview }

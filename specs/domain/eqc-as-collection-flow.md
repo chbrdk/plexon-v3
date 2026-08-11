@@ -2,7 +2,7 @@
 
 **Status:** Wave 23 — accepted for implementation  
 **Owner:** PLEXON v3  
-**Companions:** [`collection-test-flow.md`](./collection-test-flow.md) · [`ui-migrate-event-quick-check.md`](./ui-migrate-event-quick-check.md) · [`collection-projects.md`](./collection-projects.md)
+**Companions:** [`collection-test-flow.md`](./collection-test-flow.md) · [`capability-catalog.md`](./capability-catalog.md) · [`ui-migrate-event-quick-check.md`](./ui-migrate-event-quick-check.md) · [`collection-projects.md`](./collection-projects.md)
 
 ## Purpose
 

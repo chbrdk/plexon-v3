@@ -48,7 +48,19 @@ export type AssistantIntent =
   | { type: 'project_status' }
   | { type: 'start_research'; platformProjectId?: string }
   | { type: 'capabilities' }
-  | { type: 'ui_showcase' };
+  | { type: 'ui_showcase' }
+  | {
+      type: 'run_collection_flow';
+      flowId?: string;
+      flowName?: string;
+      url?: string;
+      listOnly?: boolean;
+    }
+  | {
+      type: 'promote_capability_sequence';
+      confirm?: boolean;
+      name?: string;
+    };
 
 const CREATE_PATTERNS = [
   /\b(lege|erstelle|create|neues?)\b.*\b(projekt|project)\b/i,
@@ -205,6 +217,64 @@ const MARKET_TO_AUDIENCE_PATTERNS = [
   /\bechon\b.*\b(zielgruppe|audion)\b/i,
   /\bmarkttrend/i,
 ];
+
+const RUN_COLLECTION_FLOW_PATTERNS = [
+  /\b(starte?|start|führe|run|teste?|ausführ)\w*\b.*\b(collection[\s_-]?flow|test[\s_-]?flow)\b/i,
+  /\b(collection[\s_-]?flow|test[\s_-]?flow)\b.*\b(starten|ausführen|run|testen)\b/i,
+  /\b(starte?|start|führe|run|teste?)\w*\b.*\bflows?\b/i,
+  /\bflows?\b.*\b(starten|ausführen|run|testen)\b/i,
+  /\bflow\s+(starten|ausführen|testen)\b/i,
+  /\bliste?\b.*\bflows?\b/i,
+  /\bwelche\s+flows?\b/i,
+  /\bzeig(e|t)?\s+(mir\s+)?(die\s+)?flows?\b/i,
+];
+
+const PROMOTE_CAPABILITY_PATTERNS = [
+  /\bals\s+flow\s+speichern\b/i,
+  /\bspeicher\w*\s+als\s+flow\b/i,
+  /\bflow\s+daraus\b/i,
+  /\bpromote\s+(to\s+)?flow\b/i,
+  /\bflow\s+speichern\s+bestätig/i,
+  /\bbestätig\w*\s+flow\s+speichern\b/i,
+  /\bals\s+playbook\b/i,
+  /\brezept\s+speichern\b/i,
+  /\bals\s+rezept\b/i,
+];
+
+const FLOW_UUID_RE =
+  /\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i;
+
+function extractPromoteFlowName(prompt: string): string | undefined {
+  const m =
+    prompt.match(/\bals\s+["„«]([^"“»]+)["“»]/i) ||
+    prompt.match(/\bnamens\s+["„«]?([^"“»\n]+)["“»]?/i);
+  const name = m?.[1]?.trim().replace(/[.!?]+$/, '');
+  return name || undefined;
+}
+
+function extractCollectionFlowRef(prompt: string): {
+  flowId?: string;
+  flowName?: string;
+  listOnly?: boolean;
+} {
+  if (/\b(liste?|welche|zeig)\b.*\bflows?\b/i.test(prompt)) {
+    return { listOnly: true };
+  }
+  const uuid = prompt.match(FLOW_UUID_RE);
+  if (uuid?.[1]) return { flowId: uuid[1] };
+
+  const named =
+    prompt.match(/\bflow\s+["„«]([^"“»]+)["“»]/i) ||
+    prompt.match(/\bnamens\s+["„«]?([^"“»\n]+)["“»]?/i) ||
+    prompt.match(/\bflow\s+([A-Za-z0-9][\w\s-]{1,80}?)\s*$/i);
+  if (named?.[1]) {
+    const flowName = named[1].trim().replace(/[.!?]+$/, '');
+    if (flowName && !/^(starten|ausführen|testen|run)$/i.test(flowName)) {
+      return { flowName };
+    }
+  }
+  return {};
+}
 
 const WEBSITE_AUDIT_PATTERNS = [
   /\bwebsite\s*-?\s*audit\b/i,
@@ -394,6 +464,28 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
       journeyId: extractJourneyId(trimmed),
       journeyName: extractJourneyName(trimmed) ?? extractProjectName(trimmed),
       ...(validate ? { validate: true } : {}),
+    };
+  }
+
+  if (PROMOTE_CAPABILITY_PATTERNS.some((p) => p.test(trimmed))) {
+    const confirm =
+      /\bbestätig/i.test(trimmed) ||
+      /\bconfirm\b/i.test(trimmed) ||
+      /\bflow\s+speichern\s+bestätig/i.test(trimmed);
+    return {
+      type: 'promote_capability_sequence',
+      ...(confirm ? { confirm: true } : {}),
+      ...(extractPromoteFlowName(trimmed) ? { name: extractPromoteFlowName(trimmed) } : {}),
+    };
+  }
+
+  if (RUN_COLLECTION_FLOW_PATTERNS.some((p) => p.test(trimmed))) {
+    const ref = extractCollectionFlowRef(trimmed);
+    const flowUrl = extractUrlFromText(trimmed);
+    return {
+      type: 'run_collection_flow',
+      ...ref,
+      ...(flowUrl ? { url: flowUrl } : {}),
     };
   }
 

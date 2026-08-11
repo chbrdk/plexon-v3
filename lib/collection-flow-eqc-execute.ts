@@ -48,6 +48,9 @@ import {
   toCollectionTestFlowResponse,
 } from '@/lib/db/collection-test-flows';
 import { patchCollectionFlowRun } from '@/lib/db/collection-flow-runs';
+import { executeCheckionDomainScanCapability } from '@/lib/capabilities/executors/checkion-domain-scan';
+import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job';
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import {
   fetchCheckionDomainScanV3Issues,
@@ -337,13 +340,49 @@ export async function executeEqcCollectionFlowRun(input: {
       });
       const url = chain.qualityUrl || chain.baseUrl || startUrl;
       scanUrl = url || startUrl;
-      const domainResult = await runCheckionDomainScanV3({
-        projectId: boundCheckion,
-        url: scanUrl,
-        maxPages:
-          typeof qualityNode.maxPages === 'number' ? qualityNode.maxPages : profile.scanMaxPages,
-      });
-      if (!domainResult.ok) {
+      const maxPages =
+        typeof qualityNode.maxPages === 'number' ? qualityNode.maxPages : profile.scanMaxPages;
+
+      let domainScan: {
+        id: string;
+        status: string;
+        overallScore: number | null;
+        pageCount?: number | null;
+        url?: string;
+      } | null = null;
+      let domainError: string | undefined;
+
+      if (isCapabilityCatalogRuntimeEnabled()) {
+        const cap = await executeCheckionDomainScanCapability(
+          { url: scanUrl, maxPages },
+          {
+            source: 'flow',
+            checkionProjectId: boundCheckion,
+            platformProjectId: id,
+            nodeId: node.id,
+          }
+        );
+        const flowScan =
+          cap.agentPayload?.variant === 'flow' ? cap.agentPayload.scan : undefined;
+        if (!cap.ok || !flowScan) {
+          domainError = cap.error ?? 'Domain-Scan fehlgeschlagen';
+        } else {
+          domainScan = flowScan;
+        }
+      } else {
+        const domainResult = await runCheckionDomainScanV3({
+          projectId: boundCheckion,
+          url: scanUrl,
+          maxPages,
+        });
+        if (!domainResult.ok) {
+          domainError = domainResult.error;
+        } else {
+          domainScan = domainResult.scan;
+        }
+      }
+
+      if (!domainScan) {
         return failEqc({
           id,
           fid,
@@ -351,22 +390,22 @@ export async function executeEqcCollectionFlowRun(input: {
           startedAt,
           startUrl,
           runContext,
-          error: domainResult.error,
+          error: domainError ?? 'Domain-Scan fehlgeschlagen',
           historyRunId: input.historyRunId,
         });
       }
-      domainScanId = domainResult.scan.id;
-      overallScore = domainResult.scan.overallScore;
-      const issuesRes = await fetchCheckionDomainScanV3Issues(domainResult.scan.id);
+      domainScanId = domainScan.id;
+      overallScore = domainScan.overallScore;
+      const issuesRes = await fetchCheckionDomainScanV3Issues(domainScan.id);
       runContext = setContextBundle(
         runContext,
         'domain',
         buildDomainCatalogBundle({
-          status: domainResult.scan.status,
-          overallScore: domainResult.scan.overallScore,
-          pageCount: domainResult.scan.pageCount ?? null,
-          scanId: domainResult.scan.id,
-          url: domainResult.scan.url || scanUrl,
+          status: domainScan.status,
+          overallScore: domainScan.overallScore,
+          pageCount: domainScan.pageCount ?? null,
+          scanId: domainScan.id,
+          url: domainScan.url || scanUrl,
           issues: issuesRes.ok ? issuesRes.signals : null,
           issueItems: issuesRes.ok
             ? issuesRes.items.map((o) => ({
@@ -506,15 +545,60 @@ export async function executeEqcCollectionFlowRun(input: {
         geoUrlRaw: geoNode.url,
         startUrl: scanUrl || startUrl,
       });
-      const geoResult = await runCheckionGeoJobV3({
-        projectId: boundCheckion,
-        platformProjectId: id,
-        url: chain.geoUrl || scanUrl || startUrl || undefined,
-        companyName: companyName || undefined,
-        queries: queries.length ? queries : undefined,
-        includePageScan: true,
-      });
-      if (!geoResult.ok) {
+      const geoUrl = chain.geoUrl || scanUrl || startUrl || undefined;
+
+      let geoJob: {
+        id: string;
+        status: string;
+        citedShare?: number | null;
+        geoFitness?: number | null;
+        overallScore?: number | null;
+        url?: string;
+      } | null = null;
+      let geoPreview: Parameters<typeof geoPreviewForCatalogBundle>[0] | undefined;
+      let geoCatalog: Record<string, unknown> | undefined;
+      let geoError: string | undefined;
+
+      if (isCapabilityCatalogRuntimeEnabled()) {
+        const cap = await executeCheckionGeoJobCapability(
+          {
+            url: geoUrl,
+            companyName: companyName || undefined,
+            queries,
+            includePageScan: true,
+          },
+          {
+            source: 'flow',
+            checkionProjectId: boundCheckion,
+            platformProjectId: id,
+            nodeId: node.id,
+          }
+        );
+        if (!cap.ok || !cap.agentPayload?.job) {
+          geoError = cap.error ?? 'GEO fehlgeschlagen';
+        } else {
+          geoJob = cap.agentPayload.job;
+          geoPreview = cap.agentPayload.preview;
+          geoCatalog = cap.catalogBundle;
+        }
+      } else {
+        const geoResult = await runCheckionGeoJobV3({
+          projectId: boundCheckion,
+          platformProjectId: id,
+          url: geoUrl,
+          companyName: companyName || undefined,
+          queries: queries.length ? queries : undefined,
+          includePageScan: true,
+        });
+        if (!geoResult.ok) {
+          geoError = geoResult.error;
+        } else {
+          geoJob = geoResult.job;
+          geoPreview = geoResult.preview;
+        }
+      }
+
+      if (!geoJob) {
         return failEqc({
           id,
           fid,
@@ -522,27 +606,26 @@ export async function executeEqcCollectionFlowRun(input: {
           startedAt,
           startUrl,
           runContext,
-          error: geoResult.error,
+          error: geoError ?? 'GEO fehlgeschlagen',
           historyRunId: input.historyRunId,
         });
       }
-      geoJobId = geoResult.job.id;
-      citedShare = geoResult.job.citedShare ?? null;
-      geoFitness = geoResult.job.geoFitness ?? null;
-      if (geoResult.job.overallScore != null) overallScore = geoResult.job.overallScore;
+      geoJobId = geoJob.id;
+      citedShare = geoJob.citedShare ?? null;
+      geoFitness = geoJob.geoFitness ?? null;
+      if (geoJob.overallScore != null) overallScore = geoJob.overallScore;
       runContext = setContextBundle(
         runContext,
         'geo',
-        buildGeoCatalogBundle({
-          status: geoResult.job.status,
-          citedShare,
-          geoFitness,
-          overallScore: geoResult.job.overallScore ?? null,
-          url: geoResult.job.url || scanUrl || startUrl,
-          preview: geoResult.preview
-            ? geoPreviewForCatalogBundle(geoResult.preview)
-            : null,
-        }),
+        geoCatalog ??
+          buildGeoCatalogBundle({
+            status: geoJob.status,
+            citedShare,
+            geoFitness,
+            overallScore: geoJob.overallScore ?? null,
+            url: geoJob.url || scanUrl || startUrl,
+            preview: geoPreview ? geoPreviewForCatalogBundle(geoPreview) : null,
+          }),
         node.id
       );
       continue;

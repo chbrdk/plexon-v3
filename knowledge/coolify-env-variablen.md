@@ -153,6 +153,7 @@ Zusätzliche Variablen für deterministische Workflows und External APIs. Pfade 
 | `ANTHROPIC_ASSISTANT_MODEL` | Nein | Claude-Modell für Assistant Free-Chat (Default Sonnet 4.6). |
 | `ANTHROPIC_PLANNER_MODEL` | Nein | Haiku für Tool-Planung (Default Haiku 4.5). |
 | `ANTHROPIC_ASSISTANT_THINKING_BUDGET` | Nein | Extended Thinking Token-Budget (Default `4096`; `0`/`off`/`false` = aus). |
+| `CAPABILITY_CATALOG_RUNTIME` | Nein | Capability Catalog Agent↔Flow shared executors (Wave C1). Default **off**. Explicit on: `1` / `true` / `on` / `yes`. Spec: `specs/domain/capability-catalog.md`. |
 
 **Staging-Check (manuell):** Nach Deploy `Website audit https://<echte-url>` im Assistant — erfordert `CHECKION_API_URL` + `CHECKION_API_TOKEN`. Orchestrator-Doku: `knowledge/plexon-assistant-orchestrator.md`.
 

@@ -52,11 +52,19 @@ import {
   fetchCheckionScanScores,
   runCheckionSingleScan,
 } from '@/lib/integrations/checkion-scans-client';
+import { executeCheckionScanCapability } from '@/lib/capabilities/executors/checkion-scan';
+import { executeCheckionDomainScanCapability } from '@/lib/capabilities/executors/checkion-domain-scan';
+import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job';
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import {
   fetchCheckionDomainScanV3Issues,
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
-import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import {
+  runCheckionGeoJobV3,
+  type CheckionGeoJobSummary,
+} from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import { geoPreviewForCatalogBundle } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import {
   buildDomainCatalogBundle,
@@ -489,74 +497,192 @@ export async function executeCollectionFlowRun(input: {
 
     if (hasPageQuality) {
       if (useDomain) {
-        const domainResult = await runCheckionDomainScanV3({
-          projectId: checkionProjectId,
-          url: scanUrl,
-          maxPages:
-            typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
-        });
-        if (!domainResult.ok) {
-          quality = {
-            ok: false,
-            error: domainResult.error,
-            id: domainResult.scan?.id ?? null,
-            status: domainResult.scan?.status ?? 'failed',
-            overallScore: domainResult.scan?.overallScore ?? null,
-            url: domainResult.scan?.url || scanUrl,
-            scanError: domainResult.scan?.error ?? null,
-            domainScanId: domainResult.scan?.id ?? null,
-            scanMode: 'domain',
-            pageScanId: null,
-            pageCount: domainResult.scan?.pageCount ?? null,
-          };
+        if (isCapabilityCatalogRuntimeEnabled()) {
+          const cap = await executeCheckionDomainScanCapability(
+            {
+              url: scanUrl,
+              maxPages:
+                typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
+            },
+            {
+              source: 'flow',
+              checkionProjectId,
+              platformProjectId: id,
+              nodeId: qualityNode?.id,
+            }
+          );
+          const flowScan =
+            cap.agentPayload?.variant === 'flow' ? cap.agentPayload.scan : undefined;
+          if (!cap.ok) {
+            quality = {
+              ok: false,
+              error: cap.error,
+              id: flowScan?.id ?? null,
+              status: flowScan?.status ?? 'failed',
+              overallScore: flowScan?.overallScore ?? null,
+              url: flowScan?.url || scanUrl,
+              scanError: flowScan?.error ?? null,
+              domainScanId: flowScan?.id ?? null,
+              scanMode: 'domain',
+              pageScanId: null,
+              pageCount: flowScan?.pageCount ?? null,
+            };
+          } else if (flowScan) {
+            quality = {
+              ok: true,
+              id: flowScan.id,
+              status: flowScan.status,
+              overallScore: flowScan.overallScore,
+              url: flowScan.url || scanUrl,
+              scanError: flowScan.error ?? null,
+              domainScanId: flowScan.id,
+              scanMode: 'domain',
+              pageScanId: null,
+              pageCount: flowScan.pageCount ?? null,
+            };
+          } else {
+            quality = {
+              ok: false,
+              error: 'Capability domain scan missing flow payload',
+              id: null,
+              status: 'failed',
+              overallScore: null,
+              url: scanUrl,
+              scanError: null,
+              domainScanId: null,
+              scanMode: 'domain',
+              pageScanId: null,
+              pageCount: null,
+            };
+          }
         } else {
-          quality = {
-            ok: true,
-            id: domainResult.scan.id,
-            status: domainResult.scan.status,
-            overallScore: domainResult.scan.overallScore,
-            url: domainResult.scan.url || scanUrl,
-            scanError: domainResult.scan.error ?? null,
-            domainScanId: domainResult.scan.id,
-            scanMode: 'domain',
-            pageScanId: null,
-            pageCount: domainResult.scan.pageCount ?? null,
-          };
+          const domainResult = await runCheckionDomainScanV3({
+            projectId: checkionProjectId,
+            url: scanUrl,
+            maxPages:
+              typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
+          });
+          if (!domainResult.ok) {
+            quality = {
+              ok: false,
+              error: domainResult.error,
+              id: domainResult.scan?.id ?? null,
+              status: domainResult.scan?.status ?? 'failed',
+              overallScore: domainResult.scan?.overallScore ?? null,
+              url: domainResult.scan?.url || scanUrl,
+              scanError: domainResult.scan?.error ?? null,
+              domainScanId: domainResult.scan?.id ?? null,
+              scanMode: 'domain',
+              pageScanId: null,
+              pageCount: domainResult.scan?.pageCount ?? null,
+            };
+          } else {
+            quality = {
+              ok: true,
+              id: domainResult.scan.id,
+              status: domainResult.scan.status,
+              overallScore: domainResult.scan.overallScore,
+              url: domainResult.scan.url || scanUrl,
+              scanError: domainResult.scan.error ?? null,
+              domainScanId: domainResult.scan.id,
+              scanMode: 'domain',
+              pageScanId: null,
+              pageCount: domainResult.scan.pageCount ?? null,
+            };
+          }
         }
       } else {
-        const scanResult = await runCheckionSingleScan({
-          projectId: checkionProjectId,
+        const scanInput = {
           url: scanUrl,
-          mode: pageScanMode,
-          platformProjectId: id,
+          scanMode: pageScanMode,
           audionRunId: audionJobId,
           stepUrl: stepUrl ?? scanUrl,
-        });
-        if (!scanResult.ok) {
-          quality = {
-            ok: false,
-            error: scanResult.error,
-            id: scanResult.scan?.id ?? null,
-            status: scanResult.scan?.status ?? 'failed',
-            overallScore: scanResult.scan?.overallScore ?? null,
-            url: scanResult.scan?.url || scanUrl,
-            scanError: scanResult.scan?.error ?? null,
-            domainScanId: null,
-            scanMode: pageScanMode,
-            pageScanId: scanResult.scan?.id ?? null,
-          };
+        };
+        const scanCtx = {
+          source: 'flow' as const,
+          checkionProjectId,
+          platformProjectId: id,
+          nodeId: qualityNode?.id,
+        };
+
+        if (isCapabilityCatalogRuntimeEnabled()) {
+          const cap = await executeCheckionScanCapability(scanInput, scanCtx);
+          const flowScan =
+            cap.agentPayload?.variant === 'flow' ? cap.agentPayload.scan : undefined;
+          if (!cap.ok) {
+            quality = {
+              ok: false,
+              error: cap.error,
+              id: flowScan?.id ?? null,
+              status: flowScan?.status ?? 'failed',
+              overallScore: flowScan?.overallScore ?? null,
+              url: flowScan?.url || scanUrl,
+              scanError: flowScan?.error ?? null,
+              domainScanId: null,
+              scanMode: pageScanMode,
+              pageScanId: flowScan?.id ?? null,
+            };
+          } else if (flowScan) {
+            quality = {
+              ok: true,
+              id: flowScan.id,
+              status: flowScan.status,
+              overallScore: flowScan.overallScore,
+              url: flowScan.url || scanUrl,
+              scanError: flowScan.error ?? null,
+              domainScanId: null,
+              scanMode: pageScanMode,
+              pageScanId: flowScan.id,
+            };
+          } else {
+            quality = {
+              ok: false,
+              error: 'Capability scan missing flow payload',
+              id: null,
+              status: 'failed',
+              overallScore: null,
+              url: scanUrl,
+              scanError: null,
+              domainScanId: null,
+              scanMode: pageScanMode,
+              pageScanId: null,
+            };
+          }
         } else {
-          quality = {
-            ok: true,
-            id: scanResult.scan.id,
-            status: scanResult.scan.status,
-            overallScore: scanResult.scan.overallScore,
-            url: scanResult.scan.url || scanUrl,
-            scanError: scanResult.scan.error ?? null,
-            domainScanId: null,
-            scanMode: pageScanMode,
-            pageScanId: scanResult.scan.id,
-          };
+          const scanResult = await runCheckionSingleScan({
+            projectId: checkionProjectId,
+            url: scanUrl,
+            mode: pageScanMode,
+            platformProjectId: id,
+            audionRunId: audionJobId,
+            stepUrl: stepUrl ?? scanUrl,
+          });
+          if (!scanResult.ok) {
+            quality = {
+              ok: false,
+              error: scanResult.error,
+              id: scanResult.scan?.id ?? null,
+              status: scanResult.scan?.status ?? 'failed',
+              overallScore: scanResult.scan?.overallScore ?? null,
+              url: scanResult.scan?.url || scanUrl,
+              scanError: scanResult.scan?.error ?? null,
+              domainScanId: null,
+              scanMode: pageScanMode,
+              pageScanId: scanResult.scan?.id ?? null,
+            };
+          } else {
+            quality = {
+              ok: true,
+              id: scanResult.scan.id,
+              status: scanResult.scan.status,
+              overallScore: scanResult.scan.overallScore,
+              url: scanResult.scan.url || scanUrl,
+              scanError: scanResult.scan.error ?? null,
+              domainScanId: null,
+              scanMode: pageScanMode,
+              pageScanId: scanResult.scan.id,
+            };
+          }
         }
       }
 
@@ -693,29 +819,110 @@ export async function executeCollectionFlowRun(input: {
 
     if (hasGeo) {
       const queries = geoJobQueriesFromText(resolvedGeoNode?.text ?? geoNode?.text);
-      const geoResult = await runCheckionGeoJobV3({
-        projectId: checkionProjectId,
-        platformProjectId: id,
-        url: geoUrlResolved || scanUrl || runUrl || undefined,
-        companyName:
-          (typeof body.companyName === 'string' && body.companyName.trim()
-            ? body.companyName.trim()
-            : null) ||
-          resolvedGeoNode?.companyName?.trim() ||
-          geoCompany ||
-          undefined,
-        queries: queries.length ? queries : undefined,
-        includePageScan: needGeoFitness && !hasPageQuality,
-      });
-      if (!geoResult.ok) {
-        blockers.push(geoResult.error);
-        geoJobId = geoResult.job?.id ?? null;
-        geoStatus = geoResult.job?.status ?? 'failed';
-        geoCitedShare = geoResult.job?.citedShare ?? null;
-        geoFitnessVal = geoResult.job?.geoFitness ?? null;
-        geoOverall = geoResult.job?.overallScore ?? null;
-        if (geoResult.job?.url) geoUrl = geoResult.job.url;
-        if (geoResult.job) {
+      const geoCompanyName =
+        (typeof body.companyName === 'string' && body.companyName.trim()
+          ? body.companyName.trim()
+          : null) ||
+        resolvedGeoNode?.companyName?.trim() ||
+        geoCompany ||
+        undefined;
+      const geoUrlInput = geoUrlResolved || scanUrl || runUrl || undefined;
+
+      type GeoRunOutcome =
+        | {
+            ok: true;
+            job: CheckionGeoJobSummary;
+            signals: GeoGateSignals;
+            preview?: GeoEeatJobPreview;
+            catalogBundle?: Record<string, unknown>;
+          }
+        | {
+            ok: false;
+            error: string;
+            job?: CheckionGeoJobSummary;
+            preview?: GeoEeatJobPreview;
+            catalogBundle?: Record<string, unknown>;
+          };
+
+      let geoOutcome: GeoRunOutcome;
+      if (isCapabilityCatalogRuntimeEnabled()) {
+        const cap = await executeCheckionGeoJobCapability(
+          {
+            url: geoUrlInput,
+            companyName: geoCompanyName,
+            queries,
+            includePageScan: needGeoFitness && !hasPageQuality,
+          },
+          {
+            source: 'flow',
+            checkionProjectId,
+            platformProjectId: id,
+            nodeId: geoNode?.id,
+          }
+        );
+        const job = cap.agentPayload?.job;
+        if (cap.ok && job) {
+          geoOutcome = {
+            ok: true,
+            job,
+            signals: cap.signals ?? {
+              citedShare: job.citedShare ?? null,
+              geoFitness: job.geoFitness ?? null,
+            },
+            preview: cap.agentPayload?.preview,
+            catalogBundle: cap.catalogBundle,
+          };
+        } else {
+          geoOutcome = {
+            ok: false,
+            error: cap.error ?? 'GEO fehlgeschlagen',
+            job,
+            preview: cap.agentPayload?.preview,
+            catalogBundle: cap.catalogBundle,
+          };
+        }
+      } else {
+        const geoResult = await runCheckionGeoJobV3({
+          projectId: checkionProjectId,
+          platformProjectId: id,
+          url: geoUrlInput,
+          companyName: geoCompanyName,
+          queries: queries.length ? queries : undefined,
+          includePageScan: needGeoFitness && !hasPageQuality,
+        });
+        if (geoResult.ok) {
+          geoOutcome = {
+            ok: true,
+            job: geoResult.job,
+            signals: geoResult.signals,
+            preview: geoResult.preview,
+          };
+        } else {
+          geoOutcome = {
+            ok: false,
+            error: geoResult.error,
+            job: geoResult.job,
+            preview: undefined,
+          };
+        }
+      }
+
+      if (!geoOutcome.ok) {
+        blockers.push(geoOutcome.error);
+        geoJobId = geoOutcome.job?.id ?? null;
+        geoStatus = geoOutcome.job?.status ?? 'failed';
+        geoCitedShare = geoOutcome.job?.citedShare ?? null;
+        geoFitnessVal = geoOutcome.job?.geoFitness ?? null;
+        geoOverall = geoOutcome.job?.overallScore ?? null;
+        if (geoOutcome.job?.url) geoUrl = geoOutcome.job.url;
+        if (geoOutcome.catalogBundle) {
+          runContext = setContextBundle(
+            runContext,
+            'geo',
+            geoOutcome.catalogBundle,
+            geoNode?.id
+          );
+        } else if (geoOutcome.job) {
           runContext = setContextBundle(
             runContext,
             'geo',
@@ -725,8 +932,8 @@ export async function executeCollectionFlowRun(input: {
               geoFitness: geoFitnessVal,
               overallScore: geoOverall,
               url: geoUrl,
-              preview: geoResult.preview
-                ? geoPreviewForCatalogBundle(geoResult.preview)
+              preview: geoOutcome.preview
+                ? geoPreviewForCatalogBundle(geoOutcome.preview)
                 : null,
             }),
             geoNode?.id
@@ -764,8 +971,8 @@ export async function executeCollectionFlowRun(input: {
           flowCompleted: false,
           collectionReady: false,
           pageEvidenceValid: false,
-          pageEvidenceCaveat: geoResult.error,
-          summary: `Fehler — ${geoResult.error}`,
+          pageEvidenceCaveat: geoOutcome.error,
+          summary: `Fehler — ${geoOutcome.error}`,
           blockers,
         };
         const lastRun: CollectionFlowLastRun = {
@@ -781,7 +988,7 @@ export async function executeCollectionFlowRun(input: {
           overallScore: quality?.overallScore ?? geoOverall,
           citedShare: geoCitedShare,
           geoFitness: geoFitnessVal,
-          error: geoResult.error,
+          error: geoOutcome.error,
           audionJobId,
           audionStudyId,
           audionWaveId,
@@ -797,7 +1004,8 @@ export async function executeCollectionFlowRun(input: {
           verdict: errorVerdict,
           lastRun,
         });
-        return { ok: true as const,
+        return {
+          ok: true as const,
           flow: saved ? toCollectionTestFlowResponse(saved) : null,
           verdict: errorVerdict,
           lastRun,
@@ -805,26 +1013,27 @@ export async function executeCollectionFlowRun(input: {
         };
       }
 
-      geoJobId = geoResult.job.id;
-      geoSignals = geoResult.signals;
-      geoCitedShare = geoResult.signals.citedShare;
-      geoFitnessVal = geoResult.signals.geoFitness;
-      geoStatus = geoResult.job.status;
-      geoOverall = geoResult.job.overallScore;
-      if (geoResult.job.url) geoUrl = geoResult.job.url;
+      geoJobId = geoOutcome.job.id;
+      geoSignals = geoOutcome.signals;
+      geoCitedShare = geoOutcome.signals.citedShare;
+      geoFitnessVal = geoOutcome.signals.geoFitness;
+      geoStatus = geoOutcome.job.status;
+      geoOverall = geoOutcome.job.overallScore;
+      if (geoOutcome.job.url) geoUrl = geoOutcome.job.url;
       runContext = setContextBundle(
         runContext,
         'geo',
-        buildGeoCatalogBundle({
-          status: geoStatus,
-          citedShare: geoCitedShare,
-          geoFitness: geoFitnessVal,
-          overallScore: geoOverall,
-          url: geoUrl,
-          preview: geoResult.preview
-            ? geoPreviewForCatalogBundle(geoResult.preview)
-            : null,
-        }),
+        geoOutcome.catalogBundle ??
+          buildGeoCatalogBundle({
+            status: geoStatus,
+            citedShare: geoCitedShare,
+            geoFitness: geoFitnessVal,
+            overallScore: geoOverall,
+            url: geoUrl,
+            preview: geoOutcome.preview
+              ? geoPreviewForCatalogBundle(geoOutcome.preview)
+              : null,
+          }),
         geoNode?.id
       );
     }

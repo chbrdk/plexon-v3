@@ -211,3 +211,18 @@ Playbooks, Async-Polling (GEO, Domain-Scan), CHECKION-Tool-Workflows, kostenlose
 **Sprint 5 / Epic 12 (erledigt):** Composer-Chips (Playbooks zuerst), Capabilities-UI Playbook-Sektion, CHECKION Auto-Assign (`auto-assign-checkion.ts`), Write-Confirm für Domain-Scan, GEO-Rerun und Journey-Start.
 
 **Sprint 5 / Epic 13 (erledigt):** Orchestrator-Doku Phase-2-Tabelle, Generative-UI Playbook-Rezepte, E2E-Smoke (`website_audit`, `domain_scan`, `geo_poll`), Coolify-Env für Assistant Phase 2.
+
+## Phase 3 (geplant) — Capability Catalog
+
+Einheitliche Capabilities für Assistent **und** Collection Flow — Spec: **`specs/domain/capability-catalog.md`** · Knowledge: **`knowledge/capability-catalog.md`**.
+
+| Wave | Inhalt | Status |
+|------|--------|--------|
+| C0 | Spec + Inventory | Done |
+| C1.0 | Registry, adapters, scan catalog normalizer, promote classify, tests; Flag default off | Done |
+| C1.1 | Shared `checkion.scan` executor wired into Flow + `quick_scan` behind `CAPABILITY_CATALOG_RUNTIME` | Done |
+| C2 | Chat startet bestehenden Collection Flow (`trigger: assistant`, intent `run_collection_flow`) | Done |
+| C3 | Promote: Chat-Trace → neuer Flow **oder** Playbook-Rezept (`promote_capability_sequence`) | Done |
+| C4 | EQC-Overlaps auf Catalog-IDs; Duplikat-Handler hinter Flag; `audion.journey_segment` Stub | Done |
+
+**Nicht:** Jeder Flow-Node als Agent-Tool; Free-JS-Nodes; Explore-Tools (`plexon_ui_*`, Token-Q&A) als Canvas-Nodes.

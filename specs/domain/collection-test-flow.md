@@ -6,6 +6,7 @@
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
 - Collection model: `specs/domain/collection-projects.md`
+- Capability Catalog (Agent ↔ Flow, planned): `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md`
 - AUDION journey graph: `audion-v3/specs/domain/ux-test-flow-model.md` (Phases 1–8)
 - AUDION ↔ CHECKION page handoff: `audion-v3/specs/domain/checkion-single-scan-trigger.md` · `checkion-v3/specs/domain/audion-journey-scan-trigger.md`
 - Shared chrome: `msqdx-ui/specs/domain/floating-panel.md` · `msqdx-ui/specs/domain/flow-board-chrome.md`
@@ -269,7 +270,7 @@ Caveats: infra blockers (403, empty scan) set `pageEvidenceValid=false` with rea
 |-------|-------|
 | `collection_test_flows` (Plexon) | `id`, `platform_project_id`, `name`, `flow` jsonb, `owner_id`, `template_id`, webhook fields (Wave 15), timestamps |
 | Optional link | `audion_saved_flow_id` / template reference for imported journey subgraphs |
-| Runs (Wave 15–17) | `collection_flow_runs` — status, trigger (`ui`/`webhook`/`service`), request/verdict/lastRun jsonb, optional callback; UI + webhook share the same table |
+| Runs (Wave 15–17 / C2) | `collection_flow_runs` — status, trigger (`ui`/`webhook`/`service`/`assistant`), request/verdict/lastRun jsonb, optional callback; UI + Assistant + webhook share the same table |
 
 Wave 1 ships the Drizzle table + migration `0005_collection_test_flows.sql`. Wave 15: `0006_collection_flow_triggers.sql`.
 
@@ -519,6 +520,7 @@ Do not place this on legacy `/board` Prismion island.
 - Multi-provider GEO models beyond OpenAI defaults — product later.
 - Intra-Audion step expression resolution — needs AUDION contract.
 - EQC Flow flag default-on cutover complete; archive legacy playbook path.
+- Shared Capability Catalog with Assistant (Wave C0–C4) — see `capability-catalog.md`; do **not** expose orchestration kinds as Agent tools.
 
 ## Wave 23 — Event Quick Check on Collection Flow
 

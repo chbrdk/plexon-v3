@@ -18,6 +18,8 @@
 | Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |
 | Assistant journey outline | `specs/domain/assistant-journey-outline.md` |
 | Assistant journey generate | `specs/domain/assistant-journey-generate.md` |
+| Capability Catalog (Agent ↔ Flow) | `specs/domain/capability-catalog.md` |
+| EQC as Collection Flow | `specs/domain/eqc-as-collection-flow.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 
@@ -33,6 +35,7 @@
 | Paths | `knowledge/paths.md` |
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
 | Central Assistant Flyout | `knowledge/central-assistant-flyout.md` |
+| Capability Catalog | `knowledge/capability-catalog.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |

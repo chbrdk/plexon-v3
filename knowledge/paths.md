@@ -38,6 +38,7 @@
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
 - Collection projects: `specs/domain/collection-projects.md`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
+  - Capability Catalog (Agent ↔ Flow, Wave C4): `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md` · executors `lib/capabilities/executors/*` · promote `lib/capabilities/promote.ts` · intents `run_collection_flow` / `promote_capability_sequence` · trigger `assistant` · template `assistant-promote-v1` · tests `__tests__/capability-*.test.ts` · env `CAPABILITY_CATALOG_RUNTIME` (default **off**)
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
   - EQC GEO voice spider: `knowledge/eqc-geo-voice-radar.md` · `components/event-quick-check/EventQuickCheckVoiceRadar.tsx` · `lib/assistant/reports/event-quick-check/eqc-radar-geometry.ts`
   - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · cover `70svh` · bands `100svh` · adaptive gap via `data-eqc-chapter` (`lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`)

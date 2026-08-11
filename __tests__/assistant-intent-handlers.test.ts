@@ -60,6 +60,10 @@ describe('assistant intent handlers', () => {
     expect(typeof handleProjectStatusIntent).toBe('function');
     expect(typeof handleFreeChatIntent).toBe('function');
     expect(typeof handleRunPlaybookIntent).toBe('function');
+    const { handleRunCollectionFlowIntent } = await import(
+      '@/lib/assistant/handlers/run-collection-flow'
+    );
+    expect(typeof handleRunCollectionFlowIntent).toBe('function');
   });
 
   it('handleScanSummarizeIntent prompts for scan id when missing', async () => {

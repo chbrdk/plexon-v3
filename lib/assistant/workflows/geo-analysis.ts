@@ -5,6 +5,8 @@ import {
   pollCheckionGeoJobV3,
   startCheckionGeoJobV3,
 } from '@/lib/integrations/checkion-geo-jobs-v3-client'
+import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job'
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag'
 import { GEO_ANALYSIS_INITIAL_STEPS } from '@/lib/assistant/ui-blocks/workflow-ui'
 import { tryAutoAssignCheckionResource } from '@/lib/assistant/auto-assign-checkion'
 
@@ -25,6 +27,7 @@ async function setStep(
  * GEO / E-E-A-T via CHECKION v3 `/api/geo-jobs`.
  * Requires `checkionProjectId`. Deep mode enables page-scan + competitor hosts at start
  * (no separate legacy competitive rerun endpoint).
+ * Wave C4: when `CAPABILITY_CATALOG_RUNTIME` is on, uses shared catalog executor.
  */
 export async function runGeoAnalysisWorkflow(
   input: {
@@ -67,6 +70,57 @@ export async function runGeoAnalysisWorkflow(
     return { ok: false, error: 'CHECKION-Projekt-ID fehlt für GEO (v3)', steps }
   }
   steps = await setStep(runId, steps, 'prepare', { status: 'done' })
+
+  if (isCapabilityCatalogRuntimeEnabled()) {
+    steps = await setStep(runId, steps, 'start_job', { status: 'running' })
+    steps = await setStep(runId, steps, 'run_analysis', { status: 'running', progress: 20 })
+    const cap = await executeCheckionGeoJobCapability(
+      {
+        url: input.url,
+        queries: input.queries,
+        competitors: input.competitors,
+        deep: Boolean(input.deep || input.runCompetitive),
+        includePageScan: Boolean(input.deep || input.runCompetitive),
+      },
+      {
+        source: 'agent',
+        checkionProjectId: projectId,
+        platformProjectId: input.platformProjectId,
+      }
+    )
+    if (!cap.ok || !cap.agentPayload?.job) {
+      const err = cap.error ?? 'GEO fehlgeschlagen'
+      steps = await setStep(runId, steps, 'start_job', { status: 'error', detail: err })
+      steps = await setStep(runId, steps, 'run_analysis', { status: 'error', detail: err })
+      steps = await setStep(runId, steps, 'aggregate', { status: 'error' })
+      return { ok: false, error: err, steps }
+    }
+    const jobId = cap.agentPayload.job.id
+    const preview = cap.agentPayload.preview ?? cap.agentPayload.agentPreview
+    steps = await setStep(runId, steps, 'start_job', { status: 'done', detail: jobId })
+    const assign = await tryAutoAssignCheckionResource({
+      kind: 'geo_eeat',
+      resourceId: jobId,
+      checkionProjectId: projectId,
+    })
+    if (assign.error) {
+      steps = await setStep(runId, steps, 'start_job', {
+        status: 'done',
+        detail: `${jobId} · Assign: ${assign.error}`,
+      })
+    }
+    let competitiveWarning: string | undefined
+    if (input.deep && !(input.competitors && input.competitors.length > 0)) {
+      competitiveWarning =
+        'Kompetitive Analyse ohne Wettbewerber-Hosts — Ergebnisse ggf. nur Solo-GEO'
+    }
+    steps = await setStep(runId, steps, 'run_analysis', { status: 'done', progress: 100 })
+    steps = await setStep(runId, steps, 'aggregate', { status: 'done' })
+    if (!preview) {
+      return { ok: false, error: 'GEO Preview fehlt', jobId, competitiveWarning, steps }
+    }
+    return { ok: true, job: preview, jobId, competitiveWarning, steps }
+  }
 
   steps = await setStep(runId, steps, 'start_job', { status: 'running' })
   const started = await startCheckionGeoJobV3({
