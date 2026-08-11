@@ -63,7 +63,12 @@
     "projectDashboard": "Projekt öffnen",
     "bindings": "Fähigkeits-Sync",
     "deleteProject": "Löschen",
-    "deleteProjectConfirm": "Diese Collection und Produkt-Links wirklich löschen? Lokale CHECKION-/AUDION-Projekte bleiben bestehen, werden aber nicht mehr verknüpft.",
+    "deleteProjectConfirm": "Collection unwiderruflich in Plexon löschen? Zuerst werden die Product-Spiegel archiviert. Lokale Daten in CHECKION/AUDION/BRANDION bleiben als archivierte Orphans erhalten.",
+    "archiveProject": "Archivieren",
+    "archiveProjectConfirm": "Collection archivieren und in allen Apps ausblenden?",
+    "restoreProject": "Wiederherstellen",
+    "restoringProject": "Stelle wieder her…",
+    "archivingProject": "Archiviere…",
     "editCompany": "Organisation bearbeiten",
     "saveCompany": "Speichern",
     "usersTitle": "Nutzer",
@@ -329,6 +334,16 @@
       "companiesError": "Organisationen konnten nicht geladen werden.",
       "createError": "Projekt konnte nicht angelegt werden.",
       "loadError": "Projekte konnten nicht geladen werden."
+    },
+    "lifecycle": {
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
+      "archiveConfirm": "Projekt archivieren? Es verschwindet aus den Standard-Listen in Plexon und den Product-Apps (wiederherstellbar).",
+      "restoreConfirm": "Projekt wiederherstellen und wieder in allen Apps anzeigen?",
+      "error": "Status konnte nicht aktualisiert werden.",
+      "showArchived": "Archivierte anzeigen",
+      "hideArchived": "Archivierte ausblenden",
+      "archivedEmpty": "Keine archivierten Projekte."
     },
     "detail": {
       "title": "Projekt",

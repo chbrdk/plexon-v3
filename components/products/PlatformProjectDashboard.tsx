@@ -14,6 +14,7 @@ import {
 } from '@/components/products/CollectionOverviewBand'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
+import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
 import type {
   AudionProjectSummary,
   BrandionProjectSummary,
@@ -48,6 +49,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [workNav, setWorkNav] = useState<CollectionWorkNavId>('profile')
+  const [reloadKey, setReloadKey] = useState(0)
   const workBandRef = useRef<HTMLElement | null>(null)
 
   const openWork = useCallback((id: CollectionWorkNavId) => {
@@ -81,7 +83,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
     return () => {
       cancelled = true
     }
-  }, [platformProjectId, t])
+  }, [platformProjectId, t, reloadKey])
 
   const meta = data
     ? [
@@ -108,11 +110,18 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
         }
         action={
           data ? (
-            <NextLink href={pathAssistantWithProject(data.platformProject.id)}>
-              <Button variant="ghost" size="sm">
-                {t('projects.detail.openAssistant')}
-              </Button>
-            </NextLink>
+            <div className="plexon-project-detail-actions">
+              <CollectionLifecycleActions
+                platformProjectId={data.platformProject.id}
+                status={data.platformProject.status}
+                onChanged={() => setReloadKey((k) => k + 1)}
+              />
+              <NextLink href={pathAssistantWithProject(data.platformProject.id)}>
+                <Button variant="ghost" size="sm">
+                  {t('projects.detail.openAssistant')}
+                </Button>
+              </NextLink>
+            </div>
           ) : null
         }
       />

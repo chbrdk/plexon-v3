@@ -11,9 +11,12 @@ import {
 } from '@/components/nav-icons'
 import { pathPlatformProjectDashboard } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
+import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
 
 type CollectionProjectCardProps = {
   row: CollectionProjectInsight
+  /** When set, show archive/restore controls. */
+  onLifecycleChange?: () => void
 }
 
 function Metric({
@@ -39,7 +42,7 @@ function Metric({
 }
 
 /** Magazine tile for one Collection project — theme tokens only, no forced light surface. */
-export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
+export function CollectionProjectCard({ row, onLifecycleChange }: CollectionProjectCardProps) {
   const { t } = useI18n()
   const pid = row.platformProject?.id ?? ''
   if (!pid) return null
@@ -101,6 +104,14 @@ export function CollectionProjectCard({ row }: CollectionProjectCardProps) {
               {t('dashboard.platformInsightsOpenProject')}
             </Button>
           </Link>
+        ) : null}
+        {onLifecycleChange ? (
+          <CollectionLifecycleActions
+            platformProjectId={pid}
+            status={row.platformProject.status}
+            onChanged={onLifecycleChange}
+            size="md"
+          />
         ) : null}
         <a
           href={row.links.checkionProject}

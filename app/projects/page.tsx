@@ -23,7 +23,9 @@ export default function ProjectsHubPage() {
       <CollectionProjectsList
         refreshKey={refreshKey}
         showCreateCard
+        enableLifecycle
         onCreated={() => bumpList()}
+        onLifecycleChange={bumpList}
       />
     </div>
   )

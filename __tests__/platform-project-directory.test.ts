@@ -87,4 +87,15 @@ describe('listAccessiblePlatformProjectsForUser', () => {
     const rows = await listAccessiblePlatformProjectsForUser('u1');
     expect(rows).toHaveLength(1);
   });
+
+  it('passes includeArchived to company list helper', async () => {
+    vi.mocked(getCompanyIdsForUser).mockResolvedValue(['c1']);
+    vi.mocked(listPlatformProjectsForCompanies).mockResolvedValue([sampleProject('pp-arch')]);
+
+    const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
+    await listAccessiblePlatformProjectsForUser('u1', { includeArchived: true });
+    expect(listPlatformProjectsForCompanies).toHaveBeenCalledWith(['c1'], {
+      includeArchived: true,
+    });
+  });
 });

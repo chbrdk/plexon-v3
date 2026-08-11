@@ -277,6 +277,32 @@ export default function AdminCompanyDetailPage() {
     }
   }
 
+  const setProjectStatus = async (platformProjectId: string, status: 'active' | 'archived') => {
+    const confirmKey =
+      status === 'archived' ? 'admin.archiveProjectConfirm' : 'projects.lifecycle.restoreConfirm'
+    if (!window.confirm(t(confirmKey))) return
+    setError(null)
+    try {
+      const res = await fetch(apiAdminPlatformProject(platformProjectId), {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError((data as { error?: string }).error ?? t('admin.loadError'))
+        return
+      }
+      if ((data as { syncResults?: unknown }).syncResults) {
+        setSyncMessage(JSON.stringify((data as { syncResults: unknown }).syncResults, null, 2))
+      }
+      await loadAll()
+    } catch {
+      setError(t('admin.loadError'))
+    }
+  }
+
   const deleteProject = async (platformProjectId: string) => {
     if (!window.confirm(t('admin.deleteProjectConfirm'))) return
     setError(null)
@@ -485,6 +511,23 @@ export default function AdminCompanyDetailPage() {
                           {t('admin.projectDashboard')}
                         </Button>
                       </NextLink>
+                      {p.status === 'archived' ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void setProjectStatus(p.id, 'active')}
+                        >
+                          {t('admin.restoreProject')}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void setProjectStatus(p.id, 'archived')}
+                        >
+                          {t('admin.archiveProject')}
+                        </Button>
+                      )}
                       <Button variant="danger" size="sm" onClick={() => void deleteProject(p.id)}>
                         {t('admin.deleteProject')}
                       </Button>

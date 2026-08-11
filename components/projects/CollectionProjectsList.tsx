@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { EmptyState, Spinner, Text } from '@msqdx/ui'
+import { Button, EmptyState, Spinner, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
-import { API_PLATFORM_ME_PROJECT_INSIGHTS } from '@/lib/constants'
+import { apiPlatformMeProjectInsights } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
 import { CollectionProjectCard } from '@/components/projects/CollectionProjectCard'
 import { CreateCollectionProjectCard } from '@/components/projects/CreateCollectionProjectForm'
@@ -28,6 +28,10 @@ type CollectionProjectsListProps = {
   /** Audion-style first-grid create card. */
   showCreateCard?: boolean
   onCreated?: (platformProjectId: string) => void
+  /** Hub: show archive/restore and optional archived section. */
+  enableLifecycle?: boolean
+  /** Called after archive/restore so parent can bump refreshKey. */
+  onLifecycleChange?: () => void
 }
 
 export function CollectionProjectsList({
@@ -40,6 +44,8 @@ export function CollectionProjectsList({
   onLoaded,
   showCreateCard = false,
   onCreated,
+  enableLifecycle = false,
+  onLifecycleChange,
 }: CollectionProjectsListProps) {
   const { t } = useI18n()
   const controlled = controlledProjects !== undefined
@@ -48,6 +54,9 @@ export function CollectionProjectsList({
   const [fetchLoading, setFetchLoading] = useState(!controlled)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [fetchMeta, setFetchMeta] = useState<InsightsMeta | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
+  const [archived, setArchived] = useState<CollectionProjectInsight[]>([])
+  const [archivedLoading, setArchivedLoading] = useState(false)
 
   useEffect(() => {
     if (controlled) return
@@ -56,7 +65,7 @@ export function CollectionProjectsList({
       setFetchLoading(true)
       setFetchError(null)
       try {
-        const res = await fetch(API_PLATFORM_ME_PROJECT_INSIGHTS, { credentials: 'same-origin' })
+        const res = await fetch(apiPlatformMeProjectInsights(), { credentials: 'same-origin' })
         if (!res.ok) throw new Error(await res.text().catch(() => res.statusText))
         const data = (await res.json()) as {
           projects?: CollectionProjectInsight[]
@@ -91,6 +100,30 @@ export function CollectionProjectsList({
       cancelled = true
     }
   }, [controlled, refreshKey, onLoaded, t])
+
+  useEffect(() => {
+    if (!enableLifecycle || !showArchived || controlled) return
+    let cancelled = false
+    ;(async () => {
+      setArchivedLoading(true)
+      try {
+        const res = await fetch(apiPlatformMeProjectInsights({ includeArchived: true }), {
+          credentials: 'same-origin',
+        })
+        if (!res.ok) throw new Error(await res.text().catch(() => res.statusText))
+        const data = (await res.json()) as { projects?: CollectionProjectInsight[] }
+        const list = Array.isArray(data.projects) ? data.projects : []
+        if (!cancelled) setArchived(list)
+      } catch {
+        if (!cancelled) setArchived([])
+      } finally {
+        if (!cancelled) setArchivedLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [enableLifecycle, showArchived, controlled, refreshKey])
 
   const loading = controlled ? Boolean(controlledLoading) : fetchLoading
   const error = controlled ? controlledError ?? null : fetchError
@@ -135,13 +168,48 @@ export function CollectionProjectsList({
       <div className="plexon-collection-grid">
         {showCreateCard ? <CreateCollectionProjectCard onCreated={onCreated} /> : null}
         {projects.map((row) => (
-          <CollectionProjectCard key={row.platformProject.id} row={row} />
+          <CollectionProjectCard
+            key={row.platformProject.id}
+            row={row}
+            onLifecycleChange={enableLifecycle ? onLifecycleChange : undefined}
+          />
         ))}
       </div>
       {projects.length === 0 && showCreateCard ? (
         <EmptyState className="plexon-collection-list-status">
           {t('dashboard.platformInsightsEmpty')}
         </EmptyState>
+      ) : null}
+
+      {enableLifecycle ? (
+        <div className="plexon-collection-archive-section">
+          <Button variant="ghost" size="sm" onClick={() => setShowArchived((v) => !v)}>
+            {showArchived
+              ? t('projects.lifecycle.hideArchived')
+              : t('projects.lifecycle.showArchived')}
+          </Button>
+          {showArchived ? (
+            archivedLoading ? (
+              <EmptyState className="plexon-collection-list-status">
+                <Spinner size="sm" /> {t('common.loading')}
+              </EmptyState>
+            ) : archived.length === 0 ? (
+              <EmptyState className="plexon-collection-list-status">
+                {t('projects.lifecycle.archivedEmpty')}
+              </EmptyState>
+            ) : (
+              <div className="plexon-collection-grid">
+                {archived.map((row) => (
+                  <CollectionProjectCard
+                    key={`archived-${row.platformProject.id}`}
+                    row={row}
+                    onLifecycleChange={onLifecycleChange}
+                  />
+                ))}
+              </div>
+            )
+          ) : null}
+        </div>
       ) : null}
     </div>
   )

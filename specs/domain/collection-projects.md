@@ -57,6 +57,23 @@ Users see **one project** (a Collection). CHECKION, AUDION, and BRANDION are **c
 | 2 Canonical project home UX | done — Brandion capability summary + launch on Collection home (2026-08-09) |
 | 3 Legacy backfill | **cancelled** — fresh databases; no migration planned |
 | 4 Canonical list + create hub (`/projects`) | done — 2026-07-31 |
+| 5 Lifecycle (archive / restore / admin hard-delete) | done — 2026-08-11 |
+
+## Phase 5 — Lifecycle
+
+Lifecycle lives on `platform_projects.status` (`active` | `archived`). **No** `deletedAt` column.
+
+| Action | Who | Behavior |
+|--------|-----|----------|
+| **Archive** | Company owner/admin (hub + detail) | `PATCH` status → `archived`, then `syncPlatformProjectToProducts` (upsert `status: archived` to CHECKION / AUDION / BRANDION). |
+| **Restore** | Company owner/admin | Same path with `status: active`. |
+| **Hard-Delete** | Plexon **global admin** only | Best-effort archive+sync, then `deletePlatformProject` (local cascade of bindings / packs / flows / assignments). Product mirrors stay **archived orphans** — no product DELETE in this wave. |
+
+**Lists:** Default hub, insights, and home preview show **active** Collections only. Hub may opt in with `?includeArchived=1` / UI “Archivierte anzeigen” for restore. Admin company detail lists all statuses.
+
+**APIs:**
+- Company: `PATCH /api/platform/projects/:platformProjectId` — body `{ status: 'active' | 'archived' }` (`canManageCompany`).
+- Admin: `PATCH /api/admin/platform-projects/:id` auto-syncs when status changes; `DELETE` requires global admin and archive-then-cascade.
 
 ## Canonical hub UX
 

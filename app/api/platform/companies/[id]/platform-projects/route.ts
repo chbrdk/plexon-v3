@@ -77,6 +77,7 @@ export async function GET(request: Request, ctx: { params: Promise<{ id: string 
     return apiError('Forbidden', API_STATUS.FORBIDDEN);
   }
   const { listPlatformProjectsForCompany } = await import('@/lib/db/platform-projects');
-  const items = await listPlatformProjectsForCompany(companyId);
+  const includeArchived = new URL(request.url).searchParams.get('includeArchived') === '1';
+  const items = await listPlatformProjectsForCompany(companyId, { includeArchived });
   return Response.json({ items });
 }

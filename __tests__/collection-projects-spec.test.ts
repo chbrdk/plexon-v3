@@ -76,4 +76,15 @@ describe('collection projects domain (phase 0)', () => {
     expect(route).toContain('Collections only')
     expect(route).not.toContain('buildStandaloneProductInsightRows')
   })
+
+  it('phase 5 documents archive/restore and admin hard-delete', () => {
+    const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
+    const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8')
+    const lifecycle = readFileSync(path.join(root, 'lib/platform-project-lifecycle.ts'), 'utf8')
+    expect(spec).toContain('Phase 5 — Lifecycle')
+    expect(spec).toContain('Hard-Delete')
+    expect(constants).toContain('apiPlatformProject')
+    expect(lifecycle).toContain('hardDeletePlatformProjectAfterArchive')
+    expect(lifecycle).toContain('setPlatformProjectLifecycleStatus')
+  })
 })

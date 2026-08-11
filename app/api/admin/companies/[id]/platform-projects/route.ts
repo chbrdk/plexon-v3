@@ -26,7 +26,8 @@ export async function GET(request: Request, ctx: { params: Promise<{ id: string 
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);
   const company = await getCompanyById(companyId);
   if (!company) return apiError('Not found', API_STATUS.NOT_FOUND);
-  const items = await listPlatformProjectsForCompany(companyId);
+  // Admin company detail needs archived Collections for restore/hard-delete.
+  const items = await listPlatformProjectsForCompany(companyId, { includeArchived: true });
   return Response.json({ items });
 }
 

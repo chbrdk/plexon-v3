@@ -374,8 +374,17 @@ export const apiAssistantWorkflowStream = (runId: string) =>
 /** User-facing platform project APIs (non-admin). */
 export const apiPlatformCompanyPlatformProjects = (companyId: string) =>
   `/api/platform/companies/${encodeURIComponent(companyId)}/platform-projects`;
+export const apiPlatformProject = (platformProjectId: string) =>
+  `/api/platform/projects/${encodeURIComponent(platformProjectId)}`;
 export const apiPlatformProjectSync = (platformProjectId: string) =>
   `/api/platform/projects/${encodeURIComponent(platformProjectId)}/sync`;
+/** Insights list. `includeArchived: true` returns archived Collections only (hub archive section). */
+export const apiPlatformMeProjectInsights = (options?: { includeArchived?: boolean }) => {
+  if (options?.includeArchived) {
+    return `${API_PLATFORM_ME_PROJECT_INSIGHTS}?includeArchived=1`;
+  }
+  return API_PLATFORM_ME_PROJECT_INSIGHTS;
+};
 
 /** Claude model for board completion. Default Sonnet 4.6 (Sonnet 4 snapshot retired 2026-06-15). Override with ANTHROPIC_BOARD_MODEL. */
 export const getBoardCompletionModel = (): string => {

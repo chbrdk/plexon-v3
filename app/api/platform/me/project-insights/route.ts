@@ -52,7 +52,12 @@ export async function GET(request: Request) {
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
   const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
 
-  const allPlatform = await listAccessiblePlatformProjectsForUser(user.id);
+  const includeArchived = new URL(request.url).searchParams.get('includeArchived') === '1';
+  const archivedOnly = includeArchived;
+  let allPlatform = await listAccessiblePlatformProjectsForUser(user.id, { includeArchived });
+  if (archivedOnly) {
+    allPlatform = allPlatform.filter((p) => p.status === 'archived');
+  }
   const totalAccessible = allPlatform.length;
   const truncated = totalAccessible > INSIGHTS_CAP;
 

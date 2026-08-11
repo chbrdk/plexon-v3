@@ -63,7 +63,12 @@
     "projectDashboard": "Open project",
     "bindings": "Capability sync",
     "deleteProject": "Delete",
-    "deleteProjectConfirm": "Delete this Collection and its product links? CHECKION/AUDION local projects remain but are unlinked.",
+    "deleteProjectConfirm": "Permanently delete this Collection in Plexon? Product mirrors are archived first. Local CHECKION/AUDION/BRANDION data remains as archived orphans.",
+    "archiveProject": "Archive",
+    "archiveProjectConfirm": "Archive this Collection and hide it in all apps?",
+    "restoreProject": "Restore",
+    "restoringProject": "Restoring…",
+    "archivingProject": "Archiving…",
     "editCompany": "Edit organization",
     "saveCompany": "Save",
     "usersTitle": "Users",
@@ -329,6 +334,16 @@
       "companiesError": "Could not load organizations.",
       "createError": "Could not create project.",
       "loadError": "Could not load projects."
+    },
+    "lifecycle": {
+      "archive": "Archive",
+      "restore": "Restore",
+      "archiveConfirm": "Archive this project? It will disappear from default lists in Plexon and product apps (restorable).",
+      "restoreConfirm": "Restore this project and show it in all apps again?",
+      "error": "Could not update status.",
+      "showArchived": "Show archived",
+      "hideArchived": "Hide archived",
+      "archivedEmpty": "No archived projects."
     },
     "detail": {
       "title": "Project",

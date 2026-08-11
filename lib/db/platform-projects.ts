@@ -1,7 +1,12 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 import { getDb } from './index';
 import { platformProjects } from './schema';
 import { PLATFORM_PROJECT_STATUS, type PlatformProjectStatus } from '@/lib/platform-companies';
+
+export type ListPlatformProjectsOptions = {
+  /** When false (default), exclude archived Collections. */
+  includeArchived?: boolean;
+};
 
 export async function createPlatformProject(input: {
   id: string;
@@ -56,15 +61,45 @@ export async function getPlatformProjectById(id: string) {
   return row ?? null;
 }
 
-export async function listPlatformProjectsForCompany(companyId: string) {
+export async function listPlatformProjectsForCompany(
+  companyId: string,
+  options: ListPlatformProjectsOptions = {}
+) {
   const db = getDb();
-  return db.select().from(platformProjects).where(eq(platformProjects.companyId, companyId));
+  const includeArchived = options.includeArchived === true;
+  if (includeArchived) {
+    return db.select().from(platformProjects).where(eq(platformProjects.companyId, companyId));
+  }
+  return db
+    .select()
+    .from(platformProjects)
+    .where(
+      and(
+        eq(platformProjects.companyId, companyId),
+        ne(platformProjects.status, PLATFORM_PROJECT_STATUS.ARCHIVED)
+      )
+    );
 }
 
-export async function listPlatformProjectsForCompanies(companyIds: string[]) {
+export async function listPlatformProjectsForCompanies(
+  companyIds: string[],
+  options: ListPlatformProjectsOptions = {}
+) {
   if (companyIds.length === 0) return [];
   const db = getDb();
-  return db.select().from(platformProjects).where(inArray(platformProjects.companyId, companyIds));
+  const includeArchived = options.includeArchived === true;
+  if (includeArchived) {
+    return db.select().from(platformProjects).where(inArray(platformProjects.companyId, companyIds));
+  }
+  return db
+    .select()
+    .from(platformProjects)
+    .where(
+      and(
+        inArray(platformProjects.companyId, companyIds),
+        ne(platformProjects.status, PLATFORM_PROJECT_STATUS.ARCHIVED)
+      )
+    );
 }
 
 export async function deletePlatformProject(platformProjectId: string) {

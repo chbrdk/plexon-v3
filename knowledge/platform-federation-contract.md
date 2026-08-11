@@ -55,6 +55,12 @@ Die Version wird von `PLEXON` in Service-Antworten gesetzt. Products schicken di
 - Sync-Vertrag (Pull/Publish Audion+Checkion): `knowledge/collection-knowledge-sync.md`
 - Spec: `specs/domain/collection-knowledge-pack.md` · `specs/api/collection-knowledge-pack.md`
 
+### Collection lifecycle (v3)
+
+- Archive/restore: PLEXON `PATCH` status → product upsert `status: active|archived` (thin PUT provisioning).
+- Hard-delete: PLEXON admin only after archive fan-out; product mirrors remain archived (no provisioning DELETE yet).
+- Spec: `specs/domain/collection-projects.md` Phase 5 · `knowledge/platform-projects-central-creation.md`
+
 ## Produkt-Registry
 
 Die Registry in `PLEXON/lib/platform-products.ts` ist die zentrale Quelle fuer:
