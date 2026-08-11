@@ -57,7 +57,7 @@ describe('assistant ui rebuild (wave 7 generative UI)', () => {
     expect(corner).not.toContain('MarkdownContent')
   })
 
-  it('block surface and steps use Panel / plexon-assistant classes', () => {
+  it('block surface and steps use Panel / shared chat step chrome', () => {
     const surface = readFileSync(
       path.join(root, 'components/assistant-ui/templates/UiBlockSurface.tsx'),
       'utf8'
@@ -66,11 +66,21 @@ describe('assistant ui rebuild (wave 7 generative UI)', () => {
       path.join(root, 'components/assistant-ui/organisms/UiStepList.tsx'),
       'utf8'
     )
+    const metrics = readFileSync(
+      path.join(root, 'components/assistant-ui/organisms/UiMetricGrid.tsx'),
+      'utf8'
+    )
+    const kv = readFileSync(
+      path.join(root, 'components/assistant-ui/organisms/UiKeyValueList.tsx'),
+      'utf8'
+    )
     const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
     expect(surface).toContain("from '@msqdx/ui'")
     expect(surface).toContain('plexon-assistant-block-surface')
-    expect(steps).toContain('plexon-assistant-steps')
-    expect(css).toContain('.plexon-assistant-steps')
+    expect(steps).toContain('ChatStepList')
+    expect(steps).toContain('ChatBlockPanel')
+    expect(metrics).toContain('ChatMetricGrid')
+    expect(kv).toContain('ChatKeyValueList')
     expect(css).toContain('.plexon-assistant-entity-card')
     expect(css).toContain('.plexon-assistant-capabilities')
     expect(css).toContain('.plexon-assistant-block-title')

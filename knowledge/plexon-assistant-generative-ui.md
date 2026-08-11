@@ -175,12 +175,12 @@ Das sind die **Block-Typen**, die Tools direkt ansprechen.
 | Block `type` | Organism | MSQDX / Legacy |
 |--------------|----------|----------------|
 | `text` | `UiMarkdownBlock` | `MarkdownContent` |
-| `metric_grid` | `UiMetricGrid` | `MsqdxMoleculeCard` + `UiMetricTile[]` |
+| `metric_grid` | `UiMetricGrid` | `@msqdx/ui` `ChatBlockPanel` + `ChatMetricGrid` |
 | `data_table` | `UiDataTable` | eigene Tabelle + `UiTableCell` |
-| `key_value_list` | `UiKeyValueList` | `UiKeyValueRow[]` |
+| `key_value_list` | `UiKeyValueList` | `@msqdx/ui` `ChatBlockPanel` + `ChatKeyValueList` |
 | `alert` | `UiAlertBlock` | `UiAlert` |
 | `link_list` | `UiLinkList` | `UiActionChip[]` |
-| `step_list` | `UiStepList` | `MsqdxStepper` (Status pro Step) |
+| `step_list` | `UiStepList` | `@msqdx/ui` `ChatBlockPanel` + `ChatStepList` |
 | `summary_card` | `UiSummaryCard` | ersetzt `SummaryCard` (Migration) |
 | `corner_tab_section` | `UiCornerTabSection` | `MsqdxCornerTabSection` |
 | `persona_card` | `UiPersonaCard` | `MsqdxPersonaCard` (AUDION-DS) |
