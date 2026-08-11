@@ -29,4 +29,5 @@ DS primitives: `ChatBlockPanel` + `ChatBlockList` (`@msqdx/ui`).
 | Message blocks | `@msqdx/ui` `ChatBlockPanel` / `ChatBlockList` | **`Organisms/Chat/Catalog`** · Molecules/ChatBlock* |
 | Stream / report schema wiring | **Plexon** `components/assistant-ui/**` | product |
 
-Staging Storybook: `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chat-catalog--inventory` (`URL_MSQDX_UI_STORYBOOK`).
+Staging Storybook: `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chatcatalog--inventory` (`URL_MSQDX_UI_STORYBOOK`).
+Message blocks: `@msqdx/ui` `ChatBlockPanel` / `ChatBlockList` · Storybook **`Organisms/ChatCatalog`** · Molecules/ChatBlock*
