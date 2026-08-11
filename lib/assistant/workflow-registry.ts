@@ -78,6 +78,11 @@ const LAZY_HANDLERS: Record<AssistantIntent['type'], () => Promise<IntentDispatc
     return (ctx, intent) =>
       handlePersonaBootstrapIntent(ctx, intent as Extract<AssistantIntent, { type: 'persona_bootstrap' }>);
   },
+  journey_outline: async () => {
+    const { handleJourneyOutlineIntent } = await import('@/lib/assistant/handlers/journey-outline');
+    return (ctx, intent) =>
+      handleJourneyOutlineIntent(ctx, intent as Extract<AssistantIntent, { type: 'journey_outline' }>);
+  },
   geo_analysis: async () => {
     const { handleGeoAnalysisIntent } = await import('@/lib/assistant/handlers/geo-analysis');
     return (ctx, intent) => handleGeoAnalysisIntent(ctx, intent as Extract<AssistantIntent, { type: 'geo_analysis' }>);

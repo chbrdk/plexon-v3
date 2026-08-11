@@ -5,9 +5,9 @@ import { isConfirmationRequiredToolName } from '@/lib/assistant/orchestrator-com
 import { buildCapabilitiesUiLayout } from '@/lib/assistant/capabilities-ui';
 
 describe('extended intent router', () => {
-  it('routes checkion-only create', () => {
+  it('routes checkion-worded create to Collection create_project', () => {
     expect(routeAssistantIntent('Neues Projekt Foo in checkion anlegen').type).toBe(
-      'create_checkion_project'
+      'create_project'
     );
   });
 
@@ -29,6 +29,24 @@ describe('extended intent router', () => {
     expect(routeAssistantIntent('Generiere Persona für Zielgruppe Eltern').type).toBe(
       'persona_bootstrap'
     );
+  });
+
+  it('routes journey_outline', () => {
+    const intent = routeAssistantIntent('Zeige Journey Outline für "Checkout"');
+    expect(intent.type).toBe('journey_outline');
+    if (intent.type === 'journey_outline') {
+      expect(intent.journeyName).toMatch(/Checkout/i);
+      expect(intent.validate).toBeUndefined();
+    }
+  });
+
+  it('routes journey validate with id', () => {
+    const intent = routeAssistantIntent('Validiere Journey journey-product-discovery');
+    expect(intent.type).toBe('journey_outline');
+    if (intent.type === 'journey_outline') {
+      expect(intent.validate).toBe(true);
+      expect(intent.journeyId).toBe('journey-product-discovery');
+    }
   });
 });
 

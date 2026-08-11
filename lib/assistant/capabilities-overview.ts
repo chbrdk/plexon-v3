@@ -45,7 +45,15 @@ export const ASSISTANT_CAPABILITIES_SECTIONS: CapabilitySection[] = [
     rows: [
       { name: 'Personas generieren', description: 'KI-gestützte Persona-Erstellung für Zielgruppen' },
       { name: 'Target Groups', description: 'Zielgruppen anlegen, verwalten & mit Wissen anreichern' },
-      { name: 'Customer Journeys', description: 'Journeys generieren, validieren & anreichern' },
+      {
+        name: 'Customer Journeys',
+        description: 'Journeys generieren, validieren & anreichern',
+      },
+      {
+        name: 'Journey Outline',
+        description:
+          'Phasen + Moments im Chat anzeigen (optional Validate mit Quotes/Findings)',
+      },
       { name: 'Website-Research', description: 'Automatische Website-Analyse für Projektkontext' },
       { name: 'AI Assist', description: 'KI-Templates für Persona, Journey & mehr' },
       { name: 'Dokumente & Knowledge', description: 'Wissen für Zielgruppen hinterlegen & clustern' },

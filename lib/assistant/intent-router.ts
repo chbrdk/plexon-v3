@@ -22,6 +22,12 @@ export type AssistantIntent =
   | { type: 'scan_summarize'; scanId?: string }
   | { type: 'sync_diagnose' }
   | { type: 'persona_bootstrap'; name?: string; targetGroupName?: string }
+  | {
+      type: 'journey_outline';
+      journeyId?: string;
+      journeyName?: string;
+      validate?: boolean;
+    }
   | { type: 'geo_analysis'; url: string; deep?: boolean }
   | { type: 'ssl_check'; host: string }
   | { type: 'wayback_check'; url: string }
@@ -111,6 +117,37 @@ const PERSONA_BOOTSTRAP_PATTERNS = [
   /\bpersona-?bootstrap\b/i,
   /\beasy\s*setup\b/i,
 ];
+
+const JOURNEY_OUTLINE_PATTERNS = [
+  /\bjourney\s*-?\s*outline\b/i,
+  /\b(customer\s*)?journey\b.*\b(zeig|zeige|show|outline|übersicht|detail|öffnen)\b/i,
+  /\b(zeig|zeige|show)\b.*\b(customer\s*)?journey\b/i,
+  /\bnutzerreise\b.*\b(zeig|zeige|show|outline|übersicht|detail|validier)\w*\b/i,
+  /\b(zeig|zeige|show)\b.*\bnutzerreise\b/i,
+  /\b(journey|nutzerreise)\b.*\bvalidier\w*\b/i,
+  /\bvalidier\w*\b.*\b(journey|nutzerreise)\b/i,
+];
+
+function extractJourneyId(text: string): string | undefined {
+  const slug = text.match(/\b(journey-[a-z0-9][a-z0-9-]*)\b/i);
+  if (slug?.[1]) return slug[1];
+  const uuid = text.match(
+    /\b([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\b/i
+  );
+  return uuid?.[1];
+}
+
+function extractJourneyName(text: string): string | undefined {
+  const quoted = text.match(/["„“]([^"„“]{2,80})["„“]/);
+  if (quoted?.[1]?.trim()) return quoted[1].trim();
+  const named = text.match(
+    /\b(?:journey|nutzerreise)\s+(?:outline\s+)?(?:für|for|von|namens)?\s*["„“]?([A-Za-zÄÖÜäöüß0-9][\wÄÖÜäöüß &\-]{1,60})/i
+  );
+  const candidate = named?.[1]?.trim();
+  if (!candidate) return undefined;
+  if (/^(outline|übersicht|detail|validieren|zeigen)$/i.test(candidate)) return undefined;
+  return candidate;
+}
 
 const GEO_PATTERNS = [
   /\bgeo\b/i,
@@ -326,6 +363,16 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
       type: 'persona_bootstrap',
       name: extractProjectName(trimmed),
       targetGroupName: extractProjectName(trimmed),
+    };
+  }
+
+  if (JOURNEY_OUTLINE_PATTERNS.some((p) => p.test(trimmed))) {
+    const validate = /\bvalidier\w*\b/i.test(trimmed);
+    return {
+      type: 'journey_outline',
+      journeyId: extractJourneyId(trimmed),
+      journeyName: extractJourneyName(trimmed) ?? extractProjectName(trimmed),
+      ...(validate ? { validate: true } : {}),
     };
   }
 

@@ -110,6 +110,16 @@ export function audionPlatformStudyWave(studyId: string, waveId: string): string
   return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}`;
 }
 
+/** GET /api/journeys/{journeyId} — Customer Journey detail (phases + moments). */
+export function audionPlatformJourneyById(journeyId: string): string {
+  return `${audionPlatformBase()}/journeys/${encodeURIComponent(journeyId)}`;
+}
+
+/** POST /api/ai/journeys/{journeyId}/validate — persona fit report. */
+export function audionPlatformJourneyValidate(journeyId: string): string {
+  return `${audionPlatformBase()}/ai/journeys/${encodeURIComponent(journeyId)}/validate`;
+}
+
 /** GET /api/ux-journey-agent/run/{jobId} */
 export function audionPlatformJourneyJob(jobId: string): string {
   return `${audionPlatformBase()}/ux-journey-agent/run/${encodeURIComponent(jobId)}`;

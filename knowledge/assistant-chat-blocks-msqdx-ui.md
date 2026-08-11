@@ -22,3 +22,5 @@
 | `quote_list` | `UiQuoteList` | `ChatQuoteList` |
 
 Builders: `build-journey-outline-ui.ts` (`buildJourneyOutlineBlocks` · `buildJourneyDetailLayout`)
+
+**Intent:** `journey_outline` — `specs/domain/assistant-journey-outline.md` · `knowledge/assistant-journey-outline.md` · handler `handlers/journey-outline.ts`

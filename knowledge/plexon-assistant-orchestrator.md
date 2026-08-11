@@ -92,6 +92,7 @@ Intent-Handler leben in `lib/assistant/handlers/`; Dispatch über `lib/assistant
 | Mozilla Observatory (Security Headers) | `lib/integrations/external/mozilla-observatory-client.ts` | optional in `website_audit` |
 | DNS DoH Check | `lib/integrations/external/dns-doh-client.ts` | optional in `website_audit` |
 | Persona-Bootstrap | `handlers/persona-bootstrap.ts` | `persona_bootstrap` |
+| Journey Outline | `handlers/journey-outline.ts` | `journey_outline` |
 | Sync-Diagnose | `handlers/sync-diagnose.ts` | `sync_diagnose` |
 | Paralleles Research | `handlers/start-research.ts` | `parallel_research` |
 | Projekt-Zusammenfassung | `handlers/project-status.ts` | Intent `project_status` |
