@@ -118,18 +118,25 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     )
     const globals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
     expect(globals).toMatch(
-      /\.plexon-eqc-results-scroll \{[\s\S]*?scroll-snap-type:\s*y proximity/,
+      /\.plexon-eqc-results-scroll\[data-eqc-mode='present'\] \{[\s\S]*?scroll-snap-type:\s*y proximity/,
     )
     expect(globals).toMatch(
-      /\.plexon-eqc-results > \.plexon-dash-band \{[\s\S]*?min-height:\s*100svh/,
+      /\.plexon-eqc-results\[data-eqc-mode='present'\] > \.plexon-dash-band \{[\s\S]*?min-height:\s*100svh/,
     )
     expect(globals).toMatch(
-      /\.plexon-eqc-results > \.plexon-eqc-masthead-shell \{[\s\S]*?min-height:\s*70svh/,
+      /\.plexon-eqc-results\[data-eqc-mode='present'\] > \.plexon-eqc-masthead-shell \{[\s\S]*?min-height:\s*70svh/,
     )
     expect(globals).toMatch(/--eqc-chapter-gap-tall:\s*50vh/)
     expect(globals).toMatch(/--eqc-chapter-gap-short:\s*20vh/)
+    expect(globals).toMatch(/--eqc-compact-gap:/)
+    expect(globals).toMatch(/\[data-eqc-mode='compact'\]/)
+    expect(globals).toMatch(/data-eqc-presenting/)
+    expect(globals).toContain('.plexon-eqc-present-hud')
     expect(globals).toMatch(/\[data-eqc-chapter='short'\]/)
     expect(dash).toContain('syncEqcResultsChapterHeights')
+    expect(dash).toContain("useState<EqcPresentationMode>('compact')")
+    expect(dash).toContain('useEqcPresentationMode')
+    expect(dash).toContain('EQC_PAGE_COPY.presentButton')
     expect(masthead).toContain('data-eqc-chapter="short"')
     expect(globals).toMatch(/\.app-frame:has\(\.plexon-eqc-stage\) \{[\s\S]*?height:\s*100dvh/)
     expect(globals).toMatch(/\.plexon-eqc-scroll \{[\s\S]*?overflow-y:\s*auto/)

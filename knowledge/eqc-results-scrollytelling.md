@@ -1,14 +1,20 @@
 # EQC results scrollytelling
 
-Stand: 2026-08-10  
+Stand: 2026-08-11  
 Spec: `specs/domain/ui-migrate-event-quick-check.md` (Wave 8)  
-Constants: `lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`
+Constants: `lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`  
+Mode hook: `components/event-quick-check/useEqcPresentationMode.ts`
 
 ## Intent
 
-Done Event Quick Check results read as **magazine chapters**: cover is shorter; content bands fill at least one viewport; scrolling snaps between chapters (`scroll-snap-type: y proximity` on `.plexon-eqc-results-scroll`).
+Done Event Quick Check results support two modes:
 
-## Heights & gaps
+| Mode | Default | Behavior |
+|------|---------|----------|
+| **compact** | yes | Tight section gaps, natural chapter height, no snap |
+| **present** | toggle | Magazine chapters: cover shorter; bands ≥1 viewport; snap + keyboard deck nav; chrome-less shell |
+
+## Heights & gaps (present only)
 
 | Token | Value | Role |
 |-------|-------|------|
@@ -17,26 +23,31 @@ Done Event Quick Check results read as **magazine chapters**: cover is shorter; 
 | Gap tall↔tall | `50vh` | Both neighbors measured ≥ 100vh |
 | Gap if either short | `20vh` | Cover or any chapter measured &lt; 100vh |
 
-`data-eqc-chapter="tall"|"short"` is synced by `syncEqcResultsChapterHeights` (ResizeObserver on the results root). CSS:
+`data-eqc-chapter="tall"|"short"` is synced by `syncEqcResultsChapterHeights` while presenting. CSS is scoped under `[data-eqc-mode='present']`.
 
-- `.plexon-eqc-results > * + *` → tall gap
-- `.plexon-eqc-results > [data-eqc-chapter='short'] + *` / `* + [data-eqc-chapter='short']` → short gap
+Compact uses `--eqc-compact-gap` between sections.
+
+## Interaction (present)
+
+- Masthead toggle: Präsentieren / Präsentation beenden
+- Keyboard: ↓/PgDn/Space next · ↑/PgUp prev · Home/End · Esc exit
+- HUD dots for chapter jump
+- `data-eqc-presenting` hides AppShell rail/topbar/brand/FAB via `:has()`
 
 ## CSS contract
 
 | Selector | Role |
 |----------|------|
 | `.app-frame:has(.plexon-eqc-stage)` → … → `.plexon-eqc-stage` | Height chain (`100dvh`, `overflow: hidden`) |
-| `.plexon-eqc-results-scroll` | Snap + scroll container |
-| `.plexon-eqc-results > .plexon-eqc-masthead-shell` | Cover ≥ `70svh` |
-| `.plexon-eqc-results > .plexon-dash-band` | Content ≥ `100svh` |
+| `.plexon-eqc-results-scroll[data-eqc-mode='present']` | Snap + smooth scroll |
+| `.plexon-eqc-results[data-eqc-mode='present'] > .plexon-eqc-masthead-shell` | Cover ≥ `70svh` |
+| `.plexon-eqc-results[data-eqc-mode='present'] > .plexon-dash-band` | Content ≥ `100svh` |
+| `.plexon-eqc-results[data-eqc-mode='compact']` | Everyday spacing |
 
-`prefers-reduced-motion: reduce` disables snap + smooth scroll.
-
-**Bug note (2026-08-10):** Without the height chain, `.plexon-eqc-stage { overflow: hidden }` clipped content and the scroll child never became a bounded scrollport — wheel did nothing.
+`prefers-reduced-motion: reduce` disables snap + enter motion in present.
 
 ## Non-goals
 
+- Browser Fullscreen API
+- URL `?present=1` / localStorage persistence (v1)
 - Horizontal storyboards
-- JS-driven scroll hijacking
-- Forcing the cover taller than `70svh`

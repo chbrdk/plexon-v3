@@ -827,7 +827,11 @@ export function EventQuickCheckPageClient() {
   if (phase === 'done' && report && workflowRunId) {
     return (
       <>
-        <div className="plexon-eqc-scroll plexon-eqc-results-scroll" data-plexon-event-quick-check>
+        <div
+          className="plexon-eqc-scroll plexon-eqc-results-scroll"
+          data-plexon-event-quick-check
+          data-eqc-mode="compact"
+        >
           <EventQuickCheckDashboardView
             report={report}
             workflowRunId={workflowRunId}

@@ -110,4 +110,8 @@ export const EQC_PAGE_COPY = {
   geoRerunHint: 'Fragen anpassen und GEO-Check erneut ausführen — Personas und Deep Scan bleiben erhalten.',
   geoReviewCancel: 'Zurück zum Report',
   geoReviewConfirmRerun: 'Fragen bestätigen & GEO erneut starten',
+  presentButton: 'Präsentieren',
+  exitPresentButton: 'Präsentation beenden',
+  presentHudLabel: (index: number, total: number) => `${index}/${total}`,
+  presentHudAria: 'Kapitel in der Präsentation',
 } as const;

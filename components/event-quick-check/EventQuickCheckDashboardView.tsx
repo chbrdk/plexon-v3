@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Accordion,
@@ -20,6 +20,10 @@ import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-chec
 import { EventQuickCheckGeoRecommendationsMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoRecommendationsMagazineSection'
 import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
 import { EventQuickCheckResultsMasthead } from '@/components/event-quick-check/EventQuickCheckResultsMasthead'
+import {
+  useEqcPresentationMode,
+  type EqcPresentationMode,
+} from '@/components/event-quick-check/useEqcPresentationMode'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { syncKpiTilesFromDomain } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count'
@@ -177,6 +181,18 @@ export function EventQuickCheckDashboardView({
 
   const [appendixOpen, setAppendixOpen] = useState<string | null>(null)
   const resultsRootRef = useRef<HTMLDivElement>(null)
+  const [eqcMode, setEqcMode] = useState<EqcPresentationMode>('compact')
+  const exitPresent = useCallback(() => setEqcMode('compact'), [])
+  const {
+    presenting,
+    chapterIndex,
+    chapterCount,
+    goToChapter,
+  } = useEqcPresentationMode({
+    mode: eqcMode,
+    resultsRootRef,
+    onExitPresent: exitPresent,
+  })
 
   const domain = report.domain
   const insights = report.insights
@@ -191,6 +207,7 @@ export function EventQuickCheckDashboardView({
   }, [domain, report.executive.kpiTiles])
 
   useLayoutEffect(() => {
+    if (eqcMode !== 'present') return
     const root = resultsRootRef.current
     if (!root || typeof ResizeObserver === 'undefined') return
 
@@ -207,7 +224,7 @@ export function EventQuickCheckDashboardView({
       ro.disconnect()
       window.removeEventListener('resize', sync)
     }
-  }, [report, layout, personaId, appendixOpen])
+  }, [report, layout, personaId, appendixOpen, eqcMode])
 
   return (
     <div
@@ -216,6 +233,7 @@ export function EventQuickCheckDashboardView({
       data-plexon-event-quick-check-dashboard
       data-section="eqc-magazine-results"
       data-readonly={readOnly ? 'true' : 'false'}
+      data-eqc-mode={eqcMode}
     >
       <EventQuickCheckResultsMasthead
         report={report}
@@ -226,6 +244,14 @@ export function EventQuickCheckDashboardView({
         personaCount={personas.length}
         actions={
           <>
+            <Button
+              variant={presenting ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setEqcMode(presenting ? 'compact' : 'present')}
+              aria-pressed={presenting}
+            >
+              {presenting ? EQC_PAGE_COPY.exitPresentButton : EQC_PAGE_COPY.presentButton}
+            </Button>
             {!readOnly && onNewCheck ? (
               <Button variant="ghost" size="sm" onClick={onNewCheck}>
                 {EQC_PAGE_COPY.newCheckButton}
@@ -529,6 +555,27 @@ export function EventQuickCheckDashboardView({
           ]}
         />
       </section>
+
+      {presenting && chapterCount > 0 ? (
+        <div className="plexon-eqc-present-hud" role="navigation" aria-label={EQC_PAGE_COPY.presentHudAria}>
+          <div className="plexon-eqc-present-hud__dots">
+            {Array.from({ length: chapterCount }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                className="plexon-eqc-present-hud__dot"
+                data-active={i === chapterIndex ? 'true' : undefined}
+                aria-label={EQC_PAGE_COPY.presentHudLabel(i + 1, chapterCount)}
+                aria-current={i === chapterIndex ? 'true' : undefined}
+                onClick={() => goToChapter(i)}
+              />
+            ))}
+            <span className="plexon-eqc-present-hud__label">
+              {EQC_PAGE_COPY.presentHudLabel(chapterIndex + 1, chapterCount)}
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
