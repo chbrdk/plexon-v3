@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, '..')
 const wired: Array<[string, string]> = [
   ['UiMetricGrid.tsx', 'ChatMetricGrid'],
   ['UiKeyValueList.tsx', 'ChatKeyValueList'],
+  ['UiColorSwatchGrid.tsx', 'SwatchStrip'],
+  ['UiFontSpecimenList.tsx', 'ChatBlockPanel'],
   ['UiStepList.tsx', 'ChatStepList'],
   ['UiFindingList.tsx', 'ChatBlockList'],
   ['UiRecommendationList.tsx', 'ChatBlockList'],
@@ -38,6 +40,7 @@ describe('assistant chat blocks use @msqdx/ui primitives', () => {
       'ChatBlockListTone',
       'ChatMetricGrid',
       'ChatKeyValueList',
+      'SwatchStrip',
       'ChatStepList',
       'ChatLinkList',
       'ChatAlertBlock',

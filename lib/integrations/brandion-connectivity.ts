@@ -43,6 +43,9 @@ export function buildBrandionIntegrationContextBlock(input: {
   lines.push(
     '- Bei Marken-/Farb-/Token-/Guideline-Fragen **zuerst** brandion_guidelines_list / brandion_guideline_get / brandion_tokens_list nutzen — Hex/Namen nicht schätzen.'
   );
+  lines.push(
+    '- Nach brandion_tokens_list erscheinen automatisch `color_swatch_grid` / `font_specimen_list` — Kurzkommentar, keine zweite volle Palette per plexon_ui_append_block.'
+  );
   lines.push('- `@msqdx/ui-tokens` ist nicht die Brandion-Guideline-Wahrheit.');
   return lines.join('\n');
 }

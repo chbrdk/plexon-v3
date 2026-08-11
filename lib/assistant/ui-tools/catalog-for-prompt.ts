@@ -27,6 +27,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | \`metric_grid\` | \`title?\`, \`items: [{ label, value, unit?, tone?, hint? }]\` |
 | \`data_table\` | \`title?\`, \`columns\`, \`rows\` |
 | \`key_value_list\` | \`title?\`, \`items: [{ label, value }]\` |
+| \`color_swatch_grid\` | \`title?\`, \`guidelineName?\`, \`items: [{ label, hex, path? }]\` — Brandion Farben (Auto nach brandion_tokens_list) |
+| \`font_specimen_list\` | \`title?\`, \`items: [{ label, family, weight?, sample?, path? }]\` — Brandion Schriften |
 | \`alert\` | \`title?\`, \`message\`, \`tone?\` |
 | \`link_list\` | \`title?\`, \`links: [{ label, href, external? }]\` |
 | \`text\` | \`markdown\` |
@@ -57,7 +59,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | Persona-Bootstrap | \`target_group_card\` + \`persona_card\` |
 | Journey outline (AUDION) | \`phase_strip\` + \`moment_list\` (+ \`link_list\` deep link) |
 | Journey validate (AUDION) | \`quote_list\` + \`finding_list\` + \`recommendation_list\` |
-| Sync-Diagnose | \`key_value_list\` + \`alert\` |`;
+| Sync-Diagnose | \`key_value_list\` + \`alert\` |
+| Brandion Farben/Fonts | MCP \`brandion_tokens_list\` → Auto \`color_swatch_grid\` / \`font_specimen_list\` (keine zweite volle Palette per append_block) |`;
 }
 
 export function buildUiPanelHintForPlan(intent: string): string {
@@ -72,7 +75,7 @@ export function buildUiPanelHintForPlan(intent: string): string {
     intent === 'brandion_brand' ||
     intent === 'project_status'
   ) {
-    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Side-Panel mit `plexon_ui_set_panel` darstellen. Bei Farben: `key_value_list` mit Token-Pfad + Hex.';
+    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Side-Panel mit `plexon_ui_set_panel` darstellen. Bei Brandion-Farben/Fonts: nach `brandion_tokens_list` erscheinen Auto-Blöcke `color_swatch_grid` / `font_specimen_list` — Kurztext dazu, keine zweite volle Palette per append_block.';
   }
   return '';
 }

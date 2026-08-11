@@ -25,6 +25,8 @@ import { UiRecommendationList } from '@/components/assistant-ui/organisms/UiReco
 import { UiPhaseStrip } from '@/components/assistant-ui/organisms/UiPhaseStrip'
 import { UiMomentList } from '@/components/assistant-ui/organisms/UiMomentList'
 import { UiQuoteList } from '@/components/assistant-ui/organisms/UiQuoteList'
+import { UiColorSwatchGrid } from '@/components/assistant-ui/organisms/UiColorSwatchGrid'
+import { UiFontSpecimenList } from '@/components/assistant-ui/organisms/UiFontSpecimenList'
 import { UiEventQuickCheckReviewGateBlock } from '@/components/assistant-ui/organisms/UiEventQuickCheckReviewGateBlock'
 import { EventQuickCheckReportView } from '@/components/assistant/reports/EventQuickCheckReportView'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
@@ -47,6 +49,10 @@ export function AssistantBlockRenderer({ block }: AssistantBlockRendererProps) {
       return <UiAlertBlock {...(props as Parameters<typeof UiAlertBlock>[0])} />
     case 'key_value_list':
       return <UiKeyValueList {...(props as Parameters<typeof UiKeyValueList>[0])} />
+    case 'color_swatch_grid':
+      return <UiColorSwatchGrid {...(props as Parameters<typeof UiColorSwatchGrid>[0])} />
+    case 'font_specimen_list':
+      return <UiFontSpecimenList {...(props as Parameters<typeof UiFontSpecimenList>[0])} />
     case 'data_table':
       return <UiDataTable {...(props as Parameters<typeof UiDataTable>[0])} />
     case 'link_list':

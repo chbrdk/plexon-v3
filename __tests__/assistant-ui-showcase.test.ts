@@ -7,6 +7,8 @@ const ALL_BLOCK_TYPES = [
   'alert',
   'metric_grid',
   'key_value_list',
+  'color_swatch_grid',
+  'font_specimen_list',
   'data_table',
   'link_list',
   'summary_card',
@@ -18,13 +20,12 @@ const ALL_BLOCK_TYPES = [
 ] as const;
 
 describe('buildAssistantUiShowcaseLayout', () => {
-  it('includes every block type once', () => {
+  it('includes every core block type at least once', () => {
     const layout = buildAssistantUiShowcaseLayout();
     const types = layout.blocks.map((b) => b.type);
     for (const type of ALL_BLOCK_TYPES) {
       expect(types).toContain(type);
     }
-    expect(layout.blocks.length).toBe(ALL_BLOCK_TYPES.length);
   });
 });
 

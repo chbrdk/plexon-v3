@@ -15,6 +15,10 @@ export function blockPinLabel(block: UiBlock): string {
       return 'Tabelle';
     case 'key_value_list':
       return 'Details';
+    case 'color_swatch_grid':
+      return 'Farben';
+    case 'font_specimen_list':
+      return 'Schriften';
     case 'alert':
       return 'Hinweis';
     case 'link_list':

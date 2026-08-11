@@ -39,20 +39,36 @@ Both are read-only in v1. Include in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_F
 
 Heuristic intent `brandion_brand` (or route via `project_knowledge` with brandion families) when prompt matches Farbe|Farben|color|colours?|Guideline|Marke|Brandion|Design.?Token|CD\b|Corporate.?Design and `hasBrandionMcp`.
 
-Prefer `brandion_tokens` + `brandion_guidelines` + `plexon_ui` (optional swatch/kv blocks).
+Prefer `brandion_tokens` + `brandion_guidelines` + generative Brandion cards (below).
+
+## Content cards (generative UI)
+
+After a successful `brandion.tokens_list` / `brandion_tokens_list`, the orchestrator **auto-emits** UI blocks via `buildBrandionTokenBlocks` (do not rely on the model to invent swatches).
+
+| type | Props (summary) | Render |
+|------|-----------------|--------|
+| `color_swatch_grid` | `title?`, `guidelineName?`, `items: [{ label, hex, path? }]` | `@msqdx/ui` `ChatBlockPanel` + `SwatchStrip` + row swatches |
+| `font_specimen_list` | `title?`, `items: [{ label, family, weight?, sample?, path? }]` | Specimen text with inline `font-family` (no webfont load) |
+
+Limits: `maxColorSwatches: 24`, `maxFontSpecimens: 12` in `UI_BLOCK_LIMITS`.
+
+Model guidance: when auto-cards are present, answer with short narrative — **do not** append a second full palette via `plexon_ui_append_block`.
 
 ## Orchestrator
 
-Fourth MCP fetch branch beside Checkion / Audion / Echon using shared `fetchCheckionMcpTools` client.
+Fourth MCP fetch branch beside Checkion / Audion / Echon using shared `fetchCheckionMcpTools` client.  
+Hook: after `tokens_list` tool result → parse JSON → append `color_swatch_grid` / `font_specimen_list` to `UiBlockAccumulator` + SSE `ui_block`.
 
 ## Non-goals
 
 - Write tools / confirmation flows
 - Dumping full token graphs into system prompt
 - Treating `@msqdx/ui-tokens` as Brandion guideline truth
+- Loading remote webfonts into the chat specimen
 
 ## Acceptance
 
 1. Unit: catalog classifies `brandion_tokens_list` → `brandion_tokens`.
 2. Planner: color prompt with `hasBrandionMcp` selects brandion families.
-3. Staging: `BRANDION_MCP_URL` set; assistant answers guideline colors via tools.
+3. Unit: `buildBrandionTokenBlocks` maps MCP color/typography rows → validated blocks.
+4. Staging: `BRANDION_MCP_URL` set; color Q&A shows swatch cards (not only markdown hex).

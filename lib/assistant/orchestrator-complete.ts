@@ -31,6 +31,11 @@ import {
 import { executePlexonUiTool } from '@/lib/assistant/ui-tools/executor';
 import { UiBlockAccumulator } from '@/lib/assistant/ui-tools/accumulator';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
+import {
+  buildBrandionTokenBlocks,
+  isBrandionTokensListToolName,
+  parseBrandionTokensListPayload,
+} from '@/lib/assistant/ui-blocks/build-brandion-token-ui';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -496,6 +501,23 @@ export async function runOrchestratorComplete(
       const result = await callCheckionMcpTool(baseUrl, mcpName, block.input ?? {});
       const truncated = truncateAssistantText(result, ASSISTANT_MAX_TOOL_RESULT_CHARS, `Tool ${block.name}`);
       onToolEnd?.(block.name, truncated.slice(0, 240));
+
+      if (isBrandionTokensListToolName(mcpName) || isBrandionTokensListToolName(block.name)) {
+        const payload = parseBrandionTokensListPayload(truncated);
+        if (payload) {
+          const autoBlocks = buildBrandionTokenBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
       toolResults.push({
         id: block.id,
         content: truncated,

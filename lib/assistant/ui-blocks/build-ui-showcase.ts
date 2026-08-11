@@ -43,6 +43,34 @@ export function buildAssistantUiShowcaseLayout(): UiLayout {
         { label: 'Status', value: 'Aktiv' },
       ],
     }),
+    block('color_swatch_grid', {
+      title: 'Color Swatch Grid',
+      guidelineName: 'Demo CD',
+      items: [
+        { label: 'primary', hex: '#b638ff', path: 'color.action.primary' },
+        { label: 'accent', hex: '#fef14d', path: 'color.accent.yellow' },
+        { label: 'ink', hex: '#1a1a1a', path: 'color.neutral.ink' },
+      ],
+    }),
+    block('font_specimen_list', {
+      title: 'Font Specimen List',
+      items: [
+        {
+          label: 'heading',
+          family: 'Source Serif 4',
+          weight: '600',
+          path: 'typography.heading.h1',
+          sample: 'Ag Brand Heading',
+        },
+        {
+          label: 'body',
+          family: 'Noto Sans',
+          weight: '400',
+          path: 'typography.body',
+          sample: 'The quick brown fox',
+        },
+      ],
+    }),
     block('data_table', {
       title: 'Data Table',
       columns: ['Seite', 'Score', 'Issues'],

@@ -73,6 +73,8 @@ export type {
   ChatKeyValueItem,
   ChatKeyValueListProps,
 } from '../../msqdx-ui/packages/ui/src/components/ChatKeyValueList'
+export { SwatchStrip } from '../../msqdx-ui/packages/ui/src/components/SwatchStrip'
+export type { SwatchStripProps } from '../../msqdx-ui/packages/ui/src/components/SwatchStrip'
 export { ChatStepList } from '../../msqdx-ui/packages/ui/src/components/ChatStepList'
 export type {
   ChatStepItem,

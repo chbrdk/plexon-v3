@@ -50,6 +50,8 @@ export const UI_BLOCK_ICONS: Record<UiBlockType, string> = {
   alert: 'info',
   metric_grid: 'dashboard',
   key_value_list: 'list_alt',
+  color_swatch_grid: 'palette',
+  font_specimen_list: 'text_fields',
   data_table: 'table_chart',
   link_list: 'link',
   persona_card: 'face',
@@ -61,6 +63,9 @@ export const UI_BLOCK_ICONS: Record<UiBlockType, string> = {
   collapsible: 'unfold_more',
   finding_list: 'fact_check',
   recommendation_list: 'task_alt',
+  phase_strip: 'view_timeline',
+  moment_list: 'psychology',
+  quote_list: 'format_quote',
   event_quick_check_report: 'assignment',
   event_quick_check_review_gate: 'fact_check',
 };

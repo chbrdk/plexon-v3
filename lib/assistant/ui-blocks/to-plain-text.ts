@@ -25,6 +25,30 @@ export function blockToPlainText(block: UiBlock): string {
       const title = p.title ? `${p.title}\n` : '';
       return title + items.map((i) => `${i.label}: ${i.value}`).join('\n');
     }
+    case 'color_swatch_grid': {
+      const items = (p.items as Array<{ label: string; hex: string; path?: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      return (
+        title +
+        items
+          .map((i) => `- ${i.label}: ${i.hex}${i.path ? ` (${i.path})` : ''}`)
+          .join('\n')
+      );
+    }
+    case 'font_specimen_list': {
+      const items =
+        (p.items as Array<{ label: string; family: string; weight?: string; path?: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      return (
+        title +
+        items
+          .map(
+            (i) =>
+              `- ${i.label}: ${i.family}${i.weight ? ` ${i.weight}` : ''}${i.path ? ` (${i.path})` : ''}`
+          )
+          .join('\n')
+      );
+    }
     case 'alert':
       return [p.title, p.message].filter(Boolean).join(': ');
     case 'link_list': {

@@ -167,6 +167,46 @@ export function renderUiBlockPdf(block: UiBlock): React.ReactNode {
       );
     }
 
+    case 'color_swatch_grid': {
+      const items = (p.items as Array<{ label: string; hex: string; path?: string }>) ?? [];
+      return (
+        <View key={block.id} style={s.blockWrap} wrap={false}>
+          {blockTitle(p) ? <Text style={s.sectionTitle}>{blockTitle(p)}</Text> : null}
+          {items.map((item, i) => (
+            <View key={i} style={s.metricRow}>
+              <Text>
+                {item.label}
+                {item.path ? ` (${item.path})` : ''}
+              </Text>
+              <Text>{item.hex}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
+    case 'font_specimen_list': {
+      const items =
+        (p.items as Array<{ label: string; family: string; weight?: string; path?: string }>) ?? [];
+      return (
+        <View key={block.id} style={s.blockWrap} wrap={false}>
+          {blockTitle(p) ? <Text style={s.sectionTitle}>{blockTitle(p)}</Text> : null}
+          {items.map((item, i) => (
+            <View key={i} style={s.metricRow}>
+              <Text>
+                {item.label}
+                {item.path ? ` (${item.path})` : ''}
+              </Text>
+              <Text>
+                {item.family}
+                {item.weight ? ` · ${item.weight}` : ''}
+              </Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+
     case 'finding_list': {
       const items = (p.items as Array<{ title: string; description?: string; severity?: string }>) ?? [];
       return (

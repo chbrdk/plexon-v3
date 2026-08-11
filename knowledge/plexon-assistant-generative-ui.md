@@ -79,6 +79,8 @@ Der PLEXON-Assistent soll Antworten nicht nur als Markdown liefern, sondern **li
 | `metric_grid` | `UiMetricGrid` | `UiBlockSurface` + tiles |
 | `data_table` | `UiDataTable` | semantic table + token CSS |
 | `key_value_list` | `UiKeyValueList` | rows |
+| `color_swatch_grid` | `UiColorSwatchGrid` | Brandion colors (`SwatchStrip`) |
+| `font_specimen_list` | `UiFontSpecimenList` | Brandion typography specimens |
 | `alert` | `UiAlertBlock` | `UiAlert` |
 | `link_list` | `UiLinkList` | link rows |
 | `step_list` | `UiStepList` | **`.plexon-assistant-steps`** + `Spinner` (not MUI Stepper) |

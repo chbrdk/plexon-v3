@@ -20,6 +20,8 @@ export const UI_BLOCK_LIMITS = {
   maxPhases: 16,
   maxMoments: 32,
   maxQuotes: 16,
+  maxColorSwatches: 24,
+  maxFontSpecimens: 12,
   maxString: 2000,
   maxShort: 256,
 } as const;
@@ -29,6 +31,8 @@ export const UI_BLOCK_TYPES = [
   'metric_grid',
   'data_table',
   'key_value_list',
+  'color_swatch_grid',
+  'font_specimen_list',
   'alert',
   'link_list',
   'persona_card',

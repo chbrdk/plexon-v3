@@ -57,6 +57,44 @@ export const keyValueListPropsSchema = z.object({
     .max(UI_BLOCK_LIMITS.maxKeyValues),
 });
 
+const hexColor = z
+  .string()
+  .trim()
+  .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, {
+    message: 'hex must be #RGB, #RRGGBB, or #RRGGBBAA',
+  });
+
+export const colorSwatchGridPropsSchema = z.object({
+  title: medium.optional(),
+  guidelineName: medium.optional(),
+  items: z
+    .array(
+      z.object({
+        label: short,
+        hex: hexColor,
+        path: medium.optional(),
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxColorSwatches),
+});
+
+export const fontSpecimenListPropsSchema = z.object({
+  title: medium.optional(),
+  items: z
+    .array(
+      z.object({
+        label: short,
+        family: short,
+        weight: z.string().trim().max(32).optional(),
+        sample: medium.optional(),
+        path: medium.optional(),
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxFontSpecimens),
+});
+
 export const alertPropsSchema = z.object({
   title: short.optional(),
   message: medium,
@@ -308,6 +346,8 @@ export const UI_BLOCK_SCHEMAS = {
   metric_grid: metricGridPropsSchema,
   data_table: dataTablePropsSchema,
   key_value_list: keyValueListPropsSchema,
+  color_swatch_grid: colorSwatchGridPropsSchema,
+  font_specimen_list: fontSpecimenListPropsSchema,
   alert: alertPropsSchema,
   link_list: linkListPropsSchema,
   persona_card: personaCardPropsSchema,

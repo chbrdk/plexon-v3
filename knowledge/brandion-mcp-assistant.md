@@ -12,3 +12,13 @@ Symptom if only entitlement was required: assistant invents “Brand-Daten nicht
 ## System prompt
 
 `buildBrandionIntegrationContextBlock` — when active, instruct model to call `brandion_tokens_list` / guidelines tools for CD colors.
+
+## Content cards (2026-08-11)
+
+| Block | Builder | Organism |
+|-------|---------|----------|
+| `color_swatch_grid` | `lib/assistant/ui-blocks/build-brandion-token-ui.ts` | `UiColorSwatchGrid` |
+| `font_specimen_list` | same | `UiFontSpecimenList` |
+
+Auto-emit: `orchestrator-complete.ts` after `brandion_tokens_list` / `brandion.tokens_list`.  
+MCP rows: color → `hex`; typography → `family` / `weight` (parsed in `brandion-v3/mcp-server`).
