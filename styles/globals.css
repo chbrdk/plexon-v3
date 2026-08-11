@@ -2936,6 +2936,19 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   padding: clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 2rem);
 }
 
+/* Public shareable Quick Check — no AppShell chrome */
+.plexon-eqc-share-page {
+  min-height: 100dvh;
+  background: var(--bg0, var(--bg));
+  color: var(--ink, var(--fg));
+  padding: clamp(1rem, 3vw, 2rem) 0 clamp(2.5rem, 6vw, 4rem);
+  box-sizing: border-box;
+}
+
+.plexon-eqc-share-page .plexon-eqc-results {
+  padding-bottom: 2rem;
+}
+
 .plexon-eqc-results {
   --eqc-chapter-gap-tall: 50vh;
   --eqc-chapter-gap-short: 20vh;

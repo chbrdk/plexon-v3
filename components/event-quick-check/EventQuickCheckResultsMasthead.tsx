@@ -108,8 +108,7 @@ export function EventQuickCheckResultsMasthead({
 
   const hint = [
     generatedAt,
-    readOnly ? EQC_PAGE_COPY.sharePublicReadOnly : null,
-    !readOnly && platformProjectId ? EQC_PAGE_COPY.shareTeamHint : null,
+    readOnly ? null : platformProjectId ? EQC_PAGE_COPY.shareTeamHint : null,
   ]
     .filter(Boolean)
     .join(' · ')
@@ -120,16 +119,20 @@ export function EventQuickCheckResultsMasthead({
     tags.push(`${personaCount} Persona${personaCount === 1 ? '' : 's'}`)
   }
 
+  const showTopbar = !readOnly && Boolean(hint || actions)
+
   return (
     <div
       className="plexon-eqc-masthead-shell"
       data-section="eqc-results-masthead"
       data-eqc-chapter="short"
     >
-      <div className="plexon-eqc-masthead-topbar">
-        <p className="plexon-eqc-masthead-topbar__hint">{hint || EQC_PAGE_COPY.pageTitle}</p>
-        {actions ? <div className="plexon-eqc-results-actions">{actions}</div> : null}
-      </div>
+      {showTopbar ? (
+        <div className="plexon-eqc-masthead-topbar">
+          <p className="plexon-eqc-masthead-topbar__hint">{hint || EQC_PAGE_COPY.pageTitle}</p>
+          {actions ? <div className="plexon-eqc-results-actions">{actions}</div> : null}
+        </div>
+      ) : null}
 
       <header className="plexon-eqc-masthead" data-tone={tone}>
         <div className="plexon-eqc-masthead__hero">

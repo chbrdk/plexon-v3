@@ -42,6 +42,8 @@ import {
   PATH_REGISTER,
   PATH_RESET_PASSWORD,
   PATH_SETTINGS,
+  PATH_SHARE_QUICK_CHECK,
+  PATH_SHARE_REPORTS,
 } from '@/lib/constants'
 import { USER_ROLE } from '@/lib/db/schema'
 import { useI18n } from '@/components/i18n/I18nProvider'
@@ -50,6 +52,16 @@ const AUTH_PATHS = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_
 
 function isAssistantEmbedPath(pathname: string | null): boolean {
   return Boolean(pathname === PATH_ASSISTANT_EMBED || pathname?.startsWith(`${PATH_ASSISTANT_EMBED}/`))
+}
+
+function isPublicSharePath(pathname: string | null): boolean {
+  if (!pathname) return false
+  return (
+    pathname === PATH_SHARE_QUICK_CHECK ||
+    pathname.startsWith(`${PATH_SHARE_QUICK_CHECK}/`) ||
+    pathname === PATH_SHARE_REPORTS ||
+    pathname.startsWith(`${PATH_SHARE_REPORTS}/`)
+  )
 }
 
 const TITLE_BY_PREFIX: Array<{ prefix: string; titleKey: string }> = [
@@ -95,6 +107,7 @@ export function AppShell({
 
   const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
   const isEmbedPage = isAssistantEmbedPath(pathname)
+  const isSharePage = isPublicSharePath(pathname)
 
   const frameStyle = useMemo(
     () =>
@@ -126,7 +139,7 @@ export function AppShell({
         ? t(resolvedTitle)
         : resolvedTitle
 
-  if (isAuthPage || isEmbedPage) {
+  if (isAuthPage || isEmbedPage || isSharePage) {
     return <>{children}</>
   }
 

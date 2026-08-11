@@ -243,6 +243,7 @@ export function EventQuickCheckDashboardView({
         platformProjectId={platformProjectId}
         personaCount={personas.length}
         actions={
+          readOnly ? undefined : (
           <>
             <Button
               variant={presenting ? 'primary' : 'ghost'}
@@ -252,22 +253,22 @@ export function EventQuickCheckDashboardView({
             >
               {presenting ? EQC_PAGE_COPY.exitPresentButton : EQC_PAGE_COPY.presentButton}
             </Button>
-            {!readOnly && onNewCheck ? (
+            {onNewCheck ? (
               <Button variant="ghost" size="sm" onClick={onNewCheck}>
                 {EQC_PAGE_COPY.newCheckButton}
               </Button>
             ) : null}
-            {!readOnly && canRerunGeo && onRerunGeo ? (
+            {canRerunGeo && onRerunGeo ? (
               <Button variant="ghost" size="sm" onClick={onRerunGeo}>
                 {EQC_PAGE_COPY.geoRerunButton}
               </Button>
             ) : null}
-            {!readOnly && onOpenHistory ? (
+            {onOpenHistory ? (
               <Button variant="ghost" size="sm" onClick={onOpenHistory}>
                 {EQC_PAGE_COPY.historyOpenButton}
               </Button>
             ) : null}
-            {!readOnly && onShareLink ? (
+            {onShareLink ? (
               <Button
                 variant="ghost"
                 size="sm"
@@ -277,7 +278,7 @@ export function EventQuickCheckDashboardView({
                 {shareLinkFeedback ?? EQC_PAGE_COPY.shareLinkButton}
               </Button>
             ) : null}
-            {!readOnly && platformProjectId ? (
+            {platformProjectId ? (
               <Button
                 variant="link"
                 size="sm"
@@ -286,7 +287,7 @@ export function EventQuickCheckDashboardView({
                 {EQC_PAGE_COPY.openProjectButton}
               </Button>
             ) : null}
-            {!readOnly && report.domainComparison?.checkionProjectHref ? (
+            {report.domainComparison?.checkionProjectHref ? (
               <Button
                 variant="link"
                 size="sm"
@@ -304,6 +305,7 @@ export function EventQuickCheckDashboardView({
               format="pptx"
             />
           </>
+          )
         }
       />
 
