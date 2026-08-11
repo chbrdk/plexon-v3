@@ -8,8 +8,9 @@ import { uiLayoutToPlainText } from '@/lib/assistant/ui-blocks/to-plain-text';
 import { recordAssistantUsageEvent } from '@/lib/assistant/usage';
 import { listUserCompanies } from '@/lib/assistant/user-eligibility';
 import { getUserProductEntitlementsMap } from '@/lib/db/product-entitlements';
-import { getEchonMcpUrl, getBrandionMcpUrl } from '@/lib/constants';
+import { getEchonMcpUrl } from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
+import { resolveUseBrandionMcp } from '@/lib/assistant/brandion-mcp-gate';
 import {
   emitPhase,
   type IntentHandler,
@@ -28,9 +29,10 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   const useAudionMcp = entitlements.audion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
   const useEchonMcp =
     Boolean(getEchonMcpUrl()) && (useCheckionMcp || useAudionMcp);
-  const useBrandionMcp =
-    entitlements.brandion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE &&
-    Boolean(getBrandionMcpUrl());
+  const useBrandionMcp = resolveUseBrandionMcp({
+    brandionEntitlement: entitlements.brandion,
+    pageContext: ctx.body.pageContext ?? null,
+  });
   const companies = await listUserCompanies(ctx.user.id);
 
   const effectivePrompt = ctx.body.confirmToolCall

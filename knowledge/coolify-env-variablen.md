@@ -132,7 +132,7 @@ PLEXON aktiviert ECHON-MCP automatisch, wenn `ECHON_MCP_URL` gesetzt ist **und**
 |----------|---------|--------------|
 | `BRANDION_MCP_URL` | Nein | MCP für Assistant. Intern: `http://brandion-mcp:3100`. Spec: `specs/domain/assistant-brandion-mcp.md`. |
 
-PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** der Nutzer Brandion-Entitlement (`active`) hat. Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list` (Farben aus Guidelines — nicht erfinden).
+PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** (Brandion-Entitlement `active` **oder** `pageContext.product === brandion` im Embed). Gate: `lib/assistant/brandion-mcp-gate.ts`. Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list` (Farben aus Guidelines — nicht erfinden).
 
 ### PLEXON Assistant (Phase 2 Workflows)
 

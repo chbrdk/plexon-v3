@@ -16,9 +16,15 @@ Wire Brandion guideline/token MCP tools into the Plexon free-chat orchestrator s
 
 Helper: `getBrandionMcpUrl()` in `lib/constants.ts`.
 
-## Entitlement
+## Entitlement / host product
 
-`useBrandionMcp` when `entitlements.brandion.status === active` (same gate pattern as Checkion/Audion). Tools only load when URL is set.
+`useBrandionMcp` when `BRANDION_MCP_URL` is set **and** either:
+
+1. `entitlements.brandion.status === active`, or
+2. `pageContext.product === 'brandion'` (Brandion embed / host — many users lack a seeded entitlement row)
+
+Helper: `resolveUseBrandionMcp` in `lib/assistant/brandion-mcp-gate.ts`.  
+Connectivity block: `buildBrandionIntegrationContextBlock` so the model knows MCP is on and must call `brandion_*` tools for colors (not invent).
 
 ## Tool families
 
