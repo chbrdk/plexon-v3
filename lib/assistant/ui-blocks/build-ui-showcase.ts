@@ -133,6 +133,17 @@ export function buildAssistantUiShowcaseLayout(): UiLayout {
         { id: 'm3', kind: 'opportunity', label: 'FAQ mit Citations' },
       ],
     }),
+    block('quote_list', {
+      title: 'Persona-Stimmen',
+      items: [
+        {
+          quote: 'Ich brauche Citations, sonst vertraue ich dem Anbieter nicht.',
+          attribution: 'Alex · Consideration',
+          context: 'Friction: fehlende Quellen',
+          tone: 'warning',
+        },
+      ],
+    }),
   ];
 
   return { version: UI_LAYOUT_VERSION, blocks };

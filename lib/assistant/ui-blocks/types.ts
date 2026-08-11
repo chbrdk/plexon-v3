@@ -19,6 +19,7 @@ export const UI_BLOCK_LIMITS = {
   maxRecommendations: 16,
   maxPhases: 16,
   maxMoments: 32,
+  maxQuotes: 16,
   maxString: 2000,
   maxShort: 256,
 } as const;
@@ -41,6 +42,7 @@ export const UI_BLOCK_TYPES = [
   'recommendation_list',
   'phase_strip',
   'moment_list',
+  'quote_list',
   'event_quick_check_report',
   'event_quick_check_review_gate',
 ] as const;

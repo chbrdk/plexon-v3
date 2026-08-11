@@ -100,6 +100,20 @@ export function blockToPlainText(block: UiBlock): string {
       const title = p.title ? `${p.title}\n` : '';
       return title + items.map((i) => `- [${i.kind}] ${i.label}`).join('\n');
     }
+    case 'quote_list': {
+      const items =
+        (p.items as Array<{ quote: string; attribution?: string; context?: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      return (
+        title +
+        items
+          .map((i) => {
+            const meta = [i.attribution, i.context].filter(Boolean).join(' · ');
+            return `- “${i.quote}”${meta ? ` (${meta})` : ''}`;
+          })
+          .join('\n')
+      );
+    }
     case 'event_quick_check_report': {
       const report = p.report as {
         meta?: { title?: string; url?: string };

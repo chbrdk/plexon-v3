@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
-import type { UiBlock } from '@/lib/assistant/ui-blocks/types'
+import type { UiBlock, UiLayout } from '@/lib/assistant/ui-blocks/types'
+import { UI_LAYOUT_VERSION } from '@/lib/assistant/ui-blocks/types'
 import { createUiBlock } from '@/lib/assistant/ui-blocks/validate'
 
 export type JourneyPhaseOutlineInput = {
@@ -7,6 +8,7 @@ export type JourneyPhaseOutlineInput = {
   name: string
   summary?: string | null
   order?: number
+  elements?: JourneyMomentOutlineInput[]
 }
 
 export type JourneyMomentOutlineInput = {
@@ -15,9 +17,28 @@ export type JourneyMomentOutlineInput = {
   label: string
 }
 
+export type JourneyQuoteOutlineInput = {
+  quote: string
+  attribution?: string
+  context?: string
+  tone?: 'neutral' | 'success' | 'warning' | 'error' | 'info'
+}
+
+export type JourneyFindingOutlineInput = {
+  title: string
+  description: string
+  severity?: 'neutral' | 'success' | 'warning' | 'error' | 'info'
+}
+
+export type JourneyRecommendationOutlineInput = {
+  title: string
+  description?: string
+  priority?: number
+  category?: string
+}
+
 /**
  * Build generative UI blocks for an Audion-shaped journey outline (phases + optional moments).
- * Product schemas stay outside DS — this only maps to `phase_strip` / `moment_list`.
  */
 export function buildJourneyOutlineBlocks(input: {
   title?: string
@@ -56,12 +77,20 @@ export function buildJourneyOutlineBlocks(input: {
   )
   if (phaseBlock.ok) blocks.push(phaseBlock.block)
 
-  if (input.moments && input.moments.length > 0) {
+  const moments =
+    input.moments ??
+    sorted.find((p) => p.id === input.activePhaseId)?.elements ??
+    sorted[0]?.elements
+
+  if (moments && moments.length > 0) {
+    const activePhase = sorted.find((p) => p.id === input.activePhaseId) ?? sorted[0]
     const momentBlock = createUiBlock(
       'moment_list',
       {
-        title: input.momentsTitle ?? 'Moments',
-        items: input.moments.map((m) => ({
+        title:
+          input.momentsTitle ??
+          (activePhase ? `${activePhase.name} · Moments` : 'Moments'),
+        items: moments.map((m) => ({
           id: m.id,
           kind: m.kind,
           label: m.label,
@@ -73,4 +102,89 @@ export function buildJourneyOutlineBlocks(input: {
   }
 
   return blocks
+}
+
+/**
+ * Full journey chat layout: outline + validate quotes/findings/recs + deep link.
+ * Call from tools/handlers once journey detail (or validate) is fetched.
+ */
+export function buildJourneyDetailLayout(input: {
+  journeyId: string
+  journeyName: string
+  journeyHref?: string
+  phases: JourneyPhaseOutlineInput[]
+  activePhaseId?: string
+  quotes?: JourneyQuoteOutlineInput[]
+  findings?: JourneyFindingOutlineInput[]
+  recommendations?: JourneyRecommendationOutlineInput[]
+  error?: string
+}): UiLayout {
+  const blocks: UiBlock[] = []
+
+  blocks.push(
+    ...buildJourneyOutlineBlocks({
+      title: input.journeyName,
+      phases: input.phases,
+      activePhaseId: input.activePhaseId,
+    }),
+  )
+
+  if (input.quotes && input.quotes.length > 0) {
+    const quotes = createUiBlock(
+      'quote_list',
+      {
+        title: 'Persona-Stimmen',
+        items: input.quotes,
+      },
+      randomUUID(),
+    )
+    if (quotes.ok) blocks.push(quotes.block)
+  }
+
+  if (input.findings && input.findings.length > 0) {
+    const findings = createUiBlock(
+      'finding_list',
+      {
+        title: 'Validate · Erkenntnisse',
+        items: input.findings,
+      },
+      randomUUID(),
+    )
+    if (findings.ok) blocks.push(findings.block)
+  }
+
+  if (input.recommendations && input.recommendations.length > 0) {
+    const recs = createUiBlock(
+      'recommendation_list',
+      {
+        title: 'Validate · Empfehlungen',
+        items: input.recommendations,
+      },
+      randomUUID(),
+    )
+    if (recs.ok) blocks.push(recs.block)
+  }
+
+  if (input.journeyHref) {
+    const links = createUiBlock(
+      'link_list',
+      {
+        title: 'Weiter',
+        links: [{ label: 'In AUDION öffnen', href: input.journeyHref, external: true }],
+      },
+      randomUUID(),
+    )
+    if (links.ok) blocks.push(links.block)
+  }
+
+  if (input.error) {
+    const alert = createUiBlock(
+      'alert',
+      { title: 'Journey', message: input.error, tone: 'warning' },
+      randomUUID(),
+    )
+    if (alert.ok) blocks.push(alert.block)
+  }
+
+  return { version: UI_LAYOUT_VERSION, blocks }
 }

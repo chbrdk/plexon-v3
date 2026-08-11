@@ -252,6 +252,21 @@ export const momentListPropsSchema = z.object({
     .max(UI_BLOCK_LIMITS.maxMoments),
 });
 
+export const quoteListPropsSchema = z.object({
+  title: medium.optional(),
+  items: z
+    .array(
+      z.object({
+        quote: medium,
+        attribution: short.optional(),
+        context: medium.optional(),
+        tone: uiToneSchema.optional(),
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxQuotes),
+});
+
 export const eventQuickCheckReportPropsSchema = z.object({
   report: z
     .object({
@@ -296,6 +311,7 @@ export const UI_BLOCK_SCHEMAS = {
   recommendation_list: recommendationListPropsSchema,
   phase_strip: phaseStripPropsSchema,
   moment_list: momentListPropsSchema,
+  quote_list: quoteListPropsSchema,
   event_quick_check_report: eventQuickCheckReportPropsSchema,
   event_quick_check_review_gate: eventQuickCheckReviewGatePropsSchema,
 } as const;

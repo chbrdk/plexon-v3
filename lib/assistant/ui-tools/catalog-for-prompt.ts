@@ -36,6 +36,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | \`step_list\` | \`title?\`, \`steps: [{ id, label, status, detail?, progress? }]\` |
 | \`phase_strip\` | \`title?\`, \`phases: [{ id, label, summary?, active?, status?: upcoming\\|current\\|done }]\` |
 | \`moment_list\` | \`title?\`, \`items: [{ id?, kind: action\\|thought\\|feeling\\|pain\\|opportunity\\|other, label }]\` |
+| \`quote_list\` | \`title?\`, \`items: [{ quote, attribution?, context?, tone? }]\` |
 | \`corner_tab_section\` | \`tabLabel\`, \`title?\`, \`markdown\`, \`placement?\` |
 | \`chart\` | \`chartType: bar\\|line\`, \`labels[]\`, \`datasets: [{ label, values[] }]\`, \`xAxisLabel?\`, \`yAxisLabel?\` |
 
@@ -55,6 +56,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | GEO/E-E-A-T | \`metric_grid\` + \`data_table\` + \`chart\` |
 | Persona-Bootstrap | \`target_group_card\` + \`persona_card\` |
 | Journey outline (AUDION) | \`phase_strip\` + \`moment_list\` (+ \`link_list\` deep link) |
+| Journey validate (AUDION) | \`quote_list\` + \`finding_list\` + \`recommendation_list\` |
 | Sync-Diagnose | \`key_value_list\` + \`alert\` |`;
 }
 
