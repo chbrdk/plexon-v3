@@ -23,6 +23,7 @@
 - Specs: `specs/domain/app-shell.md`
 - Specs index: `knowledge/specs-index.md`
 - Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md`
+  - Block typography density: `knowledge/assistant-block-typography.md` · `components/assistant-ui/atoms/UiText.tsx`
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
   - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed` (+ `theme` via `ASSISTANT_EMBED_THEME_QUERY_PARAM`)
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)

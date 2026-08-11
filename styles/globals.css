@@ -1657,6 +1657,24 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   margin-bottom: 0.65rem;
 }
 
+.plexon-assistant-block-title {
+  margin: 0;
+  font-weight: var(--weight-medium, 500);
+}
+
+.plexon-assistant-list-item .plexon-assistant-text.ds-text-title,
+.plexon-assistant-list-item-head .ds-text-title {
+  margin: 0;
+  font-weight: var(--weight-medium, 500);
+  letter-spacing: var(--track-tight, -0.01em);
+}
+
+.plexon-assistant-list-item .plexon-assistant-text.ds-text-meta,
+.plexon-assistant-list-item .ds-text-meta {
+  margin: 0;
+  max-width: 62ch;
+}
+
 .plexon-assistant-block-header-copy {
   display: grid;
   gap: 0.2rem;

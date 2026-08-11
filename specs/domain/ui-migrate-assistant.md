@@ -33,6 +33,7 @@
 | Empty | `EmptyState` |
 | Collection binding | pageContext / conversation / `?platformProjectId=` (no topbar picker) |
 | Block chrome | `Panel` + `Text` + `.plexon-assistant-block*` |
+| Block list typography | `UiText` → DS roles: panel title `title@xl`, item title `title@lg`, prose `meta` (`knowledge/assistant-block-typography.md`) |
 | Step progress | `.plexon-assistant-steps` + `Spinner` (Audion-like status rows) |
 | Markdown blocks | `AssistantChatAnswer` / `format-chat-answer` |
 

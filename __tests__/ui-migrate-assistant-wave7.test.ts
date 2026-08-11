@@ -73,6 +73,18 @@ describe('assistant ui rebuild (wave 7 generative UI)', () => {
     expect(css).toContain('.plexon-assistant-steps')
     expect(css).toContain('.plexon-assistant-entity-card')
     expect(css).toContain('.plexon-assistant-capabilities')
+    expect(css).toContain('.plexon-assistant-block-title')
+    const uiText = readFileSync(path.join(root, 'components/assistant-ui/atoms/UiText.tsx'), 'utf8')
+    expect(uiText).toContain('resolveUiTextTypography')
+    expect(uiText).toContain("size: 'lg'")
+  })
+
+  it('block header uses compact title size', () => {
+    const header = readFileSync(
+      path.join(root, 'components/assistant-ui/molecules/UiBlockHeader.tsx'),
+      'utf8',
+    )
+    expect(header).toContain('size="xl"')
   })
 
   it('capabilities overview and phase indicator are @msqdx/ui only', () => {

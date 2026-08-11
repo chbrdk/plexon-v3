@@ -27,7 +27,7 @@ export function UiBlockHeader({
           </Text>
         ) : null}
         <div className="plexon-assistant-block-title-row">
-          <Text role="title" as="h3" className="plexon-assistant-block-title">
+          <Text role="title" size="xl" as="h3" className="plexon-assistant-block-title">
             {title}
           </Text>
           {infoTooltip ? (

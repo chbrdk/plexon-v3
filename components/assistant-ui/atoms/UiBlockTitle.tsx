@@ -11,7 +11,12 @@ type UiBlockTitleProps = {
 
 export function UiBlockTitle({ children, className }: UiBlockTitleProps) {
   return (
-    <Text role="title" as="h3" className={['plexon-assistant-block-title', className].filter(Boolean).join(' ')}>
+    <Text
+      role="title"
+      size="xl"
+      as="h3"
+      className={['plexon-assistant-block-title', className].filter(Boolean).join(' ')}
+    >
       {children}
     </Text>
   )

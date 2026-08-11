@@ -7,6 +7,7 @@ type UiTextRole = 'body' | 'label' | 'caption'
 
 type UiTextProps = {
   children: string | number
+  /** Legacy MUI-ish variants — mapped to DS Text roles (compact chat density). */
   variant?: 'body2' | 'subtitle2' | 'caption'
   tone?: UiTone
   /** body = body copy, label/caption = meta */
@@ -16,14 +17,26 @@ type UiTextProps = {
   className?: string
 }
 
-function textRole(
-  variant: UiTextProps['variant'],
-  role: UiTextRole
-): 'body' | 'title' | 'meta' | 'label' {
-  if (role === 'label') return 'label'
-  if (role === 'caption' || variant === 'caption') return 'meta'
-  if (variant === 'subtitle2') return 'title'
-  return 'body'
+export type UiTextTypography = {
+  role: 'title' | 'meta' | 'hint' | 'label'
+  size?: 'lg'
+  as: 'p' | 'span'
+}
+
+/**
+ * Map legacy variants → DS Text roles sized for assistant / chat density.
+ * - subtitle2 → title @ lg (item headline, not magazine section title)
+ * - body2 → meta (secondary prose under a headline)
+ * - caption → hint
+ */
+export function resolveUiTextTypography(
+  variant: UiTextProps['variant'] = 'body2',
+  role: UiTextRole = 'body',
+): UiTextTypography {
+  if (role === 'label') return { role: 'label', as: 'span' }
+  if (role === 'caption' || variant === 'caption') return { role: 'hint', as: 'span' }
+  if (variant === 'subtitle2') return { role: 'title', size: 'lg', as: 'p' }
+  return { role: 'meta', as: 'p' }
 }
 
 export function UiText({
@@ -33,10 +46,12 @@ export function UiText({
   role = 'body',
   className,
 }: UiTextProps) {
+  const typography = resolveUiTextTypography(variant, role)
   return (
     <Text
-      role={textRole(variant, role)}
-      as={role === 'label' || role === 'caption' ? 'span' : 'p'}
+      role={typography.role}
+      size={typography.size}
+      as={typography.as}
       className={['plexon-assistant-text', `is-${tone}`, className].filter(Boolean).join(' ')}
     >
       {children}
