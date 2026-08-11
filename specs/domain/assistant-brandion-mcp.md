@@ -18,13 +18,13 @@ Helper: `getBrandionMcpUrl()` in `lib/constants.ts`.
 
 ## Entitlement / host product
 
-`useBrandionMcp` when `BRANDION_MCP_URL` is set **and** either:
+`useBrandionMcp` / `useAudionMcp` / `useCheckionMcp` via `resolveUseProductMcp` in `lib/assistant/product-mcp-gate.ts` when the product MCP URL is set **and** any of:
 
-1. `entitlements.brandion.status === active`, or
-2. `pageContext.product === 'brandion'` (Brandion embed / host — many users lack a seeded entitlement row)
+1. matching product entitlement `active`, or
+2. `pageContext.product` is that product **or** another platform shell (`plexon` / sibling) — Collection cross-ask (e.g. Brandion embed → AUDION personas), or
+3. any sibling product entitlement is `active`
 
-Helper: `resolveUseBrandionMcp` in `lib/assistant/brandion-mcp-gate.ts`.  
-Connectivity block: `buildBrandionIntegrationContextBlock` so the model knows MCP is on and must call `brandion_*` tools for colors (not invent).
+Connectivity blocks: `buildBrandionIntegrationContextBlock` / Audion equivalent so the model knows MCP is on.
 
 ## Tool families
 

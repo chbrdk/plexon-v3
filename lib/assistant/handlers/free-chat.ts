@@ -10,7 +10,11 @@ import { listUserCompanies } from '@/lib/assistant/user-eligibility';
 import { getUserProductEntitlementsMap } from '@/lib/db/product-entitlements';
 import { getEchonMcpUrl } from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
-import { resolveUseBrandionMcp } from '@/lib/assistant/brandion-mcp-gate';
+import {
+  resolveUseAudionMcp,
+  resolveUseBrandionMcp,
+  resolveUseCheckionMcp,
+} from '@/lib/assistant/product-mcp-gate';
 import {
   emitPhase,
   type IntentHandler,
@@ -25,13 +29,27 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   }
 
   const entitlements = await getUserProductEntitlementsMap(ctx.user.id);
-  const useCheckionMcp = entitlements.checkion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
-  const useAudionMcp = entitlements.audion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
+  const pageContext = ctx.body.pageContext ?? null;
+  const hasAnyActiveEntitlement =
+    entitlements.checkion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
+    entitlements.audion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
+    entitlements.brandion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
+  const useCheckionMcp = resolveUseCheckionMcp({
+    checkionEntitlement: entitlements.checkion,
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
+  const useAudionMcp = resolveUseAudionMcp({
+    audionEntitlement: entitlements.audion,
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
   const useEchonMcp =
     Boolean(getEchonMcpUrl()) && (useCheckionMcp || useAudionMcp);
   const useBrandionMcp = resolveUseBrandionMcp({
     brandionEntitlement: entitlements.brandion,
-    pageContext: ctx.body.pageContext ?? null,
+    pageContext,
+    hasAnyActiveEntitlement,
   });
   const companies = await listUserCompanies(ctx.user.id);
 

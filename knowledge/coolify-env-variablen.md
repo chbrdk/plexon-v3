@@ -132,7 +132,13 @@ PLEXON aktiviert ECHON-MCP automatisch, wenn `ECHON_MCP_URL` gesetzt ist **und**
 |----------|---------|--------------|
 | `BRANDION_MCP_URL` | Nein | MCP für Assistant. Intern: `http://brandion-mcp:3100`. Spec: `specs/domain/assistant-brandion-mcp.md`. |
 
-PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** (Brandion-Entitlement `active` **oder** `pageContext.product === brandion` im Embed). Gate: `lib/assistant/brandion-mcp-gate.ts`. Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list` (Farben aus Guidelines — nicht erfinden).
+PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** Gate `resolveUseProductMcp` greift (Entitlement, Host-Produkt/pageContext, oder Sibling-Entitlement). Staging: öffentliche FQDN `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` — **nicht** `http://brandion-mcp:3100` (anderes Coolify-Projekt). Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list`.
+
+### AUDION MCP
+
+| Variable | Pflicht | Beschreibung |
+|----------|---------|--------------|
+| `AUDION_MCP_URL` | Nein | Staging: `https://mcp-audion.projects-a.plygrnd.tech` (Coolify `audion-mcp`). Ohne diese Variable sind AUDION-Tools im Assistant tot — Entitlement allein reicht nicht. |
 
 ### PLEXON Assistant (Phase 2 Workflows)
 

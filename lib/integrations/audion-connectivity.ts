@@ -231,7 +231,9 @@ export async function buildAudionIntegrationContextBlock(input: {
       '- MCP-Tools: **deaktiviert** (AUDION_MCP_URL fehlt – audion.projects_list etc. nicht verfügbar)'
     );
   } else if (!input.useAudionMcp) {
-    lines.push('- MCP-Tools: **deaktiviert** (kein aktives AUDION-Entitlement für diesen Nutzer)');
+    lines.push(
+      '- MCP-Tools: **deaktiviert** (kein Zugang: Entitlement/Host-Kontext, oder AUDION_MCP_URL fehlt)'
+    );
   } else {
     lines.push(`- MCP-Tools: **aktiv** (Server: ${diag.mcpUrlPrefix ?? '…'}…)`);
     lines.push(
