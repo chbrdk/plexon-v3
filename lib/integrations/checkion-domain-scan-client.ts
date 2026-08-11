@@ -6,6 +6,8 @@ import {
   checkionApiScanDomainSummary,
 } from '@/lib/paths/checkion-api';
 
+import type { DomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
+
 export type DomainScanPreview = {
   id: string;
   domain: string;
@@ -16,6 +18,8 @@ export type DomainScanPreview = {
   stats: { errors: number; warnings: number; notices: number; total: number };
   topIssues: Array<{ title: string; count: number }>;
   seoPagesAnalyzed?: number;
+  /** Corpus composition from Checkion domain-scan overview (optional). */
+  distributions?: DomainScanDistributions;
 };
 
 export type DomainScanStartResult =

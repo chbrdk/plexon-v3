@@ -8,6 +8,7 @@ import { pollUntil } from '@/lib/assistant/poll-until';
 import {
   checkionApiDomainScanDetail,
   checkionApiDomainScanIssues,
+  checkionApiDomainScanOverview,
   checkionApiDomainScans,
 } from '@/lib/paths/checkion-api';
 import type { IssueGateSignals } from '@/lib/collection-test-flow';
@@ -16,7 +17,7 @@ import {
   mapDomainScanV3ToPreview,
   type DomainScanV3IssueRow,
 } from '@/lib/integrations/map-domain-scan-v3-preview';
-
+import { mapDomainOverviewToDistributions } from '@/lib/integrations/map-domain-scan-distributions';
 export type CheckionDomainScanSummary = {
   id: string;
   projectId: string;
@@ -280,14 +281,48 @@ export async function fetchCheckionDomainScanV3Preview(
         count: typeof o.count === 'number' ? o.count : undefined,
       }))
     : [];
-  return {
-    ok: true,
-    preview: mapDomainScanV3ToPreview({
-      scan: detail.scan,
-      issues: issueRows,
-      issueStats: detail.scan.issueStats,
-    }),
-  };
+  const preview = mapDomainScanV3ToPreview({
+    scan: detail.scan,
+    issues: issueRows,
+    issueStats: detail.scan.issueStats,
+  });
+  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId);
+  if (overviewRes.ok) {
+    const distributions = mapDomainOverviewToDistributions(overviewRes.overview);
+    if (distributions) preview.distributions = distributions;
+  }
+  return { ok: true, preview };
+}
+
+/** Best-effort DomainOverview JSON for corpus distributions. */
+export async function fetchCheckionDomainScanV3Overview(
+  domainScanId: string
+): Promise<{ ok: true; overview: unknown } | { ok: false; error: string }> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return { ok: false, error: auth.error };
+  try {
+    const res = await fetch(checkionApiDomainScanOverview(domainScanId), {
+      headers: auth.headers,
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `CHECKION domain overview: HTTP ${res.status}` };
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: 'CHECKION domain overview: ungültiges JSON' };
+    }
+    const overview =
+      json && typeof json === 'object' && 'overview' in (json as object)
+        ? (json as { overview: unknown }).overview
+        : json;
+    return { ok: true, overview };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 export async function runCheckionDomainScanV3(input: {

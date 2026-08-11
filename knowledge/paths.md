@@ -41,8 +41,10 @@
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
   - Capability Catalog (Agent ↔ Flow, Wave C4): `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md` · executors `lib/capabilities/executors/*` · promote `lib/capabilities/promote.ts` · intents `run_collection_flow` / `promote_capability_sequence` · trigger `assistant` · template `assistant-promote-v1` · tests `__tests__/capability-*.test.ts` · env `CAPABILITY_CATALOG_RUNTIME` (default **off**)
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
+  - EQC → Persona chat overlay (Wave C5): `knowledge/eqc-persona-chat.md` · `resolveEqcPersonaChatEmbedHref` → Audion `/chat/embed` iframe in `EqcPersonaChatOverlay` · fallback `resolveEqcPersonaChatHref` → `/chat` · CTA `eqc-persona-chat-cta` · Audion guest budgets (`guest-budget.ts`)
   - EQC GEO voice spider: `knowledge/eqc-geo-voice-radar.md` · `components/event-quick-check/EventQuickCheckVoiceRadar.tsx` · `lib/assistant/reports/event-quick-check/eqc-radar-geometry.ts`
   - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · cover `70svh` · bands `100svh` · adaptive gap via `data-eqc-chapter` (`lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`)
+  - EQC Distributions band (Checkion corpus donuts): `knowledge/eqc-distributions-band.md` · overview via `checkionApiDomainScanOverview`
   - EQC E-E-A-T + GEO-Empfehlungen as own bands: `knowledge/eqc-magazine-eeat-recs-bands.md`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`

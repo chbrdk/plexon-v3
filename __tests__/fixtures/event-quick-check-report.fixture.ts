@@ -88,6 +88,38 @@ export function eventQuickCheckBvikFixture(): EventQuickCheckResult {
         },
         { title: 'Img element with empty alt text must have absent or empty title attribute.', count: 49 },
       ],
+      distributions: {
+        readability: {
+          bands: [
+            { id: 'standard', label: 'Standard', value: 22 },
+            { id: 'complex', label: 'Complex', value: 26 },
+            { id: 'very', label: 'Very complex', value: 2 },
+          ],
+          score: 10.2,
+          grade: 'Complex (College)',
+          dwellSecondsMedian: 571,
+        },
+        eco: {
+          grades: [
+            { id: 'C', label: 'C', value: 26 },
+            { id: 'D', label: 'D', value: 7 },
+            { id: 'E', label: 'E', value: 3 },
+            { id: 'F', label: 'F', value: 14 },
+          ],
+          grade: 'C',
+          avgCo2: 1.02,
+        },
+        links: {
+          slices: [
+            { id: 'internal', label: 'Internal', value: 19689 },
+            { id: 'external', label: 'External', value: 656 },
+          ],
+          internal: 19689,
+          external: 656,
+          broken: 0,
+          total: 20345,
+        },
+      },
     },
     geoJob: undefined,
     audionProjectId: 'audion-1',

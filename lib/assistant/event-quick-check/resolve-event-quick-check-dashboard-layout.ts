@@ -1,8 +1,10 @@
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-personas';
+import { hasDomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
 
 export type EventQuickCheckDashboardLayout = {
   showDomain: boolean;
+  showDistributions: boolean;
   showDomainComparison: boolean;
   showPersona: boolean;
   showGeoQuestions: boolean;
@@ -23,6 +25,7 @@ export function resolveEventQuickCheckDashboardLayout(
   report: EventQuickCheckReportModel
 ): EventQuickCheckDashboardLayout {
   const showDomain = Boolean(report.domain);
+  const showDistributions = hasDomainScanDistributions(report.distributions);
   const showDomainComparison = Boolean(report.domainComparison?.rows.length);
   const showPersona = resolveReportPersonas(report).length > 0;
   const showGeoQuestions = report.geo.questions.length > 0;
@@ -64,6 +67,7 @@ export function resolveEventQuickCheckDashboardLayout(
   if (showPersona) {
     return {
       showDomain,
+      showDistributions,
       showDomainComparison,
       showPersona,
       showGeoQuestions,
@@ -83,6 +87,7 @@ export function resolveEventQuickCheckDashboardLayout(
 
   return {
     showDomain,
+    showDistributions,
     showDomainComparison,
     showPersona,
     showGeoQuestions,

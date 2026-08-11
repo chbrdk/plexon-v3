@@ -36,6 +36,8 @@
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
 | Central Assistant Flyout | `knowledge/central-assistant-flyout.md` |
 | Capability Catalog | `knowledge/capability-catalog.md` |
+| EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
+| EQC Distributions band | `knowledge/eqc-distributions-band.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |

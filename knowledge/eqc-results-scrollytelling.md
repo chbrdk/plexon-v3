@@ -5,6 +5,21 @@ Spec: `specs/domain/ui-migrate-event-quick-check.md` (Wave 8)
 Constants: `lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`  
 Mode hook: `components/event-quick-check/useEqcPresentationMode.ts`
 
+## Chapter order (compact + present)
+
+Typical sequence of direct children under `.plexon-eqc-results`:
+
+1. Cover / masthead  
+2. Markt & Trends (optional)  
+3. Domain & Barrierefreiheit  
+4. **Distributions** — Checkion-parity corpus donuts (`EventQuickCheckDistributionsMagazineSection`; data from domain-scan overview)  
+5. Domain-Vergleich (optional)  
+6. AUDION Persona(s)  
+7. GEO & Wettbewerb → E-E-A-T → GEO-Empfehlungen  
+8. Einschätzung & Empfehlungen → Appendix  
+
+Knowledge: `knowledge/eqc-distributions-band.md`
+
 ## Intent
 
 Done Event Quick Check results support two modes:

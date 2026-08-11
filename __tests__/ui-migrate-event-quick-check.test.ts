@@ -78,13 +78,33 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('EventQuickCheckResultsMasthead')
     expect(dash).toContain('SectionChrome')
+    expect(dash).toContain('eqc-persona-chat-cta')
+    expect(dash).toContain('EqcPersonaChatOverlay')
+    expect(dash).toContain('eqc-persona-chat-deep-link')
     expect(dash).not.toContain('StatLede')
     expect(dash).toContain('plexon-eqc-mag-persona-lists')
     expect(dash).toContain('EventQuickCheckGeoMagazineSection')
     expect(dash).toContain('EventQuickCheckEeatMagazineSection')
     expect(dash).toContain('EventQuickCheckGeoRecommendationsMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')
+    expect(dash).toContain('EventQuickCheckDistributionsMagazineSection')
     expect(dash).toContain('EventQuickCheckInsightsMagazineSection')
+    expect(dash).toContain('layout.showDistributions')
+    const distMag = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckDistributionsMagazineSection.tsx'),
+      'utf8'
+    )
+    expect(distMag).toContain('EqcDistributionDonut')
+    expect(distMag).toContain('sectionDistributionsHeadline')
+    expect(distMag).toContain('plexon-eqc-dist')
+    const distGlobals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(distGlobals).toContain('.plexon-eqc-donut')
+    expect(distGlobals).toContain('.plexon-eqc-dist__grid')
+    const distCopy = readFileSync(
+      path.join(root, 'lib/assistant/reports/event-quick-check-report-copy.ts'),
+      'utf8',
+    )
+    expect(distCopy).toContain("sectionDistributionsHeadline: 'Share across the corpus'")
     expect(dash).not.toContain('assistant-ui')
     expect(dash).not.toContain('UiMetricGrid')
     expect(dash).not.toContain('UiBlockSurface')

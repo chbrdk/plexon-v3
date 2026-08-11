@@ -20,6 +20,7 @@ import { mergeFlowContextIntoQuickResult } from '@/lib/assistant/reports/event-q
 import { pathCheckionDomainScan, pathCheckionProject } from '@/lib/paths/checkion-api';
 import { echonDashboardResearchUrl } from '@/lib/paths/echon-api';
 import { pathPlatformProjectDashboard } from '@/lib/constants';
+import { resolveEqcPersonaChatHref } from '@/lib/assistant/event-quick-check/eqc-persona-chat-href';
 
 function mapPersonaToReportSection(
   p: PersonaPreviewItem,
@@ -124,6 +125,10 @@ export function buildEventQuickCheckReportModel(
     projectName: quick.projectName,
   });
   const personaItemsForKpi = listPersonasFromPreview(personaPreview);
+  const audionProjectId =
+    quick.audionProjectId?.trim() ||
+    personaPreview?.projectId?.trim() ||
+    undefined;
 
   const kpiTiles: EventQuickCheckReportModel['executive']['kpiTiles'] = [
     {
@@ -253,6 +258,7 @@ export function buildEventQuickCheckReportModel(
       domain,
       projectName: quick.projectName,
       platformProjectId: quick.platformProjectId,
+      audionProjectId,
       generatedAt: new Date().toISOString(),
       playbookLabel: quick.playbookLabel,
       checkionOnly: quick.checkionOnly,
@@ -294,6 +300,7 @@ export function buildEventQuickCheckReportModel(
       scanId: quick.domainScan?.id,
       geoJobId: quick.geoJob?.jobId,
       platformProjectId: quick.platformProjectId,
+      audionProjectId,
       stepTable: {
         columns: ['Schritt', 'Status', 'Ergebnis'],
         rows: appendixRows,
@@ -321,6 +328,9 @@ export function buildEventQuickCheckReportModel(
       }),
       seoPagesAnalyzed: quick.domainScan.seoPagesAnalyzed,
     };
+    if (quick.domainScan.distributions) {
+      model.distributions = quick.domainScan.distributions;
+    }
   }
 
   if (domainComparison) {
@@ -341,6 +351,18 @@ export function buildEventQuickCheckReportModel(
       mapPersonaToReportSection(p, questionsByPersonaId.get(p.id))
     );
     model.persona = model.personas[0];
+  }
+
+  const personaChatHref = resolveEqcPersonaChatHref({
+    personaId: model.persona?.id,
+    audionProjectId,
+  });
+  if (personaChatHref) {
+    model.appendix.links.push({
+      label: EQC_REPORT_COPY.personaChatCta,
+      href: personaChatHref,
+      external: true,
+    });
   }
 
   if (EVENT_QUICK_CHECK_ECHON_RESEARCH_ENABLED) {

@@ -1211,7 +1211,6 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   margin: 0 0 0.75rem;
 }
 
-
 .plexon-collection-archive-section {
   margin-top: 1.5rem;
   display: grid;
@@ -3460,6 +3459,13 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   line-height: 1.55;
 }
 
+.plexon-eqc-mag-persona-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 900px) {
   .plexon-eqc-mag-persona-hero {
     grid-template-columns: 1fr;
@@ -4783,6 +4789,229 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   display: grid;
   gap: 0.75rem;
   min-width: 0;
+}
+
+/* ── EQC Distributions (Checkion corpus donut parity) ── */
+.plexon-eqc-dist {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.plexon-eqc-dist__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.plexon-eqc-dist__eyebrow {
+  margin: 0;
+  font-size: var(--type-xs, 0.7rem);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+.plexon-eqc-dist__headline {
+  margin: 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--ink, var(--fg));
+}
+
+.plexon-eqc-dist__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--eqc-dist-cols, 3), minmax(0, 1fr));
+  gap: 0;
+}
+
+.plexon-eqc-dist__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.15rem 1.35rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-width: 0;
+}
+
+.plexon-eqc-dist__card:first-child {
+  padding-left: 0;
+}
+
+.plexon-eqc-dist__card:last-child {
+  padding-right: 0;
+}
+
+.plexon-eqc-dist__card:not(:first-child) {
+  border-left: 1px solid var(--line);
+}
+
+.plexon-eqc-dist__card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink, var(--fg));
+}
+
+@media (max-width: 1100px) {
+  .plexon-eqc-dist__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .plexon-eqc-dist__card:nth-child(2n + 1) {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .plexon-eqc-dist__card:nth-child(2n) {
+    padding-right: 0;
+  }
+
+  .plexon-eqc-dist__card:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .plexon-eqc-dist__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plexon-eqc-dist__card,
+  .plexon-eqc-dist__card:nth-child(2n + 1),
+  .plexon-eqc-dist__card:nth-child(2n) {
+    border-left: none;
+    padding-inline: 0;
+  }
+
+  .plexon-eqc-dist__card:not(:first-child) {
+    border-top: 1px solid var(--line);
+    margin-top: 1.15rem;
+    padding-top: 1.15rem;
+  }
+}
+
+.plexon-eqc-donut {
+  --donut-1: var(--ok, #7dcea0);
+  --donut-2: var(--accent);
+  --donut-3: var(--warn, #c9a227);
+  --donut-4: var(--danger, #d46a6a);
+  --donut-5: color-mix(in srgb, var(--ok, #7dcea0) 55%, var(--accent));
+  --donut-6: color-mix(in srgb, var(--warn, #c9a227) 55%, var(--accent));
+  --donut-7: color-mix(in srgb, var(--accent) 70%, var(--muted));
+  --donut-8: color-mix(in srgb, var(--muted) 75%, var(--ink, var(--fg)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
+  padding-bottom: 0.75rem;
+}
+
+.plexon-eqc-donut__chart {
+  position: relative;
+  width: 10.5rem;
+  height: 10.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.plexon-eqc-donut__hole {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: var(--surface, var(--bg, #fff));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.08rem;
+  text-align: center;
+}
+
+.plexon-eqc-donut__center-v {
+  font-size: 1.2rem;
+  font-weight: var(--weight-light, 300);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 82%, var(--muted));
+}
+
+.plexon-eqc-donut__center-k {
+  font-size: 0.58rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-donut__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.plexon-eqc-donut__legend > li {
+  display: grid;
+  grid-template-columns: 0.4rem minmax(0, 1fr) auto auto;
+  gap: 0.4rem 0.5rem;
+  align-items: baseline;
+  font-size: 0.74rem;
+}
+
+.plexon-eqc-donut__swatch {
+  width: 0.32rem;
+  height: 0.32rem;
+  border-radius: 50%;
+  align-self: center;
+  background: var(--donut-1);
+  opacity: 0.9;
+}
+
+.plexon-eqc-donut__legend > li[data-i='2'] .plexon-eqc-donut__swatch { background: var(--donut-2); }
+.plexon-eqc-donut__legend > li[data-i='3'] .plexon-eqc-donut__swatch { background: var(--donut-3); }
+.plexon-eqc-donut__legend > li[data-i='4'] .plexon-eqc-donut__swatch { background: var(--donut-4); }
+.plexon-eqc-donut__legend > li[data-i='5'] .plexon-eqc-donut__swatch { background: var(--donut-5); }
+.plexon-eqc-donut__legend > li[data-i='6'] .plexon-eqc-donut__swatch { background: var(--donut-6); }
+.plexon-eqc-donut__legend > li[data-i='7'] .plexon-eqc-donut__swatch { background: var(--donut-7); }
+.plexon-eqc-donut__legend > li[data-i='8'] .plexon-eqc-donut__swatch { background: var(--donut-8); }
+
+.plexon-eqc-donut__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--ink, var(--fg)) 78%, var(--muted));
+}
+
+.plexon-eqc-donut__n {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-light, 300);
+}
+
+.plexon-eqc-donut__pct {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  min-width: 2.4rem;
+  text-align: right;
+}
+
+@media (max-width: 420px) {
+  .plexon-eqc-donut__chart {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
 }
 
 .plexon-eqc-lab {

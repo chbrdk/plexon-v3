@@ -15,6 +15,7 @@ import {
 import { ReportPdfDownloadButton } from '@/components/assistant/ReportPdfDownloadButton'
 import { ReportBinaryDownloadButton } from '@/components/assistant/ReportBinaryDownloadButton'
 import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-check/EventQuickCheckDomainMagazineSection'
+import { EventQuickCheckDistributionsMagazineSection } from '@/components/event-quick-check/EventQuickCheckDistributionsMagazineSection'
 import { EventQuickCheckEeatMagazineSection } from '@/components/event-quick-check/EventQuickCheckEeatMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
 import { EventQuickCheckGeoRecommendationsMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoRecommendationsMagazineSection'
@@ -31,6 +32,8 @@ import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-che
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { formatReportGeneratedAt } from '@/lib/assistant/reports/format-report-text'
 import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-personas'
+import { resolveEqcPersonaChatHref } from '@/lib/assistant/event-quick-check/eqc-persona-chat-href'
+import { EqcPersonaChatOverlay } from '@/components/event-quick-check/EqcPersonaChatOverlay'
 import {
   apiEventQuickCheckRunPdf,
   apiEventQuickCheckRunPptx,
@@ -178,6 +181,15 @@ export function EventQuickCheckDashboardView({
   const [personaId, setPersonaId] = useState<string | null>(null)
   const persona =
     personas.find((p) => p.id === (personaId ?? personas[0]?.id)) ?? personas[0] ?? null
+  const personaChatHref = useMemo(
+    () =>
+      resolveEqcPersonaChatHref({
+        personaId: persona?.id,
+        audionProjectId: report.meta.audionProjectId ?? report.appendix.audionProjectId,
+      }),
+    [persona?.id, report.meta.audionProjectId, report.appendix.audionProjectId],
+  )
+  const [personaChatOpen, setPersonaChatOpen] = useState(false)
 
   const [appendixOpen, setAppendixOpen] = useState<string | null>(null)
   const resultsRootRef = useRef<HTMLDivElement>(null)
@@ -339,6 +351,12 @@ export function EventQuickCheckDashboardView({
         </Band>
       ) : null}
 
+      {layout.showDistributions && report.distributions ? (
+        <Band title={EQC_REPORT_COPY.sectionDistributions}>
+          <EventQuickCheckDistributionsMagazineSection distributions={report.distributions} />
+        </Band>
+      ) : null}
+
       {layout.showDomainComparison && report.domainComparison?.rows.length ? (
         <Band title={EQC_REPORT_COPY.sectionDomainComparison}>
           <div className="plexon-eqc-mag-stack">
@@ -417,6 +435,29 @@ export function EventQuickCheckDashboardView({
                 {persona.traits.length > 0 ? <TraitBars traits={persona.traits} /> : null}
               </div>
             </div>
+            {personaChatHref ? (
+              <div className="plexon-eqc-mag-persona-actions">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  type="button"
+                  data-testid="eqc-persona-chat-cta"
+                  onClick={() => setPersonaChatOpen(true)}
+                >
+                  {EQC_REPORT_COPY.personaChatCta}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  href={personaChatHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="eqc-persona-chat-deep-link"
+                >
+                  {EQC_REPORT_COPY.personaChatOpenAudion}
+                </Button>
+              </div>
+            ) : null}
             {persona.goals.length > 0 ||
             persona.painPoints.length > 0 ||
             persona.interests.length > 0 ? (
@@ -578,6 +619,14 @@ export function EventQuickCheckDashboardView({
           </div>
         </div>
       ) : null}
+
+      <EqcPersonaChatOverlay
+        open={personaChatOpen}
+        onOpenChange={setPersonaChatOpen}
+        personaId={persona?.id}
+        personaName={persona?.name}
+        audionProjectId={report.meta.audionProjectId ?? report.appendix.audionProjectId}
+      />
     </div>
   )
 }

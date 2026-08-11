@@ -36,6 +36,34 @@ export type EventQuickCheckReportDomainSection = {
   seoPagesAnalyzed?: number;
 };
 
+export type EventQuickCheckReportDistributionSlice = {
+  id: string;
+  label: string;
+  value: number;
+};
+
+/** Checkion-parity corpus donuts (Readability / Eco / Link mix). */
+export type EventQuickCheckReportDistributionsSection = {
+  readability?: {
+    bands: EventQuickCheckReportDistributionSlice[];
+    score?: number;
+    grade?: string;
+    dwellSecondsMedian?: number | null;
+  };
+  eco?: {
+    grades: EventQuickCheckReportDistributionSlice[];
+    grade?: string;
+    avgCo2?: number;
+  };
+  links?: {
+    slices: EventQuickCheckReportDistributionSlice[];
+    internal: number;
+    external: number;
+    broken: number;
+    total: number;
+  };
+};
+
 export type EventQuickCheckReportDomainComparisonRow = {
   domain: string;
   role: 'own' | 'competitor';
@@ -167,6 +195,7 @@ export type EventQuickCheckReportAppendixSection = {
   scanId?: string;
   geoJobId?: string;
   platformProjectId?: string;
+  audionProjectId?: string;
   stepTable: { columns: string[]; rows: EventQuickCheckReportAppendixRow[] };
   links: Array<{ label: string; href: string; external?: boolean }>;
 };
@@ -179,6 +208,8 @@ export type EventQuickCheckReportModel = {
     domain: string;
     projectName: string;
     platformProjectId?: string;
+    /** AUDION project for persona chat deep-link (`/chat?projectId=`). */
+    audionProjectId?: string;
     generatedAt: string;
     playbookLabel: string;
     checkionOnly?: boolean;
@@ -193,6 +224,8 @@ export type EventQuickCheckReportModel = {
     steps: EventQuickCheckReportWorkflowStep[];
   };
   domain?: EventQuickCheckReportDomainSection;
+  /** Corpus composition donuts — own magazine band after Domain. */
+  distributions?: EventQuickCheckReportDistributionsSection;
   domainComparison?: EventQuickCheckReportDomainComparisonSection;
   persona?: EventQuickCheckReportPersonaSection;
   personas?: EventQuickCheckReportPersonaSection[];

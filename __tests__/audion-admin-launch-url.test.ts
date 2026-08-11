@@ -36,6 +36,7 @@ describe('buildAudionAppUrl helpers', () => {
   it('builds target group, persona, chat, journey, and study deep-links', () => {
     expect(buildAudionTargetGroupUrl(origin, 'tg-1')).toBe('https://audion.example/target-groups/tg-1');
     expect(buildAudionPersonaUrl(origin, 'p-1')).toBe('https://audion.example/personas/p-1');
+    // EQC Wave C5 CTA contract — knowledge/eqc-persona-chat.md
     expect(buildAudionChatUrl(origin, { personaId: 'p-1', projectId: 'proj-1' })).toBe(
       'https://audion.example/chat?personaId=p-1&projectId=proj-1'
     );

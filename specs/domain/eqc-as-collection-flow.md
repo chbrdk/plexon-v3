@@ -18,6 +18,21 @@ Run Event Quick Check (ohne ECHON) on the **Collection Test Flow** runtime:
 - Generic LLM / Code nodes
 - Replacing EQC UI with the Flow Board
 - Brandion / Soft-Q / Intra-Audion mid-step expressions
+- Embedding a **full Audion persona chat** inside `/event-quick-check` (second chat stack)
+- Merging Audion `/chat` into the Central Assistant flyout
+
+## Persona talk (after bootstrap) — locked
+
+| Choice | Detail |
+|--------|--------|
+| SoT UI | Audion chat-api + `/chat` / `/chat/embed` (persona workspace) |
+| EQC UX | Magazine + public share → `@msqdx/ui` `ChatOverlay` iframe of Audion `/chat/embed`; fallback deep-link full `/chat` |
+| Query contract | `personaId` + `projectId` (+ `embed=1`, optional `theme`) — see Audion `specs/domain/chat-embed.md` |
+| Guest budget | Public/embed unauthenticated: 5 turns / ~800 chars / 30 min TTL (server-enforced) |
+| Assistant | Short MCP `audion_chat` optional; prefer handoff for full sessions |
+| Catalog | Planned `audion.persona_chat` Agent-only — see Capability Catalog Wave C5 |
+
+Knowledge: `knowledge/eqc-persona-chat.md`.
 
 ## Mapping (EQC step → Flow)
 
