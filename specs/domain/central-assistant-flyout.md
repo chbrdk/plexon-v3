@@ -58,10 +58,12 @@ Authenticated shells MUST mount `PlatformAssistantHost`:
 
 | Mode | Chrome | Use |
 |------|--------|-----|
-| `overlay` | `.chat-panel.chat-panel-compact`; **no** duplicate page title / expand row — compact toolbar only | Native flyout + embed route |
-| `expand` | `.chat-panel.chat-panel-open` full height in AppShell | `/assistant` |
+| `overlay` | `.chat-panel.chat-panel-compact`; **no** duplicate page title / expand row — compact toolbar only; **no side panel** — `plexon_ui_set_panel` blocks fold into the message stream | Native flyout + embed route |
+| `expand` | `.chat-panel.chat-panel-open` full height in AppShell; side panel allowed for dense results | `/assistant` |
 
 Same stream client, history Flyout pattern, Collection picker, generative blocks.
+
+**Overlay panel rule:** Flyout width (~32rem) cannot host a second column. Client folds open `uiLayout.panel.blocks` into the assistant message (`mergeUiLayoutBlocksWithPanel`) and does not render `AssistantPanel`. Expand workspace keeps the side panel.
 
 ## Collection context
 

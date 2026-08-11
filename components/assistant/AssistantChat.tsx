@@ -594,6 +594,17 @@ export function AssistantChat({
                   return { id: b.id, type: b.type, props: b.props };
                 })
                 .filter((b): b is UiBlock => b != null);
+              // Flyout (~32rem) cannot host a side column — fold into the message stream.
+              if (presentation === 'overlay') {
+                if (event.panel.open) {
+                  for (const block of blocks) {
+                    appendStreamingUiBlock(block);
+                  }
+                }
+                setLivePanel(null);
+                scrollToBottom('auto');
+                return;
+              }
               setLivePanel({
                 open: event.panel.open,
                 title: event.panel.title,
@@ -665,6 +676,10 @@ export function AssistantChat({
               });
             },
             onDone: (payload) => {
+              if (presentation === 'overlay') {
+                setLivePanel(null);
+                return;
+              }
               const panel = getMessageUiPanel(payload.metadata);
               setLivePanel(panel);
             },
@@ -678,7 +693,7 @@ export function AssistantChat({
         streamingMessageIdRef.current = null;
         await loadConversation(done.conversationId);
         void refreshConversations();
-        setLivePanel(getMessageUiPanel(done.metadata));
+        setLivePanel(presentation === 'overlay' ? null : getMessageUiPanel(done.metadata));
 
         if (done.workflowRunId) {
           watchWorkflow(done.workflowRunId);
@@ -701,7 +716,7 @@ export function AssistantChat({
         setInput('');
       }
     },
-    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, pageContext, platformProjectId, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, pageContext, platformProjectId, presentation, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const showEmpty = messages.length === 0 && !loading;
@@ -819,6 +834,7 @@ export function AssistantChat({
               <AssistantMessageList
                 messages={messages}
                 conversationId={conversationId}
+                surface={presentation}
                 pinnedKeys={pinnedKeys}
                 onPinToggle={(messageId, block) => void toggleReportPin(messageId, block)}
                 followUpDisabled={loading}
@@ -851,7 +867,7 @@ export function AssistantChat({
           onPinsChange={setReportPins}
         />
       </section>
-      {livePanel?.open && livePanel.blocks.length > 0 ? (
+      {presentation !== 'overlay' && livePanel?.open && livePanel.blocks.length > 0 ? (
         <AssistantPanel
           title={livePanel.title}
           blocks={livePanel.blocks}

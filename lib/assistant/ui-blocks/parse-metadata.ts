@@ -102,3 +102,29 @@ export function getMessageUiPanel(metadata: unknown): UiPanelState | null {
   if (!panel?.open) return null;
   return panel;
 }
+
+/** Append open panel blocks onto message blocks (dedupe by id) for overlay/flyout. */
+export function mergeUiLayoutBlocksWithPanel(layout: UiLayout): UiBlock[] {
+  const blocks = [...layout.blocks];
+  const panelBlocks = layout.panel?.open ? layout.panel.blocks : [];
+  for (const block of panelBlocks) {
+    if (!blocks.some((b) => b.id === block.id)) {
+      blocks.push(block);
+    }
+  }
+  return blocks;
+}
+
+/**
+ * Overlay flyout: fold side-panel blocks into the chat stream.
+ * Expand workspace: message column only (panel stays in AssistantPanel).
+ */
+export function messageUiBlocksForSurface(
+  metadata: unknown,
+  surface: 'overlay' | 'expand'
+): UiBlock[] {
+  const layout = resolveMessageUiLayout(metadata);
+  if (!layout) return [];
+  if (surface === 'overlay') return mergeUiLayoutBlocksWithPanel(layout);
+  return layout.blocks;
+}

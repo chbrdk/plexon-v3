@@ -11,7 +11,7 @@ import { AssistantFollowUpChips } from '@/components/assistant/AssistantFollowUp
 import type { ConversationRecommendation } from '@/lib/assistant/insights/follow-up-suggestions'
 import { applyConversationTargetToRecommendations } from '@/lib/assistant/project-target-url'
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url'
-import { resolveMessageUiLayout } from '@/lib/assistant/ui-blocks/parse-metadata'
+import { messageUiBlocksForSurface } from '@/lib/assistant/ui-blocks/parse-metadata'
 
 export type AssistantChatMessage = {
   id: string
@@ -23,6 +23,8 @@ export type AssistantChatMessage = {
 type AssistantMessageListProps = {
   messages: AssistantChatMessage[]
   conversationId?: string | null
+  /** overlay folds uiLayout.panel into the bubble; expand keeps panel separate */
+  surface?: 'overlay' | 'expand'
   pinnedKeys?: Set<string>
   onPinToggle?: (messageId: string, block: UiBlock) => void
   onConfirmTool?: (pending: {
@@ -38,6 +40,7 @@ type AssistantMessageListProps = {
 export function AssistantMessageList({
   messages,
   conversationId,
+  surface = 'expand',
   pinnedKeys,
   onPinToggle,
   onConfirmTool,
@@ -65,8 +68,7 @@ export function AssistantMessageList({
             throughIndex: index,
           })
         )
-        const uiLayout = resolveMessageUiLayout(msg.metadata)
-        const uiBlocks = uiLayout?.blocks ?? []
+        const uiBlocks = messageUiBlocksForSurface(msg.metadata, surface)
         const hasText = msg.content.trim().length > 0
         const hasBubbleBody =
           hasText ||

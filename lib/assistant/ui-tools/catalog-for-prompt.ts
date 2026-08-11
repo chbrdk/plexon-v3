@@ -44,7 +44,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 
 \`tone\` / step \`status\`: pending, running, done, error (+ success, warning, info für tone).
 
-**Panel:** Bei ≥4 Personas/Karten oder Tabellen >8 Zeilen → \`plexon_ui_set_panel\` mit \`open: true\`. Produkt-Links über https oder interne Pfade (\`lib/paths\`).
+**Panel:** Bei ≥4 Personas/Karten oder Tabellen >8 Zeilen → im **Expand-Workspace** \`plexon_ui_set_panel\` mit \`open: true\`. Im **Flyout/Overlay** erscheinen Panel-Blöcke automatisch in der Chat-Nachricht (kein Side-Panel). Produkt-Links über https oder interne Pfade (\`lib/paths\`).
 
 **Showcase:** Wenn der Nutzer alle UI-Blöcke/Komponenten sehen will → **jeden** Block-Typ mindestens einmal per \`plexon_ui_append_block\` (nicht nur alert + metric_grid).
 
@@ -75,7 +75,7 @@ export function buildUiPanelHintForPlan(intent: string): string {
     intent === 'brandion_brand' ||
     intent === 'project_status'
   ) {
-    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Side-Panel mit `plexon_ui_set_panel` darstellen. Bei Brandion-Farben/Fonts: nach `brandion_tokens_list` erscheinen Auto-Blöcke `color_swatch_grid` / `font_specimen_list` — Kurztext dazu, keine zweite volle Palette per append_block.';
+    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Expand-Workspace per `plexon_ui_set_panel` möglich — im Flyout landen sie inline in der Nachricht. Bei Brandion-Farben/Fonts: nach `brandion_tokens_list` Auto-Blöcke `color_swatch_grid` / `font_specimen_list` — Kurztext dazu, keine zweite volle Palette per append_block.';
   }
   return '';
 }

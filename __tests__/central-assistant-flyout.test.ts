@@ -76,4 +76,15 @@ describe('central assistant flyout specs + mounts', () => {
     expect(chat).toContain('syncConversationToUrl')
     expect(chat).toContain("if (presentation === 'overlay') return")
   })
+
+  it('overlay folds side panel into message stream (no AssistantPanel column)', () => {
+    const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    const list = readFileSync(join(root, 'components/assistant/AssistantMessageList.tsx'), 'utf8')
+    const domain = readFileSync(join(root, 'specs/domain/central-assistant-flyout.md'), 'utf8')
+    expect(chat).toContain("presentation !== 'overlay' && livePanel")
+    expect(chat).toContain('surface={presentation}')
+    expect(chat).toContain('appendStreamingUiBlock(block)')
+    expect(list).toContain('messageUiBlocksForSurface')
+    expect(domain).toContain('no side panel')
+  })
 })

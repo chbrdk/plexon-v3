@@ -61,6 +61,8 @@ Chrome: `ChatOverlay` owns title / expand / close. Overlay chat keeps compact to
 
 Do **not** force `--color-bg-subtle` / `--color-text-on-light` on `[data-plexon-assistant-chat]` — that paints a cream paper panel under dark `data-theme` and makes empty-state / composer unreadable. Overlay uses transparent + `var(--ink)`; suggestion chip cloud is hidden in `presentation=overlay`.
 
+**Overlay vs side panel (2026-08-11):** Flyout must not render `AssistantPanel` beside the chat (squeezes ~32rem sheet). Open `uiLayout.panel` blocks fold into the message via `mergeUiLayoutBlocksWithPanel` / `messageUiBlocksForSurface(..., 'overlay')`. Expand workspace keeps the side column.
+
 Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps users out of the flyout onto the expand page (and hides the FAB). URL sync is expand-only; flyout keeps `conversationId` in React state + `onConversationChange`.
 
 ### Activity + answer chrome (follow-up)
