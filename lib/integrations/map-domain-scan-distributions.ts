@@ -6,6 +6,37 @@ export type DomainScanDistributionSlice = {
   value: number
 }
 
+/** Deutsche Donut-Labels (Checkion liefert EN-Ids). */
+export const DIST_SLICE_LABEL_DE: Record<string, string> = {
+  easy: 'Einfach',
+  standard: 'Standard',
+  complex: 'Komplex',
+  very: 'Sehr komplex',
+  internal: 'Intern',
+  external: 'Extern',
+  broken: 'Defekt',
+}
+
+const READABILITY_GRADE_DE: Record<string, string> = {
+  Easy: 'Einfach',
+  'Easy (6th Grade)': 'Einfach (6. Klasse)',
+  Standard: 'Standard',
+  'Standard (High School)': 'Standard (Sekundarstufe)',
+  Complex: 'Komplex',
+  'Complex (College)': 'Komplex (Hochschule)',
+  'Very complex': 'Sehr komplex',
+  'Very Complex': 'Sehr komplex',
+  'Very Complex (Academic)': 'Sehr komplex (akademisch)',
+}
+
+export function localizeDistSliceLabel(id: string, fallback: string): string {
+  return DIST_SLICE_LABEL_DE[id] ?? fallback
+}
+
+export function localizeReadabilityGrade(grade: string): string {
+  return READABILITY_GRADE_DE[grade] ?? grade
+}
+
 export type DomainScanDistributions = {
   readability?: {
     bands: DomainScanDistributionSlice[]
@@ -51,16 +82,31 @@ export function mapDomainOverviewToDistributions(overview: unknown): DomainScanD
     if (bandsRaw && typeof bandsRaw === 'object') {
       const b = bandsRaw as Record<string, unknown>
       const bands: DomainScanDistributionSlice[] = [
-        { id: 'easy', label: 'Easy', value: Number(b.easy ?? 0) || 0 },
-        { id: 'standard', label: 'Standard', value: Number(b.standard ?? 0) || 0 },
-        { id: 'complex', label: 'Complex', value: Number(b.complex ?? 0) || 0 },
-        { id: 'very', label: 'Very complex', value: Number(b.veryComplex ?? 0) || 0 },
+        { id: 'easy', label: DIST_SLICE_LABEL_DE.easy, value: Number(b.easy ?? 0) || 0 },
+        {
+          id: 'standard',
+          label: DIST_SLICE_LABEL_DE.standard,
+          value: Number(b.standard ?? 0) || 0,
+        },
+        {
+          id: 'complex',
+          label: DIST_SLICE_LABEL_DE.complex,
+          value: Number(b.complex ?? 0) || 0,
+        },
+        {
+          id: 'very',
+          label: DIST_SLICE_LABEL_DE.very,
+          value: Number(b.veryComplex ?? 0) || 0,
+        },
       ].filter((s) => s.value > 0)
       if (bands.length > 0) {
         out.readability = {
           bands,
           score: typeof ux.readabilityScore === 'number' ? ux.readabilityScore : undefined,
-          grade: typeof ux.readabilityGrade === 'string' ? ux.readabilityGrade : undefined,
+          grade:
+            typeof ux.readabilityGrade === 'string'
+              ? localizeReadabilityGrade(ux.readabilityGrade)
+              : undefined,
           dwellSecondsMedian:
             typeof ux.dwellSecondsMedian === 'number'
               ? ux.dwellSecondsMedian
@@ -98,9 +144,9 @@ export function mapDomainOverviewToDistributions(overview: unknown): DomainScanD
         ? links.total
         : internal + external
     const slices: DomainScanDistributionSlice[] = [
-      { id: 'internal', label: 'Internal', value: internal },
-      { id: 'external', label: 'External', value: external },
-      { id: 'broken', label: 'Broken', value: broken },
+      { id: 'internal', label: DIST_SLICE_LABEL_DE.internal, value: internal },
+      { id: 'external', label: DIST_SLICE_LABEL_DE.external, value: external },
+      { id: 'broken', label: DIST_SLICE_LABEL_DE.broken, value: broken },
     ].filter((s) => s.value > 0)
     if (slices.length > 0 || broken === 0) {
       // Show link mix when any positive slice exists (broken may be zero and only in center).

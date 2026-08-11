@@ -27,8 +27,15 @@ describe('mapDomainOverviewToDistributions', () => {
       links: { internal: 19689, external: 656, broken: 0, total: 20345 },
     })
     expect(dist?.readability?.bands).toHaveLength(3)
+    expect(dist?.readability?.bands.map((b) => b.label)).toEqual([
+      'Standard',
+      'Komplex',
+      'Sehr komplex',
+    ])
+    expect(dist?.readability?.grade).toBe('Komplex (Hochschule)')
     expect(dist?.readability?.score).toBe(10.2)
     expect(dist?.eco?.grades.map((g) => g.id)).toEqual(['C', 'D', 'E', 'F'])
+    expect(dist?.links?.slices.map((s) => s.label)).toEqual(['Intern', 'Extern'])
     expect(dist?.links?.broken).toBe(0)
     expect(dist?.links?.total).toBe(20345)
     expect(hasDomainScanDistributions(dist)).toBe(true)

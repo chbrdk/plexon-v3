@@ -4,18 +4,34 @@ import { Hint, Text } from '@msqdx/ui'
 import { EqcDistributionDonut } from '@/components/event-quick-check/EqcDistributionDonut'
 import type { EventQuickCheckReportDistributionsSection } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
+import {
+  localizeDistSliceLabel,
+  localizeReadabilityGrade,
+} from '@/lib/integrations/map-domain-scan-distributions'
 
 type Props = {
   distributions: EventQuickCheckReportDistributionsSection
 }
 
 /**
- * Checkion-parity corpus donuts — Readability / Eco grades / Link mix.
+ * Checkion-parity corpus donuts — Lesbarkeit / Eco-Noten / Link-Mix.
  */
 export function EventQuickCheckDistributionsMagazineSection({ distributions }: Props) {
   const { readability, eco, links } = distributions
   const cardCount =
     (readability?.bands.length ? 1 : 0) + (eco?.grades.length ? 1 : 0) + (links?.slices.length ? 1 : 0)
+
+  const readabilitySlices = readability?.bands.map((s) => ({
+    ...s,
+    label: localizeDistSliceLabel(s.id, s.label),
+  }))
+  const linkSlices = links?.slices.map((s) => ({
+    ...s,
+    label: localizeDistSliceLabel(s.id, s.label),
+  }))
+  const gradeLabel = readability?.grade
+    ? localizeReadabilityGrade(readability.grade)
+    : null
 
   return (
     <section
@@ -36,21 +52,21 @@ export function EventQuickCheckDistributionsMagazineSection({ distributions }: P
         className="plexon-eqc-dist__grid"
         style={{ ['--eqc-dist-cols' as string]: String(Math.max(cardCount, 1)) }}
       >
-        {readability?.bands.length ? (
+        {readabilitySlices?.length ? (
           <div className="plexon-eqc-dist__card">
             <h4>{EQC_REPORT_COPY.distReadability}</h4>
-            {readability.grade || readability.dwellSecondsMedian != null ? (
+            {gradeLabel || readability?.dwellSecondsMedian != null ? (
               <Text role="meta">
-                {readability.grade ? `Corpus grade ${readability.grade}` : ''}
-                {readability.dwellSecondsMedian != null
-                  ? `${readability.grade ? ' · ' : ''}median dwell ${readability.dwellSecondsMedian}s`
+                {gradeLabel ? EQC_REPORT_COPY.distCorpusGrade(gradeLabel) : ''}
+                {readability?.dwellSecondsMedian != null
+                  ? `${gradeLabel ? ' · ' : ''}${EQC_REPORT_COPY.distMedianDwell(readability.dwellSecondsMedian)}`
                   : ''}
               </Text>
             ) : null}
             <EqcDistributionDonut
-              aria-label="Readability band share"
-              slices={readability.bands}
-              centerValue={readability.score}
+              aria-label={EQC_REPORT_COPY.distReadabilityAria}
+              slices={readabilitySlices}
+              centerValue={readability?.score}
               centerLabel={EQC_REPORT_COPY.distScoreLabel}
             />
           </div>
@@ -61,14 +77,14 @@ export function EventQuickCheckDistributionsMagazineSection({ distributions }: P
             <h4>{EQC_REPORT_COPY.distEcoGrades}</h4>
             {eco.grade || eco.avgCo2 != null ? (
               <Text role="meta">
-                {eco.grade ? `Dominant ${eco.grade}` : ''}
+                {eco.grade ? EQC_REPORT_COPY.distDominantGrade(eco.grade) : ''}
                 {eco.avgCo2 != null
-                  ? `${eco.grade ? ' · ' : ''}avg ${eco.avgCo2} g CO₂`
+                  ? `${eco.grade ? ' · ' : ''}${EQC_REPORT_COPY.distAvgCo2(eco.avgCo2)}`
                   : ''}
               </Text>
             ) : null}
             <EqcDistributionDonut
-              aria-label="Eco grade share"
+              aria-label={EQC_REPORT_COPY.distEcoAria}
               slices={eco.grades}
               centerValue={eco.grade}
               centerLabel={EQC_REPORT_COPY.distModeLabel}
@@ -76,14 +92,16 @@ export function EventQuickCheckDistributionsMagazineSection({ distributions }: P
           </div>
         ) : null}
 
-        {links?.slices.length ? (
+        {linkSlices?.length ? (
           <div className="plexon-eqc-dist__card">
             <h4>{EQC_REPORT_COPY.distLinkMix}</h4>
-            <Text role="meta">{links.total.toLocaleString()} total</Text>
+            <Text role="meta">
+              {EQC_REPORT_COPY.distLinksTotal(links!.total.toLocaleString('de-DE'))}
+            </Text>
             <EqcDistributionDonut
-              aria-label="Internal, external and broken links"
-              slices={links.slices}
-              centerValue={links.broken.toLocaleString()}
+              aria-label={EQC_REPORT_COPY.distLinksAria}
+              slices={linkSlices}
+              centerValue={links!.broken.toLocaleString('de-DE')}
               centerLabel={EQC_REPORT_COPY.distBrokenLabel}
             />
           </div>

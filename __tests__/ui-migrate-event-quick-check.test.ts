@@ -104,7 +104,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       path.join(root, 'lib/assistant/reports/event-quick-check-report-copy.ts'),
       'utf8',
     )
-    expect(distCopy).toContain("sectionDistributionsHeadline: 'Share across the corpus'")
+    expect(distCopy).toContain("sectionDistributionsHeadline: 'Anteil am Corpus'")
     expect(dash).not.toContain('assistant-ui')
     expect(dash).not.toContain('UiMetricGrid')
     expect(dash).not.toContain('UiBlockSurface')
