@@ -6,10 +6,10 @@ export function buildUiToolsPromptBlock(): string {
 Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst per MCP/REST holen, dann Blöcke bauen.
 - Kein HTML/JSX im Freitext erfinden.
 - Keine Emojis/Emoticons in Block-Props (Priorität als Text, z. B. „Mittel“, nicht „⚡ Mittel“).
-- Tabellen > 3 Zeilen → \`data_table\`, nicht Markdown-Tabelle.
+- Tabellen nur für echte Matrix-Daten (Scores/Scans). **Farben, Persona×Farbe, CD-Fits → nie \`data_table\`** — nutze \`finding_list\` mit \`hex\`/\`swatches\` + \`color_swatch_grid\` + \`persona_card\`.
 - Metriken/Scores → \`metric_grid\`.
 - Personas → \`persona_card\`; Zielgruppen → \`target_group_card\`.
-- Große Übersichten (viele Personas/Karten) → **plexon_ui_set_panel** mit \`open: true\`.
+- Große Übersichten (viele Personas/Karten) → **plexon_ui_set_panel** mit \`open: true\` (Expand); im Flyout landen sie inline.
 - Status-Updates → \`plexon_ui_update_block\` mit derselben block-id.
 - Links: https-URLs oder interne Pfade ab \`/\`.
 
@@ -39,6 +39,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | \`phase_strip\` | \`title?\`, \`phases: [{ id, label, summary?, active?, status?, moments?: [{ kind, label }] }]\` — moments enable client phase switching |
 | \`moment_list\` | \`title?\`, \`items: [{ id?, kind: action\\|thought\\|feeling\\|pain\\|opportunity\\|other, label }]\` |
 | \`quote_list\` | \`title?\`, \`items: [{ quote, attribution?, context?, tone? }]\` |
+| \`finding_list\` | \`title?\`, \`items: [{ title, description, severity?, hex?, swatches? }]\` — Insights; bei Farben \`hex\`/\`swatches\` (keine Farb-Tabelle) |
+| \`recommendation_list\` | \`title?\`, \`items: [{ title, description?, priority?, category? }]\` |
 | \`corner_tab_section\` | \`tabLabel\`, \`title?\`, \`markdown\`, \`placement?\` |
 | \`chart\` | \`chartType: bar\\|line\`, \`labels[]\`, \`datasets: [{ label, values[] }]\`, \`xAxisLabel?\`, \`yAxisLabel?\` |
 
@@ -60,7 +62,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | Journey outline (AUDION) | \`phase_strip\` + \`moment_list\` (+ \`link_list\` deep link) |
 | Journey validate (AUDION) | \`quote_list\` + \`finding_list\` + \`recommendation_list\` |
 | Sync-Diagnose | \`key_value_list\` + \`alert\` |
-| Brandion Farben/Fonts | MCP \`brandion_tokens_list\` → Auto \`color_swatch_grid\` / \`font_specimen_list\` (keine zweite volle Palette per append_block) |`;
+| Brandion Farben/Fonts | MCP \`brandion_tokens_list\` → Auto \`color_swatch_grid\` / \`font_specimen_list\` |
+| Persona × Markenfarben | \`persona_card\` + \`finding_list\` (pro Fit \`hex\`/\`swatches\` + \`severity\`) — **kein** \`data_table\` |`;
 }
 
 export function buildUiPanelHintForPlan(intent: string): string {
@@ -75,7 +78,7 @@ export function buildUiPanelHintForPlan(intent: string): string {
     intent === 'brandion_brand' ||
     intent === 'project_status'
   ) {
-    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Expand-Workspace per `plexon_ui_set_panel` möglich — im Flyout landen sie inline in der Nachricht. Bei Brandion-Farben/Fonts: nach `brandion_tokens_list` Auto-Blöcke `color_swatch_grid` / `font_specimen_list` — Kurztext dazu, keine zweite volle Palette per append_block.';
+    return 'UI-Hinweis: Umfangreiche Ergebnisse im Expand per `plexon_ui_set_panel` möglich — im Flyout inline. Persona×Farbe: `finding_list` mit `hex`/`swatches` + `persona_card` + Auto-`color_swatch_grid` — kein `data_table` für Farben.';
   }
   return '';
 }

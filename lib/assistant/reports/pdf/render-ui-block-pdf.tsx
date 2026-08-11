@@ -208,18 +208,32 @@ export function renderUiBlockPdf(block: UiBlock): React.ReactNode {
     }
 
     case 'finding_list': {
-      const items = (p.items as Array<{ title: string; description?: string; severity?: string }>) ?? [];
+      const items =
+        (p.items as Array<{
+          title: string
+          description?: string
+          severity?: string
+          hex?: string
+          swatches?: string[]
+        }>) ?? []
       return (
         <PdfListBlock
           key={block.id}
           title={blockTitle(p)}
           defaultTitle="Erkenntnisse"
-          items={items.map((item) => ({
-            title: item.severity ? `[${item.severity}] ${item.title}` : item.title,
-            description: item.description,
-          }))}
+          items={items.map((item) => {
+            const colors = [...(item.swatches ?? []), ...(item.hex ? [item.hex] : [])]
+              .filter(Boolean)
+              .filter((v, i, a) => a.indexOf(v) === i)
+            const base = item.description ?? ''
+            const withColors = colors.length > 0 ? `${base}${base ? ' · ' : ''}${colors.join(', ')}` : base
+            return {
+              title: item.severity ? `[${item.severity}] ${item.title}` : item.title,
+              description: withColors || undefined,
+            }
+          })}
         />
-      );
+      )
     }
 
     case 'recommendation_list': {

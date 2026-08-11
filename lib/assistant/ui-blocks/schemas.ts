@@ -239,6 +239,10 @@ export const findingListPropsSchema = z.object({
         title: short,
         description: medium,
         severity: uiToneSchema.optional(),
+        /** Single brand color for this finding (shown as swatch card). */
+        hex: hexColor.optional(),
+        /** One or more hex swatches (e.g. palette slice related to the finding). */
+        swatches: z.array(hexColor).min(1).max(8).optional(),
       })
     )
     .min(1)

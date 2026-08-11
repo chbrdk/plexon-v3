@@ -18,7 +18,7 @@ Chunk clue: stack frames in `4bd1b696-….js` are React itself on **plexon-v3** 
 | `metric_grid` | `UiMetricGrid` | `ChatMetricGrid` |
 | `key_value_list` | `UiKeyValueList` | `ChatKeyValueList` |
 | `step_list` | `UiStepList` | `ChatStepList` |
-| `finding_list` | `UiFindingList` | `ChatBlockList` |
+| `finding_list` | `UiFindingList` | `ChatBlockPanel` + optional `SwatchStrip` (`hex` / `swatches`) |
 | `recommendation_list` | `UiRecommendationList` | `ChatBlockList` |
 | `link_list` | `UiLinkList` | `ChatLinkList` |
 | `alert` | `UiAlertBlock` | `ChatAlertBlock` |

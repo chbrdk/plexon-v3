@@ -49,10 +49,11 @@ After a successful `brandion.tokens_list` / `brandion_tokens_list`, the orchestr
 |------|-----------------|--------|
 | `color_swatch_grid` | `title?`, `guidelineName?`, `items: [{ label, hex, path? }]` | `@msqdx/ui` `ChatBlockPanel` + `SwatchStrip` + row swatches |
 | `font_specimen_list` | `title?`, `items: [{ label, family, weight?, sample?, path? }]` | Specimen text with inline `font-family` (no webfont load) |
+| `finding_list` | `items: [{ title, description, severity?, hex?, swatches? }]` | Finding rows with optional color swatch card — **prefer over `data_table` for Persona×Farbe** |
 
 Limits: `maxColorSwatches: 24`, `maxFontSpecimens: 12` in `UI_BLOCK_LIMITS`.
 
-Model guidance: when auto-cards are present, answer with short narrative — **do not** append a second full palette via `plexon_ui_append_block`.
+Model guidance: when auto-cards are present, answer with short narrative — **do not** append a second full palette via `plexon_ui_append_block`. For color fits use `finding_list.hex` / `swatches`, never a color matrix table.
 
 ## Orchestrator
 

@@ -34,4 +34,9 @@ describe('assistant ui phase 4', () => {
     expect(buildUiPanelHintForPlan('audion_persona')).toContain('plexon_ui_set_panel');
     expect(buildUiPanelHintForPlan('general_chat')).toBe('');
   });
+
+  it('brandion hint prefers finding swatches over color tables', () => {
+    expect(buildUiPanelHintForPlan('brandion_brand')).toContain('finding_list');
+    expect(buildUiPanelHintForPlan('brandion_brand')).toContain('hex');
+  });
 });

@@ -135,6 +135,11 @@ export function AssistantChat({
 
   useEffect(() => {
     if (presentation !== 'overlay') return
+    setLivePanel(null)
+  }, [presentation])
+
+  useEffect(() => {
+    if (presentation !== 'overlay') return
     if (typeof window === 'undefined' || window.parent === window) return
     let targetOrigin = ''
     try {

@@ -95,9 +95,17 @@ export function blockToPlainText(block: UiBlock): string {
     case 'collapsible':
       return [p.title, p.markdown].filter(Boolean).join('\n');
     case 'finding_list': {
-      const items = (p.items as Array<{ title: string; description: string }>) ?? [];
+      const items = (p.items as Array<{ title: string; description: string; hex?: string; swatches?: string[] }>) ?? [];
       const title = p.title ? `${p.title}\n` : '';
-      return title + items.map((i) => `- ${i.title}: ${i.description}`).join('\n');
+      return (
+        title +
+        items
+          .map((i) => {
+            const colors = [...(i.swatches ?? []), ...(i.hex ? [i.hex] : [])].join(', ');
+            return `- ${i.title}: ${i.description}${colors ? ` [${colors}]` : ''}`;
+          })
+          .join('\n')
+      );
     }
     case 'recommendation_list': {
       const items = (p.items as Array<{ title: string; description?: string; priority?: number }>) ?? [];

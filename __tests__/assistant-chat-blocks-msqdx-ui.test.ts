@@ -10,7 +10,7 @@ const wired: Array<[string, string]> = [
   ['UiColorSwatchGrid.tsx', 'SwatchStrip'],
   ['UiFontSpecimenList.tsx', 'ChatBlockPanel'],
   ['UiStepList.tsx', 'ChatStepList'],
-  ['UiFindingList.tsx', 'ChatBlockList'],
+  ['UiFindingList.tsx', 'SwatchStrip'],
   ['UiRecommendationList.tsx', 'ChatBlockList'],
   ['UiLinkList.tsx', 'ChatLinkList'],
   ['UiAlertBlock.tsx', 'ChatAlertBlock'],

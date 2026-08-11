@@ -81,6 +81,7 @@ Der PLEXON-Assistent soll Antworten nicht nur als Markdown liefern, sondern **li
 | `key_value_list` | `UiKeyValueList` | rows |
 | `color_swatch_grid` | `UiColorSwatchGrid` | Brandion colors (`SwatchStrip`) |
 | `font_specimen_list` | `UiFontSpecimenList` | Brandion typography specimens |
+| `finding_list` | `UiFindingList` | Insights; optional `hex`/`swatches` as color cards — prefer over `data_table` for Persona×Farbe |
 | `alert` | `UiAlertBlock` | `UiAlert` |
 | `link_list` | `UiLinkList` | link rows |
 | `step_list` | `UiStepList` | **`.plexon-assistant-steps`** + `Spinner` (not MUI Stepper) |

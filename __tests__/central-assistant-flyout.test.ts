@@ -81,10 +81,16 @@ describe('central assistant flyout specs + mounts', () => {
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     const list = readFileSync(join(root, 'components/assistant/AssistantMessageList.tsx'), 'utf8')
     const domain = readFileSync(join(root, 'specs/domain/central-assistant-flyout.md'), 'utf8')
+    const css = readFileSync(join(root, 'styles/globals.css'), 'utf8')
     expect(chat).toContain("presentation !== 'overlay' && livePanel")
+    expect(chat).toContain("if (presentation !== 'overlay') return")
+    expect(chat).toContain('setLivePanel(null)')
     expect(chat).toContain('surface={presentation}')
     expect(chat).toContain('appendStreamingUiBlock(block)')
     expect(list).toContain('messageUiBlocksForSurface')
     expect(domain).toContain('no side panel')
+    expect(css).toContain(
+      "[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-side-panel"
+    )
   })
 })

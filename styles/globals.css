@@ -2139,6 +2139,11 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   }
 }
 
+/* Flyout: never show a second column (defense in depth vs stale livePanel). */
+[data-plexon-assistant-chat][data-presentation='overlay'] .plexon-assistant-side-panel {
+  display: none !important;
+}
+
 .plexon-assistant-side-panel-card {
   display: flex;
   flex-direction: column;
@@ -5939,6 +5944,73 @@ main {
   font-size: 1.25rem;
   line-height: 1.3;
   color: var(--color-text-on-light, #111);
+}
+
+.plexon-ui-finding-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.plexon-ui-finding-list__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.65rem 0.35rem;
+  border-radius: 0.5rem;
+}
+
+.plexon-ui-finding-list__item.is-alt {
+  background: color-mix(in srgb, var(--color-text-on-light, #111) 4%, transparent);
+}
+
+.plexon-ui-finding-list__item:not(:has(.plexon-ui-finding-list__swatch-card)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.plexon-ui-finding-list__swatch-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.plexon-ui-finding-list__swatch-hero {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-text-on-light, #111) 16%, transparent);
+}
+
+.plexon-ui-finding-list__hex,
+.plexon-ui-finding-list__hex-row {
+  font-family: var(--font-ui-mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  color: var(--color-text-muted-on-light, #666);
+  word-break: break-all;
+}
+
+.plexon-ui-finding-list__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.plexon-ui-finding-list__title {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
+.plexon-ui-finding-list__desc {
+  margin: 0;
 }
 
 /* Board: React Flow – Pane und Nodes overflow visible, damit Toolbar/Ports nicht abgeschnitten werden */
