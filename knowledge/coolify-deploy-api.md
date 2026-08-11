@@ -19,6 +19,7 @@ Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify RE
 | audion-v3 | `putvwgqq1c9yb30tsqosujde` | https://audion-v3.projects-a.plygrnd.tech |
 | checkion-v3 | `valb5m9m099d9k7i2d1xkv6p` | https://checkion-v3.projects-a.plygrnd.tech |
 | brandion-v3 | `hta84est51lwzkqol3hd6wig` | https://brandion-v3.projects-a.plygrnd.tech |
+| brandion-mcp | `g79ues4e48rh8wq6g3jrabpv` | Coolify app `brandion-mcp` (internal `http://brandion-mcp:3100`) |
 
 ## Smoke after plexon deploy
 
