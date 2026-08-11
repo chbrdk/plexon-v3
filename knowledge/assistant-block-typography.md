@@ -11,20 +11,22 @@ Finding / recommendation rows used legacy `UiText variant="subtitle2"` → full 
 
 | Surface | DS Text | Size |
 |---------|----------|------|
-| Block panel title (`UiBlockHeader`) | `title` | `xl` |
-| List item headline (finding / rec title) | `title` | `lg` |
-| List item prose (description) | `meta` | default |
+| Block panel title | `title` | `xl` |
+| List item headline | `title` | `lg` |
+| List item prose | `meta` | default |
 | Captions / hints | `hint` | default |
 
-Mapped in `components/assistant-ui/atoms/UiText.tsx` via `resolveUiTextTypography`.
+Plexon bridge: `components/assistant-ui/atoms/UiText.tsx` via `resolveUiTextTypography`.  
+DS primitives: `ChatBlockPanel` + `ChatBlockList` (`@msqdx/ui`).
 
 ## What is in `@msqdx/ui` / Storybook vs product
 
 | Piece | Location | Storybook |
 |-------|----------|-----------|
 | Chat overlay shell | `@msqdx/ui` `ChatOverlay` | `Organisms/ChatOverlay` |
-| Chat CSS chrome (turns, composer, compact panel) | `@msqdx/ui` `chat.css` | via ChatOverlay + chat chrome docs |
-| `Text` roles | `@msqdx/ui` | Design System → Typography |
-| Generative message blocks (`UiFindingList`, `UiRecommendationList`, `UiBlockSurface`, …) | **Plexon** `components/assistant-ui/**` | **not** in msqdx-ui Storybook (product domain) |
+| Chat CSS chrome | `@msqdx/ui` `chat.css` | via ChatOverlay + catalog |
+| `Text` roles | `@msqdx/ui` | Typography |
+| Message blocks | `@msqdx/ui` `ChatBlockPanel` / `ChatBlockList` | **`Organisms/Chat/Catalog`** · Molecules/ChatBlock* |
+| Stream / report schema wiring | **Plexon** `components/assistant-ui/**` | product |
 
-Spec non-goal (msqdx-ui chat chrome): shared React message-domain `ChatPanel` / MessageList stays product-owned.
+Staging Storybook: `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chat-catalog--inventory` (`URL_MSQDX_UI_STORYBOOK`).
