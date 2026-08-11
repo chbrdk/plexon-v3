@@ -2,6 +2,7 @@
 export { Accordion } from '../../msqdx-ui/packages/ui/src/components/Accordion'
 export type { AccordionItem, AccordionProps } from '../../msqdx-ui/packages/ui/src/components/Accordion'
 export { Alert } from '../../msqdx-ui/packages/ui/src/components/Alert'
+export type { AlertTone } from '../../msqdx-ui/packages/ui/src/components/Alert'
 export { Avatar } from '../../msqdx-ui/packages/ui/src/components/Avatar'
 export { Button, buttonClassName } from '../../msqdx-ui/packages/ui/src/components/Button'
 export type { ButtonProps, ButtonVariant, ButtonSize, ButtonShape, ButtonClassNameOptions } from '../../msqdx-ui/packages/ui/src/components/Button'
@@ -51,6 +52,65 @@ export type {
   ChatOverlayPlacement,
   ChatOverlayProps,
 } from '../../msqdx-ui/packages/ui/src/components/ChatOverlay'
+/** Generative assistant chat molecules — must stay in this barrel (React #130 if missing). */
+export { ChatBlockPanel } from '../../msqdx-ui/packages/ui/src/components/ChatBlockPanel'
+export type { ChatBlockPanelProps } from '../../msqdx-ui/packages/ui/src/components/ChatBlockPanel'
+export { ChatBlockList } from '../../msqdx-ui/packages/ui/src/components/ChatBlockList'
+export type {
+  ChatBlockListChip,
+  ChatBlockListItem,
+  ChatBlockListProps,
+  ChatBlockListTone,
+} from '../../msqdx-ui/packages/ui/src/components/ChatBlockList'
+export { ChatMetricGrid } from '../../msqdx-ui/packages/ui/src/components/ChatMetricGrid'
+export type {
+  ChatMetricGridProps,
+  ChatMetricItem,
+  ChatMetricTone,
+} from '../../msqdx-ui/packages/ui/src/components/ChatMetricGrid'
+export { ChatKeyValueList } from '../../msqdx-ui/packages/ui/src/components/ChatKeyValueList'
+export type {
+  ChatKeyValueItem,
+  ChatKeyValueListProps,
+} from '../../msqdx-ui/packages/ui/src/components/ChatKeyValueList'
+export { ChatStepList } from '../../msqdx-ui/packages/ui/src/components/ChatStepList'
+export type {
+  ChatStepItem,
+  ChatStepListProps,
+  ChatStepStatus,
+} from '../../msqdx-ui/packages/ui/src/components/ChatStepList'
+export { ChatLinkList } from '../../msqdx-ui/packages/ui/src/components/ChatLinkList'
+export type { ChatLinkItem, ChatLinkListProps } from '../../msqdx-ui/packages/ui/src/components/ChatLinkList'
+export { ChatAlertBlock } from '../../msqdx-ui/packages/ui/src/components/ChatAlertBlock'
+export type { ChatAlertBlockProps, ChatAlertTone } from '../../msqdx-ui/packages/ui/src/components/ChatAlertBlock'
+export { ChatDataTable } from '../../msqdx-ui/packages/ui/src/components/ChatDataTable'
+export type { ChatDataTableProps } from '../../msqdx-ui/packages/ui/src/components/ChatDataTable'
+export { ChatCollapsible } from '../../msqdx-ui/packages/ui/src/components/ChatCollapsible'
+export type { ChatCollapsibleProps } from '../../msqdx-ui/packages/ui/src/components/ChatCollapsible'
+export { ChatEntityGrid } from '../../msqdx-ui/packages/ui/src/components/ChatEntityGrid'
+export type {
+  ChatEntityAccent,
+  ChatEntityGridProps,
+  ChatEntityItem,
+} from '../../msqdx-ui/packages/ui/src/components/ChatEntityGrid'
+export { ChatPhaseStrip } from '../../msqdx-ui/packages/ui/src/components/ChatPhaseStrip'
+export type {
+  ChatPhaseItem,
+  ChatPhaseStatus,
+  ChatPhaseStripProps,
+} from '../../msqdx-ui/packages/ui/src/components/ChatPhaseStrip'
+export { ChatMomentList } from '../../msqdx-ui/packages/ui/src/components/ChatMomentList'
+export type {
+  ChatMomentItem,
+  ChatMomentKind,
+  ChatMomentListProps,
+} from '../../msqdx-ui/packages/ui/src/components/ChatMomentList'
+export { ChatQuoteList } from '../../msqdx-ui/packages/ui/src/components/ChatQuoteList'
+export type {
+  ChatQuoteItem,
+  ChatQuoteListProps,
+  ChatQuoteTone,
+} from '../../msqdx-ui/packages/ui/src/components/ChatQuoteList'
 export { FloatingPanel } from '../../msqdx-ui/packages/ui/src/components/FloatingPanel'
 export type {
   FloatingPanelProps,

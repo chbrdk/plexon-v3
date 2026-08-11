@@ -3,6 +3,14 @@
 **Date:** 2026-08-11  
 **Storybook:** `https://ds.projects-a.plygrnd.tech` · `Organisms/ChatCatalog`
 
+## Barrel gate (React #130)
+
+Plexon aliases `@msqdx/ui` → `lib/msqdx-ui.ts`. Imports that are **not** re-exported there are `undefined` at runtime → minified React error **#130** (`Element type is invalid … got: undefined`).
+
+Same class of bug as missing `IconEdit` / `IconTrash`. When wiring a new DS chat primitive into `components/assistant-ui`, **always** add the export to `lib/msqdx-ui.ts`. Guard: `__tests__/assistant-chat-blocks-msqdx-ui.test.ts` (barrel must cover every `@msqdx/ui` import under `components/` + `app/`).
+
+Chunk clue: stack frames in `4bd1b696-….js` are React itself on **plexon-v3** (that hash is not present on brandion/audion/checkion).
+
 ## Mapping
 
 | Generative block | Plexon wrapper | DS primitive |

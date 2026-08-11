@@ -27,3 +27,32 @@ Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify RE
 3. Sheet width ~32rem; theme follows host.
 
 Never commit the API token into the repo.
+
+## Set app env via API
+
+Bulk upsert (create or update):
+
+```bash
+PATCH https://coolify.plygrnd.tech/api/v1/applications/{uuid}/envs/bulk
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "data": [{ "key": "NEXT_PUBLIC_PLEXON_URL", "value": "https://plexon-v3.projects-a.plygrnd.tech", "is_buildtime": true, "is_runtime": true }] }
+```
+
+List: `GET …/applications/{uuid}/envs`
+
+### Central Assistant FAB (product apps)
+
+Set on **audion-v3**, **checkion-v3**, **brandion-v3** (not plexon — native host):
+
+| Key | Value |
+|-----|--------|
+| `NEXT_PUBLIC_PLEXON_URL` | `https://plexon-v3.projects-a.plygrnd.tech` |
+
+`NEXT_PUBLIC_*` needs **force rebuild** (`POST /deploy` with `force: true`) after change. Fallback chain in code: `NEXT_PUBLIC_PLEXON_URL` → `NEXT_PLEXON_BASE_URL` → `PLEXON_AUTH_URL` (only `NEXT_PUBLIC_*` is reliably inlined for the browser iframe).
+
+### Brandion note (2026-08-11)
+
+Env-only force deploy while `main` still pointed at an old `MSQDX_UI_REF` (pre-ChatOverlay) failed with `Module not found: ChatOverlay`. After pins `cfcc1d4`…`d60652b`, redeploy `cpzstvsfsgeifrob39m3ak3s` finished on `d60652be17d9`.
+
