@@ -1,7 +1,7 @@
 # Assistant chat blocks ↔ `@msqdx/ui`
 
 **Date:** 2026-08-11  
-**Storybook:** `https://ds.projects-a.plygrnd.tech` · `Organisms/ChatCatalog` · Molecules `ChatMetricGrid` / `ChatKeyValueList` / `ChatStepList`
+**Storybook:** `https://ds.projects-a.plygrnd.tech` · `Organisms/ChatCatalog`
 
 ## Mapping
 
@@ -10,10 +10,17 @@
 | `metric_grid` | `UiMetricGrid` | `ChatBlockPanel` + `ChatMetricGrid` |
 | `key_value_list` | `UiKeyValueList` | `ChatBlockPanel` + `ChatKeyValueList` |
 | `step_list` | `UiStepList` | `ChatBlockPanel` + `ChatStepList` |
-| `finding_list` / `recommendation_list` | still product lists (promote next) | `ChatBlockPanel` + `ChatBlockList` available |
+| `finding_list` | `UiFindingList` | `ChatBlockPanel` + `ChatBlockList` |
+| `recommendation_list` | `UiRecommendationList` | `ChatBlockPanel` + `ChatBlockList` (+ chips) |
+| `link_list` | `UiLinkList` | `ChatBlockPanel` + `ChatLinkList` |
+| `alert` | `UiAlertBlock` | `ChatAlertBlock` |
+| `data_table` | `UiDataTable` | `ChatBlockPanel` + `ChatDataTable` |
+| `collapsible` | `UiCollapsibleBlock` | `ChatCollapsible` (+ product markdown slot) |
+| `persona_card` | `UiPersonaCardBlock` | `ChatBlockPanel` + `ChatEntityGrid` |
+| `target_group_card` | `UiTargetGroupCardBlock` | `ChatBlockPanel` + `ChatEntityGrid` |
 
-Wrappers keep the Zod-validated props API for `AssistantBlockRenderer`; chrome lives in the DS.
+Still product-owned: `summary_card`, `corner_tab_section`, `chart`, EQC report/gate.
 
 ## Dep
 
-Local: `file:../msqdx-ui/packages/ui` (see `knowledge/paths.md`). Coolify builds clone/pin separately — ship DS first, then redeploy plexon if the image does not use the sibling path.
+Local: `file:../msqdx-ui/packages/ui`. Coolify clones `msqdx-ui@main` during plexon image build.

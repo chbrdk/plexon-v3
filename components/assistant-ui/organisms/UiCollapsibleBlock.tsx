@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Button, Text } from '@msqdx/ui'
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface'
+import { ChatCollapsible } from '@msqdx/ui'
 import { AssistantChatAnswer } from '@/components/assistant/AssistantChatAnswer'
 
 type UiCollapsibleBlockProps = {
@@ -11,30 +9,13 @@ type UiCollapsibleBlockProps = {
   defaultOpen?: boolean
 }
 
+/** Generative `collapsible` — shared ChatCollapsible; markdown stays product-owned. */
 export function UiCollapsibleBlock({ title, markdown, defaultOpen = false }: UiCollapsibleBlockProps) {
-  const [open, setOpen] = useState(defaultOpen)
-
   return (
-    <UiBlockSurface className="plexon-assistant-collapsible">
-      <Button
-        type="button"
-        variant="ghost"
-        className="plexon-assistant-collapsible-trigger"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <Text role="title" as="span" className="plexon-assistant-collapsible-title">
-          {title}
-        </Text>
-        <Text role="meta" as="span" aria-hidden>
-          {open ? '▾' : '▸'}
-        </Text>
-      </Button>
-      {open ? (
-        <div className="plexon-assistant-collapsible-body">
-          <AssistantChatAnswer answer={markdown} />
-        </div>
-      ) : null}
-    </UiBlockSurface>
+    <div data-plexon-assistant-ui className="plexon-assistant-collapsible">
+      <ChatCollapsible title={title} defaultOpen={defaultOpen}>
+        <AssistantChatAnswer answer={markdown} />
+      </ChatCollapsible>
+    </div>
   )
 }

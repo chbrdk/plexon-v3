@@ -1,41 +1,33 @@
 'use client'
 
+import { ChatBlockList, ChatBlockPanel, type ChatBlockListTone } from '@msqdx/ui'
 import type { recommendationListPropsSchema } from '@/lib/assistant/ui-blocks/schemas'
 import type { z } from 'zod'
-import { UiBadge } from '@/components/assistant-ui/atoms/UiBadge'
-import { UiText } from '@/components/assistant-ui/atoms/UiText'
-import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface'
 
 type Props = z.infer<typeof recommendationListPropsSchema>
 
-function priorityTone(priority: number | undefined): 'error' | 'warning' | 'info' | 'neutral' {
+function priorityTone(priority: number | undefined): ChatBlockListTone {
   if (priority == null) return 'neutral'
   if (priority <= 2) return 'error'
   if (priority === 3) return 'warning'
   return 'info'
 }
 
+/** Generative `recommendation_list` — shared ChatBlockList chrome. */
 export function UiRecommendationList({ title, items }: Props) {
   return (
-    <UiBlockSurface title={title ?? 'Handlungsempfehlungen'} eyebrow="actions">
-      <ul className="plexon-assistant-list">
-        {items.map((item, index) => {
-          const tone = priorityTone(item.priority)
-          return (
-            <li
-              key={`${item.title}-${index}`}
-              className={`plexon-assistant-list-item${index % 2 === 1 ? ' is-alt' : ''}`}
-            >
-              <div className="plexon-assistant-list-item-head">
-                <UiText variant="subtitle2">{item.title}</UiText>
-                {item.priority != null ? <UiBadge label={`P${item.priority}`} tone={tone} /> : null}
-                {item.category ? <UiBadge label={item.category} tone="neutral" /> : null}
-              </div>
-              {item.description ? <UiText tone="neutral">{item.description}</UiText> : null}
-            </li>
-          )
-        })}
-      </ul>
-    </UiBlockSurface>
+    <div data-plexon-assistant-ui>
+      <ChatBlockPanel title={title ?? 'Handlungsempfehlungen'} eyebrow="actions">
+        <ChatBlockList
+          items={items.map((item) => ({
+            title: item.title,
+            description: item.description,
+            badge: item.priority != null ? `P${item.priority}` : undefined,
+            chips: item.category ? [{ label: item.category }] : undefined,
+            tone: priorityTone(item.priority),
+          }))}
+        />
+      </ChatBlockPanel>
+    </div>
   )
 }

@@ -176,17 +176,17 @@ Das sind die **Block-Typen**, die Tools direkt ansprechen.
 |--------------|----------|----------------|
 | `text` | `UiMarkdownBlock` | `MarkdownContent` |
 | `metric_grid` | `UiMetricGrid` | `@msqdx/ui` `ChatBlockPanel` + `ChatMetricGrid` |
-| `data_table` | `UiDataTable` | eigene Tabelle + `UiTableCell` |
+| `data_table` | `UiDataTable` | `@msqdx/ui` `ChatBlockPanel` + `ChatDataTable` |
 | `key_value_list` | `UiKeyValueList` | `@msqdx/ui` `ChatBlockPanel` + `ChatKeyValueList` |
-| `alert` | `UiAlertBlock` | `UiAlert` |
-| `link_list` | `UiLinkList` | `UiActionChip[]` |
+| `alert` | `UiAlertBlock` | `@msqdx/ui` `ChatAlertBlock` |
+| `link_list` | `UiLinkList` | `@msqdx/ui` `ChatBlockPanel` + `ChatLinkList` |
 | `step_list` | `UiStepList` | `@msqdx/ui` `ChatBlockPanel` + `ChatStepList` |
 | `summary_card` | `UiSummaryCard` | ersetzt `SummaryCard` (Migration) |
 | `corner_tab_section` | `UiCornerTabSection` | `MsqdxCornerTabSection` |
-| `persona_card` | `UiPersonaCard` | `MsqdxPersonaCard` (AUDION-DS) |
-| `target_group_card` | `UiTargetGroupCard` | `MsqdxTargetGroupCard` |
+| `persona_card` | `UiPersonaCard` | `@msqdx/ui` `ChatEntityGrid` |
+| `target_group_card` | `UiTargetGroupCard` | `@msqdx/ui` `ChatEntityGrid` |
 | `chart` | `UiChartBlock` | recharts (bar/line) |
-| `collapsible` | `UiCollapsibleBlock` | `MsqdxCollapsiblePanel` |
+| `collapsible` | `UiCollapsibleBlock` | `@msqdx/ui` `ChatCollapsible` |
 
 **Phase 1 MVP:** `text`, `metric_grid`, `data_table`, `alert`, `key_value_list`, `link_list`  
 **Phase 2:** `step_list`, `summary_card`, `corner_tab_section`  
