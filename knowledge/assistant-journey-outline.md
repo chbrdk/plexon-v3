@@ -28,3 +28,8 @@ Intent `journey_outline` loads an AUDION Customer Journey and composes chat UI v
 ## Not this
 
 Study/Wave UX agent (`lib/integrations/audion-journey-client.ts`) stays Collection Test Flow only.
+
+## Related
+
+- Generate: `specs/domain/assistant-journey-generate.md` · `handlers/journey-generate.ts`
+- Interactive: `knowledge/assistant-journey-interactive.md`

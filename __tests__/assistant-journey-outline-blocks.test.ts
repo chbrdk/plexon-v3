@@ -12,32 +12,59 @@ describe('journey outline chat blocks', () => {
     expect(isUiBlockType('quote_list')).toBe(true)
   })
 
-  it('builds phase + moment blocks from outline input', () => {
+  it('builds phase + embedded moments for interactive outline', () => {
     const blocks = buildJourneyOutlineBlocks({
       title: 'Checkout Journey',
       activePhaseId: 'ph2',
       phases: [
-        { id: 'ph1', name: 'Awareness', summary: 'Touch', order: 1 },
-        { id: 'ph2', name: 'Consideration', summary: 'Compare', order: 2 },
+        { id: 'ph1', name: 'Awareness', summary: 'Touch', order: 1, elements: [{ kind: 'action', label: 'See ad' }] },
+        {
+          id: 'ph2',
+          name: 'Consideration',
+          summary: 'Compare',
+          order: 2,
+          elements: [
+            { id: 'm1', kind: 'pain', label: 'Too many fields' },
+            { kind: 'opportunity', label: 'Add FAQ' },
+          ],
+        },
         { id: 'ph3', name: 'Decision', order: 3 },
-      ],
-      moments: [
-        { id: 'm1', kind: 'pain', label: 'Too many fields' },
-        { kind: 'opportunity', label: 'Add FAQ' },
       ],
     })
 
-    expect(blocks).toHaveLength(2)
+    expect(blocks).toHaveLength(1)
     expect(blocks[0].type).toBe('phase_strip')
-    expect(blocks[1].type).toBe('moment_list')
 
     const phases = parseUiBlockProps('phase_strip', blocks[0].props)
     expect(phases.ok).toBe(true)
     if (phases.ok) {
-      const list = phases.props.phases as Array<{ id: string; active?: boolean; status?: string }>
+      const list = phases.props.phases as Array<{
+        id: string
+        active?: boolean
+        status?: string
+        moments?: Array<{ kind: string; label: string }>
+      }>
       expect(list.find((p) => p.id === 'ph2')?.active).toBe(true)
       expect(list.find((p) => p.id === 'ph1')?.status).toBe('done')
+      expect(list.find((p) => p.id === 'ph2')?.moments?.[0].label).toBe('Too many fields')
+      expect(list.find((p) => p.id === 'ph1')?.moments?.[0].kind).toBe('action')
     }
+  })
+
+  it('can force standalone moment_list for showcase', () => {
+    const blocks = buildJourneyOutlineBlocks({
+      title: 'Checkout Journey',
+      interactive: false,
+      phases: [
+        {
+          id: 'ph2',
+          name: 'Consideration',
+          order: 2,
+          elements: [{ id: 'm1', kind: 'pain', label: 'Too many fields' }],
+        },
+      ],
+    })
+    expect(blocks.map((b) => b.type)).toEqual(['phase_strip', 'moment_list'])
   })
 
   it('builds full journey detail layout with validate quotes', () => {
@@ -73,11 +100,19 @@ describe('journey outline chat blocks', () => {
 
     const types = layout.blocks.map((b) => b.type)
     expect(types).toContain('phase_strip')
-    expect(types).toContain('moment_list')
+    expect(types).not.toContain('moment_list')
     expect(types).toContain('quote_list')
     expect(types).toContain('finding_list')
     expect(types).toContain('recommendation_list')
     expect(types).toContain('link_list')
+
+    const strip = layout.blocks.find((b) => b.type === 'phase_strip')
+    const parsed = parseUiBlockProps('phase_strip', strip!.props)
+    expect(parsed.ok).toBe(true)
+    if (parsed.ok) {
+      const phases = parsed.props.phases as Array<{ moments?: unknown[] }>
+      expect(phases[0].moments).toHaveLength(1)
+    }
   })
 
   it('Ui wrappers import DS chat primitives', async () => {

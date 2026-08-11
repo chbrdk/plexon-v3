@@ -52,7 +52,11 @@ export const ASSISTANT_CAPABILITIES_SECTIONS: CapabilitySection[] = [
       {
         name: 'Journey Outline',
         description:
-          'Phasen + Moments im Chat anzeigen (optional Validate mit Quotes/Findings)',
+          'Phasen + Moments im Chat anzeigen (Phase anklickbar; optional Validate)',
+      },
+      {
+        name: 'Journey generieren',
+        description: 'Neue Customer Journey in AUDION anlegen und Outline + Validate zeigen',
       },
       { name: 'Website-Research', description: 'Automatische Website-Analyse für Projektkontext' },
       { name: 'AI Assist', description: 'KI-Templates für Persona, Journey & mehr' },

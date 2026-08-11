@@ -10,9 +10,11 @@ import {
   fetchAudionPlatformProjectSummary,
   type AudionCatalogJourney,
   type AudionCatalogPersona,
+  type AudionCatalogTargetGroup,
 } from '@/lib/platform-project-dashboard-fetch';
 import {
   audionPlatformJourneyById,
+  audionPlatformJourneyGenerate,
   audionPlatformJourneyValidate,
 } from '@/lib/paths/audion-api';
 import type {
@@ -345,4 +347,125 @@ export async function runJourneyOutline(input: {
   }
 
   return { ok: true, preview };
+}
+
+function pickCatalogTargetGroup(
+  groups: AudionCatalogTargetGroup[],
+  targetGroupName?: string
+): AudionCatalogTargetGroup | null {
+  if (!groups.length) return null;
+  const needle = targetGroupName?.trim().toLowerCase();
+  if (needle) {
+    const exact = groups.find((g) => g.name.trim().toLowerCase() === needle);
+    if (exact) return exact;
+    const partial = groups.find((g) => g.name.trim().toLowerCase().includes(needle));
+    if (partial) return partial;
+  }
+  return groups[0] ?? null;
+}
+
+async function postJourneyGenerate(body: {
+  project_id: string;
+  target_group_id?: string | null;
+  journey_type?: string;
+}): Promise<{ ok: true; journeyId: string; journeyName: string } | { ok: false; error: string }> {
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+  const token = getAudionServiceToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(audionPlatformJourneyGenerate(), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        project_id: body.project_id,
+        target_group_id: body.target_group_id ?? null,
+        journey_type: body.journey_type?.trim() || 'customer',
+        output_locale: 'de',
+        use_async: false,
+      }),
+      cache: 'no-store',
+      redirect: 'manual',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: `AUDION Generate: HTTP ${res.status}${text ? ` – ${text.slice(0, 120)}` : ''}`,
+      };
+    }
+    const json = text
+      ? (JSON.parse(text) as { journey?: { id?: string; name?: string }; error?: string })
+      : {};
+    if (json.error) return { ok: false, error: json.error };
+    const journeyId = json.journey?.id?.trim();
+    const journeyName = json.journey?.name?.trim();
+    if (!journeyId || !journeyName) {
+      return { ok: false, error: 'AUDION Generate: Antwort ohne journey id/name' };
+    }
+    return { ok: true, journeyId, journeyName };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
+ * Generate a Customer Journey on Audion, then load outline (+ validate by default).
+ */
+export async function runJourneyGenerate(input: {
+  plexonUserId: string;
+  platformProjectId?: string;
+  audionProjectId?: string | null;
+  journeyType?: string;
+  targetGroupName?: string;
+  validate?: boolean;
+}): Promise<JourneyOutlineResult> {
+  const platformProjectId = input.platformProjectId?.trim();
+  if (!platformProjectId && !input.audionProjectId?.trim()) {
+    return {
+      ok: false,
+      error: 'Bitte ein Projekt im Kontext wählen, um eine Journey zu generieren.',
+    };
+  }
+
+  let audionProjectId = input.audionProjectId?.trim() || '';
+  let targetGroupId: string | null = null;
+  let personas: AudionCatalogPersona[] = [];
+
+  if (platformProjectId) {
+    const summary = await fetchAudionPlatformProjectSummary(
+      platformProjectId,
+      input.plexonUserId
+    );
+    if (!summary && !audionProjectId) {
+      return { ok: false, error: 'AUDION Katalog für dieses Projekt nicht erreichbar.' };
+    }
+    if (summary) {
+      personas = summary.personas;
+      if (!audionProjectId) audionProjectId = summary.externalProjectId;
+      const tg = pickCatalogTargetGroup(summary.targetGroups, input.targetGroupName);
+      targetGroupId = tg?.id ?? null;
+    }
+  }
+
+  if (!audionProjectId) {
+    return { ok: false, error: 'Kein AUDION-Projekt an dieses Collection gebunden.' };
+  }
+
+  const generated = await postJourneyGenerate({
+    project_id: audionProjectId,
+    target_group_id: targetGroupId,
+    journey_type: input.journeyType,
+  });
+  if (!generated.ok) return generated;
+
+  return runJourneyOutline({
+    plexonUserId: input.plexonUserId,
+    platformProjectId,
+    journeyId: generated.journeyId,
+    validate: input.validate !== false,
+  });
 }

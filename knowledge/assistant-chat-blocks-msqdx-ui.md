@@ -23,4 +23,5 @@
 
 Builders: `build-journey-outline-ui.ts` (`buildJourneyOutlineBlocks` · `buildJourneyDetailLayout`)
 
-**Intent:** `journey_outline` — `specs/domain/assistant-journey-outline.md` · `knowledge/assistant-journey-outline.md` · handler `handlers/journey-outline.ts`
+**Intent:** `journey_outline` / `journey_generate` — specs + `knowledge/assistant-journey-outline.md` · `knowledge/assistant-journey-interactive.md` · handlers `journey-outline.ts` / `journey-generate.ts`  
+Interactive: embedded `phase_strip.moments` + `UiPhaseStrip` phase click.

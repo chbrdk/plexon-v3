@@ -48,6 +48,11 @@ describe('extended intent router', () => {
       expect(intent.journeyId).toBe('journey-product-discovery');
     }
   });
+
+  it('routes journey_generate', () => {
+    const intent = routeAssistantIntent('Generiere Customer Journey');
+    expect(intent.type).toBe('journey_generate');
+  });
 });
 
 describe('conversation-context', () => {

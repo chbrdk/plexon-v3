@@ -28,6 +28,12 @@ export type AssistantIntent =
       journeyName?: string;
       validate?: boolean;
     }
+  | {
+      type: 'journey_generate';
+      journeyType?: string;
+      targetGroupName?: string;
+      validate?: boolean;
+    }
   | { type: 'geo_analysis'; url: string; deep?: boolean }
   | { type: 'ssl_check'; host: string }
   | { type: 'wayback_check'; url: string }
@@ -116,6 +122,12 @@ const PERSONA_BOOTSTRAP_PATTERNS = [
   /\bzielgruppe\b.*\bpersona\b/i,
   /\bpersona-?bootstrap\b/i,
   /\beasy\s*setup\b/i,
+];
+
+const JOURNEY_GENERATE_PATTERNS = [
+  /\bjourney\s*-?\s*generate\b/i,
+  /\b(generier\w*|erstell\w*|anlegen)\b.*\b(customer\s*)?(journey|nutzerreise)\b/i,
+  /\b(customer\s*)?(journey|nutzerreise)\b.*\b(generier\w*|erstell\w*|anlegen)\b/i,
 ];
 
 const JOURNEY_OUTLINE_PATTERNS = [
@@ -363,6 +375,15 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
       type: 'persona_bootstrap',
       name: extractProjectName(trimmed),
       targetGroupName: extractProjectName(trimmed),
+    };
+  }
+
+  if (JOURNEY_GENERATE_PATTERNS.some((p) => p.test(trimmed))) {
+    const skipValidate = /\bohne\s+validat/i.test(trimmed) || /\bwithout\s+validat/i.test(trimmed);
+    return {
+      type: 'journey_generate',
+      targetGroupName: extractJourneyName(trimmed) ?? extractProjectName(trimmed),
+      ...(skipValidate ? { validate: false } : {}),
     };
   }
 

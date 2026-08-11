@@ -41,6 +41,14 @@ export const JOURNEY_OUTLINE_INITIAL_STEPS: WorkflowStep[] = [
   { id: 'compose', label: 'UI aufbauen', status: 'pending' },
 ];
 
+export const JOURNEY_GENERATE_INITIAL_STEPS: WorkflowStep[] = [
+  { id: 'resolve_project', label: 'AUDION-Projekt', status: 'pending' },
+  { id: 'generate', label: 'Journey generieren', status: 'pending' },
+  { id: 'fetch', label: 'Detail laden', status: 'pending' },
+  { id: 'validate', label: 'Validate', status: 'pending' },
+  { id: 'compose', label: 'UI aufbauen', status: 'pending' },
+];
+
 export const SYNC_DIAGNOSE_INITIAL_STEPS: WorkflowStep[] = [
   { id: 'checkion_probe', label: 'CHECKION erreichbar?', status: 'pending' },
   { id: 'audion_probe', label: 'AUDION erreichbar?', status: 'pending' },
@@ -110,6 +118,7 @@ export function workflowStepListTitle(workflowType?: string): string {
   if (workflowType === 'pagespeed_check') return 'PageSpeed';
   if (workflowType === 'persona_bootstrap') return 'Persona-Bootstrap';
   if (workflowType === 'journey_outline') return 'Journey Outline';
+  if (workflowType === 'journey_generate') return 'Journey generieren';
   if (workflowType === 'sync_diagnose') return 'Sync-Diagnose';
   if (workflowType === 'geo_analysis') return 'GEO / E-E-A-T';
   if (workflowType === 'ssl_check') return 'SSL-Check';

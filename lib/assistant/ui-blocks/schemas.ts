@@ -232,6 +232,16 @@ export const phaseStripPropsSchema = z.object({
         summary: medium.optional(),
         active: z.boolean().optional(),
         status: z.enum(['upcoming', 'current', 'done']).optional(),
+        moments: z
+          .array(
+            z.object({
+              id: short.optional(),
+              kind: z.enum(['action', 'thought', 'feeling', 'pain', 'opportunity', 'other']),
+              label: short,
+            })
+          )
+          .max(UI_BLOCK_LIMITS.maxMoments)
+          .optional(),
       })
     )
     .min(1)

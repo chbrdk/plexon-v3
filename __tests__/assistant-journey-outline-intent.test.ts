@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   mapValidateToOutlineBlocks,
+  runJourneyGenerate,
   runJourneyOutline,
 } from '@/lib/integrations/audion-journey-outline-client';
 
@@ -21,6 +22,7 @@ vi.mock('@/lib/paths/audion-api', () => ({
   audionPlatformJourneyById: (id: string) => `https://audion-v3.test/api/journeys/${id}`,
   audionPlatformJourneyValidate: (id: string) =>
     `https://audion-v3.test/api/ai/journeys/${id}/validate`,
+  audionPlatformJourneyGenerate: () => `https://audion-v3.test/api/ai/journeys/generate`,
 }));
 
 import { fetchAudionPlatformProjectSummary } from '@/lib/platform-project-dashboard-fetch';
@@ -180,5 +182,72 @@ describe('runJourneyOutline', () => {
     expect(result.preview.findings?.[0].severity).toBe('error');
     expect(result.preview.recommendations?.[0].title).toBe('Add moments');
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('generates then loads outline with validate', async () => {
+    vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue({
+      externalProjectId: 'aud-1',
+      personaCount: 1,
+      targetGroupCount: 1,
+      journeyCount: 0,
+      studyCount: 0,
+      targetGroups: [
+        { id: 'tg1', name: 'Parents', segment: 'B2C', personaCount: 1, status: 'ready' },
+      ],
+      personas: [{ id: 'p1', name: 'Alex', role: 'Buyer', status: 'ready', targetGroupId: 'tg1' }],
+      journeys: [],
+      studies: [],
+    });
+
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () =>
+          JSON.stringify({
+            journey: { id: 'journey-new', name: 'Parents journey (AI stub)', phaseCount: 1 },
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () =>
+          JSON.stringify({
+            id: 'journey-new',
+            name: 'Parents journey (AI stub)',
+            phases: [
+              {
+                id: 'ph1',
+                name: 'Start',
+                order: 1,
+                elements: [{ kind: 'action', label: 'Open site' }],
+              },
+            ],
+          }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        text: async () =>
+          JSON.stringify({
+            overallFitScore: 80,
+            phases: [
+              {
+                phaseName: 'Start',
+                frictionPoints: [],
+                recommendations: ['Keep going'],
+              },
+            ],
+          }),
+      });
+
+    const result = await runJourneyGenerate({
+      plexonUserId: 'u1',
+      platformProjectId: 'pp-1',
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.preview.journeyId).toBe('journey-new');
+    expect(result.preview.validateRan).toBe(true);
+    expect(result.preview.phases[0].elements?.[0].label).toBe('Open site');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

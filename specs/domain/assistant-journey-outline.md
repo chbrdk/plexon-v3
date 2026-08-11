@@ -46,5 +46,8 @@ Documented in `knowledge/paths.md` · helpers in `lib/paths/audion-api.ts`:
 
 ## Out of scope
 
-- Generating a new journey (`journeys/generate`) — separate intent later.
 - Study/Wave UX agent jobs (`audion-journey-client.ts`) — Collection Test Flow only.
+
+## Interactive outline (2026-08-11)
+
+`phase_strip` phases may embed `moments[]`. Plexon `UiPhaseStrip` uses DS `onPhaseActivate` to switch the Moments panel client-side (no separate static `moment_list` when moments are embedded). Generate: `specs/domain/assistant-journey-generate.md`.

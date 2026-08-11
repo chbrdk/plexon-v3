@@ -39,6 +39,8 @@ export type JourneyRecommendationOutlineInput = {
 
 /**
  * Build generative UI blocks for an Audion-shaped journey outline (phases + optional moments).
+ * When phases carry elements, moments are embedded on `phase_strip` for client phase switching
+ * (no separate static `moment_list`). Pass `moments` explicitly to force a standalone list.
  */
 export function buildJourneyOutlineBlocks(input: {
   title?: string
@@ -46,9 +48,14 @@ export function buildJourneyOutlineBlocks(input: {
   activePhaseId?: string
   momentsTitle?: string
   moments?: JourneyMomentOutlineInput[]
+  /** When false, always emit a separate moment_list if moments exist (showcase). Default true. */
+  interactive?: boolean
 }): UiBlock[] {
   const blocks: UiBlock[] = []
   const sorted = [...input.phases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  const interactive = input.interactive !== false
+  const phasesHaveElements = sorted.some((p) => (p.elements?.length ?? 0) > 0)
+  const embedMoments = interactive && phasesHaveElements && input.moments === undefined
 
   const phaseBlock = createUiBlock(
     'phase_strip',
@@ -70,12 +77,23 @@ export function buildJourneyOutlineBlocks(input: {
           summary: phase.summary ?? undefined,
           active,
           status,
+          ...(embedMoments && phase.elements && phase.elements.length > 0
+            ? {
+                moments: phase.elements.map((m) => ({
+                  id: m.id,
+                  kind: m.kind,
+                  label: m.label,
+                })),
+              }
+            : {}),
         }
       }),
     },
     randomUUID(),
   )
   if (phaseBlock.ok) blocks.push(phaseBlock.block)
+
+  if (embedMoments) return blocks
 
   const moments =
     input.moments ??
@@ -126,6 +144,7 @@ export function buildJourneyDetailLayout(input: {
       title: input.journeyName,
       phases: input.phases,
       activePhaseId: input.activePhaseId,
+      interactive: true,
     }),
   )
 

@@ -110,6 +110,11 @@ export function audionPlatformStudyWave(studyId: string, waveId: string): string
   return `${audionPlatformBase()}/studies/${encodeURIComponent(studyId)}/waves/${encodeURIComponent(waveId)}`;
 }
 
+/** POST /api/ai/journeys/generate — create Customer Journey (stub/native). */
+export function audionPlatformJourneyGenerate(): string {
+  return `${audionPlatformBase()}/ai/journeys/generate`;
+}
+
 /** GET /api/journeys/{journeyId} — Customer Journey detail (phases + moments). */
 export function audionPlatformJourneyById(journeyId: string): string {
   return `${audionPlatformBase()}/journeys/${encodeURIComponent(journeyId)}`;

@@ -17,6 +17,7 @@
 | Assistant page context | `specs/domain/assistant-page-context.md` |
 | Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |
 | Assistant journey outline | `specs/domain/assistant-journey-outline.md` |
+| Assistant journey generate | `specs/domain/assistant-journey-generate.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 

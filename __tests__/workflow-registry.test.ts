@@ -14,6 +14,7 @@ describe('workflow-registry', () => {
       'domain_scan',
       'free_chat',
       'geo_analysis',
+      'journey_generate',
       'journey_outline',
       'pagespeed_check',
       'persona_bootstrap',
