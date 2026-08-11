@@ -45,6 +45,7 @@ export type RunAssistantAgentInput = {
   useCheckionMcp: boolean;
   useAudionMcp: boolean;
   useEchonMcp: boolean;
+  useBrandionMcp: boolean;
   beforeToolCall?: OrchestratorCompleteOptions['beforeToolCall'];
   onProgress?: AgentProgressCallback;
   onPlan?: (plan: AssistantPlan) => void;
@@ -112,6 +113,7 @@ export async function runAssistantAgent(
     hasCheckionMcp: input.useCheckionMcp,
     hasAudionMcp: input.useAudionMcp,
     hasEchonMcp: input.useEchonMcp,
+    hasBrandionMcp: input.useBrandionMcp,
     compactContextLoaded,
   });
   input.onPlan?.(plan);
@@ -149,6 +151,7 @@ export async function runAssistantAgent(
     useCheckionMcp: input.useCheckionMcp,
     useAudionMcp: input.useAudionMcp,
     useEchonMcp: input.useEchonMcp,
+    useBrandionMcp: input.useBrandionMcp,
     maxToolRounds: plan.maxToolRounds,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',

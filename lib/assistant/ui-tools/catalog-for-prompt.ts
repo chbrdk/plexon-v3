@@ -69,9 +69,10 @@ export function buildUiPanelHintForPlan(intent: string): string {
     intent === 'checkion_scan' ||
     intent === 'checkion_seo_geo' ||
     intent === 'checkion_journey' ||
+    intent === 'brandion_brand' ||
     intent === 'project_status'
   ) {
-    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Side-Panel mit `plexon_ui_set_panel` darstellen.';
+    return 'UI-Hinweis: Umfangreiche Ergebnisse (≥4 Personas/Karten oder Tabellen >8 Zeilen) im Side-Panel mit `plexon_ui_set_panel` darstellen. Bei Farben: `key_value_list` mit Token-Pfad + Hex.';
   }
   return '';
 }

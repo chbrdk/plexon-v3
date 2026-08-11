@@ -26,6 +26,13 @@ describe('tool-catalog', () => {
     expect(classifyToolFamily('echon_waves_list')).toBe('echon_waves');
   });
 
+  it('classifies brandion tools', () => {
+    expect(classifyToolFamily('brandion_health')).toBe('brandion_guidelines');
+    expect(classifyToolFamily('brandion_guidelines_list')).toBe('brandion_guidelines');
+    expect(classifyToolFamily('brandion_guideline_get')).toBe('brandion_guidelines');
+    expect(classifyToolFamily('brandion_tokens_list')).toBe('brandion_tokens');
+  });
+
   it('classifies ux journey and chat tools', () => {
     expect(classifyToolFamily('audion_ux_journey_run_start')).toBe('audion_ux_journey');
     expect(classifyToolFamily('audion_persona_admin_ux_journey_runs_list')).toBe(
@@ -54,6 +61,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(plan.intent).toBe('project_knowledge');
@@ -69,6 +77,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: false,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: false,
     });
     expect(plan.intent).toBe('checkion_scan');
@@ -82,6 +91,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(toolAllowedByPlan('audion_target_group_knowledge_list', plan)).toBe(true);
@@ -99,6 +109,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(plan.allowWriteTools).toBe(true);
@@ -114,6 +125,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: false,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: false,
     });
     expect(plan.intent).toBe('audion_chat');
@@ -128,6 +140,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: false,
       hasAudionMcp: false,
       hasEchonMcp: true,
+      hasBrandionMcp: false,
       compactContextLoaded: false,
     });
     expect(plan.intent).toBe('echon_market');
@@ -143,6 +156,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: true,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(plan.intent).toBe('echon_audience');
@@ -159,6 +173,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: false,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: false,
     });
     expect(plan.intent).toBe('audion_ux_journey');
@@ -173,6 +188,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(plan.allowWriteTools).toBe(false);
@@ -198,6 +214,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(plan.allowWriteTools).toBe(true);
@@ -211,6 +228,7 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     });
     expect(shouldRefinePlanWithLlm(plan, {
@@ -219,7 +237,26 @@ describe('assistant-planner heuristic', () => {
       hasCheckionMcp: true,
       hasAudionMcp: true,
       hasEchonMcp: false,
+      hasBrandionMcp: false,
       compactContextLoaded: true,
     })).toBe(true);
+  });
+
+  it('routes color / guideline questions to brandion MCP families', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'welche Farben hat MSQDX?',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: true,
+      compactContextLoaded: false,
+    });
+    expect(plan.intent).toBe('brandion_brand');
+    expect(plan.toolFamilies).toEqual(
+      expect.arrayContaining(['brandion_guidelines', 'brandion_tokens', 'plexon_ui']),
+    );
+    expect(plan.skipTools).toBe(false);
+    expect(toolAllowedByPlan('brandion_tokens_list', plan)).toBe(true);
   });
 });

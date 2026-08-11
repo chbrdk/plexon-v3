@@ -9,7 +9,7 @@ Der **Assistent** ist der user-facing Orchestrator-Chat in PLEXON. **Primäreins
 - Konversation mit Claude (Anthropic)
 - PLEXON-first Projektanlage + Sync zu CHECKION/AUDION
 - Paralleles Research (REST-Clients)
-- MCP-Steuerung von CHECKION/AUDION (wenn Entitlements aktiv)
+- MCP-Steuerung von CHECKION/AUDION/ECHON/BRANDION (wenn Entitlements + MCP-URLs aktiv)
 - Projektstatus / Dashboard-Zusammenfassungen
 
 Siehe `specs/domain/central-assistant-flyout.md` · `knowledge/central-assistant-flyout.md`.
@@ -40,7 +40,7 @@ Zentrale URLs für externe APIs: `lib/paths/checkion-api.ts`, `lib/paths/audion-
 | `ANTHROPIC_ASSISTANT_MODEL` | Optional, Default Sonnet 4.6 |
 | `ANTHROPIC_PLANNER_MODEL` | Optional, Default Haiku 4.5 (Tool-Planung) |
 | `DATABASE_URL` | Conversations, Messages, Workflow-Runs |
-| `CHECKION_MCP_URL` / `AUDION_MCP_URL` | MCP Tool-Loop |
+| `CHECKION_MCP_URL` / `AUDION_MCP_URL` / `ECHON_MCP_URL` / `BRANDION_MCP_URL` | MCP Tool-Loop |
 | `CHECKION_API_URL` + `CHECKION_API_TOKEN` | Research REST |
 | `AUDION_API_URL` + `AUDION_API_TOKEN` | Research REST |
 | `PLEXON_SERVICE_SECRET` | Federation / Dashboard-Fetch |

@@ -126,6 +126,14 @@ MX/SPF/DKIM für eure Domain setzt ihr dort, wo die **DNS-Zone** liegt (Registra
 
 PLEXON aktiviert ECHON-MCP automatisch, wenn `ECHON_MCP_URL` gesetzt ist **und** der Nutzer CHECKION- oder AUDION-Entitlement hat.
 
+### BRANDION MCP (Guidelines / Design Tokens, Assistant)
+
+| Variable | Pflicht | Beschreibung |
+|----------|---------|--------------|
+| `BRANDION_MCP_URL` | Nein | MCP für Assistant. Intern: `http://brandion-mcp:3100`. Spec: `specs/domain/assistant-brandion-mcp.md`. |
+
+PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** der Nutzer Brandion-Entitlement (`active`) hat. Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list` (Farben aus Guidelines — nicht erfinden).
+
 ### PLEXON Assistant (Phase 2 Workflows)
 
 Zusätzliche Variablen für deterministische Workflows und External APIs. Pfade zentral in `lib/paths/checkion-api.ts`, `lib/paths/external-apis.ts` — **nicht** in Coolify hardcoden, nur Basis-URLs override.

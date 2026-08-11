@@ -9,6 +9,7 @@ import {
   SCAN_FAMILIES,
   ECHON_MARKET_FAMILIES,
   ECHON_TO_AUDIENCE_FAMILIES,
+  BRANDION_BRAND_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -30,6 +31,7 @@ export type AssistantPlanIntent =
   | 'audion_documents'
   | 'echon_market'
   | 'echon_audience'
+  | 'brandion_brand'
   | 'action_write'
   | 'general_chat';
 
@@ -54,6 +56,7 @@ export type PlannerInput = {
   hasCheckionMcp: boolean;
   hasAudionMcp: boolean;
   hasEchonMcp: boolean;
+  hasBrandionMcp: boolean;
   compactContextLoaded: boolean;
 };
 
@@ -123,7 +126,7 @@ const MARKET_PATTERNS = [
 ];
 
 function hasMcp(input: PlannerInput): boolean {
-  return input.hasCheckionMcp || input.hasAudionMcp || input.hasEchonMcp;
+  return input.hasCheckionMcp || input.hasAudionMcp || input.hasEchonMcp || input.hasBrandionMcp;
 }
 
 function buildPlan(
@@ -154,10 +157,39 @@ const CHAT_PATTERNS = [
 
 const DOCUMENT_PATTERNS = [/\bdokument/i, /\bdocument/i, /\bupload\b/i, /\bpdf\b/i];
 
+const BRANDION_PATTERNS = [
+  /\bfarben?\b/i,
+  /\bcolours?\b/i,
+  /\bcolors?\b/i,
+  /\bhex\b/i,
+  /\bpantone\b/i,
+  /\bguideline/i,
+  /\bmarke\b/i,
+  /\bbrandion\b/i,
+  /\bcorporate\s*design\b/i,
+  /\b\bcd\b/i,
+  /\bdesign.?tokens?\b/i,
+  /\bswatch/i,
+  /\bfarb(ton|palette|werte?)\b/i,
+];
+
 export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   const text = (input.planningPrompt ?? input.prompt).trim();
   const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
   const audienceWrite = hasAudienceWriteIntent(text);
+
+  if (BRANDION_PATTERNS.some((p) => p.test(text)) && input.hasBrandionMcp) {
+    return buildPlan({
+      intent: 'brandion_brand',
+      mode: 'tools',
+      toolFamilies: [...BRANDION_BRAND_FAMILIES, 'plexon_ui'],
+      allowWriteTools: false,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning:
+        'Marken-/Farb-/Guideline-Intent – BRANDION guidelines + tokens (live, nicht erfinden).',
+    });
+  }
 
   if (
     UX_JOURNEY_AGENT_PATTERNS.some((p) => p.test(text)) &&
@@ -403,6 +435,7 @@ const VALID_INTENTS = new Set<AssistantPlanIntent>([
   'audion_documents',
   'echon_market',
   'echon_audience',
+  'brandion_brand',
   'action_write',
   'general_chat',
 ]);
@@ -426,6 +459,9 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'echon_research',
   'echon_signals',
   'echon_waves',
+  'brandion_guidelines',
+  'brandion_tokens',
+  'plexon_ui',
 ]);
 
 function parseLlmPlan(raw: LlmPlanJson, fallback: AssistantPlan): AssistantPlan | null {
@@ -474,7 +510,7 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_research, echon_signals, echon_waves.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_research, echon_signals, echon_waves, brandion_guidelines, brandion_tokens, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -482,6 +518,7 @@ Regeln:
     hasCheckionMcp: input.hasCheckionMcp,
     hasAudionMcp: input.hasAudionMcp,
     hasEchonMcp: input.hasEchonMcp,
+    hasBrandionMcp: input.hasBrandionMcp,
     compactContextLoaded: input.compactContextLoaded,
     heuristicSuggestion: {
       intent: heuristic.intent,
@@ -521,7 +558,7 @@ Regeln:
 
 /** Use LLM planner when heuristic is ambiguous (general_chat with MCP). */
 export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: PlannerInput): boolean {
-  if (!input.hasCheckionMcp && !input.hasAudionMcp && !input.hasEchonMcp) return false;
+  if (!input.hasCheckionMcp && !input.hasAudionMcp && !input.hasEchonMcp && !input.hasBrandionMcp) return false;
   if (heuristic.intent !== 'general_chat') return false;
   if (input.hasProjectContext) return true;
   return input.prompt.trim().length > 120;

@@ -21,6 +21,8 @@ export type ToolFamily =
   | 'echon_research'
   | 'echon_signals'
   | 'echon_waves'
+  | 'brandion_guidelines'
+  | 'brandion_tokens'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -81,6 +83,12 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   echon_research: [/^echon_research/],
   echon_signals: [/^echon_signals?_/, /^echon_signal_/],
   echon_waves: [/^echon_waves?_/, /^echon_wave_/],
+  brandion_guidelines: [
+    /^brandion_health$/,
+    /^brandion_guidelines_/,
+    /^brandion_guideline_/,
+  ],
+  brandion_tokens: [/^brandion_tokens_/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -122,12 +130,21 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'audion_project',
   'audion_knowledge',
   'audion_persona',
+  'brandion_guidelines',
+  'brandion_tokens',
 ];
 
 export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
   'checkion_project',
   'audion_knowledge',
   'audion_project',
+  'brandion_guidelines',
+  'brandion_tokens',
+];
+
+export const BRANDION_BRAND_FAMILIES: ToolFamily[] = [
+  'brandion_guidelines',
+  'brandion_tokens',
 ];
 
 export const SCAN_FAMILIES: ToolFamily[] = [

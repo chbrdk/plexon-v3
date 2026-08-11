@@ -465,3 +465,10 @@ export const getEchonMcpUrl = (): string | undefined => {
   const url = process.env.ECHON_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for BRANDION guideline/token tools. Reads BRANDION_MCP_URL (e.g. http://brandion-mcp:3100). */
+export const getBrandionMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url = process.env.BRANDION_MCP_URL?.trim();
+  return url || undefined;
+};
