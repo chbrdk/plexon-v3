@@ -44,7 +44,7 @@ Stand: Mai 2026
 
 ### CREATION (v3 Shell → Zaoly runtime)
 
-- **v3 Shell** (`creation-v3`): AppShell, Plexon Auth, stub hubs (projects / compositions / library) — Registry via `NEXT_PUBLIC_CREATION_URL`
+- **v3 Shell** (`creation-v3`): AppShell, Plexon Auth, domain hubs (projects / compositions magazine / library fixture) — Registry via `NEXT_PUBLIC_CREATION_URL`
 - Product id: `creation` (Display **CREATION**)
 - **Zaoly** (Vite editor + WC library) remains the design runtime — deep-link/embed in later waves; do not invent a second project model
 - Attach: `knowledge/creation-v3-onboarding.md` · `creation-v3/knowledge/staging-coolify.md`
