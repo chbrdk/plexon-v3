@@ -38,7 +38,7 @@ export function MagCover({ eyebrow, title, url, meta, fazit, kpis }: MagCoverPro
           {kpis.slice(0, 4).map((kpi) => (
             <View key={kpi.label} style={magStyles.kpiCell}>
               {kpi.ringValue != null ? (
-                <MagScoreRing value={kpi.ringValue} max={kpi.ringMax ?? 100} label={kpi.label} size={78} />
+                <MagScoreRing value={kpi.ringValue} max={kpi.ringMax ?? 100} label={kpi.label} size={64} />
               ) : (
                 <View>
                   <Text style={magStyles.kpiValue}>{kpi.value}</Text>

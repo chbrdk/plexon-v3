@@ -7,20 +7,18 @@ import {
 } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-personas'
-import { formatReportGeneratedAt, humanizeTraitKey } from '@/lib/assistant/reports/format-report-text'
+import { formatReportGeneratedAt } from '@/lib/assistant/reports/format-report-text'
 import { pdfCoverEyebrow } from '@/lib/paths/pdf-cover-copy'
 import {
   MagChapter,
-  MagChip,
-  MagChipRow,
   MagCover,
   MagDonut,
   MagLedger,
   MagPage,
+  MagPersonaGrid,
   MagRankedList,
   MagScoreRing,
   MagTable,
-  MagTraitBars,
   magStyles,
   type MagCoverKpi,
 } from '@/lib/assistant/reports/pdf/magazine'
@@ -133,7 +131,10 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             <Text style={magStyles.body}>{report.market.executiveSummary}</Text>
           ) : null}
           {report.market.keyFindings.length > 0 ? (
-            <MagRankedList items={report.market.keyFindings.map((f) => ({ label: f }))} />
+            <MagRankedList
+              columns={2}
+              items={report.market.keyFindings.map((f) => ({ label: f }))}
+            />
           ) : null}
           {report.market.implications ? (
             <Text style={magStyles.meta}>{report.market.implications}</Text>
@@ -150,8 +151,8 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
           title={EQC_REPORT_COPY.sectionDomain}
           lede={report.domain.domain}
         >
-          <View style={[magStyles.row, { marginBottom: 18, gap: 28 }]}>
-            <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={96} />
+          <View style={[magStyles.row, { marginBottom: 22, gap: 28 }]}>
+            <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={80} />
             <View style={[magStyles.col, { paddingTop: 8 }]}>
               <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
               <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
@@ -164,6 +165,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             <View style={magStyles.sectionBlock}>
               <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.sectionTopIssues}</Text>
               <MagRankedList
+                columns={2}
                 items={report.domain.topIssues.slice(0, 8).map((issue) => ({
                   label: issue.title,
                   meta: `${issue.count}×`,
@@ -283,46 +285,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             personas.length > 1 ? EQC_REPORT_COPY.sectionPersonas : EQC_REPORT_COPY.sectionPersona
           }
         >
-          {personas.map((p, idx) => (
-            <View key={p.id || `p-${idx}`} style={{ marginBottom: 14 }} wrap={false}>
-              {idx > 0 ? <View style={magStyles.rule} /> : null}
-              <Text style={magStyles.headline}>{p.name}</Text>
-              <MagChipRow>
-                {p.segment ? <MagChip>{p.segment}</MagChip> : null}
-                <MagChip>
-                  {Math.round(p.confidence <= 1 ? p.confidence * 100 : p.confidence)}%{' '}
-                  {EQC_REPORT_COPY.personaConfidence}
-                </MagChip>
-              </MagChipRow>
-              {p.bio || p.headline ? (
-                <Text style={magStyles.body}>{p.bio || p.headline}</Text>
-              ) : null}
-              {p.traits.length > 0 ? (
-                <MagTraitBars
-                  traits={p.traits.map((t) => ({
-                    displayName: t.displayName || humanizeTraitKey(t.name),
-                    score: t.score,
-                  }))}
-                />
-              ) : null}
-              {p.goals.length > 0 ? (
-                <>
-                  <Text style={[magStyles.eyebrow, { marginTop: 8 }]}>
-                    {EQC_REPORT_COPY.sectionGoals}
-                  </Text>
-                  <MagRankedList items={p.goals.slice(0, 5).map((g) => ({ label: g }))} />
-                </>
-              ) : null}
-              {p.painPoints.length > 0 ? (
-                <>
-                  <Text style={[magStyles.eyebrow, { marginTop: 6 }]}>
-                    {EQC_REPORT_COPY.sectionPainPoints}
-                  </Text>
-                  <MagRankedList items={p.painPoints.slice(0, 5).map((g) => ({ label: g }))} />
-                </>
-              ) : null}
-            </View>
-          ))}
+          <MagPersonaGrid personas={personas} />
         </MagChapter>
       </MagPage>
     ) : null
@@ -339,19 +302,19 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
               : undefined
           }
         >
-          <View style={[magStyles.row, { marginBottom: 12 }]}>
+          <View style={[magStyles.row, { marginBottom: 16, gap: 24 }]}>
             {report.geo.overallScore != null ? (
               <MagScoreRing
                 value={report.geo.overallScore}
                 label="GEO Score"
-                size={88}
+                size={76}
               />
             ) : null}
             {report.geo.geoFitnessScore != null ? (
               <MagScoreRing
                 value={report.geo.geoFitnessScore}
                 label={EQC_REPORT_COPY.kpiGeoFitness}
-                size={88}
+                size={76}
               />
             ) : null}
           </View>
@@ -359,6 +322,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             <>
               <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.competitors}</Text>
               <MagRankedList
+                columns={2}
                 items={report.geo.competitors.slice(0, 8).map((c) => ({
                   label: c.name,
                   meta: [
@@ -378,7 +342,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
               <Text style={[magStyles.eyebrow, { marginTop: 10 }]}>
                 {EQC_REPORT_COPY.geoPromptsLabel}
               </Text>
-              <MagRankedList items={promptDossierItems(report)} />
+              <MagRankedList columns={2} items={promptDossierItems(report)} />
             </>
           ) : null}
         </MagChapter>
@@ -406,6 +370,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
                 {EQC_REPORT_COPY.geoEeatGapsLabel}
               </Text>
               <MagRankedList
+                columns={2}
                 items={report.geo.eeatMissingElements.map((g) => ({ label: g }))}
               />
             </>
@@ -422,6 +387,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
           title={EQC_REPORT_COPY.sectionGeoRecommendations}
         >
           <MagRankedList
+            columns={2}
             items={report.geo.recommendations.slice(0, 10).map((r) => ({
               label: r.title,
               meta: r.description,
@@ -443,6 +409,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             <>
               <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.sectionFindings}</Text>
               <MagRankedList
+                columns={2}
                 items={report.insights.findings.slice(0, 10).map((f) => ({
                   label: f.severity
                     ? `[${eqcSeverityLabel(f.severity)}] ${f.title}`

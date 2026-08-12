@@ -31,7 +31,9 @@ Eyebrow → headline → meta → visual anchor (ring / donut / ledger) → body
 No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
 **Satzspiegel:** äußere Ränder ~52pt, zentrierte Content-Spalte **440pt** (nicht voller Seitenrand).  
-**Typo:** Noto Sans (DS-Stack-Twin via `magazine/fonts/`), nicht Helvetica.
+**Typo:** Noto Sans (DS-Stack-Twin via `magazine/fonts/`), nicht Helvetica. Kompaktere Größen (Headline ~15pt, Body ~9pt), mehr vertikaler Rhythmus.
+
+**Magazin-Layout:** `MagRankedList columns={2}` für Findings, Issues, GEO, E-E-A-T, Empfehlungen. Personas via `MagPersonaGrid` — 2-up Kacheln, bei einer Persona Goals | Pain side-by-side (`MagPersonaCard spread`).
 
 ## Out of scope (Wave 1)
 
