@@ -1,8 +1,8 @@
 # CREATION v3 — Plexon onboarding
 
-**Status:** Wave 6 MCP catalog · **Date:** 2026-08-12  
+**Status:** Editor migration (Zaoly sunset) · **Date:** 2026-08-12  
 **Product id:** `creation` · **Repo:** `creation-v3` · **Display:** CREATION  
-**Editor runtime:** Zaoly (`msqdx_creation_v2/MSQDX CREATION`) — not ported into Next
+**Editor SoT:** creation-v3 `/editor` + `@msqdx/ui` Storybook — Zaoly deep-link is fallback until E6
 
 > Do not confuse with `knowledge/platform-projects-central-creation.md` (Collection create APIs).
 
@@ -12,24 +12,33 @@
 |----------|--------|
 | Product id | `creation` |
 | Federated shell | `creation-v3` Next AppShell (`@msqdx/ui`) |
-| Design tool | Zaoly Vite editor (deep-link via `CREATION_EDITOR_URL`) |
+| Design tool | In-app `/editor` (React scene); legacy Zaoly via `CREATION_EDITOR_URL` until cutover |
+| UI primitives | `@msqdx/ui` + Storybook `https://ds.projects-a.plygrnd.tech` |
 | Federation | `2026-05-plexon-federation-v3` |
 | Bindings | Wave 3 — upsert + `creation-project-origin` + placeholders |
-| Auth bridge | Wave 4 — `launchCode` mint/redeem (Host consumer later) |
-| Domain hubs | Wave 5 — compositions stubs magazine + library fixture catalog |
-| MCP | Wave 6 — `creation-mcp` tools + `CREATION_MCP_URL` |
+| Auth bridge | Wave 4 — `launchCode` mint/redeem (legacy Host) |
+| Domain hubs | Wave 5 — compositions + library |
+| MCP | Wave 6 — `creation-mcp` + `CREATION_MCP_URL` |
 
-## Wave map
+## Wave map (shell + federation)
 
 | Wave | Scope |
 |------|-------|
-| 0 | Specs + namespace (this doc + product specs) |
-| 1 | AppShell + `NEXT_PUBLIC_CREATION_URL` registry + Assistant embed `product=creation` |
-| 2 | Editor launch via `CREATION_EDITOR_URL` — **landed** |
-| 3 | Collection bindings + upsert + origin — **landed** |
-| 4 | Auth bridge (launchCode mint/redeem) — **landed** |
-| 5 | Domain hubs (compositions magazine + library overview) — **landed** |
-| 6 | MCP / catalog API — **landed** (Coolify `creation-mcp` attach when ready) |
+| 0–6 | Specs → AppShell → editor deep-link → bindings → auth bridge → hubs → MCP — **landed** |
+
+## Wave map (editor migration E+)
+
+| Wave | Scope |
+|------|-------|
+| E0 | Specs/knowledge sunset + scene + workspace — creation-v3 + msqdx-ui + this doc |
+| E1 | `msqdx-ui/knowledge/ds-keep-mapping.md` keep tags → exists/alias/gap |
+| E2 | Close primitive gaps in Storybook (`pnpm ds:add`) |
+| E3 | Editor chrome primitives (CanvasViewport, SelectionHandles, …) |
+| E4 | creation-v3 `/editor` beta + Top-N + feature flag |
+| E5 | Scene persistence + Collection binding |
+| E6 | Parity sign-off; sunset Zaoly deep-link |
+
+Program SoT: `creation-v3/specs/domain/editor-migration.md`
 
 ## Env (Plexon)
 
@@ -41,20 +50,8 @@
 
 Coolify: `coolify-plexon-v3-env-cheatsheet.md` §4d · `knowledge/creation-mcp-assistant.md`.
 
-## Smoke (Wave 3–6)
+## Smoke
 
-1. creation-v3 `PUT /api/platform/provisioning/projects/{uuid}` with secret → `{ status: applied, externalProjectId }`
-2. Plexon create Collection → `creation` binding `in_sync` when CREATION URL set
-3. CREATION `/projects?platformProjectId=` redirects when bound
-4. `POST …/creation-project-origin` returns Collection UUID
-5. `POST /api/editor/launch-code` → code; redeem with service secret once
-6. `/compositions` lists fixture stubs; `/library` shows WC catalog snapshot
-7. `GET /api/library/catalog` + MCP `creation.library_catalog` when `CREATION_MCP_URL` set
-
-## Related
-
-- `creation-v3/specs/domain/app-shell.md` · `plexon-federation.md` · `auth-bridge.md` · `domain-hubs.md` · `mcp-server.md` · `specs/api/projects.md` · `specs/api/catalog.md`
-- `creation-v3/knowledge/paths.md` · `knowledge/collection-bindings.md` · `knowledge/auth-bridge.md` · `knowledge/library-fixture-sources.md` · `knowledge/mcp-server.md`
-- `specs/domain/assistant-creation-mcp.md` · `knowledge/creation-mcp-assistant.md`
-- `specs/domain/collection-projects.md` Phase 6
-- Zaoly: `knowledge/plexon-creation-v3-attach.md` (in Zaoly repo)
+- Staging shell: `https://creation-v3.projects-a.plygrnd.tech`
+- In-app editor when `CREATION_EDITOR_INAPP` on: `/editor`
+- MCP initialize → 200 on creation-mcp FQDN
