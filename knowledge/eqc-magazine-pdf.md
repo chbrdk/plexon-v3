@@ -36,7 +36,9 @@ No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
 **Magazin-Layout:** Kapitelindex `01…`; Spreads via `MagTwoColumn` (Markt Überblick|Findings, Domain Score|Issues, GEO Competitors|Prompts); `MagPullQuote` für Fazit/E-E-A-T-Reasoning; Personas als Editorial-Tiles (Top-Hairline, keine Card-Box); Listen 2-spaltig wo sinnvoll.
 
-**Page packing:** `pack-magazine-pages.ts` schätzt Kapitel-Gewicht (Listen, Prosa, Personas, Donuts) und packt leichte Module auf eine Seite (max. 3, Breathing ~12%). Cover bleibt solo. Zwischen gestapelten Kapiteln: Haarlinie. `MagChapter wrap={false}` — passt ein Modul nicht mehr, wandert es ganz auf die nächste Seite (kein Quetschen mitten im Block).
+**Page packing:** `pack-magazine-pages.ts` schätzt Kapitel-Gewicht (Listen, Prosa, Personas, Donuts) und packt leichte Module auf eine Seite (max. 3, Breathing ~12%). Cover bleibt solo. Zwischen gestapelten Kapiteln: Haarlinie. Listenzeilen `wrap={false}` (atomar); Kapitel dürfen umbrechen, wenn sie höher als die Seite sind.
+
+**Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap` (Yoga addiert Gap außerhalb und Text läuft in die Nachbarspalte). Labels in `rankedTextCol` mit `minWidth: 0`, Text mit `maxWidth: 100%`.
 
 **Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap` (Yoga addiert Gap außerhalb und Text läuft in die Nachbarspalte). Labels in `rankedTextCol` mit `minWidth: 0`, Text mit `maxWidth: 100%`.
 
