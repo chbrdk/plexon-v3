@@ -208,12 +208,14 @@ function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.Re
             <MagTwoColumn
               left={
                 <View>
-                  <View style={[magStyles.row, { marginBottom: 16, gap: 16 }]}>
-                    <MagScoreRing
-                      value={report.domain.score}
-                      label={EQC_REPORT_COPY.colScore}
-                      size={72}
-                    />
+                  <View style={[magStyles.row, { marginBottom: 16 }]}>
+                    <View style={{ marginRight: 16 }}>
+                      <MagScoreRing
+                        value={report.domain.score}
+                        label={EQC_REPORT_COPY.colScore}
+                        size={72}
+                      />
+                    </View>
                     <View style={[magStyles.col, { paddingTop: 6 }]}>
                       <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
                       <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
@@ -239,8 +241,10 @@ function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.Re
               }
             />
           ) : (
-            <View style={[magStyles.row, { marginBottom: 22, gap: 28 }]}>
-              <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={80} />
+            <View style={[magStyles.row, { marginBottom: 22 }]}>
+              <View style={{ marginRight: 20 }}>
+                <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={80} />
+              </View>
               <View style={[magStyles.col, { paddingTop: 8 }]}>
                 <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
                 <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
@@ -383,16 +387,20 @@ function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.Re
               : undefined
           }
         >
-          <View style={[magStyles.row, { marginBottom: 20, gap: 28 }]}>
+          <View style={[magStyles.row, { marginBottom: 20 }]}>
             {report.geo.overallScore != null ? (
-              <MagScoreRing value={report.geo.overallScore} label="GEO Score" size={68} />
+              <View style={{ marginRight: 20 }}>
+                <MagScoreRing value={report.geo.overallScore} label="GEO Score" size={68} />
+              </View>
             ) : null}
             {report.geo.geoFitnessScore != null ? (
-              <MagScoreRing
-                value={report.geo.geoFitnessScore}
-                label={EQC_REPORT_COPY.kpiGeoFitness}
-                size={68}
-              />
+              <View style={{ marginRight: 12 }}>
+                <MagScoreRing
+                  value={report.geo.geoFitnessScore}
+                  label={EQC_REPORT_COPY.kpiGeoFitness}
+                  size={68}
+                />
+              </View>
             ) : null}
           </View>
           {report.geo.competitors.length > 0 && promptDossierItems(report).length > 0 ? (

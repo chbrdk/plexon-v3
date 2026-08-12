@@ -16,7 +16,7 @@ type MagLedgerProps = {
 export function MagLedger({ items, max = 100 }: MagLedgerProps) {
   const sorted = [...items].sort((a, b) => a.score - b.score)
   return (
-    <View>
+    <View style={{ width: '100%' }}>
       {sorted.map((item, i) => {
         const tone =
           item.score < max * 0.4
@@ -28,7 +28,7 @@ export function MagLedger({ items, max = 100 }: MagLedgerProps) {
           <View key={`${item.label}-${i}`} style={magStyles.ledgerRow} wrap={false}>
             <Text style={magStyles.rankedIndex}>{String(i + 1).padStart(2, '0')}</Text>
             <Text style={[magStyles.ledgerScore, { color: tone }]}>{Math.round(item.score)}</Text>
-            <View style={magStyles.col}>
+            <View style={magStyles.rankedTextCol}>
               <Text style={magStyles.rankedLabel}>{item.label}</Text>
               {item.detail ? <Text style={magStyles.meta}>{item.detail}</Text> : null}
             </View>

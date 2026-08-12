@@ -15,14 +15,19 @@ export function MagPersonaGrid({ personas }: { personas: EventQuickCheckReportPe
   }
 
   return (
-    <View>
+    <View style={{ width: '100%' }}>
       {rows.map((pair, rowIndex) => (
         <View
           key={rowIndex}
           style={[magStyles.personaRow, rowIndex > 0 ? { marginTop: 22 } : null]}
         >
-          {pair.map((persona) => (
-            <MagPersonaCard key={persona.id || persona.name} persona={persona} />
+          {pair.map((persona, i) => (
+            <View
+              key={persona.id || persona.name}
+              style={i === 0 ? magStyles.personaCell : magStyles.personaCellLast}
+            >
+              <MagPersonaCard persona={persona} bare />
+            </View>
           ))}
         </View>
       ))}

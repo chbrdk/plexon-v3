@@ -27,7 +27,6 @@ export function MagChapter({
     <View
       style={[magStyles.chapterGap, stacked ? magStyles.chapterStacked : null]}
       break={pageBreak}
-      wrap={false}
     >
       {index ? <Text style={magStyles.chapterIndex}>{index}</Text> : null}
       <Text style={magStyles.eyebrow}>{eyebrow}</Text>

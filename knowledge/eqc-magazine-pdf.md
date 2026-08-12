@@ -38,6 +38,8 @@ No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
 **Page packing:** `pack-magazine-pages.ts` schätzt Kapitel-Gewicht (Listen, Prosa, Personas, Donuts) und packt leichte Module auf eine Seite (max. 3, Breathing ~12%). Cover bleibt solo. Zwischen gestapelten Kapiteln: Haarlinie. `MagChapter wrap={false}` — passt ein Modul nicht mehr, wandert es ganz auf die nächste Seite (kein Quetschen mitten im Block).
 
+**Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap` (Yoga addiert Gap außerhalb und Text läuft in die Nachbarspalte). Labels in `rankedTextCol` mit `minWidth: 0`, Text mit `maxWidth: 100%`.
+
 ## Out of scope (Wave 1)
 
 HTML/Playwright print engine · PPTX redesign · present-mode PDF · full interactive GEO dossier parity

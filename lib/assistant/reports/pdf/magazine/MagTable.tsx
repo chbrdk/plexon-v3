@@ -10,20 +10,22 @@ type MagTableProps = {
 export function MagTable({ columns, rows }: MagTableProps) {
   const width = `${100 / Math.max(columns.length, 1)}%`
   return (
-    <View>
+    <View style={{ width: '100%' }}>
       <View style={magStyles.tableHeader}>
         {columns.map((col) => (
-          <Text key={col} style={[magStyles.tableHeadCell, { width }]}>
-            {col}
-          </Text>
+          <View key={col} style={{ width, paddingRight: 4, minWidth: 0 }}>
+            <Text style={magStyles.tableHeadCell}>{col}</Text>
+          </View>
         ))}
       </View>
       {rows.map((row, ri) => (
         <View key={ri} style={magStyles.tableRow} wrap={false}>
           {columns.map((_, ci) => (
-            <Text key={ci} style={[magStyles.tableCell, { width }]}>
-              {row[ci] == null || row[ci] === '' ? '–' : String(row[ci])}
-            </Text>
+            <View key={ci} style={{ width, paddingRight: 4, minWidth: 0 }}>
+              <Text style={magStyles.tableCell}>
+                {row[ci] == null || row[ci] === '' ? '–' : String(row[ci])}
+              </Text>
+            </View>
           ))}
         </View>
       ))}

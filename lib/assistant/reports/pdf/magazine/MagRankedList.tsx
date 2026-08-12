@@ -31,7 +31,7 @@ function RankedColumn({
   compact: boolean
 }) {
   return (
-    <View style={magStyles.col}>
+    <View style={{ width: '100%' }}>
       {items.map((item, i) => (
         <View
           key={`${item.label}-${i}`}
@@ -41,7 +41,7 @@ function RankedColumn({
           <Text style={compact ? magStyles.rankedIndexCompact : magStyles.rankedIndex}>
             {String(startIndex + i).padStart(2, '0')}
           </Text>
-          <View style={magStyles.col}>
+          <View style={magStyles.rankedTextCol}>
             <Text style={compact ? magStyles.rankedLabelCompact : magStyles.rankedLabel}>
               {item.label}
             </Text>
@@ -73,16 +73,21 @@ export function MagRankedList({
 
   if (columns === 2 && items.length > 1) {
     const [left, right] = splitColumns(items)
+    const pad = 12
     return (
       <View style={[magStyles.twoColRow, { marginTop: compact ? 2 : 6 }]}>
-        <RankedColumn items={left} startIndex={startIndex} compact={compact} />
-        <RankedColumn items={right} startIndex={startIndex + left.length} compact={compact} />
+        <View style={[magStyles.twoColCell, { paddingRight: pad }]}>
+          <RankedColumn items={left} startIndex={startIndex} compact={compact} />
+        </View>
+        <View style={[magStyles.twoColCell, { paddingLeft: pad }]}>
+          <RankedColumn items={right} startIndex={startIndex + left.length} compact={compact} />
+        </View>
       </View>
     )
   }
 
   return (
-    <View style={{ marginTop: compact ? 2 : 6 }}>
+    <View style={{ marginTop: compact ? 2 : 6, width: '100%' }}>
       <RankedColumn items={items} startIndex={startIndex} compact={compact} />
     </View>
   )

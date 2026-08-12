@@ -4,6 +4,9 @@
  *
  * Print bias: soft stock, generous leading, folio hairlines, editorial spreads
  * (two-column lists / persona tiles) — not screen dashboard chrome.
+ *
+ * Layout rule: never combine percentage widths with flex `gap` on the same row —
+ * yoga adds gap outside the % measure and text spills into the sibling column.
  */
 
 import { StyleSheet } from '@react-pdf/renderer'
@@ -115,7 +118,7 @@ export const magStyles = StyleSheet.create({
     letterSpacing: -0.28,
     lineHeight: 1.18,
     marginBottom: 12,
-    maxWidth: '90%',
+    maxWidth: '100%',
   },
   coverHeadline: {
     fontFamily: MAG_FONT_FAMILY,
@@ -125,7 +128,7 @@ export const magStyles = StyleSheet.create({
     letterSpacing: -0.45,
     lineHeight: 1.12,
     marginBottom: 16,
-    maxWidth: '86%',
+    maxWidth: '100%',
   },
   lede: {
     fontFamily: MAG_FONT_FAMILY,
@@ -134,7 +137,7 @@ export const magStyles = StyleSheet.create({
     color: magColors.inkSoft,
     lineHeight: 1.55,
     marginBottom: 22,
-    maxWidth: '94%',
+    maxWidth: '100%',
   },
   body: {
     fontFamily: MAG_FONT_FAMILY,
@@ -143,6 +146,7 @@ export const magStyles = StyleSheet.create({
     color: magColors.inkSoft,
     lineHeight: 1.62,
     marginBottom: 12,
+    maxWidth: '100%',
   },
   meta: {
     fontFamily: MAG_FONT_FAMILY,
@@ -152,10 +156,12 @@ export const magStyles = StyleSheet.create({
     lineHeight: 1.4,
     marginBottom: 4,
     letterSpacing: 0.2,
+    maxWidth: '100%',
   },
   chapterGap: {
     marginTop: 2,
     marginBottom: 6,
+    width: '100%',
   },
   chapterStacked: {
     marginTop: 28,
@@ -177,12 +183,14 @@ export const magStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 20,
+    width: '100%',
   },
   col: {
     flexDirection: 'column',
     flexGrow: 1,
     flexShrink: 1,
+    minWidth: 0,
+    width: '100%',
   },
   chip: {
     fontFamily: MAG_FONT_FAMILY,
@@ -195,12 +203,14 @@ export const magStyles = StyleSheet.create({
     paddingVertical: 3,
     marginRight: 5,
     marginBottom: 5,
+    maxWidth: '100%',
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: 10,
     marginTop: 2,
+    width: '100%',
   },
   kpiValue: {
     fontFamily: MAG_FONT_FAMILY,
@@ -226,23 +236,26 @@ export const magStyles = StyleSheet.create({
     paddingTop: 20,
     borderTopWidth: 0.6,
     borderTopColor: magColors.line,
-    gap: 18,
+    width: '100%',
   },
   kpiCell: {
-    width: '22%',
-    minWidth: 68,
+    width: '25%',
+    paddingRight: 10,
     alignItems: 'flex-start',
-    marginBottom: 6,
+    marginBottom: 8,
   },
+  /** 50% + inner padding — never % width + flex gap on the same row. */
   twoColRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 26,
+    width: '100%',
   },
   twoColCell: {
-    width: '47%',
+    width: '50%',
+    maxWidth: '50%',
     flexDirection: 'column',
+    flexShrink: 1,
+    minWidth: 0,
   },
   subEyebrow: {
     fontFamily: MAG_FONT_FAMILY,
@@ -255,15 +268,30 @@ export const magStyles = StyleSheet.create({
   },
   personaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 26,
+    width: '100%',
+    alignItems: 'flex-start',
   },
   personaCell: {
-    width: '47%',
+    width: '50%',
+    maxWidth: '50%',
     paddingTop: 14,
     paddingBottom: 4,
+    paddingRight: 12,
     borderTopWidth: 1.25,
     borderTopColor: magColors.ink,
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  personaCellLast: {
+    width: '50%',
+    maxWidth: '50%',
+    paddingTop: 14,
+    paddingBottom: 4,
+    paddingLeft: 12,
+    borderTopWidth: 1.25,
+    borderTopColor: magColors.ink,
+    flexShrink: 1,
+    minWidth: 0,
   },
   personaSpread: {
     width: '100%',
@@ -278,6 +306,7 @@ export const magStyles = StyleSheet.create({
     color: magColors.ink,
     letterSpacing: -0.2,
     marginBottom: 8,
+    maxWidth: '100%',
   },
   personaBio: {
     fontFamily: MAG_FONT_FAMILY,
@@ -287,40 +316,44 @@ export const magStyles = StyleSheet.create({
     lineHeight: 1.5,
     marginTop: 10,
     marginBottom: 6,
+    maxWidth: '100%',
   },
   rankedIndex: {
     fontFamily: MAG_FONT_FAMILY,
     fontSize: 8,
     fontWeight: 700,
     color: magColors.accentInk,
-    width: 20,
+    width: 18,
+    marginRight: 6,
   },
   rankedIndexCompact: {
     fontFamily: MAG_FONT_FAMILY,
     fontSize: 7.5,
     fontWeight: 700,
     color: magColors.accentInk,
-    width: 16,
+    width: 14,
+    marginRight: 5,
+  },
+  rankedTextCol: {
+    flexGrow: 1,
+    flexShrink: 1,
+    minWidth: 0,
   },
   rankedLabel: {
     fontFamily: MAG_FONT_FAMILY,
     fontSize: 8.5,
     fontWeight: 400,
     color: magColors.ink,
-    flexGrow: 1,
-    flexShrink: 1,
     lineHeight: 1.5,
-    paddingRight: 6,
+    maxWidth: '100%',
   },
   rankedLabelCompact: {
     fontFamily: MAG_FONT_FAMILY,
     fontSize: 7.5,
     fontWeight: 400,
     color: magColors.ink,
-    flexGrow: 1,
-    flexShrink: 1,
     lineHeight: 1.42,
-    paddingRight: 4,
+    maxWidth: '100%',
   },
   rankedMetaCompact: {
     fontFamily: MAG_FONT_FAMILY,
@@ -328,6 +361,7 @@ export const magStyles = StyleSheet.create({
     fontWeight: 400,
     color: magColors.muted,
     lineHeight: 1.4,
+    maxWidth: '100%',
   },
   rankedMeta: {
     fontFamily: MAG_FONT_FAMILY,
@@ -335,10 +369,12 @@ export const magStyles = StyleSheet.create({
     fontWeight: 400,
     color: magColors.muted,
     lineHeight: 1.4,
+    maxWidth: '100%',
   },
   rankedRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    width: '100%',
     marginBottom: 12,
     paddingBottom: 10,
     borderBottomWidth: 0.5,
@@ -347,6 +383,7 @@ export const magStyles = StyleSheet.create({
   rankedRowCompact: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    width: '100%',
     marginBottom: 7,
     paddingBottom: 6,
     borderBottomWidth: 0.5,
@@ -354,6 +391,7 @@ export const magStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
+    width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: magColors.ink,
     paddingBottom: 7,
@@ -362,6 +400,7 @@ export const magStyles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: 'row',
+    width: '100%',
     borderBottomWidth: 0.5,
     borderBottomColor: magColors.line,
     paddingVertical: 7,
@@ -371,6 +410,8 @@ export const magStyles = StyleSheet.create({
     fontSize: 8,
     fontWeight: 400,
     color: magColors.inkSoft,
+    paddingRight: 6,
+    maxWidth: '100%',
   },
   tableHeadCell: {
     fontFamily: MAG_FONT_FAMILY,
@@ -379,15 +420,19 @@ export const magStyles = StyleSheet.create({
     color: magColors.muted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
+    paddingRight: 6,
+    maxWidth: '100%',
   },
   traitTrack: {
     height: 2,
+    width: '100%',
     backgroundColor: magColors.track,
     marginTop: 3,
     marginBottom: 10,
   },
   traitTrackCompact: {
     height: 1.5,
+    width: '100%',
     backgroundColor: magColors.track,
     marginTop: 2,
     marginBottom: 3,
@@ -396,35 +441,55 @@ export const magStyles = StyleSheet.create({
     height: 2,
     backgroundColor: magColors.accent,
   },
+  traitName: {
+    fontFamily: MAG_FONT_FAMILY,
+    fontSize: 7.5,
+    fontWeight: 400,
+    color: magColors.muted,
+    flexGrow: 1,
+    flexShrink: 1,
+    maxWidth: '82%',
+    paddingRight: 6,
+  },
+  traitPct: {
+    fontFamily: MAG_FONT_FAMILY,
+    fontSize: 7.5,
+    fontWeight: 400,
+    color: magColors.muted,
+    width: 28,
+    textAlign: 'right',
+  },
   ledgerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    width: '100%',
     borderBottomWidth: 0.5,
     borderBottomColor: magColors.line,
     paddingVertical: 12,
-    gap: 12,
   },
   ledgerScore: {
     fontFamily: MAG_FONT_FAMILY,
     fontSize: 13,
     fontWeight: 700,
     width: 28,
+    marginRight: 10,
   },
-  /** Editorial pull — left accent, no filled card wash. */
   pullQuote: {
     flexDirection: 'row',
+    width: '100%',
     marginTop: 8,
     marginBottom: 18,
-    gap: 12,
   },
   pullQuoteBar: {
     width: 2.5,
+    marginRight: 12,
     backgroundColor: magColors.accent,
     alignSelf: 'stretch',
   },
   pullQuoteBody: {
     flexGrow: 1,
     flexShrink: 1,
+    minWidth: 0,
     flexDirection: 'column',
     paddingVertical: 2,
   },
@@ -434,23 +499,29 @@ export const magStyles = StyleSheet.create({
     paddingHorizontal: 14,
     marginTop: 18,
     marginBottom: 8,
+    width: '100%',
   },
   distGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 18,
+    width: '100%',
     marginTop: 10,
     paddingTop: 16,
     borderTopWidth: 0.6,
     borderTopColor: magColors.line,
   },
   distCol: {
-    width: '30%',
+    width: '33.333%',
+    maxWidth: '33.333%',
+    paddingRight: 10,
+    flexShrink: 1,
+    minWidth: 0,
   },
   sectionBlock: {
     marginTop: 24,
+    width: '100%',
   },
   coverMetaBlock: {
     marginBottom: 22,
+    width: '100%',
   },
 })

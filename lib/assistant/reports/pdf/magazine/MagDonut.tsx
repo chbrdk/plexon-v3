@@ -87,7 +87,7 @@ export function MagDonut({
           </View>
         )}
       </View>
-      <View>
+      <View style={{ width: '100%' }}>
         {arcs.map((a) => (
           <View key={a.id} style={[magStyles.row, { marginBottom: 3, alignItems: 'center' }]}>
             <View
@@ -98,10 +98,10 @@ export function MagDonut({
                 marginRight: 6,
               }}
             />
-            <Text style={[magStyles.rankedLabel, { fontSize: 8 }]}>{a.label}</Text>
-            <Text style={magStyles.rankedMeta}>
-              {a.value.toLocaleString('de-DE')} · {a.pct}%
-            </Text>
+            <View style={magStyles.rankedTextCol}>
+              <Text style={[magStyles.rankedLabel, { fontSize: 7.5 }]}>{a.label}</Text>
+            </View>
+            <Text style={[magStyles.rankedMeta, { width: 40, textAlign: 'right' }]}>{a.pct}%</Text>
           </View>
         ))}
       </View>

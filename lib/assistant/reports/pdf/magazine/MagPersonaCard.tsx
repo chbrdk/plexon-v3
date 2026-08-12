@@ -13,9 +13,11 @@ type MagPersonaCardProps = {
   persona: EventQuickCheckReportPersonaSection
   /** Full-width card (single persona) vs half-width tile in a grid. */
   spread?: boolean
+  /** Parent already applied personaCell padding/border. */
+  bare?: boolean
 }
 
-export function MagPersonaCard({ persona, spread = false }: MagPersonaCardProps) {
+export function MagPersonaCard({ persona, spread = false, bare = false }: MagPersonaCardProps) {
   const confidence = Math.round(
     persona.confidence <= 1 ? persona.confidence * 100 : persona.confidence,
   )
@@ -26,8 +28,10 @@ export function MagPersonaCard({ persona, spread = false }: MagPersonaCardProps)
   const goals = persona.goals.slice(0, spread ? 6 : 3).map((g) => ({ label: g }))
   const pains = persona.painPoints.slice(0, spread ? 6 : 3).map((g) => ({ label: g }))
 
+  const shell = spread ? magStyles.personaSpread : bare ? { width: '100%' as const } : magStyles.personaCell
+
   return (
-    <View style={spread ? magStyles.personaSpread : magStyles.personaCell}>
+    <View style={shell}>
       <Text style={magStyles.personaName}>{persona.name}</Text>
       <MagChipRow>
         {persona.segment ? <MagChip>{persona.segment}</MagChip> : null}
@@ -40,11 +44,11 @@ export function MagPersonaCard({ persona, spread = false }: MagPersonaCardProps)
       ) : null}
       {traits.length > 0 ? <MagTraitBars traits={traits} compact /> : null}
       {spread && (goals.length > 0 || pains.length > 0) ? (
-        <View style={{ marginTop: 14 }}>
+        <View style={{ marginTop: 14, width: '100%' }}>
           <MagTwoColumn
             left={
               goals.length > 0 ? (
-                <View>
+                <View style={{ width: '100%' }}>
                   <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionGoals}</Text>
                   <MagRankedList items={goals} compact />
                 </View>
@@ -54,7 +58,7 @@ export function MagPersonaCard({ persona, spread = false }: MagPersonaCardProps)
             }
             right={
               pains.length > 0 ? (
-                <View>
+                <View style={{ width: '100%' }}>
                   <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionPainPoints}</Text>
                   <MagRankedList items={pains} compact />
                 </View>
@@ -66,7 +70,7 @@ export function MagPersonaCard({ persona, spread = false }: MagPersonaCardProps)
         </View>
       ) : null}
       {!spread && goals.length > 0 ? (
-        <View style={{ marginTop: 10 }}>
+        <View style={{ marginTop: 10, width: '100%' }}>
           <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionGoals}</Text>
           <MagRankedList items={goals} compact />
         </View>
