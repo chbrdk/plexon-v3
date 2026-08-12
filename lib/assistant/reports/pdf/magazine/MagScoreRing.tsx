@@ -58,7 +58,7 @@ export function MagScoreRing({
           alignItems: 'center',
         }}
       >
-        <Text style={[magStyles.kpiValue, { fontSize: size > 70 ? 16 : 12 }]}>{display}</Text>
+        <Text style={[magStyles.kpiValue, { fontSize: size > 70 ? 15 : 12 }]}>{display}</Text>
       </View>
       {label ? <Text style={[magStyles.kpiLabel, { marginTop: 6, textAlign: 'center' }]}>{label}</Text> : null}
     </View>

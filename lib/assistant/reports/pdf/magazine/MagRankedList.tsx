@@ -14,17 +14,13 @@ type MagRankedListProps = {
 
 export function MagRankedList({ items, startIndex = 1 }: MagRankedListProps) {
   return (
-    <View>
+    <View style={{ marginTop: 4 }}>
       {items.map((item, i) => (
-        <View
-          key={`${item.label}-${i}`}
-          style={[magStyles.row, { marginBottom: 6, alignItems: 'flex-start' }]}
-          wrap={false}
-        >
+        <View key={`${item.label}-${i}`} style={magStyles.rankedRow} wrap={false}>
           <Text style={magStyles.rankedIndex}>{String(startIndex + i).padStart(2, '0')}</Text>
           <View style={magStyles.col}>
             <Text style={magStyles.rankedLabel}>{item.label}</Text>
-            {item.meta ? <Text style={magStyles.meta}>{item.meta}</Text> : null}
+            {item.meta ? <Text style={[magStyles.meta, { marginTop: 2 }]}>{item.meta}</Text> : null}
           </View>
         </View>
       ))}

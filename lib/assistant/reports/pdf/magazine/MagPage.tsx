@@ -12,12 +12,16 @@ type MagPageProps = {
 export function MagPage({ children, footerTitle, showLogo = false }: MagPageProps) {
   return (
     <Page size="A4" style={magStyles.page} wrap>
-      {showLogo ? (
-        <View style={{ marginBottom: 14 }}>
-          <MsqdxLogoPdf width={52} height={12} color={magColors.ink} />
+      <View style={magStyles.columnShell}>
+        <View style={magStyles.column}>
+          {showLogo ? (
+            <View style={{ marginBottom: 28 }}>
+              <MsqdxLogoPdf width={56} height={13} color={magColors.ink} />
+            </View>
+          ) : null}
+          {children}
         </View>
-      ) : null}
-      {children}
+      </View>
       <View style={magStyles.footer} fixed>
         <Text style={magStyles.footerMeta}>{footerTitle ?? 'Quick Check'}</Text>
         <Text

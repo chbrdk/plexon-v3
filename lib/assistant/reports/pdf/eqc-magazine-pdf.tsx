@@ -150,18 +150,18 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
           title={EQC_REPORT_COPY.sectionDomain}
           lede={report.domain.domain}
         >
-          <View style={[magStyles.row, { marginBottom: 12 }]}>
-            <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={88} />
-            <View style={magStyles.col}>
+          <View style={[magStyles.row, { marginBottom: 18, gap: 28 }]}>
+            <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={96} />
+            <View style={[magStyles.col, { paddingTop: 8 }]}>
               <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
               <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
-              <Text style={[magStyles.meta, { marginTop: 8 }]}>
+              <Text style={[magStyles.meta, { marginTop: 12 }]}>
                 Fehler {report.domain.stats.errors} · Warnungen {report.domain.stats.warnings}
               </Text>
             </View>
           </View>
           {report.domain.topIssues.length > 0 ? (
-            <>
+            <View style={magStyles.sectionBlock}>
               <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.sectionTopIssues}</Text>
               <MagRankedList
                 items={report.domain.topIssues.slice(0, 8).map((issue) => ({
@@ -169,7 +169,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
                   meta: `${issue.count}×`,
                 }))}
               />
-            </>
+            </View>
           ) : null}
         </MagChapter>
       </MagPage>
@@ -183,9 +183,9 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
           title={EQC_REPORT_COPY.sectionDistributionsHeadline}
           lede={EQC_REPORT_COPY.sectionDistributionsHint}
         >
-          <View style={magStyles.row}>
+          <View style={magStyles.distGrid}>
             {report.distributions.readability?.bands.length ? (
-              <View style={[magStyles.col, { width: '32%' }]}>
+              <View style={magStyles.distCol}>
                 <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.distReadability}</Text>
                 {report.distributions.readability.grade ? (
                   <Text style={magStyles.meta}>
@@ -206,7 +206,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
               </View>
             ) : null}
             {report.distributions.eco?.grades.length ? (
-              <View style={[magStyles.col, { width: '32%' }]}>
+              <View style={magStyles.distCol}>
                 <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.distEcoGrades}</Text>
                 {report.distributions.eco.grade ? (
                   <Text style={magStyles.meta}>
@@ -222,7 +222,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
               </View>
             ) : null}
             {report.distributions.links?.slices.length ? (
-              <View style={[magStyles.col, { width: '32%' }]}>
+              <View style={magStyles.distCol}>
                 <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.distLinkMix}</Text>
                 <Text style={magStyles.meta}>
                   {EQC_REPORT_COPY.distLinksTotal(
