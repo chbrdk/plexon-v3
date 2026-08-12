@@ -10,7 +10,7 @@ import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-pe
 /** Full page budget in abstract units. */
 export const MAG_PACK_BUDGET = 100
 /** Leave unused so packed pages stay airy. */
-export const MAG_PACK_BREATHING = 16
+export const MAG_PACK_BREATHING = 12
 /** Cost of the hairline between stacked chapters. */
 export const MAG_PACK_DIVIDER = 8
 /** Cap modules per sheet even if weights would allow more. */
@@ -83,7 +83,8 @@ export function estimateEqcChapterWeight(
       if (report.distributions.readability?.bands.length) cols += 1
       if (report.distributions.eco?.grades.length) cols += 1
       if (report.distributions.links?.slices.length) cols += 1
-      return 24 + cols * 18
+      // Donuts sit in one row — height ≈ chapter chrome + one visual band, not cols×full.
+      return cols === 0 ? 0 : Math.round(26 + 16 + Math.max(0, cols - 1) * 3)
     }
     case 'domain-comparison': {
       const rows = report.domainComparison?.rows.length ?? 0
