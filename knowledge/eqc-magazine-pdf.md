@@ -30,6 +30,9 @@ Visibility follows `resolveEventQuickCheckDashboardLayout`. Interactive chrome (
 Eyebrow → headline → meta → visual anchor (ring / donut / ledger) → body.  
 No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
+**Satzspiegel:** äußere Ränder ~52pt, zentrierte Content-Spalte **440pt** (nicht voller Seitenrand).  
+**Typo:** Noto Sans (DS-Stack-Twin via `magazine/fonts/`), nicht Helvetica.
+
 ## Out of scope (Wave 1)
 
 HTML/Playwright print engine · PPTX redesign · present-mode PDF · full interactive GEO dossier parity
