@@ -16,9 +16,11 @@ import {
   MagLedger,
   MagPage,
   MagPersonaGrid,
+  MagPullQuote,
   MagRankedList,
   MagScoreRing,
   MagTable,
+  MagTwoColumn,
   magStyles,
   type MagCoverKpi,
 } from '@/lib/assistant/reports/pdf/magazine'
@@ -109,6 +111,10 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
   const generatedAt = formatReportGeneratedAt(report.meta.generatedAt)
   const footerTitle = report.meta.domain || report.meta.title
   const chapterKeys = buildEqcMagazinePdfChapters(report)
+  const chapterIndex = (key: string) => {
+    const i = chapterKeys.indexOf(key)
+    return i > 0 ? String(i).padStart(2, '0') : undefined
+  }
 
   const cover = (
     <MagPage key="cover" footerTitle={footerTitle} showLogo>
@@ -126,19 +132,50 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
   const market =
     layout.showMarket && report.market ? (
       <MagPage key="market" footerTitle={footerTitle}>
-        <MagChapter eyebrow={EQC_REPORT_COPY.sectionMarket} title={EQC_REPORT_COPY.sectionMarket}>
-          {report.market.executiveSummary ? (
-            <Text style={magStyles.body}>{report.market.executiveSummary}</Text>
-          ) : null}
-          {report.market.keyFindings.length > 0 ? (
-            <MagRankedList
-              columns={2}
-              items={report.market.keyFindings.map((f) => ({ label: f }))}
+        <MagChapter
+          index={chapterIndex('market')}
+          eyebrow={EQC_REPORT_COPY.sectionMarket}
+          title={EQC_REPORT_COPY.sectionMarket}
+        >
+          {report.market.executiveSummary && report.market.keyFindings.length > 0 ? (
+            <MagTwoColumn
+              left={
+                <View>
+                  <Text style={magStyles.subEyebrow}>Überblick</Text>
+                  <Text style={magStyles.body}>{report.market.executiveSummary}</Text>
+                  {report.market.implications ? (
+                    <Text style={[magStyles.meta, { marginTop: 10 }]}>
+                      {report.market.implications}
+                    </Text>
+                  ) : null}
+                </View>
+              }
+              right={
+                <View>
+                  <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionFindings}</Text>
+                  <MagRankedList
+                    compact
+                    items={report.market.keyFindings.map((f) => ({ label: f }))}
+                  />
+                </View>
+              }
             />
-          ) : null}
-          {report.market.implications ? (
-            <Text style={magStyles.meta}>{report.market.implications}</Text>
-          ) : null}
+          ) : (
+            <>
+              {report.market.executiveSummary ? (
+                <Text style={magStyles.body}>{report.market.executiveSummary}</Text>
+              ) : null}
+              {report.market.keyFindings.length > 0 ? (
+                <MagRankedList
+                  columns={2}
+                  items={report.market.keyFindings.map((f) => ({ label: f }))}
+                />
+              ) : null}
+              {report.market.implications ? (
+                <Text style={magStyles.meta}>{report.market.implications}</Text>
+              ) : null}
+            </>
+          )}
         </MagChapter>
       </MagPage>
     ) : null
@@ -147,32 +184,57 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showDomain && report.domain ? (
       <MagPage key="domain" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('domain')}
           eyebrow={EQC_REPORT_COPY.sectionDomainScan}
           title={EQC_REPORT_COPY.sectionDomain}
           lede={report.domain.domain}
         >
-          <View style={[magStyles.row, { marginBottom: 22, gap: 28 }]}>
-            <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={80} />
-            <View style={[magStyles.col, { paddingTop: 8 }]}>
-              <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
-              <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
-              <Text style={[magStyles.meta, { marginTop: 12 }]}>
-                Fehler {report.domain.stats.errors} · Warnungen {report.domain.stats.warnings}
-              </Text>
-            </View>
-          </View>
           {report.domain.topIssues.length > 0 ? (
-            <View style={magStyles.sectionBlock}>
-              <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.sectionTopIssues}</Text>
-              <MagRankedList
-                columns={2}
-                items={report.domain.topIssues.slice(0, 8).map((issue) => ({
-                  label: issue.title,
-                  meta: `${issue.count}×`,
-                }))}
-              />
+            <MagTwoColumn
+              left={
+                <View>
+                  <View style={[magStyles.row, { marginBottom: 16, gap: 16 }]}>
+                    <MagScoreRing
+                      value={report.domain.score}
+                      label={EQC_REPORT_COPY.colScore}
+                      size={72}
+                    />
+                    <View style={[magStyles.col, { paddingTop: 6 }]}>
+                      <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
+                      <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
+                      <Text style={[magStyles.meta, { marginTop: 10 }]}>
+                        Fehler {report.domain.stats.errors} · Warnungen{' '}
+                        {report.domain.stats.warnings}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              }
+              right={
+                <View>
+                  <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionTopIssues}</Text>
+                  <MagRankedList
+                    compact
+                    items={report.domain.topIssues.slice(0, 8).map((issue) => ({
+                      label: issue.title,
+                      meta: `${issue.count}×`,
+                    }))}
+                  />
+                </View>
+              }
+            />
+          ) : (
+            <View style={[magStyles.row, { marginBottom: 22, gap: 28 }]}>
+              <MagScoreRing value={report.domain.score} label={EQC_REPORT_COPY.colScore} size={80} />
+              <View style={[magStyles.col, { paddingTop: 8 }]}>
+                <Text style={magStyles.kpiValue}>{report.domain.totalPages}</Text>
+                <Text style={magStyles.kpiLabel}>{EQC_REPORT_COPY.colPages}</Text>
+                <Text style={[magStyles.meta, { marginTop: 12 }]}>
+                  Fehler {report.domain.stats.errors} · Warnungen {report.domain.stats.warnings}
+                </Text>
+              </View>
             </View>
-          ) : null}
+          )}
         </MagChapter>
       </MagPage>
     ) : null
@@ -181,6 +243,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showDistributions && report.distributions ? (
       <MagPage key="distributions" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('distributions')}
           eyebrow={EQC_REPORT_COPY.sectionDistributions}
           title={EQC_REPORT_COPY.sectionDistributionsHeadline}
           lede={EQC_REPORT_COPY.sectionDistributionsHint}
@@ -203,7 +266,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
                   }))}
                   centerValue={report.distributions.readability.score}
                   centerLabel={EQC_REPORT_COPY.distScoreLabel}
-                  size={84}
+                  size={76}
                 />
               </View>
             ) : null}
@@ -219,7 +282,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
                   slices={report.distributions.eco.grades}
                   centerValue={report.distributions.eco.grade}
                   centerLabel={EQC_REPORT_COPY.distModeLabel}
-                  size={84}
+                  size={76}
                 />
               </View>
             ) : null}
@@ -238,7 +301,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
                   }))}
                   centerValue={report.distributions.links.broken.toLocaleString('de-DE')}
                   centerLabel={EQC_REPORT_COPY.distBrokenLabel}
-                  size={84}
+                  size={76}
                 />
               </View>
             ) : null}
@@ -251,6 +314,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showDomainComparison && report.domainComparison?.rows.length ? (
       <MagPage key="domain-comparison" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('domain-comparison')}
           eyebrow={EQC_REPORT_COPY.sectionDomainComparison}
           title={EQC_REPORT_COPY.sectionDomainComparison}
         >
@@ -278,6 +342,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showPersona && personas.length ? (
       <MagPage key="persona" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('persona')}
           eyebrow={
             personas.length > 1 ? EQC_REPORT_COPY.sectionPersonas : EQC_REPORT_COPY.sectionPersona
           }
@@ -294,6 +359,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.geoSpan > 0 ? (
       <MagPage key="geo" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('geo')}
           eyebrow={EQC_REPORT_COPY.sectionGeo}
           title={EQC_REPORT_COPY.sectionGeoCheck}
           lede={
@@ -302,49 +368,77 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
               : undefined
           }
         >
-          <View style={[magStyles.row, { marginBottom: 16, gap: 24 }]}>
+          <View style={[magStyles.row, { marginBottom: 20, gap: 28 }]}>
             {report.geo.overallScore != null ? (
-              <MagScoreRing
-                value={report.geo.overallScore}
-                label="GEO Score"
-                size={76}
-              />
+              <MagScoreRing value={report.geo.overallScore} label="GEO Score" size={68} />
             ) : null}
             {report.geo.geoFitnessScore != null ? (
               <MagScoreRing
                 value={report.geo.geoFitnessScore}
                 label={EQC_REPORT_COPY.kpiGeoFitness}
-                size={76}
+                size={68}
               />
             ) : null}
           </View>
-          {report.geo.competitors.length > 0 ? (
+          {report.geo.competitors.length > 0 && promptDossierItems(report).length > 0 ? (
+            <MagTwoColumn
+              left={
+                <View>
+                  <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.competitors}</Text>
+                  <MagRankedList
+                    compact
+                    items={report.geo.competitors.slice(0, 8).map((c) => ({
+                      label: c.name,
+                      meta: [
+                        c.shareOfVoice != null
+                          ? `${EQC_REPORT_COPY.colShareOfVoice} ${Math.round(c.shareOfVoice * (c.shareOfVoice <= 1 ? 100 : 1))}%`
+                          : null,
+                        c.avgPosition != null ? `Ø Pos. ${c.avgPosition}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · '),
+                    }))}
+                  />
+                </View>
+              }
+              right={
+                <View>
+                  <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.geoPromptsLabel}</Text>
+                  <MagRankedList compact items={promptDossierItems(report)} />
+                </View>
+              }
+            />
+          ) : (
             <>
-              <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.competitors}</Text>
-              <MagRankedList
-                columns={2}
-                items={report.geo.competitors.slice(0, 8).map((c) => ({
-                  label: c.name,
-                  meta: [
-                    c.shareOfVoice != null
-                      ? `${EQC_REPORT_COPY.colShareOfVoice} ${Math.round(c.shareOfVoice * (c.shareOfVoice <= 1 ? 100 : 1))}%`
-                      : null,
-                    c.avgPosition != null ? `Ø Pos. ${c.avgPosition}` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · '),
-                }))}
-              />
+              {report.geo.competitors.length > 0 ? (
+                <>
+                  <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.competitors}</Text>
+                  <MagRankedList
+                    columns={2}
+                    items={report.geo.competitors.slice(0, 8).map((c) => ({
+                      label: c.name,
+                      meta: [
+                        c.shareOfVoice != null
+                          ? `${EQC_REPORT_COPY.colShareOfVoice} ${Math.round(c.shareOfVoice * (c.shareOfVoice <= 1 ? 100 : 1))}%`
+                          : null,
+                        c.avgPosition != null ? `Ø Pos. ${c.avgPosition}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · '),
+                    }))}
+                  />
+                </>
+              ) : null}
+              {promptDossierItems(report).length > 0 ? (
+                <>
+                  <Text style={[magStyles.eyebrow, { marginTop: 14 }]}>
+                    {EQC_REPORT_COPY.geoPromptsLabel}
+                  </Text>
+                  <MagRankedList columns={2} items={promptDossierItems(report)} />
+                </>
+              ) : null}
             </>
-          ) : null}
-          {promptDossierItems(report).length > 0 ? (
-            <>
-              <Text style={[magStyles.eyebrow, { marginTop: 10 }]}>
-                {EQC_REPORT_COPY.geoPromptsLabel}
-              </Text>
-              <MagRankedList columns={2} items={promptDossierItems(report)} />
-            </>
-          ) : null}
+          )}
         </MagChapter>
       </MagPage>
     ) : null
@@ -353,10 +447,15 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showGeoEeat && report.geo.eeatDimensions.length ? (
       <MagPage key="eeat" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('eeat')}
           eyebrow={EQC_REPORT_COPY.sectionGeoEeat}
           title={EQC_REPORT_COPY.sectionGeoEeat}
-          lede={report.geo.geoFitnessReasoning || EQC_REPORT_COPY.geoEeatWhyFallback}
         >
+          {report.geo.geoFitnessReasoning || EQC_REPORT_COPY.geoEeatWhyFallback ? (
+            <MagPullQuote
+              body={report.geo.geoFitnessReasoning || EQC_REPORT_COPY.geoEeatWhyFallback}
+            />
+          ) : null}
           <MagLedger
             items={report.geo.eeatDimensions.map((d) => ({
               label: d.label,
@@ -365,15 +464,13 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             }))}
           />
           {report.geo.eeatMissingElements?.length ? (
-            <>
-              <Text style={[magStyles.eyebrow, { marginTop: 10 }]}>
-                {EQC_REPORT_COPY.geoEeatGapsLabel}
-              </Text>
+            <View style={magStyles.sectionBlock}>
+              <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.geoEeatGapsLabel}</Text>
               <MagRankedList
                 columns={2}
                 items={report.geo.eeatMissingElements.map((g) => ({ label: g }))}
               />
-            </>
+            </View>
           ) : null}
         </MagChapter>
       </MagPage>
@@ -383,6 +480,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showGeoRecommendations && report.geo.recommendations.length ? (
       <MagPage key="geo-recs" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('geo-recs')}
           eyebrow={EQC_REPORT_COPY.sectionGeoRecommendations}
           title={EQC_REPORT_COPY.sectionGeoRecommendations}
         >
@@ -401,13 +499,16 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
     layout.showInsights && report.insights ? (
       <MagPage key="insights" footerTitle={footerTitle}>
         <MagChapter
+          index={chapterIndex('insights')}
           eyebrow={EQC_REPORT_COPY.sectionInsights}
           title={EQC_REPORT_COPY.fazit}
-          lede={report.insights.fazit || report.insights.assessment}
         >
+          {report.insights.fazit || report.insights.assessment ? (
+            <MagPullQuote body={report.insights.fazit || report.insights.assessment || ''} />
+          ) : null}
           {report.insights.findings.length > 0 ? (
             <>
-              <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.sectionFindings}</Text>
+              <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.sectionFindings}</Text>
               <MagRankedList
                 columns={2}
                 items={report.insights.findings.slice(0, 10).map((f) => ({
@@ -425,10 +526,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
 
   const appendix = (
     <MagPage key="appendix" footerTitle={footerTitle}>
-      <MagChapter eyebrow={EQC_REPORT_COPY.sectionAppendix} title={EQC_REPORT_COPY.sectionAppendix}>
+      <MagChapter
+        index={chapterIndex('appendix')}
+        eyebrow={EQC_REPORT_COPY.sectionAppendix}
+        title={EQC_REPORT_COPY.sectionAppendix}
+      >
         {report.appendix.stepTable.rows.length > 0 ? (
           <>
-            <Text style={magStyles.eyebrow}>{EQC_REPORT_COPY.appendixSteps}</Text>
+            <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.appendixSteps}</Text>
             <MagTable
               columns={report.appendix.stepTable.columns}
               rows={report.appendix.stepTable.rows}
@@ -437,7 +542,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
         ) : null}
         {report.appendix.links.length > 0 ? (
           <>
-            <Text style={[magStyles.eyebrow, { marginTop: 10 }]}>{EQC_REPORT_COPY.links}</Text>
+            <Text style={[magStyles.subEyebrow, { marginTop: 16 }]}>{EQC_REPORT_COPY.links}</Text>
             {report.appendix.links.map((link, i) => (
               <Text key={i} style={magStyles.meta}>
                 {link.label}: {link.href}
@@ -446,7 +551,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
           </>
         ) : null}
         {(report.appendix.scanId || report.appendix.geoJobId) && (
-          <Text style={[magStyles.meta, { marginTop: 8 }]}>
+          <Text style={[magStyles.meta, { marginTop: 12 }]}>
             {[
               report.appendix.scanId ? `Scan-ID: ${report.appendix.scanId}` : null,
               report.appendix.geoJobId ? `GEO-Job: ${report.appendix.geoJobId}` : null,

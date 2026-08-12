@@ -15,19 +15,22 @@ export function MagPage({ children, footerTitle, showLogo = false }: MagPageProp
       <View style={magStyles.columnShell}>
         <View style={magStyles.column}>
           {showLogo ? (
-            <View style={{ marginBottom: 28 }}>
-              <MsqdxLogoPdf width={56} height={13} color={magColors.ink} />
+            <View style={{ marginBottom: 36 }}>
+              <MsqdxLogoPdf width={52} height={12} color={magColors.ink} />
             </View>
           ) : null}
           {children}
         </View>
       </View>
       <View style={magStyles.footer} fixed>
-        <Text style={magStyles.footerMeta}>{footerTitle ?? 'Quick Check'}</Text>
-        <Text
-          style={magStyles.footerMeta}
-          render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-        />
+        <View style={magStyles.footerRule} />
+        <View style={magStyles.footerRow}>
+          <Text style={magStyles.footerMeta}>{footerTitle ?? 'Quick Check'}</Text>
+          <Text
+            style={magStyles.footerMeta}
+            render={({ pageNumber, totalPages }) => `${pageNumber} — ${totalPages}`}
+          />
+        </View>
       </View>
     </Page>
   )

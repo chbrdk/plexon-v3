@@ -6,13 +6,23 @@ type MagChapterProps = {
   eyebrow: string
   title: string
   lede?: string
+  /** Print folio index, e.g. "02" */
+  index?: string
   children?: React.ReactNode
   break?: boolean
 }
 
-export function MagChapter({ eyebrow, title, lede, children, break: pageBreak }: MagChapterProps) {
+export function MagChapter({
+  eyebrow,
+  title,
+  lede,
+  index,
+  children,
+  break: pageBreak,
+}: MagChapterProps) {
   return (
     <View style={magStyles.chapterGap} break={pageBreak}>
+      {index ? <Text style={magStyles.chapterIndex}>{index}</Text> : null}
       <Text style={magStyles.eyebrow}>{eyebrow}</Text>
       <Text style={magStyles.headline}>{title}</Text>
       <View style={magStyles.accentRule} />

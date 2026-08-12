@@ -30,10 +30,11 @@ Visibility follows `resolveEventQuickCheckDashboardLayout`. Interactive chrome (
 Eyebrow → headline → meta → visual anchor (ring / donut / ledger) → body.  
 No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
-**Satzspiegel:** äußere Ränder ~52pt, zentrierte Content-Spalte **440pt** (nicht voller Seitenrand).  
-**Typo:** Noto Sans (DS-Stack-Twin via `magazine/fonts/`), nicht Helvetica. Kompaktere Größen (Headline ~15pt, Body ~9pt), mehr vertikaler Rhythmus.
+**Satzspiegel:** äußere Ränder ~56pt, zentrierte Content-Spalte **428pt**. Soft-Paper `#f8f7f4` (Print-Stock, nicht reines Weiß).  
+**Typo:** Noto Sans. Kompakte Größen (Cover ~22pt, Chapter ~14pt, Body ~8.5pt / lh 1.62), großzügiger vertikaler Rhythmus.  
+**Folio:** Haarlinie + Uppercase-Meta + `n — total` unten.
 
-**Magazin-Layout:** `MagRankedList columns={2}` für Findings, Issues, GEO, E-E-A-T, Empfehlungen. Personas via `MagPersonaGrid` — 2-up Kacheln, bei einer Persona Goals | Pain side-by-side (`MagPersonaCard spread`).
+**Magazin-Layout:** Kapitelindex `01…`; Spreads via `MagTwoColumn` (Markt Überblick|Findings, Domain Score|Issues, GEO Competitors|Prompts); `MagPullQuote` für Fazit/E-E-A-T-Reasoning; Personas als Editorial-Tiles (Top-Hairline, keine Card-Box); Listen 2-spaltig wo sinnvoll.
 
 ## Out of scope (Wave 1)
 
