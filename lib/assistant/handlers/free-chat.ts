@@ -14,6 +14,7 @@ import {
   resolveUseAudionMcp,
   resolveUseBrandionMcp,
   resolveUseCheckionMcp,
+  resolveUseCreationMcp,
 } from '@/lib/assistant/product-mcp-gate';
 import {
   emitPhase,
@@ -33,7 +34,8 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   const hasAnyActiveEntitlement =
     entitlements.checkion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
     entitlements.audion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
-    entitlements.brandion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
+    entitlements.brandion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
+    entitlements.creation?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
   const useCheckionMcp = resolveUseCheckionMcp({
     checkionEntitlement: entitlements.checkion,
     pageContext,
@@ -48,6 +50,11 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     Boolean(getEchonMcpUrl()) && (useCheckionMcp || useAudionMcp);
   const useBrandionMcp = resolveUseBrandionMcp({
     brandionEntitlement: entitlements.brandion,
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
+  const useCreationMcp = resolveUseCreationMcp({
+    creationEntitlement: entitlements.creation,
     pageContext,
     hasAnyActiveEntitlement,
   });
@@ -75,6 +82,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       useAudionMcp,
       useEchonMcp,
       useBrandionMcp,
+      useCreationMcp,
       pageContext: ctx.body.pageContext ?? null,
       onProgress: (ev) => {
         ctx.emit?.(ev);

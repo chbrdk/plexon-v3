@@ -1,6 +1,6 @@
 # CREATION v3 — Plexon onboarding
 
-**Status:** Wave 5 domain hubs · **Date:** 2026-08-12  
+**Status:** Wave 6 MCP catalog · **Date:** 2026-08-12  
 **Product id:** `creation` · **Repo:** `creation-v3` · **Display:** CREATION  
 **Editor runtime:** Zaoly (`msqdx_creation_v2/MSQDX CREATION`) — not ported into Next
 
@@ -17,6 +17,7 @@
 | Bindings | Wave 3 — upsert + `creation-project-origin` + placeholders |
 | Auth bridge | Wave 4 — `launchCode` mint/redeem (Host consumer later) |
 | Domain hubs | Wave 5 — compositions stubs magazine + library fixture catalog |
+| MCP | Wave 6 — `creation-mcp` tools + `CREATION_MCP_URL` |
 
 ## Wave map
 
@@ -28,7 +29,7 @@
 | 3 | Collection bindings + upsert + origin — **landed** |
 | 4 | Auth bridge (launchCode mint/redeem) — **landed** |
 | 5 | Domain hubs (compositions magazine + library overview) — **landed** |
-| 6+ | MCP / live catalog when needed |
+| 6 | MCP / catalog API — **landed** (Coolify `creation-mcp` attach when ready) |
 
 ## Env (Plexon)
 
@@ -36,10 +37,11 @@
 |-----|------|
 | `NEXT_PUBLIC_CREATION_URL` | Public creation-v3 origin → registry lifecycle + default upsert base |
 | `CREATION_API_URL` | Optional service base for upsert (defaults to public URL) |
+| `CREATION_MCP_URL` | MCP Streamable HTTP base for assistant tools |
 
-Coolify: `coolify-plexon-v3-env-cheatsheet.md` §4d.
+Coolify: `coolify-plexon-v3-env-cheatsheet.md` §4d · `knowledge/creation-mcp-assistant.md`.
 
-## Smoke (Wave 3–5)
+## Smoke (Wave 3–6)
 
 1. creation-v3 `PUT /api/platform/provisioning/projects/{uuid}` with secret → `{ status: applied, externalProjectId }`
 2. Plexon create Collection → `creation` binding `in_sync` when CREATION URL set
@@ -47,10 +49,12 @@ Coolify: `coolify-plexon-v3-env-cheatsheet.md` §4d.
 4. `POST …/creation-project-origin` returns Collection UUID
 5. `POST /api/editor/launch-code` → code; redeem with service secret once
 6. `/compositions` lists fixture stubs; `/library` shows WC catalog snapshot
+7. `GET /api/library/catalog` + MCP `creation.library_catalog` when `CREATION_MCP_URL` set
 
 ## Related
 
-- `creation-v3/specs/domain/app-shell.md` · `plexon-federation.md` · `auth-bridge.md` · `domain-hubs.md` · `specs/api/projects.md`
-- `creation-v3/knowledge/paths.md` · `knowledge/collection-bindings.md` · `knowledge/auth-bridge.md` · `knowledge/library-fixture-sources.md`
+- `creation-v3/specs/domain/app-shell.md` · `plexon-federation.md` · `auth-bridge.md` · `domain-hubs.md` · `mcp-server.md` · `specs/api/projects.md` · `specs/api/catalog.md`
+- `creation-v3/knowledge/paths.md` · `knowledge/collection-bindings.md` · `knowledge/auth-bridge.md` · `knowledge/library-fixture-sources.md` · `knowledge/mcp-server.md`
+- `specs/domain/assistant-creation-mcp.md` · `knowledge/creation-mcp-assistant.md`
 - `specs/domain/collection-projects.md` Phase 6
 - Zaoly: `knowledge/plexon-creation-v3-attach.md` (in Zaoly repo)

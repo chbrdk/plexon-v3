@@ -1,0 +1,76 @@
+import { describe, expect, it } from 'vitest'
+import {
+  resolveUseCreationMcp,
+} from '@/lib/assistant/product-mcp-gate'
+import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements'
+import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity'
+import { classifyToolFamily } from '@/lib/assistant/tool-catalog'
+import { planAssistantTurnHeuristic } from '@/lib/assistant/assistant-planner'
+
+describe('resolveUseCreationMcp', () => {
+  it('returns false when MCP URL is missing', () => {
+    expect(
+      resolveUseCreationMcp({
+        creationEntitlement: { status: PLATFORM_ENTITLEMENT_STATUS.ACTIVE },
+        pageContext: { product: 'creation' },
+        mcpUrl: undefined,
+      })
+    ).toBe(false)
+  })
+
+  it('returns true with active creation entitlement', () => {
+    expect(
+      resolveUseCreationMcp({
+        creationEntitlement: { status: PLATFORM_ENTITLEMENT_STATUS.ACTIVE },
+        pageContext: null,
+        mcpUrl: 'https://creation-mcp.example',
+      })
+    ).toBe(true)
+  })
+
+  it('returns true for Creation embed pageContext', () => {
+    expect(
+      resolveUseCreationMcp({
+        creationEntitlement: null,
+        pageContext: { product: 'creation' },
+        mcpUrl: 'https://creation-mcp.example',
+      })
+    ).toBe(true)
+  })
+})
+
+describe('creation tool catalog + planner', () => {
+  it('classifies creation_library_catalog', () => {
+    expect(classifyToolFamily('creation_library_catalog')).toBe('creation_library')
+    expect(classifyToolFamily('creation_compositions_list')).toBe('creation_compositions')
+    expect(classifyToolFamily('creation_projects_list')).toBe('creation_projects')
+  })
+
+  it('plans creation_design for library prompts when MCP on', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Welche ds-button Props hat die CREATION library?',
+      hasProjectContext: false,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      compactContextLoaded: false,
+    })
+    expect(plan.intent).toBe('creation_design')
+  })
+})
+
+describe('creation connectivity block', () => {
+  it('mentions missing URL', () => {
+    const prev = process.env.CREATION_MCP_URL
+    delete process.env.CREATION_MCP_URL
+    try {
+      const block = buildCreationIntegrationContextBlock({ useCreationMcp: false })
+      expect(block).toMatch(/CREATION_MCP_URL fehlt/)
+    } finally {
+      if (prev === undefined) delete process.env.CREATION_MCP_URL
+      else process.env.CREATION_MCP_URL = prev
+    }
+  })
+})

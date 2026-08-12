@@ -134,6 +134,14 @@ PLEXON aktiviert ECHON-MCP automatisch, wenn `ECHON_MCP_URL` gesetzt ist **und**
 
 PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** Gate `resolveUseProductMcp` greift (Entitlement, Host-Produkt/pageContext, oder Sibling-Entitlement). Staging: öffentliche FQDN `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` — **nicht** `http://brandion-mcp:3100` (anderes Coolify-Projekt). Tools: `brandion.guidelines_list`, `brandion.guideline_get`, `brandion.tokens_list`.
 
+### CREATION MCP
+
+| Variable | Pflicht | Beschreibung |
+|----------|---------|--------------|
+| `CREATION_MCP_URL` | Nein | MCP für Assistant (library/compositions/projects). Port **3102**. Spec: `specs/domain/assistant-creation-mcp.md`. |
+
+PLEXON aktiviert CREATION-MCP analog Brandion (`resolveUseCreationMcp`). Tools: `creation.library_catalog`, `creation.compositions_list`, `creation.projects_list`, `creation.project_get`.
+
 ### AUDION MCP
 
 | Variable | Pflicht | Beschreibung |

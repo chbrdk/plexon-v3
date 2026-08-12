@@ -1,4 +1,4 @@
-import { getAudionMcpUrl, getBrandionMcpUrl, getCheckionMcpUrl } from '@/lib/constants';
+import { getAudionMcpUrl, getBrandionMcpUrl, getCheckionMcpUrl, getCreationMcpUrl } from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
@@ -6,7 +6,7 @@ export type ProductMcpEntitlementRow = {
   status?: string | null;
 } | null | undefined;
 
-export type AssistantProductMcpId = 'checkion' | 'audion' | 'brandion';
+export type AssistantProductMcpId = 'checkion' | 'audion' | 'brandion' | 'creation';
 
 /**
  * Free-chat MCP gate: URL must be set, then any of:
@@ -73,6 +73,21 @@ export function resolveUseCheckionMcp(input: {
     product: 'checkion',
     mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getCheckionMcpUrl(),
     productEntitlement: input.checkionEntitlement,
+    pageContext: input.pageContext,
+    hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
+  });
+}
+
+export function resolveUseCreationMcp(input: {
+  creationEntitlement?: ProductMcpEntitlementRow;
+  pageContext?: Pick<AssistantPageContext, 'product'> | null;
+  hasAnyActiveEntitlement?: boolean;
+  mcpUrl?: string | undefined;
+}): boolean {
+  return resolveUseProductMcp({
+    product: 'creation',
+    mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getCreationMcpUrl(),
+    productEntitlement: input.creationEntitlement,
     pageContext: input.pageContext,
     hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
   });

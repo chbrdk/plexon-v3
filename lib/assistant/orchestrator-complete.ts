@@ -3,6 +3,7 @@ import {
   getAudionMcpUrl,
   getEchonMcpUrl,
   getBrandionMcpUrl,
+  getCreationMcpUrl,
   getBoardCompletionModel,
   getBoardCompletionModelWithMcp,
   getAssistantCompletionModel,
@@ -58,6 +59,7 @@ export type OrchestratorCompleteOptions = {
   useAudionMcp?: boolean;
   useEchonMcp?: boolean;
   useBrandionMcp?: boolean;
+  useCreationMcp?: boolean;
   maxToolRounds?: number;
   modelProfile?: 'board' | 'assistant';
   skipTools?: boolean;
@@ -198,6 +200,7 @@ export async function runOrchestratorComplete(
     useAudionMcp = false,
     useEchonMcp = false,
     useBrandionMcp = false,
+    useCreationMcp = false,
     maxToolRounds = 5,
     modelProfile = 'board',
     skipTools = false,
@@ -220,6 +223,7 @@ export async function runOrchestratorComplete(
   const audionMcpUrl = useAudionMcp ? getAudionMcpUrl() : undefined;
   const echonMcpUrl = useEchonMcp ? getEchonMcpUrl() : undefined;
   const brandionMcpUrl = useBrandionMcp ? getBrandionMcpUrl() : undefined;
+  const creationMcpUrl = useCreationMcp ? getCreationMcpUrl() : undefined;
   let tools: AnthropicTool[] = [];
   let mcpNameByAnthropicName: Record<string, string> = {};
   const toolSourceByAnthropicName: Record<string, string> = {};
@@ -272,6 +276,18 @@ export async function runOrchestratorComplete(
       console.warn('[orchestrator] BRANDION MCP tools fetch failed', e);
     }
   }
+  if (creationMcpUrl) {
+    try {
+      const fetched = await fetchCheckionMcpTools(creationMcpUrl);
+      tools = [...tools, ...fetched.tools];
+      Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
+      for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
+        toolSourceByAnthropicName[name] = creationMcpUrl;
+      }
+    } catch (e) {
+      console.warn('[orchestrator] CREATION MCP tools fetch failed', e);
+    }
+  }
 
   if (toolsFilter) {
     tools = tools.filter((t) => toolsFilter(t.name));
@@ -288,7 +304,8 @@ export async function runOrchestratorComplete(
     ((useCheckionMcp && checkionMcpUrl) ||
       (useAudionMcp && audionMcpUrl) ||
       (useEchonMcp && echonMcpUrl) ||
-      (useBrandionMcp && brandionMcpUrl)) &&
+      (useBrandionMcp && brandionMcpUrl) ||
+      (useCreationMcp && creationMcpUrl)) &&
     tools.length > 0;
   const model =
     useMcp

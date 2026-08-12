@@ -496,3 +496,10 @@ export const getBrandionMcpUrl = (): string | undefined => {
   const url = process.env.BRANDION_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for CREATION library/composition tools. Reads CREATION_MCP_URL (e.g. http://creation-mcp:3102). */
+export const getCreationMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url = process.env.CREATION_MCP_URL?.trim();
+  return url || undefined;
+};

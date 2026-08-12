@@ -11,6 +11,7 @@ import {
 } from '@/lib/assistant/knowledge-retrieval';
 import { buildAudionIntegrationContextBlock } from '@/lib/integrations/audion-connectivity';
 import { buildBrandionIntegrationContextBlock } from '@/lib/integrations/brandion-connectivity';
+import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity';
 import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
 import {
   runOrchestratorComplete,
@@ -47,6 +48,7 @@ export type RunAssistantAgentInput = {
   useAudionMcp: boolean;
   useEchonMcp: boolean;
   useBrandionMcp: boolean;
+  useCreationMcp: boolean;
   beforeToolCall?: OrchestratorCompleteOptions['beforeToolCall'];
   onProgress?: AgentProgressCallback;
   onPlan?: (plan: AssistantPlan) => void;
@@ -104,6 +106,10 @@ export async function runAssistantAgent(
     useBrandionMcp: input.useBrandionMcp,
   });
 
+  const creationIntegrationBlock = buildCreationIntegrationContextBlock({
+    useCreationMcp: input.useCreationMcp,
+  });
+
   const compactContextLoaded = baseSystemPrompt.includes('## Projektkontext (Kurzfassung)');
 
   const planningPrompt = buildPlanningPromptFromConversation(
@@ -119,6 +125,7 @@ export async function runAssistantAgent(
     hasAudionMcp: input.useAudionMcp,
     hasEchonMcp: input.useEchonMcp,
     hasBrandionMcp: input.useBrandionMcp,
+    hasCreationMcp: input.useCreationMcp,
     compactContextLoaded,
   });
   input.onPlan?.(plan);
@@ -146,7 +153,7 @@ export async function runAssistantAgent(
 
   const retrievalBlock = retrieval?.block ? `\n${retrieval.block}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n${retrievalBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n${retrievalBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
@@ -157,6 +164,7 @@ export async function runAssistantAgent(
     useAudionMcp: input.useAudionMcp,
     useEchonMcp: input.useEchonMcp,
     useBrandionMcp: input.useBrandionMcp,
+    useCreationMcp: input.useCreationMcp,
     maxToolRounds: plan.maxToolRounds,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',

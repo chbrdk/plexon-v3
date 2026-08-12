@@ -23,6 +23,9 @@ export type ToolFamily =
   | 'echon_waves'
   | 'brandion_guidelines'
   | 'brandion_tokens'
+  | 'creation_library'
+  | 'creation_compositions'
+  | 'creation_projects'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -89,6 +92,9 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^brandion_guideline_/,
   ],
   brandion_tokens: [/^brandion_tokens_/],
+  creation_library: [/^creation_health$/, /^creation_library_/],
+  creation_compositions: [/^creation_compositions_/],
+  creation_projects: [/^creation_projects_/, /^creation_project_/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -132,6 +138,9 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'audion_persona',
   'brandion_guidelines',
   'brandion_tokens',
+  'creation_library',
+  'creation_compositions',
+  'creation_projects',
 ];
 
 export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
@@ -140,11 +149,20 @@ export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
   'audion_project',
   'brandion_guidelines',
   'brandion_tokens',
+  'creation_library',
+  'creation_compositions',
+  'creation_projects',
 ];
 
 export const BRANDION_BRAND_FAMILIES: ToolFamily[] = [
   'brandion_guidelines',
   'brandion_tokens',
+];
+
+export const CREATION_DESIGN_FAMILIES: ToolFamily[] = [
+  'creation_library',
+  'creation_compositions',
+  'creation_projects',
 ];
 
 export const SCAN_FAMILIES: ToolFamily[] = [
