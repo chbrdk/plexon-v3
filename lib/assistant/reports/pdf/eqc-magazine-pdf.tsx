@@ -24,6 +24,7 @@ import {
   magStyles,
   type MagCoverKpi,
 } from '@/lib/assistant/reports/pdf/magazine'
+import { packEqcMagazinePages } from '@/lib/assistant/reports/pdf/magazine/pack-magazine-pages'
 import {
   localizeDistSliceLabel,
   localizeReadabilityGrade,
@@ -105,35 +106,49 @@ export function buildEqcMagazinePdfChapters(report: EventQuickCheckReportModel):
   return keys
 }
 
-export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckReportModel }) {
-  const layout = resolveEventQuickCheckDashboardLayout(report)
-  const personas = resolveReportPersonas(report)
-  const generatedAt = formatReportGeneratedAt(report.meta.generatedAt)
-  const footerTitle = report.meta.domain || report.meta.title
-  const chapterKeys = buildEqcMagazinePdfChapters(report)
-  const chapterIndex = (key: string) => {
-    const i = chapterKeys.indexOf(key)
-    return i > 0 ? String(i).padStart(2, '0') : undefined
-  }
+/** Page groups after content-weight packing (cover stays solo). */
+export function buildEqcMagazinePdfPageGroups(report: EventQuickCheckReportModel): string[][] {
+  return packEqcMagazinePages(buildEqcMagazinePdfChapters(report), report)
+}
 
-  const cover = (
-    <MagPage key="cover" footerTitle={footerTitle} showLogo>
-      <MagCover
-        eyebrow={pdfCoverEyebrow(EQC_REPORT_COPY.pdfCoverEyebrow)}
-        title={report.meta.title || EQC_REPORT_COPY.reportPinLabel}
-        url={report.meta.url}
-        meta={[report.meta.projectName, generatedAt].filter(Boolean).join(' · ')}
-        fazit={layout.showExecutiveFazit ? report.executive.fazit : undefined}
-        kpis={coverKpis(report)}
-      />
-    </MagPage>
-  )
+type ChapterCtx = {
+  report: EventQuickCheckReportModel
+  layout: ReturnType<typeof resolveEventQuickCheckDashboardLayout>
+  personas: ReturnType<typeof resolveReportPersonas>
+  generatedAt: string
+  chapterKeys: string[]
+}
 
-  const market =
-    layout.showMarket && report.market ? (
-      <MagPage key="market" footerTitle={footerTitle}>
+function chapterIndex(keys: string[], key: string) {
+  const i = keys.indexOf(key)
+  return i > 0 ? String(i).padStart(2, '0') : undefined
+}
+
+function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.ReactNode {
+  const { report, layout, personas, generatedAt, chapterKeys } = ctx
+  const index = chapterIndex(chapterKeys, key)
+  const stackedProp = stacked ? true : undefined
+
+  switch (key) {
+    case 'cover':
+      return (
+        <MagCover
+          key="cover"
+          eyebrow={pdfCoverEyebrow(EQC_REPORT_COPY.pdfCoverEyebrow)}
+          title={report.meta.title || EQC_REPORT_COPY.reportPinLabel}
+          url={report.meta.url}
+          meta={[report.meta.projectName, generatedAt].filter(Boolean).join(' · ')}
+          fazit={layout.showExecutiveFazit ? report.executive.fazit : undefined}
+          kpis={coverKpis(report)}
+        />
+      )
+    case 'market':
+      if (!layout.showMarket || !report.market) return null
+      return (
         <MagChapter
-          index={chapterIndex('market')}
+          key="market"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionMarket}
           title={EQC_REPORT_COPY.sectionMarket}
         >
@@ -177,14 +192,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             </>
           )}
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const domain =
-    layout.showDomain && report.domain ? (
-      <MagPage key="domain" footerTitle={footerTitle}>
+      )
+    case 'domain':
+      if (!layout.showDomain || !report.domain) return null
+      return (
         <MagChapter
-          index={chapterIndex('domain')}
+          key="domain"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionDomainScan}
           title={EQC_REPORT_COPY.sectionDomain}
           lede={report.domain.domain}
@@ -236,14 +251,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             </View>
           )}
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const distributions =
-    layout.showDistributions && report.distributions ? (
-      <MagPage key="distributions" footerTitle={footerTitle}>
+      )
+    case 'distributions':
+      if (!layout.showDistributions || !report.distributions) return null
+      return (
         <MagChapter
-          index={chapterIndex('distributions')}
+          key="distributions"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionDistributions}
           title={EQC_REPORT_COPY.sectionDistributionsHeadline}
           lede={EQC_REPORT_COPY.sectionDistributionsHint}
@@ -307,14 +322,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             ) : null}
           </View>
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const domainComparison =
-    layout.showDomainComparison && report.domainComparison?.rows.length ? (
-      <MagPage key="domain-comparison" footerTitle={footerTitle}>
+      )
+    case 'domain-comparison':
+      if (!layout.showDomainComparison || !report.domainComparison?.rows.length) return null
+      return (
         <MagChapter
-          index={chapterIndex('domain-comparison')}
+          key="domain-comparison"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionDomainComparison}
           title={EQC_REPORT_COPY.sectionDomainComparison}
         >
@@ -335,14 +350,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             ])}
           />
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const persona =
-    layout.showPersona && personas.length ? (
-      <MagPage key="persona" footerTitle={footerTitle}>
+      )
+    case 'persona':
+      if (!layout.showPersona || !personas.length) return null
+      return (
         <MagChapter
-          index={chapterIndex('persona')}
+          key="persona"
+          stacked={stackedProp}
+          index={index}
           eyebrow={
             personas.length > 1 ? EQC_REPORT_COPY.sectionPersonas : EQC_REPORT_COPY.sectionPersona
           }
@@ -352,14 +367,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
         >
           <MagPersonaGrid personas={personas} />
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const geo =
-    layout.geoSpan > 0 ? (
-      <MagPage key="geo" footerTitle={footerTitle}>
+      )
+    case 'geo':
+      if (layout.geoSpan <= 0) return null
+      return (
         <MagChapter
-          index={chapterIndex('geo')}
+          key="geo"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionGeo}
           title={EQC_REPORT_COPY.sectionGeoCheck}
           lede={
@@ -440,14 +455,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             </>
           )}
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const eeat =
-    layout.showGeoEeat && report.geo.eeatDimensions.length ? (
-      <MagPage key="eeat" footerTitle={footerTitle}>
+      )
+    case 'eeat':
+      if (!layout.showGeoEeat || !report.geo.eeatDimensions.length) return null
+      return (
         <MagChapter
-          index={chapterIndex('eeat')}
+          key="eeat"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionGeoEeat}
           title={EQC_REPORT_COPY.sectionGeoEeat}
         >
@@ -473,14 +488,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             </View>
           ) : null}
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const geoRecs =
-    layout.showGeoRecommendations && report.geo.recommendations.length ? (
-      <MagPage key="geo-recs" footerTitle={footerTitle}>
+      )
+    case 'geo-recs':
+      if (!layout.showGeoRecommendations || !report.geo.recommendations.length) return null
+      return (
         <MagChapter
-          index={chapterIndex('geo-recs')}
+          key="geo-recs"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionGeoRecommendations}
           title={EQC_REPORT_COPY.sectionGeoRecommendations}
         >
@@ -492,14 +507,14 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             }))}
           />
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const insights =
-    layout.showInsights && report.insights ? (
-      <MagPage key="insights" footerTitle={footerTitle}>
+      )
+    case 'insights':
+      if (!layout.showInsights || !report.insights) return null
+      return (
         <MagChapter
-          index={chapterIndex('insights')}
+          key="insights"
+          stacked={stackedProp}
+          index={index}
           eyebrow={EQC_REPORT_COPY.sectionInsights}
           title={EQC_REPORT_COPY.fazit}
         >
@@ -521,66 +536,75 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             </>
           ) : null}
         </MagChapter>
-      </MagPage>
-    ) : null
-
-  const appendix = (
-    <MagPage key="appendix" footerTitle={footerTitle}>
-      <MagChapter
-        index={chapterIndex('appendix')}
-        eyebrow={EQC_REPORT_COPY.sectionAppendix}
-        title={EQC_REPORT_COPY.sectionAppendix}
-      >
-        {report.appendix.stepTable.rows.length > 0 ? (
-          <>
-            <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.appendixSteps}</Text>
-            <MagTable
-              columns={report.appendix.stepTable.columns}
-              rows={report.appendix.stepTable.rows}
-            />
-          </>
-        ) : null}
-        {report.appendix.links.length > 0 ? (
-          <>
-            <Text style={[magStyles.subEyebrow, { marginTop: 16 }]}>{EQC_REPORT_COPY.links}</Text>
-            {report.appendix.links.map((link, i) => (
-              <Text key={i} style={magStyles.meta}>
-                {link.label}: {link.href}
-              </Text>
-            ))}
-          </>
-        ) : null}
-        {(report.appendix.scanId || report.appendix.geoJobId) && (
-          <Text style={[magStyles.meta, { marginTop: 12 }]}>
-            {[
-              report.appendix.scanId ? `Scan-ID: ${report.appendix.scanId}` : null,
-              report.appendix.geoJobId ? `GEO-Job: ${report.appendix.geoJobId}` : null,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Text>
-        )}
-      </MagChapter>
-    </MagPage>
-  )
-
-  const pagesByKey: Record<string, React.ReactNode> = {
-    cover,
-    market,
-    domain,
-    distributions,
-    'domain-comparison': domainComparison,
-    persona,
-    geo,
-    eeat,
-    'geo-recs': geoRecs,
-    insights,
-    appendix,
+      )
+    case 'appendix':
+      return (
+        <MagChapter
+          key="appendix"
+          stacked={stackedProp}
+          index={index}
+          eyebrow={EQC_REPORT_COPY.sectionAppendix}
+          title={EQC_REPORT_COPY.sectionAppendix}
+        >
+          {report.appendix.stepTable.rows.length > 0 ? (
+            <>
+              <Text style={magStyles.subEyebrow}>{EQC_REPORT_COPY.appendixSteps}</Text>
+              <MagTable
+                columns={report.appendix.stepTable.columns}
+                rows={report.appendix.stepTable.rows}
+              />
+            </>
+          ) : null}
+          {report.appendix.links.length > 0 ? (
+            <>
+              <Text style={[magStyles.subEyebrow, { marginTop: 16 }]}>{EQC_REPORT_COPY.links}</Text>
+              {report.appendix.links.map((link, i) => (
+                <Text key={i} style={magStyles.meta}>
+                  {link.label}: {link.href}
+                </Text>
+              ))}
+            </>
+          ) : null}
+          {(report.appendix.scanId || report.appendix.geoJobId) && (
+            <Text style={[magStyles.meta, { marginTop: 12 }]}>
+              {[
+                report.appendix.scanId ? `Scan-ID: ${report.appendix.scanId}` : null,
+                report.appendix.geoJobId ? `GEO-Job: ${report.appendix.geoJobId}` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
+          )}
+        </MagChapter>
+      )
+    default:
+      return null
   }
+}
+
+export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckReportModel }) {
+  const layout = resolveEventQuickCheckDashboardLayout(report)
+  const personas = resolveReportPersonas(report)
+  const generatedAt = formatReportGeneratedAt(report.meta.generatedAt)
+  const footerTitle = report.meta.domain || report.meta.title
+  const chapterKeys = buildEqcMagazinePdfChapters(report)
+  const pageGroups = packEqcMagazinePages(chapterKeys, report)
+  const ctx: ChapterCtx = { report, layout, personas, generatedAt, chapterKeys }
 
   return (
     <Document>
-      {chapterKeys.map((key) => pagesByKey[key]).filter(Boolean)}
+      {pageGroups.map((group, pageIdx) => {
+        const isCoverOnly = group.length === 1 && group[0] === 'cover'
+        return (
+          <MagPage
+            key={`page-${pageIdx}-${group.join('+')}`}
+            footerTitle={footerTitle}
+            showLogo={isCoverOnly}
+          >
+            {group.map((key, i) => renderChapter(key, ctx, i > 0))}
+          </MagPage>
+        )
+      })}
     </Document>
   )
 }
@@ -601,6 +625,8 @@ export function renderEventQuickCheckReportPdf(
 }
 
 /** Structural chapter list for tests (replaces old page-builder keys). */
-export function buildEventQuickCheckReportPages(report: EventQuickCheckReportModel): Array<{ key: string }> {
+export function buildEventQuickCheckReportPages(
+  report: EventQuickCheckReportModel,
+): Array<{ key: string }> {
   return buildEqcMagazinePdfChapters(report).map((key) => ({ key }))
 }

@@ -13,4 +13,11 @@ export { MagPersonaCard } from './MagPersonaCard'
 export { MagPersonaGrid } from './MagPersonaGrid'
 export { MagTwoColumn } from './MagTwoColumn'
 export { MagPullQuote } from './MagPullQuote'
+export {
+  estimateEqcChapterWeight,
+  packEqcMagazinePages,
+  MAG_PACK_BUDGET,
+  MAG_PACK_BREATHING,
+  MAG_PACK_MAX_PER_PAGE,
+} from './pack-magazine-pages'
 export { registerMagazinePdfFonts, MAG_FONT_FAMILY } from './register-mag-fonts'

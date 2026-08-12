@@ -8,6 +8,8 @@ type MagChapterProps = {
   lede?: string
   /** Print folio index, e.g. "02" */
   index?: string
+  /** Second+ module on a packed page — hairline + air above. */
+  stacked?: boolean
   children?: React.ReactNode
   break?: boolean
 }
@@ -17,11 +19,16 @@ export function MagChapter({
   title,
   lede,
   index,
+  stacked = false,
   children,
   break: pageBreak,
 }: MagChapterProps) {
   return (
-    <View style={magStyles.chapterGap} break={pageBreak}>
+    <View
+      style={[magStyles.chapterGap, stacked ? magStyles.chapterStacked : null]}
+      break={pageBreak}
+      wrap={false}
+    >
       {index ? <Text style={magStyles.chapterIndex}>{index}</Text> : null}
       <Text style={magStyles.eyebrow}>{eyebrow}</Text>
       <Text style={magStyles.headline}>{title}</Text>

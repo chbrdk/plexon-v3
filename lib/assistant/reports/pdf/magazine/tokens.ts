@@ -157,6 +157,12 @@ export const magStyles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 6,
   },
+  chapterStacked: {
+    marginTop: 28,
+    paddingTop: 22,
+    borderTopWidth: 0.6,
+    borderTopColor: magColors.line,
+  },
   rule: {
     borderBottomWidth: 0.6,
     borderBottomColor: magColors.line,

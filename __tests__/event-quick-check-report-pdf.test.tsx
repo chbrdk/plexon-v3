@@ -3,6 +3,7 @@ import React from 'react'
 import { renderToBuffer } from '@react-pdf/renderer'
 import {
   buildEqcMagazinePdfChapters,
+  buildEqcMagazinePdfPageGroups,
   buildEventQuickCheckReportPages,
   EqcMagazinePdfDocument,
 } from '@/lib/assistant/reports/pdf/eqc-magazine-pdf'
@@ -28,6 +29,18 @@ describe('buildEqcMagazinePdfChapters', () => {
     expect(keys).toContain('persona')
     expect(keys).toContain('appendix')
     expect(buildEventQuickCheckReportPages(report).map((p) => p.key)).toEqual(keys)
+  })
+
+  it('packs multiple chapters onto fewer pages when content is light', () => {
+    const report = buildEventQuickCheckReportModel(
+      eventQuickCheckBvikFixture(),
+      eventQuickCheckBvikNarrativeFixture(),
+    )
+    const keys = buildEqcMagazinePdfChapters(report)
+    const groups = buildEqcMagazinePdfPageGroups(report)
+    expect(groups[0]).toEqual(['cover'])
+    expect(groups.flat()).toEqual(keys)
+    expect(groups.length).toBeLessThan(keys.length)
   })
 })
 
