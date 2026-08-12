@@ -204,6 +204,17 @@ export const getBrandionServiceApiUrl = (): string | null => {
   return process.env.BRANDION_API_URL?.trim() || getBrandionUrl();
 };
 
+export const getCreationUrl = (): string | null => {
+  if (typeof process === 'undefined') return null;
+  return process.env.NEXT_PUBLIC_CREATION_URL?.trim() || null;
+};
+
+/** Service base for CREATION project upsert (Wave 3; defaults to public web origin). */
+export const getCreationServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getCreationUrl();
+  return process.env.CREATION_API_URL?.trim() || getCreationUrl();
+};
+
 export const getAudionServiceApiUrl = (): string => {
   const explicit =
     typeof process !== 'undefined' ? process.env.AUDION_API_URL?.trim() : '';
@@ -327,6 +338,10 @@ export const API_PLATFORM_PROVISIONING_CHECKION_PROJECT_ORIGIN =
 /** Service-authenticated: BRANDION created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
   '/api/platform/provisioning/brandion-project-origin';
+
+/** Service-authenticated: CREATION created a project first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
+  '/api/platform/provisioning/creation-project-origin';
 
 /** Usage (tokens) for current user. */
 export const API_USAGE = '/api/usage';

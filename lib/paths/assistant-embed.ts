@@ -14,7 +14,7 @@ export const ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM = 'capability'
 export const ASSISTANT_EMBED_PATHNAME_QUERY_PARAM = 'pathname'
 export const ASSISTANT_EMBED_THEME_QUERY_PARAM = 'theme'
 
-export type AssistantEmbedProduct = 'plexon' | 'audion' | 'checkion' | 'brandion' | 'unknown'
+export type AssistantEmbedProduct = 'plexon' | 'audion' | 'checkion' | 'brandion' | 'creation' | 'unknown'
 
 export type AssistantEmbedQuery = {
   product: AssistantEmbedProduct | string
@@ -27,7 +27,13 @@ export type AssistantEmbedQuery = {
 
 export function normalizeAssistantEmbedProduct(raw: string | null | undefined): AssistantEmbedProduct {
   const value = (raw ?? '').trim().toLowerCase()
-  if (value === 'plexon' || value === 'audion' || value === 'checkion' || value === 'brandion') {
+  if (
+    value === 'plexon' ||
+    value === 'audion' ||
+    value === 'checkion' ||
+    value === 'brandion' ||
+    value === 'creation'
+  ) {
     return value
   }
   return 'unknown'

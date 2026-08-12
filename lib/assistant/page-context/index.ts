@@ -31,7 +31,7 @@ export type AssistantPageContext = {
 export function isAssistantPageContextProduct(
   value: string | null | undefined
 ): value is AssistantPageContextProduct {
-  return value === 'plexon' || value === 'audion' || value === 'checkion' || value === 'brandion'
+  return value === 'plexon' || value === 'audion' || value === 'checkion' || value === 'brandion' || value === 'creation'
 }
 
 /** Parse/validate complete-body or postMessage pageContext. */

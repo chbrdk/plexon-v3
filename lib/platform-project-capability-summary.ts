@@ -2,6 +2,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  CreationProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 
 type BindingLike = {
@@ -64,5 +65,19 @@ export function resolveBrandionCapability(
     guidelineCount: 0,
     analyses: [],
     guidelines: [],
+  };
+}
+
+export function resolveCreationCapability(
+  live: CreationProjectSummary | null,
+  bindings: BindingLike[]
+): CreationProjectSummary | null {
+  if (live?.externalProjectId) return live;
+  const binding = bindings.find((b) => b.productId === 'creation');
+  const id = binding?.externalProjectId?.trim();
+  if (!id) return null;
+  return {
+    externalProjectId: id,
+    compositionCount: 0,
   };
 }

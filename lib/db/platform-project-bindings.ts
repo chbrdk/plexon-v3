@@ -83,7 +83,7 @@ export async function findPlatformProjectIdByProductExternal(
 }
 
 export async function ensureBindingPlaceholders(platformProjectId: string) {
-  const products: PlatformProductId[] = ['checkion', 'audion', 'brandion'];
+  const products: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation'];
   const db = getDb();
   const now = new Date();
   for (const productId of products) {

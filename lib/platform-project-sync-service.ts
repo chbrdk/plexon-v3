@@ -4,7 +4,7 @@ import {
 } from '@/lib/platform-companies';
 import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
 import type { PlatformProductId } from '@/lib/platform-entitlements';
-import { getBrandionServiceApiUrl } from '@/lib/constants';
+import { getBrandionServiceApiUrl, getCreationServiceApiUrl } from '@/lib/constants';
 import {
   ensureBindingPlaceholders,
   upsertPlatformProjectBinding,
@@ -12,11 +12,12 @@ import {
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { pushPlatformProjectUpsert } from '@/lib/platform-project-upsert';
 
-const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion'];
+const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation'];
 
 /** Skip upsert when product API base is unset — leave binding `pending`. */
 function isProductUpsertConfigured(productId: PlatformProductId): boolean {
   if (productId === 'brandion') return Boolean(getBrandionServiceApiUrl());
+  if (productId === 'creation') return Boolean(getCreationServiceApiUrl());
   return true;
 }
 
@@ -29,7 +30,7 @@ export type SyncPlatformProjectResult = {
 };
 
 /**
- * Ensures local CHECKION/AUDION/BRANDION projects exist and updates PLEXON bindings.
+ * Ensures local CHECKION/AUDION/BRANDION/CREATION projects exist and updates PLEXON bindings.
  * @param options.onlyProducts — when set, only these products are upserted (e.g. `['checkion']` when AUDION already has the project row).
  */
 export async function syncPlatformProjectToProducts(

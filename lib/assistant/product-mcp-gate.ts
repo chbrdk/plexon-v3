@@ -26,7 +26,7 @@ export function resolveUseProductMcp(input: {
   if (input.productEntitlement?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE) return true;
   const host = input.pageContext?.product;
   if (host === input.product) return true;
-  if (host === 'plexon' || host === 'audion' || host === 'checkion' || host === 'brandion') {
+  if (host === 'plexon' || host === 'audion' || host === 'checkion' || host === 'brandion' || host === 'creation') {
     return true;
   }
   if (input.hasAnyActiveEntitlement) return true;

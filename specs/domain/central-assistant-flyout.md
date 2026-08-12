@@ -10,7 +10,7 @@
 
 ## Goals
 
-1. One **platform Assistant** across Plexon, Audion, Checkion, and Brandion v3 — admin + product help without leaving the current app.
+1. One **platform Assistant** across Plexon, Audion, Checkion, Brandion v3, and Creation v3 — admin + product help without leaving the current app.
 2. **Primary entry** = classical chat flyout (dock-end overlay), not a full-page workstation.
 3. **Expand** (`/assistant`) is the same conversation in a full-height shell — deep link / “Open workspace” only.
 4. Brain stays the existing Plexon orchestrator (`/api/assistant/*`); no second backend or conversation store.
@@ -21,7 +21,7 @@
 
 | Decision | Choice |
 |----------|--------|
-| Rollout | Day-1 mounts in all four v3 AppShells |
+| Rollout | Day-1 mounts in Plexon + Audion + Checkion + Brandion + Creation v3 AppShells |
 | Primary IA | Flyout (`ChatOverlay` dock-end) |
 | Full page | Expand / deep-link of the same `conversationId` |
 | Delivery | **Hybrid:** same-origin Plexon → in-process `AssistantChat`; cross-app → iframe `/assistant/embed` |
@@ -30,6 +30,7 @@
 | Theme | Host `data-theme` → embed query `theme` + postMessage `assistant:theme` |
 | Page context | Host publishes `AssistantPageContext` (pathname + capability + entity ids); complete hydrates EQC runs into system prompt (`assistant-page-context.md`) |
 | Audion `/chat` | Remains product-local persona/TG chat — **not** merged |
+| EQC → persona talk | Overlay iframe Audion `/chat/embed` (+ deep-link fallback); Assistant may short-turn via MCP `audion_chat` then hand off |
 
 ## Information architecture
 
@@ -74,12 +75,13 @@ Same stream client, history Flyout pattern, Collection picker, generative blocks
 
 ## Non-goals
 
-- Merging Audion persona chat into this overlay.
+- Merging Audion persona chat into this overlay (full roleplay / TG chat stays Audion `/chat`).
 - Shipping domain MessageList/Composer/orchestrator logic in `@msqdx/ui` (overlay shell only).
 - A second assistant backend or parallel conversation tables.
 - Full shared Assistant SDK / in-process chat in product apps (later wave).
 - Assistant-driven DOM editing of host pages (navigate/expand/context only).
 - Deploying Coolify prod from this island.
+- Replacing Audion `/chat` with “everything Audion can do” inside this flyout.
 
 ## Acceptance
 

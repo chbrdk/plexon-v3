@@ -1,6 +1,6 @@
 # Capability Catalog (Agent ↔ Collection Flow)
 
-**Status:** Wave C4 complete — EQC/Agent overlaps on catalog executors (`CAPABILITY_CATALOG_RUNTIME`, default off)  
+**Status:** Wave C4 complete — EQC/Agent overlaps on catalog executors (`CAPABILITY_CATALOG_RUNTIME`, default off); **Wave C5** EQC → Audion persona chat overlay (+ guest budgets)  
 **Owner:** PLEXON v3  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Implements (C1–C3):** `lib/capabilities/*` · `lib/assistant/workflows/run-collection-flow.ts` · handlers `run-collection-flow` / `promote-capability-sequence` · intents `run_collection_flow` / `promote_capability_sequence` · `__tests__/capability-*.test.ts`  
@@ -58,6 +58,7 @@ Two mental models (“assistant workflow” vs “Collection Flow”) confuse us
 | Promote | Chat → Flow only via **validated capability sequences** + templates; never free graph synthesis |
 | Naming | Capability ids are stable kebab/dot ids (`checkion.scan`, `brandion.brand_measure`) — independent of MCP underscore names and Flow kind strings |
 | Chat run trigger | First-class `trigger: 'assistant'` on `collection_flow_runs` (Wave C2) — **not** reuse `service` (keeps history/analytics distinct; same executor as UI/webhook) |
+| Persona talk after EQC | **Audion SoT** — EQC magazine + public share open `ChatOverlay` iframe of Audion `/chat/embed` (guest budgets); fallback deep-link full `/chat`; Platform Assistant may do **short** MCP turns (`audion_chat`) — **never** a second chat stack in Plexon |
 | Explore recipes | Wave C3: promote to **Playbook / saved prompt** only — no new DB entity yet. Revisit “Saved Recipe” store after C3 usage |
 | Brandion measure | Agent write + Flow share one executor; fixture/live gated by existing Brandion Wave-24 adapter (same flag/path) |
 | Promote target | **Always create a new Flow** (draft) on confirm; optional “replace existing” is Later (avoids silent overwrite) |
@@ -193,6 +194,8 @@ Only these capabilities share Agent + Flow in the first implementation wave:
 | `audion.persona_bootstrap` | audion | `persona_bootstrap` | persona_bootstrap / EQC | Catalog `persona.*` |
 | `plexon.collection_flow.run` | plexon | — (meta) | **new** (Wave C2) | Start existing Flow by id; not a canvas node |
 
+**Planned Agent-only (not Flow):** `audion.persona_chat` — maps to Audion chat-api / MCP `audion_chat_*`; SoT UI remains Audion `/chat`. See Wave C5.
+
 Explicitly **out of pilot** as Agent tools: `compare`, `set`, `human_confirm`, Family-A micro-kinds, `research_brief`, Echon waves.
 
 ## Chat → run existing Flow
@@ -313,6 +316,20 @@ MUSS: Promote never creates a node for `brandion.tokens_list` until that capabil
 - [x] Update `knowledge/plexon-assistant-orchestrator.md` Phase 3.
 
 **Exit:** No second executor for pilot ids when flag on; EQC still green on Flow runtime when flag off. **Done.**
+
+### Wave C5 — Persona talk after EQC (overlay + budgets)
+
+**Decision (2026-08-11):** Do **not** rebuild Audion chat in Plexon and do **not** merge Audion `/chat` into the Central Assistant. Host Audion via iframe + `ChatOverlay`; enforce guest budgets on public/embed stream.
+
+| Surface | Behavior |
+|---------|----------|
+| EQC magazine + public share | CTA **„Mit Persona sprechen“** → `EqcPersonaChatOverlay` iframe `resolveEqcPersonaChatEmbedHref` → Audion `/chat/embed?…` |
+| Fallback | **„In Audion öffnen“** → `resolveEqcPersonaChatHref` → full `/chat?personaId=&projectId=` |
+| Guest budget | 5 turns / ~800 chars / 30 min TTL — Audion `guest-budget.ts` + stream gate |
+| Central Assistant | Orchestration + optional **short** `audion_chat` MCP turns; long sessions → same handoff (**chip optional**) |
+| Capability | Register `audion.persona_chat` as **Agent-only** (`surfaces.flow: false`) — **optional stub** |
+
+**Exit:** Public share + logged-in magazine open overlay chat without a second stack; budget hard-stop works; deep-link fallback remains. Spec companions: `eqc-as-collection-flow.md` · `ui-migrate-event-quick-check.md` · `knowledge/eqc-persona-chat.md` · Audion `chat-embed.md`.
 
 ## Relation to existing systems
 

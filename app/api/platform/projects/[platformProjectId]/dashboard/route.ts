@@ -17,16 +17,19 @@ import {
   fetchAudionPlatformProjectSummary,
   fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
+  fetchCreationPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import {
   resolveAudionCapability,
   resolveBrandionCapability,
   resolveCheckionCapability,
+  resolveCreationCapability,
 } from '@/lib/platform-project-capability-summary';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
-import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl } from '@/lib/constants';
+import { buildCreationProjectLaunchUrl } from '@/lib/creation-launch-url';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl } from '@/lib/constants';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 
 const FLOW_TEASER_LIMIT = 3;
@@ -57,16 +60,18 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, brandionLive, packRow, flowRows] = await Promise.all([
+  const [checkionLive, audionLive, brandionLive, creationLive, packRow, flowRows] = await Promise.all([
     fetchCheckionPlatformProjectSummary(ppid, user.id),
     fetchAudionPlatformProjectSummary(ppid, user.id),
     fetchBrandionPlatformProjectSummary(ppid, user.id),
+    fetchCreationPlatformProjectSummary(ppid, user.id),
     getOrCreateKnowledgePack(ppid),
     listCollectionTestFlows(ppid),
   ]);
   const checkion = resolveCheckionCapability(checkionLive, bindings);
   const audion = resolveAudionCapability(audionLive, bindings);
   const brandion = resolveBrandionCapability(brandionLive, bindings);
+  const creation = resolveCreationCapability(creationLive, bindings);
 
   const facets = ensureFacetsShape(packRow.facets, packRow.updatedAt.toISOString());
   const knowledge = {
@@ -91,6 +96,7 @@ export async function GET(
   const checkionBase = getCheckionUrl().replace(/\/+$/, '');
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
   const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
+  const creationBase = (getCreationUrl() ?? '').replace(/\/+$/, '');
   const companyId = project.companyId;
 
   return Response.json({
@@ -99,6 +105,7 @@ export async function GET(
     checkion,
     audion,
     brandion,
+    creation,
     knowledge,
     flows,
     links: {
@@ -113,6 +120,11 @@ export async function GET(
         ? buildBrandionProjectLaunchUrl(brandionBase, { platformProjectId: ppid })
         : brandionBase
           ? `${brandionBase}/projects`
+          : '',
+      creationProject: creation
+        ? buildCreationProjectLaunchUrl(creationBase, { platformProjectId: ppid })
+        : creationBase
+          ? `${creationBase}/projects`
           : '',
     },
   });

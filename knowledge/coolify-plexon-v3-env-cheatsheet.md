@@ -169,6 +169,45 @@ NEXT_PUBLIC_BRANDION_URL={{environment.V3_BRANDION_PUBLIC_URL}}
 
 ---
 
+## 4d. Wave D — CREATION v3 Registry deep-link
+
+Sobald **creation-v3** Staging-Smoke grün ist (`https://creation-v3.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
+
+```bash
+NEXT_PUBLIC_CREATION_URL=https://creation-v3.projects-a.plygrnd.tech
+```
+
+Dann Redeploy plexon-v3. Wirkung:
+
+- `getCreationUrl()` → Staging-FQDN
+- Products Registry: CREATION `lifecycle: active` (sonst `planned`)
+- Deep-Links: home `/`, projects `/projects`, login `/login`, health `/api/health`
+- Collection binding / upsert: Wave 3 landed — `creation` in placeholders; upsert when URL set; origin `creation-project-origin`. See `knowledge/creation-v3-onboarding.md`.
+
+Auf **creation-v3** für Auth + Assistant:
+
+```bash
+CREATION_FEDERATION_MODE=dummy   # live later with provisioning
+NEXT_PUBLIC_PLEXON_URL=<plexon public>
+PLEXON_AUTH_URL=<plexon>
+PLEXON_SERVICE_SECRET=<shared>
+AUTH_SECRET=<≥32>
+```
+
+**Nie** Prod-URL hier eintragen ohne Staging-Smoke.
+
+Optional Shared Variable:
+
+| Shared Name | Wert |
+|-------------|------|
+| `V3_CREATION_PUBLIC_URL` | `https://creation-v3.projects-a.plygrnd.tech` |
+
+```bash
+NEXT_PUBLIC_CREATION_URL={{environment.V3_CREATION_PUBLIC_URL}}
+```
+
+---
+
 ## 5. Passwort-Reset (Staging, optional)
 
 **Einfach:** nichts setzen → Reset-Link nur in Container-Logs.

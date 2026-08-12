@@ -14,7 +14,7 @@ The flyout assistant MUST know which host page/entity the user is viewing so que
 
 ```ts
 type AssistantPageContext = {
-  product: 'plexon' | 'audion' | 'checkion' | 'brandion'
+  product: 'plexon' | 'audion' | 'checkion' | 'brandion' | 'creation'
   pathname: string
   capability?: string // e.g. ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK
   platformProjectId?: string

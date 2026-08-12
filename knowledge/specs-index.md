@@ -39,6 +39,7 @@
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
+| CREATION product (v3 shell) | `knowledge/creation-v3-onboarding.md` · product id `creation` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |
 | UI rebuild | `knowledge/ui-rebuild-msqdx-ui.md` |

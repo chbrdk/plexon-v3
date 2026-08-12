@@ -87,4 +87,14 @@ describe('collection projects domain (phase 0)', () => {
     expect(lifecycle).toContain('hardDeletePlatformProjectAfterArchive')
     expect(lifecycle).toContain('setPlatformProjectLifecycleStatus')
   })
+
+  it('phase 6 documents CREATION bindings landed (Wave 3)', () => {
+    const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
+    const knowledge = readFileSync(path.join(root, 'knowledge/creation-v3-onboarding.md'), 'utf8')
+    expect(spec).toContain('CREATION capability mirror')
+    expect(spec).toContain('creation-project-origin')
+    expect(knowledge).toContain('NEXT_PUBLIC_CREATION_URL')
+    expect(knowledge).toContain('Wave 3 landed')
+    expect(knowledge).toContain('creation-project-origin')
+  })
 })

@@ -2,6 +2,7 @@ import {
   getAudionAdminUrl,
   getBrandionUrl,
   getCheckionUrl,
+  getCreationUrl,
   getVideonUrl,
   PATH_ASSISTANT,
   PATH_BOARD,
@@ -120,6 +121,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const audionBaseUrl = getAudionBaseUrl();
   const videonUrl = getVideonUrl();
   const brandionUrl = getBrandionUrl();
+  const creationUrl = getCreationUrl();
 
   return [
     {
@@ -239,6 +241,33 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
           id: 'brandion-projects',
           labelKey: 'dashboard.entry.projects',
           href: joinUrl(brandionUrl, '/projects') ?? brandionUrl ?? '#',
+          openInNewTab: true,
+        },
+      ],
+      defaultAccess: 'hidden',
+    },
+    {
+      id: 'creation',
+      name: 'CREATION',
+      descriptionKey: 'dashboard.productCreationDescription',
+      lifecycle: creationUrl ? 'active' : 'planned',
+      surface: 'federated',
+      promoted: true,
+      primaryActionKey: 'dashboard.openCreation',
+      homeUrl: creationUrl,
+      loginUrl: joinUrl(creationUrl, '/login'),
+      healthUrl: joinUrl(creationUrl, '/api/health'),
+      capabilities: [
+        'dashboard.capabilityCentralIdentity',
+        'dashboard.capabilityUsage',
+        'dashboard.capabilityFutureRegistry',
+      ],
+      entryPoints: [
+        { id: 'creation-home', labelKey: 'dashboard.entry.home', href: creationUrl ?? '#', openInNewTab: true },
+        {
+          id: 'creation-projects',
+          labelKey: 'dashboard.entry.projects',
+          href: joinUrl(creationUrl, '/projects') ?? creationUrl ?? '#',
           openInNewTab: true,
         },
       ],

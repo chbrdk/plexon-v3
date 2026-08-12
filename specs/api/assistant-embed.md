@@ -22,7 +22,7 @@ Plexon public base: host runtime-config / env (e.g. `NEXT_PUBLIC_PLEXON_URL`) â€
 
 | Param | Constant / key | Required | Meaning |
 |-------|----------------|----------|---------|
-| `product` | `ASSISTANT_EMBED_PRODUCT_QUERY_PARAM` | yes | Host product id: `plexon` \| `audion` \| `checkion` \| `brandion` |
+| `product` | `ASSISTANT_EMBED_PRODUCT_QUERY_PARAM` | yes | Host product id: `plexon` \| `audion` \| `checkion` \| `brandion` \| `creation` |
 | `project` | `ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM` | no | Collection `platformProjectId` |
 | `c` | `ASSISTANT_CONVERSATION_QUERY_PARAM` | no | Resume conversation |
 | `capability` | `ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM` | no | Host capability hint (e.g. `scan`, `guidelines`) |

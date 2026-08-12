@@ -42,6 +42,13 @@ Stand: Mai 2026
 - Guidelines, Tokens, Voice, Asset-Checks — Domain nach Keep/Drop; Pack-Facet `brand` bleibt **reserviert** bis Publish-API (nur Refs/Distillate, kein Voll-Dump)
 - Attach: `brandion-v3/knowledge/staging-coolify.md`
 
+### CREATION (v3 Shell → Zaoly runtime)
+
+- **v3 Shell** (`creation-v3`): AppShell, Plexon Auth, stub hubs (projects / compositions / library) — Registry via `NEXT_PUBLIC_CREATION_URL`
+- Product id: `creation` (Display **CREATION**)
+- **Zaoly** (Vite editor + WC library) remains the design runtime — deep-link/embed in later waves; do not invent a second project model
+- Attach: `knowledge/creation-v3-onboarding.md` · `creation-v3/knowledge/staging-coolify.md`
+
 ## Selektive Surface-Konsolidierung
 
 Folgende Surfaces sind gute Kandidaten fuer spaetere PLEXON-Integration:
@@ -60,7 +67,7 @@ Folgende Surfaces sind **keine** guten fruehen Kandidaten:
 
 ## Onboarding-Regeln fuer neue Produkte
 
-Jedes neue Produkt, z. B. `VIDEON` oder `BRANDION`, braucht vor Aufnahme in die Registry:
+Jedes neue Produkt, z. B. `VIDEON`, `BRANDION` oder `CREATION`, braucht vor Aufnahme in die Registry:
 
 1. Produkt-ID
 2. oeffentliche oder interne Produkt-URL

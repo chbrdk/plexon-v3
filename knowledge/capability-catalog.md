@@ -33,6 +33,10 @@
 
 Flag off → legacy clients unchanged.
 
+### Next — Wave C5 (Persona talk)
+
+EQC magazine + public share → Audion `/chat/embed` in `ChatOverlay` iframe (guest budgets); deep-link fallback full `/chat`; Assistant stays orchestrator. Details: `knowledge/eqc-persona-chat.md`.
+
 ### C3 usage (Assistant)
 
 1. Nach Scan/GEO: „Als Flow speichern“ → Vorschau  
@@ -141,6 +145,7 @@ Env: `CAPABILITY_CATALOG_RUNTIME` — default off; `1`/`true`/`on`/`yes` enables
 | C2 | chat run Flow smoke | collection-test-flow-smoke companion section |
 | C3 | promote reject + happy | this file recipes |
 | C4 | EQC/Flow/Agent behind flag; `__tests__/capability-c4-executors.test.ts` | this file + orchestrator Phase 3 |
+| C5 | EQC persona overlay → Audion `/chat/embed` + budgets | `knowledge/eqc-persona-chat.md` |
 
 ## Do / Don't
 

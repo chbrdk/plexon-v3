@@ -8,6 +8,7 @@ import {
   getAudionPlatformApiBase,
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
+  getCreationServiceApiUrl,
 } from '@/lib/constants';
 
 export type PlatformProjectUpsertPayload = {
@@ -44,6 +45,11 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
   }
   if (productId === 'brandion') {
     const base = getBrandionServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
+  }
+  if (productId === 'creation') {
+    const base = getCreationServiceApiUrl();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }

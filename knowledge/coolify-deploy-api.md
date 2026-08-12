@@ -19,6 +19,7 @@ Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify RE
 | audion-v3 | `putvwgqq1c9yb30tsqosujde` | https://audion-v3.projects-a.plygrnd.tech |
 | checkion-v3 | `valb5m9m099d9k7i2d1xkv6p` | https://checkion-v3.projects-a.plygrnd.tech |
 | brandion-v3 | `hta84est51lwzkqol3hd6wig` | https://brandion-v3.projects-a.plygrnd.tech |
+| creation-v3 | `uk1t9tnsqo65vlpzo2vwq0u2` | https://creation-v3.projects-a.plygrnd.tech |
 | brandion-mcp | `g79ues4e48rh8wq6g3jrabpv` | https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech |
 | audion-mcp | `oswkso8os4wc0o4soosgwwcc` | https://mcp-audion.projects-a.plygrnd.tech |
 

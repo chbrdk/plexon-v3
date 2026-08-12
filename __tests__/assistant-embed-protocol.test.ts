@@ -22,6 +22,7 @@ describe('assistant embed paths', () => {
   it('normalizes unknown products', () => {
     expect(normalizeAssistantEmbedProduct('videon')).toBe('unknown')
     expect(normalizeAssistantEmbedProduct('AUDION')).toBe('audion')
+    expect(normalizeAssistantEmbedProduct('creation')).toBe('creation')
   })
 
   it('includes project conversation capability pathname theme', () => {

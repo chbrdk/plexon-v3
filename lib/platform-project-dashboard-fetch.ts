@@ -2,6 +2,7 @@ import {
   getAudionPlatformApiBase,
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
+  getCreationServiceApiUrl,
 } from '@/lib/constants';
 import {
   PLEXON_CONTRACT_VERSION_HEADER,
@@ -233,4 +234,41 @@ export async function fetchBrandionPlatformProjectSummary(
   if (!response.ok) return null;
   const data = await readJson<BrandionProjectSummary>(response);
   return data ? normalizeBrandionSummary(data) : null;
+}
+
+export type CreationProjectSummary = {
+  externalProjectId: string;
+  platformProjectId?: string;
+  compositionCount: number;
+};
+
+function normalizeCreationSummary(data: CreationProjectSummary): CreationProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  return {
+    externalProjectId: data.externalProjectId,
+    platformProjectId: data.platformProjectId,
+    compositionCount: Number(data.compositionCount) || 0,
+  };
+}
+
+export async function fetchCreationPlatformProjectSummary(
+  platformProjectId: string,
+  plexonUserId: string
+): Promise<CreationProjectSummary | null> {
+  const base = getCreationServiceApiUrl();
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!base?.trim() || !secret) return null;
+  const url = `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      [PLEXON_SERVICE_SECRET_HEADER]: secret,
+      [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+      'X-Plexon-User-Id': plexonUserId,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return null;
+  const data = await readJson<CreationProjectSummary>(response);
+  return data ? normalizeCreationSummary(data) : null;
 }

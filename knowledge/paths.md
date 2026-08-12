@@ -13,9 +13,11 @@
 - Companion: `https://audion-v3.projects-a.plygrnd.tech`
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - BRANDION staging companion: `https://brandion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_BRANDION_URL` / `URL_BRANDION_V3`) — set after brandion-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4c
+- CREATION staging companion: `https://creation-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CREATION_URL` / `URL_CREATION_V3`) — set after creation-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4d · onboarding `knowledge/creation-v3-onboarding.md`
 - BRANDION MCP (guidelines/tokens): `BRANDION_MCP_URL` → staging `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` · spec `specs/domain/assistant-brandion-mcp.md` · gate `knowledge/brandion-mcp-assistant.md` · product MCP `brandion-v3/mcp-server/`
 - AUDION MCP: `AUDION_MCP_URL` → staging `https://mcp-audion.projects-a.plygrnd.tech` (`audion-mcp`)
 - BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`
+- CREATION project origin (service): `POST /api/platform/provisioning/creation-project-origin` · upsert target `{CREATION}/api/platform/provisioning/projects/{platformProjectId}` · launch `{CREATION}/projects?platformProjectId=`
 - BRANDION Collection launch: `{BRANDION}/projects?platformProjectId={id}` · guideline `{BRANDION}/guidelines/{id}` · evaluate `{BRANDION}/guidelines/{id}/evaluate` — `lib/brandion-launch-url.ts` · `lib/paths/brandion-api.ts` (`pathBrandionGuideline` / `pathBrandionGuidelineEvaluate` / `apiBrandionGuidelineAnalysisRuns`) · `dashboard-product-urls.md`
 - Collection Flow Wave 24 (Brandion Marke): `knowledge/collection-flow-brandion.md` · client `lib/integrations/brandion-analysis-runs-client.ts` · execute `lib/collection-flow-brand-execute.ts` / `lib/collection-flow-brand-segment.ts`
 - Federation contract: `2026-05-plexon-federation-v3`
