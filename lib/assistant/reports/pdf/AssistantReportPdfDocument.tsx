@@ -2,7 +2,7 @@ import React from 'react';
 import { Document, Page, Text } from '@react-pdf/renderer';
 import type { UiLayout } from '@/lib/assistant/ui-blocks/types';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
-import { EventQuickCheckReportPdfDocument } from '@/lib/assistant/reports/pdf/event-quick-check-report-pdf';
+import { EqcMagazinePdfDocument } from '@/lib/assistant/reports/pdf/eqc-magazine-pdf';
 import { renderUiBlockPdf } from '@/lib/assistant/reports/pdf/render-ui-block-pdf';
 import { reportPdfStyles as s } from '@/lib/assistant/reports/pdf/report-pdf-styles';
 
@@ -16,7 +16,7 @@ export function AssistantReportPdfDocument({
   const reportBlock = uiLayout.blocks.find((b) => b.type === 'event_quick_check_report');
   if (reportBlock) {
     const report = reportBlock.props.report as EventQuickCheckReportModel;
-    return <EventQuickCheckReportPdfDocument report={report} />;
+    return <EqcMagazinePdfDocument report={report} />;
   }
 
   return (

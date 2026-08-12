@@ -4,16 +4,21 @@
 
 `event_quick_check_report` — ein UiBlock mit vollständigem `EventQuickCheckReportModel`.
 
-## Sections (App scroll + PDF)
+## Sections (App scroll + Magazin-PDF)
 
-| Section | App | PDF Seite |
-|---------|-----|-----------|
-| Cover / Executive KPIs | oben | 1 |
-| Domain & A11y | SectionDomain | 2 |
-| AUDION Persona | SectionPersona | 3 |
-| GEO Competitive | SectionGeo | 4 |
-| Insights & Empfehlungen | SectionInsights | 5 |
-| Anhang (collapsible) | SectionAppendix | 5/6 |
+| Section | App | PDF Kapitel |
+|---------|-----|-------------|
+| Cover / Masthead KPIs | Masthead | `cover` |
+| Markt | Band | `market` |
+| Domain & A11y | Domain magazine | `domain` |
+| Verteilungen | Distributions | `distributions` |
+| Domain-Vergleich | MagTable | `domain-comparison` |
+| AUDION Persona | Persona hero | `persona` |
+| GEO Competitive | GEO magazine | `geo` |
+| E-E-A-T | Ledger | `eeat` |
+| GEO-Empfehlungen | Moves | `geo-recs` |
+| Insights | Insights | `insights` |
+| Anhang | Appendix | `appendix` |
 
 ## Code
 
@@ -21,8 +26,9 @@
 - UI-Texte (DE): `lib/assistant/reports/event-quick-check-report-copy.ts`
 - Model: `lib/assistant/reports/build-event-quick-check-report-model.ts`
 - UiBlock: `lib/assistant/reports/build-event-quick-check-report-block.ts`
-- App: `components/assistant/reports/EventQuickCheckReportView.tsx`
-- PDF CHECKION: `CHECKION/components/pdf/EventQuickCheckReportPdfDocument.tsx`
+- App: `components/event-quick-check/EventQuickCheckDashboardView.tsx`
+- PDF: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + `lib/assistant/reports/pdf/magazine/`
+- Spec: `knowledge/eqc-magazine-pdf.md`
 
 ## Pfade
 

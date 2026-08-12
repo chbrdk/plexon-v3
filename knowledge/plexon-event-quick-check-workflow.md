@@ -127,7 +127,7 @@ Parsing: `lib/integrations/parse-geo-eeat-job-preview.ts` (CHECKION `payload`), 
 Der Quick Check liefert **einen** UiBlock `event_quick_check_report` mit festem `EventQuickCheckReportModel`:
 
 - App: scrollender One-Pager + aufklappbarer Anhang (`EventQuickCheckReportView`)
-- PDF: MSQDX-Branding (Logo auf Cover + Footer, Doppelseiten-Layout). Primär CHECKION `EventQuickCheckReportPdfDocument`; Fallback lokal `lib/assistant/reports/pdf/msqdx/` + `event-quick-check-report-pdf.tsx` (Cover mit KPI-Kacheln + 7 Kapitel: Executive, Domain, Persona, GEO inkl. E-E-A-T/Zitate, Insights, Anhang). Tokens: `lib/paths/pdf-print-tokens.ts`, Cover-Eyebrow: `lib/paths/pdf-cover-copy.ts`.
+- PDF: Magazin-Print (`EqcMagazinePdfDocument` in `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + `pdf/magazine/` primitives). Kapitel folgen Screen-Bands (Cover, Domain, Verteilungen, Persona, GEO, E-E-A-T, Moves, Insights, Anhang). Siehe `knowledge/eqc-magazine-pdf.md`. Legacy `pdf/msqdx/` nur noch für nicht-EQC Assistant-PDFs.
 - PPTX: `mapEventQuickCheckReportToSlides`
 - Workflow: `buildEventQuickCheckReportLayoutFromQuick` in `run-playbook.ts`; Insights nur im Model, kein `appendInsightBlocksToLayout`
 

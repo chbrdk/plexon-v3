@@ -3,7 +3,7 @@ import { Text, View } from '@react-pdf/renderer';
 import type { UiBlock, UiStepStatus } from '@/lib/assistant/ui-blocks/types';
 import { reportPdfStyles as s, reportPdfToneColors } from '@/lib/assistant/reports/pdf/report-pdf-styles';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
-import { renderEventQuickCheckReportPdf } from '@/lib/assistant/reports/pdf/event-quick-check-report-pdf';
+import { renderEventQuickCheckReportPdf } from '@/lib/assistant/reports/pdf/eqc-magazine-pdf';
 
 
 function blockTitle(props: Record<string, unknown>): string | null {
