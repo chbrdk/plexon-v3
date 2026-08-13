@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D3 shipped · **D4 CREATION consume landed** (2026-08-13) · D6 drift CI next
+**Status:** D0–D4 shipped · **D6 drift CI landed** (2026-08-13) · D5 optional
 
 ## Plexon role (only)
 
@@ -22,6 +22,7 @@
 | D2 operator | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
 | D3 operator | `brandion-v3/knowledge/ds-deposit-d3-operator.md` |
 | D4 operator | `creation-v3/knowledge/ds-deposit-d4-operator.md` |
+| D6 drift CI | `brandion-v3/knowledge/ds-deposit-d6-operator.md` · `npm run ds:deposit:check` |
 
 Federation contract remains `2026-05-plexon-federation-v3`.
 

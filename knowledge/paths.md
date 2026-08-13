@@ -39,7 +39,7 @@
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)
   - Page context: `specs/domain/assistant-page-context.md` · `lib/assistant/page-context.ts` (`ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK`, `ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN`) · EQC URL `PATH_EVENT_QUICK_CHECK` + `EVENT_QUICK_CHECK_RUN_QUERY_PARAM`
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
-- DS tokens as Collection (program **DS-DEPOSIT**): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)
+- DS tokens as Collection (program **DS-DEPOSIT**, D0–D4 + **D6**): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` · drift CI `brandion-v3/knowledge/ds-deposit-d6-operator.md` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)
 - **D2 staging** Collection **MSQ DX** under company **MSQDX**: `platformProjectId` `32498667-471e-4b21-b920-5eff5c338300` — operator `brandion-v3/knowledge/ds-deposit-d2-operator.md`
 - **D4 CREATION consume** landed 2026-08-13 — `creation-v3/knowledge/ds-deposit-d4-operator.md` (BFF + gap map; Coolify Brandion env verified)
 - Collection projects: `specs/domain/collection-projects.md`
