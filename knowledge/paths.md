@@ -40,6 +40,7 @@
   - Page context: `specs/domain/assistant-page-context.md` · `lib/assistant/page-context.ts` (`ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK`, `ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN`) · EQC URL `PATH_EVENT_QUICK_CHECK` + `EVENT_QUICK_CHECK_RUN_QUERY_PARAM`
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
 - DS tokens as Collection (program **DS-DEPOSIT**): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)
+- **D2 staging** Collection **MSQ DX** under company **MSQDX**: `platformProjectId` `32498667-471e-4b21-b920-5eff5c338300` — operator `brandion-v3/knowledge/ds-deposit-d2-operator.md`
 - Collection projects: `specs/domain/collection-projects.md`
   - Lifecycle Phase 5: archive/restore `PATCH /api/platform/projects/:id` (`apiPlatformProject`) · admin hard-delete `DELETE /api/admin/platform-projects/:id` (archive+sync first) · helpers in `lib/platform-project-lifecycle.ts`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph

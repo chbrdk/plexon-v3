@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D1 shipped in Brandion; **D2** = operator bootstrap (do not invent product-only projects)
+**Status:** D0–D1 shipped in Brandion; **D2 staging done** (2026-08-13)
 
 ## Plexon role (only)
 
@@ -10,7 +10,16 @@
 - Deep-link: Brandion guidelines / CREATION editor with `platformProjectId`.
 - **Do not** store token JSON or invent a platform token service.
 
-Bootstrap work lives in wave **D2** — operator steps: `brandion-v3/knowledge/ds-deposit-d2-operator.md`. Federation contract remains `2026-05-plexon-federation-v3`.
+## Staging Collection (D2)
+
+| Field | Value |
+|-------|-------|
+| Company | MSQDX |
+| Collection | MSQ DX |
+| `platformProjectId` | `32498667-471e-4b21-b920-5eff5c338300` |
+| Operator notes | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
+
+Federation contract remains `2026-05-plexon-federation-v3`.
 
 ## Related
 
