@@ -39,6 +39,7 @@
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)
   - Page context: `specs/domain/assistant-page-context.md` · `lib/assistant/page-context.ts` (`ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK`, `ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN`) · EQC URL `PATH_EVENT_QUICK_CHECK` + `EVENT_QUICK_CHECK_RUN_QUERY_PARAM`
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
+- DS tokens as Collection (program **DS-DEPOSIT**): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)
 - Collection projects: `specs/domain/collection-projects.md`
   - Lifecycle Phase 5: archive/restore `PATCH /api/platform/projects/:id` (`apiPlatformProject`) · admin hard-delete `DELETE /api/admin/platform-projects/:id` (archive+sync first) · helpers in `lib/platform-project-lifecycle.ts`
   - Collection Test Flow (domain): `specs/domain/collection-test-flow.md` — Plexon-orchestrated AUDION journey + CHECKION page quality graph
