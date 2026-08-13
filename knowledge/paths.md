@@ -41,6 +41,7 @@
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
 - DS tokens as Collection (program **DS-DEPOSIT**, D0–D4 + **D6**): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` · drift CI `brandion-v3/knowledge/ds-deposit-d6-operator.md` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)
 - **D2 staging** Collection **MSQ DX** under company **MSQDX**: `platformProjectId` `32498667-471e-4b21-b920-5eff5c338300` — operator `brandion-v3/knowledge/ds-deposit-d2-operator.md`
+- CREATION empty `/projects` after DS-DEPOSIT (repair): `knowledge/msq-dx-creation-mirror-repair.md` · companion `creation-v3/knowledge/empty-projects-after-ds-deposit.md`
 - **D4 CREATION consume** landed 2026-08-13 — `creation-v3/knowledge/ds-deposit-d4-operator.md` (BFF + gap map; Coolify Brandion env verified)
 - Collection projects: `specs/domain/collection-projects.md`
   - Lifecycle Phase 5: archive/restore `PATCH /api/platform/projects/:id` (`apiPlatformProject`) · admin hard-delete `DELETE /api/admin/platform-projects/:id` (archive+sync first) · helpers in `lib/platform-project-lifecycle.ts`
