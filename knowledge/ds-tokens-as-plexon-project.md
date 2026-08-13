@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D1 shipped in Brandion; **D2 staging done** (2026-08-13)
+**Status:** D0–D2 shipped · **D4 CREATION consume landed** (2026-08-13) · D3 leftover
 
 ## Plexon role (only)
 
@@ -10,14 +10,16 @@
 - Deep-link: Brandion guidelines / CREATION editor with `platformProjectId`.
 - **Do not** store token JSON or invent a platform token service.
 
-## Staging Collection (D2)
+## Staging Collection (D2 → D4)
 
 | Field | Value |
 |-------|-------|
 | Company | MSQDX |
 | Collection | MSQ DX |
 | `platformProjectId` | `32498667-471e-4b21-b920-5eff5c338300` |
-| Operator notes | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
+| Guideline | `gl-msrxlt4u` (active) |
+| D2 operator | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
+| D4 operator | `creation-v3/knowledge/ds-deposit-d4-operator.md` |
 
 Federation contract remains `2026-05-plexon-federation-v3`.
 
@@ -25,6 +27,6 @@ Federation contract remains `2026-05-plexon-federation-v3`.
 
 - Brandion SSOT + `active-pack`: `brandion-v3/specs/domain/creation-token-export.md`
 - Deposit pack file: `brandion-v3/packs/msq-dx-deposit.dtcg.json`
-- CREATION consume: `creation-v3/knowledge/token-layers.md`
+- CREATION consume: `creation-v3/knowledge/token-layers.md` · CT-14 gap map
 - Collection model: `specs/domain/collection-projects.md`
 - Paths: `knowledge/paths.md` (this repo)
