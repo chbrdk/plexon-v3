@@ -72,6 +72,12 @@ describe('POST /api/platform/provisioning/brandion-project-origin', () => {
         ok: true,
         externalProjectId: 'aud-99',
       },
+      {
+        platformProjectId: 'pp-new',
+        productId: 'creation',
+        ok: true,
+        externalProjectId: 'cre-99',
+      },
     ]);
   });
 
@@ -106,9 +112,16 @@ describe('POST /api/platform/provisioning/brandion-project-origin', () => {
       platformProjectId: expect.any(String),
       checkionProjectId: 'chk-99',
       audionProjectId: 'aud-99',
+      creationProjectId: 'cre-99',
       platformCompanyId: 'comp-a',
       ownerPlexonUserId: 'owner-1',
     });
+    expect(syncPlatformProjectToProducts).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        onlyProducts: expect.arrayContaining(['checkion', 'audion', 'creation']),
+      })
+    );
     expect(upsertPlatformProjectBinding).toHaveBeenCalledWith(
       expect.objectContaining({
         productId: 'brandion',

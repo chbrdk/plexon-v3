@@ -41,14 +41,24 @@ const bodySchema = z.object({
 async function bestEffortSiblingMirrors(
   platformProjectId: string,
   source: string
-): Promise<{ checkionProjectId: string | null; audionProjectId: string | null }> {
+): Promise<{
+  checkionProjectId: string | null;
+  audionProjectId: string | null;
+  creationProjectId: string | null;
+}> {
   let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
   let audionId = await getExternalProjectId(platformProjectId, 'audion');
-  const missing: Array<'checkion' | 'audion'> = [];
+  let creationId = await getExternalProjectId(platformProjectId, 'creation');
+  const missing: Array<'checkion' | 'audion' | 'creation'> = [];
   if (!checkionId) missing.push('checkion');
   if (!audionId) missing.push('audion');
+  if (!creationId) missing.push('creation');
   if (missing.length === 0) {
-    return { checkionProjectId: checkionId, audionProjectId: audionId };
+    return {
+      checkionProjectId: checkionId,
+      audionProjectId: audionId,
+      creationProjectId: creationId,
+    };
   }
   try {
     const results = await syncPlatformProjectToProducts(platformProjectId, {
@@ -57,12 +67,18 @@ async function bestEffortSiblingMirrors(
     });
     const checkion = results.find((r) => r.productId === 'checkion');
     const audion = results.find((r) => r.productId === 'audion');
+    const creation = results.find((r) => r.productId === 'creation');
     if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
     if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
+    if (creation?.ok && creation.externalProjectId) creationId = creation.externalProjectId;
   } catch {
     /* sibling mirrors can be repaired via sync later */
   }
-  return { checkionProjectId: checkionId, audionProjectId: audionId };
+  return {
+    checkionProjectId: checkionId,
+    audionProjectId: audionId,
+    creationProjectId: creationId,
+  };
 }
 
 export async function POST(request: Request) {
@@ -116,6 +132,7 @@ export async function POST(request: Request) {
       platformProjectId: existingPlatformId,
       checkionProjectId: siblings.checkionProjectId,
       audionProjectId: siblings.audionProjectId,
+      creationProjectId: siblings.creationProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -155,6 +172,7 @@ export async function POST(request: Request) {
         platformProjectId,
         checkionProjectId: siblings.checkionProjectId,
         audionProjectId: siblings.audionProjectId,
+        creationProjectId: siblings.creationProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

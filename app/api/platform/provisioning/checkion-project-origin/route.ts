@@ -84,9 +84,11 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(existingPlatformId);
     let audionId = await getExternalProjectId(existingPlatformId, 'audion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
-    const missing: Array<'audion' | 'brandion'> = [];
+    let creationId = await getExternalProjectId(existingPlatformId, 'creation');
+    const missing: Array<'audion' | 'brandion' | 'creation'> = [];
     if (!audionId) missing.push('audion');
     if (!brandionId) missing.push('brandion');
+    if (!creationId) missing.push('creation');
     if (missing.length > 0) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
@@ -95,9 +97,13 @@ export async function POST(request: Request) {
         });
         const audionRow = retry.find((r) => r.productId === 'audion');
         const brandionRow = retry.find((r) => r.productId === 'brandion');
+        const creationRow = retry.find((r) => r.productId === 'creation');
         if (audionRow?.ok && audionRow.externalProjectId) audionId = audionRow.externalProjectId;
         if (brandionRow?.ok && brandionRow.externalProjectId) {
           brandionId = brandionRow.externalProjectId;
+        }
+        if (creationRow?.ok && creationRow.externalProjectId) {
+          creationId = creationRow.externalProjectId;
         }
       } catch {
         /* fall through with null mirrors */
@@ -107,6 +113,7 @@ export async function POST(request: Request) {
       platformProjectId: existingPlatformId,
       audionProjectId: audionId,
       brandionProjectId: brandionId,
+      creationProjectId: creationId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -136,21 +143,26 @@ export async function POST(request: Request) {
       lastSyncAt: new Date(),
     });
 
-    // CHECKION already bound; sync AUDION + BRANDION best-effort.
+    // CHECKION already bound; sync AUDION + BRANDION + CREATION best-effort.
     let audionProjectId: string | null = null;
     let brandionProjectId: string | null = null;
+    let creationProjectId: string | null = null;
     try {
       const results = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-checkion-project-origin',
-        onlyProducts: ['audion', 'brandion'],
+        onlyProducts: ['audion', 'brandion', 'creation'],
       });
       const audion = results.find((r) => r.productId === 'audion');
       const brandion = results.find((r) => r.productId === 'brandion');
+      const creation = results.find((r) => r.productId === 'creation');
       if (audion?.ok && audion.externalProjectId) {
         audionProjectId = audion.externalProjectId;
       }
       if (brandion?.ok && brandion.externalProjectId) {
         brandionProjectId = brandion.externalProjectId;
+      }
+      if (creation?.ok && creation.externalProjectId) {
+        creationProjectId = creation.externalProjectId;
       }
     } catch {
       /* sibling mirrors can be repaired via sync later */
@@ -161,6 +173,7 @@ export async function POST(request: Request) {
         platformProjectId,
         audionProjectId,
         brandionProjectId,
+        creationProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

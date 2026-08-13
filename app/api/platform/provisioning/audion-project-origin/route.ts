@@ -84,6 +84,7 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(existingPlatformId);
     let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
+    let creationId = await getExternalProjectId(existingPlatformId, 'creation');
     if (!checkionId) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
@@ -108,10 +109,23 @@ export async function POST(request: Request) {
         /* fall through with null brandion */
       }
     }
+    if (!creationId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(existingPlatformId, {
+          source: 'plexon-audion-project-origin-idempotent',
+          onlyProducts: ['creation'],
+        });
+        const row = retry.find((r) => r.productId === 'creation');
+        if (row?.ok && row.externalProjectId) creationId = row.externalProjectId;
+      } catch {
+        /* fall through with null creation */
+      }
+    }
     return platformJson({
       platformProjectId: existingPlatformId,
       checkionProjectId: checkionId,
       brandionProjectId: brandionId,
+      creationProjectId: creationId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -153,6 +167,7 @@ export async function POST(request: Request) {
     }
 
     let brandionProjectId: string | null = null;
+    let creationProjectId: string | null = null;
     try {
       const brandionResults = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-audion-project-origin',
@@ -165,12 +180,25 @@ export async function POST(request: Request) {
     } catch {
       /* BRANDION mirror can be repaired via sync later */
     }
+    try {
+      const creationResults = await syncPlatformProjectToProducts(platformProjectId, {
+        source: 'plexon-audion-project-origin',
+        onlyProducts: ['creation'],
+      });
+      const creation = creationResults.find((r) => r.productId === 'creation');
+      if (creation?.ok && creation.externalProjectId) {
+        creationProjectId = creation.externalProjectId;
+      }
+    } catch {
+      /* CREATION mirror can be repaired via sync later */
+    }
 
     return platformJson(
       {
         platformProjectId,
         checkionProjectId: checkion.externalProjectId,
         brandionProjectId,
+        creationProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },
