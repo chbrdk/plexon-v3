@@ -8,6 +8,8 @@
 
 On Collection **MSQ DX** (company MSQDX), run capability **Sync** (UI or `POST /api/platform/projects/{id}/sync` as signed-in member). Requires `NEXT_PUBLIC_CREATION_URL` (or `CREATION_API_URL`) on plexon-v3 Coolify.
 
+Or from CREATION (after `CREATION_FEDERATION_MODE=live`): **Sync Collections from Plexon** on `/projects` — upserts CREATION mirrors for all Collections the user can see.
+
 Expect CREATION upsert → durable row once creation-v3 `projectStore=postgres` is live (`988a398+`).
 
 ## Alternate (CREATION UI)

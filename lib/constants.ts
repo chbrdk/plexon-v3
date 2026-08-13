@@ -343,6 +343,14 @@ export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
 export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
   '/api/platform/provisioning/creation-project-origin';
 
+/** Session: upsert capability mirrors for all Collections the user can see. */
+export const API_PLATFORM_ME_SYNC_CAPABILITY_MIRRORS =
+  '/api/platform/me/sync-capability-mirrors';
+
+/** Service + X-Plexon-User-Id: same as me sync, for product BFFs (CREATION Sync from Plexon). */
+export const API_PLATFORM_PROVISIONING_SYNC_CAPABILITY_MIRRORS =
+  '/api/platform/provisioning/sync-capability-mirrors';
+
 /** Usage (tokens) for current user. */
 export const API_USAGE = '/api/usage';
 

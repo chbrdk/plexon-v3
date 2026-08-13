@@ -47,6 +47,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, and CREATI
 - Healthy Collection: checkion + audion (+ brandion / creation when configured) bindings `in_sync` with `external_project_id`.
 - Partial failure is visible as capability status, not as a different project kind.
 - Admin sync / retry remains the repair path.
+- **Bulk repair (Phase 1):** `POST /api/platform/me/sync-capability-mirrors` (session) and `POST /api/platform/provisioning/sync-capability-mirrors` (service + `X-Plexon-User-Id`) upsert mirrors for **all Collections the user can see** (cap 50). Optional body `{ productIds: ['creation'] }` — CREATION `/projects` “Sync from Plexon” uses this so every accessible Collection gets a CREATION capability row.
 
 ## Phases
 
