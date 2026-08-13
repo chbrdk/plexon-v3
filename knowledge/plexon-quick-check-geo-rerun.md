@@ -1,6 +1,6 @@
 # Quick Check: GEO-Fragen nachträglich ändern
 
-Stand: 2026-07-22
+Stand: 2026-08-13
 
 ## Feature
 
@@ -10,6 +10,8 @@ Nach einem abgeschlossenen Quick Check / Komplettscan:
 2. Fragen bearbeiten (inkl. Persona-Gruppen)
 3. **„Fragen bestätigen & GEO erneut starten“** → nur GEO-Job neu, Personas/Deep Scan bleiben
 4. **„Zurück zum Report“** bricht ab
+
+Bestätigte Fragen **ersetzen** den Suggest-Draft (`queries` + `n-suggest-q`). Der neue GEO-Job und das Magazin (GEO-Kapitel, auch mit Persona) müssen die editierte Liste zeigen — nicht die ursprünglichen Suggest-Prompts.
 
 ## Voraussetzungen
 
@@ -32,4 +34,7 @@ Nach einem abgeschlossenen Quick Check / Komplettscan:
 
 - `lib/assistant/event-quick-check/reopen-geo-questions.ts`
 - `lib/assistant/event-quick-check/resolve-geo-questions-reopen-draft.ts`
+- `lib/collection-flow-run-context.ts` → `resolveGeoJobQueriesFromContext` (confirmed `queries.items` win)
+- `lib/collection-flow-eqc-execute.ts` — confirm writes `queries` + `suggest_queries` alias
 - Completion in `execute-event-quick-check-page.ts` speichert `…stored` inkl. Checkpoint
+- Magazine: `EventQuickCheckGeoMagazineSection` shows questions even when a persona exists; persona band lists `persona.geoQuestions`

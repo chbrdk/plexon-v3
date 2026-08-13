@@ -448,7 +448,9 @@ export async function runEqcViaCollectionFlow(
   const outputs = result.lastRun.context?.outputs ?? {};
   const companyBrief = briefFromContext(outputs) ?? options.companyBrief;
   const competitors = stringList(outputs.competitors?.items);
-  const geoQuestions = stringList(outputs.queries?.items);
+  const geoQuestions = options.geoQuestions?.length
+    ? options.geoQuestions
+    : stringList(outputs.queries?.items);
   const domainScan = await hydrateDomainScanPageCount(
     domainScanFromContext(outputs, result.lastRun)
   );
@@ -456,7 +458,9 @@ export async function runEqcViaCollectionFlow(
     geoJobFromContext(outputs, result.lastRun)
   );
   const personaPreview = personaPreviewFromContext(outputs);
-  const geoQuestionsByPersona = geoQuestionsByPersonaFromCatalogBundle(outputs.persona);
+  const geoQuestionsByPersona = options.geoQuestionsByPersona?.length
+    ? options.geoQuestionsByPersona
+    : geoQuestionsByPersonaFromCatalogBundle(outputs.persona);
 
   const eqcFlowState: EqcFlowRuntimeState = {
     flowId: boot.flowId,

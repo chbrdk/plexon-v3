@@ -31,7 +31,7 @@ function scoreTone(score: number | null | undefined): 'pos' | 'low' | 'neg' | un
  * score rings → share-of-voice race → model strip + ranking.
  * E-E-A-T and GEO recommendations live in their own bands.
  */
-export function EventQuickCheckGeoMagazineSection({ report, showQuestions = false }: Props) {
+export function EventQuickCheckGeoMagazineSection({ report, showQuestions = true }: Props) {
   const geo = report.geo
   const ownHost = normalizeGeoDomain(geo.url ?? report.meta.domain ?? report.meta.url)
 

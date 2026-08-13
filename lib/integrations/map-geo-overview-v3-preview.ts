@@ -1,6 +1,9 @@
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client'
 import { formatGeoModelLabel, sortGeoModelIds } from '@/lib/integrations/format-geo-model-label'
-import { GEO_COMPETITIVE_ANSWER_TEXT_MAX } from '@/lib/integrations/geo-competitive-answer-limits'
+import {
+  GEO_COMPETITIVE_ANSWER_TEXT_MAX,
+  GEO_COMPETITIVE_CITATION_TARGET,
+} from '@/lib/integrations/geo-competitive-answer-limits'
 
 type V3GeoCitation = { domain?: string; position?: number; context?: string }
 type V3GeoQueryRun = {
@@ -149,7 +152,7 @@ export function mapGeoOverviewV3ToPreview(
         context: typeof c.context === 'string' ? c.context : undefined,
       }))
       .filter((c) => c.domain)
-    for (const c of citations.slice(0, 6)) {
+    for (const c of citations.slice(0, GEO_COMPETITIVE_CITATION_TARGET)) {
       bucket.citations.push({ query, domain: c.domain, position: c.position })
     }
     const answerText = typeof run.answerText === 'string' ? run.answerText : undefined
@@ -169,7 +172,7 @@ export function mapGeoOverviewV3ToPreview(
     return {
       modelId,
       modelLabel: formatGeoModelLabel(modelId),
-      citations: bucket.citations.slice(0, 24),
+      citations: bucket.citations.slice(0, GEO_COMPETITIVE_CITATION_TARGET * 12),
       runs: bucket.runs.slice(0, 12),
     }
   })

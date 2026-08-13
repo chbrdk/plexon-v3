@@ -460,7 +460,8 @@ export function EventQuickCheckDashboardView({
             ) : null}
             {persona.goals.length > 0 ||
             persona.painPoints.length > 0 ||
-            persona.interests.length > 0 ? (
+            persona.interests.length > 0 ||
+            (persona.geoQuestions?.length ?? 0) > 0 ? (
               <div className="plexon-eqc-mag-persona-lists">
                 {persona.goals.length > 0 || persona.painPoints.length > 0 ? (
                   <div className="plexon-eqc-mag-persona-pair">
@@ -503,6 +504,13 @@ export function EventQuickCheckDashboardView({
                     </ul>
                   </div>
                 ) : null}
+                {persona.geoQuestions && persona.geoQuestions.length > 0 ? (
+                  <RankedList hint={EQC_REPORT_COPY.sectionGeoQuestions}>
+                    {persona.geoQuestions.map((q, i) => (
+                      <RankedRow key={i} index={i + 1} label={q} />
+                    ))}
+                  </RankedList>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -513,7 +521,7 @@ export function EventQuickCheckDashboardView({
         <Band title={EQC_REPORT_COPY.sectionGeo}>
           <EventQuickCheckGeoMagazineSection
             report={report}
-            showQuestions={!layout.showPersona}
+            showQuestions
           />
         </Band>
       ) : null}

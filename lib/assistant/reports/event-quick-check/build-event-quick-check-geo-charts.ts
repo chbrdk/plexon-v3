@@ -5,6 +5,7 @@ import type {
   EventQuickCheckReportCitationQueryRun,
 } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
+import { GEO_COMPETITIVE_CITATION_TARGET } from '@/lib/integrations/geo-competitive-answer-limits';
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain';
 
 export type EventQuickCheckGeoBarChartModel = {
@@ -127,7 +128,7 @@ export function buildCitationCompetitorChart(
   const series = resolveCitationChartSeries(runs, normalizedOwnHost, knownCompetitors);
   if (series.length === 0) return null;
 
-  let maxPosition = 6;
+  let maxPosition = GEO_COMPETITIVE_CITATION_TARGET;
   const rows = runs.map((run, index) => {
     const row: Record<string, string | number> = {
       queryLabel: citationQueryChartLabel(run.query, index),
@@ -157,7 +158,7 @@ export function buildCitationCompetitorChart(
     rows,
     series,
     valueLabel: EQC_REPORT_COPY.colPosition,
-    maxPosition: Math.max(6, maxPosition),
+    maxPosition: Math.max(GEO_COMPETITIVE_CITATION_TARGET, maxPosition),
   };
 }
 
@@ -229,7 +230,7 @@ export function buildOwnDomainMultiModelChart(
     isOwn: false,
   }));
 
-  let maxPosition = 6;
+  let maxPosition = GEO_COMPETITIVE_CITATION_TARGET;
   const rows = queryOrder.map((query, index) => {
     const row: Record<string, string | number> = {
       queryLabel: citationQueryChartLabel(query, index),
@@ -260,7 +261,7 @@ export function buildOwnDomainMultiModelChart(
     rows,
     series,
     valueLabel: EQC_REPORT_COPY.colPosition,
-    maxPosition: Math.max(6, maxPosition),
+    maxPosition: Math.max(GEO_COMPETITIVE_CITATION_TARGET, maxPosition),
   };
 }
 

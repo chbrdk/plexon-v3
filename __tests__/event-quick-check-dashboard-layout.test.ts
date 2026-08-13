@@ -57,7 +57,7 @@ describe('resolveEventQuickCheckDashboardLayout', () => {
     expect(layout.personaSpan).toBe(12);
   });
 
-  it('does not allocate geo column for competitor-only geo data on dashboard', () => {
+  it('allocates the GEO chapter when competitors exist for share-of-voice', () => {
     const report = buildEventQuickCheckReportModel(
       {
         ...eventQuickCheckBvikFixture(),
@@ -76,6 +76,6 @@ describe('resolveEventQuickCheckDashboardLayout', () => {
     const layout = resolveEventQuickCheckDashboardLayout(report);
 
     expect(layout.showGeoCompetitors).toBe(false);
-    expect(layout.geoSpan).toBe(0);
+    expect(layout.geoSpan).toBe(7);
   });
 });

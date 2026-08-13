@@ -5,6 +5,7 @@
 
 import {
   DEFAULT_SCORE_GATE_THRESHOLD,
+  geoJobQueriesFromText,
   type CollectionFlowNode,
   type IssueGateSignals,
 } from '@/lib/collection-test-flow';
@@ -614,6 +615,26 @@ export function buildPersonaCatalogBundle(input: {
 export function buildQueriesCatalogBundle(items: string[]): Record<string, unknown> {
   const cleaned = items.map((s) => String(s).trim()).filter(Boolean);
   return { items: cleaned, text: cleaned.join('\n') };
+}
+
+/**
+ * GEO job prompts: confirmed `queries.items` win over the suggest-node template
+ * (`{{ $('n-suggest-q').json.text }}`), so edited/reopened questions actually run.
+ */
+export function resolveGeoJobQueriesFromContext(
+  ctx: CollectionFlowRunContext,
+  geoNodeText: string | null | undefined
+): string[] {
+  const items = ctx.outputs.queries?.items;
+  if (Array.isArray(items) && items.length > 0) {
+    const fromCatalog = items.map((q) => String(q).trim()).filter(Boolean);
+    if (fromCatalog.length > 0) return fromCatalog;
+  }
+  const fromTemplate = resolveFlowParamString(ctx, geoNodeText);
+  const fromText =
+    fromTemplate ||
+    (typeof ctx.outputs.queries?.text === 'string' ? ctx.outputs.queries.text : '');
+  return geoJobQueriesFromText(fromText);
 }
 
 export function flattenContextForInspector(

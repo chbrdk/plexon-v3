@@ -13,6 +13,9 @@ import {
   buildCompetitorsCatalogBundle,
   buildQueriesCatalogBundle,
   buildPersonaCatalogBundle,
+  emptyRunContext,
+  resolveGeoJobQueriesFromContext,
+  setContextBundle,
 } from '@/lib/collection-flow-run-context';
 import { isEqcFlowRuntimeEnabled } from '@/lib/collection-flow-eqc-execute';
 import {
@@ -106,6 +109,28 @@ describe('Wave 23 catalog bundles', () => {
     const q = buildQueriesCatalogBundle(['Q1', 'Q2']);
     expect(q.items).toEqual(['Q1', 'Q2']);
     expect(q.text).toBe('Q1\nQ2');
+  });
+});
+
+describe('resolveGeoJobQueriesFromContext', () => {
+  it('prefers confirmed queries.items over the suggest-node template', () => {
+    let ctx = emptyRunContext();
+    ctx = setContextBundle(ctx, 'queries', { items: ['Original A'], text: 'Original A' }, 'n-suggest-q');
+    ctx = setContextBundle(ctx, 'queries', { items: ['Edited B', 'Edited C'], text: 'Edited B\nEdited C' });
+    expect(
+      resolveGeoJobQueriesFromContext(ctx, "{{ $('n-suggest-q').json.text }}")
+    ).toEqual(['Edited B', 'Edited C']);
+  });
+
+  it('falls back to resolved suggest-node text when catalog items are empty', () => {
+    let ctx = emptyRunContext();
+    ctx = setContextBundle(ctx, 'queries', { items: ['Fallback Q'], text: 'Fallback Q' }, 'n-suggest-q');
+    expect(
+      resolveGeoJobQueriesFromContext(
+        { outputs: { 'n-suggest-q': ctx.outputs['n-suggest-q'] } },
+        "{{ $('n-suggest-q').json.text }}"
+      )
+    ).toEqual(['Fallback Q']);
   });
 });
 

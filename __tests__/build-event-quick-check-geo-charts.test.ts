@@ -56,5 +56,32 @@ describe('build-event-quick-check-geo-charts', () => {
     expect(model?.series.some((s) => s.label.includes('competitor'))).toBe(true);
     expect(model?.rows[0]?.['wera.de']).toBe(1);
     expect(model?.rows[0]?.['competitor.de']).toBe(2);
+    expect(model?.maxPosition).toBe(20);
+  });
+
+  it('keeps the citation axis at 20 places when ranks are shallower', () => {
+    const model = buildCitationCompetitorChart(
+      [
+        {
+          query: 'best tools',
+          citations: [{ domain: 'wera.de', position: 3 }],
+        },
+      ],
+      'wera.de'
+    );
+    expect(model?.maxPosition).toBe(20);
+  });
+
+  it('expands the axis when a citation ranks beyond 20', () => {
+    const model = buildCitationCompetitorChart(
+      [
+        {
+          query: 'best tools',
+          citations: [{ domain: 'wera.de', position: 24 }],
+        },
+      ],
+      'wera.de'
+    );
+    expect(model?.maxPosition).toBe(24);
   });
 });

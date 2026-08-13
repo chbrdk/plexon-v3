@@ -20,6 +20,7 @@ import {
   evaluateAllCompares,
   resolveDocumentStringParams,
   resolveFlowParamString,
+  resolveGeoJobQueriesFromContext,
   resolveRunUrlChain,
   seedStartNodeIntoContext,
   setContextBundle,
@@ -33,7 +34,6 @@ import {
   deriveCollectionVerdict,
   documentHasEqcSpine,
   geoJobNode,
-  geoJobQueriesFromText,
   nodeStatesFromVerdict,
   qualityScanNode,
   scoreGateThreshold,
@@ -194,11 +194,9 @@ export async function executeEqcCollectionFlowRun(input: {
         buildCompetitorsCatalogBundle(body.payload as string[])
       );
     } else if (kind === 'geo_queries' && Array.isArray(body.payload)) {
-      runContext = setContextBundle(
-        runContext,
-        root,
-        buildQueriesCatalogBundle(body.payload as string[])
-      );
+      const bundle = buildQueriesCatalogBundle(body.payload as string[]);
+      const suggestId = doc.nodes.find((n) => n.kind === 'suggest_queries')?.id;
+      runContext = setContextBundle(runContext, root, bundle, suggestId);
     }
   }
 
@@ -527,12 +525,7 @@ export async function executeEqcCollectionFlowRun(input: {
       const boundCheckion = await requireCheckion('GEO');
       if (typeof boundCheckion !== 'string') return boundCheckion;
       const geoNode = geoJobNode(resolvedNodes) ?? resolved;
-      const queries = geoJobQueriesFromText(
-        resolveFlowParamString(runContext, geoNode.text) ||
-          (typeof runContext.outputs.queries?.text === 'string'
-            ? String(runContext.outputs.queries.text)
-            : '')
-      );
+      const queries = resolveGeoJobQueriesFromContext(runContext, geoNode.text);
       const companyName =
         resolveFlowParamString(runContext, geoNode.companyName) ||
         (typeof runContext.outputs.brief?.displayName === 'string'

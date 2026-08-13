@@ -60,8 +60,11 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 | `persona_bootstrap` | `persona` | Creates personas; ids for GEO/journey |
 | `suggest_queries` | `queries` | `items[]` + optional byPersona |
 | `human_confirm` | same as draft root | Pauses run (`awaiting_input`); resume applies edits |
+| `geo_job` | `geo` | CHECKION competitive job. **Queries MUST come from confirmed `queries.items`**, not the pre-confirm `suggest_queries` node alias. |
 
 `human_confirm.confirmKind`: `brief` \| `competitors` \| `geo_queries` \| `deep_scan`.
+
+**GEO confirm (required):** Resume `geo_queries` writes `buildQueriesCatalogBundle(payload)` to catalog root `queries` **and** to the `suggest_queries` node alias (`n-suggest-q`). `geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` — confirmed `queries.items` win over `{{ $('n-suggest-q').json.text }}`. Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job.
 
 ## Template
 
