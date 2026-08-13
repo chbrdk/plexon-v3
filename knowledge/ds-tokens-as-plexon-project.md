@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D2 shipped · **D4 CREATION consume landed** (2026-08-13) · D3 leftover
+**Status:** D0–D3 shipped · **D4 CREATION consume landed** (2026-08-13) · D6 drift CI next
 
 ## Plexon role (only)
 
@@ -17,8 +17,10 @@
 | Company | MSQDX |
 | Collection | MSQ DX |
 | `platformProjectId` | `32498667-471e-4b21-b920-5eff5c338300` |
-| Guideline | `gl-msrxlt4u` (active) |
+| Guideline | `gl-msrxlt4u` (active, **116** leaves after D3) |
+| Theme | **D3a** — dark active; light = second guideline (not dual channels) |
 | D2 operator | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
+| D3 operator | `brandion-v3/knowledge/ds-deposit-d3-operator.md` |
 | D4 operator | `creation-v3/knowledge/ds-deposit-d4-operator.md` |
 
 Federation contract remains `2026-05-plexon-federation-v3`.
@@ -26,7 +28,7 @@ Federation contract remains `2026-05-plexon-federation-v3`.
 ## Related
 
 - Brandion SSOT + `active-pack`: `brandion-v3/specs/domain/creation-token-export.md`
-- Deposit pack file: `brandion-v3/packs/msq-dx-deposit.dtcg.json`
+- Deposit pack file: `brandion-v3/packs/msq-dx-deposit.dtcg.json` · light twin `…/msq-dx-deposit-light.dtcg.json`
 - CREATION consume: `creation-v3/knowledge/token-layers.md` · CT-14 gap map
 - Collection model: `specs/domain/collection-projects.md`
 - Paths: `knowledge/paths.md` (this repo)
