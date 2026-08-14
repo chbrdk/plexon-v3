@@ -20,6 +20,7 @@
 - BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`
 - CREATION project origin (service): `POST /api/platform/provisioning/creation-project-origin` · upsert target `{CREATION}/api/platform/provisioning/projects/{platformProjectId}` · launch `{CREATION}/projects?platformProjectId=`
 - Sync all visible Collection mirrors (session): `POST /api/platform/me/sync-capability-mirrors` · service BFF: `POST /api/platform/provisioning/sync-capability-mirrors` (+ `X-Plexon-User-Id`) · optional `{ productIds: ['creation'] }`
+- List Collections the user can see (same directory as Sync; cap 50): `GET /api/platform/me/accessible-collections` · service BFF: `GET /api/platform/provisioning/accessible-collections` (+ `X-Plexon-User-Id`) — CREATION P71 picker
 - BRANDION Collection launch: `{BRANDION}/projects?platformProjectId={id}` · guideline `{BRANDION}/guidelines/{id}` · evaluate `{BRANDION}/guidelines/{id}/evaluate` — `lib/brandion-launch-url.ts` · `lib/paths/brandion-api.ts` (`pathBrandionGuideline` / `pathBrandionGuidelineEvaluate` / `apiBrandionGuidelineAnalysisRuns`) · `dashboard-product-urls.md`
 - Collection Flow Wave 24 (Brandion Marke): `knowledge/collection-flow-brandion.md` · client `lib/integrations/brandion-analysis-runs-client.ts` · execute `lib/collection-flow-brand-execute.ts` / `lib/collection-flow-brand-segment.ts`
 - Federation contract: `2026-05-plexon-federation-v3`

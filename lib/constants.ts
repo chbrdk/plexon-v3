@@ -351,6 +351,14 @@ export const API_PLATFORM_ME_SYNC_CAPABILITY_MIRRORS =
 export const API_PLATFORM_PROVISIONING_SYNC_CAPABILITY_MIRRORS =
   '/api/platform/provisioning/sync-capability-mirrors';
 
+/** Session: list Collections the user can see (picker; same directory as Sync). */
+export const API_PLATFORM_ME_ACCESSIBLE_COLLECTIONS =
+  '/api/platform/me/accessible-collections';
+
+/** Service + X-Plexon-User-Id: same list for product BFFs (CREATION Collection picker). */
+export const API_PLATFORM_PROVISIONING_ACCESSIBLE_COLLECTIONS =
+  '/api/platform/provisioning/accessible-collections';
+
 /** Usage (tokens) for current user. */
 export const API_USAGE = '/api/usage';
 
