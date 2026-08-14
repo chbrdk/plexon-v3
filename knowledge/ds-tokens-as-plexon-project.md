@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D4 shipped · **D6 drift CI landed** (2026-08-13) · D5 optional
+**Status:** D0–D4 shipped · **D6 drift CI landed** (2026-08-13) · **D7 spacing roles** (2026-08-14) · D5 optional
 
 ## Plexon role (only)
 
@@ -17,12 +17,13 @@
 | Company | MSQDX |
 | Collection | MSQ DX |
 | `platformProjectId` | `32498667-471e-4b21-b920-5eff5c338300` |
-| Guideline | `gl-msrxlt4u` (active, **116** leaves after D3) |
+| Guideline | `gl-msrxlt4u` (active, **138** leaves after D7) |
 | Theme | **D3a** — dark active; light = second guideline (not dual channels) |
 | D2 operator | `brandion-v3/knowledge/ds-deposit-d2-operator.md` |
 | D3 operator | `brandion-v3/knowledge/ds-deposit-d3-operator.md` |
 | D4 operator | `creation-v3/knowledge/ds-deposit-d4-operator.md` |
 | D6 drift CI | `brandion-v3/knowledge/ds-deposit-d6-operator.md` · `npm run ds:deposit:check` |
+| D7 spacing roles | `brandion-v3/knowledge/ds-deposit-d7-operator.md` · W-SPACING-ROLES |
 
 Federation contract remains `2026-05-plexon-federation-v3`.
 
