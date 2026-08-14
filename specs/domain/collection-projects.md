@@ -48,6 +48,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, and CREATI
 - Partial failure is visible as capability status, not as a different project kind.
 - Admin sync / retry remains the repair path.
 - **Bulk repair (Phase 1):** `POST /api/platform/me/sync-capability-mirrors` (session) and `POST /api/platform/provisioning/sync-capability-mirrors` (service + `X-Plexon-User-Id`) upsert mirrors for **all Collections the user can see** (cap 50). Optional body `{ productIds: ['creation'] }` — CREATION `/projects` “Sync from Plexon” uses this so every accessible Collection gets a CREATION capability row.
+- **Single Collection sync (P73):** `POST /api/platform/provisioning/projects/:platformProjectId/sync` (service + `X-Plexon-User-Id`) reuses `syncPlatformProjectToProducts` for **one** Collection the user can view. CREATION picker open/bind uses this so Brandion/Checkion/Audion/Creation siblings stay aligned — do not invent a parallel sync path.
 - **List for product pickers (P71):** `GET /api/platform/me/accessible-collections` (session) and `GET /api/platform/provisioning/accessible-collections` (service + `X-Plexon-User-Id`) return `{ items: [{ id, name, status, companyId, domain }], totalAccessible, truncated }` from the **same** `listAccessiblePlatformProjectsForUser` (cap 50). CREATION Collection picker uses the provisioning GET — do not invent a second catalog.
 
 ## Phases

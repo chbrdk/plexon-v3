@@ -351,6 +351,17 @@ export const API_PLATFORM_ME_SYNC_CAPABILITY_MIRRORS =
 export const API_PLATFORM_PROVISIONING_SYNC_CAPABILITY_MIRRORS =
   '/api/platform/provisioning/sync-capability-mirrors';
 
+/**
+ * Service + X-Plexon-User-Id: sync sibling capability mirrors for one Collection
+ * (P73 picker → sync). Path template uses `:platformProjectId`.
+ */
+export const API_PLATFORM_PROVISIONING_PROJECT_SYNC =
+  '/api/platform/provisioning/projects/:platformProjectId/sync';
+
+export function apiPlatformProvisioningProjectSync(platformProjectId: string): string {
+  return `/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}/sync`;
+}
+
 /** Session: list Collections the user can see (picker; same directory as Sync). */
 export const API_PLATFORM_ME_ACCESSIBLE_COLLECTIONS =
   '/api/platform/me/accessible-collections';
