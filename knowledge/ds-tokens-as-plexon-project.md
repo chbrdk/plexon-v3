@@ -1,7 +1,7 @@
 # DS tokens as a Plexon Collection project
 
 **Canonical plan:** `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` (program **DS-DEPOSIT**, 2026-08-13)  
-**Status:** D0–D4 shipped · **D6 drift CI landed** (2026-08-13) · **D7 spacing roles** (2026-08-14) · D5 optional
+**Status:** D0–**D7** shipped · **D5 component semantic map landed** (2026-08-14)
 
 ## Plexon role (only)
 
@@ -24,6 +24,7 @@
 | D4 operator | `creation-v3/knowledge/ds-deposit-d4-operator.md` |
 | D6 drift CI | `brandion-v3/knowledge/ds-deposit-d6-operator.md` · `npm run ds:deposit:check` |
 | D7 spacing roles | `brandion-v3/knowledge/ds-deposit-d7-operator.md` · W-SPACING-ROLES |
+| D5 consume map | `brandion-v3/knowledge/ds-deposit-component-semantic-map.json` |
 
 Federation contract remains `2026-05-plexon-federation-v3`.
 
