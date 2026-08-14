@@ -5,7 +5,9 @@ Print export that mirrors the EQC magazine screen rhythm (not the legacy `pdf/ms
 ## Engine
 
 `@react-pdf` · document: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx`  
-Primitives: `lib/assistant/reports/pdf/magazine/`
+**Mag primitives SSOT:** `@msqdx/ui/mag` (`msqdx-ui/packages/ui/src/mag/`) — P78  
+**App-local:** packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`, report models/copy, `MsqdxLogoPdf` injected into `MagPage`  
+Thin re-exports (compat): `lib/assistant/reports/pdf/magazine/index.ts` → `@msqdx/ui/mag`
 
 ## Chapter map (screen → PDF)
 
@@ -31,21 +33,19 @@ Eyebrow → headline → meta → visual anchor (ring / donut / ledger) → body
 No generic card stacks from the old kit. Accent `#00ca55`, white paper, DE copy.
 
 **Satzspiegel:** äußere Ränder ~56pt, zentrierte Content-Spalte **428pt**. Soft-Paper `#f8f7f4` (Print-Stock, nicht reines Weiß).  
-**Typo:** Noto Sans. Kompakte Größen (Cover ~22pt, Chapter ~14pt, Body ~8.5pt / lh 1.62), großzügiger vertikaler Rhythmus.  
+**Typo:** Noto Sans (fonts in DS `packages/ui/src/mag/fonts/`). Kompakte Größen (Cover ~22pt, Chapter ~14pt, Body ~8.5pt / lh 1.62), großzügiger vertikaler Rhythmus.  
 **Folio:** Haarlinie + Uppercase-Meta + `n — total` unten.
 
-**Magazin-Layout:** Kapitelindex `01…`; Spreads via `MagTwoColumn` (Markt Überblick|Findings, Domain Score|Issues, GEO Competitors|Prompts); `MagPullQuote` für Fazit/E-E-A-T-Reasoning; Personas als Editorial-Tiles (Top-Hairline, keine Card-Box); Listen 2-spaltig wo sinnvoll.
+**Magazin-Layout:** Kapitelindex `01…`; Spreads via `MagTwoColumn`; `MagPullQuote` für Fazit/E-E-A-T-Reasoning; Personas mapped to `MagPersonaCardModel` + EQC labels at the document layer.
 
-**Page packing:** `pack-magazine-pages.ts` schätzt Kapitel-Gewicht (Listen, Prosa, Personas, Donuts) und packt leichte Module auf eine Seite (max. 3, Breathing ~12%). Cover bleibt solo. Zwischen gestapelten Kapiteln: Haarlinie. Listenzeilen `wrap={false}` (atomar); Kapitel dürfen umbrechen, wenn sie höher als die Seite sind.
+**Page packing:** `pack-magazine-pages.ts` schätzt Kapitel-Gewicht und packt leichte Module (max. 3, Breathing ~12%). Cover bleibt solo.
 
-**Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap` (Yoga addiert Gap außerhalb und Text läuft in die Nachbarspalte). Labels in `rankedTextCol` mit `minWidth: 0`, Text mit `maxWidth: 100%`.
+**Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap`.
 
-**Text containment:** Zweispaltigkeit immer `50%` + Innen-Padding — **nie** `%`-Breite zusammen mit Flex-`gap` (Yoga addiert Gap außerhalb und Text läuft in die Nachbarspalte). Labels in `rankedTextCol` mit `minWidth: 0`, Text mit `maxWidth: 100%`.
+## Out of scope (Wave 1 / P78)
 
-## Out of scope (Wave 1)
+HTML/Playwright print engine · Creation Composition → PDF · PPTX redesign · present-mode PDF
 
-HTML/Playwright print engine · PPTX redesign · present-mode PDF · full interactive GEO dossier parity
+## Storybook / twins
 
-## Storybook
-
-HTML visual twins live in `msqdx-ui` under catalog layer `Print/` (tokens aligned with `pdf/magazine/tokens.ts`).
+HTML visual twins: `msqdx-ui` catalog layer `Print/` · twin matrix `msqdx-ui/knowledge/print-magazine-twins.md` · shared colors `magazine/colors.ts`

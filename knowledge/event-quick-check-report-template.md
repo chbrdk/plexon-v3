@@ -27,7 +27,7 @@
 - Model: `lib/assistant/reports/build-event-quick-check-report-model.ts`
 - UiBlock: `lib/assistant/reports/build-event-quick-check-report-block.ts`
 - App: `components/event-quick-check/EventQuickCheckDashboardView.tsx`
-- PDF: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + `lib/assistant/reports/pdf/magazine/`
+- PDF: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + Mag* via `@msqdx/ui/mag` + packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
 - Spec: `knowledge/eqc-magazine-pdf.md`
 
 ## Pfade

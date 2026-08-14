@@ -1,18 +1,41 @@
-export { magColors, magStyles, MAG_MARGIN_X, MAG_COLUMN_MAX, MAG_PAGE_WIDTH, MAG_PAGE_HEIGHT } from './tokens'
-export { MagPage } from './MagPage'
-export { MagCover, type MagCoverKpi } from './MagCover'
-export { MagChapter } from './MagChapter'
-export { MagScoreRing } from './MagScoreRing'
-export { MagDonut, type MagDonutSlice } from './MagDonut'
-export { MagLedger, type MagLedgerItem } from './MagLedger'
-export { MagRankedList, type MagRankedItem } from './MagRankedList'
-export { MagTraitBars, type MagTrait } from './MagTraitBars'
-export { MagTable } from './MagTable'
-export { MagChip, MagChipRow } from './MagChip'
-export { MagPersonaCard } from './MagPersonaCard'
-export { MagPersonaGrid } from './MagPersonaGrid'
-export { MagTwoColumn } from './MagTwoColumn'
-export { MagPullQuote } from './MagPullQuote'
+/**
+ * Temporary re-export surface — Mag* SSOT is `@msqdx/ui/mag`.
+ * Prefer importing Mag primitives from `@msqdx/ui/mag` in new code.
+ * Packing stays local.
+ */
+export {
+  magColors,
+  magStyles,
+  MAG_MARGIN_X,
+  MAG_COLUMN_MAX,
+  MAG_PAGE_WIDTH,
+  MAG_PAGE_HEIGHT,
+  MagPage,
+  MagCover,
+  type MagCoverKpi,
+  MagChapter,
+  MagScoreRing,
+  MagDonut,
+  type MagDonutSlice,
+  MagLedger,
+  type MagLedgerItem,
+  MagRankedList,
+  type MagRankedItem,
+  MagTraitBars,
+  type MagTrait,
+  MagTable,
+  MagChip,
+  MagChipRow,
+  MagPersonaCard,
+  type MagPersonaCardModel,
+  type MagPersonaCardLabels,
+  MagPersonaGrid,
+  MagTwoColumn,
+  MagPullQuote,
+  registerMagazinePdfFonts,
+  MAG_FONT_FAMILY,
+} from '@msqdx/ui/mag'
+
 export {
   estimateEqcChapterWeight,
   packEqcMagazinePages,
@@ -20,4 +43,3 @@ export {
   MAG_PACK_BREATHING,
   MAG_PACK_MAX_PER_PAGE,
 } from './pack-magazine-pages'
-export { registerMagazinePdfFonts, MAG_FONT_FAMILY } from './register-mag-fonts'

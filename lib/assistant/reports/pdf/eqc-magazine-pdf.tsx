@@ -7,7 +7,7 @@ import {
 } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { resolveEventQuickCheckDashboardLayout } from '@/lib/assistant/event-quick-check/resolve-event-quick-check-dashboard-layout'
 import { resolveReportPersonas } from '@/lib/assistant/reports/resolve-report-personas'
-import { formatReportGeneratedAt } from '@/lib/assistant/reports/format-report-text'
+import { formatReportGeneratedAt, humanizeTraitKey } from '@/lib/assistant/reports/format-report-text'
 import { pdfCoverEyebrow } from '@/lib/paths/pdf-cover-copy'
 import {
   MagChapter,
@@ -21,14 +21,42 @@ import {
   MagScoreRing,
   MagTable,
   MagTwoColumn,
+  magColors,
   magStyles,
   type MagCoverKpi,
-} from '@/lib/assistant/reports/pdf/magazine'
+  type MagPersonaCardModel,
+} from '@msqdx/ui/mag'
 import { packEqcMagazinePages } from '@/lib/assistant/reports/pdf/magazine/pack-magazine-pages'
+import { MsqdxLogoPdf } from '@/lib/assistant/reports/pdf/msqdx/MsqdxLogoPdf'
 import {
   localizeDistSliceLabel,
   localizeReadabilityGrade,
 } from '@/lib/integrations/map-domain-scan-distributions'
+
+function toMagPersonas(
+  personas: ReturnType<typeof resolveReportPersonas>,
+): MagPersonaCardModel[] {
+  return personas.map((p) => ({
+    id: p.id,
+    name: p.name,
+    segment: p.segment,
+    confidence: p.confidence,
+    bio: p.bio,
+    headline: p.headline,
+    traits: p.traits.map((t) => ({
+      displayName: t.displayName || humanizeTraitKey(t.name),
+      score: t.score,
+    })),
+    goals: p.goals,
+    painPoints: p.painPoints,
+  }))
+}
+
+const MAG_PERSONA_LABELS = {
+  confidence: EQC_REPORT_COPY.personaConfidence,
+  goals: EQC_REPORT_COPY.sectionGoals,
+  painPoints: EQC_REPORT_COPY.sectionPainPoints,
+} as const
 
 function formatKpiValue(value: string | number, unit?: string): string {
   return `${value}${unit ? ` ${unit}` : ''}`
@@ -369,7 +397,7 @@ function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.Re
             personas.length > 1 ? EQC_REPORT_COPY.sectionPersonas : EQC_REPORT_COPY.sectionPersona
           }
         >
-          <MagPersonaGrid personas={personas} />
+          <MagPersonaGrid personas={toMagPersonas(personas)} labels={MAG_PERSONA_LABELS} />
         </MagChapter>
       )
     case 'geo':
@@ -608,6 +636,7 @@ export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckRepo
             key={`page-${pageIdx}-${group.join('+')}`}
             footerTitle={footerTitle}
             showLogo={isCoverOnly}
+            logo={<MsqdxLogoPdf width={52} height={12} color={magColors.ink} />}
           >
             {group.map((key, i) => renderChapter(key, ctx, i > 0))}
           </MagPage>

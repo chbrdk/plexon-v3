@@ -30,12 +30,15 @@ const nextConfig = {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       '@': resolve(__dirname),
-      '@msqdx/ui': resolve(__dirname, 'lib/msqdx-ui.ts'),
+      // Exact `$` so `@msqdx/ui/mag` is not swallowed by `@msqdx/ui`.
+      '@msqdx/ui$': resolve(__dirname, 'lib/msqdx-ui.ts'),
+      '@msqdx/ui/mag': resolve(msqdxUiRoot, 'packages/ui/src/mag/index.ts'),
       '@msqdx/ui-shell': resolve(__dirname, 'lib/msqdx-ui-shell.ts'),
       '@msqdx/ui/styles.css': resolve(msqdxUiRoot, 'packages/ui/src/styles.css'),
       '@msqdx/ui-tokens': resolve(msqdxUiRoot, 'packages/ui-tokens/dist/index.js'),
       '@msqdx/react': resolve(__dirname, 'lib/msqdx-react-bridge/index.ts'),
       '@msqdx/tokens': resolve(__dirname, 'lib/msqdx-tokens-shim.ts'),
+      '@react-pdf/renderer': resolve(__dirname, 'node_modules/@react-pdf/renderer'),
       '@mui/material': resolve(__dirname, 'lib/mui-shim.tsx'),
       '@mui/material/Popper': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
       '@mui/material/Toolbar': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
