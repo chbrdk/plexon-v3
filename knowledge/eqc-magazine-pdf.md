@@ -5,10 +5,10 @@ Print export that mirrors the EQC magazine screen rhythm (not the legacy `pdf/ms
 ## Engine
 
 `@react-pdf` · document: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx`  
-**Mag primitives SSOT:** `@msqdx/ui/mag` (`msqdx-ui/packages/ui/src/mag/`) — P78  
+**Mag primitives SSOT:** `@msqdx/ui/mag` (`msqdx-ui/packages/ui/src/mag/`) — P78 · MagTheme / Drift-CI / Mag Storybook docs **P80b/c**  
 **App-local:** packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`, report models/copy, `MsqdxLogoPdf` injected into `MagPage`  
 Thin re-exports (compat): `lib/assistant/reports/pdf/magazine/index.ts` → `@msqdx/ui/mag`  
-**Not this pipeline:** Creation composition → PDF lives in creation-v3 (`lib/magazine-pdf/`) — separate scene adapter, not an extension of EQC packing.
+**Not this pipeline:** Creation composition → PDF lives in creation-v3 (`lib/magazine-pdf/`) — separate scene adapter (P79/P80a Brandion Mag styles + P80d logo). Twin knowledge: `msqdx-ui/knowledge/print-magazine-twins.md`.
 
 ## Chapter map (screen → PDF)
 
