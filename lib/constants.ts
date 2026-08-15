@@ -215,6 +215,17 @@ export const getCreationServiceApiUrl = (): string | null => {
   return process.env.CREATION_API_URL?.trim() || getCreationUrl();
 };
 
+export const getDigUrl = (): string | null => {
+  if (typeof process === 'undefined') return null;
+  return process.env.NEXT_PUBLIC_DIG_URL?.trim() || null;
+};
+
+/** Service base for DIG project upsert (Wave dig; defaults to public web origin). */
+export const getDigServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getDigUrl();
+  return process.env.DIG_API_URL?.trim() || getDigUrl();
+};
+
 export const getAudionServiceApiUrl = (): string => {
   const explicit =
     typeof process !== 'undefined' ? process.env.AUDION_API_URL?.trim() : '';
@@ -342,6 +353,10 @@ export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
 /** Service-authenticated: CREATION created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
   '/api/platform/provisioning/creation-project-origin';
+
+/** Service-authenticated: DIG created a project first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_DIG_PROJECT_ORIGIN =
+  '/api/platform/provisioning/dig-project-origin';
 
 /** Session: upsert capability mirrors for all Collections the user can see. */
 export const API_PLATFORM_ME_SYNC_CAPABILITY_MIRRORS =

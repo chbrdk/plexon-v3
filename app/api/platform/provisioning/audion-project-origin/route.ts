@@ -85,6 +85,7 @@ export async function POST(request: Request) {
     let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
     let creationId = await getExternalProjectId(existingPlatformId, 'creation');
+    let digId = await getExternalProjectId(existingPlatformId, 'dig');
     if (!checkionId) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
@@ -121,11 +122,24 @@ export async function POST(request: Request) {
         /* fall through with null creation */
       }
     }
+    if (!digId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(existingPlatformId, {
+          source: 'plexon-audion-project-origin-idempotent',
+          onlyProducts: ['dig'],
+        });
+        const row = retry.find((r) => r.productId === 'dig');
+        if (row?.ok && row.externalProjectId) digId = row.externalProjectId;
+      } catch {
+        /* fall through with null dig */
+      }
+    }
     return platformJson({
       platformProjectId: existingPlatformId,
       checkionProjectId: checkionId,
       brandionProjectId: brandionId,
       creationProjectId: creationId,
+      digProjectId: digId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -168,6 +182,7 @@ export async function POST(request: Request) {
 
     let brandionProjectId: string | null = null;
     let creationProjectId: string | null = null;
+    let digProjectId: string | null = null;
     try {
       const brandionResults = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-audion-project-origin',
@@ -192,6 +207,18 @@ export async function POST(request: Request) {
     } catch {
       /* CREATION mirror can be repaired via sync later */
     }
+    try {
+      const digResults = await syncPlatformProjectToProducts(platformProjectId, {
+        source: 'plexon-audion-project-origin',
+        onlyProducts: ['dig'],
+      });
+      const dig = digResults.find((r) => r.productId === 'dig');
+      if (dig?.ok && dig.externalProjectId) {
+        digProjectId = dig.externalProjectId;
+      }
+    } catch {
+      /* DIG mirror can be repaired via sync later */
+    }
 
     return platformJson(
       {
@@ -199,6 +226,7 @@ export async function POST(request: Request) {
         checkionProjectId: checkion.externalProjectId,
         brandionProjectId,
         creationProjectId,
+        digProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

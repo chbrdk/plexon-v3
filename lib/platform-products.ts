@@ -3,6 +3,7 @@ import {
   getBrandionUrl,
   getCheckionUrl,
   getCreationUrl,
+  getDigUrl,
   getVideonUrl,
   PATH_ASSISTANT,
   PATH_BOARD,
@@ -122,6 +123,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const videonUrl = getVideonUrl();
   const brandionUrl = getBrandionUrl();
   const creationUrl = getCreationUrl();
+  const digUrl = getDigUrl();
 
   return [
     {
@@ -268,6 +270,33 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
           id: 'creation-projects',
           labelKey: 'dashboard.entry.projects',
           href: joinUrl(creationUrl, '/projects') ?? creationUrl ?? '#',
+          openInNewTab: true,
+        },
+      ],
+      defaultAccess: 'hidden',
+    },
+    {
+      id: 'dig',
+      name: 'DIG',
+      descriptionKey: 'dashboard.productDigDescription',
+      lifecycle: digUrl ? 'active' : 'planned',
+      surface: 'federated',
+      promoted: true,
+      primaryActionKey: 'dashboard.openDig',
+      homeUrl: digUrl,
+      loginUrl: joinUrl(digUrl, '/login'),
+      healthUrl: joinUrl(digUrl, '/api/health'),
+      capabilities: [
+        'dashboard.capabilityCentralIdentity',
+        'dashboard.capabilityUsage',
+        'dashboard.capabilityFutureRegistry',
+      ],
+      entryPoints: [
+        { id: 'dig-home', labelKey: 'dashboard.entry.home', href: digUrl ?? '#', openInNewTab: true },
+        {
+          id: 'dig-capture',
+          labelKey: 'dashboard.entry.projects',
+          href: joinUrl(digUrl, '/capture') ?? digUrl ?? '#',
           openInNewTab: true,
         },
       ],

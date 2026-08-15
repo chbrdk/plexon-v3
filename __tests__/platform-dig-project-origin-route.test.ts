@@ -44,7 +44,7 @@ function authHeaders(): Record<string, string> {
   };
 }
 
-describe('POST /api/platform/provisioning/brandion-project-origin', () => {
+describe('POST /api/platform/provisioning/dig-project-origin', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
@@ -74,23 +74,23 @@ describe('POST /api/platform/provisioning/brandion-project-origin', () => {
       },
       {
         platformProjectId: 'pp-new',
-        productId: 'creation',
+        productId: 'brandion',
         ok: true,
-        externalProjectId: 'cre-99',
+        externalProjectId: 'br-99',
       },
       {
         platformProjectId: 'pp-new',
-        productId: 'dig',
+        productId: 'creation',
         ok: true,
-        externalProjectId: 'dig-99',
+        externalProjectId: 'cre-99',
       },
     ]);
   });
 
   it('returns 401 without service secret', async () => {
-    const { POST } = await import('@/app/api/platform/provisioning/brandion-project-origin/route');
+    const { POST } = await import('@/app/api/platform/provisioning/dig-project-origin/route');
     const res = await POST(
-      new Request('http://localhost/api/platform/provisioning/brandion-project-origin', {
+      new Request('http://localhost/api/platform/provisioning/dig-project-origin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -100,15 +100,15 @@ describe('POST /api/platform/provisioning/brandion-project-origin', () => {
   });
 
   it('returns 201 and sibling ids on success', async () => {
-    const { POST } = await import('@/app/api/platform/provisioning/brandion-project-origin/route');
+    const { POST } = await import('@/app/api/platform/provisioning/dig-project-origin/route');
     const res = await POST(
-      new Request('http://localhost/api/platform/provisioning/brandion-project-origin', {
+      new Request('http://localhost/api/platform/provisioning/dig-project-origin', {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({
-          brandionProjectId: 'br-1',
-          name: 'Brand Project',
-          domain: 'brand.example',
+          digProjectId: 'dig-1',
+          name: 'Design Project',
+          domain: 'design.example',
         }),
       })
     );
@@ -118,22 +118,54 @@ describe('POST /api/platform/provisioning/brandion-project-origin', () => {
       platformProjectId: expect.any(String),
       checkionProjectId: 'chk-99',
       audionProjectId: 'aud-99',
+      brandionProjectId: 'br-99',
       creationProjectId: 'cre-99',
-      digProjectId: 'dig-99',
       platformCompanyId: 'comp-a',
       ownerPlexonUserId: 'owner-1',
     });
+    expect(upsertPlatformProjectBinding).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'dig',
+        externalProjectId: 'dig-1',
+      })
+    );
     expect(syncPlatformProjectToProducts).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
-        onlyProducts: expect.arrayContaining(['checkion', 'audion', 'creation', 'dig']),
+        onlyProducts: expect.arrayContaining(['checkion', 'audion', 'brandion', 'creation']),
       })
     );
-    expect(upsertPlatformProjectBinding).toHaveBeenCalledWith(
-      expect.objectContaining({
-        productId: 'brandion',
-        externalProjectId: 'br-1',
+  });
+
+  it('is idempotent when dig binding already exists', async () => {
+    vi.mocked(findPlatformProjectIdByProductExternal).mockResolvedValue('pp-existing');
+    vi.mocked(getPlatformProjectById).mockResolvedValue({
+      id: 'pp-existing',
+      companyId: 'comp-a',
+      name: 'Existing',
+    } as never);
+    vi.mocked(getExternalProjectId).mockImplementation(async (_id, product) => {
+      if (product === 'checkion') return 'chk-1';
+      if (product === 'audion') return 'aud-1';
+      if (product === 'brandion') return 'br-1';
+      if (product === 'creation') return 'cre-1';
+      return null;
+    });
+
+    const { POST } = await import('@/app/api/platform/provisioning/dig-project-origin/route');
+    const res = await POST(
+      new Request('http://localhost/api/platform/provisioning/dig-project-origin', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          digProjectId: 'dig-1',
+          name: 'Design Project',
+        }),
       })
     );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.platformProjectId).toBe('pp-existing');
+    expect(createPlatformProject).not.toHaveBeenCalled();
   });
 });

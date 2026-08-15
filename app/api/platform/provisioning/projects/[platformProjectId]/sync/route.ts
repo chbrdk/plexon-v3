@@ -15,7 +15,7 @@ const PLEXON_USER_HEADER = 'X-Plexon-User-Id';
  * Service BFF: upsert sibling capability mirrors for one Collection.
  * Requires service secret + contract header + `X-Plexon-User-Id`.
  * Reuses `syncPlatformProjectToProducts` (same core as session `/projects/:id/sync`).
- * Body optional: `{ productIds?: ('checkion'|'audion'|'brandion'|'creation')[] }`
+ * Body optional: `{ productIds?: ('checkion'|'audion'|'brandion'|'creation'|'dig')[] }`
  * — omit to fan out all Phase-1 mirror products (picker intent).
  */
 export async function POST(
@@ -60,9 +60,13 @@ export async function POST(
 
   const onlyProducts = Array.isArray(body.productIds)
     ? (body.productIds.filter(
-        (id): id is 'checkion' | 'audion' | 'brandion' | 'creation' =>
-          id === 'checkion' || id === 'audion' || id === 'brandion' || id === 'creation'
-      ) as Array<'checkion' | 'audion' | 'brandion' | 'creation'>)
+        (id): id is 'checkion' | 'audion' | 'brandion' | 'creation' | 'dig' =>
+          id === 'checkion' ||
+          id === 'audion' ||
+          id === 'brandion' ||
+          id === 'creation' ||
+          id === 'dig'
+      ) as Array<'checkion' | 'audion' | 'brandion' | 'creation' | 'dig'>)
     : undefined;
 
   try {

@@ -208,6 +208,37 @@ NEXT_PUBLIC_CREATION_URL={{environment.V3_CREATION_PUBLIC_URL}}
 
 ---
 
+## 4e. Wave E — DIG (Design Intelligence) Registry deep-link
+
+Sobald **dig** Staging-Smoke grün ist (`https://dig.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
+
+```bash
+NEXT_PUBLIC_DIG_URL=https://dig.projects-a.plygrnd.tech
+# optional service upsert base (defaults to public URL):
+# DIG_API_URL=https://dig-api.projects-a.plygrnd.tech
+```
+
+Dann Redeploy plexon-v3. Wirkung:
+
+- `getDigUrl()` / `getDigServiceApiUrl()` → Staging-FQDN
+- Products Registry: DIG `lifecycle: active` (sonst `planned`)
+- Collection binding / upsert: product id `dig` in placeholders; upsert when URL set; origin `dig-project-origin`
+- Capability catalog stubs: `dig.capture`, `dig.enrich`, `dig.reference_search`, `dig.reference_pack`, `dig.generate`
+
+**Nie** Prod-URL hier eintragen ohne Staging-Smoke.
+
+Optional Shared Variable:
+
+| Shared Name | Wert |
+|-------------|------|
+| `V3_DIG_PUBLIC_URL` | `https://dig.projects-a.plygrnd.tech` |
+
+```bash
+NEXT_PUBLIC_DIG_URL={{environment.V3_DIG_PUBLIC_URL}}
+```
+
+---
+
 ## 5. Passwort-Reset (Staging, optional)
 
 **Einfach:** nichts setzen → Reset-Link nur in Container-Logs.

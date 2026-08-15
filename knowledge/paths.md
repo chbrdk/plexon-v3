@@ -14,6 +14,7 @@
 - CHECKION staging companion: `https://checkion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CHECKION_URL` / `URL_CHECKION_V3`)
 - BRANDION staging companion: `https://brandion-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_BRANDION_URL` / `URL_BRANDION_V3`) — set after brandion-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4c
 - CREATION staging companion: `https://creation-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_CREATION_URL` / `URL_CREATION_V3`) — set after creation-v3 Coolify smoke; see `coolify-plexon-v3-env-cheatsheet.md` §4d · onboarding `knowledge/creation-v3-onboarding.md`
+- DIG staging companion: `https://dig.projects-a.plygrnd.tech` (`NEXT_PUBLIC_DIG_URL`) — optional `DIG_API_URL` for upsert; see `coolify-plexon-v3-env-cheatsheet.md` §4e · origin `POST /api/platform/provisioning/dig-project-origin`
 - BRANDION MCP (guidelines/tokens): `BRANDION_MCP_URL` → staging `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` · spec `specs/domain/assistant-brandion-mcp.md` · gate `knowledge/brandion-mcp-assistant.md` · product MCP `brandion-v3/mcp-server/`
 - CREATION MCP (library/compositions): `CREATION_MCP_URL` → attach `creation-mcp` port **3102** · spec `specs/domain/assistant-creation-mcp.md` · `knowledge/creation-mcp-assistant.md` · product MCP `creation-v3/mcp-server/`
 - AUDION MCP: `AUDION_MCP_URL` → staging `https://mcp-audion.projects-a.plygrnd.tech` (`audion-mcp`)

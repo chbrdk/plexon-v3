@@ -85,10 +85,12 @@ export async function POST(request: Request) {
     let audionId = await getExternalProjectId(existingPlatformId, 'audion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
     let creationId = await getExternalProjectId(existingPlatformId, 'creation');
-    const missing: Array<'audion' | 'brandion' | 'creation'> = [];
+    let digId = await getExternalProjectId(existingPlatformId, 'dig');
+    const missing: Array<'audion' | 'brandion' | 'creation' | 'dig'> = [];
     if (!audionId) missing.push('audion');
     if (!brandionId) missing.push('brandion');
     if (!creationId) missing.push('creation');
+    if (!digId) missing.push('dig');
     if (missing.length > 0) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
@@ -98,6 +100,7 @@ export async function POST(request: Request) {
         const audionRow = retry.find((r) => r.productId === 'audion');
         const brandionRow = retry.find((r) => r.productId === 'brandion');
         const creationRow = retry.find((r) => r.productId === 'creation');
+        const digRow = retry.find((r) => r.productId === 'dig');
         if (audionRow?.ok && audionRow.externalProjectId) audionId = audionRow.externalProjectId;
         if (brandionRow?.ok && brandionRow.externalProjectId) {
           brandionId = brandionRow.externalProjectId;
@@ -105,6 +108,7 @@ export async function POST(request: Request) {
         if (creationRow?.ok && creationRow.externalProjectId) {
           creationId = creationRow.externalProjectId;
         }
+        if (digRow?.ok && digRow.externalProjectId) digId = digRow.externalProjectId;
       } catch {
         /* fall through with null mirrors */
       }
@@ -114,6 +118,7 @@ export async function POST(request: Request) {
       audionProjectId: audionId,
       brandionProjectId: brandionId,
       creationProjectId: creationId,
+      digProjectId: digId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -143,18 +148,20 @@ export async function POST(request: Request) {
       lastSyncAt: new Date(),
     });
 
-    // CHECKION already bound; sync AUDION + BRANDION + CREATION best-effort.
+    // CHECKION already bound; sync AUDION + BRANDION + CREATION + DIG best-effort.
     let audionProjectId: string | null = null;
     let brandionProjectId: string | null = null;
     let creationProjectId: string | null = null;
+    let digProjectId: string | null = null;
     try {
       const results = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-checkion-project-origin',
-        onlyProducts: ['audion', 'brandion', 'creation'],
+        onlyProducts: ['audion', 'brandion', 'creation', 'dig'],
       });
       const audion = results.find((r) => r.productId === 'audion');
       const brandion = results.find((r) => r.productId === 'brandion');
       const creation = results.find((r) => r.productId === 'creation');
+      const dig = results.find((r) => r.productId === 'dig');
       if (audion?.ok && audion.externalProjectId) {
         audionProjectId = audion.externalProjectId;
       }
@@ -163,6 +170,9 @@ export async function POST(request: Request) {
       }
       if (creation?.ok && creation.externalProjectId) {
         creationProjectId = creation.externalProjectId;
+      }
+      if (dig?.ok && dig.externalProjectId) {
+        digProjectId = dig.externalProjectId;
       }
     } catch {
       /* sibling mirrors can be repaired via sync later */
@@ -174,6 +184,7 @@ export async function POST(request: Request) {
         audionProjectId,
         brandionProjectId,
         creationProjectId,
+        digProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

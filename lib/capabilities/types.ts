@@ -3,7 +3,7 @@
  * @see specs/domain/capability-catalog.md
  */
 
-export type CapabilityOwner = 'audion' | 'checkion' | 'brandion' | 'echon' | 'plexon';
+export type CapabilityOwner = 'audion' | 'checkion' | 'brandion' | 'echon' | 'plexon' | 'dig';
 
 export type CapabilitySideEffect = 'read' | 'write' | 'job';
 
@@ -16,7 +16,12 @@ export type CapabilityId =
   | 'brandion.brand_measure'
   | 'audion.persona_bootstrap'
   | 'audion.journey_segment'
-  | 'plexon.collection_flow.run';
+  | 'plexon.collection_flow.run'
+  | 'dig.capture'
+  | 'dig.enrich'
+  | 'dig.reference_search'
+  | 'dig.reference_pack'
+  | 'dig.generate';
 
 export type CapabilitySurfaces = {
   agent: boolean;

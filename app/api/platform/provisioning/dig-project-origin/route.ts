@@ -31,7 +31,7 @@ function checkSecret(request: Request): boolean {
 }
 
 const bodySchema = z.object({
-  creationProjectId: z.string().min(1),
+  digProjectId: z.string().min(1),
   name: z.string().min(1),
   domain: z.string().nullable().optional(),
   /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
@@ -46,23 +46,23 @@ async function bestEffortSiblingMirrors(
   checkionProjectId: string | null;
   audionProjectId: string | null;
   brandionProjectId: string | null;
-  digProjectId: string | null;
+  creationProjectId: string | null;
 }> {
   let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
   let audionId = await getExternalProjectId(platformProjectId, 'audion');
   let brandionId = await getExternalProjectId(platformProjectId, 'brandion');
-  let digId = await getExternalProjectId(platformProjectId, 'dig');
+  let creationId = await getExternalProjectId(platformProjectId, 'creation');
   const missing: PlatformProductId[] = [];
   if (!checkionId) missing.push('checkion');
   if (!audionId) missing.push('audion');
   if (!brandionId) missing.push('brandion');
-  if (!digId) missing.push('dig');
+  if (!creationId) missing.push('creation');
   if (missing.length === 0) {
     return {
       checkionProjectId: checkionId,
       audionProjectId: audionId,
       brandionProjectId: brandionId,
-      digProjectId: digId,
+      creationProjectId: creationId,
     };
   }
   try {
@@ -73,11 +73,11 @@ async function bestEffortSiblingMirrors(
     const checkion = results.find((r) => r.productId === 'checkion');
     const audion = results.find((r) => r.productId === 'audion');
     const brandion = results.find((r) => r.productId === 'brandion');
-    const dig = results.find((r) => r.productId === 'dig');
+    const creation = results.find((r) => r.productId === 'creation');
     if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
     if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
     if (brandion?.ok && brandion.externalProjectId) brandionId = brandion.externalProjectId;
-    if (dig?.ok && dig.externalProjectId) digId = dig.externalProjectId;
+    if (creation?.ok && creation.externalProjectId) creationId = creation.externalProjectId;
   } catch {
     /* sibling mirrors can be repaired via sync later */
   }
@@ -85,7 +85,7 @@ async function bestEffortSiblingMirrors(
     checkionProjectId: checkionId,
     audionProjectId: audionId,
     brandionProjectId: brandionId,
-    digProjectId: digId,
+    creationProjectId: creationId,
   };
 }
 
@@ -123,9 +123,9 @@ export async function POST(request: Request) {
     return apiError(msg, API_STATUS.BAD_REQUEST);
   }
 
-  const creationId = parsed.creationProjectId.trim();
+  const digId = parsed.digProjectId.trim();
 
-  const existingPlatformId = await findPlatformProjectIdByProductExternal('creation', creationId);
+  const existingPlatformId = await findPlatformProjectIdByProductExternal('dig', digId);
   if (existingPlatformId) {
     const existingProject = await getPlatformProjectById(existingPlatformId);
     if (!existingProject) {
@@ -134,14 +134,14 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(existingPlatformId);
     const siblings = await bestEffortSiblingMirrors(
       existingPlatformId,
-      'plexon-creation-project-origin-idempotent'
+      'plexon-dig-project-origin-idempotent'
     );
     return platformJson({
       platformProjectId: existingPlatformId,
       checkionProjectId: siblings.checkionProjectId,
       audionProjectId: siblings.audionProjectId,
       brandionProjectId: siblings.brandionProjectId,
-      digProjectId: siblings.digProjectId,
+      creationProjectId: siblings.creationProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -164,17 +164,14 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(platformProjectId);
     await upsertPlatformProjectBinding({
       platformProjectId,
-      productId: 'creation',
-      externalProjectId: creationId,
+      productId: 'dig',
+      externalProjectId: digId,
       syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC,
       syncMessage: null,
       lastSyncAt: new Date(),
     });
 
-    const siblings = await bestEffortSiblingMirrors(
-      platformProjectId,
-      'plexon-creation-project-origin'
-    );
+    const siblings = await bestEffortSiblingMirrors(platformProjectId, 'plexon-dig-project-origin');
 
     return platformJson(
       {
@@ -182,7 +179,7 @@ export async function POST(request: Request) {
         checkionProjectId: siblings.checkionProjectId,
         audionProjectId: siblings.audionProjectId,
         brandionProjectId: siblings.brandionProjectId,
-        digProjectId: siblings.digProjectId,
+        creationProjectId: siblings.creationProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },
@@ -194,6 +191,6 @@ export async function POST(request: Request) {
     } catch {
       /* best-effort cleanup */
     }
-    return handleApiError(e, { context: 'creation-project-origin' });
+    return handleApiError(e, { context: 'dig-project-origin' });
   }
 }

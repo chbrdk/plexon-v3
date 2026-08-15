@@ -1,4 +1,4 @@
-export const PLATFORM_PRODUCT_IDS = ['plexon', 'checkion', 'audion', 'videon', 'brandion', 'creation'] as const;
+export const PLATFORM_PRODUCT_IDS = ['plexon', 'checkion', 'audion', 'videon', 'brandion', 'creation', 'dig'] as const;
 export type PlatformProductId = (typeof PLATFORM_PRODUCT_IDS)[number];
 
 export const PLATFORM_ENTITLEMENT_STATUS = {

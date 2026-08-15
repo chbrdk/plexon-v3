@@ -11,7 +11,7 @@ const PLEXON_USER_HEADER = 'X-Plexon-User-Id';
 /**
  * Service: upsert capability mirrors for all Collections a Plexon user can see.
  * Requires service secret + contract header + `X-Plexon-User-Id`.
- * Body optional: `{ productIds?: ('checkion'|'audion'|'brandion'|'creation')[] }`
+ * Body optional: `{ productIds?: ('checkion'|'audion'|'brandion'|'creation'|'dig')[] }`
  */
 export async function POST(request: Request) {
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);

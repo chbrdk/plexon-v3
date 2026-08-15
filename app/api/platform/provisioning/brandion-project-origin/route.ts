@@ -45,19 +45,23 @@ async function bestEffortSiblingMirrors(
   checkionProjectId: string | null;
   audionProjectId: string | null;
   creationProjectId: string | null;
+  digProjectId: string | null;
 }> {
   let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
   let audionId = await getExternalProjectId(platformProjectId, 'audion');
   let creationId = await getExternalProjectId(platformProjectId, 'creation');
-  const missing: Array<'checkion' | 'audion' | 'creation'> = [];
+  let digId = await getExternalProjectId(platformProjectId, 'dig');
+  const missing: Array<'checkion' | 'audion' | 'creation' | 'dig'> = [];
   if (!checkionId) missing.push('checkion');
   if (!audionId) missing.push('audion');
   if (!creationId) missing.push('creation');
+  if (!digId) missing.push('dig');
   if (missing.length === 0) {
     return {
       checkionProjectId: checkionId,
       audionProjectId: audionId,
       creationProjectId: creationId,
+      digProjectId: digId,
     };
   }
   try {
@@ -68,9 +72,11 @@ async function bestEffortSiblingMirrors(
     const checkion = results.find((r) => r.productId === 'checkion');
     const audion = results.find((r) => r.productId === 'audion');
     const creation = results.find((r) => r.productId === 'creation');
+    const dig = results.find((r) => r.productId === 'dig');
     if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
     if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
     if (creation?.ok && creation.externalProjectId) creationId = creation.externalProjectId;
+    if (dig?.ok && dig.externalProjectId) digId = dig.externalProjectId;
   } catch {
     /* sibling mirrors can be repaired via sync later */
   }
@@ -78,6 +84,7 @@ async function bestEffortSiblingMirrors(
     checkionProjectId: checkionId,
     audionProjectId: audionId,
     creationProjectId: creationId,
+    digProjectId: digId,
   };
 }
 
@@ -133,6 +140,7 @@ export async function POST(request: Request) {
       checkionProjectId: siblings.checkionProjectId,
       audionProjectId: siblings.audionProjectId,
       creationProjectId: siblings.creationProjectId,
+      digProjectId: siblings.digProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -173,6 +181,7 @@ export async function POST(request: Request) {
         checkionProjectId: siblings.checkionProjectId,
         audionProjectId: siblings.audionProjectId,
         creationProjectId: siblings.creationProjectId,
+        digProjectId: siblings.digProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

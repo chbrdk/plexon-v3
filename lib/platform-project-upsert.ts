@@ -9,6 +9,7 @@ import {
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
   getCreationServiceApiUrl,
+  getDigServiceApiUrl,
 } from '@/lib/constants';
 
 export type PlatformProjectUpsertPayload = {
@@ -50,6 +51,11 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
   }
   if (productId === 'creation') {
     const base = getCreationServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
+  }
+  if (productId === 'dig') {
+    const base = getDigServiceApiUrl();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }

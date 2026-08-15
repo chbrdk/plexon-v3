@@ -4,7 +4,7 @@ import {
 } from '@/lib/platform-companies';
 import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
 import type { PlatformProductId } from '@/lib/platform-entitlements';
-import { getBrandionServiceApiUrl, getCreationServiceApiUrl } from '@/lib/constants';
+import { getBrandionServiceApiUrl, getCreationServiceApiUrl, getDigServiceApiUrl } from '@/lib/constants';
 import {
   ensureBindingPlaceholders,
   upsertPlatformProjectBinding,
@@ -12,12 +12,13 @@ import {
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { pushPlatformProjectUpsert } from '@/lib/platform-project-upsert';
 
-const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation'];
+const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'dig'];
 
 /** Skip upsert when product API base is unset — leave binding `pending`. */
 function isProductUpsertConfigured(productId: PlatformProductId): boolean {
   if (productId === 'brandion') return Boolean(getBrandionServiceApiUrl());
   if (productId === 'creation') return Boolean(getCreationServiceApiUrl());
+  if (productId === 'dig') return Boolean(getDigServiceApiUrl());
   return true;
 }
 
