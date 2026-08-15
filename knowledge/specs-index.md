@@ -20,6 +20,7 @@
 | Assistant journey generate | `specs/domain/assistant-journey-generate.md` |
 | Capability Catalog (Agent ↔ Flow) | `specs/domain/capability-catalog.md` |
 | EQC as Collection Flow | `specs/domain/eqc-as-collection-flow.md` |
+| Creation MagazineTemplate consume (EQC Mag PDF) | `specs/domain/creation-magazine-template-consume.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 
@@ -38,6 +39,7 @@
 | Capability Catalog | `knowledge/capability-catalog.md` |
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |
+| EQC Magazin-PDF (Creation SSOT + legacy fallback) | `knowledge/eqc-magazine-pdf.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | CREATION product (v3 shell) | `knowledge/creation-v3-onboarding.md` · product id `creation` |
 | Federation contract | `knowledge/platform-federation-contract.md` |

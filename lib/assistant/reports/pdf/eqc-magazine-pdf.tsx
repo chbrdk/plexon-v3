@@ -1,3 +1,8 @@
+/**
+ * @deprecated Prefer Creation MagazineTemplate + slot bind
+ * (`specs/domain/creation-magazine-template-consume.md`).
+ * Kept as fallback when `EQC_CREATION_MAGAZINE_TEMPLATE=0` or no published template.
+ */
 import React from 'react'
 import { Document, Text, View } from '@react-pdf/renderer'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'

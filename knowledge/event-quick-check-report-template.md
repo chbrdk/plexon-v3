@@ -27,7 +27,8 @@
 - Model: `lib/assistant/reports/build-event-quick-check-report-model.ts`
 - UiBlock: `lib/assistant/reports/build-event-quick-check-report-block.ts`
 - App: `components/event-quick-check/EventQuickCheckDashboardView.tsx`
-- PDF: `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + Mag* via `@msqdx/ui/mag` + packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
+- **PDF SSOT:** Creation MagazineTemplate (`role: quick-check-magazine`) + slot bind — `specs/domain/creation-magazine-template-consume.md` · `lib/assistant/reports/pdf/magazine/bind-eqc-report-slots.ts` · `lib/integrations/creation-magazine-template-client.ts`
+- **PDF legacy (deprecated fallback):** `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` + Mag* via `@msqdx/ui/mag` + packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
 - Spec: `knowledge/eqc-magazine-pdf.md`
 
 ## Pfade

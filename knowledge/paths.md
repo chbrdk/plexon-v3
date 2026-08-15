@@ -59,7 +59,7 @@
   - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · cover `70svh` · bands `100svh` · adaptive gap via `data-eqc-chapter` (`lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`)
   - EQC Distributions band (Checkion corpus donuts): `knowledge/eqc-distributions-band.md` · overview via `checkionApiDomainScanOverview`
   - EQC E-E-A-T + GEO-Empfehlungen as own bands: `knowledge/eqc-magazine-eeat-recs-bands.md`
-  - EQC Magazin-PDF: `knowledge/eqc-magazine-pdf.md` · document `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` · Mag* SSOT `@msqdx/ui/mag` (alias in `next.config.mjs` / `vitest.config.ts`; pin `@react-pdf/renderer` to app `node_modules`) · packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
+  - EQC Magazin-PDF: `knowledge/eqc-magazine-pdf.md` · **SSOT Creation MagazineTemplate** (`specs/domain/creation-magazine-template-consume.md` · paths `lib/paths/creation-magazine-templates.ts` · env `EQC_CREATION_MAGAZINE_TEMPLATE` · `CREATION_API_URL`) · legacy fallback `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` · Mag* SSOT `@msqdx/ui/mag` · packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`
