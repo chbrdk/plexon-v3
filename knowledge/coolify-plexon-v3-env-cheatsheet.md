@@ -208,22 +208,25 @@ NEXT_PUBLIC_CREATION_URL={{environment.V3_CREATION_PUBLIC_URL}}
 
 ---
 
-## 4e. Wave E — DIG (Design Intelligence) Registry deep-link
+## 4e. Wave E — SPIRION Registry deep-link
 
-Sobald **dig** Staging-Smoke grün ist (`https://dig.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
+Sobald **SPIRION** Staging-Smoke grün ist (`https://dig.projects-a.plygrnd.tech/api/health` — FQDN still `dig.*` until infra rename), auf **plexon-v3** setzen:
 
 ```bash
-NEXT_PUBLIC_DIG_URL=https://dig.projects-a.plygrnd.tech
+NEXT_PUBLIC_SPIRION_URL=https://dig.projects-a.plygrnd.tech
 # optional service upsert base (defaults to public URL):
-# DIG_API_URL=https://dig-api.projects-a.plygrnd.tech
+# SPIRION_API_URL=https://dig-api.projects-a.plygrnd.tech
+# Legacy aliases still work for one release:
+# NEXT_PUBLIC_DIG_URL=… / DIG_API_URL=…
 ```
 
 Dann Redeploy plexon-v3. Wirkung:
 
-- `getDigUrl()` / `getDigServiceApiUrl()` → Staging-FQDN
-- Products Registry: DIG `lifecycle: active` (sonst `planned`)
-- Collection binding / upsert: product id `dig` in placeholders; upsert when URL set; origin `dig-project-origin`
-- Capability catalog stubs: `dig.capture`, `dig.enrich`, `dig.reference_search`, `dig.reference_pack`, `dig.generate`
+- `getSpirionUrl()` / `getSpirionServiceApiUrl()` → Staging-FQDN (`getDigUrl` / `getDigServiceApiUrl` are thin aliases)
+- Products Registry: SPIRION `lifecycle: active` (sonst `planned`)
+- Collection binding / upsert: product id `spirion` in placeholders; upsert when URL set; origin `spirion-project-origin` (legacy `dig-project-origin` forwards)
+- Capability catalog stubs: `spirion.capture`, `spirion.enrich`, `spirion.reference_search`, `spirion.reference_pack`, `spirion.generate`
+- Existing DB rows with `product_id='dig'` need: `UPDATE platform_project_product_bindings SET product_id='spirion' WHERE product_id='dig';` (see `lib/db/migrations/0008_rename_dig_to_spirion.sql`)
 
 **Nie** Prod-URL hier eintragen ohne Staging-Smoke.
 
@@ -231,10 +234,13 @@ Optional Shared Variable:
 
 | Shared Name | Wert |
 |-------------|------|
-| `V3_DIG_PUBLIC_URL` | `https://dig.projects-a.plygrnd.tech` |
+| `V3_SPIRION_PUBLIC_URL` | `https://dig.projects-a.plygrnd.tech` |
+| `V3_DIG_PUBLIC_URL` | legacy alias — prefer `V3_SPIRION_PUBLIC_URL` |
 
 ```bash
-NEXT_PUBLIC_DIG_URL={{environment.V3_DIG_PUBLIC_URL}}
+NEXT_PUBLIC_SPIRION_URL={{environment.V3_SPIRION_PUBLIC_URL}}
+# or legacy:
+# NEXT_PUBLIC_DIG_URL={{environment.V3_DIG_PUBLIC_URL}}
 ```
 
 ---

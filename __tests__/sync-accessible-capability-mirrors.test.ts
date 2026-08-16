@@ -52,7 +52,7 @@ describe('syncAccessibleCapabilityMirrors', () => {
       '@/lib/sync-accessible-capability-mirrors'
     );
     const result = await syncAccessibleCapabilityMirrors('user-1');
-    expect(result.productIds).toEqual(['checkion', 'audion', 'brandion', 'creation', 'dig']);
+    expect(result.productIds).toEqual(['checkion', 'audion', 'brandion', 'creation', 'spirion']);
     expect(result.synced).toBe(0);
   });
 });

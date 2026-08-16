@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
     let creationId = await getExternalProjectId(existingPlatformId, 'creation');
-    let digId = await getExternalProjectId(existingPlatformId, 'dig');
+    let spirionId = await getExternalProjectId(existingPlatformId, 'spirion');
     if (!checkionId) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
@@ -122,16 +122,16 @@ export async function POST(request: Request) {
         /* fall through with null creation */
       }
     }
-    if (!digId) {
+    if (!spirionId) {
       try {
         const retry = await syncPlatformProjectToProducts(existingPlatformId, {
           source: 'plexon-audion-project-origin-idempotent',
-          onlyProducts: ['dig'],
+          onlyProducts: ['spirion'],
         });
-        const row = retry.find((r) => r.productId === 'dig');
-        if (row?.ok && row.externalProjectId) digId = row.externalProjectId;
+        const row = retry.find((r) => r.productId === 'spirion');
+        if (row?.ok && row.externalProjectId) spirionId = row.externalProjectId;
       } catch {
-        /* fall through with null dig */
+        /* fall through with null spirion */
       }
     }
     return platformJson({
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       checkionProjectId: checkionId,
       brandionProjectId: brandionId,
       creationProjectId: creationId,
-      digProjectId: digId,
+      spirionProjectId: spirionId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
 
     let brandionProjectId: string | null = null;
     let creationProjectId: string | null = null;
-    let digProjectId: string | null = null;
+    let spirionProjectId: string | null = null;
     try {
       const brandionResults = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-audion-project-origin',
@@ -208,16 +208,16 @@ export async function POST(request: Request) {
       /* CREATION mirror can be repaired via sync later */
     }
     try {
-      const digResults = await syncPlatformProjectToProducts(platformProjectId, {
+      const spirionResults = await syncPlatformProjectToProducts(platformProjectId, {
         source: 'plexon-audion-project-origin',
-        onlyProducts: ['dig'],
+        onlyProducts: ['spirion'],
       });
-      const dig = digResults.find((r) => r.productId === 'dig');
-      if (dig?.ok && dig.externalProjectId) {
-        digProjectId = dig.externalProjectId;
+      const spirion = spirionResults.find((r) => r.productId === 'spirion');
+      if (spirion?.ok && spirion.externalProjectId) {
+        spirionProjectId = spirion.externalProjectId;
       }
     } catch {
-      /* DIG mirror can be repaired via sync later */
+      /* SPIRION mirror can be repaired via sync later */
     }
 
     return platformJson(
@@ -226,7 +226,7 @@ export async function POST(request: Request) {
         checkionProjectId: checkion.externalProjectId,
         brandionProjectId,
         creationProjectId,
-        digProjectId,
+        spirionProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },

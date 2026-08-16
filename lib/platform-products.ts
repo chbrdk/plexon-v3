@@ -3,7 +3,7 @@ import {
   getBrandionUrl,
   getCheckionUrl,
   getCreationUrl,
-  getDigUrl,
+  getSpirionUrl,
   getVideonUrl,
   PATH_ASSISTANT,
   PATH_BOARD,
@@ -123,7 +123,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const videonUrl = getVideonUrl();
   const brandionUrl = getBrandionUrl();
   const creationUrl = getCreationUrl();
-  const digUrl = getDigUrl();
+  const spirionUrl = getSpirionUrl();
 
   return [
     {
@@ -276,27 +276,32 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
       defaultAccess: 'hidden',
     },
     {
-      id: 'dig',
-      name: 'DIG',
-      descriptionKey: 'dashboard.productDigDescription',
-      lifecycle: digUrl ? 'active' : 'planned',
+      id: 'spirion',
+      name: 'SPIRION',
+      descriptionKey: 'dashboard.productSpirionDescription',
+      lifecycle: spirionUrl ? 'active' : 'planned',
       surface: 'federated',
       promoted: true,
-      primaryActionKey: 'dashboard.openDig',
-      homeUrl: digUrl,
-      loginUrl: joinUrl(digUrl, '/login'),
-      healthUrl: joinUrl(digUrl, '/api/health'),
+      primaryActionKey: 'dashboard.openSpirion',
+      homeUrl: spirionUrl,
+      loginUrl: joinUrl(spirionUrl, '/login'),
+      healthUrl: joinUrl(spirionUrl, '/api/health'),
       capabilities: [
         'dashboard.capabilityCentralIdentity',
         'dashboard.capabilityUsage',
         'dashboard.capabilityFutureRegistry',
       ],
       entryPoints: [
-        { id: 'dig-home', labelKey: 'dashboard.entry.home', href: digUrl ?? '#', openInNewTab: true },
         {
-          id: 'dig-capture',
+          id: 'spirion-home',
+          labelKey: 'dashboard.entry.home',
+          href: spirionUrl ?? '#',
+          openInNewTab: true,
+        },
+        {
+          id: 'spirion-capture',
           labelKey: 'dashboard.entry.projects',
-          href: joinUrl(digUrl, '/capture') ?? digUrl ?? '#',
+          href: joinUrl(spirionUrl, '/capture') ?? spirionUrl ?? '#',
           openInNewTab: true,
         },
       ],

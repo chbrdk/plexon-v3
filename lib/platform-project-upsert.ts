@@ -9,7 +9,7 @@ import {
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
   getCreationServiceApiUrl,
-  getDigServiceApiUrl,
+  getSpirionServiceApiUrl,
 } from '@/lib/constants';
 
 export type PlatformProjectUpsertPayload = {
@@ -54,8 +54,8 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }
-  if (productId === 'dig') {
-    const base = getDigServiceApiUrl();
+  if (productId === 'spirion') {
+    const base = getSpirionServiceApiUrl();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }

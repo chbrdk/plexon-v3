@@ -30,14 +30,21 @@ function checkSecret(request: Request): boolean {
   return Boolean(serviceSecret && secret === serviceSecret);
 }
 
-const bodySchema = z.object({
-  creationProjectId: z.string().min(1),
-  name: z.string().min(1),
-  domain: z.string().nullable().optional(),
-  /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
-  ownerPlexonUserId: z.string().min(1).optional(),
-  platformCompanyId: z.string().min(1).optional(),
-});
+/** Accept canonical `spirionProjectId` or legacy `digProjectId` for one release. */
+const bodySchema = z
+  .object({
+    spirionProjectId: z.string().min(1).optional(),
+    digProjectId: z.string().min(1).optional(),
+    name: z.string().min(1),
+    domain: z.string().nullable().optional(),
+    /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
+    ownerPlexonUserId: z.string().min(1).optional(),
+    platformCompanyId: z.string().min(1).optional(),
+  })
+  .refine((b) => Boolean(b.spirionProjectId?.trim() || b.digProjectId?.trim()), {
+    message: 'spirionProjectId or digProjectId is required',
+    path: ['spirionProjectId'],
+  });
 
 async function bestEffortSiblingMirrors(
   platformProjectId: string,
@@ -46,23 +53,23 @@ async function bestEffortSiblingMirrors(
   checkionProjectId: string | null;
   audionProjectId: string | null;
   brandionProjectId: string | null;
-  spirionProjectId: string | null;
+  creationProjectId: string | null;
 }> {
   let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
   let audionId = await getExternalProjectId(platformProjectId, 'audion');
   let brandionId = await getExternalProjectId(platformProjectId, 'brandion');
-  let spirionId = await getExternalProjectId(platformProjectId, 'spirion');
+  let creationId = await getExternalProjectId(platformProjectId, 'creation');
   const missing: PlatformProductId[] = [];
   if (!checkionId) missing.push('checkion');
   if (!audionId) missing.push('audion');
   if (!brandionId) missing.push('brandion');
-  if (!spirionId) missing.push('spirion');
+  if (!creationId) missing.push('creation');
   if (missing.length === 0) {
     return {
       checkionProjectId: checkionId,
       audionProjectId: audionId,
       brandionProjectId: brandionId,
-      spirionProjectId: spirionId,
+      creationProjectId: creationId,
     };
   }
   try {
@@ -73,11 +80,11 @@ async function bestEffortSiblingMirrors(
     const checkion = results.find((r) => r.productId === 'checkion');
     const audion = results.find((r) => r.productId === 'audion');
     const brandion = results.find((r) => r.productId === 'brandion');
-    const spirion = results.find((r) => r.productId === 'spirion');
+    const creation = results.find((r) => r.productId === 'creation');
     if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
     if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
     if (brandion?.ok && brandion.externalProjectId) brandionId = brandion.externalProjectId;
-    if (spirion?.ok && spirion.externalProjectId) spirionId = spirion.externalProjectId;
+    if (creation?.ok && creation.externalProjectId) creationId = creation.externalProjectId;
   } catch {
     /* sibling mirrors can be repaired via sync later */
   }
@@ -85,7 +92,7 @@ async function bestEffortSiblingMirrors(
     checkionProjectId: checkionId,
     audionProjectId: audionId,
     brandionProjectId: brandionId,
-    spirionProjectId: spirionId,
+    creationProjectId: creationId,
   };
 }
 
@@ -123,9 +130,9 @@ export async function POST(request: Request) {
     return apiError(msg, API_STATUS.BAD_REQUEST);
   }
 
-  const creationId = parsed.creationProjectId.trim();
+  const spirionId = (parsed.spirionProjectId ?? parsed.digProjectId)!.trim();
 
-  const existingPlatformId = await findPlatformProjectIdByProductExternal('creation', creationId);
+  const existingPlatformId = await findPlatformProjectIdByProductExternal('spirion', spirionId);
   if (existingPlatformId) {
     const existingProject = await getPlatformProjectById(existingPlatformId);
     if (!existingProject) {
@@ -134,14 +141,14 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(existingPlatformId);
     const siblings = await bestEffortSiblingMirrors(
       existingPlatformId,
-      'plexon-creation-project-origin-idempotent'
+      'plexon-spirion-project-origin-idempotent'
     );
     return platformJson({
       platformProjectId: existingPlatformId,
       checkionProjectId: siblings.checkionProjectId,
       audionProjectId: siblings.audionProjectId,
       brandionProjectId: siblings.brandionProjectId,
-      spirionProjectId: siblings.spirionProjectId,
+      creationProjectId: siblings.creationProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -164,8 +171,8 @@ export async function POST(request: Request) {
     await ensureBindingPlaceholders(platformProjectId);
     await upsertPlatformProjectBinding({
       platformProjectId,
-      productId: 'creation',
-      externalProjectId: creationId,
+      productId: 'spirion',
+      externalProjectId: spirionId,
       syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC,
       syncMessage: null,
       lastSyncAt: new Date(),
@@ -173,7 +180,7 @@ export async function POST(request: Request) {
 
     const siblings = await bestEffortSiblingMirrors(
       platformProjectId,
-      'plexon-creation-project-origin'
+      'plexon-spirion-project-origin'
     );
 
     return platformJson(
@@ -182,7 +189,7 @@ export async function POST(request: Request) {
         checkionProjectId: siblings.checkionProjectId,
         audionProjectId: siblings.audionProjectId,
         brandionProjectId: siblings.brandionProjectId,
-        spirionProjectId: siblings.spirionProjectId,
+        creationProjectId: siblings.creationProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },
@@ -194,6 +201,6 @@ export async function POST(request: Request) {
     } catch {
       /* best-effort cleanup */
     }
-    return handleApiError(e, { context: 'creation-project-origin' });
+    return handleApiError(e, { context: 'spirion-project-origin' });
   }
 }

@@ -215,16 +215,31 @@ export const getCreationServiceApiUrl = (): string | null => {
   return process.env.CREATION_API_URL?.trim() || getCreationUrl();
 };
 
-export const getDigUrl = (): string | null => {
+/** Public SPIRION web origin. Prefer `NEXT_PUBLIC_SPIRION_URL`, fall back to legacy `NEXT_PUBLIC_DIG_URL`. */
+export const getSpirionUrl = (): string | null => {
   if (typeof process === 'undefined') return null;
-  return process.env.NEXT_PUBLIC_DIG_URL?.trim() || null;
+  return (
+    process.env.NEXT_PUBLIC_SPIRION_URL?.trim() ||
+    process.env.NEXT_PUBLIC_DIG_URL?.trim() ||
+    null
+  );
 };
 
-/** Service base for DIG project upsert (Wave dig; defaults to public web origin). */
-export const getDigServiceApiUrl = (): string | null => {
-  if (typeof process === 'undefined') return getDigUrl();
-  return process.env.DIG_API_URL?.trim() || getDigUrl();
+/** @deprecated Prefer getSpirionUrl — legacy DIG alias. */
+export const getDigUrl = (): string | null => getSpirionUrl();
+
+/** Service base for SPIRION project upsert (defaults to public web origin). Prefer `SPIRION_API_URL`, fall back to `DIG_API_URL`. */
+export const getSpirionServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getSpirionUrl();
+  return (
+    process.env.SPIRION_API_URL?.trim() ||
+    process.env.DIG_API_URL?.trim() ||
+    getSpirionUrl()
+  );
 };
+
+/** @deprecated Prefer getSpirionServiceApiUrl — legacy DIG alias. */
+export const getDigServiceApiUrl = (): string | null => getSpirionServiceApiUrl();
 
 export const getAudionServiceApiUrl = (): string => {
   const explicit =
@@ -354,7 +369,11 @@ export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
 export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
   '/api/platform/provisioning/creation-project-origin';
 
-/** Service-authenticated: DIG created a project first; PLEXON registers platform row + sibling mirrors. */
+/** Service-authenticated: SPIRION created a project first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_SPIRION_PROJECT_ORIGIN =
+  '/api/platform/provisioning/spirion-project-origin';
+
+/** @deprecated Prefer API_PLATFORM_PROVISIONING_SPIRION_PROJECT_ORIGIN — legacy DIG path still forwards. */
 export const API_PLATFORM_PROVISIONING_DIG_PROJECT_ORIGIN =
   '/api/platform/provisioning/dig-project-origin';
 

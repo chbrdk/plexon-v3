@@ -105,19 +105,19 @@ describe('collection projects domain (phase 0)', () => {
     expect(paths).toContain('provisioning/projects/{platformProjectId}/sync')
   })
 
-  it('phase 7 documents DIG bindings', () => {
+  it('phase 7 documents SPIRION bindings', () => {
     const spec = readFileSync(path.join(root, 'specs/domain/collection-projects.md'), 'utf8')
     const paths = readFileSync(path.join(root, 'knowledge/paths.md'), 'utf8')
     const cheatsheet = readFileSync(
       path.join(root, 'knowledge/coolify-plexon-v3-env-cheatsheet.md'),
       'utf8',
     )
-    expect(spec).toContain('DIG capability mirror')
-    expect(spec).toContain('dig-project-origin')
-    expect(spec).toContain('ensureBindingPlaceholders(checkion, audion, brandion, creation, dig)')
-    expect(paths).toContain('NEXT_PUBLIC_DIG_URL')
-    expect(paths).toContain('dig-project-origin')
-    expect(cheatsheet).toContain('4e. Wave E — DIG')
-    expect(cheatsheet).toContain('NEXT_PUBLIC_DIG_URL')
+    expect(spec).toContain('SPIRION capability mirror')
+    expect(spec).toContain('spirion-project-origin')
+    expect(spec).toContain('ensureBindingPlaceholders(checkion, audion, brandion, creation, spirion)')
+    expect(paths).toContain('NEXT_PUBLIC_SPIRION_URL')
+    expect(paths).toContain('spirion-project-origin')
+    expect(cheatsheet).toContain('4e. Wave E — SPIRION')
+    expect(cheatsheet).toContain('NEXT_PUBLIC_SPIRION_URL')
   })
 })

@@ -6,7 +6,7 @@ import {
 } from '@/lib/platform-project-sync-service';
 
 /** Products that receive Collection capability mirrors (not plexon/videon). */
-const MIRROR_PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'dig'];
+const MIRROR_PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion'];
 
 export const SYNC_ACCESSIBLE_MIRRORS_CAP = 50;
 

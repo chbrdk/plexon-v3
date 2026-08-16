@@ -45,23 +45,23 @@ async function bestEffortSiblingMirrors(
   checkionProjectId: string | null;
   audionProjectId: string | null;
   creationProjectId: string | null;
-  digProjectId: string | null;
+  spirionProjectId: string | null;
 }> {
   let checkionId = await getExternalProjectId(platformProjectId, 'checkion');
   let audionId = await getExternalProjectId(platformProjectId, 'audion');
   let creationId = await getExternalProjectId(platformProjectId, 'creation');
-  let digId = await getExternalProjectId(platformProjectId, 'dig');
-  const missing: Array<'checkion' | 'audion' | 'creation' | 'dig'> = [];
+  let spirionId = await getExternalProjectId(platformProjectId, 'spirion');
+  const missing: Array<'checkion' | 'audion' | 'creation' | 'spirion'> = [];
   if (!checkionId) missing.push('checkion');
   if (!audionId) missing.push('audion');
   if (!creationId) missing.push('creation');
-  if (!digId) missing.push('dig');
+  if (!spirionId) missing.push('spirion');
   if (missing.length === 0) {
     return {
       checkionProjectId: checkionId,
       audionProjectId: audionId,
       creationProjectId: creationId,
-      digProjectId: digId,
+      spirionProjectId: spirionId,
     };
   }
   try {
@@ -72,11 +72,11 @@ async function bestEffortSiblingMirrors(
     const checkion = results.find((r) => r.productId === 'checkion');
     const audion = results.find((r) => r.productId === 'audion');
     const creation = results.find((r) => r.productId === 'creation');
-    const dig = results.find((r) => r.productId === 'dig');
+    const spirion = results.find((r) => r.productId === 'spirion');
     if (checkion?.ok && checkion.externalProjectId) checkionId = checkion.externalProjectId;
     if (audion?.ok && audion.externalProjectId) audionId = audion.externalProjectId;
     if (creation?.ok && creation.externalProjectId) creationId = creation.externalProjectId;
-    if (dig?.ok && dig.externalProjectId) digId = dig.externalProjectId;
+    if (spirion?.ok && spirion.externalProjectId) spirionId = spirion.externalProjectId;
   } catch {
     /* sibling mirrors can be repaired via sync later */
   }
@@ -84,7 +84,7 @@ async function bestEffortSiblingMirrors(
     checkionProjectId: checkionId,
     audionProjectId: audionId,
     creationProjectId: creationId,
-    digProjectId: digId,
+    spirionProjectId: spirionId,
   };
 }
 
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       checkionProjectId: siblings.checkionProjectId,
       audionProjectId: siblings.audionProjectId,
       creationProjectId: siblings.creationProjectId,
-      digProjectId: siblings.digProjectId,
+      spirionProjectId: siblings.spirionProjectId,
       platformCompanyId: existingProject.companyId,
       ownerPlexonUserId: ownerId,
     });
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
         checkionProjectId: siblings.checkionProjectId,
         audionProjectId: siblings.audionProjectId,
         creationProjectId: siblings.creationProjectId,
-        digProjectId: siblings.digProjectId,
+        spirionProjectId: siblings.spirionProjectId,
         platformCompanyId: companyId,
         ownerPlexonUserId: ownerId,
       },
