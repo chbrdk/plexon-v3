@@ -27,6 +27,8 @@ export function resolveEqcPersonaChatEmbedHref(input: {
   audionProjectId?: string | null;
   webOrigin?: string;
   theme?: string | null;
+  /** Full persona chat (Tavus, inspect) — logged-in EQC overlay; public share stays guest. */
+  full?: boolean;
 }): string | null {
   const personaId = input.personaId?.trim() ?? '';
   const projectId = input.audionProjectId?.trim() ?? '';
@@ -34,7 +36,7 @@ export function resolveEqcPersonaChatEmbedHref(input: {
   return buildAudionAppUrl(input.webOrigin ?? getAudionWebOrigin(), '/chat/embed', {
     personaId,
     projectId,
-    embed: '1',
+    embed: input.full ? 'full' : '1',
     theme: input.theme?.trim() || undefined,
   });
 }

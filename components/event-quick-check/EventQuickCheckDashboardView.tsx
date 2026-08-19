@@ -18,6 +18,7 @@ import { EventQuickCheckDomainMagazineSection } from '@/components/event-quick-c
 import { EventQuickCheckDistributionsMagazineSection } from '@/components/event-quick-check/EventQuickCheckDistributionsMagazineSection'
 import { EventQuickCheckEeatMagazineSection } from '@/components/event-quick-check/EventQuickCheckEeatMagazineSection'
 import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoMagazineSection'
+import { geoMeasurementMagazineLabel } from '@/lib/geo/measurement'
 import { EventQuickCheckGeoRecommendationsMagazineSection } from '@/components/event-quick-check/EventQuickCheckGeoRecommendationsMagazineSection'
 import { EventQuickCheckInsightsMagazineSection } from '@/components/event-quick-check/EventQuickCheckInsightsMagazineSection'
 import { EventQuickCheckResultsMasthead } from '@/components/event-quick-check/EventQuickCheckResultsMasthead'
@@ -519,10 +520,19 @@ export function EventQuickCheckDashboardView({
 
       {layout.geoSpan > 0 ? (
         <Band title={EQC_REPORT_COPY.sectionGeo}>
-          <EventQuickCheckGeoMagazineSection
-            report={report}
-            showQuestions
-          />
+          {(report.geoLayers?.length ? report.geoLayers : [report.geo]).map((geo, index) => (
+            <EventQuickCheckGeoMagazineSection
+              key={geo.measurement ?? geo.jobId ?? index}
+              report={report}
+              geo={geo}
+              layerLabel={
+                report.geoLayers && report.geoLayers.length > 1 && geo.measurement
+                  ? geoMeasurementMagazineLabel(geo.measurement)
+                  : undefined
+              }
+              showQuestions={index === 0}
+            />
+          ))}
         </Band>
       ) : null}
 
@@ -634,6 +644,7 @@ export function EventQuickCheckDashboardView({
         personaId={persona?.id}
         personaName={persona?.name}
         audionProjectId={report.meta.audionProjectId ?? report.appendix.audionProjectId}
+        guestEmbed={readOnly}
       />
     </div>
   )

@@ -52,6 +52,19 @@ describe('resolveEqcPersonaChatEmbedHref (Wave C5 overlay)', () => {
     );
   });
 
+  it('uses embed=full for logged-in EQC overlay (Tavus + inspect)', () => {
+    expect(
+      resolveEqcPersonaChatEmbedHref({
+        personaId: 'persona-elena',
+        audionProjectId: 'audion-1',
+        webOrigin: 'https://audion-v3.example',
+        full: true,
+      })
+    ).toBe(
+      'https://audion-v3.example/chat/embed?personaId=persona-elena&projectId=audion-1&embed=full'
+    );
+  });
+
   it('returns null when ids missing', () => {
     expect(
       resolveEqcPersonaChatEmbedHref({

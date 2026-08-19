@@ -20,6 +20,8 @@ export type EqcPersonaChatOverlayProps = {
   personaId?: string | null
   personaName?: string | null
   audionProjectId?: string | null
+  /** Public share → guest embed; logged-in EQC → full chat incl. Tavus. */
+  guestEmbed?: boolean
 }
 
 export function EqcPersonaChatOverlay({
@@ -28,6 +30,7 @@ export function EqcPersonaChatOverlay({
   personaId,
   personaName,
   audionProjectId,
+  guestEmbed = false,
 }: EqcPersonaChatOverlayProps) {
   const [themeId, setThemeId] = useState<string | null>(null)
 
@@ -46,8 +49,9 @@ export function EqcPersonaChatOverlay({
         personaId,
         audionProjectId,
         theme: themeId,
+        full: !guestEmbed,
       }),
-    [personaId, audionProjectId, themeId],
+    [personaId, audionProjectId, themeId, guestEmbed],
   )
 
   const fullHref = useMemo(
@@ -100,7 +104,7 @@ export function EqcPersonaChatOverlay({
           display: 'block',
           background: 'transparent',
         }}
-        allow="clipboard-write"
+        allow="camera; microphone; fullscreen; display-capture; clipboard-write"
       />
     </ChatOverlay>
   )

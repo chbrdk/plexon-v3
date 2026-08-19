@@ -27,7 +27,7 @@ Audion owns persona system prompts, TG mode, conversation resume, and share. The
 ## Implement checklist (C5 overlay)
 
 1. [x] Magazine CTA **„Mit Persona sprechen“** opens overlay (`data-testid=eqc-persona-chat-cta`)
-2. [x] Embed href via `resolveEqcPersonaChatEmbedHref` → Audion `/chat/embed?personaId=&projectId=&embed=1` (+ optional `theme`)
+2. [x] Embed href via `resolveEqcPersonaChatEmbedHref` → Audion `/chat/embed?personaId=&projectId=&embed=1|full` (+ optional `theme`); logged-in EQC uses `embed=full` (Tavus + inspect)
 3. [x] Secondary / header action **„In Audion öffnen“** → `resolveEqcPersonaChatHref` deep-link
 4. [x] Hide CTA when `persona.id` or Audion `projectId` missing
 5. [x] Guest budget constants documented (Audion `guest-budget.ts` + paths knowledge)
