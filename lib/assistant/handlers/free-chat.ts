@@ -8,13 +8,13 @@ import { uiLayoutToPlainText } from '@/lib/assistant/ui-blocks/to-plain-text';
 import { recordAssistantUsageEvent } from '@/lib/assistant/usage';
 import { listUserCompanies } from '@/lib/assistant/user-eligibility';
 import { getUserProductEntitlementsMap } from '@/lib/db/product-entitlements';
-import { getEchonMcpUrl } from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
 import {
   resolveUseAudionMcp,
   resolveUseBrandionMcp,
   resolveUseCheckionMcp,
   resolveUseCreationMcp,
+  resolveUseEchonMcp,
 } from '@/lib/assistant/product-mcp-gate';
 import {
   emitPhase,
@@ -35,7 +35,8 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     entitlements.checkion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
     entitlements.audion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
     entitlements.brandion?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
-    entitlements.creation?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
+    entitlements.creation?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE ||
+    entitlements.echon?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE;
   const useCheckionMcp = resolveUseCheckionMcp({
     checkionEntitlement: entitlements.checkion,
     pageContext,
@@ -46,8 +47,11 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     pageContext,
     hasAnyActiveEntitlement,
   });
-  const useEchonMcp =
-    Boolean(getEchonMcpUrl()) && (useCheckionMcp || useAudionMcp);
+  const useEchonMcp = resolveUseEchonMcp({
+    echonEntitlement: entitlements.echon,
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
   const useBrandionMcp = resolveUseBrandionMcp({
     brandionEntitlement: entitlements.brandion,
     pageContext,

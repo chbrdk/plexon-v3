@@ -126,6 +126,9 @@ const MARKET_PATTERNS = [
   /\bechon\b/i,
   /\bresearch\b/i,
   /\brecherchier/i,
+  /\bforesight\b/i,
+  /\bbriefing\b/i,
+  /\bmomentum\b/i,
 ];
 
 function hasMcp(input: PlannerInput): boolean {
@@ -485,9 +488,12 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'audion_ux_journey',
   'audion_chat',
   'audion_documents',
+  'echon_ops',
   'echon_research',
   'echon_signals',
   'echon_waves',
+  'echon_foresight',
+  'echon_corpus',
   'brandion_guidelines',
   'brandion_tokens',
   'creation_library',
@@ -542,7 +548,7 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_research, echon_signals, echon_waves, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -610,7 +616,7 @@ export async function planAssistantTurn(
 
 export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
   const writeToolsNote = plan.allowWriteTools
-    ? '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start (Bestätigung kann nötig sein).'
+    ? '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein).'
     : '';
   return `
 ## Ausführungsplan (Planner)

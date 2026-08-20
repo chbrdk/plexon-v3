@@ -1,4 +1,10 @@
-import { getAudionMcpUrl, getBrandionMcpUrl, getCheckionMcpUrl, getCreationMcpUrl } from '@/lib/constants';
+import {
+  getAudionMcpUrl,
+  getBrandionMcpUrl,
+  getCheckionMcpUrl,
+  getCreationMcpUrl,
+  getEchonMcpUrl,
+} from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
@@ -6,7 +12,7 @@ export type ProductMcpEntitlementRow = {
   status?: string | null;
 } | null | undefined;
 
-export type AssistantProductMcpId = 'checkion' | 'audion' | 'brandion' | 'creation';
+export type AssistantProductMcpId = 'checkion' | 'audion' | 'brandion' | 'creation' | 'echon';
 
 /**
  * Free-chat MCP gate: URL must be set, then any of:
@@ -26,7 +32,14 @@ export function resolveUseProductMcp(input: {
   if (input.productEntitlement?.status === PLATFORM_ENTITLEMENT_STATUS.ACTIVE) return true;
   const host = input.pageContext?.product;
   if (host === input.product) return true;
-  if (host === 'plexon' || host === 'audion' || host === 'checkion' || host === 'brandion' || host === 'creation') {
+  if (
+    host === 'plexon' ||
+    host === 'audion' ||
+    host === 'checkion' ||
+    host === 'brandion' ||
+    host === 'creation' ||
+    host === 'echon'
+  ) {
     return true;
   }
   if (input.hasAnyActiveEntitlement) return true;
@@ -88,6 +101,21 @@ export function resolveUseCreationMcp(input: {
     product: 'creation',
     mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getCreationMcpUrl(),
     productEntitlement: input.creationEntitlement,
+    pageContext: input.pageContext,
+    hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
+  });
+}
+
+export function resolveUseEchonMcp(input: {
+  echonEntitlement?: ProductMcpEntitlementRow;
+  pageContext?: Pick<AssistantPageContext, 'product'> | null;
+  hasAnyActiveEntitlement?: boolean;
+  mcpUrl?: string | undefined;
+}): boolean {
+  return resolveUseProductMcp({
+    product: 'echon',
+    mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getEchonMcpUrl(),
+    productEntitlement: input.echonEntitlement,
     pageContext: input.pageContext,
     hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
   });

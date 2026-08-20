@@ -109,16 +109,16 @@ export async function buildEchonIntegrationContextBlock(input: {
   const diag = getEchonUrlDiagnostics();
   if (!input.useEchonMcp) {
     return `## ECHON (Markt-Intelligence)
-- MCP-Tools: **deaktiviert** (ECHON_MCP_URL fehlt oder kein CHECKION/AUDION-Entitlement)`;
+- MCP-Tools: **deaktiviert** (ECHON_MCP_URL fehlt oder Gate resolveUseEchonMcp greift nicht)`;
   }
   const probe = await probeEchonApiHealth();
   const lines = [
     '## ECHON (Markt-Intelligence)',
     `- MCP: aktiv (${diag.mcpUrlPrefix ?? '?'})`,
     `- API: ${diag.apiUrlPrefix}${probe.ok ? ' ✓' : ' ✗'}`,
-    '- Rolle: externe Markt-Signale, Waves, Research — **nicht** Site-Qualität (das ist CHECKION)',
+    '- Rolle: externe Markt-Signale, Waves, Foresight, Research — **nicht** Site-Qualität (das ist CHECKION)',
     '- Workflow: ECHON Markt recherchieren → Erkenntnisse in AUDION Zielgruppen ableiten',
-    '- Tools: echon_signals_list, echon_waves_list (schnell); echon_research_chat (sync, fast); echon_research_run_start (async, Minuten, Bestätigung)',
+    '- Tools: echon_signals_list, echon_waves_list, echon_foresight_* (schnell); echon_research_chat (sync); echon_research_run_start / echon_signal_ingest / echon_waves_detect (Bestätigung)',
     '- project_id für AUDION-Tools: **audionProjectId** aus Projektkontext (UUID), nicht platformProjectId',
   ];
   if (probe.hint) lines.push(`- Hinweis: ${probe.hint}`);

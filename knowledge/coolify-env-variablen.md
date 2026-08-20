@@ -120,11 +120,11 @@ MX/SPF/DKIM für eure Domain setzt ihr dort, wo die **DNS-Zone** liegt (Registra
 
 | Variable | Pflicht | Beschreibung |
 |----------|---------|--------------|
-| `ECHON_MCP_URL` | Nein | MCP für Assistant. Intern: `http://echon-mcp:3101`. |
-| `ECHON_API_URL` | Empfohlen | FastAPI-Basis für Health-Probe im Assistant. Intern: `http://echon-v2-api:8000`. |
-| `ECHON_SERVICE_TOKEN` | Nein | Bearer für ECHON API (falls Auth aktiv). |
+| `ECHON_MCP_URL` | Nein | MCP für Assistant. Intern: `http://echon-mcp:3101`. Spec: `specs/domain/assistant-echon-mcp.md`. |
+| `ECHON_API_URL` | Empfohlen | FastAPI-Basis für Health-Probe im Assistant (v3). |
+| `ECHON_SERVICE_TOKEN` | Nein | Nicht auf Plexon nötig für MCP-Calls; Token lebt auf echon-api + echon-mcp. |
 
-PLEXON aktiviert ECHON-MCP automatisch, wenn `ECHON_MCP_URL` gesetzt ist **und** der Nutzer CHECKION- oder AUDION-Entitlement hat.
+PLEXON aktiviert ECHON-MCP, wenn `ECHON_MCP_URL` gesetzt ist **und** Gate `resolveUseEchonMcp` greift (Entitlement `echon`, Host-Produkt/pageContext, oder Sibling-Entitlement).
 
 ### BRANDION MCP (Guidelines / Design Tokens, Assistant)
 

@@ -18,9 +18,12 @@ export type ToolFamily =
   | 'audion_ux_journey'
   | 'audion_chat'
   | 'audion_documents'
+  | 'echon_ops'
   | 'echon_research'
   | 'echon_signals'
   | 'echon_waves'
+  | 'echon_foresight'
+  | 'echon_corpus'
   | 'brandion_guidelines'
   | 'brandion_tokens'
   | 'creation_library'
@@ -83,9 +86,12 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   audion_journey: [/^audion_journey/],
   audion_chat: [/^audion_chat/],
   audion_documents: [/^audion_documents_/],
+  echon_ops: [/^echon_health$/, /^echon_pipeline_/, /^echon_workers_/],
   echon_research: [/^echon_research/],
   echon_signals: [/^echon_signals?_/, /^echon_signal_/],
   echon_waves: [/^echon_waves?_/, /^echon_wave_/],
+  echon_foresight: [/^echon_foresight_/],
+  echon_corpus: [/^echon_sources_/, /^echon_industries_/],
   brandion_guidelines: [
     /^brandion_health$/,
     /^brandion_guidelines_/,
@@ -99,7 +105,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
 };
 
 const DESTRUCTIVE = /(?:^|_)(delete|revoke)(?:_|$)/i;
-const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun)(?:_|$)/i;
+const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS) as [ToolFamily, RegExp[]][]) {
@@ -141,6 +147,12 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'creation_library',
   'creation_compositions',
   'creation_projects',
+  'echon_ops',
+  'echon_research',
+  'echon_signals',
+  'echon_waves',
+  'echon_foresight',
+  'echon_corpus',
 ];
 
 export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
@@ -188,9 +200,12 @@ export const UX_JOURNEY_FAMILIES: ToolFamily[] = [
 ];
 
 export const ECHON_MARKET_FAMILIES: ToolFamily[] = [
+  'echon_ops',
   'echon_research',
   'echon_signals',
   'echon_waves',
+  'echon_foresight',
+  'echon_corpus',
 ];
 
 export const ECHON_TO_AUDIENCE_FAMILIES: ToolFamily[] = [

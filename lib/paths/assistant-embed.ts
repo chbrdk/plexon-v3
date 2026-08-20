@@ -20,6 +20,7 @@ export type AssistantEmbedProduct =
   | 'checkion'
   | 'brandion'
   | 'creation'
+  | 'echon'
   | 'spirion'
   | 'unknown'
 
@@ -41,6 +42,7 @@ export function normalizeAssistantEmbedProduct(raw: string | null | undefined): 
     value === 'checkion' ||
     value === 'brandion' ||
     value === 'creation' ||
+    value === 'echon' ||
     value === 'spirion'
   ) {
     return value

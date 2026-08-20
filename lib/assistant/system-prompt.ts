@@ -54,7 +54,7 @@ MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - checkion.scans_list / scans_domain_list: limit ≤ 10.
 - audion.target_group_knowledge_chunks nur gezielt; lade nie alle Chunks aller Zielgruppen auf einmal.
 - Zielgruppen/Personas **anlegen**: audion_target_group_create, audion_persona_create (Schreib-Tools; ggf. Nutzerbestätigung).
-- Markt/Signale: echon_signals_list, echon_waves_list (schnell); echon_research_chat (kurz); echon_research_run_start nur mit Bestätigung (dauert Minuten).
+- Markt/Signale: echon_signals_list, echon_waves_list, echon_foresight_* (schnell); echon_research_chat (kurz); echon_research_run_start / echon_signal_ingest / echon_waves_detect nur mit Bestätigung.
 - Cross-Workflow: CHECKION (eigene Site) → ECHON (Markt) → AUDION (Zielgruppen ableiten).
 - Vermeide wiederholte Tool-Aufrufe mit denselben Parametern.`;
 

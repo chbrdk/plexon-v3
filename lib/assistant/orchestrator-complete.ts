@@ -103,6 +103,8 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /geo_eeat_start$/,
   /target_group_create$/,
   /research_run_start$/,
+  /signal_ingest$/,
+  /waves_detect$/,
   /project_create$/,
 ];
 
