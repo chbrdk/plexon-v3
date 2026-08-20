@@ -1,6 +1,6 @@
 # Coolify deploy via API
 
-Stand: 2026-08-10
+Stand: 2026-08-17
 
 Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify REST API.
 
@@ -9,6 +9,9 @@ Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify RE
 | API base | `https://coolify.plygrnd.tech/api/v1` |
 | Auth | Bearer token (same as Cursor MCP Coolify header in `~/.cursor/mcp.json`) |
 | Endpoint | `POST /deploy` body `{ "uuid": "<app-uuid>", "force": true }` |
+| Auto-deploy PATCH | `PATCH /applications/{uuid}` `{ "is_auto_deploy_enabled": true }` (Storybook `rtxcfh4gtxi6yba5l70fu177` + CREATION `uk1t9tnsqo65vlpzo2vwq0u2`, 200). This Coolify API rejects `is_preview_deployments_enabled` on PATCH — toggle PR previews in the GitHub App source UI (`preview_url_template` is already `{{pr_id}}.{{domain}}`). |
+
+Force-deploy is fallback when a GitHub webhook missed. Default for Storybook (`rtxcfh4gtxi6yba5l70fu177`) and CREATION (`uk1t9tnsqo65vlpzo2vwq0u2`) is auto-deploy on `main`. Never commit the API token.
 
 ## Staging app UUIDs
 
@@ -23,6 +26,8 @@ Coolify MCP (`user-coolify`) is **read-only**. Deploys go through the Coolify RE
 | brandion-mcp | `g79ues4e48rh8wq6g3jrabpv` | https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech |
 | audion-mcp | `oswkso8os4wc0o4soosgwwcc` | https://mcp-audion.projects-a.plygrnd.tech |
 | creation-mcp | `j1pmt4en25da2yp40f4827d7` | https://j1pmt4en25da2yp40f4827d7.projects-a.plygrnd.tech |
+| echon-mcp | `rgb7mzqnbi0n9qskbcp1tupk` | https://rgb7mzqnbi0n9qskbcp1tupk.projects-a.plygrnd.tech |
+| echon-v3 | `wckcahadnuy7vv4yrjxf6fbm` | https://echon-v3.projects-a.plygrnd.tech |
 
 ## Smoke after plexon deploy
 
