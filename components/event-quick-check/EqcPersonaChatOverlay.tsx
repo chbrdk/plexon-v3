@@ -5,13 +5,15 @@
  * Spec: knowledge/eqc-persona-chat.md · audion-v3/specs/domain/chat-embed.md
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, ChatOverlay } from '@msqdx/ui'
 import {
   resolveEqcPersonaChatEmbedHref,
   resolveEqcPersonaChatHref,
 } from '@/lib/assistant/event-quick-check/eqc-persona-chat-href'
+import { postAssistantHostMessage } from '@/lib/assistant/embed-protocol'
 import { readDocumentThemeId } from '@/lib/assistant/embed-theme'
+import { getAudionWebOrigin } from '@/lib/constants'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 
 export type EqcPersonaChatOverlayProps = {
@@ -32,7 +34,18 @@ export function EqcPersonaChatOverlay({
   audionProjectId,
   guestEmbed = false,
 }: EqcPersonaChatOverlayProps) {
-  const [themeId, setThemeId] = useState<string | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [themeId, setThemeId] = useState<string | null>(() =>
+    typeof document !== 'undefined' ? readDocumentThemeId() : null,
+  )
+
+  const audionOrigin = useMemo(() => {
+    try {
+      return new URL(getAudionWebOrigin()).origin
+    } catch {
+      return ''
+    }
+  }, [])
 
   useEffect(() => {
     const sync = () => setThemeId(readDocumentThemeId())
@@ -42,6 +55,16 @@ export function EqcPersonaChatOverlay({
     observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
     return () => observer.disconnect()
   }, [])
+
+  const postThemeToEmbed = () => {
+    if (!themeId || !audionOrigin) return
+    const frame = iframeRef.current?.contentWindow
+    if (!frame) return
+    postAssistantHostMessage(frame, audionOrigin, {
+      type: 'assistant:theme',
+      themeId,
+    })
+  }
 
   const embedHref = useMemo(
     () =>
@@ -53,6 +76,11 @@ export function EqcPersonaChatOverlay({
       }),
     [personaId, audionProjectId, themeId, guestEmbed],
   )
+
+  useEffect(() => {
+    if (!open) return
+    postThemeToEmbed()
+  }, [open, themeId, audionOrigin])
 
   const fullHref = useMemo(
     () =>
@@ -92,8 +120,10 @@ export function EqcPersonaChatOverlay({
       }
     >
       <iframe
+        ref={iframeRef}
         title={title}
         src={open ? embedHref : undefined}
+        onLoad={postThemeToEmbed}
         className="plexon-eqc-persona-chat-iframe"
         data-testid="eqc-persona-chat-iframe"
         style={{
