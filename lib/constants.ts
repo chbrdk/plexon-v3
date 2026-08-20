@@ -198,6 +198,15 @@ export const getBrandionUrl = (): string | null => {
   return process.env.NEXT_PUBLIC_BRANDION_URL?.trim() || null;
 };
 
+/** ECHON v3 product UI (federation staging). */
+export const getEchonUrl = (): string | null => {
+  if (typeof process === 'undefined') return null;
+  return (
+    process.env.NEXT_PUBLIC_ECHON_URL?.trim() ||
+    'https://echon-v3.projects-a.plygrnd.tech'
+  );
+};
+
 /** Service base for BRANDION project upsert (defaults to public web origin). */
 export const getBrandionServiceApiUrl = (): string | null => {
   if (typeof process === 'undefined') return getBrandionUrl();

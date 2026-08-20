@@ -3,6 +3,7 @@ import {
   getBrandionUrl,
   getCheckionUrl,
   getCreationUrl,
+  getEchonUrl,
   getSpirionUrl,
   getVideonUrl,
   PATH_ASSISTANT,
@@ -124,6 +125,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const brandionUrl = getBrandionUrl();
   const creationUrl = getCreationUrl();
   const spirionUrl = getSpirionUrl();
+  const echonUrl = getEchonUrl();
 
   return [
     {
@@ -197,6 +199,39 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
         { id: 'audion-personas', labelKey: 'dashboard.entry.personas', href: joinUrl(audionBaseUrl, '/admin/personas') ?? audionAdminUrl, openInNewTab: true },
         { id: 'audion-projects', labelKey: 'dashboard.entry.projects', href: joinUrl(audionBaseUrl, '/admin/projects') ?? audionAdminUrl, openInNewTab: true },
         { id: 'audion-chat', labelKey: 'dashboard.entry.chat', href: joinUrl(audionBaseUrl, '/chat') ?? audionAdminUrl, openInNewTab: true },
+      ],
+      defaultAccess: 'granted',
+    },
+    {
+      id: 'echon',
+      name: 'ECHON',
+      descriptionKey: 'dashboard.productEchonDescription',
+      lifecycle: echonUrl ? 'active' : 'planned',
+      surface: 'federated',
+      promoted: true,
+      primaryActionKey: 'dashboard.openEchon',
+      homeUrl: echonUrl,
+      loginUrl: joinUrl(echonUrl, '/login'),
+      healthUrl: joinUrl(echonUrl, '/health'),
+      capabilities: [
+        'dashboard.capabilityCentralIdentity',
+        'dashboard.capabilityUsage',
+        'dashboard.capabilityFutureRegistry',
+      ],
+      entryPoints: [
+        { id: 'echon-home', labelKey: 'dashboard.entry.home', href: echonUrl ?? '#', openInNewTab: true },
+        {
+          id: 'echon-signals',
+          labelKey: 'dashboard.entry.signals',
+          href: joinUrl(echonUrl, '/signals') ?? echonUrl ?? '#',
+          openInNewTab: true,
+        },
+        {
+          id: 'echon-settings',
+          labelKey: 'dashboard.entry.settings',
+          href: joinUrl(echonUrl, '/settings') ?? echonUrl ?? '#',
+          openInNewTab: true,
+        },
       ],
       defaultAccess: 'granted',
     },
