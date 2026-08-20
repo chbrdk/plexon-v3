@@ -16,4 +16,12 @@ describe('EqcPersonaChatOverlay (Wave C6 native)', () => {
     expect(src).toContain('guestMode={guestEmbed}');
     expect(src).toContain('eqc-persona-chat-open-audion');
   });
+
+  it('gives Tavus video iframe min-height 80vh', () => {
+    const css = readFileSync(
+      path.join(root, 'components/persona-chat/persona-chat.css'),
+      'utf8',
+    );
+    expect(css).toMatch(/\.plexon-tavus-video-panel iframe\s*\{[^}]*min-height:\s*80vh/s);
+  });
 });
