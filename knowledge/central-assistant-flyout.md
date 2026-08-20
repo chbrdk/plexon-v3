@@ -4,7 +4,7 @@ Stand: 2026-08-10 (hybrid restyle)
 
 ## Summary
 
-Cross-app **platform Assistant** as a dock-end chat flyout (`min(32rem)`). **Hybrid delivery:** same-origin Plexon mounts `AssistantChat` in-process; product apps iframe Plexon `/assistant/embed` with theme sync. Audion persona chat stays separate — EQC hosts Audion `/chat/embed` in its own `ChatOverlay` (`knowledge/eqc-persona-chat.md`).
+Cross-app **platform Assistant** as a dock-end chat flyout (`min(32rem)`). **Hybrid delivery:** same-origin Plexon mounts `AssistantChat` in-process; product apps iframe Plexon `/assistant/embed` with theme sync. Audion persona chat stays separate — EQC hosts native `PersonaChatWorkspace` in its own `ChatOverlay` with Audion API via BFF (`knowledge/eqc-persona-chat.md` Wave C6).
 
 ## Specs
 

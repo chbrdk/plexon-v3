@@ -55,10 +55,10 @@
 
 | Item | Spec |
 |------|------|
-| Decision | Audion SoT via iframe overlay — not a second chat stack — `eqc-as-collection-flow.md` § Persona talk · `capability-catalog.md` Wave C5 · Audion `chat-embed.md` |
-| UI | Persona band: primary CTA opens `EqcPersonaChatOverlay` (`data-testid=eqc-persona-chat-cta`); secondary deep-link |
-| URL | Embed: `resolveEqcPersonaChatEmbedHref` → `/chat/embed?…`; fallback: `resolveEqcPersonaChatHref` → `/chat?…` |
-| Surfaces | Authenticated magazine + public `/share/quick-check/[token]` |
+| Decision | Audion API SoT via native overlay (Wave C6) — Plexon BFF proxies; not a second chat stack — `eqc-as-collection-flow.md` § Persona talk · `capability-catalog.md` Wave C5/C6 · Audion `chat-embed.md` |
+| UI | Persona band: primary CTA opens `EqcPersonaChatOverlay` → `PersonaChatWorkspace` (`data-testid=eqc-persona-chat-cta`); secondary deep-link |
+| API | `/api/capabilities/audion/chat/stream` · share personas · Tavus · tool decisions → Audion platform `/api` |
+| Surfaces | Authenticated magazine (`guestEmbed=false`, Tavus+inspect) + public share (`guestEmbed=true`, guest budget) |
 | Tests | `__tests__/eqc-persona-chat-href.test.ts` (+ overlay CTA smoke) |
 | Knowledge | `knowledge/eqc-persona-chat.md` |
 | Still open | Optional Assistant chip; optional `audion.persona_chat` catalog stub |

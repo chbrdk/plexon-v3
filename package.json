@@ -16,6 +16,7 @@
     "generate:ecosystem-pptx": "node scripts/generate-plexon-ecosystem-pptx.mjs"
   },
   "dependencies": {
+    "@audion-v3/contracts": "file:../audion-v3/packages/contracts",
     "@msqdx/ui": "file:../msqdx-ui/packages/ui",
     "@msqdx/ui-tokens": "file:../msqdx-ui/packages/ui-tokens",
     "@react-pdf/renderer": "^4.5.1",

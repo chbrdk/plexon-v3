@@ -331,6 +331,21 @@ MUSS: Promote never creates a node for `brandion.tokens_list` until that capabil
 
 **Exit:** Public share + logged-in magazine open overlay chat without a second stack; budget hard-stop works; deep-link fallback remains. Spec companions: `eqc-as-collection-flow.md` · `ui-migrate-event-quick-check.md` · `knowledge/eqc-persona-chat.md` · Audion `chat-embed.md`.
 
+### Wave C6 — Native EQC persona chat (Audion API SoT)
+
+**Decision (2026-08-20):** Replace iframe host with native `PersonaChatWorkspace` in Plexon. Audion remains SoT for stream, share persona, Tavus, and inspect tool execution. Plexon BFF proxies same-origin under `/api/capabilities/audion/*`.
+
+| Surface | Behavior |
+|---------|----------|
+| EQC magazine + public share | CTA → `EqcPersonaChatOverlay` → `PersonaChatWorkspace` (not iframe) |
+| API | Plexon BFF → Audion `/api/chat/stream`, `/api/share/personas/*`, `/api/chat/tavus/session`, tool decisions |
+| Guest budget | Unchanged — Audion enforces; Plexon forwards `guestSessionId` + sets host cookie |
+| Logged-in EQC | `guestEmbed={false}` — Tavus + inspect; still guest stream budget unless user opens full Audion |
+| Fallback | **„In Audion öffnen“** → `resolveEqcPersonaChatHref` |
+| Audion `/chat/embed` | Optional public fallback; not primary EQC host |
+
+**Exit:** Native overlay chat works on staging; tests green; Audion API unchanged. Spec: `knowledge/eqc-persona-chat.md`.
+
 ## Relation to existing systems
 
 | System | Stays | Changes |

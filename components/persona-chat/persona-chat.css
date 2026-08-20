@@ -1,0 +1,106 @@
+/* Native EQC persona chat — Wave C6. Shared chat chrome from @msqdx/ui chat.css */
+
+.plexon-persona-chat-workspace {
+  display: flex;
+  flex-direction: column;
+  min-height: 28rem;
+  height: 100%;
+  gap: 0.75rem;
+}
+
+.plexon-persona-chat-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0 0.25rem;
+}
+
+.plexon-persona-chat-badge {
+  font-size: var(--type-xs);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.1rem 0.45rem;
+}
+
+.plexon-persona-chat-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.plexon-persona-chat-panel .chat-turns {
+  flex: 1;
+  min-height: 12rem;
+  overflow: auto;
+}
+
+.plexon-persona-chat-composer-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.plexon-persona-chat-modality-btn.is-active {
+  color: var(--accent);
+}
+
+.plexon-persona-chat-modality-note,
+.plexon-persona-chat-guest-hint {
+  margin: 0;
+  font-size: var(--type-sm);
+  color: var(--muted);
+}
+
+.plexon-persona-chat-tool-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+}
+
+.plexon-persona-chat-tool-title {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.plexon-persona-chat-tool-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.plexon-persona-chat-tool-progress {
+  margin: 0.35rem 0;
+  padding-left: 1.1rem;
+  font-size: var(--type-sm);
+  color: var(--muted);
+}
+
+.plexon-tavus-video-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 14rem;
+}
+
+.plexon-tavus-video-panel iframe {
+  width: 100%;
+  min-height: 14rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.plexon-tavus-video-caption {
+  margin: 0;
+  font-size: var(--type-sm);
+  color: var(--muted);
+}
+
+.plexon-tavus-video-panel--empty {
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
