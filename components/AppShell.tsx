@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react'
 import type { ReactNode } from 'react'
 import {
   AppFrame,
-  BrandCorner,
   MsqdxLogoMark,
   NavRail,
   PageTitle,
@@ -46,6 +45,7 @@ import {
   PATH_SHARE_REPORTS,
 } from '@/lib/constants'
 import { USER_ROLE } from '@/lib/db/schema'
+import { ShellBrandCorner } from '@/components/ShellBrandCorner'
 import { useI18n } from '@/components/i18n/I18nProvider'
 
 const AUTH_PATHS = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD]
@@ -239,7 +239,7 @@ export function AppShell({
             ]}
           />
         }
-        brandCorner={<BrandCorner label="PLEXON" />}
+        brandCorner={<ShellBrandCorner currentProductId="plexon" label="PLEXON" />}
         topbar={
           <>
             <div className="topbar-brand">{brandContent}</div>

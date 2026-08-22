@@ -1,8 +1,8 @@
 # App Shell
 
 **Status:** Accepted — 2026-07-31; Central Assistant flyout — 2026-08-10  
-**Implements:** `components/AppShell.tsx` · `components/PlatformAssistantHost.tsx` · `lib/shell-paths.ts`  
-**DS:** `AppFrame`, `NavRail`, `BrandCorner`, `PageTitle`, `ChatOverlay` from `@msqdx/ui`  
+**Implements:** `components/AppShell.tsx` · `components/ShellBrandCorner.tsx` · `components/PlatformAssistantHost.tsx` · `lib/shell-paths.ts`  
+**DS:** `AppFrame`, `NavRail`, `BrandCornerProductMenu`, `PageTitle`, `ChatOverlay` from `@msqdx/ui`  
 **Index:** `specs/domain/ui-migrate.md` · `specs/domain/central-assistant-flyout.md`
 
 ## Rules
@@ -10,6 +10,7 @@
 - Shared chrome only via `@msqdx/ui` (server barrel `lib/msqdx-ui.ts`, shell barrel `lib/msqdx-ui-shell.ts`).
 - Composition language: `app-frame`, atmospheric background, floating rail, top-right brand corner, quiet topbar.
 - Topbar: `PageTitle` + optional `TopStatus` / actions / `leading`.
+- **Brand corner:** `ShellBrandCorner` loads `GET /api/platform/products` and opens `BrandCornerProductMenu` on click (federated launch via `buildFederatedLaunchHref`).
 - Primary nav: Dashboard · Assistant · Event Quick Check · Products · Board (admin) · Admin (admin).
 - Settings rail footer: → `paths.routes.settings`; avatar from session display name.
 - No MUI and no `@msqdx/react`.
