@@ -114,6 +114,31 @@ describe('capability C4 executors + adapters', () => {
     expect(resolveCatalogPath(ctx, 'geo.geoFitness')).toBe(0.55);
   });
 
+  it('geo_job capability forwards measurement=live', async () => {
+    vi.mocked(runCheckionGeoJobV3).mockResolvedValue({
+      ok: true,
+      job: {
+        id: 'geo-live',
+        projectId: 'ck-1',
+        url: 'https://geo.test',
+        status: 'completed',
+        overallScore: 50,
+        citedShare: 0.2,
+        geoFitness: 0.3,
+      },
+      signals: { citedShare: 0.2, geoFitness: 0.3 },
+    });
+
+    await executeCheckionGeoJobCapability(
+      { url: 'https://geo.test', measurement: 'live' },
+      { source: 'flow', checkionProjectId: 'ck-1', platformProjectId: 'pp-1' }
+    );
+
+    expect(runCheckionGeoJobV3).toHaveBeenCalledWith(
+      expect.objectContaining({ measurement: 'live', url: 'https://geo.test' })
+    );
+  });
+
   it('persona_bootstrap capability writes persona.* catalog', async () => {
     vi.mocked(runPersonaBootstrap).mockResolvedValue({
       ok: true,

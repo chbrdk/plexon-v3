@@ -10,6 +10,7 @@ import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-ch
 import { hydrateDomainScanPageCount } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import {
   geoJobFromCatalogBundle,
+  geoJobsFromCatalogBundle,
   hydrateGeoJobPreview,
 } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import {
@@ -33,6 +34,7 @@ import {
   resolveEventQuickCheckProfile,
   type EventQuickCheckDepth,
 } from '@/lib/paths/assistant-workflows';
+import { parseGeoMeasurementsOrDefaultEqc } from '@/lib/geo/measurement';
 import type {
   EventQuickCheckResult,
   EventQuickCheckRunMode,
@@ -398,6 +400,7 @@ export async function runEqcViaCollectionFlow(
     body.resumeFromNodeId = resumeFrom || 'n-confirm-geo';
     body.confirmKind = 'geo_queries';
     body.payload = options.geoQuestions;
+    body.measurements = parseGeoMeasurementsOrDefaultEqc(options.geoMeasurements);
     body.priorContext = options.eqcFlowState?.context ?? { outputs: {} };
   }
 
@@ -456,6 +459,15 @@ export async function runEqcViaCollectionFlow(
   );
   const geoJob = await hydrateGeoJobPreview(
     geoJobFromContext(outputs, result.lastRun)
+  );
+  const geoJobsRaw = geoJobsFromCatalogBundle(outputs.geo, result.lastRun.geoJobId);
+  const geoJobs = (
+    await Promise.all(
+      geoJobsRaw.map(async (layer) => ({
+        measurement: layer.measurement,
+        job: (await hydrateGeoJobPreview(layer.job)) ?? layer.job,
+      }))
+    )
   );
   const personaPreview = personaPreviewFromContext(outputs);
   const geoQuestionsByPersona = options.geoQuestionsByPersona?.length
@@ -690,6 +702,7 @@ export async function runEqcViaCollectionFlow(
     companyBrief,
     domainScan,
     geoJob,
+    geoJobs: geoJobs.length ? geoJobs : undefined,
     geoQuestions,
     geoQuestionsByPersona,
     personaPreview,

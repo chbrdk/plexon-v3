@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Field, Text, Textarea } from '@msqdx/ui';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
+import {
+  parseGeoMeasurementsOrDefaultEqc,
+  toggleGeoMeasurement,
+  type GeoMeasurement,
+} from '@/lib/geo/measurement';
 
 export type EventQuickCheckGeoQuestionsPanelProps = {
   questions: string[];
@@ -12,7 +17,12 @@ export type EventQuickCheckGeoQuestionsPanelProps = {
   hasPersona?: boolean;
   loading?: boolean;
   maxQuestions?: number;
-  onConfirm: (questions: string[], groups?: PersonaGeoQuestionGroup[]) => void;
+  defaultMeasurements?: GeoMeasurement[];
+  onConfirm: (
+    questions: string[],
+    groups?: PersonaGeoQuestionGroup[],
+    measurements?: GeoMeasurement[]
+  ) => void;
   onCancel?: () => void;
   cancelLabel?: string;
   confirmLabel?: string;
@@ -20,6 +30,26 @@ export type EventQuickCheckGeoQuestionsPanelProps = {
 };
 
 type GroupState = PersonaGeoQuestionGroup;
+
+const GEO_LAYER_CARDS: Array<{
+  id: GeoMeasurement;
+  label: string;
+  kicker: string;
+  deck: string;
+}> = [
+  {
+    id: 'recall',
+    label: EQC_PAGE_COPY.geoReviewMeasurementRecallLabel,
+    kicker: EQC_PAGE_COPY.geoReviewMeasurementRecallKicker,
+    deck: EQC_PAGE_COPY.geoReviewMeasurementRecallDeck,
+  },
+  {
+    id: 'live',
+    label: EQC_PAGE_COPY.geoReviewMeasurementLiveLabel,
+    kicker: EQC_PAGE_COPY.geoReviewMeasurementLiveKicker,
+    deck: EQC_PAGE_COPY.geoReviewMeasurementLiveDeck,
+  },
+];
 
 function flattenGroups(groups: GroupState[]): string[] {
   return groups.flatMap((g) => g.questions.map((q) => q.trim()).filter(Boolean));
@@ -31,6 +61,7 @@ export function EventQuickCheckGeoQuestionsPanel({
   hasPersona = true,
   loading = false,
   maxQuestions = 8,
+  defaultMeasurements,
   onConfirm,
   onCancel,
   cancelLabel,
@@ -40,6 +71,9 @@ export function EventQuickCheckGeoQuestionsPanel({
   const grouped = Boolean(groups?.length);
   const [flatItems, setFlatItems] = useState<string[]>(questions.length ? questions : ['']);
   const [groupItems, setGroupItems] = useState<GroupState[]>(groups ?? []);
+  const [measurements, setMeasurements] = useState<GeoMeasurement[]>(() =>
+    parseGeoMeasurementsOrDefaultEqc(defaultMeasurements)
+  );
 
   useEffect(() => {
     if (grouped && groups?.length) {
@@ -85,10 +119,14 @@ export function EventQuickCheckGeoQuestionsPanel({
         ...g,
         questions: g.questions.map((q) => q.trim()).filter(Boolean),
       }));
-      onConfirm(flattenGroups(nextGroups), nextGroups);
+      onConfirm(flattenGroups(nextGroups), nextGroups, measurements);
       return;
     }
-    onConfirm(flatItems.map((q) => q.trim()).filter(Boolean));
+    onConfirm(
+      flatItems.map((q) => q.trim()).filter(Boolean),
+      undefined,
+      measurements
+    );
   };
 
   return (
@@ -104,6 +142,38 @@ export function EventQuickCheckGeoQuestionsPanel({
             ? EQC_PAGE_COPY.geoReviewPersonaHint
             : EQC_PAGE_COPY.geoReviewFallbackHint}
       </Text>
+
+      <div className="plexon-eqc-stack-sm">
+        <Text role="label" as="h3">
+          {EQC_PAGE_COPY.geoReviewMeasurementTitle}
+        </Text>
+        <Text role="hint">{EQC_PAGE_COPY.geoReviewMeasurementLead}</Text>
+        <div className="plexon-eqc-geo-layer-grid" role="group" aria-label="GEO measurement">
+          {GEO_LAYER_CARDS.map((card) => {
+            const selected = measurements.includes(card.id);
+            return (
+              <button
+                key={card.id}
+                type="button"
+                role="checkbox"
+                aria-checked={selected}
+                aria-label={`${card.label}. ${card.deck}`}
+                className={
+                  selected
+                    ? 'plexon-eqc-geo-layer-tile plexon-eqc-geo-layer-tile--selected'
+                    : 'plexon-eqc-geo-layer-tile'
+                }
+                disabled={loading}
+                onClick={() => setMeasurements((prev) => toggleGeoMeasurement(prev, card.id))}
+              >
+                <span className="plexon-eqc-geo-layer-tile__kicker">{card.kicker}</span>
+                <span className="plexon-eqc-geo-layer-tile__label">{card.label}</span>
+                <span className="plexon-eqc-geo-layer-tile__deck">{card.deck}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {grouped
         ? groupItems.map((group, groupIndex) => (
@@ -163,10 +233,17 @@ export function EventQuickCheckGeoQuestionsPanel({
         </div>
       ) : null}
 
-      <Button variant="primary" onClick={handleConfirm} disabled={loading || totalCount < 1}>
+      <Button
+        variant="primary"
+        onClick={handleConfirm}
+        disabled={loading || totalCount < 1 || measurements.length < 1}
+      >
         {loading
           ? (confirmingLabel ?? EQC_PAGE_COPY.geoReviewConfirming)
-          : (confirmLabel ?? EQC_PAGE_COPY.geoReviewConfirm)}
+          : (confirmLabel ??
+            (measurements.length > 1
+              ? EQC_PAGE_COPY.geoReviewConfirmBoth
+              : EQC_PAGE_COPY.geoReviewConfirm))}
       </Button>
       {onCancel ? (
         <Button variant="link" onClick={onCancel} disabled={loading}>

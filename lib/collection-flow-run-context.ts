@@ -16,6 +16,11 @@ import {
   resolveTemplateString,
   toCatalogScalar,
 } from '@/lib/collection-flow-expression';
+import {
+  GEO_MEASUREMENT_DEFAULT,
+  parseGeoMeasurements,
+  type GeoMeasurement,
+} from '@/lib/geo/measurement';
 
 export const COLLECTION_FLOW_COMPARE_OPS = [
   'gte',
@@ -491,6 +496,9 @@ export function buildGeoCatalogBundle(input: {
   geoFitness: number | null;
   overallScore: number | null;
   url: string;
+  measurement?: string;
+  jobId?: string;
+  layers?: Array<Record<string, unknown>>;
   /** Full CHECKION GEO preview for magazine restore (models, answers, EEAT, …). */
   preview?: Record<string, unknown> | null;
 }): Record<string, unknown> {
@@ -500,6 +508,9 @@ export function buildGeoCatalogBundle(input: {
     geoFitness: input.geoFitness,
     overallScore: input.overallScore,
     url: input.url,
+    ...(input.measurement ? { measurement: input.measurement } : {}),
+    ...(input.jobId ? { jobId: input.jobId } : {}),
+    ...(input.layers?.length ? { layers: input.layers } : {}),
     ...(input.preview && typeof input.preview === 'object' ? { preview: input.preview } : {}),
   };
 }
@@ -612,9 +623,16 @@ export function buildPersonaCatalogBundle(input: {
   };
 }
 
-export function buildQueriesCatalogBundle(items: string[]): Record<string, unknown> {
+export function buildQueriesCatalogBundle(
+  items: string[],
+  extra?: { measurements?: string[] }
+): Record<string, unknown> {
   const cleaned = items.map((s) => String(s).trim()).filter(Boolean);
-  return { items: cleaned, text: cleaned.join('\n') };
+  return {
+    items: cleaned,
+    text: cleaned.join('\n'),
+    ...(extra?.measurements?.length ? { measurements: extra.measurements } : {}),
+  };
 }
 
 /**
@@ -635,6 +653,14 @@ export function resolveGeoJobQueriesFromContext(
     fromTemplate ||
     (typeof ctx.outputs.queries?.text === 'string' ? ctx.outputs.queries.text : '');
   return geoJobQueriesFromText(fromText);
+}
+
+export function resolveGeoJobMeasurementsFromContext(
+  ctx: CollectionFlowRunContext,
+  fallback: readonly GeoMeasurement[] = [GEO_MEASUREMENT_DEFAULT]
+): GeoMeasurement[] {
+  const parsed = parseGeoMeasurements(ctx.outputs.queries?.measurements);
+  return parsed.length ? parsed : [...fallback];
 }
 
 export function flattenContextForInspector(

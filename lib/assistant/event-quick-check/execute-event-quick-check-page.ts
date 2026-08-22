@@ -18,6 +18,7 @@ import {
   EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
+  EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY,
   EVENT_QUICK_CHECK_DEPTH_KEY,
   EVENT_QUICK_CHECK_TARGET_GROUP_COUNT_KEY,
   EVENT_QUICK_CHECK_PERSONA_COUNT_KEY,
@@ -57,6 +58,7 @@ import { resolveEventQuickCheckDeepScanStatus } from '@/lib/assistant/event-quic
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { EventQuickCheckResumeCheckpoint, EventQuickCheckCompetitorsCheckpoint } from '@/lib/assistant/event-quick-check/event-quick-check-checkpoint';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
+import { parseGeoMeasurementsOrDefaultEqc, type GeoMeasurement } from '@/lib/geo/measurement';
 import type { EventQuickCheckRunMode } from '@/lib/assistant/playbooks/run-event-quick-check';
 import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-quick-check';
 import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion-project-deep-scan-client';
@@ -106,6 +108,7 @@ export type ExecuteEventQuickCheckRunInput = {
   /** Set when resuming after user confirmed company brief. */
   companyBriefConfirmed?: EventQuickCheckCompanyBrief;
   geoQuestionsConfirmed?: string[];
+  geoMeasurementsConfirmed?: GeoMeasurement[];
   geoCompetitorsConfirmed?: string[];
   competitorsConfirmed?: string[];
   /** Resume Komplettscan after CHECKION deep scans finished. */
@@ -422,6 +425,9 @@ export async function executeEventQuickCheckRun(
       emit: input.emit,
       companyBrief: confirmedBrief,
       geoQuestions: confirmedGeoQuestions,
+      geoMeasurements: parseGeoMeasurementsOrDefaultEqc(
+        input.geoMeasurementsConfirmed ?? stored[EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY]
+      ),
       geoQuestionsByPersona: stored[EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY] as
         | PersonaGeoQuestionGroup[]
         | undefined,

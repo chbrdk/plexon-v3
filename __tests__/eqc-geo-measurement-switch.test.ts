@@ -12,6 +12,7 @@ describe('EQC GEO measurement switch', () => {
     );
     expect(panel).toContain('aria-label="GEO measurement"');
     expect(panel).toContain('role="checkbox"');
+    expect(panel).toContain('parseGeoMeasurementsOrDefaultEqc');
     expect(panel).toContain('toggleGeoMeasurement');
     expect(panel).toContain('onConfirm(flattenGroups(nextGroups), nextGroups, measurements)');
 
@@ -29,6 +30,7 @@ describe('EQC GEO measurement switch', () => {
       'utf8'
     );
     expect(execute).toContain('resolveGeoJobMeasurementsFromContext');
+    expect(execute).toContain('GEO_MEASUREMENT_DEFAULTS_EQC');
     expect(execute).toContain('for (const measurement of measurements)');
   });
 });

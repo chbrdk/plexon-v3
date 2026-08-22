@@ -64,7 +64,11 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 `human_confirm.confirmKind`: `brief` \| `competitors` \| `geo_queries` \| `deep_scan`.
 
-**GEO confirm (required):** Resume `geo_queries` writes `buildQueriesCatalogBundle(payload)` to catalog root `queries` **and** to the `suggest_queries` node alias (`n-suggest-q`). `geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` — confirmed `queries.items` win over `{{ $('n-suggest-q').json.text }}`. Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job.
+**GEO confirm (required):** Resume `geo_queries` writes `buildQueriesCatalogBundle(payload)` to catalog root `queries` **and** to the `suggest_queries` node alias (`n-suggest-q`). Sibling field `measurements` (`recall` | `live`, one or both) is stored on `queries.measurements` — never stuffed into the questions array. **EQC default when omitted:** `['recall', 'live']` (both layers). User may deselect one tile before confirm.
+
+`geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer. Magazine renders a GEO chapter per layer.
+
+The GEO-questions confirm panel **must** show the same layer switch as CHECKION `/scan` (multi-select). Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job(s).
 
 ## Template
 
@@ -93,4 +97,4 @@ Complete depth adds `competitors_suggest` + confirms and optional `human_confirm
 - `brief.displayName`, `brief.industry`, `brief.summary`, `brief.targetAudienceHint`, `brief.companyContext`
 - `competitors.items` (array)
 - `persona.id`, `persona.name`, `persona.segment`
-- `queries.items`, `queries.text` (joined lines for `geo_job.text`)
+- `queries.items`, `queries.text` (joined lines for `geo_job.text`), `queries.measurements` (`recall` | `live`[])

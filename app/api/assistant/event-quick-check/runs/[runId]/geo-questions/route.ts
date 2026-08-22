@@ -2,6 +2,7 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { confirmEventQuickCheckGeoQuestions } from '@/lib/assistant/event-quick-check/confirm-geo-questions';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
+import type { GeoMeasurement } from '@/lib/geo/measurement';
 
 export async function POST(
   request: Request,
@@ -12,7 +13,11 @@ export async function POST(
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);
 
   const { runId } = await ctx.params;
-  let body: { questions?: string[]; groups?: PersonaGeoQuestionGroup[] } = {};
+  let body: {
+    questions?: string[];
+    groups?: PersonaGeoQuestionGroup[];
+    measurements?: GeoMeasurement[];
+  } = {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -25,6 +30,7 @@ export async function POST(
       workflowRunId: runId,
       questions: body.questions,
       groups: body.groups,
+      measurements: body.measurements,
     });
     return Response.json(result);
   } catch (e) {

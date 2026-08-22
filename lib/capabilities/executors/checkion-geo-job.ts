@@ -16,6 +16,7 @@ import {
   runCheckionGeoJobV3,
   type CheckionGeoJobSummary,
 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import { parseGeoMeasurement } from '@/lib/geo/measurement';
 
 export type CheckionGeoJobPayload = {
   variant: 'flow' | 'agent';
@@ -71,6 +72,7 @@ export async function executeCheckionGeoJobCapability(
     companyName: companyName || undefined,
     queries: queries.length ? queries : undefined,
     includePageScan,
+    measurement: parseGeoMeasurement(input.measurement),
     ...(competitors?.length ? { competitors } : {}),
   });
 
@@ -93,6 +95,7 @@ export async function executeCheckionGeoJobCapability(
     geoFitness: job.geoFitness ?? null,
     overallScore: job.overallScore ?? null,
     url: job.url || url || '',
+    measurement: parseGeoMeasurement(input.measurement),
     preview: result.preview ? geoPreviewForCatalogBundle(result.preview) : null,
   });
 

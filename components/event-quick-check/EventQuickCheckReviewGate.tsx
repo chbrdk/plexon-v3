@@ -8,6 +8,7 @@ import { EventQuickCheckGeoQuestionsPanel } from '@/components/event-quick-check
 import { UiBlockSurface } from '@/components/assistant-ui/templates/UiBlockSurface';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
+import type { GeoMeasurement } from '@/lib/geo/measurement';
 import { maxGeoQuestionsForProfile } from '@/lib/assistant/event-quick-check/apply-geo-question-edits';
 import { resolveEventQuickCheckProfile } from '@/lib/paths/assistant-workflows';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
@@ -199,7 +200,11 @@ export function EventQuickCheckReviewGate({
   );
 
   const confirmGeoQuestions = useCallback(
-    async (questions: string[], groups?: PersonaGeoQuestionGroup[]) => {
+    async (
+      questions: string[],
+      groups?: PersonaGeoQuestionGroup[],
+      measurements?: GeoMeasurement[]
+    ) => {
       setConfirmLoading(true);
       setError(null);
       watchStream();
@@ -208,7 +213,7 @@ export function EventQuickCheckReviewGate({
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions, groups }),
+          body: JSON.stringify({ questions, groups, measurements }),
         });
         const result = (await res.json()) as { ok?: boolean; error?: string; report?: unknown };
         streamRef.current?.close();

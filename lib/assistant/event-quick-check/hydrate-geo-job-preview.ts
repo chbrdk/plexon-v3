@@ -1,6 +1,7 @@
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import { fetchCheckionGeoJobV3Preview } from '@/lib/integrations/checkion-geo-jobs-v3-client';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
+import { parseGeoMeasurement, type GeoMeasurement } from '@/lib/geo/measurement';
 
 function isRealGeoJobId(id: string | null | undefined): id is string {
   const t = id?.trim();
@@ -133,6 +134,26 @@ export function geoJobFromCatalogBundle(
   };
 
   return fromPreview ? mergeGeoPreviewIntoJob(thin, fromPreview) : thin;
+}
+
+export function geoJobsFromCatalogBundle(
+  bundle: Record<string, unknown> | null | undefined,
+  fallbackJobId?: string | null
+): Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }> {
+  const layers = Array.isArray(bundle?.layers) ? bundle.layers : [];
+  const fromLayers = layers
+    .map((row) => {
+      if (!row || typeof row !== 'object') return null;
+      const o = row as Record<string, unknown>;
+      const job = geoJobFromCatalogBundle(o, typeof o.jobId === 'string' ? o.jobId : fallbackJobId);
+      if (!job) return null;
+      return { measurement: parseGeoMeasurement(o.measurement), job };
+    })
+    .filter((x): x is { measurement: GeoMeasurement; job: GeoEeatJobPreview } => Boolean(x));
+  if (fromLayers.length) return fromLayers;
+  const one = geoJobFromCatalogBundle(bundle, fallbackJobId);
+  if (!one) return [];
+  return [{ measurement: parseGeoMeasurement(bundle?.measurement), job: one }];
 }
 
 /** Refetch full GEO magazine fields from CHECKION when flow left only scores. */

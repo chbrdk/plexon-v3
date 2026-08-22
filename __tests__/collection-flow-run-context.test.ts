@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   actionKindForCatalogRoot,
+  buildQueriesCatalogBundle,
   buildScanCatalogBundle,
   catalogPathFromOutHandle,
   catalogPortsForActionKind,
@@ -9,6 +10,7 @@ import {
   evaluateCompareNode,
   resolveCatalogPath,
   resolveFlowParamString,
+  resolveGeoJobMeasurementsFromContext,
   resolveNodeStringParams,
   resolveRunUrlChain,
   seedStartNodeIntoContext,
@@ -147,5 +149,14 @@ describe('resolveFlowParamString + start seed', () => {
     );
     expect(action.text).toBe('Open https://shop.test/ and continue');
     expect(action.note).toBe('https://shop.test/');
+  });
+
+  it('stores GEO measurements on queries catalog without mixing into items', () => {
+    const bundle = buildQueriesCatalogBundle(['q1'], { measurements: ['recall', 'live'] });
+    expect(bundle.items).toEqual(['q1']);
+    expect(bundle.measurements).toEqual(['recall', 'live']);
+    const ctx = setContextBundle(emptyRunContext(), 'queries', bundle);
+    expect(resolveGeoJobMeasurementsFromContext(ctx)).toEqual(['recall', 'live']);
+    expect(resolveGeoJobMeasurementsFromContext(emptyRunContext())).toEqual(['recall']);
   });
 });

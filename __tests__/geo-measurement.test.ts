@@ -3,6 +3,7 @@ import {
   parseGeoMeasurement,
   parseGeoMeasurements,
   parseGeoMeasurementsOrDefault,
+  parseGeoMeasurementsOrDefaultEqc,
   toggleGeoMeasurement,
   geoMeasurementMagazineLabel,
 } from '@/lib/geo/measurement';
@@ -14,6 +15,7 @@ describe('GEO measurement helpers', () => {
     expect(parseGeoMeasurements('both')).toEqual(['recall', 'live']);
     expect(parseGeoMeasurements('recall,live')).toEqual(['recall', 'live']);
     expect(parseGeoMeasurementsOrDefault(undefined)).toEqual(['recall']);
+    expect(parseGeoMeasurementsOrDefaultEqc(undefined)).toEqual(['recall', 'live']);
   });
 
   it('toggles without mixing layers', () => {

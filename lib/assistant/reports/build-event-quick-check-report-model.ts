@@ -13,11 +13,14 @@ import {
   EVENT_QUICK_CHECK_REPORT_TEMPLATE_ID,
   type EventQuickCheckReportModel,
   type EventQuickCheckReportPersonaSection,
+  type EventQuickCheckReportGeoSection,
 } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
 import { buildEventQuickCheckDomainComparisonSection } from '@/lib/assistant/reports/map-event-quick-check-domain-comparison';
 import { mergeFlowContextIntoQuickResult } from '@/lib/assistant/reports/event-quick-check-from-flow-context';
 import { pathCheckionDomainScan, pathCheckionProject } from '@/lib/paths/checkion-api';
+import { parseGeoMeasurement, type GeoMeasurement } from '@/lib/geo/measurement';
+import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
 import { echonDashboardResearchUrl } from '@/lib/paths/echon-api';
 import { pathPlatformProjectDashboard } from '@/lib/constants';
 import { resolveEqcPersonaChatHref } from '@/lib/assistant/event-quick-check/eqc-persona-chat-href';
@@ -104,6 +107,51 @@ function mapWorkflowStatus(
   if (status === 'done') return 'done';
   if (status === 'error') return 'error';
   return 'skipped';
+}
+
+function geoSectionFromJob(input: {
+  job?: GeoEeatJobPreview;
+  questions: string[];
+  url: string;
+  measurement?: GeoMeasurement;
+  geoFailed: boolean;
+  geoPartial: boolean;
+  errorMessage?: string;
+}): EventQuickCheckReportGeoSection {
+  const job = input.job;
+  return {
+    status: input.geoFailed
+      ? input.geoPartial
+        ? 'partial'
+        : 'failed'
+      : job
+        ? 'complete'
+        : 'skipped',
+    errorMessage: input.errorMessage,
+    measurement: input.measurement,
+    questions: input.questions,
+    overallScore: job?.overallScore ?? null,
+    geoFitnessScore: job?.geoFitnessScore ?? null,
+    jobId: job?.jobId,
+    url: job?.url ?? input.url,
+    competitors: (job?.competitors ?? []).map((c) => ({
+      name: c.name,
+      score: c.score,
+      shareOfVoice: c.shareOfVoice,
+      avgPosition: c.avgPosition,
+      mentionCount: c.mentionCount,
+    })),
+    eeatDimensions: [],
+    eeatMissingElements: job?.missingGeoElements,
+    geoFitnessReasoning: job?.geoFitnessReasoning,
+    recommendations: (job?.recommendations ?? []).map((r) => ({
+      title: r.title,
+      description: r.description,
+      priority: r.priority,
+    })),
+    citationHighlights: job?.citationHighlights ?? [],
+    citationHighlightsByModel: job?.citationHighlightsByModel,
+  };
 }
 
 export function buildEventQuickCheckReportModel(
@@ -250,6 +298,40 @@ export function buildEventQuickCheckReportModel(
         .filter((d): d is NonNullable<typeof d> => d != null)
     : [];
 
+  const geoLayersSource =
+    quick.geoJobs?.length
+      ? quick.geoJobs
+      : quick.geoJob
+        ? [{ measurement: parseGeoMeasurement(undefined), job: quick.geoJob }]
+        : [];
+  const geoPrimaryMeasurement = geoLayersSource[0]?.measurement;
+  const geo = geoSectionFromJob({
+    job: quick.geoJob,
+    questions: quick.geoQuestions ?? [],
+    url: quick.url,
+    measurement: geoPrimaryMeasurement,
+    geoFailed,
+    geoPartial,
+    errorMessage: geoOutcome?.error,
+  });
+  geo.eeatDimensions = eeatDimensions;
+
+  const geoLayers =
+    geoLayersSource.length > 1
+      ? geoLayersSource.map((layer, index) => {
+          const section = geoSectionFromJob({
+            job: layer.job,
+            questions: quick.geoQuestions ?? [],
+            url: quick.url,
+            measurement: layer.measurement,
+            geoFailed: false,
+            geoPartial: false,
+          });
+          if (index === 0) section.eeatDimensions = eeatDimensions;
+          return section;
+        })
+      : undefined;
+
   const model: EventQuickCheckReportModel = {
     templateId: EVENT_QUICK_CHECK_REPORT_TEMPLATE_ID,
     meta: {
@@ -270,32 +352,8 @@ export function buildEventQuickCheckReportModel(
       kpiTiles,
     },
     workflow: { steps: workflowSteps },
-    geo: {
-      status: geoFailed ? (geoPartial ? 'partial' : 'failed') : quick.geoJob ? 'complete' : 'skipped',
-      errorMessage: geoOutcome?.error,
-      questions: quick.geoQuestions ?? [],
-      overallScore: quick.geoJob?.overallScore ?? null,
-      geoFitnessScore: quick.geoJob?.geoFitnessScore ?? null,
-      jobId: quick.geoJob?.jobId,
-      url: quick.geoJob?.url ?? quick.url,
-      competitors: (quick.geoJob?.competitors ?? []).map((c) => ({
-        name: c.name,
-        score: c.score,
-        shareOfVoice: c.shareOfVoice,
-        avgPosition: c.avgPosition,
-        mentionCount: c.mentionCount,
-      })),
-      eeatDimensions,
-      eeatMissingElements: quick.geoJob?.missingGeoElements,
-      geoFitnessReasoning: quick.geoJob?.geoFitnessReasoning,
-      recommendations: (quick.geoJob?.recommendations ?? []).map((r) => ({
-        title: r.title,
-        description: r.description,
-        priority: r.priority,
-      })),
-      citationHighlights: quick.geoJob?.citationHighlights ?? [],
-      citationHighlightsByModel: quick.geoJob?.citationHighlightsByModel,
-    },
+    geo,
+    ...(geoLayers?.length ? { geoLayers } : {}),
     appendix: {
       scanId: quick.domainScan?.id,
       geoJobId: quick.geoJob?.jobId,

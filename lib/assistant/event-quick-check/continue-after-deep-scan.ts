@@ -5,10 +5,12 @@ import {
 } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import { getAssistantWorkflowRunById, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
 import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
+import type { GeoMeasurement } from '@/lib/geo/measurement';
 import {
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
   EVENT_QUICK_CHECK_CHECKPOINT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
+  EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY,
 } from '@/lib/paths/event-quick-check-page';
 import type { WorkflowStepEmitter } from '@/lib/assistant/workflows/workflow-step-stream';
 
@@ -50,5 +52,8 @@ export async function continueEventQuickCheckAfterDeepScan(
     emit: input.emit,
     continueAfterDeepScan: true,
     geoQuestionsConfirmed: geoConfirmed,
+    geoMeasurementsConfirmed: stored[EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY] as
+      | GeoMeasurement[]
+      | undefined,
   });
 }

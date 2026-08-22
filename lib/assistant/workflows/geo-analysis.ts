@@ -6,6 +6,7 @@ import {
   startCheckionGeoJobV3,
 } from '@/lib/integrations/checkion-geo-jobs-v3-client'
 import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job'
+import { parseGeoMeasurement, type GeoMeasurement } from '@/lib/geo/measurement'
 import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag'
 import { GEO_ANALYSIS_INITIAL_STEPS } from '@/lib/assistant/ui-blocks/workflow-ui'
 import { tryAutoAssignCheckionResource } from '@/lib/assistant/auto-assign-checkion'
@@ -39,6 +40,7 @@ export async function runGeoAnalysisWorkflow(
     competitors?: string[]
     runCompetitive?: boolean
     generateQueries?: boolean
+    measurement?: GeoMeasurement
   },
   options: {
     workflowRunId?: string
@@ -81,6 +83,7 @@ export async function runGeoAnalysisWorkflow(
         competitors: input.competitors,
         deep: Boolean(input.deep || input.runCompetitive),
         includePageScan: Boolean(input.deep || input.runCompetitive),
+        measurement: parseGeoMeasurement(input.measurement),
       },
       {
         source: 'agent',
@@ -130,6 +133,7 @@ export async function runGeoAnalysisWorkflow(
     queries: input.queries,
     competitors: input.competitors,
     includePageScan: Boolean(input.deep || input.runCompetitive),
+    measurement: parseGeoMeasurement(input.measurement),
   })
   if (!started.ok) {
     steps = await setStep(runId, steps, 'start_job', { status: 'error', detail: started.error })

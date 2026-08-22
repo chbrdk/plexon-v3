@@ -21,14 +21,14 @@ Bestätigte Fragen **ersetzen** den Suggest-Draft (`queries` + `n-suggest-q`). D
 - `report`
 - Fragen (Draft / Confirmed / Report)
 
-**Hinweis:** Alte Läufe vor dem Persistence-Fix haben oft keinen Checkpoint mehr → Button fehlt. Neue Läufe speichern Checkpoint + Fragen beim Abschluss.
+**EQC:** Layer switch on the GEO-questions confirm panel (same tiles as CHECKION `/scan`). Multi-select — one or both of `recall` / `live`. Each layer is a separate CHECKION job; `citedShare` is never mixed. **Default:** both layers pre-selected (`['recall', 'live']`). Confirm POST `{ questions, groups?, measurements? }`. Client: `startCheckionGeoJobV3({ measurement })`.
 
 ## APIs
 
 | Aktion | Route |
 |--------|--------|
 | Reopen / Cancel | `POST …/runs/:id/geo-questions/reopen` `{ cancel?: boolean }` |
-| Confirm + neu | `POST …/runs/:id/geo-questions` `{ questions, groups? }` |
+| Confirm + neu | `POST …/runs/:id/geo-questions` `{ questions, groups?, measurements? }` |
 
 ## Code
 

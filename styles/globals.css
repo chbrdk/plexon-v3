@@ -2948,6 +2948,63 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   max-width: 40rem;
 }
 
+.plexon-eqc-geo-layer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.plexon-eqc-geo-layer-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line, color-mix(in srgb, var(--ink) 16%, transparent));
+  border-radius: 0.85rem;
+  background: var(--bg1, var(--bg));
+  color: inherit;
+  cursor: pointer;
+}
+
+.plexon-eqc-geo-layer-tile:hover {
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 45%, var(--line));
+}
+
+.plexon-eqc-geo-layer-tile--selected {
+  border-color: var(--accent, #00ca55);
+  box-shadow: inset 0 0 0 1px var(--accent, #00ca55);
+}
+
+.plexon-eqc-geo-layer-tile__kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.plexon-eqc-geo-layer-tile--selected .plexon-eqc-geo-layer-tile__kicker {
+  opacity: 1;
+  color: var(--accent, #00ca55);
+}
+
+.plexon-eqc-geo-layer-tile__label {
+  font-weight: 650;
+}
+
+.plexon-eqc-geo-layer-tile__deck {
+  font-size: 0.85rem;
+  opacity: 0.78;
+  line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  .plexon-eqc-geo-layer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .plexon-eqc-progress {
   height: 4px;
   border-radius: 999px;

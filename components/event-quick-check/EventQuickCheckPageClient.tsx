@@ -24,6 +24,7 @@ import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-q
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import { maxGeoQuestionsForProfile } from '@/lib/assistant/event-quick-check/apply-geo-question-edits';
+import type { GeoMeasurement } from '@/lib/geo/measurement';
 import {
   EVENT_QUICK_CHECK_COMPETITOR_COUNT_MAX,
   EVENT_QUICK_CHECK_PERSONA_COUNT_MAX,
@@ -475,7 +476,11 @@ export function EventQuickCheckPageClient() {
   );
 
   const confirmGeoQuestions = useCallback(
-    async (questions: string[], groups?: PersonaGeoQuestionGroup[]) => {
+    async (
+      questions: string[],
+      groups?: PersonaGeoQuestionGroup[],
+      measurements?: GeoMeasurement[]
+    ) => {
       if (!workflowRunId) return;
       setConfirmLoading(true);
       setError(null);
@@ -499,7 +504,7 @@ export function EventQuickCheckPageClient() {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questions, groups }),
+          body: JSON.stringify({ questions, groups, measurements }),
         });
 
         const result = (await res.json()) as {
@@ -1058,7 +1063,9 @@ export function EventQuickCheckPageClient() {
                 confirmLabel={
                   geoRerunMode ? EQC_PAGE_COPY.geoReviewConfirmRerun : undefined
                 }
-                onConfirm={(questions, groups) => void confirmGeoQuestions(questions, groups)}
+                onConfirm={(questions, groups, measurements) =>
+                  void confirmGeoQuestions(questions, groups, measurements)
+                }
                 onCancel={geoRerunMode ? () => void cancelGeoReopen() : undefined}
               />
             </div>

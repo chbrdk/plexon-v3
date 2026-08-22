@@ -15,7 +15,9 @@ import {
   EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY,
   EVENT_QUICK_CHECK_GEO_QUESTIONS_DRAFT_KEY,
+  EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY,
 } from '@/lib/paths/event-quick-check-page';
+import { parseGeoMeasurementsOrDefaultEqc, type GeoMeasurement } from '@/lib/geo/measurement';
 import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 import type { WorkflowStepEmitter } from '@/lib/assistant/workflows/workflow-step-stream';
 
@@ -24,6 +26,7 @@ export type ConfirmGeoQuestionsInput = {
   workflowRunId: string;
   questions?: string[];
   groups?: PersonaGeoQuestionGroup[];
+  measurements?: GeoMeasurement[];
   emit?: WorkflowStepEmitter;
 };
 
@@ -84,6 +87,7 @@ export async function confirmEventQuickCheckGeoQuestions(
         ? { [EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY]: confirmedGroups }
         : {}),
       [EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]: false,
+      [EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY]: parseGeoMeasurementsOrDefaultEqc(input.measurements),
     },
   });
 
@@ -93,5 +97,6 @@ export async function confirmEventQuickCheckGeoQuestions(
     emit: input.emit,
     geoQuestionsConfirmed: confirmedQuestions,
     geoCompetitorsConfirmed: competitors,
+    geoMeasurementsConfirmed: parseGeoMeasurementsOrDefaultEqc(input.measurements),
   });
 }

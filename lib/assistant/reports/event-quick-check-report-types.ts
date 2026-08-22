@@ -1,4 +1,5 @@
 import type { UiTone } from '@/lib/assistant/ui-blocks/types';
+import type { GeoMeasurement } from '@/lib/geo/measurement';
 
 export const EVENT_QUICK_CHECK_REPORT_BLOCK_TYPE = 'event_quick_check_report' as const;
 export const EVENT_QUICK_CHECK_REPORT_TEMPLATE_ID = 'event_quick_check' as const;
@@ -153,6 +154,7 @@ export type EventQuickCheckReportMarketSection = {
 export type EventQuickCheckReportGeoSection = {
   status: 'complete' | 'failed' | 'skipped' | 'partial';
   errorMessage?: string;
+  measurement?: GeoMeasurement;
   questions: string[];
   overallScore?: number | null;
   geoFitnessScore?: number | null;
@@ -231,6 +233,8 @@ export type EventQuickCheckReportModel = {
   personas?: EventQuickCheckReportPersonaSection[];
   market?: EventQuickCheckReportMarketSection;
   geo: EventQuickCheckReportGeoSection;
+  /** Extra GEO layers when both recall and live were run. `geo` is the primary (first) layer. */
+  geoLayers?: EventQuickCheckReportGeoSection[];
   insights?: EventQuickCheckReportInsightsSection;
   appendix: EventQuickCheckReportAppendixSection;
 };

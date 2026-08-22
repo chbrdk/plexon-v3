@@ -125,6 +125,8 @@ export async function startCheckionGeoJobV3(input: {
   competitors?: string[];
   models?: string[];
   includePageScan?: boolean;
+  /** Layer 1 recall (default) or Layer 2 live search. EQC stays recall unless set. */
+  measurement?: 'recall' | 'live';
 }): Promise<
   | { ok: true; job: CheckionGeoJobSummary }
   | { ok: false; error: string }
@@ -163,6 +165,7 @@ export async function startCheckionGeoJobV3(input: {
           ? { includePageScan: input.includePageScan }
           : {}),
         ...(input.competitors?.length ? { competitors: input.competitors } : {}),
+        ...(input.measurement ? { measurement: input.measurement } : {}),
       }),
       cache: 'no-store',
     });
@@ -288,6 +291,7 @@ export async function runCheckionGeoJobV3(input: {
   queries?: string[];
   competitors?: string[];
   includePageScan?: boolean;
+  measurement?: 'recall' | 'live';
 }): Promise<
   | { ok: true; job: CheckionGeoJobSummary; signals: GeoGateSignals; preview?: GeoEeatJobPreview }
   | { ok: false; error: string; job?: CheckionGeoJobSummary }

@@ -55,7 +55,20 @@ export const EQC_PAGE_COPY = {
     'Website konnte nur teilweise gelesen werden — bitte Profil manuell ergänzen.',
   geoReviewTitle: 'GEO-Fragen prüfen',
   geoReviewLead:
-    'Diese Fragen werden an mehrere LLMs gesendet. Bitte prüfen, ob sie zur Zielgruppe und zum Unternehmen passen — erst danach startet der GEO-Check.',
+    'Diese Fragen werden an mehrere LLMs gesendet. Bitte prüfen, ob sie zur Zielgruppe und zum Unternehmen passen — und welchen Mess-Layer der GEO-Check nutzen soll.',
+  geoReviewMeasurementTitle: 'Mess-Layer',
+  geoReviewMeasurementLead:
+    'Ein oder beide Layer. Jeder Layer ist ein eigener GEO-Job — Trefferquoten werden nicht gemischt.',
+  geoReviewMeasurementRecallLabel: 'Modellgedächtnis',
+  geoReviewMeasurementRecallKicker: 'Layer 1',
+  geoReviewMeasurementRecallDeck:
+    'Ungrounded — Marken, die das Modell aus dem Training kennt.',
+  geoReviewMeasurementLiveLabel: 'Live-Suche',
+  geoReviewMeasurementLiveKicker: 'Layer 2',
+  geoReviewMeasurementLiveDeck:
+    'Web-grounded — Zitate aus der Suche, näher an ChatGPT mit Browse.',
+  geoReviewConfirmBoth: 'Fragen bestätigen & GEO-Checks starten',
+  geoReviewConfirmRerunBoth: 'Fragen bestätigen & GEO erneut starten',
   geoReviewQuestionLabel: (index: number) => `Frage ${index + 1}`,
   geoReviewAddQuestion: 'Frage hinzufügen',
   geoReviewRemoveQuestion: 'Entfernen',

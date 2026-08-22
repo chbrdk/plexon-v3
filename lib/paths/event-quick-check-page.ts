@@ -37,6 +37,7 @@ export const EVENT_QUICK_CHECK_GEO_QUESTIONS_DRAFT_KEY = 'geoQuestionsDraft' as 
 export const EVENT_QUICK_CHECK_GEO_QUESTIONS_BY_PERSONA_DRAFT_KEY = 'geoQuestionsByPersonaDraft' as const;
 export const EVENT_QUICK_CHECK_GEO_COMPETITORS_DRAFT_KEY = 'geoCompetitorsDraft' as const;
 export const EVENT_QUICK_CHECK_GEO_QUESTIONS_CONFIRMED_KEY = 'geoQuestionsConfirmed' as const;
+export const EVENT_QUICK_CHECK_GEO_MEASUREMENTS_KEY = 'geoMeasurements' as const;
 
 export const EVENT_QUICK_CHECK_DEPTH_KEY = 'depth' as const;
 /** Per-run override: buyer segments / target groups. */

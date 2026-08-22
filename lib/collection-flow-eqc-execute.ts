@@ -20,6 +20,7 @@ import {
   evaluateAllCompares,
   resolveDocumentStringParams,
   resolveFlowParamString,
+  resolveGeoJobMeasurementsFromContext,
   resolveGeoJobQueriesFromContext,
   resolveRunUrlChain,
   seedStartNodeIntoContext,
@@ -57,6 +58,7 @@ import {
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
 import { runCheckionGeoJobV3 } from '@/lib/integrations/checkion-geo-jobs-v3-client';
+import { parseGeoMeasurement, parseGeoMeasurementsOrDefaultEqc, GEO_MEASUREMENT_DEFAULTS_EQC, type GeoMeasurement } from '@/lib/geo/measurement';
 import { suggestCheckionProjectCompetitors } from '@/lib/integrations/checkion-project-competitors-client';
 import {
   parseEventQuickCheckProfileOverrides,
@@ -194,7 +196,8 @@ export async function executeEqcCollectionFlowRun(input: {
         buildCompetitorsCatalogBundle(body.payload as string[])
       );
     } else if (kind === 'geo_queries' && Array.isArray(body.payload)) {
-      const bundle = buildQueriesCatalogBundle(body.payload as string[]);
+      const measurements = parseGeoMeasurementsOrDefaultEqc(body.measurements);
+      const bundle = buildQueriesCatalogBundle(body.payload as string[], { measurements });
       const suggestId = doc.nodes.find((n) => n.kind === 'suggest_queries')?.id;
       runContext = setContextBundle(runContext, root, bundle, suggestId);
     }
@@ -539,86 +542,120 @@ export async function executeEqcCollectionFlowRun(input: {
         startUrl: scanUrl || startUrl,
       });
       const geoUrl = chain.geoUrl || scanUrl || startUrl || undefined;
+      const measurements = resolveGeoJobMeasurementsFromContext(
+        runContext,
+        GEO_MEASUREMENT_DEFAULTS_EQC
+      ) as GeoMeasurement[];
 
-      let geoJob: {
-        id: string;
-        status: string;
-        citedShare?: number | null;
-        geoFitness?: number | null;
-        overallScore?: number | null;
-        url?: string;
-      } | null = null;
-      let geoPreview: Parameters<typeof geoPreviewForCatalogBundle>[0] | undefined;
-      let geoCatalog: Record<string, unknown> | undefined;
-      let geoError: string | undefined;
+      const layers: Array<{
+        measurement: GeoMeasurement;
+        job: {
+          id: string;
+          status: string;
+          citedShare?: number | null;
+          geoFitness?: number | null;
+          overallScore?: number | null;
+          url?: string;
+        };
+        preview?: Parameters<typeof geoPreviewForCatalogBundle>[0];
+        catalog?: Record<string, unknown>;
+      }> = [];
 
-      if (isCapabilityCatalogRuntimeEnabled()) {
-        const cap = await executeCheckionGeoJobCapability(
-          {
+      for (const measurement of measurements) {
+        let geoJob: (typeof layers)[number]['job'] | null = null;
+        let geoPreview: Parameters<typeof geoPreviewForCatalogBundle>[0] | undefined;
+        let geoCatalog: Record<string, unknown> | undefined;
+        let geoError: string | undefined;
+
+        if (isCapabilityCatalogRuntimeEnabled()) {
+          const cap = await executeCheckionGeoJobCapability(
+            {
+              url: geoUrl,
+              companyName: companyName || undefined,
+              queries,
+              includePageScan: true,
+              measurement,
+            },
+            {
+              source: 'flow',
+              checkionProjectId: boundCheckion,
+              platformProjectId: id,
+              nodeId: node.id,
+            }
+          );
+          if (!cap.ok || !cap.agentPayload?.job) {
+            geoError = cap.error ?? 'GEO fehlgeschlagen';
+          } else {
+            geoJob = cap.agentPayload.job;
+            geoPreview = cap.agentPayload.preview;
+            geoCatalog = cap.catalogBundle;
+          }
+        } else {
+          const geoResult = await runCheckionGeoJobV3({
+            projectId: boundCheckion,
+            platformProjectId: id,
             url: geoUrl,
             companyName: companyName || undefined,
-            queries,
+            queries: queries.length ? queries : undefined,
             includePageScan: true,
-          },
-          {
-            source: 'flow',
-            checkionProjectId: boundCheckion,
-            platformProjectId: id,
-            nodeId: node.id,
+            measurement,
+          });
+          if (!geoResult.ok) {
+            geoError = geoResult.error;
+          } else {
+            geoJob = geoResult.job;
+            geoPreview = geoResult.preview;
           }
-        );
-        if (!cap.ok || !cap.agentPayload?.job) {
-          geoError = cap.error ?? 'GEO fehlgeschlagen';
-        } else {
-          geoJob = cap.agentPayload.job;
-          geoPreview = cap.agentPayload.preview;
-          geoCatalog = cap.catalogBundle;
         }
-      } else {
-        const geoResult = await runCheckionGeoJobV3({
-          projectId: boundCheckion,
-          platformProjectId: id,
-          url: geoUrl,
-          companyName: companyName || undefined,
-          queries: queries.length ? queries : undefined,
-          includePageScan: true,
+
+        if (!geoJob) {
+          return failEqc({
+            id,
+            fid,
+            doc,
+            startedAt,
+            startUrl,
+            runContext,
+            error: geoError ?? `GEO fehlgeschlagen (${measurement})`,
+            historyRunId: input.historyRunId,
+          });
+        }
+        layers.push({
+          measurement,
+          job: geoJob,
+          preview: geoPreview,
+          catalog: geoCatalog,
         });
-        if (!geoResult.ok) {
-          geoError = geoResult.error;
-        } else {
-          geoJob = geoResult.job;
-          geoPreview = geoResult.preview;
-        }
       }
 
-      if (!geoJob) {
-        return failEqc({
-          id,
-          fid,
-          doc,
-          startedAt,
-          startUrl,
-          runContext,
-          error: geoError ?? 'GEO fehlgeschlagen',
-          historyRunId: input.historyRunId,
-        });
-      }
-      geoJobId = geoJob.id;
-      citedShare = geoJob.citedShare ?? null;
-      geoFitness = geoJob.geoFitness ?? null;
-      if (geoJob.overallScore != null) overallScore = geoJob.overallScore;
+      const primary = layers[0]!;
+      geoJobId = primary.job.id;
+      citedShare = primary.job.citedShare ?? null;
+      geoFitness = primary.job.geoFitness ?? null;
+      if (primary.job.overallScore != null) overallScore = primary.job.overallScore;
       runContext = setContextBundle(
         runContext,
         'geo',
-        geoCatalog ??
-          buildGeoCatalogBundle({
-            status: geoJob.status,
-            citedShare,
-            geoFitness,
-            overallScore: geoJob.overallScore ?? null,
-            url: geoJob.url || scanUrl || startUrl,
-            preview: geoPreview ? geoPreviewForCatalogBundle(geoPreview) : null,
-          }),
+        buildGeoCatalogBundle({
+          status: primary.job.status,
+          citedShare,
+          geoFitness,
+          overallScore: primary.job.overallScore ?? null,
+          url: primary.job.url || scanUrl || startUrl,
+          measurement: parseGeoMeasurement(primary.measurement),
+          jobId: primary.job.id,
+          preview: primary.preview ? geoPreviewForCatalogBundle(primary.preview) : null,
+          layers: layers.map((layer) => ({
+            measurement: layer.measurement,
+            jobId: layer.job.id,
+            status: layer.job.status,
+            citedShare: layer.job.citedShare ?? null,
+            geoFitness: layer.job.geoFitness ?? null,
+            overallScore: layer.job.overallScore ?? null,
+            url: layer.job.url || scanUrl || startUrl,
+            preview: layer.preview ? geoPreviewForCatalogBundle(layer.preview) : null,
+          })),
+        }),
         node.id
       );
       continue;

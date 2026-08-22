@@ -8,6 +8,9 @@ export type GeoMeasurement = 'recall' | 'live'
 
 export const GEO_MEASUREMENT_DEFAULT: GeoMeasurement = 'recall'
 
+/** Event Quick Check / EQC spine — run both layers unless the user deselects one. */
+export const GEO_MEASUREMENT_DEFAULTS_EQC: readonly GeoMeasurement[] = ['recall', 'live']
+
 export const GEO_MEASUREMENT_ORDER: readonly GeoMeasurement[] = ['recall', 'live']
 
 export function parseGeoMeasurement(value: unknown): GeoMeasurement {
@@ -40,6 +43,11 @@ export function parseGeoMeasurements(value: unknown): GeoMeasurement[] {
 export function parseGeoMeasurementsOrDefault(value: unknown): GeoMeasurement[] {
   const parsed = parseGeoMeasurements(value)
   return parsed.length ? parsed : [GEO_MEASUREMENT_DEFAULT]
+}
+
+export function parseGeoMeasurementsOrDefaultEqc(value: unknown): GeoMeasurement[] {
+  const parsed = parseGeoMeasurements(value)
+  return parsed.length ? parsed : [...GEO_MEASUREMENT_DEFAULTS_EQC]
 }
 
 export function toggleGeoMeasurement(

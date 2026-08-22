@@ -11,6 +11,8 @@ import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 type Props = {
   report: EventQuickCheckReportModel
+  geo?: EventQuickCheckReportModel['geo']
+  layerLabel?: string
   showQuestions?: boolean
 }
 
@@ -31,8 +33,13 @@ function scoreTone(score: number | null | undefined): 'pos' | 'low' | 'neg' | un
  * score rings → share-of-voice race → model strip + ranking.
  * E-E-A-T and GEO recommendations live in their own bands.
  */
-export function EventQuickCheckGeoMagazineSection({ report, showQuestions = true }: Props) {
-  const geo = report.geo
+export function EventQuickCheckGeoMagazineSection({
+  report,
+  geo: geoOverride,
+  layerLabel,
+  showQuestions = true,
+}: Props) {
+  const geo = geoOverride ?? report.geo
   const ownHost = normalizeGeoDomain(geo.url ?? report.meta.domain ?? report.meta.url)
 
   const voiceRows = (() => {
@@ -69,6 +76,11 @@ export function EventQuickCheckGeoMagazineSection({ report, showQuestions = true
 
   return (
     <div className="plexon-eqc-geo-spread" data-section="eqc-geo-spread">
+      {layerLabel ? (
+        <Text role="label" as="h3">
+          {layerLabel}
+        </Text>
+      ) : null}
       {geo.status === 'failed' && geo.errorMessage ? (
         <Alert tone="error">{geo.errorMessage}</Alert>
       ) : null}

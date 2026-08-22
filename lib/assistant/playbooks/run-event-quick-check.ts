@@ -44,6 +44,7 @@ import {
 import { pathPlatformProjectDashboard } from '@/lib/constants';
 import type { PersonaBootstrapPreview } from '@/lib/assistant/ui-blocks/build-persona-bootstrap-ui';
 import type { GeoEeatJobPreview } from '@/lib/integrations/checkion-geo-client';
+import { parseGeoMeasurementsOrDefaultEqc, type GeoMeasurement } from '@/lib/geo/measurement';
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import {
   patchWorkflowSteps,
@@ -113,6 +114,7 @@ export type EventQuickCheckResult = {
   geoQuestions?: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
   geoJob?: GeoEeatJobPreview;
+  geoJobs?: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }>;
   domainScan?: DomainScanPreview;
   personaPreview?: PersonaBootstrapPreview;
   audionProjectId?: string;
@@ -146,6 +148,7 @@ export type EventQuickCheckRunOptions = {
   emit?: WorkflowStepEmitter;
   companyBrief?: EventQuickCheckCompanyBrief;
   geoQuestions?: string[];
+  geoMeasurements?: GeoMeasurement[];
   geoCompetitors?: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
   resumeCheckpoint?: EventQuickCheckResumeCheckpoint;
@@ -176,6 +179,55 @@ function domainFromUrl(url: string): string | undefined {
 
 function streamPhase(emit: WorkflowStepEmitter | undefined, detail: string): void {
   emitPhase(emit, 'workflow', detail);
+}
+
+async function runGeoLayersForQuickCheck(input: {
+  url: string
+  checkionProjectId?: string | null
+  queries?: string[]
+  competitors?: string[]
+  measurements?: GeoMeasurement[]
+  patchStep: (stepId: string, patch: Partial<WorkflowStep>) => Promise<WorkflowStep[]>
+  emit?: WorkflowStepEmitter
+}): Promise<{
+  ok: boolean
+  error?: string
+  job?: GeoEeatJobPreview
+  jobId?: string
+  geoJobs: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }>
+}> {
+  const measurements = parseGeoMeasurementsOrDefaultEqc(input.measurements)
+  const geoJobs: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }> = []
+  for (const measurement of measurements) {
+    const geo = await runGeoAnalysisWorkflow(
+      {
+        url: input.url,
+        checkionProjectId: input.checkionProjectId,
+        queries: input.queries,
+        competitors: input.competitors,
+        runCompetitive: Boolean(input.queries?.length),
+        generateQueries: !input.queries?.length,
+        measurement,
+      },
+      {
+        workflowRunId: undefined,
+        onExternalProgress: async (status, progress) => {
+          await input.patchStep('geo_check', { status: 'running', progress, detail: status })
+          streamPhase(input.emit, `GEO ${measurement}: ${status}${progress > 0 ? ` (${progress}%)` : ''}`)
+        },
+      }
+    )
+    if (!geo.ok || !geo.job) {
+      return { ok: false, error: geo.error, geoJobs, job: geoJobs[0]?.job, jobId: geoJobs[0]?.job?.jobId }
+    }
+    geoJobs.push({ measurement, job: geo.job })
+  }
+  return {
+    ok: true,
+    geoJobs,
+    job: geoJobs[0]?.job,
+    jobId: geoJobs[0]?.job.jobId,
+  }
 }
 
 async function bindAudionToPlatform(platformProjectId: string, audionProjectId: string): Promise<void> {
@@ -301,6 +353,7 @@ export async function runEventQuickCheck(
   let personaPreview: PersonaBootstrapPreview | undefined;
   let domainScan: DomainScanPreview | undefined;
   let geoJob: GeoEeatJobPreview | undefined;
+  let geoJobs: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }> | undefined;
   let audionProjectId: string | undefined;
   let audionSetupRequired = false;
   let checkionProjectId: string | null = null;
@@ -404,6 +457,7 @@ export async function runEventQuickCheck(
       checkionProjectId: checkpoint.checkionProjectId ?? null,
       geoQuestions: confirmedGeoQuestions,
       geoQuestionsByPersona: options.geoQuestionsByPersona,
+      geoMeasurements: options.geoMeasurements,
       geoCompetitors: options.geoCompetitors ?? checkpoint.geoCompetitors,
       echonHandle: checkpoint.echonHandle ?? null,
       echonSkippedReason: checkpoint.echonSkippedReason,
@@ -1032,24 +1086,15 @@ export async function runEventQuickCheck(
 
     steps = await patchStep('geo_check', { status: 'running', progress: 10, detail: 'GEO-Job starten…' });
     streamPhase(emit, 'GEO / E-E-A-T Analyse läuft…');
-    const geo = await runGeoAnalysisWorkflow(
-      {
-        url,
-        // CHECKION GEO/E-E-A-T: projectId optional — assign to project only when binding exists.
-        checkionProjectId: checkionProjectId ?? ensured?.checkionProjectId ?? null,
-        queries: geoQuestions,
-        competitors: geoCompetitors,
-        runCompetitive: Boolean(geoQuestions?.length),
-        generateQueries: !geoQuestions?.length,
-      },
-      {
-        workflowRunId: undefined,
-        onExternalProgress: async (status, progress) => {
-          await patchStep('geo_check', { status: 'running', progress, detail: status });
-          streamPhase(emit, `GEO: ${status}${progress > 0 ? ` (${progress}%)` : ''}`);
-        },
-      }
-    );
+    const geo = await runGeoLayersForQuickCheck({
+      url,
+      checkionProjectId: checkionProjectId ?? ensured?.checkionProjectId ?? null,
+      queries: geoQuestions,
+      competitors: geoCompetitors,
+      measurements: options.geoMeasurements,
+      patchStep,
+      emit,
+    });
     if (!geo.ok) {
       steps = await patchStep('geo_check', { status: 'error', detail: geo.error });
       outcomes.push({
@@ -1060,6 +1105,7 @@ export async function runEventQuickCheck(
       });
     } else {
       geoJob = geo.job;
+      geoJobs = geo.geoJobs;
       steps = await patchStep('geo_check', {
         status: 'done',
         progress: 100,
@@ -1069,7 +1115,7 @@ export async function runEventQuickCheck(
         stepId: 'geo_check',
         label: 'GEO Competitive Check',
         status: 'done',
-        data: { jobId: geo.jobId, job: geo.job, questions: geoQuestions },
+        data: { jobId: geo.jobId, job: geo.job, questions: geoQuestions, measurements: options.geoMeasurements },
       });
     }
   }
@@ -1169,6 +1215,7 @@ export async function runEventQuickCheck(
     dashboardPath,
     geoQuestions,
     geoJob,
+    geoJobs,
     domainScan,
     personaPreview,
     audionProjectId,
@@ -1477,6 +1524,7 @@ type FinishFromGeoInput = {
   checkionProjectId: string | null;
   geoQuestions: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+  geoMeasurements?: GeoMeasurement[];
   geoCompetitors: string[];
   echonHandle: EchonQuickCheckResearchHandle | null;
   echonSkippedReason?: string;
@@ -1513,25 +1561,18 @@ async function finishEventQuickCheckFromGeo(
 
   steps = await patchStep('geo_check', { status: 'running', progress: 10, detail: 'GEO-Job starten…' });
   streamPhase(emit, 'GEO / E-E-A-T Analyse läuft…');
-  const geo = await runGeoAnalysisWorkflow(
-    {
-      url,
-      checkionProjectId,
-      queries: geoQuestions,
-      competitors: geoCompetitors,
-      runCompetitive: Boolean(geoQuestions.length),
-      generateQueries: !geoQuestions.length,
-    },
-    {
-      workflowRunId: undefined,
-      onExternalProgress: async (status, progress) => {
-        await patchStep('geo_check', { status: 'running', progress, detail: status });
-        streamPhase(emit, `GEO: ${status}${progress > 0 ? ` (${progress}%)` : ''}`);
-      },
-    }
-  );
+  const geo = await runGeoLayersForQuickCheck({
+    url,
+    checkionProjectId,
+    queries: geoQuestions,
+    competitors: geoCompetitors,
+    measurements: input.geoMeasurements,
+    patchStep,
+    emit,
+  });
 
   let geoJob: GeoEeatJobPreview | undefined;
+  let geoJobs: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }> | undefined;
   if (!geo.ok) {
     steps = await patchStep('geo_check', { status: 'error', detail: geo.error });
     outcomes.push({
@@ -1542,6 +1583,7 @@ async function finishEventQuickCheckFromGeo(
     });
   } else {
     geoJob = geo.job;
+    geoJobs = geo.geoJobs;
     steps = await patchStep('geo_check', {
       status: 'done',
       progress: 100,
@@ -1651,6 +1693,7 @@ async function finishEventQuickCheckFromGeo(
     geoQuestions,
     geoQuestionsByPersona,
     geoJob,
+    geoJobs,
     domainScan,
     personaPreview,
     audionProjectId,
