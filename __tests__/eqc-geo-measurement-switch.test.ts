@@ -24,6 +24,7 @@ describe('EQC GEO measurement switch', () => {
       'utf8'
     );
     expect(route).toContain('measurements: body.measurements');
+    expect(route).toContain('status: 202');
 
     const execute = readFileSync(
       path.join(root, 'lib/collection-flow-eqc-execute.ts'),
@@ -31,6 +32,6 @@ describe('EQC GEO measurement switch', () => {
     );
     expect(execute).toContain('resolveGeoJobMeasurementsFromContext');
     expect(execute).toContain('GEO_MEASUREMENT_DEFAULTS_EQC');
-    expect(execute).toContain('for (const measurement of measurements)');
+    expect(execute).toContain('Promise.all');
   });
 });

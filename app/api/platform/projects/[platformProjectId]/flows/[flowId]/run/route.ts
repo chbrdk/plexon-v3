@@ -3,6 +3,7 @@ import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 import { executeCollectionFlowRun } from '@/lib/collection-flow-execute';
+import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
 import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
 import { isSessionOwnedFlowTrigger } from '@/lib/collection-flow-run-triggers';
 import {
@@ -16,7 +17,7 @@ import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { platformJson } from '@/lib/platform-contract';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300;
+export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
 
 export async function POST(
   request: Request,

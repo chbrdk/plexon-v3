@@ -30,9 +30,18 @@ export type ConfirmGeoQuestionsInput = {
   emit?: WorkflowStepEmitter;
 };
 
-export async function confirmEventQuickCheckGeoQuestions(
+export type PersistGeoQuestionsConfirmationResult = {
+  workflowRunId: string;
+  geoQuestionsConfirmed: string[];
+  geoCompetitorsConfirmed?: string[];
+  geoMeasurementsConfirmed: GeoMeasurement[];
+  emit?: WorkflowStepEmitter;
+};
+
+/** DB + step updates only — safe to return HTTP 202 before execute. */
+export async function persistGeoQuestionsConfirmation(
   input: ConfirmGeoQuestionsInput
-): Promise<ExecuteEventQuickCheckRunResult> {
+): Promise<PersistGeoQuestionsConfirmationResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
   if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
@@ -91,12 +100,25 @@ export async function confirmEventQuickCheckGeoQuestions(
     },
   });
 
-  return executeEventQuickCheckRun({
-    user: input.user,
+  return {
     workflowRunId: run.id,
-    emit: input.emit,
     geoQuestionsConfirmed: confirmedQuestions,
     geoCompetitorsConfirmed: competitors,
     geoMeasurementsConfirmed: parseGeoMeasurementsOrDefaultEqc(input.measurements),
+    emit: input.emit,
+  };
+}
+
+export async function confirmEventQuickCheckGeoQuestions(
+  input: ConfirmGeoQuestionsInput
+): Promise<ExecuteEventQuickCheckRunResult> {
+  const prep = await persistGeoQuestionsConfirmation(input);
+  return executeEventQuickCheckRun({
+    user: input.user,
+    workflowRunId: prep.workflowRunId,
+    emit: prep.emit,
+    geoQuestionsConfirmed: prep.geoQuestionsConfirmed,
+    geoCompetitorsConfirmed: prep.geoCompetitorsConfirmed,
+    geoMeasurementsConfirmed: prep.geoMeasurementsConfirmed,
   });
 }

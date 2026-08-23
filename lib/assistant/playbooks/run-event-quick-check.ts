@@ -198,25 +198,30 @@ async function runGeoLayersForQuickCheck(input: {
 }> {
   const measurements = parseGeoMeasurementsOrDefaultEqc(input.measurements)
   const geoJobs: Array<{ measurement: GeoMeasurement; job: GeoEeatJobPreview }> = []
-  for (const measurement of measurements) {
-    const geo = await runGeoAnalysisWorkflow(
-      {
-        url: input.url,
-        checkionProjectId: input.checkionProjectId,
-        queries: input.queries,
-        competitors: input.competitors,
-        runCompetitive: Boolean(input.queries?.length),
-        generateQueries: !input.queries?.length,
-        measurement,
-      },
-      {
-        workflowRunId: undefined,
-        onExternalProgress: async (status, progress) => {
-          await input.patchStep('geo_check', { status: 'running', progress, detail: status })
-          streamPhase(input.emit, `GEO ${measurement}: ${status}${progress > 0 ? ` (${progress}%)` : ''}`)
+  const layerResults = await Promise.all(
+    measurements.map(async (measurement) => {
+      const geo = await runGeoAnalysisWorkflow(
+        {
+          url: input.url,
+          checkionProjectId: input.checkionProjectId,
+          queries: input.queries,
+          competitors: input.competitors,
+          runCompetitive: Boolean(input.queries?.length),
+          generateQueries: !input.queries?.length,
+          measurement,
         },
-      }
-    )
+        {
+          workflowRunId: undefined,
+          onExternalProgress: async (status, progress) => {
+            await input.patchStep('geo_check', { status: 'running', progress, detail: status })
+            streamPhase(input.emit, `GEO ${measurement}: ${status}${progress > 0 ? ` (${progress}%)` : ''}`)
+          },
+        }
+      )
+      return { measurement, geo }
+    })
+  )
+  for (const { measurement, geo } of layerResults) {
     if (!geo.ok || !geo.job) {
       return { ok: false, error: geo.error, geoJobs, job: geoJobs[0]?.job, jobId: geoJobs[0]?.job?.jobId }
     }

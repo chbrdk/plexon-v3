@@ -19,6 +19,7 @@ import {
   apiEventQuickCheckRunGeoQuestions,
 } from '@/lib/paths/event-quick-check-page';
 import { subscribeAssistantWorkflowStream } from '@/lib/assistant/workflow-stream-client';
+import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
 
 export type EventQuickCheckReviewGateProps = {
   workflowRunId: string;
@@ -215,13 +216,20 @@ export function EventQuickCheckReviewGate({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ questions, groups, measurements }),
         });
-        const result = (await res.json()) as { ok?: boolean; error?: string; report?: unknown };
+        if (res.status === 202) {
+          const polled = await pollEventQuickCheckRunUntilSettled(workflowRunId);
+          if (!polled.ok || polled.error) {
+            throw new Error(polled.error ?? EQC_PAGE_COPY.errorRunFailed);
+          }
+        } else {
+          const result = (await res.json()) as { ok?: boolean; error?: string; report?: unknown };
+          if (!res.ok || result.error) {
+            throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
+          }
+        }
+
         streamRef.current?.close();
         streamRef.current = null;
-
-        if (!res.ok || result.error) {
-          throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
-        }
 
         onComplete?.();
       } catch (e) {

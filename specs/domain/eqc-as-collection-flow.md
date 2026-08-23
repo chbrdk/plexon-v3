@@ -66,7 +66,9 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 **GEO confirm (required):** Resume `geo_queries` writes `buildQueriesCatalogBundle(payload)` to catalog root `queries` **and** to the `suggest_queries` node alias (`n-suggest-q`). Sibling field `measurements` (`recall` | `live`, one or both) is stored on `queries.measurements` — never stuffed into the questions array. **EQC default when omitted:** `['recall', 'live']` (both layers). User may deselect one tile before confirm.
 
-`geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer. Magazine renders a GEO chapter per layer.
+`geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — run **in parallel** when multiple layers are selected; page scan only on the primary (first) layer. Do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer. Magazine renders a GEO chapter per layer.
+
+GEO confirm `POST …/geo-questions` returns **202** immediately and finishes the flow in-process; the client polls `GET …/runs/:id` until `completed` (avoids proxy timeout on dual-layer runs).
 
 The GEO-questions confirm panel **must** show the same layer switch as CHECKION `/scan` (multi-select). Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job(s).
 

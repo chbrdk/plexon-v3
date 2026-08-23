@@ -547,7 +547,7 @@ export async function executeEqcCollectionFlowRun(input: {
         GEO_MEASUREMENT_DEFAULTS_EQC
       ) as GeoMeasurement[];
 
-      const layers: Array<{
+      type GeoLayerOutcome = {
         measurement: GeoMeasurement;
         job: {
           id: string;
@@ -559,21 +559,19 @@ export async function executeEqcCollectionFlowRun(input: {
         };
         preview?: Parameters<typeof geoPreviewForCatalogBundle>[0];
         catalog?: Record<string, unknown>;
-      }> = [];
+      };
 
-      for (const measurement of measurements) {
-        let geoJob: (typeof layers)[number]['job'] | null = null;
-        let geoPreview: Parameters<typeof geoPreviewForCatalogBundle>[0] | undefined;
-        let geoCatalog: Record<string, unknown> | undefined;
-        let geoError: string | undefined;
-
+      const runGeoLayer = async (
+        measurement: GeoMeasurement,
+        includePageScan: boolean
+      ): Promise<GeoLayerOutcome | { measurement: GeoMeasurement; error: string }> => {
         if (isCapabilityCatalogRuntimeEnabled()) {
           const cap = await executeCheckionGeoJobCapability(
             {
               url: geoUrl,
               companyName: companyName || undefined,
               queries,
-              includePageScan: true,
+              includePageScan,
               measurement,
             },
             {
@@ -584,31 +582,42 @@ export async function executeEqcCollectionFlowRun(input: {
             }
           );
           if (!cap.ok || !cap.agentPayload?.job) {
-            geoError = cap.error ?? 'GEO fehlgeschlagen';
-          } else {
-            geoJob = cap.agentPayload.job;
-            geoPreview = cap.agentPayload.preview;
-            geoCatalog = cap.catalogBundle;
+            return { measurement, error: cap.error ?? 'GEO fehlgeschlagen' };
           }
-        } else {
-          const geoResult = await runCheckionGeoJobV3({
-            projectId: boundCheckion,
-            platformProjectId: id,
-            url: geoUrl,
-            companyName: companyName || undefined,
-            queries: queries.length ? queries : undefined,
-            includePageScan: true,
+          return {
             measurement,
-          });
-          if (!geoResult.ok) {
-            geoError = geoResult.error;
-          } else {
-            geoJob = geoResult.job;
-            geoPreview = geoResult.preview;
-          }
+            job: cap.agentPayload.job,
+            preview: cap.agentPayload.preview,
+            catalog: cap.catalogBundle,
+          };
         }
 
-        if (!geoJob) {
+        const geoResult = await runCheckionGeoJobV3({
+          projectId: boundCheckion,
+          platformProjectId: id,
+          url: geoUrl,
+          companyName: companyName || undefined,
+          queries: queries.length ? queries : undefined,
+          includePageScan,
+          measurement,
+        });
+        if (!geoResult.ok) {
+          return { measurement, error: geoResult.error };
+        }
+        return {
+          measurement,
+          job: geoResult.job,
+          preview: geoResult.preview,
+        };
+      };
+
+      const layerOutcomes = await Promise.all(
+        measurements.map((measurement, index) => runGeoLayer(measurement, index === 0))
+      );
+
+      const layers: GeoLayerOutcome[] = [];
+      for (const outcome of layerOutcomes) {
+        if ('error' in outcome) {
           return failEqc({
             id,
             fid,
@@ -616,16 +625,11 @@ export async function executeEqcCollectionFlowRun(input: {
             startedAt,
             startUrl,
             runContext,
-            error: geoError ?? `GEO fehlgeschlagen (${measurement})`,
+            error: outcome.error ?? `GEO fehlgeschlagen (${outcome.measurement})`,
             historyRunId: input.historyRunId,
           });
         }
-        layers.push({
-          measurement,
-          job: geoJob,
-          preview: geoPreview,
-          catalog: geoCatalog,
-        });
+        layers.push(outcome);
       }
 
       const primary = layers[0]!;

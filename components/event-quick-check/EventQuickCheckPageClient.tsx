@@ -20,6 +20,7 @@ import { EventQuickCheckDashboardView } from '@/components/event-quick-check/Eve
 import { EventQuickCheckHistoryDialog } from '@/components/event-quick-check/EventQuickCheckHistoryDialog';
 import { EventQuickCheckReadinessBanner } from '@/components/event-quick-check/EventQuickCheckReadinessBanner';
 import { EventQuickCheckRunningProgress } from '@/components/event-quick-check/EventQuickCheckRunningProgress';
+import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
@@ -507,22 +508,29 @@ export function EventQuickCheckPageClient() {
           body: JSON.stringify({ questions, groups, measurements }),
         });
 
-        const result = (await res.json()) as {
-          ok: boolean;
-          report?: EventQuickCheckReportModel;
-          steps?: WorkflowStep[];
-          platformProjectId?: string;
-          error?: string;
-          awaitingDeepScan?: boolean;
-          deepScanProgress?: { complete: number; total: number; detail: string };
-          checkionProjectId?: string;
-          canRerunGeo?: boolean;
-        };
+        const result =
+          res.status === 202
+            ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
+            : ((await res.json()) as {
+                ok: boolean;
+                report?: EventQuickCheckReportModel;
+                steps?: WorkflowStep[];
+                platformProjectId?: string;
+                error?: string;
+                awaitingDeepScan?: boolean;
+                deepScanProgress?: { complete: number; total: number; detail: string };
+                checkionProjectId?: string;
+                canRerunGeo?: boolean;
+              });
 
         streamRef.current?.close();
         streamRef.current = null;
 
         if (result.steps?.length) setSteps(result.steps);
+
+        if (!result.ok || result.error) {
+          throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
+        }
 
         if (result.awaitingDeepScan) {
           setGeoQuestions([]);
@@ -534,8 +542,8 @@ export function EventQuickCheckPageClient() {
           return;
         }
 
-        if (!res.ok || !result.ok || !result.report) {
-          throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
+        if (!result.report) {
+          throw new Error(EQC_PAGE_COPY.errorRunFailed);
         }
 
         setReport(result.report);

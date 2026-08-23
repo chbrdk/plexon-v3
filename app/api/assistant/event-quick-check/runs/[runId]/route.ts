@@ -31,9 +31,13 @@ import {
 } from '@/lib/assistant/event-quick-check/hydrate-domain-scan-page-count';
 import { hydrateEventQuickCheckReportGeo } from '@/lib/assistant/event-quick-check/hydrate-geo-job-preview';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
+import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
 import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
 import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 import { hasDomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
+
+export const runtime = 'nodejs';
+export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
 
 function seedDomainFromCheckpoint(
   report: EventQuickCheckReportModel | null,

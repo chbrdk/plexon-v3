@@ -1,8 +1,15 @@
 import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
-import { confirmEventQuickCheckGeoQuestions } from '@/lib/assistant/event-quick-check/confirm-geo-questions';
+import {
+  persistGeoQuestionsConfirmation,
+} from '@/lib/assistant/event-quick-check/confirm-geo-questions';
+import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
+import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { GeoMeasurement } from '@/lib/geo/measurement';
+
+export const runtime = 'nodejs';
+export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
 
 export async function POST(
   request: Request,
@@ -25,14 +32,34 @@ export async function POST(
   }
 
   try {
-    const result = await confirmEventQuickCheckGeoQuestions({
+    const prep = await persistGeoQuestionsConfirmation({
       user,
       workflowRunId: runId,
       questions: body.questions,
       groups: body.groups,
       measurements: body.measurements,
     });
-    return Response.json(result);
+
+    // Dual GEO layers can exceed proxy timeouts — finish in background; client polls GET run.
+    void executeEventQuickCheckRun({
+      user,
+      workflowRunId: prep.workflowRunId,
+      geoQuestionsConfirmed: prep.geoQuestionsConfirmed,
+      geoCompetitorsConfirmed: prep.geoCompetitorsConfirmed,
+      geoMeasurementsConfirmed: prep.geoMeasurementsConfirmed,
+    }).catch((error) => {
+      console.error('[event-quick-check geo-questions]', error);
+    });
+
+    return Response.json(
+      {
+        ok: true,
+        accepted: true,
+        workflowRunId: prep.workflowRunId,
+        status: 'running',
+      },
+      { status: 202 }
+    );
   } catch (e) {
     if (e instanceof Error) {
       if (e.message === 'NOT_FOUND') return apiError('Not found', API_STATUS.NOT_FOUND);
