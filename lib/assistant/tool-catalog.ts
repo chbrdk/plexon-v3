@@ -29,6 +29,8 @@ export type ToolFamily =
   | 'creation_library'
   | 'creation_compositions'
   | 'creation_projects'
+  | 'creation_scene'
+  | 'creation_scene_write'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -101,6 +103,15 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   creation_library: [/^creation_health$/, /^creation_library_/],
   creation_compositions: [/^creation_compositions_/],
   creation_projects: [/^creation_projects_/, /^creation_project_/],
+  creation_scene: [
+    /^creation_scene_(get|list|tree_index)$/,
+    /^creation_editor_palette$/,
+    /^creation_brand_tokens_get$/,
+  ],
+  creation_scene_write: [
+    /^creation_scene_apply_ops$/,
+    /^creation_site_kit_composition_save$/,
+  ],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -147,6 +158,7 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'creation_library',
   'creation_compositions',
   'creation_projects',
+  'creation_scene',
   'echon_ops',
   'echon_research',
   'echon_signals',
@@ -164,6 +176,7 @@ export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
   'creation_library',
   'creation_compositions',
   'creation_projects',
+  'creation_scene',
 ];
 
 export const BRANDION_BRAND_FAMILIES: ToolFamily[] = [
@@ -175,6 +188,13 @@ export const CREATION_DESIGN_FAMILIES: ToolFamily[] = [
   'creation_library',
   'creation_compositions',
   'creation_projects',
+];
+
+export const CREATION_SCENE_WRITE_FAMILIES: ToolFamily[] = ['creation_scene_write'];
+
+export const CREATION_SCENE_EDIT_FAMILIES: ToolFamily[] = [
+  'creation_scene',
+  'creation_scene_write',
 ];
 
 export const SCAN_FAMILIES: ToolFamily[] = [

@@ -11,6 +11,7 @@ import {
   ECHON_TO_AUDIENCE_FAMILIES,
   BRANDION_BRAND_FAMILIES,
   CREATION_DESIGN_FAMILIES,
+  CREATION_SCENE_EDIT_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -34,6 +35,7 @@ export type AssistantPlanIntent =
   | 'echon_audience'
   | 'brandion_brand'
   | 'creation_design'
+  | 'creation_scene_edit'
   | 'action_write'
   | 'general_chat';
 
@@ -179,6 +181,19 @@ const BRANDION_PATTERNS = [
   /\bfarb(ton|palette|werte?)\b/i,
 ];
 
+const CREATION_SCENE_PATTERNS = [
+  /\bscene\b/i,
+  /\blayout\b/i,
+  /\beditor\b/i,
+  /\blanding\s*page\b/i,
+  /\bhero\b/i,
+  /\bsite\s*kit\b/i,
+  /\bmaster\b/i,
+  /\binstanz/i,
+  /\bscene_apply_ops\b/i,
+  /\bscene_tree_index\b/i,
+];
+
 const CREATION_PATTERNS = [
   /\bcreation\b/i,
   /\bzaoly\b/i,
@@ -206,6 +221,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       skipTools: false,
       reasoning:
         'Marken-/Farb-/Guideline-Intent – BRANDION guidelines + tokens (live, nicht erfinden).',
+    });
+  }
+
+  if (CREATION_SCENE_PATTERNS.some((p) => p.test(text)) && input.hasCreationMcp) {
+    return buildPlan({
+      intent: 'creation_scene_edit',
+      mode: 'hybrid',
+      toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
+      allowWriteTools: writeIntent,
+      maxToolRounds: 6,
+      skipTools: false,
+      reasoning:
+        'CREATION Scene-Layout — tree index + palette lesen; scene_apply_ops bei Schreib-Intent.',
     });
   }
 
@@ -468,6 +496,7 @@ const VALID_INTENTS = new Set<AssistantPlanIntent>([
   'echon_audience',
   'brandion_brand',
   'creation_design',
+  'creation_scene_edit',
   'action_write',
   'general_chat',
 ]);
@@ -499,6 +528,8 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'creation_library',
   'creation_compositions',
   'creation_projects',
+  'creation_scene',
+  'creation_scene_write',
   'plexon_ui',
 ]);
 
@@ -548,7 +579,7 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,

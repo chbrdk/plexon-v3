@@ -44,6 +44,8 @@ describe('creation tool catalog + planner', () => {
     expect(classifyToolFamily('creation_library_catalog')).toBe('creation_library')
     expect(classifyToolFamily('creation_compositions_list')).toBe('creation_compositions')
     expect(classifyToolFamily('creation_projects_list')).toBe('creation_projects')
+    expect(classifyToolFamily('creation_scene_tree_index')).toBe('creation_scene')
+    expect(classifyToolFamily('creation_scene_apply_ops')).toBe('creation_scene_write')
   })
 
   it('plans creation_design for library prompts when MCP on', () => {
@@ -58,6 +60,22 @@ describe('creation tool catalog + planner', () => {
       compactContextLoaded: false,
     })
     expect(plan.intent).toBe('creation_design')
+  })
+
+  it('plans creation_scene_edit for layout prompts when MCP on', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Erstelle mir eine Hero-Section im CREATION Editor Scene layout',
+      hasProjectContext: false,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      compactContextLoaded: false,
+    })
+    expect(plan.intent).toBe('creation_scene_edit')
+    expect(plan.toolFamilies).toContain('creation_scene')
+    expect(plan.allowWriteTools).toBe(true)
   })
 })
 
