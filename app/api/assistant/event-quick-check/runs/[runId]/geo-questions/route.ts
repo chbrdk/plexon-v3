@@ -3,13 +3,13 @@ import { getRequestUser } from '@/lib/auth-request-user';
 import {
   persistGeoQuestionsConfirmation,
 } from '@/lib/assistant/event-quick-check/confirm-geo-questions';
-import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
 import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { GeoMeasurement } from '@/lib/geo/measurement';
 
 export const runtime = 'nodejs';
-export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
+/** Dual-layer GEO — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+export const maxDuration = 900;
 
 export async function POST(
   request: Request,
