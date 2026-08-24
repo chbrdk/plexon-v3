@@ -48,9 +48,11 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 Phasen (eigene apply_ops-Batches):
-1. Struktur — add_page / SiteStack / SiteGrid / Sections
-2. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
-3. Polish — Tree neu lesen; jede sichtbare Seed-Copy per set_prop ersetzen; Tokens/Spacing
+1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für Struktur/Copy-Ideen (nicht 1:1 kopieren)
+2. Struktur — add_page / SiteStack / SiteGrid / Sections
+3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
+4. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
+5. Polish — Tree neu lesen; Tokens/Spacing
 
 Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
 
@@ -82,5 +84,8 @@ Prop-Cheat:
 Nur wenn Master nötig: insert_instance { masterId, parentId, props: { children|options|… } } im selben Op,
 oder sofort set_prop auf die neue Instance-ID. Nackte Instances = Seed-Copy → unfertig.
 
-PDP-Checklist vor Abschluss: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.`;
+### Pflicht vor Abschluss
+1. creation_scene_content_audit(sceneId) — bei ok=false Fehler beheben und erneut auditen.
+2. PDP-Checklist: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.
+Nicht fertig melden solange Audit error-Findings hat.`;
 }

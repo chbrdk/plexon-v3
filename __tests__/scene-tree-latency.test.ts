@@ -12,6 +12,7 @@ const baseFlags = {
   useEchonMcp: true,
   useBrandionMcp: true,
   useCreationMcp: true,
+  useSpirionMcp: true,
 }
 
 function plan(intent: AssistantPlan['intent']): AssistantPlan {
@@ -28,13 +29,25 @@ function plan(intent: AssistantPlan['intent']): AssistantPlan {
 }
 
 describe('resolveMcpFlagsForPlan', () => {
-  it('keeps only Creation MCP for scene edit', () => {
+  it('keeps Creation + Spirion MCP for scene edit', () => {
     expect(resolveMcpFlagsForPlan(plan('creation_scene_edit'), baseFlags)).toEqual({
       useCheckionMcp: false,
       useAudionMcp: false,
       useEchonMcp: false,
       useBrandionMcp: false,
       useCreationMcp: true,
+      useSpirionMcp: true,
+    })
+  })
+
+  it('keeps only Spirion for spirion_research', () => {
+    expect(resolveMcpFlagsForPlan(plan('spirion_research'), baseFlags)).toEqual({
+      useCheckionMcp: false,
+      useAudionMcp: false,
+      useEchonMcp: false,
+      useBrandionMcp: false,
+      useCreationMcp: false,
+      useSpirionMcp: true,
     })
   })
 

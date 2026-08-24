@@ -53,10 +53,11 @@ Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|la
 
 ### Latency
 
-- `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` only contact CREATION MCP (skip Checkion/Audion/Echon/Brandion `tools/list`).
+- `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` contact CREATION MCP (skip Checkion/Audion/Echon/Brandion `tools/list`). When `useSpirionMcp`, also contact Spirion for reference/screen inspiration (see `assistant-spirion-mcp.md`).
 - Prefetch: editor turns load a compact scene-tree **outline** into the system prompt before the first LLM round.
 - Orchestrator compacts `creation_scene_tree_index` results to the same outline format.
 - MCP `tools/list` is cached ~60s per base URL; product MCP fetches run in parallel when multiple are enabled.
+- Before finishing PDP/landing builds: call `creation_scene_content_audit` and fix error findings (Welle 1 self-check).
 
 ### Creative depth (`creation_scene_edit` only)
 

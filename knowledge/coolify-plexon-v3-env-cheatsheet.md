@@ -218,11 +218,16 @@ NEXT_PUBLIC_SPIRION_URL=https://dig.projects-a.plygrnd.tech
 # SPIRION_API_URL=https://dig-api.projects-a.plygrnd.tech
 # Legacy aliases still work for one release:
 # NEXT_PUBLIC_DIG_URL=… / DIG_API_URL=…
+
+# Assistant MCP (Welle 1 — references/screens search):
+SPIRION_MCP_URL=https://spirion-api.projects-a.plygrnd.tech/mcp
+# DIG_MCP_URL=…  # legacy fallback if SPIRION_MCP_URL unset
 ```
 
 Dann Redeploy plexon-v3. Wirkung:
 
 - `getSpirionUrl()` / `getSpirionServiceApiUrl()` → Staging-FQDN (`getDigUrl` / `getDigServiceApiUrl` are thin aliases)
+- `getSpirionMcpUrl()` → dig-api MCP endpoint when `SPIRION_MCP_URL` set (spec `assistant-spirion-mcp.md`)
 - Products Registry: SPIRION `lifecycle: active` (sonst `planned`)
 - Collection binding / upsert: product id `spirion` in placeholders; upsert when URL set; origin `spirion-project-origin` (legacy `dig-project-origin` forwards)
 - Capability catalog stubs: `spirion.capture`, `spirion.enrich`, `spirion.reference_search`, `spirion.reference_pack`, `spirion.generate`

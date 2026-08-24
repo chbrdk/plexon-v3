@@ -4,6 +4,7 @@ import {
   getEchonMcpUrl,
   getBrandionMcpUrl,
   getCreationMcpUrl,
+  getSpirionMcpUrl,
   getBoardCompletionModel,
   getBoardCompletionModelWithMcp,
   getAssistantCompletionModel,
@@ -62,6 +63,7 @@ export type OrchestratorCompleteOptions = {
   useEchonMcp?: boolean;
   useBrandionMcp?: boolean;
   useCreationMcp?: boolean;
+  useSpirionMcp?: boolean;
   pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
   actorUserId?: string;
   maxToolRounds?: number;
@@ -209,6 +211,7 @@ export async function runOrchestratorComplete(
     useEchonMcp = false,
     useBrandionMcp = false,
     useCreationMcp = false,
+    useSpirionMcp = false,
     pageContext = null,
     actorUserId = '',
     maxToolRounds = 5,
@@ -235,6 +238,7 @@ export async function runOrchestratorComplete(
   const echonMcpUrl = useEchonMcp ? getEchonMcpUrl() : undefined;
   const brandionMcpUrl = useBrandionMcp ? getBrandionMcpUrl() : undefined;
   const creationMcpUrl = useCreationMcp ? getCreationMcpUrl() : undefined;
+  const spirionMcpUrl = useSpirionMcp ? getSpirionMcpUrl() : undefined;
   let tools: AnthropicTool[] = [];
   let mcpNameByAnthropicName: Record<string, string> = {};
   const toolSourceByAnthropicName: Record<string, string> = {};
@@ -264,6 +268,7 @@ export async function runOrchestratorComplete(
   if (echonMcpUrl) mcpFetches.push(loadMcpTools('ECHON', echonMcpUrl));
   if (brandionMcpUrl) mcpFetches.push(loadMcpTools('BRANDION', brandionMcpUrl));
   if (creationMcpUrl) mcpFetches.push(loadMcpTools('CREATION', creationMcpUrl));
+  if (spirionMcpUrl) mcpFetches.push(loadMcpTools('SPIRION', spirionMcpUrl));
   if (mcpFetches.length) {
     const loaded = await Promise.all(mcpFetches);
     for (const fetched of loaded) {
@@ -292,7 +297,8 @@ export async function runOrchestratorComplete(
       (useAudionMcp && audionMcpUrl) ||
       (useEchonMcp && echonMcpUrl) ||
       (useBrandionMcp && brandionMcpUrl) ||
-      (useCreationMcp && creationMcpUrl)) &&
+      (useCreationMcp && creationMcpUrl) ||
+      (useSpirionMcp && spirionMcpUrl)) &&
     tools.length > 0;
   const model =
     useMcp

@@ -6,12 +6,12 @@ export type AssistantMcpFlags = {
   useEchonMcp: boolean;
   useBrandionMcp: boolean;
   useCreationMcp: boolean;
+  useSpirionMcp: boolean;
 };
 
 /**
  * Narrow which product MCP servers to contact for a planned turn.
- * Avoids sequential initialize+tools/list on 5 servers when only one product is needed
- * (the main latency before creation_scene_tree_index).
+ * Avoids sequential initialize+tools/list on all servers when only one product is needed.
  */
 export function resolveMcpFlagsForPlan(
   plan: AssistantPlan,
@@ -26,6 +26,17 @@ export function resolveMcpFlagsForPlan(
         useEchonMcp: false,
         useBrandionMcp: false,
         useCreationMcp: flags.useCreationMcp,
+        // Scene builds may pull Spirion references/screens for inspiration.
+        useSpirionMcp: flags.useSpirionMcp,
+      };
+    case 'spirion_research':
+      return {
+        useCheckionMcp: false,
+        useAudionMcp: false,
+        useEchonMcp: false,
+        useBrandionMcp: false,
+        useCreationMcp: false,
+        useSpirionMcp: flags.useSpirionMcp,
       };
     case 'brandion_brand':
       return {
@@ -34,6 +45,7 @@ export function resolveMcpFlagsForPlan(
         useEchonMcp: false,
         useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: false,
+        useSpirionMcp: false,
       };
     case 'echon_market':
     case 'echon_audience':
@@ -43,6 +55,7 @@ export function resolveMcpFlagsForPlan(
         useEchonMcp: flags.useEchonMcp,
         useBrandionMcp: false,
         useCreationMcp: false,
+        useSpirionMcp: false,
       };
     case 'audion_persona':
     case 'audion_knowledge':
@@ -56,6 +69,7 @@ export function resolveMcpFlagsForPlan(
         useEchonMcp: false,
         useBrandionMcp: false,
         useCreationMcp: false,
+        useSpirionMcp: false,
       };
     case 'checkion_scan':
     case 'checkion_seo_geo':
@@ -66,6 +80,7 @@ export function resolveMcpFlagsForPlan(
         useEchonMcp: false,
         useBrandionMcp: false,
         useCreationMcp: false,
+        useSpirionMcp: false,
       };
     default:
       return flags;

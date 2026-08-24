@@ -12,6 +12,8 @@ import {
   BRANDION_BRAND_FAMILIES,
   CREATION_DESIGN_FAMILIES,
   CREATION_SCENE_EDIT_FAMILIES,
+  CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
+  SPIRION_RESEARCH_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -42,6 +44,7 @@ export type AssistantPlanIntent =
   | 'brandion_brand'
   | 'creation_design'
   | 'creation_scene_edit'
+  | 'spirion_research'
   | 'action_write'
   | 'general_chat';
 
@@ -68,6 +71,7 @@ export type PlannerInput = {
   hasEchonMcp: boolean;
   hasBrandionMcp: boolean;
   hasCreationMcp: boolean;
+  hasSpirionMcp?: boolean;
   compactContextLoaded: boolean;
   pageContext?: AssistantPageContext | null;
 };
@@ -213,17 +217,36 @@ const CREATION_PATTERNS = [
   /\bwc\b/i,
 ];
 
+const SPIRION_PATTERNS = [
+  /\bspirion\b/i,
+  /\bdig\b/i,
+  /\bdesign.?intelligence\b/i,
+  /\breferenz(en)?\b/i,
+  /\breferences?\b/i,
+  /\bscreen.?search\b/i,
+  /\bmoodboard\b/i,
+  /\bpattern.?library\b/i,
+  /\bdesign.?referenz/i,
+];
+
+function creationSceneEditFamilies(hasSpirionMcp: boolean): ToolFamily[] {
+  return hasSpirionMcp
+    ? [...CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES, 'plexon_ui']
+    : [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'];
+}
+
 export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   const text = (input.planningPrompt ?? input.prompt).trim();
   const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
   const sceneWriteIntent = hasSceneWriteIntent(text, input.pageContext);
   const audienceWrite = hasAudienceWriteIntent(text);
+  const hasSpirionMcp = Boolean(input.hasSpirionMcp);
 
   if (hasCreationEditorSceneContext(input.pageContext) && input.hasCreationMcp) {
     return buildPlan({
       intent: 'creation_scene_edit',
       mode: 'hybrid',
-      toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
+      toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
       allowWriteTools: writeIntent || sceneWriteIntent,
       maxToolRounds: getCreationSceneMaxToolRounds(),
       skipTools: false,
@@ -249,7 +272,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'creation_scene_edit',
       mode: 'hybrid',
-      toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
+      toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
       allowWriteTools: writeIntent || sceneWriteIntent,
       maxToolRounds: getCreationSceneMaxToolRounds(),
       skipTools: false,
@@ -268,6 +291,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       skipTools: false,
       reasoning:
         'CREATION Library/Composition-Intent – Catalog + stubs (nicht Tags erfinden).',
+    });
+  }
+
+  if (SPIRION_PATTERNS.some((p) => p.test(text)) && hasSpirionMcp) {
+    return buildPlan({
+      intent: 'spirion_research',
+      mode: 'tools',
+      toolFamilies: [...SPIRION_RESEARCH_FAMILIES, 'plexon_ui'],
+      allowWriteTools: false,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning:
+        'SPIRION Research — references/screens search (live, Patterns nicht erfinden).',
     });
   }
 
@@ -518,6 +554,7 @@ const VALID_INTENTS = new Set<AssistantPlanIntent>([
   'brandion_brand',
   'creation_design',
   'creation_scene_edit',
+  'spirion_research',
   'action_write',
   'general_chat',
 ]);
@@ -551,6 +588,8 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'creation_projects',
   'creation_scene',
   'creation_scene_write',
+  'spirion_references',
+  'spirion_screens',
   'plexon_ui',
 ]);
 
@@ -609,7 +648,7 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -619,6 +658,7 @@ Regeln:
     hasEchonMcp: input.hasEchonMcp,
     hasBrandionMcp: input.hasBrandionMcp,
     hasCreationMcp: input.hasCreationMcp,
+    hasSpirionMcp: Boolean(input.hasSpirionMcp),
     compactContextLoaded: input.compactContextLoaded,
     heuristicSuggestion: {
       intent: heuristic.intent,

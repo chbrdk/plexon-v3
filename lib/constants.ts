@@ -576,3 +576,11 @@ export const getCreationMcpUrl = (): string | undefined => {
   const url = process.env.CREATION_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for SPIRION design references/screens. Prefer SPIRION_MCP_URL; fall back to DIG_MCP_URL. */
+export const getSpirionMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url =
+    process.env.SPIRION_MCP_URL?.trim() || process.env.DIG_MCP_URL?.trim();
+  return url || undefined;
+};

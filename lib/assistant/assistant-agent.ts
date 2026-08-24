@@ -13,6 +13,7 @@ import { buildAudionIntegrationContextBlock } from '@/lib/integrations/audion-co
 import { buildBrandionIntegrationContextBlock } from '@/lib/integrations/brandion-connectivity';
 import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity';
 import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
+import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import {
   runOrchestratorComplete,
   type OrchestratorCompleteOptions,
@@ -52,6 +53,7 @@ export type RunAssistantAgentInput = {
   useEchonMcp: boolean;
   useBrandionMcp: boolean;
   useCreationMcp: boolean;
+  useSpirionMcp: boolean;
   beforeToolCall?: OrchestratorCompleteOptions['beforeToolCall'];
   onProgress?: AgentProgressCallback;
   onPlan?: (plan: AssistantPlan) => void;
@@ -113,6 +115,10 @@ export async function runAssistantAgent(
     useCreationMcp: input.useCreationMcp,
   });
 
+  const spirionIntegrationBlock = buildSpirionIntegrationContextBlock({
+    useSpirionMcp: input.useSpirionMcp,
+  });
+
   const compactContextLoaded = baseSystemPrompt.includes('## Projektkontext (Kurzfassung)');
 
   const planningPrompt = buildPlanningPromptFromConversation(
@@ -129,6 +135,7 @@ export async function runAssistantAgent(
     hasEchonMcp: input.useEchonMcp,
     hasBrandionMcp: input.useBrandionMcp,
     hasCreationMcp: input.useCreationMcp,
+    hasSpirionMcp: input.useSpirionMcp,
     compactContextLoaded,
     pageContext: input.pageContext,
   });
@@ -140,6 +147,7 @@ export async function runAssistantAgent(
     useEchonMcp: input.useEchonMcp,
     useBrandionMcp: input.useBrandionMcp,
     useCreationMcp: input.useCreationMcp,
+    useSpirionMcp: input.useSpirionMcp,
   });
 
   let retrieval: RetrievalResult | null = null;
@@ -182,7 +190,7 @@ export async function runAssistantAgent(
   const retrievalBlock = retrieval?.block ? `\n${retrieval.block}\n` : '';
   const prefetchBlock = sceneTreePrefetch ? `\n${sceneTreePrefetch}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n${retrievalBlock}${prefetchBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n${retrievalBlock}${prefetchBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
@@ -194,6 +202,7 @@ export async function runAssistantAgent(
     useEchonMcp: mcpFlags.useEchonMcp,
     useBrandionMcp: mcpFlags.useBrandionMcp,
     useCreationMcp: mcpFlags.useCreationMcp,
+    useSpirionMcp: mcpFlags.useSpirionMcp,
     pageContext: input.pageContext,
     actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,

@@ -31,6 +31,8 @@ export type ToolFamily =
   | 'creation_projects'
   | 'creation_scene'
   | 'creation_scene_write'
+  | 'spirion_references'
+  | 'spirion_screens'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -104,13 +106,29 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   creation_compositions: [/^creation_compositions_/],
   creation_projects: [/^creation_projects_/, /^creation_project_/],
   creation_scene: [
-    /^creation_scene_(get|list|tree_index)$/,
+    /^creation_scene_(get|list|tree_index|content_audit)$/,
     /^creation_editor_palette$/,
     /^creation_brand_tokens_get$/,
   ],
   creation_scene_write: [
     /^creation_scene_apply_ops$/,
     /^creation_site_kit_composition_save$/,
+  ],
+  spirion_references: [
+    /^spirion_references_search$/,
+    /^spirion_reference_(get|pack)$/,
+    /^spirion_compose_brief$/,
+    /^dig_(search|inspect|neighbors|compare|recommend)$/,
+    /^dig_reference_/,
+  ],
+  spirion_screens: [
+    /^spirion_screens_search$/,
+    /^spirion_capture_prompt_pack$/,
+    /^spirion_flows_/,
+    /^spirion_flow_/,
+    /^dig_screen_/,
+    /^dig_capture_/,
+    /^dig_flow_/,
   ],
   plexon_ui: [/^plexon_ui_/],
 };
@@ -159,6 +177,8 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'creation_compositions',
   'creation_projects',
   'creation_scene',
+  'spirion_references',
+  'spirion_screens',
   'echon_ops',
   'echon_research',
   'echon_signals',
@@ -177,6 +197,8 @@ export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
   'creation_compositions',
   'creation_projects',
   'creation_scene',
+  'spirion_references',
+  'spirion_screens',
 ];
 
 export const BRANDION_BRAND_FAMILIES: ToolFamily[] = [
@@ -195,6 +217,18 @@ export const CREATION_SCENE_WRITE_FAMILIES: ToolFamily[] = ['creation_scene_writ
 export const CREATION_SCENE_EDIT_FAMILIES: ToolFamily[] = [
   'creation_scene',
   'creation_scene_write',
+];
+
+/** Spirion research families (Welle 1 read-only). */
+export const SPIRION_RESEARCH_FAMILIES: ToolFamily[] = [
+  'spirion_references',
+  'spirion_screens',
+];
+
+/** Creation scene edit + optional Spirion inspiration. */
+export const CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES: ToolFamily[] = [
+  ...CREATION_SCENE_EDIT_FAMILIES,
+  ...SPIRION_RESEARCH_FAMILIES,
 ];
 
 export const SCAN_FAMILIES: ToolFamily[] = [
