@@ -1,32 +1,40 @@
 import { describe, expect, it } from 'vitest'
 import {
-  EQC_GEO_CLAUDE_MODELS,
+  EQC_GEO_ALLOWED_MODELS,
   EQC_GEO_DEFAULT_MODELS,
   eqcGeoDefaultModels,
+  sanitizeEqcGeoModels,
 } from '@/lib/integrations/eqc-geo-default-models'
 
 describe('eqc-geo-default-models', () => {
-  it('includes GPT-5.6, every catalog Claude id, and Gemini Flash', () => {
+  it('locks Plexon EQC to one GPT, one Claude, and one Gemini model', () => {
     expect(EQC_GEO_DEFAULT_MODELS).toEqual([
-      'gpt-5.6-luna',
       'gpt-5.6-terra',
-      'gpt-5.6-sol',
-      'claude-fable-5',
-      'claude-opus-5',
       'claude-sonnet-5',
-      'claude-opus-4-8',
-      'claude-sonnet-4-6',
-      'claude-haiku-4-5',
       'gemini-3.6-flash',
     ])
-    expect([...EQC_GEO_CLAUDE_MODELS]).toEqual([
-      'claude-fable-5',
-      'claude-opus-5',
+    expect([...EQC_GEO_ALLOWED_MODELS]).toEqual([
+      'gpt-5.6-terra',
       'claude-sonnet-5',
-      'claude-opus-4-8',
-      'claude-sonnet-4-6',
-      'claude-haiku-4-5',
+      'gemini-3.6-flash',
     ])
     expect(eqcGeoDefaultModels()).toEqual([...EQC_GEO_DEFAULT_MODELS])
+  })
+
+  it('filters requested models to the locked trio and falls back when none survive', () => {
+    expect(
+      sanitizeEqcGeoModels([
+        'gpt-5.6-sol',
+        'claude-sonnet-5',
+        'claude-sonnet-5',
+        'gemini-3.6-flash',
+      ])
+    ).toEqual(['claude-sonnet-5', 'gemini-3.6-flash'])
+
+    expect(sanitizeEqcGeoModels(['gpt-5.6-sol', 'claude-opus-5'])).toEqual([
+      'gpt-5.6-terra',
+      'claude-sonnet-5',
+      'gemini-3.6-flash',
+    ])
   })
 })

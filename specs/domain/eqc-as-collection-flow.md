@@ -68,6 +68,8 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 `geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — run **in parallel** when multiple layers are selected; page scan only on the primary (first) layer. Do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer. Magazine renders a GEO chapter per layer.
 
+**Plexon EQC model budget (locked):** GEO jobs from `/event-quick-check` MUST use only the curated cross-provider trio `gpt-5.6-terra`, `claude-sonnet-5`, and `gemini-3.6-flash`. Broader CHECKION model catalogs may exist elsewhere, but EQC keeps one mid-tier OpenAI model, one mid-tier Claude model, and one Gemini model for stable cost, latency, and report comparability.
+
 GEO confirm `POST …/geo-questions` returns **202** immediately and finishes the flow in-process; the client polls `GET …/runs/:id` until `completed` (avoids proxy timeout on dual-layer runs).
 
 The GEO-questions confirm panel **must** show the same layer switch as CHECKION `/scan` (multi-select). Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job(s).

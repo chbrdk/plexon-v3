@@ -1,10 +1,7 @@
-export const EQC_GEO_CLAUDE_MODELS = [
-  'claude-fable-5',
-  'claude-opus-5',
+export const EQC_GEO_ALLOWED_MODELS = [
+  'gpt-5.6-terra',
   'claude-sonnet-5',
-  'claude-opus-4-8',
-  'claude-sonnet-4-6',
-  'claude-haiku-4-5',
+  'gemini-3.6-flash',
 ] as const
 
 /**
@@ -13,13 +10,22 @@ export const EQC_GEO_CLAUDE_MODELS = [
  * then the results magazine has nothing to switch.
  */
 export const EQC_GEO_DEFAULT_MODELS = [
-  'gpt-5.6-luna',
   'gpt-5.6-terra',
-  'gpt-5.6-sol',
-  ...EQC_GEO_CLAUDE_MODELS,
+  'claude-sonnet-5',
   'gemini-3.6-flash',
 ] as const
 
 export function eqcGeoDefaultModels(): string[] {
   return [...EQC_GEO_DEFAULT_MODELS]
+}
+
+export function sanitizeEqcGeoModels(models?: string[]): string[] {
+  const requested = Array.isArray(models) ? models : []
+  const allowed = new Set<string>(EQC_GEO_ALLOWED_MODELS)
+  const filtered = requested.filter((modelId, index) => {
+    if (typeof modelId !== 'string') return false
+    if (!allowed.has(modelId)) return false
+    return requested.indexOf(modelId) === index
+  })
+  return filtered.length > 0 ? filtered : eqcGeoDefaultModels()
 }
