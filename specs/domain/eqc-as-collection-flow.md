@@ -66,7 +66,9 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 **GEO confirm (required):** Resume `geo_queries` writes `buildQueriesCatalogBundle(payload)` to catalog root `queries` **and** to the `suggest_queries` node alias (`n-suggest-q`). Sibling field `measurements` (`recall` | `live`, one or both) is stored on `queries.measurements` — never stuffed into the questions array. **EQC default when omitted:** `['recall', 'live']` (both layers). User may deselect one tile before confirm.
 
-`geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — run **in parallel** when multiple layers are selected; page scan only on the primary (first) layer. Do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer. Magazine renders a GEO chapter per layer.
+`geo_job` resolves prompts via `resolveGeoJobQueriesFromContext` and layers via `resolveGeoJobMeasurementsFromContext`. **One CHECKION job per measurement** — run **in parallel** when multiple layers are selected; page scan only on the primary (first) layer. Do not mix `citedShare`. Catalog `geo.*` is the **primary** (first selected) layer for compare gates; `geo.layers[]` holds every layer.
+
+**Magazine (dual layers):** WHEN `geoLayers.length > 1`, the report MUST render **one** GEO band with (1) a compact Layer-1 vs Layer-2 compare strip (overallScore / fitness + winner verdict) and (2) an exclusive layer `ToggleGroup` that switches score rings, SoV, radar, and the citation dossier together. Do **not** stack two full GEO chapters. Confirm tiles and parallel jobs are unchanged. PDF stays on primary `report.geo`.
 
 **Plexon EQC model budget (locked):** GEO jobs from `/event-quick-check` MUST use only the curated cross-provider trio `gpt-5.6-terra`, `claude-sonnet-5`, and `gemini-3.6-flash`. Broader CHECKION model catalogs may exist elsewhere, but EQC keeps one mid-tier OpenAI model, one mid-tier Claude model, and one Gemini model for stable cost, latency, and report comparability.
 

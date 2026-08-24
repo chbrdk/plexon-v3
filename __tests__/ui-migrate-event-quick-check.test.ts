@@ -83,7 +83,16 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('eqc-persona-chat-deep-link')
     expect(dash).not.toContain('StatLede')
     expect(dash).toContain('plexon-eqc-mag-persona-lists')
-    expect(dash).toContain('EventQuickCheckGeoMagazineSection')
+    expect(dash).toContain('EventQuickCheckGeoBand')
+    expect(dash).not.toContain('geoLayers?.length ? report.geoLayers')
+    const geoBand = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckGeoBand.tsx'),
+      'utf8',
+    )
+    expect(geoBand).toContain('ToggleGroup')
+    expect(geoBand).toContain('buildEqcGeoLayerCompare')
+    expect(geoBand).toContain('EventQuickCheckGeoMagazineSection')
+    expect(geoBand).toContain('plexon-eqc-geo-layer-compare')
     expect(dash).toContain('EventQuickCheckEeatMagazineSection')
     expect(dash).toContain('EventQuickCheckGeoRecommendationsMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')
@@ -137,6 +146,8 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       geoMag.indexOf('plexon-eqc-geo-snapshot__lede'),
     )
     const globals = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
+    expect(globals).toContain('.plexon-eqc-geo-layer-compare')
+    expect(globals).toContain('.plexon-eqc-geo-band__switch')
     expect(globals).toMatch(
       /\.plexon-eqc-results-scroll\[data-eqc-mode='present'\] \{[\s\S]*?scroll-snap-type:\s*y proximity/,
     )

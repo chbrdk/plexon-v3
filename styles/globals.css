@@ -4008,6 +4008,90 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   margin-bottom: 0.75rem;
 }
 
+/* Dual-layer GEO band — compare strip + switch (one chapter, not stacked) */
+.plexon-eqc-geo-band {
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 1.85rem);
+}
+
+.plexon-eqc-geo-band__switch {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+
+.plexon-eqc-geo-layer-compare {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.85rem 0 0.15rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.plexon-eqc-geo-layer-compare__head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.plexon-eqc-geo-layer-compare__verdict {
+  margin: 0;
+}
+
+.plexon-eqc-geo-layer-compare__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .plexon-eqc-geo-layer-compare__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plexon-eqc-geo-layer-compare__card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+
+.plexon-eqc-geo-layer-compare__card--winner {
+  border-color: color-mix(in srgb, var(--accent, #00ca55) 55%, var(--line));
+  background: color-mix(in srgb, var(--accent, #00ca55) 8%, transparent);
+}
+
+.plexon-eqc-geo-layer-compare__label {
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plexon-eqc-geo-layer-compare__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 0.85rem;
+  margin: 0;
+}
+
+.plexon-eqc-geo-layer-compare__metrics dt {
+  margin: 0;
+  font-size: var(--type-xs, 0.72rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.plexon-eqc-geo-layer-compare__metrics dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display, var(--font-body));
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  font-weight: var(--weight-light, 300);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink, var(--fg));
+}
+
 /* GEO magazine chapter — Checkion presence / model-strip pattern */
 .plexon-eqc-geo-spread {
   display: grid;
