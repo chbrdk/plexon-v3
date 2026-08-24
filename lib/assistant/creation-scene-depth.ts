@@ -52,5 +52,18 @@ Phasen (wenn sinnvoll in eigenen apply_ops-Batches):
 2. Inhalt — Instances aus Palette/Masters, echte Labels/CTAs, keine leeren Platzhalter-Stapel
 3. Polish — Token-Bindings wo passend, Spacing/Typo-Hierarchie, fehlende CTAs/Badges ergänzen
 Bevorzuge Masters/insert_instance und wiederkehrende Patterns statt flacher Text-Ketten.
-Neue Seite/PDP: add_page zuerst, dann auf dem neuen Root bauen.`;
+Neue Seite/PDP: add_page zuerst, dann auf dem neuen Root bauen.
+
+### Content-complete (Pflicht bei Produkt-/Landing-Seiten)
+insert_child merged Palette-Defaults — trotzdem Props mit echtem Inhalt setzen (Defaults allein = unfertig).
+Marketing/PDP → **Site Kit** bevorzugen. creation_editor_palette liefert seedProps + contentHint.
+- SiteButton: props.children = CTA („In den Warenkorb“, „Jetzt kaufen“)
+- SiteText: props.role=display|title|body|label + props.children
+- SiteInput/SiteTextarea: props.placeholder
+- SiteSelect: props.placeholder + props.options als Zeilen („S\\nM\\nL“)
+- SiteImage: props.src + props.alt (Bild-Platzhalter)
+- SiteBadge/SiteCheckbox/SiteLink: props.children (+ href bei Link)
+- SiteGrid/SiteStack: columns bzw. direction + gap
+Legacy nur wenn nötig: Select options=[{value,label}] + size; Spacer size+axis; Button-Label = Kind-Text-Slot.
+PDP-Checklist: Gallery (SiteImage) · Titel/Preis (SiteText) · Variante (SiteSelect mit Optionen) · CTA (SiteButton) · Kurztext — keine leeren unlabeled Atoms.`;
 }

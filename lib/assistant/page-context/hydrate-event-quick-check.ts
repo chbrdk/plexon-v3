@@ -99,7 +99,7 @@ function buildCreationEditorContextBlock(pageContext: AssistantPageContext): str
     'Scene-Tree wird bei Scene-Edit-Turns vorab als Outline geladen — creation_scene_tree_index nur bei Bedarf erneut.',
     'sceneId und baseUpdatedAt stehen oben — den Nutzer NIEMALS nach der Scene-ID fragen.',
     'Neue Seite/Zeichenfläche: add_page { name? } zuerst (aktiviert die neue Page) → Response/Tree lesen (root.id) → dann Inhalte. Auch set_active_page / rename_page / duplicate_page / delete_page / move_node_to_page.',
-    'Insert: insert_child { parentId, child: { id, type, name?, props? } } — Button type=Button, props.children=Label, props.href=Link. Oder insert_instance { masterId, parentId } mit Master-ID aus Tree-Outline. Niemals insert_node / add_instance / append_child.',
+    'Insert: insert_child { parentId, child: { id, type, name?, props? } } — Defaults werden gemerged; Props trotzdem setzen. PDP/Marketing: SiteButton props.children=CTA, SiteInput/SiteSelect placeholder+options, SiteImage src+alt, SiteText role+children. Oder insert_instance { masterId, parentId }. Niemals insert_node / add_instance / append_child.',
     'Bei expliziter Änderungsbitte (einfügen, ändern, bauen, neue Seite): creation_scene_apply_ops mit sceneId und baseUpdatedAt aus diesem Kontext.',
   )
   return lines.join('\n')

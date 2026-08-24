@@ -151,6 +151,8 @@ describe('assistant page context', () => {
     expect(block).toContain('insert_child')
     expect(block).toContain('add_page')
     expect(block).toContain('Niemals insert_node')
+    expect(block).toContain('SiteButton')
+    expect(block).toContain('placeholder')
   })
 
   it('wires EQC publish + complete body + host', () => {

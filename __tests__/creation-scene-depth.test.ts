@@ -78,6 +78,9 @@ describe('creation scene depth', () => {
   it('adds layout-depth prompt only for writable scene-edit plans', () => {
     expect(buildCreationSceneDepthPromptBlock(false)).toBe('')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('Layout-Tiefe')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Content-complete')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('SiteSelect')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('SiteButton')
 
     const plan = planAssistantTurnHeuristic({
       prompt: 'Erstelle eine Hero-Section',

@@ -57,6 +57,8 @@ describe('creation tool catalog + planner', () => {
       expect(block).toContain('insert_instance')
       expect(block).toContain('add_page')
       expect(block).toContain('Niemals insert_node')
+      expect(block).toContain('SiteButton')
+      expect(block).toContain('options')
     } finally {
       if (prev === undefined) delete process.env.CREATION_MCP_URL
       else process.env.CREATION_MCP_URL = prev
