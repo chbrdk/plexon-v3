@@ -81,6 +81,9 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('Content-complete')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('SiteSelect')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('SiteButton')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Get started')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('insert_child')
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/VERBOTENE|nackte Instances/i)
 
     const plan = planAssistantTurnHeuristic({
       prompt: 'Erstelle eine Hero-Section',

@@ -66,12 +66,12 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 |-------|---------|--------------|---------------|
 | `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
 | Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
-| System prompt | phased layout craft (structure → content → polish; Masters/tokens) + **content-complete** Site Kit prop cookbook (labels, placeholders, select options, image alt) | — | no craft block |
+| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop` | — | no craft block |
 
 - WENN `ANTHROPIC_ASSISTANT_THINKING_BUDGET` global `0`/`off` ist, DANN bleibt Thinking auch für Scene-Edit aus.
 - LLM planner refine MUST NOT shrink `maxToolRounds` below the Creation depth default when intent stays `creation_scene_edit`.
 - `creation_design` (library/catalog Q&A) does **not** get this budget — only scene/layout editing.
-- Content-complete: Agents MUST set real `props` on inserts (SiteButton `children`, SiteSelect `options`, SiteInput `placeholder`, …). Palette `seedProps`/`contentHint` and server-side default merge are fallbacks, not finished copy.
+- Content-complete: Agents MUST set real `props` on inserts. Bare `insert_instance` (Master seeds: „Get started“, „Option A“, „Text“) is **not** a finished page — override via `props` on the op or `set_prop`.
 
 ## Non-goals
 

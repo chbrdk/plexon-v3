@@ -46,24 +46,41 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
   if (!allowWriteTools) return '';
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
-Nutze die verfügbaren Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
-Phasen (wenn sinnvoll in eigenen apply_ops-Batches):
-1. Struktur — Pages/Sections/Grids/Stacks mit klarer Hierarchie
-2. Inhalt — Instances aus Palette/Masters, echte Labels/CTAs, keine leeren Platzhalter-Stapel
-3. Polish — Token-Bindings wo passend, Spacing/Typo-Hierarchie, fehlende CTAs/Badges ergänzen
-Bevorzuge Masters/insert_instance und wiederkehrende Patterns statt flacher Text-Ketten.
-Neue Seite/PDP: add_page zuerst, dann auf dem neuen Root bauen.
+Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
+Phasen (eigene apply_ops-Batches):
+1. Struktur — add_page / SiteStack / SiteGrid / Sections
+2. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
+3. Polish — Tree neu lesen; jede sichtbare Seed-Copy per set_prop ersetzen; Tokens/Spacing
 
-### Content-complete (Pflicht bei Produkt-/Landing-Seiten)
-insert_child merged Palette-Defaults — trotzdem Props mit echtem Inhalt setzen (Defaults allein = unfertig).
-Marketing/PDP → **Site Kit** bevorzugen. creation_editor_palette liefert seedProps + contentHint.
-- SiteButton: props.children = CTA („In den Warenkorb“, „Jetzt kaufen“)
-- SiteText: props.role=display|title|body|label + props.children
-- SiteInput/SiteTextarea: props.placeholder
-- SiteSelect: props.placeholder + props.options als Zeilen („S\\nM\\nL“)
-- SiteImage: props.src + props.alt (Bild-Platzhalter)
-- SiteBadge/SiteCheckbox/SiteLink: props.children (+ href bei Link)
-- SiteGrid/SiteStack: columns bzw. direction + gap
-Legacy nur wenn nötig: Select options=[{value,label}] + size; Spacer size+axis; Button-Label = Kind-Text-Slot.
-PDP-Checklist: Gallery (SiteImage) · Titel/Preis (SiteText) · Variante (SiteSelect mit Optionen) · CTA (SiteButton) · Kurztext — keine leeren unlabeled Atoms.`;
+Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
+
+### VERBOTENE End-Copy (Master-/Palette-Seeds — dürfen NICHT auf der Fläche bleiben)
+„Get started“, „Option A“, „Option B“, alleiniges „Text“, alleiniges „Link“, generisches „New“, „Button“, „Email“, „Select“, „Image“, „Message“.
+Wenn so etwas nach dem Bau noch sichtbar wäre → set_prop / props überschreiben BEVOR du fertig meldest.
+
+### Content-complete — bevorzugter Weg
+Marketing/PDP: **insert_child** Site Kit + props im selben Op (nicht nur Type).
+Beispiel (E-Bike PDP — anpassen an Nutzerprompt):
+- SiteText role=title children=\"Urban Glide E-Bike\"
+- SiteText role=body children=\"2.999 € · Reichweite 80 km\"
+- SiteBadge children=\"Neuheit\"
+- SiteSelect placeholder=\"Rahmengröße\" options=\"S\\nM\\nL\\nXL\"
+- SiteSelect placeholder=\"Farbe\" options=\"Graphit\\nSand\\nOcean\"
+- SiteButton children=\"In den Warenkorb\"
+- SiteLink children=\"Finanzierung anfragen\" href=\"#\"
+- SiteImage alt=\"E-Bike Seitenansicht\" (src aus Seed ok, alt MUSS produktspezifisch sein)
+
+Prop-Cheat:
+- SiteButton/SiteBadge/SiteCheckbox/SiteLink → props.children (+ href bei Link)
+- SiteText → props.role + props.children
+- SiteInput/SiteTextarea → props.placeholder
+- SiteSelect → props.placeholder + props.options (Zeilen)
+- SiteImage → props.src + props.alt
+- SiteGrid/SiteStack → columns / direction / gap
+
+### insert_instance nur mit Inhalt
+Nur wenn Master nötig: insert_instance { masterId, parentId, props: { children|options|… } } im selben Op,
+oder sofort set_prop auf die neue Instance-ID. Nackte Instances = Seed-Copy → unfertig.
+
+PDP-Checklist vor Abschluss: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.`;
 }
