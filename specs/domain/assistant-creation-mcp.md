@@ -67,14 +67,14 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 |-------|---------|--------------|---------------|
 | `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
 | Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
-| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop`; **mandatory Brand-Pack + `set_token_binding`**; anti-wireframe Vision | — | no craft block |
+| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; **free literals via `set_prop`** (Hex/gap/radius) + optional `set_token_binding`; anti-wireframe Vision | — | no craft block |
 
 - WENN `ANTHROPIC_ASSISTANT_THINKING_BUDGET` global `0`/`off` ist, DANN bleibt Thinking auch für Scene-Edit aus.
 - LLM planner refine MUST NOT shrink `maxToolRounds` below the Creation depth default when intent stays `creation_scene_edit`.
 - `creation_design` (library/catalog Q&A) does **not** get this budget — only scene/layout editing.
 - Content-complete: Agents MUST set real `props` on inserts. Bare `insert_instance` (Master seeds: „Get started“, „Option A“, „Text“) is **not** a finished page — override via `props` on the op or `set_prop`.
-- **Brand tokens (pflicht):** Early `creation_brand_tokens_get` (scene `platformProjectId`). Site Kit insert defaults = fixture MSQDX look — **not** Collection brand. Colors/fill/type/radius/gap nur via `set_token_binding` (keys: `background`, `color`, `borderColor`, `radius`, `gap`, typography keys). `set_style` = **nur** `width`/`height` (z. B. Hero-Image). Pack `source: brandion` → key surfaces (CTA, Badge, Section, Text) auf Pack-Paths rebinden. Pack `source: fixture` / leer → im Abschluss nennen; Layout trotzdem differenzieren (Spacing/Größen/Rollen), nicht „fertig gebrandet“ behaupten. Spirion = Inspiration only (see `assistant-spirion-mcp.md` § Tokens vs Literals).
-- After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds). Vision MUST fail gray wireframe / tiny placeholder images / all-defaults Site Kit chrome.
+- **Freies Styling (first-class):** Farben/Abstände/Radii wie im Inspector — `set_prop` mit Literal (`background`/`color`/`borderColor`/`gap`/`radius`/`fontSize`/… → Hex, rem, px). Bestehendes Token auf dem Key → `clear_token_binding`. Paint: Props überschreiben Token-Resolve (`resolveNodePaintStyle`). **Kein** neues Brandion-Token nötig. `set_token_binding` optional wenn Pack passt. `set_style` nur `width`/`height`. Optional `creation_brand_tokens_get` — nicht blockierend. Spirion = Inspiration only (see `assistant-spirion-mcp.md`).
+- After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds). Vision MUST fail gray wireframe / tiny placeholder images / untouched Site Kit fixture chrome.
 
 ## Non-goals
 

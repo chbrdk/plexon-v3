@@ -61,11 +61,11 @@ On PDP/landing builds with Spirion active: optionally `spirion_references_search
 Spirion is **not** a complete token library for the Collection. WENN der Agent eine Spirion-Referenz umsetzt:
 
 1. Spirion = Struktur, Hierarchie, Copy-Muster — **kein** 1:1 Pixel-/Farb-/Token-Clone der Fremdmarke.
-2. MUSS früh `creation_brand_tokens_get` (scene `platformProjectId`) aufrufen. Site-Kit-Defaults sind Fixture — nicht Collection-Brand.
-3. WENN der Pack passende Paths liefert, DANN MUSS der Agent `set_token_binding` auf Schlüssel-Flächen setzen (`background`/`color`/`borderColor`/`radius`/`gap`/Typography).
-4. WENN kein passendes Token existiert: Gap-/Rollen-**Props** und `set_style` **nur** für `width`/`height` nutzen; fehlende Farbe im Text nennen („Pack ohne X → Fixture-Path Y belassen“). Roh-Hex-Fills gibt es in Scene-Ops **nicht** — Farben laufen über Token-Paths.
-5. Collection-Brand vor Fremdmarke: vorhandene Brandion-Pack-Farben nicht durch Spirion-Inspiration ersetzen.
-6. Nicht blockieren oder nur Seed-Defaults lassen, nur weil Spirion einen Wert zeigt, den der Pack nicht hat.
+2. **Freies Styling first-class:** Farben/Abstände/Radii via `set_prop` Literale (`#hex`, rem, px) auf Keys wie `background`/`color`/`gap`/`radius` — **ohne** neue Tokens anzulegen. Bei vorhandenem Binding zusätzlich `clear_token_binding`. Paint: Props überschreiben Token-Resolve.
+3. Optional: `creation_brand_tokens_get` + `set_token_binding`, wenn der Pack den Intent trifft und wiederverwendbar sein soll.
+4. `set_style` nur für `width`/`height` (Zahlen).
+5. Collection-Pack vor Fremdmarken-Clone, wenn Pack genutzt wird — sonst bewusste Literale.
+6. Nicht blockieren oder nur Site-Kit-Fixture belassen.
 
 ## Non-goals (Welle 1)
 

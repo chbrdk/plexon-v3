@@ -84,9 +84,10 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('Get started')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('insert_child')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/VERBOTENE|nackte Instances/i)
-    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Brand / Tokens')
-    expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_brand_tokens_get')
-    expect(buildCreationSceneDepthPromptBlock(true)).toContain('set_token_binding')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Freies Styling')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('set_prop')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('clear_token_binding')
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#RRGGBB|background/)
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_preview')
 

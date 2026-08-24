@@ -48,26 +48,31 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 Phasen (eigene apply_ops-Batches):
-0. **Brand-Pack** — \`creation_brand_tokens_get\` mit scene \`platformProjectId\` (Pflicht vor Polish). Optional \`brandion_tokens_list\`. Merke \`source\` (brandion vs fixture) und nutzbare Paths.
+0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
 1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für **Homepage/Landing** (Struktur/Copy; nicht 1:1). Corpus oft ohne PDP — leere Treffer OK → Best-Practice Landing (Hero, Benefits, CTA) fortsetzen, nicht abbrechen.
 2. Struktur — add_page / SiteStack / SiteGrid / Sections
 3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
-4. **Brand-Polish** — \`set_token_binding\` auf Schlüssel-Nodes (nicht Site-Kit-Fixture belassen). CTA/Badge/Section-Fills, Textfarben, Gaps, Radii. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
+4. **Look & Feel (frei erlaubt)** — Farben/Abstände/Radii bewusst setzen (siehe „Freies Styling“). Site-Kit-Fixture nicht als fertiges Branding belassen. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
 5. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
 6. Pixel-Check — **creation_scene_preview** (max. 1–2×): kompaktes WebP Vision. Bei Preview-error / network: **nur Audit**, Pixel-QA nicht behaupten, Turn trotzdem abschließen.
-7. Abschluss — Tree neu lesen; Pack-\`source\` + welche Paths gebunden wurden kurz nennen.
+7. Abschluss — Tree neu lesen; kurz sagen ob Literale und/oder Token-Bindings genutzt wurden.
 
 Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
 
-### Brand / Tokens (nicht optional)
-Site-Kit-Inserts bringen **Fixture-Defaults** (z. B. \`color.action.primary\`, \`color.black\`) — das ist **kein** Collection-Brand und wirkt „basic“.
-1. \`creation_brand_tokens_get\` **muss** laufen (platformProjectId der Scene).
-2. Farben/Fills/Typography/Radius/Gap **nur** über \`set_token_binding\` — Keys: \`background\`, \`color\`, \`borderColor\`, \`radius\`, \`gap\`, \`fontFamily\`/\`fontSize\`/\`fontWeight\`/\`lineHeight\`.
-3. \`set_style\` = **ausschließlich** \`width\` / \`height\` (Zahlen). **Kein** Hex-Fill über set_style — gibt es nicht.
-4. Pack \`source: brandion\` mit Farben → CTA/Badge/Sections/Headlines auf Pack-Paths rebinden (nicht Fixture-Orange/-Schwarz belassen).
-5. Pack \`source: fixture\` / leer → im Abschluss sagen („kein Collection-Pack — Fixture“); Layout trotzdem differenzieren (Rollen, Gaps, Bildgröße). Nicht „individuell gebrandet“ behaupten.
-6. Spirion = Struktur/Copy — **kein** Fremdmarken-Farb-Clone. Collection-Pack vor Spirion-Inspiration.
-7. Gap-Enums / role-Props wo sinnvoll; fehlende Pack-Farbe → Fixture-Path bewusst wählen und nennen, nicht Seed-Chrome ignorieren.
+### Freies Styling (Hex / Abstände — ohne Token anlegen)
+Wie im Inspector: **Literale in \`props\`**, Paint-Merge = Tokens dann **Props überschreiben Tokens**.
+1. Farbe/Fill: \`set_prop\` key=\`background\`|\`color\`|\`borderColor\` value=\`#RRGGBB\` (oder \`rgb(...)\`). Wenn noch ein Token auf dem Key liegt → zusätzlich \`clear_token_binding\` für denselben Key (wie die UI).
+2. Spacing/Radius/Typo-Literale: \`set_prop\` key=\`gap\`|\`padding\`|\`paddingTop\`|…|\`radius\`|\`fontSize\`|\`fontWeight\`|\`lineHeight\`|\`fontFamily\` value z. B. \`24\`, \`1.5rem\`, \`12px\`, \`700\`, Fontname.
+3. Gap-Enums der Layout-Props bleiben ok (\`sm\`/\`md\`/…), wenn passend.
+4. \`set_style\` = **nur** \`width\` / \`height\` (Zahlen, px). Kein Hex über set_style.
+5. **Kein** neues Brandion-Token anlegen nötig. Pack-Tokens (\`set_token_binding\`) sind optional — nutzen wenn Pack passt und wiederverwendbar sein soll.
+6. Site-Kit-Defaults (Fixture-Orange/\`color.black\`) = Startpunkt, nicht Endzustand: durch Literale oder Bindings ersetzen.
+
+Beispiel-Ops (CTA frei):
+\`{ "op":"set_prop", "nodeId":"<btn>", "key":"background", "value":"#0B3D2E" }\`
+\`{ "op":"clear_token_binding", "nodeId":"<btn>", "key":"background" }\`
+\`{ "op":"set_prop", "nodeId":"<btn>", "key":"color", "value":"#F7F6F2" }\`
+\`{ "op":"clear_token_binding", "nodeId":"<btn>", "key":"color" }\`
 
 ### VERBOTENE End-Copy (Master-/Palette-Seeds — dürfen NICHT auf der Fläche bleiben)
 „Get started“, „Option A“, „Option B“, alleiniges „Text“, alleiniges „Link“, generisches „New“, „Button“, „Email“, „Select“, „Image“, „Message“.
@@ -98,10 +103,10 @@ Nur wenn Master nötig: insert_instance { masterId, parentId, props: { children|
 oder sofort set_prop auf die neue Instance-ID. Nackte Instances = Seed-Copy → unfertig.
 
 ### Pflicht vor Abschluss
-1. creation_brand_tokens_get gelaufen; bei brandion-Pack: sichtbare set_token_binding-Polish-Ops.
+1. Look & Feel bewusst gesetzt (Literale und/oder Token-Bindings) — nicht nur Site-Kit-Fixture belassen.
 2. creation_scene_content_audit(sceneId) — bei ok=false Fehler beheben und erneut auditen.
 3. creation_scene_preview(sceneId) — Vision auf dem WebP; max. 2 Preview-Runden; bei error-Feld nur Audit nutzen.
-4. Vision **nicht** ok bei: grauem Wireframe, Mini-Platzhalter-Bild, reinem Site-Kit-Default-Chrome ohne Pack-Hinweis, Seed-Copy/fehlende CTAs.
+4. Vision **nicht** ok bei: grauem Wireframe, Mini-Platzhalter-Bild, reinem Site-Kit-Default-Chrome ohne bewusste Farben/Abstände, Seed-Copy/fehlende CTAs.
 5. PDP-Checklist: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.
 Nicht fertig melden solange Audit error-Findings hat oder Vision offensichtliche Seed-Copy/fehlende CTAs/Wireframe zeigt.`;
 }
