@@ -53,9 +53,17 @@ Phasen (eigene apply_ops-Batches):
 3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
 4. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
 5. Pixel-Check — **creation_scene_preview** (max. 2×): PNG Vision gegen Intent (Hierarchie, CTAs, Seed-Copy, Kontrast). Bei Preview-error: nur Audit, Pixel-QA nicht behaupten.
-6. Polish — Tree neu lesen; Tokens/Spacing
+6. Polish — Tree neu lesen; Tokens **oder Literale**/Spacing
 
 Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
+
+### Tokens vs Literale (Spirion / fehlende Library)
+Spirion und die Site-Kit-Palette liefern **nicht** jedes Spacing/Farbe/Radius als Token.
+1. Inspiration = Struktur + Copy — **kein** 1:1 Fremdmarken-Clone.
+2. Passendes Collection-Token vorhanden (\`creation_brand_tokens_get\` / bekanntem Pack) → \`set_token_binding\` bevorzugen.
+3. **Kein** Token → bewusstes Literal setzen (\`set_style\` / Props: Hex, rem, Gap-Enum, …). Kurz im Abschluss nennen („kein Token für X → Literal …“).
+4. Nicht blockieren oder Seed-Defaults lassen, nur weil die Library den Wert nicht kennt.
+5. Collection-Brand vor Spirion-Hex, wenn der Pack den Intent abdeckt.
 
 ### VERBOTENE End-Copy (Master-/Palette-Seeds — dürfen NICHT auf der Fläche bleiben)
 „Get started“, „Option A“, „Option B“, alleiniges „Text“, alleiniges „Link“, generisches „New“, „Button“, „Email“, „Select“, „Image“, „Message“.

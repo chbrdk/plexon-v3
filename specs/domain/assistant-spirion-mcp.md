@@ -54,7 +54,17 @@ Heuristic `spirion_research`: spirion|dig\b|design.?intelligence|referenz|screen
 
 ## Creation loop guidance
 
-On PDP/landing builds with Spirion active: optionally `spirion_references_search` / `spirion_screens_search` for structure/copy inspiration, then build scene, then `creation_scene_content_audit` before claiming done.
+On PDP/landing builds with Spirion active: optionally `spirion_references_search` / `spirion_screens_search` for **structure/copy inspiration**, then build scene, then `creation_scene_content_audit` / `creation_scene_preview` before claiming done.
+
+### Tokens vs Literals (Spirion → Creation)
+
+Spirion is **not** a complete token library for the Collection. WENN der Agent eine Spirion-Referenz umsetzt:
+
+1. Spirion = Struktur, Hierarchie, Copy-Muster — **kein** 1:1 Pixel-/Farb-/Token-Clone der Fremdmarke.
+2. WENN `creation_brand_tokens_get` (oder bekannter Pack) passende Tokens liefert, DANN MUSS der Agent `set_token_binding` / Pack-Werte bevorzugen.
+3. WENN kein passendes Token existiert (Farbe, Radius, Spacing, Font-Size, …), DANN DARF und SOLL der Agent **bewusste Literale** setzen (`set_style` / Props mit Hex, rem, Gap-Enum, …) und im Text kurz nennen („kein Token für X → Literal …“).
+4. Collection-Brand vor Fremdmarke: vorhandene Brandion-Pack-Farben nicht durch Spirion-Hex ersetzen, wenn der Pack den Intent abdeckt.
+5. Nicht blockieren oder Seed-Defaults lassen, nur weil die Library den Spirion-Wert nicht kennt.
 
 ## Non-goals (Welle 1)
 

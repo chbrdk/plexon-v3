@@ -67,12 +67,14 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 |-------|---------|--------------|---------------|
 | `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
 | Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
-| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop` | — | no craft block |
+| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop`; **token-or-literal** policy for Spirion-inspired builds | — | no craft block |
 
 - WENN `ANTHROPIC_ASSISTANT_THINKING_BUDGET` global `0`/`off` ist, DANN bleibt Thinking auch für Scene-Edit aus.
 - LLM planner refine MUST NOT shrink `maxToolRounds` below the Creation depth default when intent stays `creation_scene_edit`.
 - `creation_design` (library/catalog Q&A) does **not** get this budget — only scene/layout editing.
 - Content-complete: Agents MUST set real `props` on inserts. Bare `insert_instance` (Master seeds: „Get started“, „Option A“, „Text“) is **not** a finished page — override via `props` on the op or `set_prop`.
+- Tokens vs Literals: prefer Collection pack via `creation_brand_tokens_get` / `set_token_binding` when a match exists; otherwise **choose deliberate literals** (`set_style` / prop values). Spirion is inspiration only — do not stall for missing library tokens (see `assistant-spirion-mcp.md` § Tokens vs Literals).
+- After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds).
 
 ## Non-goals
 
