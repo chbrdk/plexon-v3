@@ -30,10 +30,12 @@ Plexon public base: host runtime-config / env (e.g. `NEXT_PUBLIC_PLEXON_URL`) �
 | `theme` | `ASSISTANT_EMBED_THEME_QUERY_PARAM` | no | Host `data-theme` id for initial paint (allowlisted) |
 | `entityType` | `ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM` | no | Host entity type (e.g. `composition_scene`) |
 | `entityId` | `ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM` | no | Host entity id (e.g. CREATION `sceneId`) |
-| `entityUpdatedAt` | `ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM` | no | Optimistic-lock token (`baseUpdatedAt` for scene ops) |
+| `entityUpdatedAt` | `ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM` | no | Optimistic-lock token (`baseUpdatedAt` for scene ops). **Hosts MUST NOT put live lock-token updates into the iframe `src`** — that remounts the embed and wipes chat state. Prefer `assistant:context` postMessage for lock-token churn; URL param is optional bootstrap only. |
 
 Unknown params are ignored. Invalid `product` → embed still loads with `product=unknown` and logs a client warning.  
 Invalid / unknown `theme` → ignore; keep document default theme.
+
+**Iframe stability:** While the flyout is open, hosts MUST freeze the embed URL. Conversation assignment (`assistant:conversation`) and `entityUpdatedAt` updates MUST NOT change `iframe.src`.
 
 ## Auth
 

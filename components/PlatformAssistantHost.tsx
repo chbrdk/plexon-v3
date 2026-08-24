@@ -59,6 +59,9 @@ function resolveEmbedSrc(
   theme: string | null,
   pageContext: AssistantPageContext | null,
 ): string {
+  // Omit entityUpdatedAt from the iframe URL — it changes on every scene save /
+  // live-sync and would remount the embed, wiping in-flight chat state.
+  // Live lock tokens are delivered via assistant:context postMessage instead.
   const query = {
     product,
     platformProjectId,
@@ -67,7 +70,6 @@ function resolveEmbedSrc(
     theme,
     entityType: pageContext?.entityType,
     entityId: pageContext?.entityId,
-    entityUpdatedAt: pageContext?.entityUpdatedAt,
   }
   if (typeof window !== 'undefined') {
     const base = plexonPublicBase.replace(/\/$/, '')
@@ -149,9 +151,26 @@ export function PlatformAssistantHost({
     return () => observer.disconnect()
   }, [])
 
-  const embedSrc = useMemo(() => {
-    if (typeof window === 'undefined' || useNative) return ''
-    return resolveEmbedSrc(
+  /**
+   * Freeze iframe src for the open session so scene lock-token churn
+   * (`entityUpdatedAt`) and conversation assignment do not remount the chat.
+   */
+  const [embedSrc, setEmbedSrc] = useState('')
+  const embedSrcLockedRef = useRef(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || useNative) {
+      embedSrcLockedRef.current = false
+      setEmbedSrc('')
+      return
+    }
+    if (!open) {
+      embedSrcLockedRef.current = false
+      setEmbedSrc('')
+      return
+    }
+    if (embedSrcLockedRef.current) return
+    const next = resolveEmbedSrc(
       plexonPublicBase,
       product,
       effectivePlatformProjectId,
@@ -160,6 +179,8 @@ export function PlatformAssistantHost({
       themeId,
       pageContext,
     )
+    embedSrcLockedRef.current = true
+    setEmbedSrc(next)
   }, [
     plexonPublicBase,
     product,
@@ -167,7 +188,8 @@ export function PlatformAssistantHost({
     effectiveCapability,
     pathname,
     themeId,
-    pageContext,
+    pageContext?.entityType,
+    pageContext?.entityId,
     useNative,
     open,
   ])
