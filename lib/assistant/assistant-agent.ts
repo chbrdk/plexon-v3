@@ -127,6 +127,7 @@ export async function runAssistantAgent(
     hasBrandionMcp: input.useBrandionMcp,
     hasCreationMcp: input.useCreationMcp,
     compactContextLoaded,
+    pageContext: input.pageContext,
   });
   input.onPlan?.(plan);
 

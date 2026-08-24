@@ -17,6 +17,8 @@ import {
   type ToolFamily,
 } from '@/lib/assistant/tool-catalog';
 import { hasAudienceWriteIntent } from '@/lib/assistant/audience-write-intent';
+import { hasSceneWriteIntent, hasCreationEditorSceneContext } from '@/lib/assistant/scene-write-intent';
+import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -63,6 +65,7 @@ export type PlannerInput = {
   hasBrandionMcp: boolean;
   hasCreationMcp: boolean;
   compactContextLoaded: boolean;
+  pageContext?: AssistantPageContext | null;
 };
 
 const KNOWLEDGE_PATTERNS = [
@@ -209,7 +212,21 @@ const CREATION_PATTERNS = [
 export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   const text = (input.planningPrompt ?? input.prompt).trim();
   const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
+  const sceneWriteIntent = hasSceneWriteIntent(text, input.pageContext);
   const audienceWrite = hasAudienceWriteIntent(text);
+
+  if (hasCreationEditorSceneContext(input.pageContext) && input.hasCreationMcp) {
+    return buildPlan({
+      intent: 'creation_scene_edit',
+      mode: 'hybrid',
+      toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
+      allowWriteTools: writeIntent || sceneWriteIntent,
+      maxToolRounds: 6,
+      skipTools: false,
+      reasoning:
+        'CREATION Editor — offene Scene im Seitenkontext; scene_apply_ops bei Schreib-Intent.',
+    });
+  }
 
   if (BRANDION_PATTERNS.some((p) => p.test(text)) && input.hasBrandionMcp) {
     return buildPlan({
@@ -229,11 +246,11 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       intent: 'creation_scene_edit',
       mode: 'hybrid',
       toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
-      allowWriteTools: writeIntent,
+      allowWriteTools: writeIntent || sceneWriteIntent,
       maxToolRounds: 6,
       skipTools: false,
       reasoning:
-        'CREATION Scene-Layout — tree index + palette lesen; scene_apply_ops bei Schreib-Intent.',
+        'CREATION Scene-Layout — tree index + palette lesen; scene_apply_ops bei Schreib-Intent oder Editor-Kontext.',
     });
   }
 
@@ -647,8 +664,12 @@ export async function planAssistantTurn(
 
 export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
   const writeToolsNote = plan.allowWriteTools
-    ? '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein).'
-    : '';
+    ? plan.intent === 'creation_scene_edit'
+      ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops (baseUpdatedAt aus Seitenkontext!), creation_site_kit_composition_save (Publish; Bestätigung kann nötig sein).'
+      : '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein).'
+    : plan.intent === 'creation_scene_edit'
+      ? '\n- Schreib-Tools derzeit aus: Nutzer muss explizit bitten (z. B. „füge … ein“, „ändere …“, „baue …“). Kein Hinweis auf nicht existierende Einstellungen.'
+      : '';
   return `
 ## Ausführungsplan (Planner)
 - Intent: ${plan.intent}
@@ -672,6 +693,7 @@ export function toolAllowedByPlan(toolName: string, plan: AssistantPlan): boolea
     return true;
   }
   if (!plan.allowWriteTools && isDestructiveOrWriteTool(toolName)) return false;
+  if (!plan.allowWriteTools && toolMatchesFamilies(toolName, ['creation_scene_write'])) return false;
   return toolMatchesFamilies(toolName, plan.toolFamilies);
 }
 

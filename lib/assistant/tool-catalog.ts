@@ -116,7 +116,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
 };
 
 const DESTRUCTIVE = /(?:^|_)(delete|revoke)(?:_|$)/i;
-const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect)(?:_|$)/i;
+const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS) as [ToolFamily, RegExp[]][]) {
