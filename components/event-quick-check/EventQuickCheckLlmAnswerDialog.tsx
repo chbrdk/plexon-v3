@@ -1,6 +1,6 @@
 'use client';
 
-import { Chip, Dialog, Text } from '@msqdx/ui';
+import { Chip, Dialog, Text, MarkdownProse } from '@msqdx/ui';
 import type { EventQuickCheckReportCitationQueryRun } from '@/lib/assistant/reports/event-quick-check-report-types';
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy';
 import { formatGeoLlmAnswerForDisplay } from '@/lib/integrations/format-geo-llm-answer';
@@ -37,9 +37,9 @@ export function EventQuickCheckLlmAnswerDialog({ open, onClose, run, modelLabel 
 
         <div className="plexon-eqc-stack-sm">
           <Text role="hint">{EQC_REPORT_COPY.geoLlmAnswerExcerpt}</Text>
-          <pre className="plexon-eqc-llm-answer-pre">
+          <MarkdownProse className="plexon-eqc-llm-answer-prose">
             {answerText || EQC_REPORT_COPY.geoLlmAnswerMissing}
-          </pre>
+          </MarkdownProse>
         </div>
 
         {run.citations.length > 0 ? (

@@ -42,6 +42,8 @@ export { WizardSteps } from '../../msqdx-ui/packages/ui/src/components/WizardSte
 export type { WizardStep, WizardStepsProps } from '../../msqdx-ui/packages/ui/src/components/WizardSteps'
 export { Lede, LedeStrip } from '../../msqdx-ui/packages/ui/src/components/Lede'
 export type { LedeProps, LedeStripProps, LedeTone, LedeStep } from '../../msqdx-ui/packages/ui/src/components/Lede'
+export { MarkdownProse } from '../../msqdx-ui/packages/ui/src/components/MarkdownProse'
+export type { MarkdownProseProps } from '../../msqdx-ui/packages/ui/src/components/MarkdownProse'
 export { StatLede, StatLedeGroup } from '../../msqdx-ui/packages/ui/src/components/StatLede'
 export type { StatLedeTone } from '../../msqdx-ui/packages/ui/src/components/StatLede'
 export { StatusDot } from '../../msqdx-ui/packages/ui/src/components/StatusDot'

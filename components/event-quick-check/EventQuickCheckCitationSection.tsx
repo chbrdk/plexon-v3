@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Text } from '@msqdx/ui'
+import { Text, MarkdownProse } from '@msqdx/ui'
 import { EventQuickCheckCitationCompetitorChart } from '@/components/event-quick-check/EventQuickCheckCitationCompetitorChart'
 import { EventQuickCheckGeoBarChart } from '@/components/event-quick-check/EventQuickCheckGeoBarChart'
 import type {
@@ -345,9 +345,9 @@ export function EventQuickCheckCitationSection({
                           : `#${activeCell.position}`}
                       </span>
                     </header>
-                    <blockquote className="plexon-eqc-geo-answer__prose">
+                    <MarkdownProse as="blockquote" className="plexon-eqc-geo-answer__prose">
                       {answerText || EQC_REPORT_COPY.geoLlmAnswerMissing}
-                    </blockquote>
+                    </MarkdownProse>
                     {activeCell.run.citations.length > 0 ? (
                       <div className="plexon-eqc-geo-answer__cites">
                         <p className="plexon-eqc-geo-answer__cites-k">
