@@ -193,6 +193,8 @@ export async function runAssistantAgent(
     useEchonMcp: mcpFlags.useEchonMcp,
     useBrandionMcp: mcpFlags.useBrandionMcp,
     useCreationMcp: mcpFlags.useCreationMcp,
+    pageContext: input.pageContext,
+    actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',

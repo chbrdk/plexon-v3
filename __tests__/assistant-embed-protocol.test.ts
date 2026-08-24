@@ -25,7 +25,7 @@ describe('assistant embed paths', () => {
     expect(normalizeAssistantEmbedProduct('creation')).toBe('creation')
   })
 
-  it('includes project conversation capability pathname theme', () => {
+  it('includes project conversation capability pathname theme entity', () => {
     const href = pathAssistantEmbed({
       product: 'brandion',
       platformProjectId: 'proj-1',
@@ -33,6 +33,9 @@ describe('assistant embed paths', () => {
       capability: 'guidelines',
       pathname: '/guidelines',
       theme: 'msqdx-dark',
+      entityType: 'composition_scene',
+      entityId: 'scene-1',
+      entityUpdatedAt: '2026-08-23T20:00:00.000Z',
     })
     expect(href).toContain('product=brandion')
     expect(href).toContain('project=proj-1')
@@ -40,6 +43,9 @@ describe('assistant embed paths', () => {
     expect(href).toContain('capability=guidelines')
     expect(href).toContain('pathname=%2Fguidelines')
     expect(href).toContain('theme=msqdx-dark')
+    expect(href).toContain('entityType=composition_scene')
+    expect(href).toContain('entityId=scene-1')
+    expect(href).toContain('entityUpdatedAt=')
   })
 
   it('builds absolute embed url without double slash', () => {

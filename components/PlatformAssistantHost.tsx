@@ -57,6 +57,7 @@ function resolveEmbedSrc(
   capability: string | null | undefined,
   pathname: string | null,
   theme: string | null,
+  pageContext: AssistantPageContext | null,
 ): string {
   const query = {
     product,
@@ -64,6 +65,9 @@ function resolveEmbedSrc(
     capability,
     pathname,
     theme,
+    entityType: pageContext?.entityType,
+    entityId: pageContext?.entityId,
+    entityUpdatedAt: pageContext?.entityUpdatedAt,
   }
   if (typeof window !== 'undefined') {
     const base = plexonPublicBase.replace(/\/$/, '')
@@ -154,6 +158,7 @@ export function PlatformAssistantHost({
       effectiveCapability,
       pathname,
       themeId,
+      pageContext,
     )
   }, [
     plexonPublicBase,
@@ -162,6 +167,7 @@ export function PlatformAssistantHost({
     effectiveCapability,
     pathname,
     themeId,
+    pageContext,
     useNative,
     open,
   ])
@@ -185,6 +191,38 @@ export function PlatformAssistantHost({
     window.open(`${base}${path}`, '_blank', 'noopener,noreferrer')
   }, [conversationId, platformProjectId, product, useNative, plexonPublicBase, router])
 
+  const postContextToEmbed = useCallback(() => {
+    if (useNative || !open) return
+    const frame = iframeRef.current?.contentWindow
+    if (!frame || !plexonOrigin) return
+    postAssistantHostMessage(frame, plexonOrigin, {
+      type: 'assistant:context',
+      product,
+      platformProjectId: effectivePlatformProjectId ?? undefined,
+      capability: effectiveCapability ?? undefined,
+      pathname: pageContext?.pathname ?? pathname ?? undefined,
+      entityType: pageContext?.entityType,
+      entityId: pageContext?.entityId,
+      entityUpdatedAt: pageContext?.entityUpdatedAt,
+    })
+    if (themeId) {
+      postAssistantHostMessage(frame, plexonOrigin, {
+        type: 'assistant:theme',
+        themeId,
+      })
+    }
+  }, [
+    useNative,
+    open,
+    plexonOrigin,
+    product,
+    effectivePlatformProjectId,
+    effectiveCapability,
+    pathname,
+    pageContext,
+    themeId,
+  ])
+
   const onMessage = useCallback(
     (event: MessageEvent) => {
       if (useNative) return
@@ -198,8 +236,9 @@ export function PlatformAssistantHost({
         setConversationId(event.data.conversationId)
         return
       }
-      if (event.data.type === 'assistant:ready' && event.data.conversationId) {
-        setConversationId(event.data.conversationId)
+      if (event.data.type === 'assistant:ready') {
+        if (event.data.conversationId) setConversationId(event.data.conversationId)
+        postContextToEmbed()
         return
       }
       if (event.data.type === 'assistant:expand') {
@@ -222,7 +261,7 @@ export function PlatformAssistantHost({
         window.open(`${base}${path}`, '_blank', 'noopener,noreferrer')
       }
     },
-    [useNative, plexonOrigin, conversationId, effectivePlatformProjectId, product, plexonPublicBase, router],
+    [useNative, plexonOrigin, conversationId, effectivePlatformProjectId, product, plexonPublicBase, router, postContextToEmbed],
   )
 
   useEffect(() => {
@@ -231,36 +270,8 @@ export function PlatformAssistantHost({
   }, [onMessage])
 
   useEffect(() => {
-    if (!open || useNative) return
-    const frame = iframeRef.current?.contentWindow
-    if (!frame || !plexonOrigin) return
-    postAssistantHostMessage(frame, plexonOrigin, {
-      type: 'assistant:context',
-      product,
-      platformProjectId: effectivePlatformProjectId ?? undefined,
-      capability: effectiveCapability ?? undefined,
-      pathname: pageContext?.pathname ?? pathname ?? undefined,
-      entityType: pageContext?.entityType,
-      entityId: pageContext?.entityId,
-      entityUpdatedAt: pageContext?.entityUpdatedAt,
-    })
-    if (themeId) {
-      postAssistantHostMessage(frame, plexonOrigin, {
-        type: 'assistant:theme',
-        themeId,
-      })
-    }
-  }, [
-    open,
-    useNative,
-    product,
-    effectivePlatformProjectId,
-    effectiveCapability,
-    pathname,
-    pageContext,
-    plexonOrigin,
-    themeId,
-  ])
+    postContextToEmbed()
+  }, [postContextToEmbed])
 
   if (onExpandRoute) return null
 

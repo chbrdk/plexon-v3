@@ -13,6 +13,9 @@ export const ASSISTANT_EMBED_PRODUCT_QUERY_PARAM = 'product'
 export const ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM = 'capability'
 export const ASSISTANT_EMBED_PATHNAME_QUERY_PARAM = 'pathname'
 export const ASSISTANT_EMBED_THEME_QUERY_PARAM = 'theme'
+export const ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM = 'entityType'
+export const ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM = 'entityId'
+export const ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM = 'entityUpdatedAt'
 
 export type AssistantEmbedProduct =
   | 'plexon'
@@ -31,6 +34,9 @@ export type AssistantEmbedQuery = {
   capability?: string | null
   pathname?: string | null
   theme?: string | null
+  entityType?: string | null
+  entityId?: string | null
+  entityUpdatedAt?: string | null
 }
 
 export function normalizeAssistantEmbedProduct(raw: string | null | undefined): AssistantEmbedProduct {
@@ -63,6 +69,12 @@ export function pathAssistantEmbed(query: AssistantEmbedQuery): string {
   if (pathname) params.set(ASSISTANT_EMBED_PATHNAME_QUERY_PARAM, pathname)
   const theme = query.theme?.trim()
   if (theme) params.set(ASSISTANT_EMBED_THEME_QUERY_PARAM, theme)
+  const entityType = query.entityType?.trim()
+  if (entityType) params.set(ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM, entityType)
+  const entityId = query.entityId?.trim()
+  if (entityId) params.set(ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM, entityId)
+  const entityUpdatedAt = query.entityUpdatedAt?.trim()
+  if (entityUpdatedAt) params.set(ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM, entityUpdatedAt)
   const qs = params.toString()
   return qs ? `${PATH_ASSISTANT_EMBED}?${qs}` : PATH_ASSISTANT_EMBED
 }

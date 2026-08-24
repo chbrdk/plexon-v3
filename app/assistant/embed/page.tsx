@@ -8,6 +8,9 @@ import { AssistantChat } from '@/components/assistant/AssistantChat'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM,
+  ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM,
+  ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM,
+  ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM,
   ASSISTANT_EMBED_PATHNAME_QUERY_PARAM,
   ASSISTANT_EMBED_PRODUCT_QUERY_PARAM,
   ASSISTANT_EMBED_THEME_QUERY_PARAM,
@@ -111,6 +114,10 @@ function EmbedAssistantChat() {
       pathname: searchParams.get(ASSISTANT_EMBED_PATHNAME_QUERY_PARAM) || '/',
       capability: searchParams.get(ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM) || undefined,
       platformProjectId: searchParams.get(ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM) || undefined,
+      entityType: searchParams.get(ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM) || undefined,
+      entityId: searchParams.get(ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM) || undefined,
+      entityUpdatedAt:
+        searchParams.get(ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM) || undefined,
     })
   }, [searchParams])
 

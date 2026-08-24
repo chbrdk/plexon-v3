@@ -22,6 +22,7 @@ import {
   trimMessageHistory,
 } from '@/lib/assistant/context-budget';
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
+import { injectCreationSceneToolArgs } from '@/lib/assistant/creation-scene-tool-args';
 import { parseAnthropicMessageStream } from '@/lib/assistant/anthropic-stream';
 import {
   getPlexonUiAnthropicTools,
@@ -61,6 +62,8 @@ export type OrchestratorCompleteOptions = {
   useEchonMcp?: boolean;
   useBrandionMcp?: boolean;
   useCreationMcp?: boolean;
+  pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
+  actorUserId?: string;
   maxToolRounds?: number;
   modelProfile?: 'board' | 'assistant';
   skipTools?: boolean;
@@ -204,6 +207,8 @@ export async function runOrchestratorComplete(
     useEchonMcp = false,
     useBrandionMcp = false,
     useCreationMcp = false,
+    pageContext = null,
+    actorUserId = '',
     maxToolRounds = 5,
     modelProfile = 'board',
     skipTools = false,
@@ -494,7 +499,11 @@ export async function runOrchestratorComplete(
         continue;
       }
       onToolStart?.(block.name, block.input ?? {});
-      const result = await callCheckionMcpTool(baseUrl, mcpName, block.input ?? {});
+      const toolInput = injectCreationSceneToolArgs(block.name, block.input ?? {}, {
+        pageContext,
+        actorUserId,
+      });
+      const result = await callCheckionMcpTool(baseUrl, mcpName, toolInput);
       const compacted = maybeCompactSceneTreeToolResult(block.name, result);
       const truncated = truncateAssistantText(
         compacted,

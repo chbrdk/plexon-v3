@@ -28,6 +28,9 @@ Plexon public base: host runtime-config / env (e.g. `NEXT_PUBLIC_PLEXON_URL`) �
 | `capability` | `ASSISTANT_EMBED_CAPABILITY_QUERY_PARAM` | no | Host capability hint (e.g. `scan`, `guidelines`) |
 | `pathname` | `ASSISTANT_EMBED_PATHNAME_QUERY_PARAM` | no | Host pathname for help context |
 | `theme` | `ASSISTANT_EMBED_THEME_QUERY_PARAM` | no | Host `data-theme` id for initial paint (allowlisted) |
+| `entityType` | `ASSISTANT_EMBED_ENTITY_TYPE_QUERY_PARAM` | no | Host entity type (e.g. `composition_scene`) |
+| `entityId` | `ASSISTANT_EMBED_ENTITY_ID_QUERY_PARAM` | no | Host entity id (e.g. CREATION `sceneId`) |
+| `entityUpdatedAt` | `ASSISTANT_EMBED_ENTITY_UPDATED_AT_QUERY_PARAM` | no | Optimistic-lock token (`baseUpdatedAt` for scene ops) |
 
 Unknown params are ignored. Invalid `product` → embed still loads with `product=unknown` and logs a client warning.  
 Invalid / unknown `theme` → ignore; keep document default theme.
@@ -53,7 +56,7 @@ Channel marker: every message is a JSON-serializable object with `source: 'plexo
 
 | `type` | Payload | When |
 |--------|---------|------|
-| `assistant:ready` | `{ conversationId?: string }` | Embed chat mounted |
+| `assistant:ready` | `{ conversationId?: string }` | Embed chat mounted — host SHOULD re-post `assistant:context` (iframe listener may miss the first post) |
 | `assistant:close` | `{}` | User closed from inside embed |
 | `assistant:expand` | `{ conversationId?: string; project?: string }` | “Open workspace” — host should navigate or `window.open` expand URL |
 | `assistant:auth-required` | `{ loginPath: string }` | Session missing |
