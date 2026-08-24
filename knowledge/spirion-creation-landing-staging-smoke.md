@@ -20,7 +20,7 @@ Zuerst creation_brand_tokens_get — Pack-Tokens via set_token_binding auf CTA/B
 
 | Step | Pass |
 |------|------|
-| Spirion search | Called; **empty corpus OK** — continues with best-practice landing |
+| Spirion search | Called; **empty corpus OK** — user sees „Corpus leer → Best-Practice Editorial-Patterns (Linear / Verve / Superhuman)“; agent continues with structured import-html (header/hero/stats rows, 3-col benefits) |
 | Brand pack | `creation_brand_tokens_get` called; `source` noted (brandion vs fixture) |
 | Page | `add_page` (or clear section on active page) named for Urban Glide |
 | Content | No seed copy („Get started“, „Option A“, bare „Text“) |

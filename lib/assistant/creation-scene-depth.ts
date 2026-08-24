@@ -4,6 +4,8 @@
  */
 import { getAssistantThinkingBudgetTokens } from '@/lib/constants';
 
+import { buildEditorialLandingFallbackBrief } from './editorial-landing-fallback';
+
 const DEFAULT_MAX_TOOL_ROUNDS = 12;
 const DEFAULT_THINKING_BUDGET = 8192;
 const MAX_TOOL_ROUNDS_CAP = 16;
@@ -50,7 +52,8 @@ Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 **Greenfield Landing/Homepage:** Bevorzuge **ein** vollständiges HTML (inline CSS oder einfache \`.class\`-Regeln in \`<style>\`) → \`creation_scene_import_html\` → audit → preview. **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\` (inline oder Klasse). Benefits/Metrics 3-spaltig: \`display:grid\` oder row-flex. Danach nur kleine \`apply_ops\`-Fixes.
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
-1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für **Homepage/Landing** (Struktur/Copy; nicht 1:1). Corpus oft ohne PDP — leere Treffer OK → Best-Practice Landing (Hero, Benefits, CTA) fortsetzen, nicht abbrechen.
+1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für **Homepage/Landing** (Struktur/Copy; nicht 1:1). **Leere Treffer = normal auf Staging** → sofort Editorial-Fallback (siehe unten), **max. 1 Search-Runde**, dann Import.
+${buildEditorialLandingFallbackBrief()}
 2. **Erstentwurf** — greenfield: \`creation_scene_import_html\` mit einem HTML-Dokument (\`pageName\` optional für neue Seite). Sonst: add_page / SiteStack / Sections via ops.
 3. Inhalt nachziehen — nur wenn Import/ops Lücken lassen: **insert_child mit echten props**. Bare insert_instance = verboten für Seiten-Copy.
 4. **Look & Feel (frei erlaubt)** — bei Ops: Farben/Abstände/Radii bewusst setzen (siehe „Freies Styling“). Import liefert Literale bereits. Site-Kit-Fixture nicht als fertiges Branding belassen. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
