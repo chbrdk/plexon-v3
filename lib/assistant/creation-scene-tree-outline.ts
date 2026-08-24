@@ -17,6 +17,7 @@ export type SceneTreeIndexLike = {
     instanceOf?: string;
     childCount?: number;
   }>;
+  pages?: Array<{ id?: string; name?: string }>;
   masters?: Array<{ id?: string; name?: string; sourceKey?: string }>;
 };
 
@@ -43,6 +44,13 @@ export function formatSceneTreeOutline(raw: unknown): string | null {
     `sceneId=${index.sceneId ?? '?'} updatedAt=${index.updatedAt ?? '?'} nodes=${index.nodeCount ?? index.nodes.length}`,
   ];
   if (index.activePageId) lines.push(`activePageId=${index.activePageId}`);
+  if (index.pages?.length) {
+    lines.push(
+      `pages: ${index.pages
+        .map((p) => `${p.name ?? p.id}[${p.id}]`)
+        .join(', ')}`,
+    );
+  }
 
   let rendered = 0;
   const walk = (parentId: string | null, depth: number) => {

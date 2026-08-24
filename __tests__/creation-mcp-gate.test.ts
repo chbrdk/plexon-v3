@@ -55,6 +55,7 @@ describe('creation tool catalog + planner', () => {
       const block = buildCreationIntegrationContextBlock({ useCreationMcp: true })
       expect(block).toContain('insert_child')
       expect(block).toContain('insert_instance')
+      expect(block).toContain('add_page')
       expect(block).toContain('Niemals insert_node')
     } finally {
       if (prev === undefined) delete process.env.CREATION_MCP_URL

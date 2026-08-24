@@ -48,7 +48,12 @@ describe('formatSceneTreeOutline', () => {
     const outline = formatSceneTreeOutline({
       sceneId: 'sc1',
       updatedAt: '2026-01-01T00:00:00.000Z',
+      activePageId: 'page-home',
       nodeCount: 3,
+      pages: [
+        { id: 'page-home', name: 'Home' },
+        { id: 'page-pdp', name: 'PDP' },
+      ],
       nodes: [
         { id: 'root', type: 'frame', name: 'Page', parentId: null, index: 0, childCount: 1 },
         { id: 'teaser', type: 'instance', name: 'Hero Teaser', parentId: 'root', index: 0, childCount: 1 },
@@ -56,6 +61,8 @@ describe('formatSceneTreeOutline', () => {
       ],
     })
     expect(outline).toContain('sceneId=sc1')
+    expect(outline).toContain('activePageId=page-home')
+    expect(outline).toContain('pages: Home[page-home], PDP[page-pdp]')
     expect(outline).toContain('Hero Teaser [teaser]')
     expect(outline).toContain('Button [btn]')
     expect(outline!.indexOf('Hero Teaser')).toBeLessThan(outline!.indexOf('Button'))

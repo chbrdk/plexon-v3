@@ -41,7 +41,7 @@ export function buildCreationIntegrationContextBlock(input: {
     '- Bei Library-/Composition-/CREATION-Fragen **zuerst** creation_library_catalog / creation_compositions_list / creation_projects_list nutzen — Tags nicht schätzen.',
   );
   lines.push(
-    '- Bei Scene-Layout: Prefetch-Outline; Palette nur bei Bedarf. Schreiben: creation_scene_apply_ops. Insert-Ops NUR `insert_child` (parentId + child {id,type,name,props}) oder `insert_instance` (masterId+parentId). Niemals insert_node / add_instance / append_child. Button: type `Button`, Label in props.children oder props.label, href in props.href. 400 op-rejected: `reason` lesen, nicht andere Op-Namen raten. 409 stale-scene: Tree neu laden, neues updatedAt als baseUpdatedAt.',
+    '- Bei Scene-Layout: Prefetch-Outline; Palette nur bei Bedarf. Schreiben: creation_scene_apply_ops. Neue Seite/Zeichenfläche (PDP, Pricing, …): zuerst `add_page` {name?} (aktiviert die neue Page), dann Tree/Response lesen und unter `scene.root.id` inserten — nicht nur auf Home stapeln. Auch: set_active_page, rename_page, duplicate_page, delete_page, move_node_to_page. Insert-Ops NUR `insert_child` (parentId + child {id,type,name,props}) oder `insert_instance` (masterId+parentId). Niemals insert_node / add_instance / append_child. Button: type `Button`, Label in props.children oder props.label, href in props.href. 400 op-rejected: `reason` lesen, nicht andere Op-Namen raten. 409 stale-scene: Tree neu laden, neues updatedAt als baseUpdatedAt.',
   );
   lines.push('- Fixture-Snapshot: SoT bleibt Zaoly `@zaoly/library`; Catalog ist Orientierung, kein Live-CEM.');
   return lines.join('\n');

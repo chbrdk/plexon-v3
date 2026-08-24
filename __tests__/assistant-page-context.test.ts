@@ -149,6 +149,7 @@ describe('assistant page context', () => {
     expect(block).toContain('scene-abc')
     expect(block).toContain('baseUpdatedAt')
     expect(block).toContain('insert_child')
+    expect(block).toContain('add_page')
     expect(block).toContain('Niemals insert_node')
   })
 
