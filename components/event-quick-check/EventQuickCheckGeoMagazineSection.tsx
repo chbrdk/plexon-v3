@@ -44,14 +44,25 @@ export function EventQuickCheckGeoMagazineSection({
   showQuestions = true,
 }: Props) {
   const geo = geoOverride ?? report.geo
-  const snapshot: EqcGeoSnapshot = snapshotOverride ?? {
-    citedShare: sharePct(geo.citedShare),
-    geoFitnessScore:
-      typeof geo.geoFitnessScore === 'number' && Number.isFinite(geo.geoFitnessScore)
-        ? Math.round(geo.geoFitnessScore)
-        : null,
-    promptCount: geo.questions.length || geo.citationHighlights.length || 0,
-  }
+  const snapshot: EqcGeoSnapshot =
+    snapshotOverride ??
+    (() => {
+      const citedShare = sharePct(geo.citedShare)
+      const geoFitnessScore =
+        typeof geo.geoFitnessScore === 'number' && Number.isFinite(geo.geoFitnessScore)
+          ? Math.round(geo.geoFitnessScore)
+          : null
+      const parts = [citedShare, geoFitnessScore].filter((n): n is number => n != null)
+      return {
+        citedShare,
+        geoFitnessScore,
+        promptCount: geo.questions.length || geo.citationHighlights.length || 0,
+        geoScore:
+          parts.length === 0
+            ? null
+            : Math.round(parts.reduce((sum, n) => sum + n, 0) / parts.length),
+      }
+    })()
   const ownHost = normalizeGeoDomain(geo.url ?? report.meta.domain ?? report.meta.url)
 
   const voiceRows = (() => {
@@ -85,13 +96,15 @@ export function EventQuickCheckGeoMagazineSection({
   const maxVoice = Math.max(...voiceRows.map((r) => r.pct), 1)
   const voiceRadarPoints = buildEqcVoiceRadarPoints(voiceRows)
 
+  const geoScore = snapshot.geoScore
   const citedShare = snapshot.citedShare
   const fitness = snapshot.geoFitnessScore
   const queryCount = snapshot.promptCount
+  const scoreIsPartial = geoScore != null && (citedShare == null || fitness == null)
 
   const lede =
-    citedShare != null
-      ? EQC_REPORT_COPY.geoSnapshotLedeCited(citedShare)
+    geoScore != null
+      ? EQC_REPORT_COPY.geoSnapshotLedeScore(geoScore)
       : fitness != null
         ? EQC_REPORT_COPY.geoSnapshotLedeFitness(fitness)
         : queryCount > 0
@@ -109,19 +122,23 @@ export function EventQuickCheckGeoMagazineSection({
         <Alert tone="error">{geo.errorMessage}</Alert>
       ) : null}
 
-      {(citedShare != null || fitness != null || queryCount > 0) && (
+      {(geoScore != null || fitness != null || queryCount > 0) && (
         <section
           className="plexon-eqc-geo-snapshot"
           aria-label={EQC_REPORT_COPY.sectionGeoCheck}
           data-eqc-geo-snapshot="combined"
         >
           <div className="plexon-eqc-geo-snapshot__dials">
-            {citedShare != null ? (
+            {geoScore != null ? (
               <EventQuickCheckScoreRing
-                value={citedShare}
-                label={EQC_REPORT_COPY.geoSnapshotCitedShare}
-                meta={EQC_REPORT_COPY.geoSnapshotCitedShareMeta}
-                tone={scoreTone(citedShare)}
+                value={geoScore}
+                label={EQC_REPORT_COPY.geoSnapshotScore}
+                meta={
+                  scoreIsPartial
+                    ? EQC_REPORT_COPY.geoSnapshotScoreMetaPartial
+                    : EQC_REPORT_COPY.geoSnapshotScoreMeta
+                }
+                tone={scoreTone(geoScore)}
                 size="lg"
               />
             ) : null}

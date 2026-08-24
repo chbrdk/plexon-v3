@@ -52,10 +52,15 @@ export const EQC_REPORT_COPY = {
   geoLayerCompareUnavailable: 'Layer-Vergleich noch nicht auswertbar',
   geoSnapshotCitedShare: 'Zitieranteil',
   geoSnapshotCitedShareMeta: 'über beide Layer',
+  geoSnapshotScore: 'GEO Score',
+  geoSnapshotScoreMeta: 'gesamt',
+  geoSnapshotScoreMetaPartial: 'teilweise',
   geoSnapshotFitness: 'GEO Fitness',
   geoSnapshotFitnessMeta: 'On-page',
   geoSnapshotPrompts: 'Prompts',
   geoSnapshotPromptsMeta: 'im Lauf',
+  geoSnapshotLedeScore: (score: number) =>
+    `GEO Score ${score}/100 — kombiniert Zitieranteil über beide Layer und On-Page-Fitness.`,
   geoSnapshotLedeCited: (share: number) =>
     `Zitieranteil ${share}% — Mittelwert aus Layer 1 und Layer 2, wie oft Modelle deine Domain nennen.`,
   geoSnapshotLedeFitness: (fitness: number) =>

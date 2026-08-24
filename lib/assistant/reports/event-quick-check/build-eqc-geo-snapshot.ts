@@ -1,6 +1,12 @@
 import type { EventQuickCheckReportGeoSection } from '@/lib/assistant/reports/event-quick-check-report-types'
+import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 export type EqcGeoSnapshot = {
+  /**
+   * Headline GEO Score: mean of cross-layer citation strength + on-page fitness
+   * when both exist; otherwise whichever signal is available.
+   */
+  geoScore: number | null
   /** Mean citedShare across layers that have a score (0–100). */
   citedShare: number | null
   /** On-page GEO fitness — usually from the primary layer page scan. */
@@ -18,6 +24,23 @@ function mean(values: number[]): number | null {
   return Math.round(values.reduce((sum, n) => sum + n, 0) / values.length)
 }
 
+/** Own-domain SoV / score as citation fallback when citedShare was not persisted. */
+function citationFallbackFromCompetitors(
+  layer: EventQuickCheckReportGeoSection
+): number | null {
+  const ownHost = normalizeGeoDomain(layer.url ?? '')
+  if (!ownHost) return null
+  for (const row of layer.competitors) {
+    if (normalizeGeoDomain(row.name) !== ownHost) continue
+    return scoreOrNull(row.shareOfVoice ?? row.score ?? null)
+  }
+  return null
+}
+
+function citationForLayer(layer: EventQuickCheckReportGeoSection): number | null {
+  return scoreOrNull(layer.citedShare) ?? citationFallbackFromCompetitors(layer)
+}
+
 /**
  * Fixed magazine snapshot dials across all GEO layers.
  * Spec: specs/domain/eqc-as-collection-flow.md — dials must not follow the layer switch.
@@ -28,7 +51,7 @@ export function buildEqcGeoSnapshot(
 ): EqcGeoSnapshot {
   const list = layers?.length ? [...layers] : fallback ? [fallback] : []
   const citedShares = list
-    .map((layer) => scoreOrNull(layer.citedShare))
+    .map((layer) => citationForLayer(layer))
     .filter((n): n is number => n != null)
   const fitnessScores = list
     .map((layer) => scoreOrNull(layer.geoFitnessScore))
@@ -38,10 +61,15 @@ export function buildEqcGeoSnapshot(
     ...list.map((layer) => layer.questions.length || layer.citationHighlights.length || 0)
   )
 
+  const citedShare = mean(citedShares)
+  // Page scan runs once on the primary layer — prefer first available fitness.
+  const geoFitnessScore = fitnessScores[0] ?? null
+  const geoScoreParts = [citedShare, geoFitnessScore].filter((n): n is number => n != null)
+
   return {
-    citedShare: mean(citedShares),
-    // Page scan runs once on the primary layer — prefer first available fitness.
-    geoFitnessScore: fitnessScores[0] ?? null,
+    geoScore: mean(geoScoreParts),
+    citedShare,
+    geoFitnessScore,
     promptCount,
   }
 }

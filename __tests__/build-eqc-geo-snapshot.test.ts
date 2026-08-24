@@ -17,7 +17,7 @@ function layer(
 }
 
 describe('buildEqcGeoSnapshot', () => {
-  it('averages citedShare across layers and keeps first fitness', () => {
+  it('combines mean citedShare with fitness into geoScore', () => {
     const snapshot = buildEqcGeoSnapshot([
       layer({
         measurement: 'recall',
@@ -33,18 +33,40 @@ describe('buildEqcGeoSnapshot', () => {
       }),
     ])
     expect(snapshot).toEqual({
+      geoScore: 49, // mean(50, 48)
       citedShare: 50,
       geoFitnessScore: 48,
       promptCount: 2,
     })
   })
 
-  it('normalizes fractional citedShare and falls back to single geo', () => {
+  it('falls back citation from own competitor SoV and single-layer geo', () => {
     expect(
-      buildEqcGeoSnapshot(undefined, layer({ citedShare: 0.4, geoFitnessScore: 70, questions: ['x'] }))
+      buildEqcGeoSnapshot(
+        undefined,
+        layer({
+          url: 'https://brand.test',
+          citedShare: null,
+          geoFitnessScore: 70,
+          questions: ['x'],
+          competitors: [{ name: 'brand.test', shareOfVoice: 0.4 }],
+        })
+      )
     ).toEqual({
+      geoScore: 55, // mean(40, 70)
       citedShare: 40,
       geoFitnessScore: 70,
+      promptCount: 1,
+    })
+  })
+
+  it('uses fitness alone as geoScore when citation is missing', () => {
+    expect(
+      buildEqcGeoSnapshot([layer({ measurement: 'recall', geoFitnessScore: 48, questions: ['a'] })])
+    ).toEqual({
+      geoScore: 48,
+      citedShare: null,
+      geoFitnessScore: 48,
       promptCount: 1,
     })
   })
