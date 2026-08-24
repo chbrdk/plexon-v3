@@ -21,6 +21,7 @@ import {
   truncateAssistantText,
   trimMessageHistory,
 } from '@/lib/assistant/context-budget';
+import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
 import { parseAnthropicMessageStream } from '@/lib/assistant/anthropic-stream';
 import {
   getPlexonUiAnthropicTools,
@@ -230,64 +231,40 @@ export async function runOrchestratorComplete(
   let mcpNameByAnthropicName: Record<string, string> = {};
   const toolSourceByAnthropicName: Record<string, string> = {};
 
-  if (checkionMcpUrl) {
-    try {
-      const fetched = await fetchCheckionMcpTools(checkionMcpUrl);
+  const mcpFetches: Array<
+    Promise<{
+      label: string;
+      baseUrl: string;
+      tools: AnthropicTool[];
+      mcpNameByAnthropicName: Record<string, string>;
+    } | null>
+  > = [];
+  const loadMcpTools = (label: string, baseUrl: string) =>
+    fetchCheckionMcpTools(baseUrl)
+      .then((fetched) => ({
+        label,
+        baseUrl,
+        tools: fetched.tools,
+        mcpNameByAnthropicName: fetched.mcpNameByAnthropicName,
+      }))
+      .catch((e) => {
+        console.warn(`[orchestrator] ${label} MCP tools fetch failed`, e);
+        return null;
+      });
+  if (checkionMcpUrl) mcpFetches.push(loadMcpTools('CHECKION', checkionMcpUrl));
+  if (audionMcpUrl) mcpFetches.push(loadMcpTools('AUDION', audionMcpUrl));
+  if (echonMcpUrl) mcpFetches.push(loadMcpTools('ECHON', echonMcpUrl));
+  if (brandionMcpUrl) mcpFetches.push(loadMcpTools('BRANDION', brandionMcpUrl));
+  if (creationMcpUrl) mcpFetches.push(loadMcpTools('CREATION', creationMcpUrl));
+  if (mcpFetches.length) {
+    const loaded = await Promise.all(mcpFetches);
+    for (const fetched of loaded) {
+      if (!fetched) continue;
       tools = [...tools, ...fetched.tools];
       Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
       for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
-        toolSourceByAnthropicName[name] = checkionMcpUrl;
+        toolSourceByAnthropicName[name] = fetched.baseUrl;
       }
-    } catch (e) {
-      console.warn('[orchestrator] CHECKION MCP tools fetch failed', e);
-    }
-  }
-  if (audionMcpUrl) {
-    try {
-      const fetched = await fetchCheckionMcpTools(audionMcpUrl);
-      tools = [...tools, ...fetched.tools];
-      Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
-      for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
-        toolSourceByAnthropicName[name] = audionMcpUrl;
-      }
-    } catch (e) {
-      console.warn('[orchestrator] AUDION MCP tools fetch failed', e);
-    }
-  }
-  if (echonMcpUrl) {
-    try {
-      const fetched = await fetchCheckionMcpTools(echonMcpUrl);
-      tools = [...tools, ...fetched.tools];
-      Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
-      for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
-        toolSourceByAnthropicName[name] = echonMcpUrl;
-      }
-    } catch (e) {
-      console.warn('[orchestrator] ECHON MCP tools fetch failed', e);
-    }
-  }
-  if (brandionMcpUrl) {
-    try {
-      const fetched = await fetchCheckionMcpTools(brandionMcpUrl);
-      tools = [...tools, ...fetched.tools];
-      Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
-      for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
-        toolSourceByAnthropicName[name] = brandionMcpUrl;
-      }
-    } catch (e) {
-      console.warn('[orchestrator] BRANDION MCP tools fetch failed', e);
-    }
-  }
-  if (creationMcpUrl) {
-    try {
-      const fetched = await fetchCheckionMcpTools(creationMcpUrl);
-      tools = [...tools, ...fetched.tools];
-      Object.assign(mcpNameByAnthropicName, fetched.mcpNameByAnthropicName);
-      for (const name of Object.keys(fetched.mcpNameByAnthropicName)) {
-        toolSourceByAnthropicName[name] = creationMcpUrl;
-      }
-    } catch (e) {
-      console.warn('[orchestrator] CREATION MCP tools fetch failed', e);
     }
   }
 
@@ -518,7 +495,12 @@ export async function runOrchestratorComplete(
       }
       onToolStart?.(block.name, block.input ?? {});
       const result = await callCheckionMcpTool(baseUrl, mcpName, block.input ?? {});
-      const truncated = truncateAssistantText(result, ASSISTANT_MAX_TOOL_RESULT_CHARS, `Tool ${block.name}`);
+      const compacted = maybeCompactSceneTreeToolResult(block.name, result);
+      const truncated = truncateAssistantText(
+        compacted,
+        ASSISTANT_MAX_TOOL_RESULT_CHARS,
+        `Tool ${block.name}`,
+      );
       onToolEnd?.(block.name, truncated.slice(0, 240));
 
       if (isBrandionTokensListToolName(mcpName) || isBrandionTokensListToolName(block.name)) {

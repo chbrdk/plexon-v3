@@ -26,6 +26,8 @@ import type { AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 import { buildAssistantPageContextBlock } from '@/lib/assistant/page-context/hydrate-event-quick-check';
+import { resolveMcpFlagsForPlan } from '@/lib/assistant/mcp-flags-for-plan';
+import { prefetchCreationSceneTreeBlock } from '@/lib/assistant/creation-scene-prefetch';
 
 export type AgentProgressCallback = (event: {
   type: 'phase';
@@ -131,6 +133,14 @@ export async function runAssistantAgent(
   });
   input.onPlan?.(plan);
 
+  const mcpFlags = resolveMcpFlagsForPlan(plan, {
+    useCheckionMcp: input.useCheckionMcp,
+    useAudionMcp: input.useAudionMcp,
+    useEchonMcp: input.useEchonMcp,
+    useBrandionMcp: input.useBrandionMcp,
+    useCreationMcp: input.useCreationMcp,
+  });
+
   let retrieval: RetrievalResult | null = null;
   if (
     input.platformProjectId &&
@@ -152,20 +162,37 @@ export async function runAssistantAgent(
     phase: plan.maxToolRounds > 0 && !plan.skipTools ? 'tools' : 'executing',
   });
 
+  const sceneTreePrefetch =
+    plan.intent === 'creation_scene_edit'
+      ? await prefetchCreationSceneTreeBlock({
+          pageContext: input.pageContext,
+          actorUserId: input.user.id,
+          useCreationMcp: mcpFlags.useCreationMcp,
+        })
+      : null;
+  if (sceneTreePrefetch) {
+    input.onToolStart?.('creation_scene_tree_index', {
+      sceneId: input.pageContext?.entityId,
+      prefetch: true,
+    });
+    input.onToolEnd?.('creation_scene_tree_index', 'prefetch outline');
+  }
+
   const retrievalBlock = retrieval?.block ? `\n${retrieval.block}\n` : '';
+  const prefetchBlock = sceneTreePrefetch ? `\n${sceneTreePrefetch}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n${retrievalBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n${retrievalBlock}${prefetchBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
     prompt: input.prompt,
     history: input.history,
     systemPrompt,
-    useCheckionMcp: input.useCheckionMcp,
-    useAudionMcp: input.useAudionMcp,
-    useEchonMcp: input.useEchonMcp,
-    useBrandionMcp: input.useBrandionMcp,
-    useCreationMcp: input.useCreationMcp,
+    useCheckionMcp: mcpFlags.useCheckionMcp,
+    useAudionMcp: mcpFlags.useAudionMcp,
+    useEchonMcp: mcpFlags.useEchonMcp,
+    useBrandionMcp: mcpFlags.useBrandionMcp,
+    useCreationMcp: mcpFlags.useCreationMcp,
     maxToolRounds: plan.maxToolRounds,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',

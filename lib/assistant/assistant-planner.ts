@@ -224,7 +224,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       maxToolRounds: 6,
       skipTools: false,
       reasoning:
-        'CREATION Editor — offene Scene im Seitenkontext; scene_apply_ops bei Schreib-Intent.',
+        'CREATION Editor — Scene-Tree Prefetch; scene_apply_ops bei Schreib-Intent.',
     });
   }
 
@@ -250,7 +250,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       maxToolRounds: 6,
       skipTools: false,
       reasoning:
-        'CREATION Scene-Layout — tree index + palette lesen; scene_apply_ops bei Schreib-Intent oder Editor-Kontext.',
+        'CREATION Scene-Layout — Prefetch/Outline; scene_apply_ops bei Schreib-Intent oder Editor-Kontext.',
     });
   }
 

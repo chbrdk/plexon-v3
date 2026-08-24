@@ -95,7 +95,8 @@ function buildCreationEditorContextBlock(pageContext: AssistantPageContext): str
     lines.push(`- baseUpdatedAt: ${pageContext.entityUpdatedAt}`)
   }
   lines.push(
-    'Der Nutzer bearbeitet diese Composition-Scene im CREATION-Editor. Bei Layout-Fragen zuerst creation_scene_tree_index (und ggf. creation_editor_palette) lesen.',
+    'Der Nutzer bearbeitet diese Composition-Scene im CREATION-Editor.',
+    'Scene-Tree wird bei Scene-Edit-Turns vorab als Outline geladen — creation_scene_tree_index nur bei Bedarf erneut.',
     'Bei expliziter Änderungsbitte (einfügen, ändern, bauen): creation_scene_apply_ops mit sceneId und baseUpdatedAt aus diesem Kontext — kein manuelles Nachfragen der Scene-ID.',
   )
   return lines.join('\n')

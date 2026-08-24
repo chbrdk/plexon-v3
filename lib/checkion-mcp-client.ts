@@ -77,6 +77,13 @@ const MCP_SESSION_HEADER = 'mcp-session-id';
 /** In-memory cache: baseUrl -> session ID or null (so we don't send initialize twice and hit "Server already initialized"). */
 const sessionCache = new Map<string, string | null>();
 
+/** Short TTL cache for tools/list — avoids re-listing on every assistant turn. */
+const TOOLS_LIST_TTL_MS = 60_000;
+const toolsListCache = new Map<
+  string,
+  { expiresAt: number; value: { tools: AnthropicTool[]; mcpNameByAnthropicName: Record<string, string> } }
+>();
+
 /**
  * Parse MCP response body: server may return application/json or text/event-stream (SSE).
  * SSE format: "event: message\ndata: {...}\n" or multiple data lines. We take the last JSON from a "data:" line.
@@ -268,11 +275,17 @@ export async function fetchCheckionMcpTools(baseUrl: string): Promise<{
   tools: AnthropicTool[];
   mcpNameByAnthropicName: Record<string, string>;
 }> {
+  const cached = toolsListCache.get(baseUrl);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.value;
+  }
   try {
     const sessionId = await getSessionIdOrNull(baseUrl);
     const { result } = await mcpRequest<{ tools?: McpTool[] }>(baseUrl, 'tools/list', {}, sessionId);
     const rawTools = result?.tools ?? [];
-    return mcpToolsToAnthropic(rawTools);
+    const value = mcpToolsToAnthropic(rawTools);
+    toolsListCache.set(baseUrl, { expiresAt: Date.now() + TOOLS_LIST_TTL_MS, value });
+    return value;
   } catch (err) {
     const msg = formatMcpError(err);
     console.error('[checkion-mcp] listTools failed', baseUrl, msg);

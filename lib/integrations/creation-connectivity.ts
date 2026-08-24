@@ -41,7 +41,7 @@ export function buildCreationIntegrationContextBlock(input: {
     '- Bei Library-/Composition-/CREATION-Fragen **zuerst** creation_library_catalog / creation_compositions_list / creation_projects_list nutzen — Tags nicht schätzen.',
   );
   lines.push(
-    '- Bei Scene-Layout: creation_scene_tree_index + creation_editor_palette lesen; Schreiben nur mit Nutzerauftrag via creation_scene_apply_ops (baseUpdatedAt!). Publish: creation.site_kit_composition_save mit sceneId+masterId.',
+    '- Bei Scene-Layout: Scene-Tree-Outline kommt oft als Prefetch; creation_editor_palette nur bei Bedarf. Schreiben nur mit Nutzerauftrag via creation_scene_apply_ops (baseUpdatedAt!). Publish: creation.site_kit_composition_save mit sceneId+masterId.',
   );
   lines.push('- Fixture-Snapshot: SoT bleibt Zaoly `@zaoly/library`; Catalog ist Orientierung, kein Live-CEM.');
   return lines.join('\n');

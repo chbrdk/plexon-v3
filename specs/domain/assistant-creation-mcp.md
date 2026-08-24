@@ -47,7 +47,14 @@ Connectivity: `buildCreationIntegrationContextBlock`.
 | `creation_design` | Library / catalog / Zaoly / WC tags | `creation_library`, `creation_compositions`, `creation_projects` |
 | `creation_scene_edit` | Scene / layout / editor / Site Kit master prompts | `creation_scene`, `creation_scene_write` (write gated) |
 
-Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|landing|site kit|master and `hasCreationMcp`.
+Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|landing|site kit|master and `hasCreationMcp`, **or** when CREATION editor page context has an open composition scene.
+
+### Latency
+
+- `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` only contact CREATION MCP (skip Checkion/Audion/Echon/Brandion `tools/list`).
+- Prefetch: editor turns load a compact scene-tree **outline** into the system prompt before the first LLM round.
+- Orchestrator compacts `creation_scene_tree_index` results to the same outline format.
+- MCP `tools/list` is cached ~60s per base URL; product MCP fetches run in parallel when multiple are enabled.
 
 ## Non-goals
 
