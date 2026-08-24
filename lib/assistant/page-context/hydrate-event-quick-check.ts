@@ -1,6 +1,8 @@
 import type { RequestUser } from '@/lib/auth-request-user'
 import {
+  ASSISTANT_CAPABILITY_CREATION_EDITOR,
   ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
+  ASSISTANT_ENTITY_COMPOSITION_SCENE,
   ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN,
   ASSISTANT_MAX_PAGE_CONTEXT_CHARS,
   buildPageContextRouteHint,
@@ -69,6 +71,36 @@ function compactEqcReport(report: EventQuickCheckReportModel): string[] {
   return lines
 }
 
+function isCreationEditorContext(pageContext: AssistantPageContext): boolean {
+  return (
+    pageContext.product === 'creation' &&
+    (pageContext.capability === ASSISTANT_CAPABILITY_CREATION_EDITOR ||
+      pageContext.entityType === ASSISTANT_ENTITY_COMPOSITION_SCENE ||
+      pageContext.pathname.startsWith('/editor'))
+  )
+}
+
+function buildCreationEditorContextBlock(pageContext: AssistantPageContext): string {
+  const lines = [
+    '## Aktueller Seitenkontext — CREATION Editor',
+    `- pathname: ${pageContext.pathname}`,
+  ]
+  if (pageContext.platformProjectId) {
+    lines.push(`- platformProjectId: ${pageContext.platformProjectId}`)
+  }
+  if (pageContext.entityType === ASSISTANT_ENTITY_COMPOSITION_SCENE && pageContext.entityId) {
+    lines.push(`- sceneId: ${pageContext.entityId}`)
+  }
+  if (pageContext.entityUpdatedAt) {
+    lines.push(`- baseUpdatedAt: ${pageContext.entityUpdatedAt}`)
+  }
+  lines.push(
+    'Der Nutzer bearbeitet diese Composition-Scene im CREATION-Editor. Bei Layout-Fragen oder -Änderungen zuerst creation_scene_tree_index (und ggf. creation_editor_palette) lesen.',
+    'Schreiben nur mit Nutzerauftrag via creation_scene_apply_ops — sceneId und baseUpdatedAt aus diesem Kontext verwenden.',
+  )
+  return lines.join('\n')
+}
+
 /**
  * Build system-prompt block for the current host page.
  * EQC runs are authorized and summarized; other pages get a route hint only.
@@ -120,6 +152,18 @@ export async function buildAssistantPageContextBlock(
       'Der Nutzer hat diesen Quick Check geöffnet. Beantworte Fragen dazu mit diesem Kontext; lade Tools nur wenn Details fehlen.'
     )
     return truncateAssistantText(lines.join('\n'), ASSISTANT_MAX_PAGE_CONTEXT_CHARS, 'Seitenkontext')
+  }
+
+  if (
+    isCreationEditorContext(pageContext) &&
+    pageContext.entityType === ASSISTANT_ENTITY_COMPOSITION_SCENE &&
+    pageContext.entityId
+  ) {
+    return truncateAssistantText(
+      buildCreationEditorContextBlock(pageContext),
+      ASSISTANT_MAX_PAGE_CONTEXT_CHARS,
+      'Seitenkontext',
+    )
   }
 
   if (isEqc || pageContext.capability || pageContext.entityId) {

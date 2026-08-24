@@ -130,6 +130,7 @@ function EmbedAssistantChat() {
           platformProjectId: event.data.platformProjectId,
           entityType: event.data.entityType,
           entityId: event.data.entityId,
+          entityUpdatedAt: event.data.entityUpdatedAt,
         })
       )
     }

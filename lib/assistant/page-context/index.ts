@@ -14,6 +14,12 @@ export const ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK = 'event_quick_check' as con
 /** Entity for an EQC workflow run (`?run=`). */
 export const ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN = 'event_quick_check_run' as const
 
+/** Capability id when the user is in the CREATION composition editor. */
+export const ASSISTANT_CAPABILITY_CREATION_EDITOR = 'creation_editor' as const
+
+/** Entity for an open composition scene in the CREATION editor. */
+export const ASSISTANT_ENTITY_COMPOSITION_SCENE = 'composition_scene' as const
+
 /** Compact page-context block budget in the system prompt. */
 export const ASSISTANT_MAX_PAGE_CONTEXT_CHARS = 6_000
 
@@ -26,6 +32,8 @@ export type AssistantPageContext = {
   platformProjectId?: string
   entityType?: string
   entityId?: string
+  /** Optimistic-lock token for scene_apply_ops (CREATION editor). */
+  entityUpdatedAt?: string
 }
 
 export function isAssistantPageContextProduct(
@@ -60,6 +68,9 @@ export function parseAssistantPageContext(raw: unknown): AssistantPageContext | 
   if (typeof row.entityId === 'string' && row.entityId.trim()) {
     out.entityId = row.entityId.trim()
   }
+  if (typeof row.entityUpdatedAt === 'string' && row.entityUpdatedAt.trim()) {
+    out.entityUpdatedAt = row.entityUpdatedAt.trim()
+  }
   return out
 }
 
@@ -77,6 +88,7 @@ export function mergeAssistantPageContext(
     platformProjectId: overlay.platformProjectId ?? base.platformProjectId,
     entityType: overlay.entityType ?? base.entityType,
     entityId: overlay.entityId ?? base.entityId,
+    entityUpdatedAt: overlay.entityUpdatedAt ?? base.entityUpdatedAt,
   }
 }
 
@@ -126,6 +138,9 @@ export function buildPageContextRouteHint(ctx: AssistantPageContext): string {
   if (ctx.platformProjectId) lines.push(`- platformProjectId: ${ctx.platformProjectId}`)
   if (ctx.entityType && ctx.entityId) {
     lines.push(`- Entity: ${ctx.entityType} (${ctx.entityId})`)
+  }
+  if (ctx.entityUpdatedAt) {
+    lines.push(`- entityUpdatedAt: ${ctx.entityUpdatedAt}`)
   }
   lines.push(
     'Der Nutzer betrachtet diese Seite. Beziehe dich darauf, wenn die Frage den aktuellen Kontext meint (z. B. „dieser Scan“, „dieser Quick Check“).'

@@ -31,7 +31,8 @@ export function AssistantPageContextProvider({ children }: { children: ReactNode
         prev.capability === next.capability &&
         prev.platformProjectId === next.platformProjectId &&
         prev.entityType === next.entityType &&
-        prev.entityId === next.entityId
+        prev.entityId === next.entityId &&
+        prev.entityUpdatedAt === next.entityUpdatedAt
       ) {
         return prev
       }

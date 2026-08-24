@@ -242,6 +242,7 @@ export function PlatformAssistantHost({
       pathname: pageContext?.pathname ?? pathname ?? undefined,
       entityType: pageContext?.entityType,
       entityId: pageContext?.entityId,
+      entityUpdatedAt: pageContext?.entityUpdatedAt,
     })
     if (themeId) {
       postAssistantHostMessage(frame, plexonOrigin, {

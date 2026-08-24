@@ -18,8 +18,9 @@ type AssistantPageContext = {
   pathname: string
   capability?: string // e.g. ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK
   platformProjectId?: string
-  entityType?: 'event_quick_check_run'
-  entityId?: string // workflowRunId for EQC
+  entityType?: 'event_quick_check_run' | 'composition_scene'
+  entityId?: string // workflowRunId for EQC · sceneId for CREATION editor
+  entityUpdatedAt?: string // optimistic-lock token for scene_apply_ops
 }
 ```
 
@@ -46,8 +47,17 @@ Server:
 1. Validate shape (ignore unknown fields).
 2. Prefer `pageContext.platformProjectId` for Collection binding when authorized (same as body/conversation).
 3. If `capability === event_quick_check` and `entityType === event_quick_check_run` and `entityId` set → hydrate run (authz via `userCanAccessEventQuickCheckRun`).
-4. Append compact block to system prompt: `## Aktueller Seitenkontext — Event Quick Check`.
+4. Append compact block to system prompt: `## Aktueller Seitenkontext — Event Quick Check` (EQC) or `## Aktueller Seitenkontext — CREATION Editor` (scene).
 5. On hydrate failure (missing/forbidden): keep a thin route hint only (pathname + capability).
+
+### CREATION editor (P90)
+
+| Constant | Value |
+|----------|--------|
+| `ASSISTANT_CAPABILITY_CREATION_EDITOR` | `creation_editor` |
+| `ASSISTANT_ENTITY_COMPOSITION_SCENE` | `composition_scene` |
+
+Host (creation-v3): `EditorWorkspace` publishes `entityId=sceneId`, `entityUpdatedAt=baseUpdatedAt` (saved lock token), optional `platformProjectId`. Embed posts `assistant:context` while flyout is open.
 
 ## Hydration budget
 

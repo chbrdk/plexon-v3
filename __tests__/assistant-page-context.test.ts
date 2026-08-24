@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import {
+  ASSISTANT_CAPABILITY_CREATION_EDITOR,
   ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
+  ASSISTANT_ENTITY_COMPOSITION_SCENE,
   ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN,
   buildPageContextRouteHint,
   derivePageContextFromLocation,
@@ -130,6 +132,23 @@ describe('assistant page context', () => {
     })
     expect(denied).toContain('Seitenkontext')
     expect(denied).not.toContain('Missing alt')
+  })
+
+  it('hydrates CREATION editor scene context for assistant', async () => {
+    const user = { id: 'u1', email: 'u@example.com', role: 'user' as const }
+    const block = await buildAssistantPageContextBlock(user, {
+      product: 'creation',
+      pathname: '/editor',
+      capability: ASSISTANT_CAPABILITY_CREATION_EDITOR,
+      entityType: ASSISTANT_ENTITY_COMPOSITION_SCENE,
+      entityId: 'scene-abc',
+      entityUpdatedAt: '2026-08-23T20:00:00.000Z',
+      platformProjectId: 'pp-1',
+    })
+    expect(block).toContain('CREATION Editor')
+    expect(block).toContain('scene-abc')
+    expect(block).toContain('baseUpdatedAt')
+    expect(block).toContain('creation_scene_apply_ops')
   })
 
   it('wires EQC publish + complete body + host', () => {

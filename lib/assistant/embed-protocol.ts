@@ -35,6 +35,7 @@ export type AssistantHostMessage = {
   pathname?: string
   entityType?: string
   entityId?: string
+  entityUpdatedAt?: string
   themeId?: string
 }
 

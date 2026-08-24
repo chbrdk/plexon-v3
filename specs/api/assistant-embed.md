@@ -63,7 +63,7 @@ Channel marker: every message is a JSON-serializable object with `source: 'plexo
 
 | `type` | Payload | When |
 |--------|---------|------|
-| `assistant:context` | `{ product; platformProjectId?; capability?; pathname?; entityType?; entityId? }` | Host context changed while open |
+| `assistant:context` | `{ product; platformProjectId?; capability?; pathname?; entityType?; entityId?; entityUpdatedAt? }` | Host context changed while open |
 | `assistant:theme` | `{ themeId: string }` | Host theme changed / initial sync |
 | `assistant:close` | `{}` | Host requests embed to shut down UI (optional) |
 
