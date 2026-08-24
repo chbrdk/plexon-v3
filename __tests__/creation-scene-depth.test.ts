@@ -84,8 +84,10 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('Get started')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('insert_child')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/VERBOTENE|nackte Instances/i)
-    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Tokens vs Literale')
-    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/bewusstes Literal|Literale setzen/i)
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('Brand / Tokens')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_brand_tokens_get')
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('set_token_binding')
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_preview')
 
     const plan = planAssistantTurnHeuristic({

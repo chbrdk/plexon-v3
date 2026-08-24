@@ -47,13 +47,13 @@ Connectivity: `buildCreationIntegrationContextBlock`.
 | Intent | When | Families |
 |--------|------|----------|
 | `creation_design` | Library / catalog / Zaoly / WC tags | `creation_library`, `creation_compositions`, `creation_projects` |
-| `creation_scene_edit` | Scene / layout / editor / Site Kit master prompts | `creation_scene`, `creation_scene_write` (write gated) |
+| `creation_scene_edit` | Scene / layout / editor / Site Kit master prompts | `creation_scene`, `creation_scene_write` (write gated); plus `brandion_tokens` when Brandion MCP is on |
 
 Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|landing|site kit|master and `hasCreationMcp`, **or** when CREATION editor page context has an open composition scene.
 
 ### Latency
 
-- `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` contact CREATION MCP (skip Checkion/Audion/Echon/Brandion `tools/list`). When `useSpirionMcp`, also contact Spirion for reference/screen inspiration (see `assistant-spirion-mcp.md`).
+- `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` contact CREATION MCP (skip Checkion/Audion/Echon). Also contact **Brandion** when `useBrandionMcp` (active-pack / `brandion_tokens_*` for Collection identity). When `useSpirionMcp`, also contact Spirion for reference/screen inspiration (see `assistant-spirion-mcp.md`).
 - Prefetch: editor turns load a compact scene-tree **outline** into the system prompt before the first LLM round.
 - Orchestrator compacts `creation_scene_tree_index` results to the same outline format.
 - MCP `tools/list` is cached ~60s per base URL; product MCP fetches run in parallel when multiple are enabled.
@@ -67,14 +67,14 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 |-------|---------|--------------|---------------|
 | `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
 | Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
-| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop`; **token-or-literal** policy for Spirion-inspired builds | — | no craft block |
+| System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; `insert_instance` only with `props`/immediate `set_prop`; **mandatory Brand-Pack + `set_token_binding`**; anti-wireframe Vision | — | no craft block |
 
 - WENN `ANTHROPIC_ASSISTANT_THINKING_BUDGET` global `0`/`off` ist, DANN bleibt Thinking auch für Scene-Edit aus.
 - LLM planner refine MUST NOT shrink `maxToolRounds` below the Creation depth default when intent stays `creation_scene_edit`.
 - `creation_design` (library/catalog Q&A) does **not** get this budget — only scene/layout editing.
 - Content-complete: Agents MUST set real `props` on inserts. Bare `insert_instance` (Master seeds: „Get started“, „Option A“, „Text“) is **not** a finished page — override via `props` on the op or `set_prop`.
-- Tokens vs Literals: prefer Collection pack via `creation_brand_tokens_get` / `set_token_binding` when a match exists; otherwise **choose deliberate literals** (`set_style` / prop values). Spirion is inspiration only — do not stall for missing library tokens (see `assistant-spirion-mcp.md` § Tokens vs Literals).
-- After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds).
+- **Brand tokens (pflicht):** Early `creation_brand_tokens_get` (scene `platformProjectId`). Site Kit insert defaults = fixture MSQDX look — **not** Collection brand. Colors/fill/type/radius/gap nur via `set_token_binding` (keys: `background`, `color`, `borderColor`, `radius`, `gap`, typography keys). `set_style` = **nur** `width`/`height` (z. B. Hero-Image). Pack `source: brandion` → key surfaces (CTA, Badge, Section, Text) auf Pack-Paths rebinden. Pack `source: fixture` / leer → im Abschluss nennen; Layout trotzdem differenzieren (Spacing/Größen/Rollen), nicht „fertig gebrandet“ behaupten. Spirion = Inspiration only (see `assistant-spirion-mcp.md` § Tokens vs Literals).
+- After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds). Vision MUST fail gray wireframe / tiny placeholder images / all-defaults Site Kit chrome.
 
 ## Non-goals
 

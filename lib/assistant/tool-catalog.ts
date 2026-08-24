@@ -217,6 +217,7 @@ export const CREATION_SCENE_WRITE_FAMILIES: ToolFamily[] = ['creation_scene_writ
 export const CREATION_SCENE_EDIT_FAMILIES: ToolFamily[] = [
   'creation_scene',
   'creation_scene_write',
+  'brandion_tokens',
 ];
 
 /** Spirion research families (Welle 1 read-only). */

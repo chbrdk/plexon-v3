@@ -24,7 +24,8 @@ export function resolveMcpFlagsForPlan(
         useCheckionMcp: false,
         useAudionMcp: false,
         useEchonMcp: false,
-        useBrandionMcp: false,
+        // Active Brandion pack for set_token_binding (Collection identity).
+        useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: flags.useCreationMcp,
         // Scene builds may pull Spirion references/screens for inspiration.
         useSpirionMcp: flags.useSpirionMcp,

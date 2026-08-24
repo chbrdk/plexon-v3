@@ -29,12 +29,12 @@ function plan(intent: AssistantPlan['intent']): AssistantPlan {
 }
 
 describe('resolveMcpFlagsForPlan', () => {
-  it('keeps Creation + Spirion MCP for scene edit', () => {
+  it('keeps Creation + Brandion + Spirion MCP for scene edit', () => {
     expect(resolveMcpFlagsForPlan(plan('creation_scene_edit'), baseFlags)).toEqual({
       useCheckionMcp: false,
       useAudionMcp: false,
       useEchonMcp: false,
-      useBrandionMcp: false,
+      useBrandionMcp: true,
       useCreationMcp: true,
       useSpirionMcp: true,
     })
