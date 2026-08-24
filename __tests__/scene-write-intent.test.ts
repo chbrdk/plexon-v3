@@ -54,6 +54,7 @@ describe('scene write intent', () => {
 
   it('blocks scene write tools when plan disallows writes', () => {
     expect(isDestructiveOrWriteTool('creation_scene_apply_ops')).toBe(true)
+    expect(isDestructiveOrWriteTool('creation_scene_import_html')).toBe(true)
     const plan = planAssistantTurnHeuristic({
       prompt: 'Was steht in der Scene?',
       hasProjectContext: false,

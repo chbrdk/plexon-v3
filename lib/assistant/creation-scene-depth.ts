@@ -47,17 +47,18 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
-Phasen (eigene apply_ops-Batches):
+**Greenfield Landing/Homepage:** Bevorzuge **ein** vollständiges HTML (inline CSS) → \`creation_scene_import_html\` (Literale, kein Fixture-Token-Chrome) → audit → preview. Danach nur kleine \`apply_ops\`-Fixes. Nicht Dutzende \`insert_child\`-Runden für die Erststruktur.
+Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
 1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für **Homepage/Landing** (Struktur/Copy; nicht 1:1). Corpus oft ohne PDP — leere Treffer OK → Best-Practice Landing (Hero, Benefits, CTA) fortsetzen, nicht abbrechen.
-2. Struktur — add_page / SiteStack / SiteGrid / Sections
-3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
-4. **Look & Feel (frei erlaubt)** — Farben/Abstände/Radii bewusst setzen (siehe „Freies Styling“). Site-Kit-Fixture nicht als fertiges Branding belassen. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
+2. **Erstentwurf** — greenfield: \`creation_scene_import_html\` mit einem HTML-Dokument (\`pageName\` optional für neue Seite). Sonst: add_page / SiteStack / Sections via ops.
+3. Inhalt nachziehen — nur wenn Import/ops Lücken lassen: **insert_child mit echten props**. Bare insert_instance = verboten für Seiten-Copy.
+4. **Look & Feel (frei erlaubt)** — bei Ops: Farben/Abstände/Radii bewusst setzen (siehe „Freies Styling“). Import liefert Literale bereits. Site-Kit-Fixture nicht als fertiges Branding belassen. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
 5. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
 6. Pixel-Check — **creation_scene_preview** (max. 1–2×): kompaktes WebP Vision. Bei Preview-error / network: **nur Audit**, Pixel-QA nicht behaupten, Turn trotzdem abschließen.
-7. Abschluss — Tree neu lesen; kurz sagen ob Literale und/oder Token-Bindings genutzt wurden.
+7. Abschluss — Tree neu lesen; kurz sagen ob Import und/oder Literale/Token-Bindings genutzt wurden. Non-empty import \`warnings\` dem User nennen.
 
-Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
+Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst, dann unter neuem root.id bauen.
 
 ### Freies Styling (Hex / Abstände — ohne Token anlegen)
 Wie im Inspector: **Literale in \`props\`**, Paint-Merge = Tokens dann **Props überschreiben Tokens**.

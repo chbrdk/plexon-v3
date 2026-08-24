@@ -34,7 +34,7 @@ Connectivity: `buildCreationIntegrationContextBlock`.
 | `creation_compositions` | `^creation_compositions_` |
 | `creation_projects` | `^creation_projects_`, `^creation_project_` |
 | `creation_scene` | `^creation_scene_(get|list|tree_index)$`, `^creation_editor_palette$`, `^creation_brand_tokens_get$` |
-| `creation_scene_write` | `^creation_scene_apply_ops$`, `^creation_site_kit_composition_save$` |
+| `creation_scene_write` | `^creation_scene_(apply_ops|import_html)$`, `^creation_site_kit_composition_save$` |
 
 - v1 read families (`creation_library`, `creation_compositions`, `creation_projects`) remain read-only in Q&A.
 - `creation_scene` is read-only; include in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_FAMILIES`.
@@ -75,7 +75,7 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 - Content-complete: Agents MUST set real `props` on inserts. Bare `insert_instance` (Master seeds: „Get started“, „Option A“, „Text“) is **not** a finished page — override via `props` on the op or `set_prop`.
 - **Freies Styling (first-class):** Farben/Abstände/Radii wie im Inspector — `set_prop` mit Literal (`background`/`color`/`borderColor`/`gap`/`radius`/`fontSize`/… → Hex, rem, px). Bestehendes Token auf dem Key → `clear_token_binding`. Paint: Props überschreiben Token-Resolve (`resolveNodePaintStyle`). **Kein** neues Brandion-Token nötig. `set_token_binding` optional wenn Pack passt. `set_style` nur `width`/`height`. Optional `creation_brand_tokens_get` — nicht blockierend. Spirion = Inspiration only (see `assistant-spirion-mcp.md`).
 - After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds). Vision MUST fail gray wireframe / tiny placeholder images / untouched Site Kit fixture chrome.
-- **HTML first-draft (Proposed):** When `creation_scene_import_html` ships (`creation-v3/specs/domain/html-scene-import.md`), greenfield landings SHOULD use one HTML document → import → audit/preview, not dozens of `insert_child` rounds. Ops remain for polish. React/JSX import is out of scope for v1.
+- **HTML first-draft (Shipped P1):** Greenfield landings SHOULD use one HTML document → `creation_scene_import_html` → audit/preview, not dozens of `insert_child` rounds. Ops remain for polish. React/JSX import is out of scope for v1. See `creation-v3/specs/domain/html-scene-import.md`.
 
 ## Non-goals
 
@@ -85,7 +85,7 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 
 ## Acceptance
 
-1. Unit: catalog classifies `creation_scene_tree_index` → `creation_scene`, `creation_scene_apply_ops` → `creation_scene_write`.
+1. Unit: catalog classifies `creation_scene_tree_index` → `creation_scene`, `creation_scene_apply_ops` / `creation_scene_import_html` → `creation_scene_write`.
 2. Gate: `resolveUseCreationMcp` mirrors Brandion rules.
 3. Planner: layout prompts → `creation_scene_edit` with write tools only when user asks to change/build.
 4. Staging: set `CREATION_MCP_URL` after Coolify `creation-mcp` is live.

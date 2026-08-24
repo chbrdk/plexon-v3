@@ -46,6 +46,7 @@ describe('creation tool catalog + planner', () => {
     expect(classifyToolFamily('creation_projects_list')).toBe('creation_projects')
     expect(classifyToolFamily('creation_scene_tree_index')).toBe('creation_scene')
     expect(classifyToolFamily('creation_scene_apply_ops')).toBe('creation_scene_write')
+    expect(classifyToolFamily('creation_scene_import_html')).toBe('creation_scene_write')
   })
 
   it('mentions valid insert ops in connectivity block', () => {

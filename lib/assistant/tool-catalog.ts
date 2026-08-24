@@ -111,7 +111,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^creation_brand_tokens_get$/,
   ],
   creation_scene_write: [
-    /^creation_scene_apply_ops$/,
+    /^creation_scene_(apply_ops|import_html)$/,
     /^creation_site_kit_composition_save$/,
   ],
   spirion_references: [
@@ -134,7 +134,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
 };
 
 const DESTRUCTIVE = /(?:^|_)(delete|revoke)(?:_|$)/i;
-const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply)(?:_|$)/i;
+const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS) as [ToolFamily, RegExp[]][]) {
