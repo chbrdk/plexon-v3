@@ -16,7 +16,7 @@ describe('scene preview multimodal tool results', () => {
       sceneId: 's1',
       pageId: 'p1',
       breakpoint: 'desktop',
-      mimeType: 'image/jpeg',
+      mimeType: 'image/webp',
       pngBase64: 'AAAABBBB',
       width: 960,
       height: 600,
@@ -28,13 +28,13 @@ describe('scene preview multimodal tool results', () => {
     expect((content[0] as { text: string }).text).not.toContain('AAAABBBB');
     expect(content[1]).toEqual({
       type: 'image',
-      source: { type: 'base64', media_type: 'image/jpeg', data: 'AAAABBBB' },
+      source: { type: 'base64', media_type: 'image/webp', data: 'AAAABBBB' },
     });
   });
 
   it('omits oversized images as text soft-fail', () => {
     const raw = JSON.stringify({
-      mimeType: 'image/jpeg',
+      mimeType: 'image/webp',
       pngBase64: 'x'.repeat(500_000),
       sceneId: 's1',
     });
@@ -48,7 +48,7 @@ describe('scene preview multimodal tool results', () => {
     const raw = JSON.stringify({
       error: 'preview-failed:browser missing',
       pngBase64: '',
-      mimeType: 'image/jpeg',
+      mimeType: 'image/webp',
     });
     const content = formatToolResultForAnthropic('creation_scene_preview', raw);
     expect(typeof content).toBe('string');
