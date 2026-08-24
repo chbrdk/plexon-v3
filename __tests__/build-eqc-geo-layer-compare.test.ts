@@ -19,33 +19,33 @@ function layer(
 describe('buildEqcGeoLayerCompare', () => {
   it('returns null for fewer than two layers', () => {
     expect(buildEqcGeoLayerCompare(undefined)).toBeNull()
-    expect(buildEqcGeoLayerCompare([layer({ measurement: 'recall', overallScore: 50 })])).toBeNull()
+    expect(buildEqcGeoLayerCompare([layer({ measurement: 'recall', citedShare: 50 })])).toBeNull()
   })
 
-  it('picks the higher overallScore as winner', () => {
+  it('picks the higher citedShare as winner', () => {
     const compare = buildEqcGeoLayerCompare([
-      layer({ measurement: 'recall', overallScore: 52, geoFitnessScore: 40 }),
-      layer({ measurement: 'live', overallScore: 61, geoFitnessScore: 55 }),
+      layer({ measurement: 'recall', citedShare: 52, geoFitnessScore: 40 }),
+      layer({ measurement: 'live', citedShare: 61, geoFitnessScore: 55 }),
     ])
     expect(compare?.winner).toBe('live')
     expect(compare?.layers).toEqual([
-      { measurement: 'recall', overallScore: 52, geoFitnessScore: 40 },
-      { measurement: 'live', overallScore: 61, geoFitnessScore: 55 },
+      { measurement: 'recall', citedShare: 52, geoFitnessScore: 40 },
+      { measurement: 'live', citedShare: 61, geoFitnessScore: 55 },
     ])
   })
 
-  it('marks a tie when overallScores match', () => {
+  it('marks a tie when citedShares match', () => {
     const compare = buildEqcGeoLayerCompare([
-      layer({ measurement: 'live', overallScore: 44 }),
-      layer({ measurement: 'recall', overallScore: 44 }),
+      layer({ measurement: 'live', citedShare: 44 }),
+      layer({ measurement: 'recall', citedShare: 44 }),
     ])
     expect(compare?.winner).toBe('tie')
   })
 
-  it('leaves winner null when scores are missing', () => {
+  it('leaves winner null when citedShares are missing', () => {
     const compare = buildEqcGeoLayerCompare([
-      layer({ measurement: 'recall', overallScore: null }),
-      layer({ measurement: 'live', overallScore: 30 }),
+      layer({ measurement: 'recall', citedShare: null }),
+      layer({ measurement: 'live', citedShare: 30 }),
     ])
     expect(compare?.winner).toBeNull()
   })

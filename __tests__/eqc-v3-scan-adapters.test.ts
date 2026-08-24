@@ -71,6 +71,7 @@ describe('mapGeoOverviewV3ToPreview', () => {
     )
     expect(job.jobId).toBe('g1')
     expect(job.status).toBe('complete')
+    expect(job.citedShare).toBe(40)
     expect(job.geoFitnessScore).toBe(72)
     expect(job.eeatScores?.expertise?.score).toBe(80)
     expect(job.eeatScores?.expertise?.reasoning).toMatch(/product depth/)

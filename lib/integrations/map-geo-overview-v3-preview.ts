@@ -184,6 +184,12 @@ export function mapGeoOverviewV3ToPreview(
     url,
     status,
     overallScore: job.overallScore ?? null,
+    citedShare:
+      typeof job.citedShare === 'number' && Number.isFinite(job.citedShare)
+        ? job.citedShare <= 1
+          ? Math.round(job.citedShare * 100)
+          : Math.round(job.citedShare)
+        : null,
     geoFitnessScore,
     eeatScores: eeat
       ? {

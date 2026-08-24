@@ -6,12 +6,15 @@ import { EventQuickCheckScoreRing } from '@/components/event-quick-check/EventQu
 import { EventQuickCheckVoiceRadar } from '@/components/event-quick-check/EventQuickCheckVoiceRadar'
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
+import type { EqcGeoSnapshot } from '@/lib/assistant/reports/event-quick-check/build-eqc-geo-snapshot'
 import { buildEqcVoiceRadarPoints } from '@/lib/assistant/reports/event-quick-check/eqc-radar-geometry'
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 type Props = {
   report: EventQuickCheckReportModel
   geo?: EventQuickCheckReportModel['geo']
+  /** Fixed dials across layers — must not follow the active layer switch. */
+  snapshot?: EqcGeoSnapshot
   layerLabel?: string
   showQuestions?: boolean
 }
@@ -30,16 +33,25 @@ function scoreTone(score: number | null | undefined): 'pos' | 'low' | 'neg' | un
 
 /**
  * GEO magazine chapter — Checkion overview pattern:
- * score rings → share-of-voice race → model strip + ranking.
+ * fixed snapshot dials → share-of-voice race → model strip + ranking.
  * E-E-A-T and GEO recommendations live in their own bands.
  */
 export function EventQuickCheckGeoMagazineSection({
   report,
   geo: geoOverride,
+  snapshot: snapshotOverride,
   layerLabel,
   showQuestions = true,
 }: Props) {
   const geo = geoOverride ?? report.geo
+  const snapshot: EqcGeoSnapshot = snapshotOverride ?? {
+    citedShare: sharePct(geo.citedShare),
+    geoFitnessScore:
+      typeof geo.geoFitnessScore === 'number' && Number.isFinite(geo.geoFitnessScore)
+        ? Math.round(geo.geoFitnessScore)
+        : null,
+    promptCount: geo.questions.length || geo.citationHighlights.length || 0,
+  }
   const ownHost = normalizeGeoDomain(geo.url ?? report.meta.domain ?? report.meta.url)
 
   const voiceRows = (() => {
@@ -55,14 +67,17 @@ export function EventQuickCheckGeoMagazineSection({
         }
       })
       .filter((r) => r.domain)
-    if (ownHost && !rows.some((r) => r.isOwn) && geo.overallScore != null) {
-      rows.unshift({
-        domain: ownHost,
-        pct: Math.round(geo.overallScore),
-        avgPosition: null,
-        mentionCount: null,
-        isOwn: true,
-      })
+    if (ownHost && !rows.some((r) => r.isOwn)) {
+      const ownPct = sharePct(geo.citedShare)
+      if (ownPct != null) {
+        rows.unshift({
+          domain: ownHost,
+          pct: ownPct,
+          avgPosition: null,
+          mentionCount: null,
+          isOwn: true,
+        })
+      }
     }
     return rows.sort((a, b) => b.pct - a.pct)
   })()
@@ -70,9 +85,18 @@ export function EventQuickCheckGeoMagazineSection({
   const maxVoice = Math.max(...voiceRows.map((r) => r.pct), 1)
   const voiceRadarPoints = buildEqcVoiceRadarPoints(voiceRows)
 
-  const score = geo.overallScore
-  const fitness = geo.geoFitnessScore
-  const queryCount = geo.questions.length || geo.citationHighlights.length || 0
+  const citedShare = snapshot.citedShare
+  const fitness = snapshot.geoFitnessScore
+  const queryCount = snapshot.promptCount
+
+  const lede =
+    citedShare != null
+      ? EQC_REPORT_COPY.geoSnapshotLedeCited(citedShare)
+      : fitness != null
+        ? EQC_REPORT_COPY.geoSnapshotLedeFitness(fitness)
+        : queryCount > 0
+          ? EQC_REPORT_COPY.geoSnapshotLedePrompts(queryCount)
+          : null
 
   return (
     <div className="plexon-eqc-geo-spread" data-section="eqc-geo-spread">
@@ -85,26 +109,27 @@ export function EventQuickCheckGeoMagazineSection({
         <Alert tone="error">{geo.errorMessage}</Alert>
       ) : null}
 
-      {(score != null || fitness != null || queryCount > 0) && (
+      {(citedShare != null || fitness != null || queryCount > 0) && (
         <section
           className="plexon-eqc-geo-snapshot"
           aria-label={EQC_REPORT_COPY.sectionGeoCheck}
+          data-eqc-geo-snapshot="combined"
         >
           <div className="plexon-eqc-geo-snapshot__dials">
-            {score != null ? (
+            {citedShare != null ? (
               <EventQuickCheckScoreRing
-                value={score}
-                label="GEO Score"
-                meta="Zitierstärke"
-                tone={scoreTone(score)}
+                value={citedShare}
+                label={EQC_REPORT_COPY.geoSnapshotCitedShare}
+                meta={EQC_REPORT_COPY.geoSnapshotCitedShareMeta}
+                tone={scoreTone(citedShare)}
                 size="lg"
               />
             ) : null}
             {fitness != null ? (
               <EventQuickCheckScoreRing
                 value={fitness}
-                label="GEO Fitness"
-                meta="On-page"
+                label={EQC_REPORT_COPY.geoSnapshotFitness}
+                meta={EQC_REPORT_COPY.geoSnapshotFitnessMeta}
                 tone={scoreTone(fitness)}
               />
             ) : null}
@@ -112,8 +137,8 @@ export function EventQuickCheckGeoMagazineSection({
               <EventQuickCheckScoreRing
                 value={queryCount}
                 max={Math.max(queryCount, 12)}
-                label="Prompts"
-                meta="im Lauf"
+                label={EQC_REPORT_COPY.geoSnapshotPrompts}
+                meta={EQC_REPORT_COPY.geoSnapshotPromptsMeta}
               />
             ) : null}
           </div>
@@ -121,13 +146,7 @@ export function EventQuickCheckGeoMagazineSection({
             <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
               {EQC_REPORT_COPY.sectionGeoCheck}
             </Text>
-            <p className="plexon-eqc-geo-snapshot__lede">
-              {score != null
-                ? `GEO Score ${score}/100 — so oft und wie stark Modelle deine Domain zitieren.`
-                : fitness != null
-                  ? `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten.`
-                  : `${queryCount} Prompts im Wettbewerbslauf.`}
-            </p>
+            {lede ? <p className="plexon-eqc-geo-snapshot__lede">{lede}</p> : null}
           </header>
         </section>
       )}

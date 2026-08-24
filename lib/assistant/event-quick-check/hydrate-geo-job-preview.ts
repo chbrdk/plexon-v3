@@ -25,6 +25,7 @@ export function geoPreviewForCatalogBundle(
     url: preview.url,
     status: preview.status,
     overallScore: preview.overallScore ?? null,
+    citedShare: preview.citedShare ?? null,
     geoFitnessScore: preview.geoFitnessScore ?? null,
     eeatScores: preview.eeatScores,
     geoFitnessReasoning: preview.geoFitnessReasoning,
@@ -49,6 +50,7 @@ export function mergeGeoPreviewIntoJob(
     url: preview.url || base?.url || '',
     status: preview.status || base?.status || 'completed',
     overallScore: preview.overallScore ?? base?.overallScore ?? null,
+    citedShare: preview.citedShare ?? base?.citedShare ?? null,
     geoFitnessScore: preview.geoFitnessScore ?? base?.geoFitnessScore ?? null,
     eeatScores: preview.eeatScores ?? base?.eeatScores,
     geoFitnessReasoning: preview.geoFitnessReasoning ?? base?.geoFitnessReasoning,
@@ -93,6 +95,10 @@ export function geoJobFromCatalogBundle(
         status: typeof previewRaw.status === 'string' ? previewRaw.status : 'completed',
         overallScore:
           typeof previewRaw.overallScore === 'number' ? previewRaw.overallScore : null,
+        citedShare:
+          typeof previewRaw.citedShare === 'number'
+            ? previewRaw.citedShare
+            : null,
         geoFitnessScore:
           typeof previewRaw.geoFitnessScore === 'number'
             ? previewRaw.geoFitnessScore
@@ -127,6 +133,10 @@ export function geoJobFromCatalogBundle(
       typeof bundle?.overallScore === 'number'
         ? bundle.overallScore
         : fromPreview?.overallScore ?? null,
+    citedShare:
+      typeof bundle?.citedShare === 'number'
+        ? bundle.citedShare
+        : fromPreview?.citedShare ?? null,
     geoFitnessScore:
       typeof bundle?.geoFitness === 'number'
         ? bundle.geoFitness

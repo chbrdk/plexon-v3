@@ -157,6 +157,8 @@ export type EventQuickCheckReportGeoSection = {
   measurement?: GeoMeasurement;
   questions: string[];
   overallScore?: number | null;
+  /** Citation strength 0–100 (CHECKION citedShare). Distinct from geoFitness. */
+  citedShare?: number | null;
   geoFitnessScore?: number | null;
   jobId?: string;
   url?: string;

@@ -131,6 +131,7 @@ function geoSectionFromJob(input: {
     measurement: input.measurement,
     questions: input.questions,
     overallScore: job?.overallScore ?? null,
+    citedShare: job?.citedShare ?? null,
     geoFitnessScore: job?.geoFitnessScore ?? null,
     jobId: job?.jobId,
     url: job?.url ?? input.url,

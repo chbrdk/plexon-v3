@@ -24,6 +24,8 @@ export type GeoEeatJobPreview = {
   url: string;
   status: string;
   overallScore?: number | null;
+  /** Citation strength 0–100 from CHECKION presence.solo.citedShare. */
+  citedShare?: number | null;
   geoFitnessScore?: number | null;
   eeatScores?: {
     trust?: GeoEeatEeatDimension;

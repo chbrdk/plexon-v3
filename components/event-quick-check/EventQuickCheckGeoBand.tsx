@@ -6,6 +6,7 @@ import { EventQuickCheckGeoMagazineSection } from '@/components/event-quick-chec
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import { buildEqcGeoLayerCompare } from '@/lib/assistant/reports/event-quick-check/build-eqc-geo-layer-compare'
+import { buildEqcGeoSnapshot } from '@/lib/assistant/reports/event-quick-check/build-eqc-geo-snapshot'
 import {
   geoMeasurementMagazineLabel,
   type GeoMeasurement,
@@ -21,12 +22,17 @@ function formatScore(value: number | null): string {
 
 /**
  * Dual-layer GEO band: compare strip + exclusive layer switch + one magazine chapter.
+ * Snapshot dials stay combined; switch only affects SoV / dossier.
  * Spec: specs/domain/eqc-as-collection-flow.md
  */
 export function EventQuickCheckGeoBand({ report }: Props) {
   const layers = report.geoLayers?.length ? report.geoLayers : [report.geo]
   const dual = layers.length > 1
   const compare = useMemo(() => buildEqcGeoLayerCompare(report.geoLayers), [report.geoLayers])
+  const snapshot = useMemo(
+    () => buildEqcGeoSnapshot(report.geoLayers, report.geo),
+    [report.geoLayers, report.geo]
+  )
 
   const initialMeasurement: GeoMeasurement =
     layers[0]?.measurement === 'live' || layers[0]?.measurement === 'recall'
@@ -88,7 +94,7 @@ export function EventQuickCheckGeoBand({ report }: Props) {
                   <dl className="plexon-eqc-geo-layer-compare__metrics">
                     <div>
                       <dt>{EQC_REPORT_COPY.geoLayerCompareScore}</dt>
-                      <dd>{formatScore(row.overallScore)}</dd>
+                      <dd>{formatScore(row.citedShare)}</dd>
                     </div>
                     <div>
                       <dt>{EQC_REPORT_COPY.geoLayerCompareFitness}</dt>
@@ -119,6 +125,7 @@ export function EventQuickCheckGeoBand({ report }: Props) {
       <EventQuickCheckGeoMagazineSection
         report={report}
         geo={activeGeo}
+        snapshot={snapshot}
         showQuestions
       />
     </div>

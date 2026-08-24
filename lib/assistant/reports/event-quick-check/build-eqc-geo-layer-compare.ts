@@ -4,18 +4,19 @@ import { GEO_MEASUREMENT_ORDER } from '@/lib/geo/measurement'
 
 export type EqcGeoLayerCompareRow = {
   measurement: GeoMeasurement
-  overallScore: number | null
+  citedShare: number | null
   geoFitnessScore: number | null
 }
 
 export type EqcGeoLayerCompare = {
   layers: EqcGeoLayerCompareRow[]
-  /** Higher overallScore wins; null when fewer than two scored layers. */
+  /** Higher citedShare wins; null when fewer than two scored layers. */
   winner: GeoMeasurement | 'tie' | null
 }
 
 function scoreOrNull(value: number | null | undefined): number | null {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null
+  return value <= 1 ? Math.round(value * 100) : Math.round(value)
 }
 
 /**
@@ -34,7 +35,7 @@ export function buildEqcGeoLayerCompare(
     if (byMeasurement.has(measurement)) continue
     byMeasurement.set(measurement, {
       measurement,
-      overallScore: scoreOrNull(layer.overallScore),
+      citedShare: scoreOrNull(layer.citedShare),
       geoFitnessScore: scoreOrNull(layer.geoFitnessScore),
     })
   }
@@ -44,13 +45,13 @@ export function buildEqcGeoLayerCompare(
   )
   if (rows.length < 2) return null
 
-  const scored = rows.filter((row) => row.overallScore != null)
+  const scored = rows.filter((row) => row.citedShare != null)
   let winner: EqcGeoLayerCompare['winner'] = null
   if (scored.length >= 2) {
     const a = scored[0]!
     const b = scored[1]!
-    if (a.overallScore === b.overallScore) winner = 'tie'
-    else winner = (a.overallScore! > b.overallScore! ? a.measurement : b.measurement) as GeoMeasurement
+    if (a.citedShare === b.citedShare) winner = 'tie'
+    else winner = (a.citedShare! > b.citedShare! ? a.measurement : b.measurement) as GeoMeasurement
   }
 
   return { layers: rows, winner }
