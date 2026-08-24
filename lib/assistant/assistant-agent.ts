@@ -28,6 +28,7 @@ import type { AssistantPageContext } from '@/lib/assistant/page-context';
 import { buildAssistantPageContextBlock } from '@/lib/assistant/page-context/hydrate-event-quick-check';
 import { resolveMcpFlagsForPlan } from '@/lib/assistant/mcp-flags-for-plan';
 import { prefetchCreationSceneTreeBlock } from '@/lib/assistant/creation-scene-prefetch';
+import { resolveAssistantThinkingBudgetForIntent } from '@/lib/assistant/creation-scene-depth';
 
 export type AgentProgressCallback = (event: {
   type: 'phase';
@@ -196,6 +197,7 @@ export async function runAssistantAgent(
     pageContext: input.pageContext,
     actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,
+    thinkingBudgetTokens: resolveAssistantThinkingBudgetForIntent(plan.intent),
     skipTools: plan.skipTools,
     modelProfile: 'assistant',
     beforeToolCall: input.beforeToolCall,

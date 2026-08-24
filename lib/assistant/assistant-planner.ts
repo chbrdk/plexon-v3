@@ -18,6 +18,10 @@ import {
 } from '@/lib/assistant/tool-catalog';
 import { hasAudienceWriteIntent } from '@/lib/assistant/audience-write-intent';
 import { hasSceneWriteIntent, hasCreationEditorSceneContext } from '@/lib/assistant/scene-write-intent';
+import {
+  buildCreationSceneDepthPromptBlock,
+  getCreationSceneMaxToolRounds,
+} from '@/lib/assistant/creation-scene-depth';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -221,10 +225,10 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       mode: 'hybrid',
       toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
       allowWriteTools: writeIntent || sceneWriteIntent,
-      maxToolRounds: 6,
+      maxToolRounds: getCreationSceneMaxToolRounds(),
       skipTools: false,
       reasoning:
-        'CREATION Editor — Scene-Tree Prefetch; scene_apply_ops bei Schreib-Intent.',
+        'CREATION Editor — Scene-Tree Prefetch; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
     });
   }
 
@@ -247,10 +251,10 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       mode: 'hybrid',
       toolFamilies: [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'],
       allowWriteTools: writeIntent || sceneWriteIntent,
-      maxToolRounds: 6,
+      maxToolRounds: getCreationSceneMaxToolRounds(),
       skipTools: false,
       reasoning:
-        'CREATION Scene-Layout — Prefetch/Outline; scene_apply_ops bei Schreib-Intent oder Editor-Kontext.',
+        'CREATION Scene-Layout — Prefetch/Outline; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
     });
   }
 
@@ -561,9 +565,18 @@ function parseLlmPlan(raw: LlmPlanJson, fallback: AssistantPlan): AssistantPlan 
     ? raw.toolFamilies.filter((f): f is ToolFamily => VALID_FAMILIES.has(f as ToolFamily))
     : fallback.toolFamilies;
   const maxToolRounds =
-    typeof raw.maxToolRounds === 'number'
-      ? Math.min(8, Math.max(0, Math.floor(raw.maxToolRounds)))
-      : fallback.maxToolRounds;
+    intent === 'creation_scene_edit'
+      ? Math.max(
+          fallback.intent === 'creation_scene_edit'
+            ? fallback.maxToolRounds
+            : getCreationSceneMaxToolRounds(),
+          typeof raw.maxToolRounds === 'number'
+            ? Math.min(16, Math.max(0, Math.floor(raw.maxToolRounds)))
+            : 0,
+        )
+      : typeof raw.maxToolRounds === 'number'
+        ? Math.min(8, Math.max(0, Math.floor(raw.maxToolRounds)))
+        : fallback.maxToolRounds;
 
   return {
     intent,
@@ -670,6 +683,10 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
     : plan.intent === 'creation_scene_edit'
       ? '\n- Schreib-Tools derzeit aus: Nutzer muss explizit bitten (z. B. „füge … ein“, „ändere …“, „baue …“). Kein Hinweis auf nicht existierende Einstellungen.'
       : '';
+  const creationDepth =
+    plan.intent === 'creation_scene_edit'
+      ? buildCreationSceneDepthPromptBlock(plan.allowWriteTools)
+      : '';
   return `
 ## Ausführungsplan (Planner)
 - Intent: ${plan.intent}
@@ -678,7 +695,7 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
 - Schreib-Tools: ${plan.allowWriteTools ? 'ja' : 'nein'}
 - Max. Tool-Runden: ${plan.maxToolRounds}
 - Strategie: ${plan.reasoning}${writeToolsNote}
-
+${creationDepth}
 Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/hybrid: antworte zuerst aus der Projektkurzinfo oben.`;
 }
 

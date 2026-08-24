@@ -150,7 +150,8 @@ Free-Chat-Anfragen laufen über `runAssistantAgent` (`lib/assistant/assistant-ag
 
 **Streaming** (`POST /api/assistant/complete/stream`): SSE-Events `phase`, `plan`, `retrieval`, `thinking`, `thinking_reset`, `token`, `token_reset`, `tool_call`, `done`, `error`. Claude-Antworten werden per Anthropic Stream API tokenweise an den Client gesendet; Extended Thinking (`thinking_delta`) wird live angezeigt und nach Antwortstart eingeklappt. Tool-Aufrufe erscheinen als `tool_call` (start/done).
 
-**Env:** `ANTHROPIC_ASSISTANT_THINKING_BUDGET` (Default `4096`, `0`/`off`/`false` deaktiviert Extended Thinking).
+**Env:** `ANTHROPIC_ASSISTANT_THINKING_BUDGET` (Default `4096`, `0`/`off`/`false` deaktiviert Extended Thinking).  
+**CREATION Scene-Edit only:** `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (Default `12`), `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` (Default `8192`, floored against base) — see `specs/domain/assistant-creation-mcp.md` § Creative depth.
 
 Plan-Metadaten: `assistant_messages.metadata.planner`.
 

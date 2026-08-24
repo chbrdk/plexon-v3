@@ -91,6 +91,7 @@ describe('creation tool catalog + planner', () => {
     expect(plan.intent).toBe('creation_scene_edit')
     expect(plan.toolFamilies).toContain('creation_scene')
     expect(plan.allowWriteTools).toBe(true)
+    expect(plan.maxToolRounds).toBeGreaterThanOrEqual(12)
   })
 })
 

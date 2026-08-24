@@ -58,6 +58,20 @@ Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|la
 - Orchestrator compacts `creation_scene_tree_index` results to the same outline format.
 - MCP `tools/list` is cached ~60s per base URL; product MCP fetches run in parallel when multiple are enabled.
 
+### Creative depth (`creation_scene_edit` only)
+
+Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planner intent is `creation_scene_edit`:
+
+| Lever | Default | Env override | Other intents |
+|-------|---------|--------------|---------------|
+| `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
+| Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
+| System prompt | phased layout craft (structure → content → polish; Masters/tokens) | — | no craft block |
+
+- WENN `ANTHROPIC_ASSISTANT_THINKING_BUDGET` global `0`/`off` ist, DANN bleibt Thinking auch für Scene-Edit aus.
+- LLM planner refine MUST NOT shrink `maxToolRounds` below the Creation depth default when intent stays `creation_scene_edit`.
+- `creation_design` (library/catalog Q&A) does **not** get this budget — only scene/layout editing.
+
 ## Non-goals
 
 - Live CEM / Host ops
@@ -70,3 +84,4 @@ Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|la
 2. Gate: `resolveUseCreationMcp` mirrors Brandion rules.
 3. Planner: layout prompts → `creation_scene_edit` with write tools only when user asks to change/build.
 4. Staging: set `CREATION_MCP_URL` after Coolify `creation-mcp` is live.
+5. Unit: `creation_scene_edit` plans ≥12 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.

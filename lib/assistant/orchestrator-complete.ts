@@ -65,6 +65,8 @@ export type OrchestratorCompleteOptions = {
   pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
   actorUserId?: string;
   maxToolRounds?: number;
+  /** Override extended-thinking budget (e.g. Creation scene depth). Omit → env default. */
+  thinkingBudgetTokens?: number;
   modelProfile?: 'board' | 'assistant';
   skipTools?: boolean;
   toolsFilter?: (toolName: string) => boolean;
@@ -210,6 +212,7 @@ export async function runOrchestratorComplete(
     pageContext = null,
     actorUserId = '',
     maxToolRounds = 5,
+    thinkingBudgetTokens,
     modelProfile = 'board',
     skipTools = false,
     toolsFilter,
@@ -306,7 +309,9 @@ export async function runOrchestratorComplete(
 
   const thinkingBudget =
     modelProfile === 'assistant' && (onTextDelta || onThinkingDelta)
-      ? getAssistantThinkingBudgetTokens()
+      ? typeof thinkingBudgetTokens === 'number'
+        ? Math.max(0, Math.floor(thinkingBudgetTokens))
+        : getAssistantThinkingBudgetTokens()
       : 0;
   const useStream = Boolean(onTextDelta || onThinkingDelta);
 
