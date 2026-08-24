@@ -41,7 +41,7 @@ export function buildSpirionIntegrationContextBlock(input: {
     '- Bei Referenz-/Screen-/Moodboard-Fragen **zuerst** spirion_references_search / spirion_screens_search (oder dig_*) — Patterns nicht schätzen.',
   );
   lines.push(
-    '- Bei CREATION Scene-Builds (PDP/Landing): optional search für Struktur/Copy-Inspiration (kein 1:1 Clone), dann bauen, dann creation_scene_content_audit / creation_scene_preview.',
+    '- Bei CREATION Scene-Builds: search für **Homepage/Landing**-Struktur/Copy (kein 1:1 Clone). Leere Spirion-Treffer OK → Best-Practice Landing fortsetzen. Dann content_audit; preview optional/soft.',
   );
   lines.push(
     '- Fehlende Tokens: bewusst Literale wählen (`set_style` / Props) — nicht stallen; Collection-Pack bevorzugen wenn passend (`creation_brand_tokens_get`).',

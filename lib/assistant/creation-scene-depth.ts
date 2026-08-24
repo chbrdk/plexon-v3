@@ -48,11 +48,11 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 Phasen (eigene apply_ops-Batches):
-1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für Struktur/Copy-Ideen (nicht 1:1 kopieren)
+1. Inspiration (wenn Spirion-Tools verfügbar) — spirion_references_search / spirion_screens_search für **Homepage/Landing** (Struktur/Copy; nicht 1:1). Corpus oft ohne PDP — leere Treffer OK → Best-Practice Landing (Hero, Benefits, CTA) fortsetzen, nicht abbrechen.
 2. Struktur — add_page / SiteStack / SiteGrid / Sections
 3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
 4. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
-5. Pixel-Check — **creation_scene_preview** (max. 2×): PNG Vision gegen Intent (Hierarchie, CTAs, Seed-Copy, Kontrast). Bei Preview-error: nur Audit, Pixel-QA nicht behaupten.
+5. Pixel-Check — **creation_scene_preview** (max. 1–2×): kompaktes JPEG Vision. Bei Preview-error / network: **nur Audit**, Pixel-QA nicht behaupten, Turn trotzdem abschließen.
 6. Polish — Tree neu lesen; Tokens **oder Literale**/Spacing
 
 Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.

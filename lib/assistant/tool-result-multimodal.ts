@@ -14,8 +14,11 @@ export type AnthropicToolResultContent = string | AnthropicToolResultPart[];
 const PREVIEW_TOOL =
   /(?:^|_)creation_scene_preview$/i;
 
-/** Max base64 chars to attach (~3MB binary ≈ 4M chars — keep under Anthropic image limits). */
-const MAX_PNG_BASE64_CHARS = 3_500_000;
+/**
+ * Soft cap for Vision attach (~300KB binary ≈ 400k base64).
+ * Larger payloads caused assistant SSE / proxy "network error" on long Creation turns.
+ */
+const MAX_IMAGE_BASE64_CHARS = 450_000;
 
 export function isCreationScenePreviewToolName(toolName: string): boolean {
   return (
@@ -26,8 +29,9 @@ export function isCreationScenePreviewToolName(toolName: string): boolean {
 }
 
 /**
- * If the tool result is a scene_preview PNG payload, return multimodal content.
+ * If the tool result is a scene_preview image payload, return multimodal content.
  * Otherwise return the (already truncated) text string.
+ * Never echo raw base64 into the text summary (SSE-safe).
  */
 export function formatToolResultForAnthropic(
   toolName: string,
@@ -38,6 +42,7 @@ export function formatToolResultForAnthropic(
   try {
     const parsed = JSON.parse(truncatedText) as {
       pngBase64?: string
+      imageBase64?: string
       mimeType?: string
       error?: string
       sceneId?: string
@@ -46,15 +51,26 @@ export function formatToolResultForAnthropic(
       width?: number
       height?: number
     };
-    if (parsed.error || !parsed.pngBase64 || !parsed.mimeType?.startsWith('image/')) {
-      return truncatedText;
-    }
-    if (parsed.pngBase64.length > MAX_PNG_BASE64_CHARS) {
+    const data = parsed.pngBase64 || parsed.imageBase64 || '';
+    if (parsed.error || !data || !parsed.mimeType?.startsWith('image/')) {
+      // Strip any accidental base64 from error payloads before returning as text.
       return JSON.stringify({
-        ...parsed,
-        pngBase64: undefined,
+        error: parsed.error || 'preview-missing-image',
+        sceneId: parsed.sceneId,
+        pageId: parsed.pageId,
+        breakpoint: parsed.breakpoint,
+        note: 'Pixel QA skipped — rely on creation_scene_content_audit; do not claim Vision ran.',
+      });
+    }
+    if (data.length > MAX_IMAGE_BASE64_CHARS) {
+      return JSON.stringify({
+        sceneId: parsed.sceneId,
+        pageId: parsed.pageId,
+        breakpoint: parsed.breakpoint,
+        width: parsed.width,
+        height: parsed.height,
         error: 'preview-too-large-for-vision',
-        note: 'PNG omitted — re-run with smaller viewport or fix layout',
+        note: 'Image omitted — finish with content_audit only; do not claim pixels were checked.',
       });
     }
     const summary = {
@@ -64,7 +80,7 @@ export function formatToolResultForAnthropic(
       width: parsed.width,
       height: parsed.height,
       mimeType: parsed.mimeType,
-      note: 'PNG attached as image — Vision-check hierarchy, CTAs, seed leftovers, contrast.',
+      note: 'Image attached — Vision-check hierarchy, CTAs, seed leftovers, contrast. Max 1 more preview after fixes.',
     };
     return [
       { type: 'text', text: JSON.stringify(summary) },
@@ -73,11 +89,13 @@ export function formatToolResultForAnthropic(
         source: {
           type: 'base64',
           media_type: parsed.mimeType,
-          data: parsed.pngBase64,
+          data,
         },
       },
     ];
   } catch {
-    return truncatedText;
+    return truncatedText.length > 2_000
+      ? truncatedText.slice(0, 2_000) + '…[preview payload truncated]'
+      : truncatedText;
   }
 }

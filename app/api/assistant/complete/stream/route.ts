@@ -11,6 +11,9 @@ import {
   type AssistantCompleteBody,
 } from '@/lib/assistant/complete-handler';
 
+/** Creation scene-edit + preview can exceed default serverless limits. */
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   const user = await getRequestUser(request);
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);

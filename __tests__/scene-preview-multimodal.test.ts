@@ -16,26 +16,39 @@ describe('scene preview multimodal tool results', () => {
       sceneId: 's1',
       pageId: 'p1',
       breakpoint: 'desktop',
-      mimeType: 'image/png',
+      mimeType: 'image/jpeg',
       pngBase64: 'AAAABBBB',
-      width: 1280,
-      height: 900,
+      width: 960,
+      height: 600,
     });
     const content = formatToolResultForAnthropic('creation_scene_preview', raw);
     expect(Array.isArray(content)).toBe(true);
     if (!Array.isArray(content)) throw new Error('expected array');
     expect(content[0]?.type).toBe('text');
+    expect((content[0] as { text: string }).text).not.toContain('AAAABBBB');
     expect(content[1]).toEqual({
       type: 'image',
-      source: { type: 'base64', media_type: 'image/png', data: 'AAAABBBB' },
+      source: { type: 'base64', media_type: 'image/jpeg', data: 'AAAABBBB' },
     });
+  });
+
+  it('omits oversized images as text soft-fail', () => {
+    const raw = JSON.stringify({
+      mimeType: 'image/jpeg',
+      pngBase64: 'x'.repeat(500_000),
+      sceneId: 's1',
+    });
+    const content = formatToolResultForAnthropic('creation_scene_preview', raw);
+    expect(typeof content).toBe('string');
+    expect(content).toContain('preview-too-large-for-vision');
+    expect(content).not.toContain('xxxxx');
   });
 
   it('stays text-only when preview error is set', () => {
     const raw = JSON.stringify({
       error: 'preview-failed:browser missing',
       pngBase64: '',
-      mimeType: 'image/png',
+      mimeType: 'image/jpeg',
     });
     const content = formatToolResultForAnthropic('creation_scene_preview', raw);
     expect(typeof content).toBe('string');
