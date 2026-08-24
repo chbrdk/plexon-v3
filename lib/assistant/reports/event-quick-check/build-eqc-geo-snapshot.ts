@@ -3,11 +3,11 @@ import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
 export type EqcGeoSnapshot = {
   /**
-   * Headline GEO Score: mean of cross-layer citation strength + on-page fitness
-   * when both exist; otherwise whichever signal is available.
+   * Headline GEO Score = cross-layer citation strength (citedShare / own SoV).
+   * Never equals on-page fitness — that stays in geoFitnessScore.
    */
   geoScore: number | null
-  /** Mean citedShare across layers that have a score (0–100). */
+  /** Mean citedShare across layers (0–100); same signal as geoScore when available. */
   citedShare: number | null
   /** On-page GEO fitness — usually from the primary layer page scan. */
   geoFitnessScore: number | null
@@ -44,6 +44,7 @@ function citationForLayer(layer: EventQuickCheckReportGeoSection): number | null
 /**
  * Fixed magazine snapshot dials across all GEO layers.
  * Spec: specs/domain/eqc-as-collection-flow.md — dials must not follow the layer switch.
+ * GEO Score = citation; GEO Fitness = on-page — never collapse Score onto Fitness.
  */
 export function buildEqcGeoSnapshot(
   layers: readonly EventQuickCheckReportGeoSection[] | undefined,
@@ -62,14 +63,12 @@ export function buildEqcGeoSnapshot(
   )
 
   const citedShare = mean(citedShares)
-  // Page scan runs once on the primary layer — prefer first available fitness.
-  const geoFitnessScore = fitnessScores[0] ?? null
-  const geoScoreParts = [citedShare, geoFitnessScore].filter((n): n is number => n != null)
 
   return {
-    geoScore: mean(geoScoreParts),
+    geoScore: citedShare,
     citedShare,
-    geoFitnessScore,
+    // Page scan runs once on the primary layer — prefer first available fitness.
+    geoFitnessScore: fitnessScores[0] ?? null,
     promptCount,
   }
 }

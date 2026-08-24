@@ -97,6 +97,7 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(geoMag).toContain('data-eqc-geo-snapshot="combined"')
     expect(geoMag).toContain('geoSnapshotScore')
     expect(geoMag).toContain('geoSnapshotFitness')
+    expect(geoMag).not.toContain('geoSnapshotPrompts')
     expect(dash).toContain('EventQuickCheckEeatMagazineSection')
     expect(dash).toContain('EventQuickCheckGeoRecommendationsMagazineSection')
     expect(dash).toContain('EventQuickCheckDomainMagazineSection')

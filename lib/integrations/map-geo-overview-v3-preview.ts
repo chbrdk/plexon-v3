@@ -53,6 +53,7 @@ export type GeoOverviewV3Like = {
   presence?: {
     field?: { shareOfVoice?: V3GeoShare[] } | null
     rivals?: string[]
+    solo?: { citedShare?: number | null; shareOfVoice?: number | null }
   }
   queryRuns?: V3GeoQueryRun[]
 }
@@ -179,17 +180,33 @@ export function mapGeoOverviewV3ToPreview(
 
   const citationHighlights = citationHighlightsByModel[0]?.citations ?? []
 
+  const citedFromJob =
+    typeof job.citedShare === 'number' && Number.isFinite(job.citedShare)
+      ? job.citedShare <= 1
+        ? Math.round(job.citedShare * 100)
+        : Math.round(job.citedShare)
+      : null
+  const citedFromSolo =
+    typeof overview.presence?.solo?.citedShare === 'number' &&
+    Number.isFinite(overview.presence.solo.citedShare)
+      ? overview.presence.solo.citedShare <= 1
+        ? Math.round(overview.presence.solo.citedShare * 100)
+        : Math.round(overview.presence.solo.citedShare)
+      : null
+  const targetShare = shareRows.find((row) => row.isTarget)
+  const citedFromTargetShare =
+    typeof targetShare?.shareOfVoice === 'number' && Number.isFinite(targetShare.shareOfVoice)
+      ? targetShare.shareOfVoice <= 1
+        ? Math.round(targetShare.shareOfVoice * 100)
+        : Math.round(targetShare.shareOfVoice)
+      : null
+
   return {
     jobId,
     url,
     status,
     overallScore: job.overallScore ?? null,
-    citedShare:
-      typeof job.citedShare === 'number' && Number.isFinite(job.citedShare)
-        ? job.citedShare <= 1
-          ? Math.round(job.citedShare * 100)
-          : Math.round(job.citedShare)
-        : null,
+    citedShare: citedFromJob ?? citedFromSolo ?? citedFromTargetShare,
     geoFitnessScore,
     eeatScores: eeat
       ? {

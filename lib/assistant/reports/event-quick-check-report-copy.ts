@@ -53,18 +53,17 @@ export const EQC_REPORT_COPY = {
   geoSnapshotCitedShare: 'Zitieranteil',
   geoSnapshotCitedShareMeta: 'über beide Layer',
   geoSnapshotScore: 'GEO Score',
-  geoSnapshotScoreMeta: 'gesamt',
-  geoSnapshotScoreMetaPartial: 'teilweise',
+  geoSnapshotScoreMeta: 'Zitierung',
   geoSnapshotFitness: 'GEO Fitness',
   geoSnapshotFitnessMeta: 'On-page',
-  geoSnapshotPrompts: 'Prompts',
-  geoSnapshotPromptsMeta: 'im Lauf',
-  geoSnapshotLedeScore: (score: number) =>
-    `GEO Score ${score}/100 — kombiniert Zitieranteil über beide Layer und On-Page-Fitness.`,
+  geoSnapshotLedeScore: (score: number, fitness: number | null) =>
+    fitness != null
+      ? `GEO Score ${score}/100 (Zitierung über beide Layer) · Fitness ${fitness}/100 (On-page).`
+      : `GEO Score ${score}/100 — Zitieranteil über beide Layer.`,
+  geoSnapshotLedeFitness: (fitness: number) =>
+    `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten. Zitierdaten für den GEO Score fehlen noch.`,
   geoSnapshotLedeCited: (share: number) =>
     `Zitieranteil ${share}% — Mittelwert aus Layer 1 und Layer 2, wie oft Modelle deine Domain nennen.`,
-  geoSnapshotLedeFitness: (fitness: number) =>
-    `GEO Fitness ${fitness}/100 — On-Page-Tauglichkeit für generative Antworten.`,
   geoSnapshotLedePrompts: (count: number) => `${count} Prompts im Wettbewerbslauf.`,
   sectionCitations: 'Zitierungen',
   chartCitationPositions: 'Ranking pro Suchanfrage',
