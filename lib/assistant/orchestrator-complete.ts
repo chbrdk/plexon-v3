@@ -24,6 +24,11 @@ import {
 } from '@/lib/assistant/context-budget';
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
 import { injectCreationSceneToolArgs } from '@/lib/assistant/creation-scene-tool-args';
+import {
+  formatToolResultForAnthropic,
+  isCreationScenePreviewToolName,
+  type AnthropicToolResultContent,
+} from '@/lib/assistant/tool-result-multimodal';
 import { parseAnthropicMessageStream } from '@/lib/assistant/anthropic-stream';
 import {
   getPlexonUiAnthropicTools,
@@ -49,7 +54,7 @@ export type ContentBlock =
   | { type: 'text'; text: string }
   | { type: 'thinking'; thinking: string; signature?: string }
   | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
-  | { type: 'tool_result'; tool_use_id: string; content: string };
+  | { type: 'tool_result'; tool_use_id: string; content: AnthropicToolResultContent };
 
 type AnthropicMessage = { role: 'user' | 'assistant'; content: string | ContentBlock[] };
 
@@ -157,7 +162,10 @@ export function normalizeMessageHistory(rawMessages: unknown[], maxHistory = 50)
 function buildMessages(
   history: OrchestratorMessage[],
   currentPrompt: string,
-  toolRounds: Array<{ assistantContent: ContentBlock[]; toolResults: { id: string; content: string }[] }>
+  toolRounds: Array<{
+    assistantContent: ContentBlock[];
+    toolResults: { id: string; content: AnthropicToolResultContent }[];
+  }>,
 ): AnthropicMessage[] {
   const out: AnthropicMessage[] = [];
   if (history.length > 0) {
@@ -180,9 +188,27 @@ function buildMessages(
   return out;
 }
 
+function stripImagesFromToolContent(content: AnthropicToolResultContent): AnthropicToolResultContent {
+  if (typeof content === 'string') return content;
+  return content
+    .filter((p) => p.type === 'text')
+    .map((p) => (p.type === 'text' ? p : { type: 'text' as const, text: '[image omitted]' }));
+}
+
 function shrinkToolRoundsForBudget(
-  toolRounds: Array<{ assistantContent: ContentBlock[]; toolResults: { id: string; content: string }[] }>
+  toolRounds: Array<{
+    assistantContent: ContentBlock[];
+    toolResults: { id: string; content: AnthropicToolResultContent }[];
+  }>,
 ): void {
+  for (let i = 0; i < toolRounds.length - 1; i++) {
+    const round = toolRounds[i];
+    if (!round) continue;
+    round.toolResults = round.toolResults.map((r) => ({
+      ...r,
+      content: stripImagesFromToolContent(r.content),
+    }));
+  }
   while (toolRounds.length > 1) {
     const messages = JSON.stringify(toolRounds);
     if (messages.length <= ASSISTANT_MAX_PROMPT_CHARS) break;
@@ -192,9 +218,17 @@ function shrinkToolRoundsForBudget(
   const messages = JSON.stringify(toolRounds);
   if (messages.length <= ASSISTANT_MAX_PROMPT_CHARS) return;
   const last = toolRounds[toolRounds.length - 1];
+  if (!last) return;
   last.toolResults = last.toolResults.map((r) => ({
-    ...r,
-    content: truncateAssistantText(r.content, Math.floor(ASSISTANT_MAX_TOOL_RESULT_CHARS / 2), 'Tool-Ergebnis'),
+    id: r.id,
+    content:
+      typeof r.content === 'string'
+        ? truncateAssistantText(
+            r.content,
+            Math.floor(ASSISTANT_MAX_TOOL_RESULT_CHARS / 2),
+            'Tool-Ergebnis',
+          )
+        : stripImagesFromToolContent(r.content),
   }));
 }
 
@@ -309,8 +343,10 @@ export async function runOrchestratorComplete(
         ? getAssistantCompletionModel()
         : getBoardCompletionModel();
 
-  const toolRounds: Array<{ assistantContent: ContentBlock[]; toolResults: { id: string; content: string }[] }> =
-    [];
+  const toolRounds: Array<{
+    assistantContent: ContentBlock[];
+    toolResults: { id: string; content: AnthropicToolResultContent }[];
+  }> = [];
   let lastText = '';
 
   const thinkingBudget =
@@ -425,7 +461,7 @@ export async function runOrchestratorComplete(
       })
       .filter((b) => (b.type === 'text' ? b.text !== '' : true));
 
-    const toolResults: { id: string; content: string }[] = [];
+    const toolResults: { id: string; content: AnthropicToolResultContent }[] = [];
     for (const block of toolUseBlocks) {
       if (beforeToolCall) {
         const gate = await beforeToolCall(block.name, block.input ?? {});
@@ -516,15 +552,28 @@ export async function runOrchestratorComplete(
       });
       const result = await callCheckionMcpTool(baseUrl, mcpName, toolInput);
       const compacted = maybeCompactSceneTreeToolResult(block.name, result);
-      const truncated = truncateAssistantText(
-        compacted,
-        ASSISTANT_MAX_TOOL_RESULT_CHARS,
-        `Tool ${block.name}`,
-      );
-      onToolEnd?.(block.name, truncated.slice(0, 240));
+      const multimodal =
+        isCreationScenePreviewToolName(block.name) || isCreationScenePreviewToolName(mcpName)
+          ? formatToolResultForAnthropic(block.name, compacted)
+          : truncateAssistantText(
+              compacted,
+              ASSISTANT_MAX_TOOL_RESULT_CHARS,
+              `Tool ${block.name}`,
+            );
+      const previewLog =
+        typeof multimodal === 'string'
+          ? multimodal.slice(0, 240)
+          : multimodal
+              .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+              .map((p) => p.text)
+              .join(' ')
+              .slice(0, 240) || 'image';
+      onToolEnd?.(block.name, previewLog);
 
       if (isBrandionTokensListToolName(mcpName) || isBrandionTokensListToolName(block.name)) {
-        const payload = parseBrandionTokensListPayload(truncated);
+        const payload = parseBrandionTokensListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
         if (payload) {
           const autoBlocks = buildBrandionTokenBlocks(payload, {
             source: 'plexon_ui',
@@ -541,7 +590,7 @@ export async function runOrchestratorComplete(
 
       toolResults.push({
         id: block.id,
-        content: truncated,
+        content: multimodal,
       });
     }
 

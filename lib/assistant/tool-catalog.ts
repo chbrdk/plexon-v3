@@ -106,7 +106,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   creation_compositions: [/^creation_compositions_/],
   creation_projects: [/^creation_projects_/, /^creation_project_/],
   creation_scene: [
-    /^creation_scene_(get|list|tree_index|content_audit)$/,
+    /^creation_scene_(get|list|tree_index|content_audit|preview)$/,
     /^creation_editor_palette$/,
     /^creation_brand_tokens_get$/,
   ],

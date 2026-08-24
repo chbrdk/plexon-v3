@@ -52,7 +52,8 @@ Phasen (eigene apply_ops-Batches):
 2. Struktur — add_page / SiteStack / SiteGrid / Sections
 3. Inhalt — **insert_child mit echten props** (siehe unten). Bare insert_instance = verboten für Seiten-Copy.
 4. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
-5. Polish — Tree neu lesen; Tokens/Spacing
+5. Pixel-Check — **creation_scene_preview** (max. 2×): PNG Vision gegen Intent (Hierarchie, CTAs, Seed-Copy, Kontrast). Bei Preview-error: nur Audit, Pixel-QA nicht behaupten.
+6. Polish — Tree neu lesen; Tokens/Spacing
 
 Neue Seite/PDP: add_page zuerst, dann unter neuem root.id bauen.
 
@@ -86,6 +87,7 @@ oder sofort set_prop auf die neue Instance-ID. Nackte Instances = Seed-Copy → 
 
 ### Pflicht vor Abschluss
 1. creation_scene_content_audit(sceneId) — bei ok=false Fehler beheben und erneut auditen.
-2. PDP-Checklist: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.
-Nicht fertig melden solange Audit error-Findings hat.`;
+2. creation_scene_preview(sceneId) — Vision auf dem PNG; max. 2 Preview-Runden; bei error-Feld nur Audit nutzen.
+3. PDP-Checklist: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.
+Nicht fertig melden solange Audit error-Findings hat oder Vision offensichtliche Seed-Copy/fehlende CTAs zeigt.`;
 }
