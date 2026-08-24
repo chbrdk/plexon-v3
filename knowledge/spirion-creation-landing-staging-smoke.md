@@ -13,7 +13,7 @@
 ```
 Bau eine Marketing-Landing Page für „Urban Glide“ (Hero, Benefits, CTA, optional Varianten-Block).
 Hol dir zuerst Spirion-Referenzen für Homepage / Landing, übernimm nur Struktur/Copy-Muster — keine 1:1-Fremdmarke.
-Pack-Tokens wo möglich, sonst Literale.
+Zuerst creation_brand_tokens_get — Pack-Tokens via set_token_binding auf CTA/Badge/Sections; set_style nur für Bildgröße.
 ```
 
 ## Expect
@@ -21,9 +21,11 @@ Pack-Tokens wo möglich, sonst Literale.
 | Step | Pass |
 |------|------|
 | Spirion search | Called; **empty corpus OK** — continues with best-practice landing |
+| Brand pack | `creation_brand_tokens_get` called; `source` noted (brandion vs fixture) |
 | Page | `add_page` (or clear section on active page) named for Urban Glide |
 | Content | No seed copy („Get started“, „Option A“, bare „Text“) |
-| Tokens | Pack bindings and/or **named literals** (Hex/gap) — no stall |
+| Tokens | `set_token_binding` polish on key surfaces — **not** only Site Kit fixture defaults; if fixture pack, say so |
+| Layout | No gray wireframe / tiny 320-placeholder hero |
 | Audit | `creation_scene_content_audit` → `ok` or only warnings |
 | Preview | `creation_scene_preview` attempted; on error/network → finish with audit only, no Vision claim |
 | Turn | Completes with assistant text (no hanging „network error“) |
@@ -32,9 +34,11 @@ Pack-Tokens wo möglich, sonst Literale.
 
 - Seed copy left on canvas
 - Abort because Spirion empty or „token missing“
+- Finished look = pure Site Kit fixture chrome with no pack fetch / no binding polish
 - Network error / stream death at preview without soft-fail recovery
 - Claims pixel QA when preview `error` set
 
 ## Notes
 
 Spirion staging corpus is mostly **homepages/landings**, not e-commerce PDPs — do not require PDP references.
+Ohne Brandion active-pack für die Collection bleibt nur Fixture — Agent muss das sagen; individuelle Markenfarben brauchen Brandion-Pack.
