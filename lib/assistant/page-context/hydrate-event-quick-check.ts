@@ -98,6 +98,7 @@ function buildCreationEditorContextBlock(pageContext: AssistantPageContext): str
     'Der Nutzer bearbeitet diese Composition-Scene im CREATION-Editor.',
     'Scene-Tree wird bei Scene-Edit-Turns vorab als Outline geladen — creation_scene_tree_index nur bei Bedarf erneut.',
     'sceneId und baseUpdatedAt stehen oben — den Nutzer NIEMALS nach der Scene-ID fragen.',
+    'Insert: insert_child { parentId, child: { id, type, name?, props? } } — Button type=Button, props.children=Label, props.href=Link. Oder insert_instance { masterId, parentId } mit Master-ID aus Tree-Outline. Niemals insert_node / add_instance / append_child.',
     'Bei expliziter Änderungsbitte (einfügen, ändern, bauen): creation_scene_apply_ops mit sceneId und baseUpdatedAt aus diesem Kontext.',
   )
   return lines.join('\n')

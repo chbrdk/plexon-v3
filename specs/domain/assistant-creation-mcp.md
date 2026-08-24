@@ -39,6 +39,7 @@ Connectivity: `buildCreationIntegrationContextBlock`.
 - v1 read families (`creation_library`, `creation_compositions`, `creation_projects`) remain read-only in Q&A.
 - `creation_scene` is read-only; include in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_FAMILIES`.
 - `creation_scene_write` requires explicit user write intent (`allowWriteTools`) — detected via `hasSceneWriteIntent` (einfügen/ändern/bauen/…) or editor-context confirm; user confirmation per orchestrator policy for destructive ops.
+- Scene insert contract (do not invent aliases): `insert_child` `{ parentId, child: { id, type, name?, props? } }` or `insert_instance` `{ masterId, parentId, index? }`. Forbidden: `insert_node`, `add_instance`, `append_child`. On `400 op-rejected` use the server `reason`; on `409 stale-scene` reload tree `updatedAt` as `baseUpdatedAt`.
 
 ## Planner
 

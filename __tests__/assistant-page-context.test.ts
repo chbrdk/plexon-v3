@@ -148,7 +148,8 @@ describe('assistant page context', () => {
     expect(block).toContain('CREATION Editor')
     expect(block).toContain('scene-abc')
     expect(block).toContain('baseUpdatedAt')
-    expect(block).toContain('creation_scene_apply_ops')
+    expect(block).toContain('insert_child')
+    expect(block).toContain('Niemals insert_node')
   })
 
   it('wires EQC publish + complete body + host', () => {

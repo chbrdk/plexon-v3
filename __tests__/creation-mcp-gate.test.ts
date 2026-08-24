@@ -48,6 +48,20 @@ describe('creation tool catalog + planner', () => {
     expect(classifyToolFamily('creation_scene_apply_ops')).toBe('creation_scene_write')
   })
 
+  it('mentions valid insert ops in connectivity block', () => {
+    const prev = process.env.CREATION_MCP_URL
+    process.env.CREATION_MCP_URL = 'https://creation-mcp.example'
+    try {
+      const block = buildCreationIntegrationContextBlock({ useCreationMcp: true })
+      expect(block).toContain('insert_child')
+      expect(block).toContain('insert_instance')
+      expect(block).toContain('Niemals insert_node')
+    } finally {
+      if (prev === undefined) delete process.env.CREATION_MCP_URL
+      else process.env.CREATION_MCP_URL = prev
+    }
+  })
+
   it('plans creation_design for library prompts when MCP on', () => {
     const plan = planAssistantTurnHeuristic({
       prompt: 'Welche ds-button Props hat die CREATION library?',

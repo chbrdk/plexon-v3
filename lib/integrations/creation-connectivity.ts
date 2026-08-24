@@ -41,7 +41,7 @@ export function buildCreationIntegrationContextBlock(input: {
     '- Bei Library-/Composition-/CREATION-Fragen **zuerst** creation_library_catalog / creation_compositions_list / creation_projects_list nutzen — Tags nicht schätzen.',
   );
   lines.push(
-    '- Bei Scene-Layout: Scene-Tree-Outline kommt oft als Prefetch; creation_editor_palette nur bei Bedarf. Schreiben nur mit Nutzerauftrag via creation_scene_apply_ops (baseUpdatedAt!). Publish: creation.site_kit_composition_save mit sceneId+masterId.',
+    '- Bei Scene-Layout: Prefetch-Outline; Palette nur bei Bedarf. Schreiben: creation_scene_apply_ops. Insert-Ops NUR `insert_child` (parentId + child {id,type,name,props}) oder `insert_instance` (masterId+parentId). Niemals insert_node / add_instance / append_child. Button: type `Button`, Label in props.children oder props.label, href in props.href. 400 op-rejected: `reason` lesen, nicht andere Op-Namen raten. 409 stale-scene: Tree neu laden, neues updatedAt als baseUpdatedAt.',
   );
   lines.push('- Fixture-Snapshot: SoT bleibt Zaoly `@zaoly/library`; Catalog ist Orientierung, kein Live-CEM.');
   return lines.join('\n');

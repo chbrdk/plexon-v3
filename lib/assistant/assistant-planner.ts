@@ -665,7 +665,7 @@ export async function planAssistantTurn(
 export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
   const writeToolsNote = plan.allowWriteTools
     ? plan.intent === 'creation_scene_edit'
-      ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops (baseUpdatedAt aus Seitenkontext!), creation_site_kit_composition_save (Publish; Bestätigung kann nötig sein).'
+      ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops (baseUpdatedAt aus Seitenkontext!). Insert NUR insert_child oder insert_instance — nie insert_node/add_instance/append_child. Bei op-rejected die Server-reason zitieren, nicht raten.'
       : '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein).'
     : plan.intent === 'creation_scene_edit'
       ? '\n- Schreib-Tools derzeit aus: Nutzer muss explizit bitten (z. B. „füge … ein“, „ändere …“, „baue …“). Kein Hinweis auf nicht existierende Einstellungen.'
