@@ -14,7 +14,7 @@ Read families: `spirion_references`, `spirion_screens` (includes `captures_list`
 
 ## Creation quality path
 
-1. `spirion_captures_list` (no project filter on staging)  
+1. `spirion_captures_list` (**never** pass Collection `platformProjectId` — unbound staging rows would vanish; orchestrator strips it)  
 2. `spirion_capture_prompt_pack` → look_contract / page_rhythm  
 3. optional `spirion_compose_brief`  
 4. `creation_scene_import_html` implementing the pack  
