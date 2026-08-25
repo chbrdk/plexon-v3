@@ -76,12 +76,18 @@ export async function maybeReconcileEqcDomainScan(input: {
     | undefined;
 
   const pastCompetitors =
-    Array.isArray(competitorsConfirmed) &&
-    competitorsConfirmed.length > 0 &&
-    Boolean(competitorsCheckpoint);
-  const pastBriefOnly = Boolean(companyBriefConfirmed) && !competitorsCheckpoint;
+    Array.isArray(competitorsConfirmed) && competitorsConfirmed.length > 0;
+  // Complete-depth runs keep competitorsCheckpoint even before confirm; prefer confirmed list.
+  const pastBriefOnly =
+    Boolean(companyBriefConfirmed) &&
+    !(Array.isArray(competitorsConfirmed) && competitorsConfirmed.length > 0);
 
-  if (!pastCompetitors && !pastBriefOnly) return 'skipped';
+  if (!pastCompetitors && !pastBriefOnly) {
+    console.info('[eqc domain-reconcile] skipped: not past brief/competitors', {
+      runId: run.id,
+    });
+    return 'skipped';
+  }
 
   const kickedAtRaw = stored[EVENT_QUICK_CHECK_DOMAIN_RECONCILE_KICKED_AT_KEY];
   if (typeof kickedAtRaw === 'string') {
