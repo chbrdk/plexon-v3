@@ -95,6 +95,8 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Eigenes Design-System|Design-System erfinden/)
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#ff6a3b|Noto Sans/)
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/kein.*creation_brand_tokens_get|kein.*set_token_binding/i)
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Dichte|page_rhythm|craft-thin|craftMeta\.spirion/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Type-Scale|Band-Höhen|Hero/)
 
     const plan = planAssistantTurnHeuristic({
       prompt: 'Erstelle eine Hero-Section',

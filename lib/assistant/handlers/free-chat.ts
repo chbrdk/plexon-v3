@@ -21,6 +21,10 @@ import {
   emitPhase,
   type IntentHandler,
 } from '@/lib/assistant/handlers/context';
+import {
+  summarizeAssistantToolTrace,
+  type AssistantToolTraceEntry,
+} from '@/lib/assistant/tool-trace-summary';
 
 export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
@@ -78,6 +82,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   emitPhase(ctx.emit, 'planning');
 
   try {
+    const toolTraceEntries: AssistantToolTraceEntry[] = [];
     const result = await runAssistantAgent({
       apiKey,
       user: ctx.user,
@@ -126,7 +131,10 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       onTextDelta: (text) => ctx.emit?.({ type: 'token', text }),
       onThinkingDelta: (text) => ctx.emit?.({ type: 'thinking', text }),
       onToolStart: (name) => ctx.emit?.({ type: 'tool_call', status: 'start', name }),
-      onToolEnd: (name, preview) => ctx.emit?.({ type: 'tool_call', status: 'done', name, preview }),
+      onToolEnd: (name, preview) => {
+        toolTraceEntries.push({ name, preview });
+        ctx.emit?.({ type: 'tool_call', status: 'done', name, preview });
+      },
       onUiBlock: (block, index) => ctx.emit?.({ type: 'ui_block', block, index }),
       onUiBlockUpdate: (block, index) => ctx.emit?.({ type: 'ui_block_update', block, index }),
       onUiPanel: (panel) => ctx.emit?.({ type: 'ui_panel', panel }),
@@ -146,6 +154,8 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       uiLayout &&
         (uiLayout.blocks.length > 0 || uiLayout.panel?.open || (uiLayout.panel?.blocks.length ?? 0) > 0)
     );
+    const toolTrace =
+      toolTraceEntries.length > 0 ? summarizeAssistantToolTrace(toolTraceEntries) : undefined;
     const metadata: Record<string, unknown> = {
       contentType: hasUiLayout
         ? ASSISTANT_MESSAGE_CONTENT_TYPE.UI_COMPOSED
@@ -164,6 +174,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
         retrievalVectorHits: result.retrieval?.vectorHits ?? 0,
         retrievalTerms: result.retrieval?.terms ?? [],
       },
+      ...(toolTrace ? { toolTrace } : {}),
     };
     if (result.pendingConfirmation) {
       metadata.pendingConfirmation = result.pendingConfirmation;

@@ -62,6 +62,16 @@ Greenfield Landing = **freie Art-Direction**, nicht Site-Kit-/Brandion-/MSQDX-Fi
 **Greenfield Landing/Homepage:** Entwirf wie eine **freistehende HTML-Seite** (Spirion = Rhythm/Look-Inspiration). Liefere **ein** vollständiges HTML mit **Hex/rem/px-Literalen** → \`creation_scene_import_html\` → audit → preview.
 **VERBOTEN im Import-HTML:** \`var(--…)\`, Site-Kit-\`--site-*\`, Brandion-Token-Namen, Fixture-Chrome, MSQDX-Orange-Default, Noto-only.
 **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`). **Page-BG + font-family** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
+
+### Pflicht: Dichte aus Spirion-Pack (nicht nur Farben)
+Nach \`capture_prompt_pack\` **müssen** diese Felder im HTML sichtbar werden:
+1. \`look_contract.typography\` — starker Type-Scale-Sprung (Display groß, oft ≥48–80px / clamp; Body klein). Kein einheitliches 16–24px überall.
+2. \`page_rhythm\` — unterschiedliche Section-/Band-Höhen; above-fold dominant (Hero mit visueller Masse: große Type und/oder Media-Block). Nicht jede Section mit gleichem 64/96px-Padding.
+3. \`look_contract.cta_chrome\` — Outline vs Filled bewusst umsetzen.
+4. \`look_contract.avoid\` — genannte Anti-Patterns **nicht** bauen (z. B. „equal three-up card grid as the whole page“).
+5. Bei Import optional \`craftMeta.spirion\` setzen (\`captureIds\`, look/rhythm-Kurzform, \`avoid\`) — landet im Craft-Debug-Bundle.
+**Verboten als Endzustand:** gleichmäßige Padding-Stapel, Hero nur 2 Textzeilen ohne Masse, drei gleiche Feature-Cards als ganze Seite, Audit-Warning \`craft-thin\` ignorieren.
+
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. **Design-System erfinden** (siehe oben) — **nicht** Brand-Pack laden für freie Landings.
 1. Inspiration (wenn Spirion-Tools verfügbar) — **Primärpfad:**
@@ -69,15 +79,15 @@ Phasen (eigene Batches; Import zählt als Schreib-Runde):
    b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`).
    c. Optional \`spirion_compose_brief\` zum Mergen.
    d. Optional Search — **0 Treffer ≠ Corpus leer**; Captures-Pfad trotzdem.
-   e. Pack → **eigene** Hex/Type/Spacing-Literale ableiten (kein 1:1 Fremdmarken-Clone, kein Zurückfallen auf Fixture-Orange).
+   e. Pack → **eigene** Hex/Type/Spacing-Literale + **Dichte/Rhythm** ableiten (kein 1:1 Fremdmarken-Clone, kein Zurückfallen auf Fixture-Orange).
    **Editorial-Fallback nur** wenn \`captures_list\` wirklich \`captures: []\` — **nicht** nach Search-0.
 ${buildEditorialLandingFallbackBrief()}
-2. **Erstentwurf** — \`creation_scene_import_html\` (\`pageName\` optional).
+2. **Erstentwurf** — \`creation_scene_import_html\` (\`pageName\` optional; \`craftMeta.spirion\` wenn Pack genutzt).
 3. Inhalt nachziehen nur bei Lücken: **insert_child mit echten props**.
-4. **Look & Feel** — wenn Import noch Fixture-Nähe zeigt: Literale nachziehen (\`set_prop\` + \`clear_token_binding\`). Hero-Image großzügig.
-5. Self-Check — **creation_scene_content_audit**
+4. **Look & Feel / Dichte** — wenn Import noch Fixture-Nähe oder \`craft-thin\` zeigt: Literale + Type-Scale + Surfaces nachziehen.
+5. Self-Check — **creation_scene_content_audit** (auch \`craft-thin\` Warnings lesen)
 6. Pixel-Check — **creation_scene_preview** (max. 1–2×)
-7. Abschluss — erfundenes System nennen; import \`warnings\` melden.
+7. Abschluss — erfundenes System + \`capture_run_id\` + max Hero-px + Grid-Spalten nennen; import \`warnings\` / craftFlags melden.
 
 Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst.
 
@@ -95,9 +105,9 @@ Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst.
 Marketing/PDP: **insert_child** mit props. Prop-Cheat: SiteButton/SiteBadge/SiteLink children(+href) · SiteText role+children · SiteSelect options · SiteImage alt · SiteGrid columns/gap.
 
 ### Pflicht vor Abschluss
-1. Eigenes System sichtbar (andere Farben/Font/Spacing als Site-Kit-Fixture) — Vision **nicht** ok bei MSQDX-Orange+Noto+Near-black-Default.
-2. creation_scene_content_audit — errors fixen.
+1. Eigenes System + Pack-Dichte sichtbar — Vision **nicht** ok bei MSQDX-Orange+Noto+Near-black-Default oder wireframe-dünnem Hero.
+2. creation_scene_content_audit — errors fixen; \`craft-thin\` Warnings ernst nehmen.
 3. creation_scene_preview — max. 2×.
 4. Kein Wireframe / Seed-Copy / fehlende CTAs.
-Nicht fertig melden solange Fixture-Look oder Seed-Copy sichtbar.`;
+Nicht fertig melden solange Fixture-Look, Seed-Copy oder offensichtlich dünne Craft sichtbar.`;
 }

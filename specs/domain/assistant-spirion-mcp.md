@@ -64,8 +64,10 @@ On PDP/landing builds with Spirion active, prefer **craft from real captures** (
 2. Pick 1–2 high-quality homepage/landing captures → **`spirion_capture_prompt_pack`** (`output_contract: both` or `layout_hints_json`; strip project scope likewise).
 3. Optional: **`spirion_compose_brief`** to merge packs / refs into one builder brief.
 4. Optional Collection search: `spirion_screens_search` / `spirion_references_search` **with** injected `platformProjectId` — useful only when the Collection has scoped refs; 0 hits here must **not** skip steps 1–3.
-5. Build via `creation_scene_import_html` implementing `look_contract` / `page_rhythm` / measured tokens from the pack (structure + craft; no 1:1 foreign brand copy).
-6. `creation_scene_content_audit` / soft `creation_scene_preview`.
+5. Build via `creation_scene_import_html` implementing `look_contract` / `page_rhythm` / measured tokens from the pack (structure + craft; no 1:1 foreign brand copy). Pass optional `craftMeta.spirion` (captureIds, look/rhythm short form, avoid) so Creation persists a **Craft Debug Bundle**.
+6. `creation_scene_content_audit` (treat `craft-thin` warnings seriously) / soft `creation_scene_preview`.
+
+**Density playbook (required):** Pack fields MUST show in HTML — type-scale jump (`look_contract.typography`), varied band heights (`page_rhythm`), CTA chrome, and `avoid[]`. Forbidden end states: uniform 64/96 padding stacks, hero as two text lines without visual mass, three equal feature cards as the whole page. Closure names capture id, palette, max hero px, grid columns.
 
 **Editorial fallback** (Linear/Verve/Superhuman structure) only when `captures_list` is empty **and** prompt packs fail — never after a single empty search.
 
@@ -75,10 +77,22 @@ Spirion is **not** a complete token library for the Collection. WENN der Agent e
 
 1. Spirion = Struktur, Hierarchie, Copy-Muster — **kein** 1:1 Pixel-/Farb-/Token-Clone der Fremdmarke.
 2. **Freies Styling first-class:** Farben/Abstände/Radii via `set_prop` Literale (`#hex`, rem, px) auf Keys wie `background`/`color`/`gap`/`radius` — **ohne** neue Tokens anzulegen. Bei vorhandenem Binding zusätzlich `clear_token_binding`. Paint: Props überschreiben Token-Resolve.
-3. Optional: `creation_brand_tokens_get` + `set_token_binding`, wenn der Pack den Intent trifft und wiederverwendbar sein soll.
+3. Optional: `creation_brand_tokens_get` + `set_token_binding`, wenn der Pack den Intent trifft und wiederverwendbar sein soll — **nicht** Pflicht für freie Agency-Landings (dort: inventiertes Hex/Font-System).
 4. `set_style` nur für `width`/`height` (Zahlen).
 5. Collection-Pack vor Fremdmarken-Clone, wenn Pack genutzt wird — sonst bewusste Literale.
 6. Nicht blockieren oder nur Site-Kit-Fixture belassen.
+
+### Craft debug (toolTrace + Creation bundle)
+
+Nach Creation/Spirion-Turns schreibt der free-chat Handler in Message-`metadata.toolTrace`:
+
+| Feld | Inhalt |
+|------|--------|
+| `tools` | Unique tool names in call order |
+| `spirion.capturesListCalled` / `capturePromptPackCalled` / `captureIds` | Library path used? |
+| `creation.importHtmlCalled` / `contentAuditCalled` / `previewCalled` | Import/audit/preview spur |
+
+Creation persistiert pro Import `page.craftDebug` (stats, craftFlags, optional spirion meta) — `GET /api/scenes/:id/craft-debug?pageId=` (Creation; see creation `specs/domain/craft-debug.md`).
 
 ## Non-goals (Welle 1)
 
@@ -93,3 +107,5 @@ Spirion is **not** a complete token library for the Collection. WENN der Agent e
 3. Planner: `creation_scene_edit` includes Spirion families when `hasSpirionMcp`; research prompts → `spirion_research`.
 4. Orchestrator injects `platformProjectId` into Spirion **search** tools when known; **strips** project scope from `captures_list` / `capture_prompt_pack` / other library tools.
 5. Staging: set `SPIRION_MCP_URL` on plexon-v3 Coolify.
+6. Unit: `summarizeAssistantToolTrace` flags captures_list / prompt_pack / import_html; depth prompt requires density + `craftMeta.spirion`.
+7. Staging smoke: after a landing turn, `metadata.toolTrace` present; Creation `craft-debug` fetchable by sceneId — see `knowledge/spirion-creation-landing-staging-smoke.md`.
