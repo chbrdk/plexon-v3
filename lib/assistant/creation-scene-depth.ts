@@ -49,7 +49,7 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
-**Greenfield Landing/Homepage:** Bevorzuge **ein** vollständiges HTML (inline CSS oder einfache \`.class\`-Regeln in \`<style>\`) → \`creation_scene_import_html\` → audit → preview. **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\` (inline oder Klasse). Benefits/Metrics 3-spaltig: \`display:grid\` oder row-flex. Danach nur kleine \`apply_ops\`-Fixes.
+**Greenfield Landing/Homepage:** Bevorzuge **ein** vollständiges HTML (inline CSS oder einfache \`.class\` / \`body\` / \`:root\`-Regeln in \`<style>\`) → \`creation_scene_import_html\` → audit → preview. **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\` (inline oder Klasse). Benefits/Metrics 3-spaltig: \`display:grid\` oder row-flex. **Page-BG** auf \`body\`/\`:root\` setzen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`360°\`, \`MSQ DX\`) — nie Zahl und Suffix splitten. Danach nur kleine \`apply_ops\`-Fixes.
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
 1. Inspiration (wenn Spirion-Tools verfügbar) — **Primärpfad:**
