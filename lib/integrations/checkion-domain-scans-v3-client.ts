@@ -252,7 +252,7 @@ export async function pollCheckionDomainScanV3(
       const res = await fetchCheckionDomainScanV3Detail(domainScanId);
       if (!res.ok) return { done: true, error: res.error, status: 'error' };
       lastScan = res.scan;
-      const status = res.scan.status.toLowerCase();
+      const status = String(res.scan.status ?? '').toLowerCase();
       if (status === 'failed' || status === 'error' || status === 'cancelled') {
         return {
           done: true,
@@ -357,7 +357,7 @@ export async function runCheckionDomainScanV3(input: {
     waitForCompletion: false,
   });
   if (!started.ok) return started;
-  if (TERMINAL.has(started.scan.status.toLowerCase())) {
+  if (TERMINAL.has(String(started.scan.status ?? '').toLowerCase())) {
     return { ok: true, scan: started.scan };
   }
   const polled = await pollCheckionDomainScanV3(started.scan.id, {

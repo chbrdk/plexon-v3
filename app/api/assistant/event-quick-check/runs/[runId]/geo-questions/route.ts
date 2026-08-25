@@ -4,6 +4,7 @@ import {
   persistGeoQuestionsConfirmation,
 } from '@/lib/assistant/event-quick-check/confirm-geo-questions';
 import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
+import { markEventQuickCheckBackgroundFailure } from '@/lib/assistant/event-quick-check/mark-eqc-background-failure';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { GeoMeasurement } from '@/lib/geo/measurement';
 
@@ -51,7 +52,7 @@ export async function POST(
       geoCompetitorsConfirmed: prep.geoCompetitorsConfirmed,
       geoMeasurementsConfirmed: prep.geoMeasurementsConfirmed,
     }).catch((error) => {
-      console.error('[event-quick-check geo-questions]', error);
+      void markEventQuickCheckBackgroundFailure(prep.workflowRunId, error, 'geo-questions');
     });
 
     return Response.json(

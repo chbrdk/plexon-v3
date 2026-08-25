@@ -172,59 +172,96 @@ async function syncStepsFromFlow(input: {
   complete?: boolean;
   error?: string | null;
 }): Promise<WorkflowStep[]> {
-  const doneThrough: string[] = ['prepare', 'company_research'];
+  const markDone = async (ids: string[]) => {
+    let steps: WorkflowStep[] | undefined;
+    for (const id of ids) {
+      steps = await input.patchStep(id, { status: 'done' });
+    }
+    return steps;
+  };
+
   if (input.awaitingKind === 'brief') {
-    let steps = await input.patchStep('company_research', {
-      status: 'done',
-      detail: 'Profil erstellt',
-    });
-    steps = await input.patchStep('company_brief_confirm', {
+    await markDone(['prepare', 'company_research']);
+    return input.patchStep('company_brief_confirm', {
       status: 'running',
       detail: 'Bitte Profil prüfen und bestätigen',
     });
-    return steps;
   }
-  doneThrough.push('company_brief_confirm', 'create_project', 'ensure_audion');
+
   if (input.awaitingKind === 'competitors') {
-    let steps = await input.patchStep('competitors_suggest', {
-      status: 'done',
-      detail: 'Vorschläge bereit',
-    });
-    steps = await input.patchStep('competitors_confirm', {
+    await markDone([
+      'prepare',
+      'company_research',
+      'company_brief_confirm',
+      'create_project',
+      'ensure_audion',
+      'competitors_suggest',
+    ]);
+    return input.patchStep('competitors_confirm', {
       status: 'running',
       detail: 'Bitte Wettbewerber prüfen',
     });
-    return steps;
   }
-  doneThrough.push('competitors_suggest', 'competitors_confirm', 'domain_scan', 'persona_bootstrap');
+
   if (input.awaitingKind === 'geo_queries') {
-    let steps = await input.patchStep('geo_questions', {
-      status: 'done',
-      detail: 'Fragen vorgeschlagen',
-    });
-    steps = await input.patchStep('geo_questions_confirm', {
+    // Domain + persona are already done when GEO confirm pauses — mark them so UI leaves "Domain".
+    await markDone([
+      'prepare',
+      'company_research',
+      'company_brief_confirm',
+      'create_project',
+      'ensure_audion',
+      'competitors_suggest',
+      'competitors_confirm',
+      'domain_scan',
+      'persona_bootstrap',
+      'geo_questions',
+    ]);
+    return input.patchStep('geo_questions_confirm', {
       status: 'running',
       detail: 'Bitte GEO-Fragen prüfen',
     });
-    return steps;
   }
+
   if (input.awaitingKind === 'deep_scan') {
+    await markDone([
+      'prepare',
+      'company_research',
+      'company_brief_confirm',
+      'create_project',
+      'ensure_audion',
+      'competitors_suggest',
+      'competitors_confirm',
+    ]);
     return input.patchStep('domain_scan', {
       status: 'running',
       detail: 'Deep Scan läuft…',
     });
   }
+
   if (input.complete) {
-    let steps = await input.patchStep('geo_check', { status: 'done', detail: 'Abgeschlossen' });
-    steps = await input.patchStep('aggregate', { status: 'done', detail: 'Report' });
-    return steps;
+    await markDone([
+      'prepare',
+      'company_research',
+      'company_brief_confirm',
+      'create_project',
+      'ensure_audion',
+      'competitors_suggest',
+      'competitors_confirm',
+      'domain_scan',
+      'persona_bootstrap',
+      'geo_questions',
+      'geo_questions_confirm',
+      'geo_check',
+    ]);
+    return input.patchStep('aggregate', { status: 'done', detail: 'Report' });
   }
+
   if (input.error) {
     return input.patchStep('aggregate', { status: 'error', detail: input.error });
   }
-  for (const id of doneThrough) {
-    await input.patchStep(id, { status: 'done' });
-  }
+
+  await markDone(['prepare', 'company_research', 'company_brief_confirm', 'create_project', 'ensure_audion']);
   return input.patchStep('prepare', { status: 'done' });
 }
 
@@ -419,6 +456,12 @@ export async function runEqcViaCollectionFlow(
   }
 
   emitPhase(emit, 'workflow', 'Collection Flow läuft…');
+  if (runMode === 'continue_after_brief' || runMode === 'continue_after_competitors') {
+    steps = await patchStep('domain_scan', {
+      status: 'running',
+      detail: 'CHECKION Domain-Scan…',
+    });
+  }
   const result = await executeEqcCollectionFlowRun({
     platformProjectId: boot.platformProjectId,
     flowId: boot.flowId,
@@ -471,25 +514,11 @@ export async function runEqcViaCollectionFlow(
   const geoQuestions = options.geoQuestions?.length
     ? options.geoQuestions
     : stringList(outputs.queries?.items);
-  const domainScan = await hydrateDomainScanPageCount(
-    domainScanFromContext(outputs, lastRun)
-  );
-  const geoJob = await hydrateGeoJobPreview(
-    geoJobFromContext(outputs, lastRun)
-  );
-  const geoJobsRaw = geoJobsFromCatalogBundle(outputs.geo, lastRun.geoJobId);
-  const geoJobs = (
-    await Promise.all(
-      geoJobsRaw.map(async (layer) => ({
-        measurement: layer.measurement,
-        job: (await hydrateGeoJobPreview(layer.job)) ?? layer.job,
-      }))
-    )
-  );
   const personaPreview = personaPreviewFromContext(outputs);
   const geoQuestionsByPersona = options.geoQuestionsByPersona?.length
     ? options.geoQuestionsByPersona
     : geoQuestionsByPersonaFromCatalogBundle(outputs.persona);
+  const domainScanLite = domainScanFromContext(outputs, lastRun);
 
   const eqcFlowState: EqcFlowRuntimeState = {
     flowId: boot.flowId,
@@ -500,6 +529,7 @@ export async function runEqcViaCollectionFlow(
       : undefined,
   };
 
+  // Human gates before CHECKION hydrate — hydrate must not block pause after domain is done.
   if (lastRun.status === 'awaiting_input') {
     const kind = lastRun.awaitingConfirmKind;
     steps = await syncStepsFromFlow({ patchStep, awaitingKind: kind });
@@ -616,8 +646,14 @@ export async function runEqcViaCollectionFlow(
         steps,
         companyBrief,
         personaPreview,
-        domainScan,
+        domainScan: domainScanLite,
         geoCompetitors: competitors.length ? competitors : options.geoCompetitors ?? [],
+      });
+      outcomes.push({
+        stepId: 'domain_scan',
+        label: 'Domain-Scan',
+        status: 'done',
+        data: { scanId: lastRun.domainScanId },
       });
       return {
         ok: true,
@@ -631,7 +667,7 @@ export async function runEqcViaCollectionFlow(
         steps,
         companyBrief,
         personaPreview,
-        domainScan,
+        domainScan: domainScanLite,
         geoQuestions,
         geoQuestionsByPersona,
         geoCompetitors: resumeCheckpoint.geoCompetitors,
@@ -657,6 +693,22 @@ export async function runEqcViaCollectionFlow(
       eqcFlowState,
     };
   }
+
+  const domainScan = await hydrateDomainScanPageCount(domainScanLite).catch((err) => {
+    console.error('[eqc] hydrateDomainScanPageCount', err);
+    return domainScanLite;
+  });
+  const geoJob = await hydrateGeoJobPreview(geoJobFromContext(outputs, lastRun)).catch((err) => {
+    console.error('[eqc] hydrateGeoJobPreview', err);
+    return geoJobFromContext(outputs, lastRun);
+  });
+  const geoJobsRaw = geoJobsFromCatalogBundle(outputs.geo, lastRun.geoJobId);
+  const geoJobs = await Promise.all(
+    geoJobsRaw.map(async (layer) => ({
+      measurement: layer.measurement,
+      job: (await hydrateGeoJobPreview(layer.job).catch(() => layer.job)) ?? layer.job,
+    }))
+  );
 
   if (result.verdict?.status === 'error' || lastRun.status === 'error') {
     const err = lastRun.error || result.verdict?.summary || 'Flow fehlgeschlagen';

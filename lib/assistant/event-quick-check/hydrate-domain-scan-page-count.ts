@@ -57,10 +57,10 @@ export async function hydrateDomainScanPageCount(
     totalPages: preview.preview.totalPages || scan.totalPages,
     score: scan.score || preview.preview.score,
     stats:
-      preview.preview.stats.total > 0 || preview.preview.stats.errors > 0
+      (preview.preview.stats?.total ?? 0) > 0 || (preview.preview.stats?.errors ?? 0) > 0
         ? preview.preview.stats
         : scan.stats,
-    topIssues: preview.preview.topIssues.length ? preview.preview.topIssues : scan.topIssues,
+    topIssues: preview.preview.topIssues?.length ? preview.preview.topIssues : scan.topIssues,
     status: preview.preview.status || scan.status,
     url: scan.url || preview.preview.url,
     domain: scan.domain || preview.preview.domain,

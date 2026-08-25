@@ -2,6 +2,7 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { persistCompetitorsConfirmation } from '@/lib/assistant/event-quick-check/confirm-competitors';
 import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
+import { markEventQuickCheckBackgroundFailure } from '@/lib/assistant/event-quick-check/mark-eqc-background-failure';
 
 export const runtime = 'nodejs';
 /**
@@ -39,7 +40,7 @@ export async function POST(
       workflowRunId: prep.workflowRunId,
       competitorsConfirmed: prep.competitorsConfirmed,
     }).catch((error) => {
-      console.error('[event-quick-check competitors]', error);
+      void markEventQuickCheckBackgroundFailure(prep.workflowRunId, error, 'competitors');
     });
 
     return Response.json(
