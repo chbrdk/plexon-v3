@@ -7,11 +7,9 @@ import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/exe
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { GeoMeasurement } from '@/lib/geo/measurement';
 
-import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
-
 export const runtime = 'nodejs';
-/** Dual-layer GEO — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
-export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
+/** Must be a numeric literal (Next segment config). Same as `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+export const maxDuration = 900;
 
 export async function POST(
   request: Request,

@@ -5,6 +5,7 @@ import type { WorkflowStep } from '@/lib/db/assistant-workflow-runs';
 import type { DeepScanProgress } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { apiEventQuickCheckRun } from '@/lib/paths/event-quick-check-page';
 import { EQC_PAGE_COPY } from '@/lib/assistant/event-quick-check/event-quick-check-page-copy';
+import { readEqcJsonResponse } from '@/components/event-quick-check/read-eqc-json-response';
 
 const POLL_MS = 5_000;
 const MAX_POLL_MS = 20 * 60 * 1000;
@@ -45,7 +46,7 @@ export async function pollEventQuickCheckRunUntilSettled(
       throw new Error(EQC_PAGE_COPY.errorLoadRun);
     }
 
-    const data = (await res.json()) as {
+    const data = await readEqcJsonResponse<{
       status?: string;
       report?: EventQuickCheckReportModel | null;
       steps?: WorkflowStep[];
@@ -63,7 +64,7 @@ export async function pollEventQuickCheckRunUntilSettled(
       checkionProjectId?: string;
       canRerunGeo?: boolean;
       companyBrief?: EventQuickCheckCompanyBrief;
-    };
+    }>(res);
 
     if (data.awaitingCompetitors) {
       return {

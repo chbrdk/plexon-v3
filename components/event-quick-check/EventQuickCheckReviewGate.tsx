@@ -20,6 +20,7 @@ import {
 } from '@/lib/paths/event-quick-check-page';
 import { subscribeAssistantWorkflowStream } from '@/lib/assistant/workflow-stream-client';
 import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
+import { readEqcJsonResponse } from '@/components/event-quick-check/read-eqc-json-response';
 
 export type EventQuickCheckReviewGateProps = {
   workflowRunId: string;
@@ -100,11 +101,13 @@ export function EventQuickCheckReviewGate({
         const result =
           res.status === 202
             ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
-            : ((await res.json()) as RunSnapshot & {
-                ok?: boolean;
-                error?: string;
-                report?: unknown;
-              });
+            : await readEqcJsonResponse<
+                RunSnapshot & {
+                  ok?: boolean;
+                  error?: string;
+                  report?: unknown;
+                }
+              >(res);
         streamRef.current?.close();
         streamRef.current = null;
 
@@ -169,14 +172,16 @@ export function EventQuickCheckReviewGate({
         const result =
           res.status === 202
             ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
-            : ((await res.json()) as RunSnapshot & {
-                ok?: boolean;
-                error?: string;
-                report?: unknown;
-                awaitingGeoQuestions?: boolean;
-                geoQuestions?: string[];
-                awaitingDeepScan?: boolean;
-              });
+            : await readEqcJsonResponse<
+                RunSnapshot & {
+                  ok?: boolean;
+                  error?: string;
+                  report?: unknown;
+                  awaitingGeoQuestions?: boolean;
+                  geoQuestions?: string[];
+                  awaitingDeepScan?: boolean;
+                }
+              >(res);
         streamRef.current?.close();
         streamRef.current = null;
 
@@ -237,7 +242,9 @@ export function EventQuickCheckReviewGate({
             throw new Error(polled.error ?? EQC_PAGE_COPY.errorRunFailed);
           }
         } else {
-          const result = (await res.json()) as { ok?: boolean; error?: string; report?: unknown };
+          const result = await readEqcJsonResponse<{ ok?: boolean; error?: string; report?: unknown }>(
+            res
+          );
           if (!res.ok || result.error) {
             throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
           }

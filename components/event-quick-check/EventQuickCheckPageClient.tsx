@@ -21,6 +21,7 @@ import { EventQuickCheckHistoryDialog } from '@/components/event-quick-check/Eve
 import { EventQuickCheckReadinessBanner } from '@/components/event-quick-check/EventQuickCheckReadinessBanner';
 import { EventQuickCheckRunningProgress } from '@/components/event-quick-check/EventQuickCheckRunningProgress';
 import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
+import { readEqcJsonResponse } from '@/components/event-quick-check/read-eqc-json-response';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
 import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
@@ -341,7 +342,7 @@ export function EventQuickCheckPageClient() {
         const result =
           res.status === 202
             ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
-            : ((await res.json()) as {
+            : await readEqcJsonResponse<{
                 ok: boolean;
                 report?: EventQuickCheckReportModel;
                 steps?: WorkflowStep[];
@@ -356,7 +357,7 @@ export function EventQuickCheckPageClient() {
                 maxCompetitors?: number;
                 deepScanProgress?: { complete: number; total: number; detail: string };
                 checkionProjectId?: string;
-              });
+              }>(res);
 
         streamRef.current?.close();
         streamRef.current = null;
@@ -441,7 +442,7 @@ export function EventQuickCheckPageClient() {
         const result =
           res.status === 202
             ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
-            : ((await res.json()) as {
+            : await readEqcJsonResponse<{
                 ok: boolean;
                 report?: EventQuickCheckReportModel;
                 steps?: WorkflowStep[];
@@ -453,7 +454,7 @@ export function EventQuickCheckPageClient() {
                 geoHasPersona?: boolean;
                 deepScanProgress?: { complete: number; total: number; detail: string };
                 checkionProjectId?: string;
-              });
+              }>(res);
 
         streamRef.current?.close();
         streamRef.current = null;
@@ -535,7 +536,7 @@ export function EventQuickCheckPageClient() {
         const result =
           res.status === 202
             ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
-            : ((await res.json()) as {
+            : await readEqcJsonResponse<{
                 ok: boolean;
                 report?: EventQuickCheckReportModel;
                 steps?: WorkflowStep[];
@@ -545,7 +546,7 @@ export function EventQuickCheckPageClient() {
                 deepScanProgress?: { complete: number; total: number; detail: string };
                 checkionProjectId?: string;
                 canRerunGeo?: boolean;
-              });
+              }>(res);
 
         streamRef.current?.close();
         streamRef.current = null;

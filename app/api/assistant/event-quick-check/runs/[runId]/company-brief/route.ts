@@ -2,11 +2,10 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { persistCompanyBriefConfirmation } from '@/lib/assistant/event-quick-check/confirm-company-brief';
 import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
-import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
 
 export const runtime = 'nodejs';
-/** Domain scan after brief confirm — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
-export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
+/** Must be a numeric literal (Next segment config). Same as `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+export const maxDuration = 900;
 
 export async function POST(
   request: Request,
