@@ -282,8 +282,67 @@ export function EventQuickCheckPageClient() {
         }
 
         if (data.status === 'running' || data.status === 'pending') {
+          // GET may kick domain→GEO reconcile; keep polling until a gate/report/fail.
           setPhase('running');
-          return;
+          if (data.steps?.length) setSteps(data.steps);
+
+          streamRef.current?.close();
+          streamRef.current = subscribeAssistantWorkflowStream(runId, {
+            onUiBlockUpdate: (block) => {
+              const rawSteps = block.props.steps;
+              if (Array.isArray(rawSteps)) {
+                setSteps(rawSteps as WorkflowStep[]);
+              }
+            },
+            onWorkflow: (payload) => {
+              if (payload.steps?.length) setSteps(payload.steps);
+            },
+          });
+
+          const polled = await pollEventQuickCheckRunUntilSettled(runId);
+          streamRef.current?.close();
+          streamRef.current = null;
+
+          if (polled.steps?.length) setSteps(polled.steps);
+
+          if (polled.awaitingCompetitors) {
+            setCompetitors(polled.competitors?.length ? polled.competitors : ['']);
+            setMaxCompetitors(polled.maxCompetitors ?? 3);
+            setPhase('competitorsReview');
+            return;
+          }
+
+          if (polled.awaitingDeepScan) {
+            setDeepScanProgress(polled.deepScanProgress);
+            setCheckionProjectId(polled.checkionProjectId);
+            setPhase('deepScanWaiting');
+            return;
+          }
+
+          if (polled.awaitingGeoQuestions && polled.geoQuestions?.length) {
+            setGeoQuestions(polled.geoQuestions);
+            setGeoQuestionsByPersona(polled.geoQuestionsByPersona);
+            setGeoHasPersona(polled.geoHasPersona !== false);
+            if (polled.deepScanProgress) setDeepScanProgress(polled.deepScanProgress);
+            if (polled.checkionProjectId) setCheckionProjectId(polled.checkionProjectId);
+            setPhase('geoReview');
+            return;
+          }
+
+          if (!polled.ok) {
+            throw new Error(polled.error ?? EQC_PAGE_COPY.errorRunFailed);
+          }
+
+          if (polled.report) {
+            setReport(polled.report);
+            setPlatformProjectId(polled.platformProjectId);
+            setCanRerunGeo(Boolean(polled.canRerunGeo));
+            setGeoRerunMode(false);
+            setPhase('done');
+            return;
+          }
+
+          throw new Error(EQC_PAGE_COPY.errorLoadRun);
         }
 
         throw new Error(data.error ?? EQC_PAGE_COPY.errorLoadRun);

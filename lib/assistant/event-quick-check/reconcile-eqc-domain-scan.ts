@@ -120,10 +120,20 @@ export async function maybeReconcileEqcDomainScan(input: {
       })) ?? '';
   }
 
-  if (!scanId) return 'skipped';
+  if (!scanId) {
+    console.info('[eqc domain-reconcile] skipped: no scan id', { runId: run.id, url });
+    return 'skipped';
+  }
 
   const detail = await fetchCheckionDomainScanV3Detail(scanId);
-  if (!detail.ok) return 'skipped';
+  if (!detail.ok) {
+    console.info('[eqc domain-reconcile] skipped: detail fetch failed', {
+      runId: run.id,
+      scanId,
+      error: detail.error,
+    });
+    return 'skipped';
+  }
 
   const status = String(detail.scan.status ?? '').toLowerCase();
 
@@ -168,6 +178,12 @@ export async function maybeReconcileEqcDomainScan(input: {
       [EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY]: scanId,
       [EVENT_QUICK_CHECK_DOMAIN_RECONCILE_KICKED_AT_KEY]: new Date().toISOString(),
     },
+  });
+
+  console.info('[eqc domain-reconcile] kicking resume', {
+    runId: run.id,
+    scanId,
+    via: pastCompetitors ? 'competitors' : 'brief',
   });
 
   void executeEventQuickCheckRun({
