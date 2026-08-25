@@ -15,9 +15,9 @@ describe('editorial landing fallback', () => {
   it('requires flex row sections in the brief', () => {
     const brief = buildEditorialLandingFallbackBrief();
     expect(brief).toContain('flex-direction:row');
-    expect(brief).toContain('grid-template-columns:repeat(3,1fr)');
+    expect(brief).toMatch(/grid-template-columns:repeat\(3/);
     expect(brief).toContain('creation_scene_import_html');
-    expect(brief).toMatch(/Hex-Literale|kein `var\(--/);
+    expect(brief).toMatch(/eigene Hex-Palette|#ff6a3b/);
   });
 
   it('is embedded in creation scene depth prompt as last resort after captures', () => {

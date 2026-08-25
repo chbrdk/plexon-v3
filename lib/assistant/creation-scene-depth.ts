@@ -49,76 +49,55 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
-**Greenfield Landing/Homepage:** Entwirf wie eine **freistehende HTML-Seite** (Spirion nur als Inspiration für Rhythm/Look — kein Token-/Site-Kit-First). Liefere **ein** vollständiges HTML mit **Hex/rem/px-Literalen** in Inline-Styles oder einfachen \`.class\`/\`body\`/\`:root\`-Regeln → \`creation_scene_import_html\` → audit → preview.
-**VERBOTEN im Import-HTML:** \`var(--…)\`, Site-Kit-\`--site-*\`, Brandion-Token-Namen, Fixture-Chrome als Endlook. Wenn \`:root\` Custom Props hat, müssen **dieselben** Namen in Styles vorkommen **oder** besser direkt Hex schreiben.
-**Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`, nicht \`var(--bg)\`). **Page-BG** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen (\`Was wir mitbringen\`, nie \`Was\`+\`wir\`+\`mitbringen\` ohne Space). **Metriken/Logos als ein Textknoten** (\`3+\`, \`360°\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
+
+### Pflicht: Eigenes Design-System erfinden (vor dem HTML)
+Greenfield Landing = **freie Art-Direction**, nicht Site-Kit-/Brandion-/MSQDX-Fixture.
+**VOR** \`creation_scene_import_html\` kurz intern festlegen und im HTML umsetzen:
+1. **Palette (neu):** mind. 4 Hex-Literale — Page-BG · Ink · Muted · Accent(+ ggf. Surface). **Nicht** die MSQDX-Defaults: \`#ff6a3b\` / \`#ff391e\` / Fixture-Orange, \`#0a0a0a\`/\`#0b0b0b\`+\`#f8f8f8\` als Standard-Combo, \`#f7f6f2\` Paper, \`Noto Sans\`. Wähle eine **andere** Stimmung (z. B. warm paper + deep ink, cool slate, olive, indigo, sand, high-contrast editorial …) — Inspiration aus Spirion-Pack-Farben ok, aber **eigene** Hex-Werte schreiben.
+2. **Typo (neu):** \`font-family\` auf \`body\`/Root mit **charakteristischer** Stack (Display + Body erlaubt). **Verboten als alleinige Wahl:** \`Noto Sans\`, \`Inter\`, \`Roboto\`, \`Arial\`, nur \`system-ui\`. Beispiele ok: \`'Fraunces', 'Iowan Old Style', Georgia, serif\` · \`'Syne', 'Avenir Next', 'Trebuchet MS', sans-serif\` · \`'IBM Plex Sans', 'Helvetica Neue', sans-serif\` — Stack muss im HTML als Literal stehen (\`font-family:…\` auf body und Headlines).
+3. **Spacing/Radius (neu):** eigene Skala in rem/px (nicht nur 16/24/48 und \`0.5rem\` Site-Kit-Radius). Section-Padding und Grid-Gaps bewusst unterschiedlich.
+4. **Kein Token-Pfad:** Bei freier Landing **kein** \`creation_brand_tokens_get\`, **kein** \`set_token_binding\`, **kein** Brandion-Token-Name. Nur Hex/rem/px in HTML-Props. Mapping auf Tokens kommt später manuell/Import — nicht jetzt.
+5. Abschluss kurz: „Palette: … · Font: … · Spacing: …“ (die erfundenen Werte nennen).
+
+**Greenfield Landing/Homepage:** Entwirf wie eine **freistehende HTML-Seite** (Spirion = Rhythm/Look-Inspiration). Liefere **ein** vollständiges HTML mit **Hex/rem/px-Literalen** → \`creation_scene_import_html\` → audit → preview.
+**VERBOTEN im Import-HTML:** \`var(--…)\`, Site-Kit-\`--site-*\`, Brandion-Token-Namen, Fixture-Chrome, MSQDX-Orange-Default, Noto-only.
+**Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`). **Page-BG + font-family** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
-0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
+0. **Design-System erfinden** (siehe oben) — **nicht** Brand-Pack laden für freie Landings.
 1. Inspiration (wenn Spirion-Tools verfügbar) — **Primärpfad:**
-   a. \`spirion_captures_list\` (limit ~12; **KEIN** \`platformProjectId\` / \`digProjectId\` — sonst filtert Staging auf [] obwohl die Library voll ist).
-   b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`; ebenfalls **ohne** Project-Filter).
+   a. \`spirion_captures_list\` (limit ~12; **KEIN** \`platformProjectId\` / \`digProjectId\`).
+   b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`).
    c. Optional \`spirion_compose_brief\` zum Mergen.
-   d. Optional \`spirion_screens_search\` / \`spirion_references_search\` (mit Collection-\`platformProjectId\`) — **0 Treffer hier ist häufig**; Captures-Pfad trotzdem nutzen. **Nie** „Corpus leer“ melden, wenn nur Search 0 hatte.
-   e. Import setzt Pack-Craft um (**gemessene Hex-Werte / Rhythm in Literale** — kein \`var(--site-*)\`, kein Fremdmarken-Copy-Clone).
-   **Editorial-Fallback nur** wenn \`captures_list\` wirklich \`captures: []\` liefert (siehe unten) — **nicht** nach einer Search-Runde.
+   d. Optional Search — **0 Treffer ≠ Corpus leer**; Captures-Pfad trotzdem.
+   e. Pack → **eigene** Hex/Type/Spacing-Literale ableiten (kein 1:1 Fremdmarken-Clone, kein Zurückfallen auf Fixture-Orange).
+   **Editorial-Fallback nur** wenn \`captures_list\` wirklich \`captures: []\` — **nicht** nach Search-0.
 ${buildEditorialLandingFallbackBrief()}
-2. **Erstentwurf** — greenfield: \`creation_scene_import_html\` mit einem HTML-Dokument (\`pageName\` optional für neue Seite). Sonst: add_page / SiteStack / Sections via ops.
-3. Inhalt nachziehen — nur wenn Import/ops Lücken lassen: **insert_child mit echten props**. Bare insert_instance = verboten für Seiten-Copy.
-4. **Look & Feel (frei erlaubt)** — bei Ops: Farben/Abstände/Radii bewusst setzen (siehe „Freies Styling“). Import liefert Literale bereits. Site-Kit-Fixture nicht als fertiges Branding belassen. Hero-Image: \`set_style\` width/height großzügig (kein Mini-Placeholder 320×180).
-5. Self-Check — **creation_scene_content_audit** aufrufen; bei error-Findings set_prop / Inserts nachziehen bis ok (Warnings ok nach Fix-Versuch)
-6. Pixel-Check — **creation_scene_preview** (max. 1–2×): kompaktes WebP Vision. Bei Preview-error / network: **nur Audit**, Pixel-QA nicht behaupten, Turn trotzdem abschließen.
-7. Abschluss — Tree neu lesen; kurz sagen ob Import und/oder Literale/Token-Bindings genutzt wurden. Non-empty import \`warnings\` dem User nennen.
+2. **Erstentwurf** — \`creation_scene_import_html\` (\`pageName\` optional).
+3. Inhalt nachziehen nur bei Lücken: **insert_child mit echten props**.
+4. **Look & Feel** — wenn Import noch Fixture-Nähe zeigt: Literale nachziehen (\`set_prop\` + \`clear_token_binding\`). Hero-Image großzügig.
+5. Self-Check — **creation_scene_content_audit**
+6. Pixel-Check — **creation_scene_preview** (max. 1–2×)
+7. Abschluss — erfundenes System nennen; import \`warnings\` melden.
 
-Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst, dann unter neuem root.id bauen.
+Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst.
 
-### Freies Styling (Hex / Abstände — ohne Token anlegen)
-Wie im Inspector: **Literale in \`props\`**, Paint-Merge = Tokens dann **Props überschreiben Tokens**.
-1. Farbe/Fill: \`set_prop\` key=\`background\`|\`color\`|\`borderColor\` value=\`#RRGGBB\` (oder \`rgb(...)\`). Wenn noch ein Token auf dem Key liegt → zusätzlich \`clear_token_binding\` für denselben Key (wie die UI).
-2. Spacing/Radius/Typo-Literale: \`set_prop\` key=\`gap\`|\`padding\`|\`paddingTop\`|…|\`radius\`|\`fontSize\`|\`fontWeight\`|\`lineHeight\`|\`fontFamily\` value z. B. \`24\`, \`1.5rem\`, \`12px\`, \`700\`, Fontname.
-3. Gap-Enums der Layout-Props bleiben ok (\`sm\`/\`md\`/…), wenn passend.
-4. \`set_style\` = **nur** \`width\` / \`height\` (Zahlen, px). Kein Hex über set_style.
-5. **Kein** neues Brandion-Token anlegen nötig. Pack-Tokens (\`set_token_binding\`) sind optional — nutzen wenn Pack passt und wiederverwendbar sein soll.
-6. Site-Kit-Defaults (Fixture-Orange/\`color.black\`) = Startpunkt, nicht Endzustand: durch Literale oder Bindings ersetzen.
+### Freies Styling (Hex / Abstände — ohne Token)
+**Literale in \`props\`**; Props überschreiben Tokens.
+1. Farbe: \`set_prop\` \`background\`|\`color\`|\`borderColor\` = \`#RRGGBB\` (+ \`clear_token_binding\` wenn Binding lag).
+2. Spacing/Typo: \`gap\`|\`padding*\`|\`radius\`|\`fontSize\`|\`fontWeight\`|\`lineHeight\`|\`fontFamily\` als Literale.
+3. \`set_style\` nur \`width\`/\`height\`.
+4. **Kein** Brandion-Token anlegen; **kein** \`set_token_binding\` auf freien Landings.
 
-Beispiel-Ops (CTA frei):
-\`{ "op":"set_prop", "nodeId":"<btn>", "key":"background", "value":"#0B3D2E" }\`
-\`{ "op":"clear_token_binding", "nodeId":"<btn>", "key":"background" }\`
-\`{ "op":"set_prop", "nodeId":"<btn>", "key":"color", "value":"#F7F6F2" }\`
-\`{ "op":"clear_token_binding", "nodeId":"<btn>", "key":"color" }\`
+### VERBOTENE End-Copy
+„Get started“, „Option A/B“, alleiniges „Text“/„Link“/„Button“/„Image“/… — vor Abschluss überschreiben.
 
-### VERBOTENE End-Copy (Master-/Palette-Seeds — dürfen NICHT auf der Fläche bleiben)
-„Get started“, „Option A“, „Option B“, alleiniges „Text“, alleiniges „Link“, generisches „New“, „Button“, „Email“, „Select“, „Image“, „Message“.
-Wenn so etwas nach dem Bau noch sichtbar wäre → set_prop / props überschreiben BEVOR du fertig meldest.
-
-### Content-complete — bevorzugter Weg
-Marketing/PDP: **insert_child** Site Kit + props im selben Op (nicht nur Type).
-Beispiel (E-Bike PDP — anpassen an Nutzerprompt):
-- SiteText role=title children=\"Urban Glide E-Bike\"
-- SiteText role=body children=\"2.999 € · Reichweite 80 km\"
-- SiteBadge children=\"Neuheit\"
-- SiteSelect placeholder=\"Rahmengröße\" options=\"S\\nM\\nL\\nXL\"
-- SiteSelect placeholder=\"Farbe\" options=\"Graphit\\nSand\\nOcean\"
-- SiteButton children=\"In den Warenkorb\"
-- SiteLink children=\"Finanzierung anfragen\" href=\"#\"
-- SiteImage alt=\"E-Bike Seitenansicht\" (src aus Seed ok, alt MUSS produktspezifisch sein)
-
-Prop-Cheat:
-- SiteButton/SiteBadge/SiteCheckbox/SiteLink → props.children (+ href bei Link)
-- SiteText → props.role + props.children
-- SiteInput/SiteTextarea → props.placeholder
-- SiteSelect → props.placeholder + props.options (Zeilen)
-- SiteImage → props.src + props.alt
-- SiteGrid/SiteStack → columns / direction / gap
-
-### insert_instance nur mit Inhalt
-Nur wenn Master nötig: insert_instance { masterId, parentId, props: { children|options|… } } im selben Op,
-oder sofort set_prop auf die neue Instance-ID. Nackte Instances = Seed-Copy → unfertig.
+### Content-complete
+Marketing/PDP: **insert_child** mit props. Prop-Cheat: SiteButton/SiteBadge/SiteLink children(+href) · SiteText role+children · SiteSelect options · SiteImage alt · SiteGrid columns/gap.
 
 ### Pflicht vor Abschluss
-1. Look & Feel bewusst gesetzt (Literale und/oder Token-Bindings) — nicht nur Site-Kit-Fixture belassen.
-2. creation_scene_content_audit(sceneId) — bei ok=false Fehler beheben und erneut auditen.
-3. creation_scene_preview(sceneId) — Vision auf dem WebP; max. 2 Preview-Runden; bei error-Feld nur Audit nutzen.
-4. Vision **nicht** ok bei: grauem Wireframe, Mini-Platzhalter-Bild, reinem Site-Kit-Default-Chrome ohne bewusste Farben/Abstände, Seed-Copy/fehlende CTAs.
-5. PDP-Checklist: Galerie+alt · Titel/Preis · Varianten-Selects mit echten Optionen · CTA-Label · Nav-Links mit Labels — null Seed-Text.
-Nicht fertig melden solange Audit error-Findings hat oder Vision offensichtliche Seed-Copy/fehlende CTAs/Wireframe zeigt.`;
+1. Eigenes System sichtbar (andere Farben/Font/Spacing als Site-Kit-Fixture) — Vision **nicht** ok bei MSQDX-Orange+Noto+Near-black-Default.
+2. creation_scene_content_audit — errors fixen.
+3. creation_scene_preview — max. 2×.
+4. Kein Wireframe / Seed-Copy / fehlende CTAs.
+Nicht fertig melden solange Fixture-Look oder Seed-Copy sichtbar.`;
 }

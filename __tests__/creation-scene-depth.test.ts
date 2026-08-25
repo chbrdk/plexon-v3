@@ -88,10 +88,13 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('set_prop')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('clear_token_binding')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#RRGGBB|background/)
-    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe|Fixture/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_preview')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/var\(--|Hex\/rem\/px/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('freistehende HTML')
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Eigenes Design-System|Design-System erfinden/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#ff6a3b|Noto Sans/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/kein.*creation_brand_tokens_get|kein.*set_token_binding/i)
 
     const plan = planAssistantTurnHeuristic({
       prompt: 'Erstelle eine Hero-Section',
