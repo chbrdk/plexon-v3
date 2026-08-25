@@ -434,7 +434,7 @@ export async function executeEqcCollectionFlowRun(input: {
         geoCompetitors: competitors,
         platformProjectId: id,
       });
-      if (step.personaOutcome.status === 'error') {
+      if (step.personaOutcome?.status === 'error') {
         return failEqc({
           id,
           fid,
