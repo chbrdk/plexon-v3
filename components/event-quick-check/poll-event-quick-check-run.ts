@@ -1,4 +1,6 @@
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
+import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
+import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-geo-questions';
 import type { WorkflowStep } from '@/lib/db/assistant-workflow-runs';
 import type { DeepScanProgress } from '@/lib/assistant/event-quick-check/deep-scan-run-status';
 import { apiEventQuickCheckRun } from '@/lib/paths/event-quick-check-page';
@@ -13,17 +15,25 @@ export type EventQuickCheckRunPollResult = {
   steps?: WorkflowStep[];
   platformProjectId?: string;
   error?: string;
+  awaitingCompetitors?: boolean;
+  competitors?: string[];
+  maxCompetitors?: number;
+  awaitingGeoQuestions?: boolean;
+  geoQuestions?: string[];
+  geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+  geoHasPersona?: boolean;
   awaitingDeepScan?: boolean;
   deepScanProgress?: DeepScanProgress;
   checkionProjectId?: string;
   canRerunGeo?: boolean;
+  companyBrief?: EventQuickCheckCompanyBrief;
 };
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-/** Poll GET run until workflow leaves `running` (async GEO confirm path). */
+/** Poll GET run until workflow leaves bare `running` (async confirm paths). */
 export async function pollEventQuickCheckRunUntilSettled(
   workflowRunId: string
 ): Promise<EventQuickCheckRunPollResult> {
@@ -41,11 +51,44 @@ export async function pollEventQuickCheckRunUntilSettled(
       steps?: WorkflowStep[];
       platformProjectId?: string;
       error?: string;
+      awaitingCompetitors?: boolean;
+      competitors?: string[];
+      maxCompetitors?: number;
+      awaitingGeoQuestions?: boolean;
+      geoQuestions?: string[];
+      geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+      geoHasPersona?: boolean;
       awaitingDeepScan?: boolean;
       deepScanProgress?: DeepScanProgress;
       checkionProjectId?: string;
       canRerunGeo?: boolean;
+      companyBrief?: EventQuickCheckCompanyBrief;
     };
+
+    if (data.awaitingCompetitors) {
+      return {
+        ok: true,
+        awaitingCompetitors: true,
+        competitors: data.competitors,
+        maxCompetitors: data.maxCompetitors,
+        steps: data.steps,
+        platformProjectId: data.platformProjectId,
+      };
+    }
+
+    if (data.awaitingGeoQuestions && data.geoQuestions?.length) {
+      return {
+        ok: true,
+        awaitingGeoQuestions: true,
+        geoQuestions: data.geoQuestions,
+        geoQuestionsByPersona: data.geoQuestionsByPersona,
+        geoHasPersona: data.geoHasPersona,
+        deepScanProgress: data.deepScanProgress,
+        checkionProjectId: data.checkionProjectId,
+        steps: data.steps,
+        platformProjectId: data.platformProjectId,
+      };
+    }
 
     if (data.awaitingDeepScan) {
       return {
@@ -74,5 +117,7 @@ export async function pollEventQuickCheckRunUntilSettled(
     await sleep(POLL_MS);
   }
 
-  throw new Error('Quick Check Timeout — GEO läuft noch im Hintergrund. Seite neu laden oder Run in der Historie öffnen.');
+  throw new Error(
+    'Quick Check Timeout — Analyse läuft noch im Hintergrund. Seite neu laden oder Run in der Historie öffnen.'
+  );
 }

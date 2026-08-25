@@ -1,6 +1,12 @@
 import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
-import { confirmEventQuickCheckCompetitors } from '@/lib/assistant/event-quick-check/confirm-competitors';
+import { persistCompetitorsConfirmation } from '@/lib/assistant/event-quick-check/confirm-competitors';
+import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
+import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits';
+
+export const runtime = 'nodejs';
+/** Domain scan after competitors confirm — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+export const maxDuration = EQC_LONG_RUNNING_MAX_DURATION_SEC;
 
 export async function POST(
   request: Request,
@@ -19,12 +25,30 @@ export async function POST(
   }
 
   try {
-    const result = await confirmEventQuickCheckCompetitors({
+    const prep = await persistCompetitorsConfirmation({
       user,
       workflowRunId: runId,
       competitors: body.competitors,
     });
-    return Response.json(result);
+
+    // Domain scan can exceed proxy timeouts — finish in background; client polls GET run.
+    void executeEventQuickCheckRun({
+      user,
+      workflowRunId: prep.workflowRunId,
+      competitorsConfirmed: prep.competitorsConfirmed,
+    }).catch((error) => {
+      console.error('[event-quick-check competitors]', error);
+    });
+
+    return Response.json(
+      {
+        ok: true,
+        accepted: true,
+        workflowRunId: prep.workflowRunId,
+        status: 'running',
+      },
+      { status: 202 }
+    );
   } catch (e) {
     if (e instanceof Error) {
       if (e.message === 'NOT_FOUND') return apiError('Not found', API_STATUS.NOT_FOUND);

@@ -24,9 +24,16 @@ export type ConfirmCompetitorsInput = {
   emit?: WorkflowStepEmitter;
 };
 
-export async function confirmEventQuickCheckCompetitors(
+export type PersistCompetitorsConfirmationResult = {
+  workflowRunId: string;
+  competitorsConfirmed: string[];
+  emit?: WorkflowStepEmitter;
+};
+
+/** DB + Checkion patch only — safe to return HTTP 202 before execute (domain scan). */
+export async function persistCompetitorsConfirmation(
   input: ConfirmCompetitorsInput
-): Promise<ExecuteEventQuickCheckRunResult> {
+): Promise<PersistCompetitorsConfirmationResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
   if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
@@ -61,6 +68,7 @@ export async function confirmEventQuickCheckCompetitors(
   );
 
   await updateAssistantWorkflowRun(run.id, {
+    status: 'running',
     steps,
     result: {
       ...stored,
@@ -69,10 +77,21 @@ export async function confirmEventQuickCheckCompetitors(
     },
   });
 
+  return {
+    workflowRunId: run.id,
+    competitorsConfirmed: confirmed,
+    emit: input.emit,
+  };
+}
+
+export async function confirmEventQuickCheckCompetitors(
+  input: ConfirmCompetitorsInput
+): Promise<ExecuteEventQuickCheckRunResult> {
+  const prep = await persistCompetitorsConfirmation(input);
   return executeEventQuickCheckRun({
     user: input.user,
-    workflowRunId: run.id,
-    emit: input.emit,
-    competitorsConfirmed: confirmed,
+    workflowRunId: prep.workflowRunId,
+    emit: prep.emit,
+    competitorsConfirmed: prep.competitorsConfirmed,
   });
 }

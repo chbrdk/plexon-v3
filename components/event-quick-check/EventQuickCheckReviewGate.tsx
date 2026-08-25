@@ -97,15 +97,18 @@ export function EventQuickCheckReviewGate({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(edits),
         });
-        const result = (await res.json()) as RunSnapshot & {
-          ok?: boolean;
-          error?: string;
-          report?: unknown;
-        };
+        const result =
+          res.status === 202
+            ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
+            : ((await res.json()) as RunSnapshot & {
+                ok?: boolean;
+                error?: string;
+                report?: unknown;
+              });
         streamRef.current?.close();
         streamRef.current = null;
 
-        if (!res.ok || result.error) {
+        if ((!res.ok && res.status !== 202) || result.error) {
           throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
         }
 
@@ -131,9 +134,13 @@ export function EventQuickCheckReviewGate({
           return;
         }
 
-        if (result.report || result.status === 'completed') {
+        if (result.awaitingDeepScan || result.report || result.status === 'completed') {
           onComplete?.();
           return;
+        }
+
+        if (!result.ok) {
+          throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
         }
 
         await loadRun();
@@ -159,17 +166,21 @@ export function EventQuickCheckReviewGate({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ competitors }),
         });
-        const result = (await res.json()) as RunSnapshot & {
-          ok?: boolean;
-          error?: string;
-          report?: unknown;
-          awaitingGeoQuestions?: boolean;
-          geoQuestions?: string[];
-        };
+        const result =
+          res.status === 202
+            ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
+            : ((await res.json()) as RunSnapshot & {
+                ok?: boolean;
+                error?: string;
+                report?: unknown;
+                awaitingGeoQuestions?: boolean;
+                geoQuestions?: string[];
+                awaitingDeepScan?: boolean;
+              });
         streamRef.current?.close();
         streamRef.current = null;
 
-        if (!res.ok || result.error) {
+        if ((!res.ok && res.status !== 202) || result.error) {
           throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
         }
 
@@ -184,9 +195,13 @@ export function EventQuickCheckReviewGate({
           return;
         }
 
-        if (result.report || result.status === 'completed') {
+        if (result.awaitingDeepScan || result.report || result.status === 'completed') {
           onComplete?.();
           return;
+        }
+
+        if (!result.ok) {
+          throw new Error(result.error ?? EQC_PAGE_COPY.errorRunFailed);
         }
 
         await loadRun();

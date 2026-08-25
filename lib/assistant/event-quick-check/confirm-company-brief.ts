@@ -25,9 +25,16 @@ export type ConfirmCompanyBriefInput = {
   emit?: WorkflowStepEmitter;
 };
 
-export async function confirmEventQuickCheckCompanyBrief(
+export type PersistCompanyBriefConfirmationResult = {
+  workflowRunId: string;
+  companyBriefConfirmed: EventQuickCheckCompanyBrief;
+  emit?: WorkflowStepEmitter;
+};
+
+/** DB + step updates only — safe to return HTTP 202 before execute (domain scan). */
+export async function persistCompanyBriefConfirmation(
   input: ConfirmCompanyBriefInput
-): Promise<ExecuteEventQuickCheckRunResult> {
+): Promise<PersistCompanyBriefConfirmationResult> {
   const run = await getAssistantWorkflowRunById(input.workflowRunId);
   if (!run || !(await userCanAccessEventQuickCheckRun(input.user, run))) {
     throw new Error('NOT_FOUND');
@@ -54,6 +61,7 @@ export async function confirmEventQuickCheckCompanyBrief(
   );
 
   await updateAssistantWorkflowRun(run.id, {
+    status: 'running',
     steps,
     result: {
       ...stored,
@@ -63,10 +71,21 @@ export async function confirmEventQuickCheckCompanyBrief(
     },
   });
 
+  return {
+    workflowRunId: run.id,
+    companyBriefConfirmed: confirmed,
+    emit: input.emit,
+  };
+}
+
+export async function confirmEventQuickCheckCompanyBrief(
+  input: ConfirmCompanyBriefInput
+): Promise<ExecuteEventQuickCheckRunResult> {
+  const prep = await persistCompanyBriefConfirmation(input);
   return executeEventQuickCheckRun({
     user: input.user,
-    workflowRunId: run.id,
-    emit: input.emit,
-    companyBriefConfirmed: confirmed,
+    workflowRunId: prep.workflowRunId,
+    emit: prep.emit,
+    companyBriefConfirmed: prep.companyBriefConfirmed,
   });
 }

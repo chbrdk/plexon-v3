@@ -448,19 +448,36 @@ export async function runEqcViaCollectionFlow(
     };
   }
 
-  const outputs = result.lastRun.context?.outputs ?? {};
+  const lastRun = result.lastRun;
+  if (!lastRun) {
+    steps = await patchStep('aggregate', { status: 'error', detail: 'Flow ohne lastRun' });
+    return {
+      ok: false,
+      playbookId: EVENT_QUICK_CHECK_PLAYBOOK_ID,
+      playbookLabel: QUICK_CHECK_LABEL,
+      projectName,
+      url,
+      platformProjectId: boot.platformProjectId,
+      outcomes,
+      steps,
+      error: 'Collection Flow lieferte kein lastRun',
+      eqcFlowState: { flowId: boot.flowId, historyRunId, context: undefined },
+    };
+  }
+
+  const outputs = lastRun.context?.outputs ?? {};
   const companyBrief = briefFromContext(outputs) ?? options.companyBrief;
   const competitors = stringList(outputs.competitors?.items);
   const geoQuestions = options.geoQuestions?.length
     ? options.geoQuestions
     : stringList(outputs.queries?.items);
   const domainScan = await hydrateDomainScanPageCount(
-    domainScanFromContext(outputs, result.lastRun)
+    domainScanFromContext(outputs, lastRun)
   );
   const geoJob = await hydrateGeoJobPreview(
-    geoJobFromContext(outputs, result.lastRun)
+    geoJobFromContext(outputs, lastRun)
   );
-  const geoJobsRaw = geoJobsFromCatalogBundle(outputs.geo, result.lastRun.geoJobId);
+  const geoJobsRaw = geoJobsFromCatalogBundle(outputs.geo, lastRun.geoJobId);
   const geoJobs = (
     await Promise.all(
       geoJobsRaw.map(async (layer) => ({
@@ -477,14 +494,14 @@ export async function runEqcViaCollectionFlow(
   const eqcFlowState: EqcFlowRuntimeState = {
     flowId: boot.flowId,
     historyRunId,
-    awaitingNodeId: result.lastRun.awaitingNodeId ?? null,
-    context: result.lastRun.context
-      ? { outputs: result.lastRun.context.outputs as Record<string, Record<string, unknown>> }
+    awaitingNodeId: lastRun.awaitingNodeId ?? null,
+    context: lastRun.context
+      ? { outputs: lastRun.context.outputs as Record<string, Record<string, unknown>> }
       : undefined,
   };
 
-  if (result.lastRun.status === 'awaiting_input') {
-    const kind = result.lastRun.awaitingConfirmKind;
+  if (lastRun.status === 'awaiting_input') {
+    const kind = lastRun.awaitingConfirmKind;
     steps = await syncStepsFromFlow({ patchStep, awaitingKind: kind });
 
     if (kind === 'brief') {
@@ -641,8 +658,8 @@ export async function runEqcViaCollectionFlow(
     };
   }
 
-  if (result.verdict.status === 'error' || result.lastRun.status === 'error') {
-    const err = result.lastRun.error || result.verdict.summary || 'Flow fehlgeschlagen';
+  if (result.verdict?.status === 'error' || lastRun.status === 'error') {
+    const err = lastRun.error || result.verdict?.summary || 'Flow fehlgeschlagen';
     steps = await syncStepsFromFlow({ patchStep, error: err });
     return {
       ok: false,
@@ -667,7 +684,7 @@ export async function runEqcViaCollectionFlow(
       stepId: 'domain_scan',
       label: 'Domain-Scan',
       status: 'done',
-      data: { scanId: result.lastRun.domainScanId },
+      data: { scanId: lastRun.domainScanId },
     },
     {
       stepId: 'persona_bootstrap',

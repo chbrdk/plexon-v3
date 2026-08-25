@@ -338,22 +338,25 @@ export function EventQuickCheckPageClient() {
           body: JSON.stringify(edits),
         });
 
-        const result = (await res.json()) as {
-          ok: boolean;
-          report?: EventQuickCheckReportModel;
-          steps?: WorkflowStep[];
-          platformProjectId?: string;
-          error?: string;
-          awaitingGeoQuestions?: boolean;
-          geoQuestions?: string[];
-          geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
-          geoHasPersona?: boolean;
-          awaitingCompetitors?: boolean;
-          competitors?: string[];
-          maxCompetitors?: number;
-          deepScanProgress?: { complete: number; total: number; detail: string };
-          checkionProjectId?: string;
-        };
+        const result =
+          res.status === 202
+            ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
+            : ((await res.json()) as {
+                ok: boolean;
+                report?: EventQuickCheckReportModel;
+                steps?: WorkflowStep[];
+                platformProjectId?: string;
+                error?: string;
+                awaitingGeoQuestions?: boolean;
+                geoQuestions?: string[];
+                geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+                geoHasPersona?: boolean;
+                awaitingCompetitors?: boolean;
+                competitors?: string[];
+                maxCompetitors?: number;
+                deepScanProgress?: { complete: number; total: number; detail: string };
+                checkionProjectId?: string;
+              });
 
         streamRef.current?.close();
         streamRef.current = null;
@@ -365,6 +368,15 @@ export function EventQuickCheckPageClient() {
           setCompetitors(result.competitors?.length ? result.competitors : ['']);
           setMaxCompetitors(result.maxCompetitors ?? 3);
           setPhase('competitorsReview');
+          void refreshHistory();
+          return;
+        }
+
+        if (result.awaitingDeepScan) {
+          setCompanyBrief(null);
+          setDeepScanProgress(result.deepScanProgress);
+          setCheckionProjectId(result.checkionProjectId);
+          setPhase('deepScanWaiting');
           void refreshHistory();
           return;
         }
@@ -426,19 +438,22 @@ export function EventQuickCheckPageClient() {
           body: JSON.stringify({ competitors: domains }),
         });
 
-        const result = (await res.json()) as {
-          ok: boolean;
-          report?: EventQuickCheckReportModel;
-          steps?: WorkflowStep[];
-          platformProjectId?: string;
-          error?: string;
-          awaitingGeoQuestions?: boolean;
-          geoQuestions?: string[];
-          geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
-          geoHasPersona?: boolean;
-          deepScanProgress?: { complete: number; total: number; detail: string };
-          checkionProjectId?: string;
-        };
+        const result =
+          res.status === 202
+            ? await pollEventQuickCheckRunUntilSettled(workflowRunId)
+            : ((await res.json()) as {
+                ok: boolean;
+                report?: EventQuickCheckReportModel;
+                steps?: WorkflowStep[];
+                platformProjectId?: string;
+                error?: string;
+                awaitingGeoQuestions?: boolean;
+                geoQuestions?: string[];
+                geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
+                geoHasPersona?: boolean;
+                deepScanProgress?: { complete: number; total: number; detail: string };
+                checkionProjectId?: string;
+              });
 
         streamRef.current?.close();
         streamRef.current = null;
@@ -453,6 +468,15 @@ export function EventQuickCheckPageClient() {
           if (result.deepScanProgress) setDeepScanProgress(result.deepScanProgress);
           if (result.checkionProjectId) setCheckionProjectId(result.checkionProjectId);
           setPhase('geoReview');
+          void refreshHistory();
+          return;
+        }
+
+        if (result.awaitingDeepScan) {
+          setCompetitors([]);
+          setDeepScanProgress(result.deepScanProgress);
+          setCheckionProjectId(result.checkionProjectId);
+          setPhase('deepScanWaiting');
           void refreshHistory();
           return;
         }
