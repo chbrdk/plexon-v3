@@ -204,6 +204,7 @@ export async function runAssistantAgent(
     useCreationMcp: mcpFlags.useCreationMcp,
     useSpirionMcp: mcpFlags.useSpirionMcp,
     pageContext: input.pageContext,
+    platformProjectId: input.platformProjectId,
     actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,
     thinkingBudgetTokens: resolveAssistantThinkingBudgetForIntent(plan.intent),

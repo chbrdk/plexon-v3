@@ -23,7 +23,7 @@ import {
   trimMessageHistory,
 } from '@/lib/assistant/context-budget';
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
-import { injectCreationSceneToolArgs } from '@/lib/assistant/creation-scene-tool-args';
+import { injectAssistantMcpToolArgs } from '@/lib/assistant/creation-scene-tool-args';
 import {
   formatToolResultForAnthropic,
   isCreationScenePreviewToolName,
@@ -70,6 +70,8 @@ export type OrchestratorCompleteOptions = {
   useCreationMcp?: boolean;
   useSpirionMcp?: boolean;
   pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
+  /** Collection id for Spirion live search injection when pageContext lacks it. */
+  platformProjectId?: string | null;
   actorUserId?: string;
   maxToolRounds?: number;
   /** Override extended-thinking budget (e.g. Creation scene depth). Omit → env default. */
@@ -247,6 +249,7 @@ export async function runOrchestratorComplete(
     useCreationMcp = false,
     useSpirionMcp = false,
     pageContext = null,
+    platformProjectId = null,
     actorUserId = '',
     maxToolRounds = 5,
     thinkingBudgetTokens,
@@ -546,9 +549,10 @@ export async function runOrchestratorComplete(
         continue;
       }
       onToolStart?.(block.name, block.input ?? {});
-      const toolInput = injectCreationSceneToolArgs(block.name, block.input ?? {}, {
+      const toolInput = injectAssistantMcpToolArgs(block.name, block.input ?? {}, {
         pageContext,
         actorUserId,
+        platformProjectId,
       });
       const result = await callCheckionMcpTool(baseUrl, mcpName, toolInput);
       const compacted = maybeCompactSceneTreeToolResult(block.name, result);

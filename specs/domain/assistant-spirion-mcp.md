@@ -32,9 +32,13 @@ Connectivity: `buildSpirionIntegrationContextBlock`.
 | Family | Anthropic name patterns |
 |--------|-------------------------|
 | `spirion_references` | `^spirion_references_search$`, `^spirion_reference_(get|pack)$`, `^spirion_compose_brief$`, `^dig_(search|inspect|neighbors|compare|recommend)$`, `^dig_reference_` |
-| `spirion_screens` | `^spirion_screens_search$`, `^spirion_capture_prompt_pack$`, `^spirion_flows_`, `^spirion_flow_`, `^dig_screen_`, `^dig_capture_`, `^dig_flow_` |
+| `spirion_screens` | `^spirion_screens_search$`, `^spirion_captures_list$`, `^spirion_capture_prompt_pack$`, `^spirion_analyses_list$`, `^spirion_analysis_get$`, `^spirion_health$`, `^spirion_enrichment_(list|get)$`, `^spirion_jobs_list$`, `^spirion_job_get$`, `^spirion_flows_`, `^spirion_flow_`, `^dig_screen_`, `^dig_capture_`, `^dig_flow_` |
 
 Write/job tools (`job_start`, `generate`, enrichment writes) are **not** in these families — Welle 1 is research only.
+
+### Live federation note
+
+`DIG_FEDERATION_MODE=live` requires `platformProjectId` on **search** tools (`screens_search` / `references_search`). Staging captures often have `platform_project_id: null`, so Collection-scoped search can return 0 even when the global library has captures. Prefer the **library path** below for Creation quality.
 
 Include both families in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_FAMILIES`.
 
@@ -54,7 +58,16 @@ Heuristic `spirion_research`: spirion|dig\b|design.?intelligence|referenz|screen
 
 ## Creation loop guidance
 
-On PDP/landing builds with Spirion active: optionally `spirion_references_search` / `spirion_screens_search` for **structure/copy inspiration**, then build scene, then `creation_scene_content_audit` / `creation_scene_preview` before claiming done.
+On PDP/landing builds with Spirion active, prefer **craft from real captures** (not editorial templates):
+
+1. **`spirion_captures_list`** (limit 8–20; **omit** `platformProjectId` so unbound staging captures appear).
+2. Pick 1–2 high-quality homepage/landing captures → **`spirion_capture_prompt_pack`** (`output_contract: both` or `layout_hints_json`).
+3. Optional: **`spirion_compose_brief`** to merge packs / refs into one builder brief.
+4. Optional Collection search: `spirion_screens_search` / `spirion_references_search` **with** injected `platformProjectId` — useful only when the Collection has scoped refs; 0 hits here must **not** skip steps 1–3.
+5. Build via `creation_scene_import_html` implementing `look_contract` / `page_rhythm` / measured tokens from the pack (structure + craft; no 1:1 foreign brand copy).
+6. `creation_scene_content_audit` / soft `creation_scene_preview`.
+
+**Editorial fallback** (Linear/Verve/Superhuman structure) only when `captures_list` is empty **and** prompt packs fail — never after a single empty search.
 
 ### Tokens vs Literals (Spirion → Creation)
 
@@ -75,7 +88,8 @@ Spirion is **not** a complete token library for the Collection. WENN der Agent e
 
 ## Acceptance
 
-1. Unit: catalog classifies `spirion_references_search` → `spirion_references`, `spirion_screens_search` → `spirion_screens`.
+1. Unit: catalog classifies `spirion_references_search` → `spirion_references`, `spirion_screens_search` / `spirion_captures_list` / `spirion_capture_prompt_pack` → `spirion_screens`.
 2. Gate: `resolveUseSpirionMcp` mirrors Brandion/Creation rules; host `creation` enables Spirion when URL set.
 3. Planner: `creation_scene_edit` includes Spirion families when `hasSpirionMcp`; research prompts → `spirion_research`.
-4. Staging: set `SPIRION_MCP_URL` on plexon-v3 Coolify.
+4. Orchestrator injects `platformProjectId` into Spirion search tools when known; does not inject into `captures_list`.
+5. Staging: set `SPIRION_MCP_URL` on plexon-v3 Coolify.

@@ -41,6 +41,9 @@ describe('spirion tool catalog', () => {
   it('classifies references and screens families', () => {
     expect(classifyToolFamily('spirion_references_search')).toBe('spirion_references');
     expect(classifyToolFamily('spirion_screens_search')).toBe('spirion_screens');
+    expect(classifyToolFamily('spirion_captures_list')).toBe('spirion_screens');
+    expect(classifyToolFamily('spirion_capture_prompt_pack')).toBe('spirion_screens');
+    expect(classifyToolFamily('spirion_compose_brief')).toBe('spirion_references');
     expect(classifyToolFamily('creation_scene_content_audit')).toBe('creation_scene');
   });
 });
@@ -75,7 +78,9 @@ describe('buildSpirionIntegrationContextBlock', () => {
     try {
       const block = buildSpirionIntegrationContextBlock({ useSpirionMcp: true });
       expect(block).toContain('MCP-Tools: **aktiv**');
-      expect(block).toMatch(/spirion_references_search|references_search/);
+      expect(block).toMatch(/spirion_captures_list|captures_list/);
+      expect(block).toMatch(/capture_prompt_pack/);
+      expect(block).not.toMatch(/Leerer Corpus = OK/);
     } finally {
       if (prev === undefined) delete process.env.SPIRION_MCP_URL;
       else process.env.SPIRION_MCP_URL = prev;

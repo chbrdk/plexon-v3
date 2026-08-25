@@ -10,9 +10,17 @@
 
 Gate: `resolveUseSpirionMcp` — URL + entitlement / host product / sibling.
 
-Read families: `spirion_references`, `spirion_screens` (no job/generate writes in Welle 1).
+Read families: `spirion_references`, `spirion_screens` (includes `captures_list`, `capture_prompt_pack`, analyses; no job/generate writes in Welle 1).
 
-Creation scene edits may call search tools for **homepage/landing** inspiration (empty corpus OK); finish with `creation_scene_content_audit` / soft `creation_scene_preview`.
+## Creation quality path
+
+1. `spirion_captures_list` (no project filter on staging)  
+2. `spirion_capture_prompt_pack` → look_contract / page_rhythm  
+3. optional `spirion_compose_brief`  
+4. `creation_scene_import_html` implementing the pack  
+5. Editorial fallback **only** if library empty  
+
+Live search needs `platformProjectId` (orchestrator injects from page/conversation). Unbound captures → search count 0 is expected; use captures path.
 
 Staging smoke: `knowledge/spirion-creation-landing-staging-smoke.md`.
 

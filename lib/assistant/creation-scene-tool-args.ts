@@ -2,6 +2,7 @@ import {
   hasCreationEditorSceneContext,
 } from '@/lib/assistant/scene-write-intent';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
+import { injectSpirionToolArgs } from '@/lib/assistant/spirion-tool-args';
 
 function isCreationSceneFamilyTool(toolName: string): boolean {
   return (
@@ -43,4 +44,18 @@ export function injectCreationSceneToolArgs(
   }
 
   return out;
+}
+
+/** Creation scene args + Spirion search platformProjectId injection. */
+export function injectAssistantMcpToolArgs(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: {
+    pageContext?: AssistantPageContext | null;
+    actorUserId: string;
+    platformProjectId?: string | null;
+  },
+): Record<string, unknown> {
+  const withCreation = injectCreationSceneToolArgs(toolName, input, ctx);
+  return injectSpirionToolArgs(toolName, withCreation, ctx);
 }

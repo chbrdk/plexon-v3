@@ -19,9 +19,11 @@ describe('editorial landing fallback', () => {
     expect(brief).toContain('creation_scene_import_html');
   });
 
-  it('is embedded in creation scene depth prompt', () => {
+  it('is embedded in creation scene depth prompt as last resort after captures', () => {
     const block = buildCreationSceneDepthPromptBlock(true);
     expect(block).toContain(EDITORIAL_LANDING_FALLBACK_LABEL);
-    expect(block).toContain('Spirion leer');
+    expect(block).toContain('spirion_captures_list');
+    expect(block).toContain('spirion_capture_prompt_pack');
+    expect(block).toContain('Spirion Library leer');
   });
 });

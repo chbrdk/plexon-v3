@@ -38,14 +38,17 @@ export function buildSpirionIntegrationContextBlock(input: {
 
   lines.push(`- MCP-Tools: **aktiv** (Server: ${diag.mcpUrlPrefix ?? '…'}…)`);
   lines.push(
-    '- Bei Referenz-/Screen-/Moodboard-Fragen **zuerst** spirion_references_search / spirion_screens_search (oder dig_*) — Patterns nicht schätzen.',
+    '- Creation Landing/PDP: **zuerst** `spirion_captures_list` → `spirion_capture_prompt_pack` (look_contract / page_rhythm) → optional `spirion_compose_brief` — dann `creation_scene_import_html`.',
   );
   lines.push(
-    '- Bei CREATION Scene-Builds: search für **Homepage/Landing**-Struktur/Copy (kein 1:1 Clone). **Leerer Corpus = OK** → Editorial-Fallback (Linear/Verve/Superhuman-Muster: Header-row, Hero+Stats-row, 3-col Benefits, Split, CTA, Footer) — siehe CREATION Layout-Tiefe. Dann import-html + content_audit; preview optional/soft.',
+    '- Collection-Search (`spirion_screens_search` / `spirion_references_search`) braucht `platformProjectId` (wird injiziert wenn bekannt). 0 Treffer bei unbound Captures = häufig — **nicht** als „Corpus leer“ werten; Captures-Pfad nutzen.',
+  );
+  lines.push(
+    '- Editorial-Fallback (Linear/Verve/Superhuman) **nur** wenn Captures-Liste leer / Packs fehlschlagen — siehe CREATION Layout-Tiefe.',
   );
   lines.push(
     '- Fehlende Tokens: bewusst Literale wählen (`set_style` / Props) — nicht stallen; Collection-Pack bevorzugen wenn passend (`creation_brand_tokens_get`).',
   );
-  lines.push('- Welle 1 read-only: keine Capture-/Generate-Jobs starten.');
+  lines.push('- Welle 1 read-only: keine Capture-/Generate-Jobs starten (`job_start` / `generate` nicht aufrufen).');
   return lines.join('\n');
 }
