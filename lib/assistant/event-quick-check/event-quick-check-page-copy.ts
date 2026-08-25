@@ -26,6 +26,8 @@ export const EQC_PAGE_COPY = {
   errorInvalidUrl: 'Bitte eine gültige URL eingeben.',
   errorRunFailed: 'Analyse fehlgeschlagen.',
   errorLoadRun: 'Ergebnis konnte nicht geladen werden.',
+  errorNetwork:
+    'Netzwerk unterbrochen (Failed to fetch). Verbindung prüfen und Seite neu laden — der Run läuft oft im Hintergrund weiter (Historie).',
   historyTitle: 'Verlauf',
   historyOpenButton: 'Verlauf',
   historyCloseButton: 'Schließen',

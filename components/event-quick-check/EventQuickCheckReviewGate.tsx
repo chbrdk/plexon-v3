@@ -20,6 +20,7 @@ import {
 } from '@/lib/paths/event-quick-check-page';
 import { subscribeAssistantWorkflowStream } from '@/lib/assistant/workflow-stream-client';
 import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
+import { eqcClientErrorMessage } from '@/components/event-quick-check/eqc-client-error';
 import { readEqcJsonResponse } from '@/components/event-quick-check/read-eqc-json-response';
 
 export type EventQuickCheckReviewGateProps = {
@@ -65,7 +66,7 @@ export function EventQuickCheckReviewGate({
         onComplete?.();
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorLoadRun);
+      setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorLoadRun));
     } finally {
       setLoading(false);
     }
@@ -149,7 +150,7 @@ export function EventQuickCheckReviewGate({
         await loadRun();
         onPhaseChange?.();
       } catch (e) {
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }
@@ -212,7 +213,7 @@ export function EventQuickCheckReviewGate({
         await loadRun();
         onPhaseChange?.();
       } catch (e) {
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }
@@ -255,7 +256,7 @@ export function EventQuickCheckReviewGate({
 
         onComplete?.();
       } catch (e) {
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }

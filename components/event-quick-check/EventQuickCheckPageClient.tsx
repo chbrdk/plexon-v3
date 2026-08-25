@@ -21,6 +21,7 @@ import { EventQuickCheckHistoryDialog } from '@/components/event-quick-check/Eve
 import { EventQuickCheckReadinessBanner } from '@/components/event-quick-check/EventQuickCheckReadinessBanner';
 import { EventQuickCheckRunningProgress } from '@/components/event-quick-check/EventQuickCheckRunningProgress';
 import { pollEventQuickCheckRunUntilSettled } from '@/components/event-quick-check/poll-event-quick-check-run';
+import { eqcClientErrorMessage } from '@/components/event-quick-check/eqc-client-error';
 import { readEqcJsonResponse } from '@/components/event-quick-check/read-eqc-json-response';
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types';
 import type { EventQuickCheckCompanyBrief } from '@/lib/assistant/event-quick-check/company-brief-types';
@@ -288,7 +289,7 @@ export function EventQuickCheckPageClient() {
         throw new Error(data.error ?? EQC_PAGE_COPY.errorLoadRun);
       } catch (e) {
         setPhase('error');
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorLoadRun);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorLoadRun));
       }
     },
     [router]
@@ -403,7 +404,7 @@ export function EventQuickCheckPageClient() {
         void refreshHistory();
       } catch (e) {
         setPhase('error');
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }
@@ -493,7 +494,7 @@ export function EventQuickCheckPageClient() {
         void refreshHistory();
       } catch (e) {
         setPhase('error');
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }
@@ -581,7 +582,7 @@ export function EventQuickCheckPageClient() {
         void refreshHistory();
       } catch (e) {
         setPhase('error');
-        setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+        setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       } finally {
         setConfirmLoading(false);
       }
@@ -616,7 +617,7 @@ export function EventQuickCheckPageClient() {
       setGeoRerunMode(true);
       setPhase('geoReview');
     } catch (e) {
-      setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+      setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
     } finally {
       setConfirmLoading(false);
     }
@@ -717,7 +718,7 @@ export function EventQuickCheckPageClient() {
       void refreshHistory();
     } catch (e) {
       setPhase('error');
-      setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+      setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
     } finally {
       setConfirmLoading(false);
     }
@@ -845,7 +846,7 @@ export function EventQuickCheckPageClient() {
       void refreshHistory();
     } catch (e) {
       setPhase('error');
-      setError(e instanceof Error ? e.message : EQC_PAGE_COPY.errorRunFailed);
+      setError(eqcClientErrorMessage(e, EQC_PAGE_COPY.errorRunFailed));
       void refreshHistory();
     }
   }, [url, projectName, depth, scanMaxPages, targetGroupCount, personaCount, maxCompetitors, router, refreshHistory]);
