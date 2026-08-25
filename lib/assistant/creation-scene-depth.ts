@@ -55,12 +55,12 @@ Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
 1. Inspiration (wenn Spirion-Tools verfügbar) — **Primärpfad:**
-   a. \`spirion_captures_list\` (limit ~12; **ohne** \`platformProjectId\` — unbound Staging-Captures).
-   b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`).
+   a. \`spirion_captures_list\` (limit ~12; **KEIN** \`platformProjectId\` / \`digProjectId\` — sonst filtert Staging auf [] obwohl die Library voll ist).
+   b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`; ebenfalls **ohne** Project-Filter).
    c. Optional \`spirion_compose_brief\` zum Mergen.
-   d. Optional \`spirion_screens_search\` / \`spirion_references_search\` (mit Collection-\`platformProjectId\`) — **0 Treffer hier ist häufig**; Captures-Pfad trotzdem nutzen.
+   d. Optional \`spirion_screens_search\` / \`spirion_references_search\` (mit Collection-\`platformProjectId\`) — **0 Treffer hier ist häufig**; Captures-Pfad trotzdem nutzen. **Nie** „Corpus leer“ melden, wenn nur Search 0 hatte.
    e. Import setzt Pack-Craft um (**gemessene Hex-Werte / Rhythm in Literale** — kein \`var(--site-*)\`, kein Fremdmarken-Copy-Clone).
-   **Editorial-Fallback nur** wenn Captures/Packs wirklich leer (siehe unten) — **nicht** nach einer Search-Runde.
+   **Editorial-Fallback nur** wenn \`captures_list\` wirklich \`captures: []\` liefert (siehe unten) — **nicht** nach einer Search-Runde.
 ${buildEditorialLandingFallbackBrief()}
 2. **Erstentwurf** — greenfield: \`creation_scene_import_html\` mit einem HTML-Dokument (\`pageName\` optional für neue Seite). Sonst: add_page / SiteStack / Sections via ops.
 3. Inhalt nachziehen — nur wenn Import/ops Lücken lassen: **insert_child mit echten props**. Bare insert_instance = verboten für Seiten-Copy.

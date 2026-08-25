@@ -60,8 +60,8 @@ Heuristic `spirion_research`: spirion|dig\b|design.?intelligence|referenz|screen
 
 On PDP/landing builds with Spirion active, prefer **craft from real captures** (not editorial templates):
 
-1. **`spirion_captures_list`** (limit 8–20; **omit** `platformProjectId` so unbound staging captures appear).
-2. Pick 1–2 high-quality homepage/landing captures → **`spirion_capture_prompt_pack`** (`output_contract: both` or `layout_hints_json`).
+1. **`spirion_captures_list`** (limit 8–20; **omit** `platformProjectId` so unbound staging captures appear). Orchestrator MUST **strip** `platformProjectId` / `digProjectId` if the model still passes them — scoped list returns `[]` for unbound library rows.
+2. Pick 1–2 high-quality homepage/landing captures → **`spirion_capture_prompt_pack`** (`output_contract: both` or `layout_hints_json`; strip project scope likewise).
 3. Optional: **`spirion_compose_brief`** to merge packs / refs into one builder brief.
 4. Optional Collection search: `spirion_screens_search` / `spirion_references_search` **with** injected `platformProjectId` — useful only when the Collection has scoped refs; 0 hits here must **not** skip steps 1–3.
 5. Build via `creation_scene_import_html` implementing `look_contract` / `page_rhythm` / measured tokens from the pack (structure + craft; no 1:1 foreign brand copy).
@@ -91,5 +91,5 @@ Spirion is **not** a complete token library for the Collection. WENN der Agent e
 1. Unit: catalog classifies `spirion_references_search` → `spirion_references`, `spirion_screens_search` / `spirion_captures_list` / `spirion_capture_prompt_pack` → `spirion_screens`.
 2. Gate: `resolveUseSpirionMcp` mirrors Brandion/Creation rules; host `creation` enables Spirion when URL set.
 3. Planner: `creation_scene_edit` includes Spirion families when `hasSpirionMcp`; research prompts → `spirion_research`.
-4. Orchestrator injects `platformProjectId` into Spirion search tools when known; does not inject into `captures_list`.
+4. Orchestrator injects `platformProjectId` into Spirion **search** tools when known; **strips** project scope from `captures_list` / `capture_prompt_pack` / other library tools.
 5. Staging: set `SPIRION_MCP_URL` on plexon-v3 Coolify.

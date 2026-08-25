@@ -31,6 +31,31 @@ describe('injectSpirionToolArgs', () => {
     expect(out.platformProjectId).toBeUndefined();
   });
 
+  it('strips agent-supplied platformProjectId from captures_list', () => {
+    const out = injectSpirionToolArgs(
+      'spirion_captures_list',
+      { limit: 12, platformProjectId: 'proj-1', digProjectId: 'dig-1' },
+      { platformProjectId: 'proj-1' },
+    );
+    expect(out).toEqual({ limit: 12 });
+  });
+
+  it('strips project scope from capture_prompt_pack', () => {
+    const out = injectSpirionToolArgs(
+      'spirion_capture_prompt_pack',
+      {
+        capture_run_id: 'cap_abc',
+        output_contract: 'both',
+        platformProjectId: 'proj-1',
+      },
+      { platformProjectId: 'proj-1' },
+    );
+    expect(out).toEqual({
+      capture_run_id: 'cap_abc',
+      output_contract: 'both',
+    });
+  });
+
   it('prefers pageContext platformProjectId', () => {
     const out = injectSpirionToolArgs(
       'spirion_screens_search',

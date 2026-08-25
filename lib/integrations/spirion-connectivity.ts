@@ -38,7 +38,10 @@ export function buildSpirionIntegrationContextBlock(input: {
 
   lines.push(`- MCP-Tools: **aktiv** (Server: ${diag.mcpUrlPrefix ?? '…'}…)`);
   lines.push(
-    '- Creation Landing/PDP: **zuerst** `spirion_captures_list` → `spirion_capture_prompt_pack` (look_contract / page_rhythm) → optional `spirion_compose_brief` — dann `creation_scene_import_html`.',
+    '- Creation Landing/PDP: **zuerst** `spirion_captures_list` (**ohne** `platformProjectId`) → `spirion_capture_prompt_pack` → optional `spirion_compose_brief` — dann `creation_scene_import_html`.',
+  );
+  lines.push(
+    '- `captures_list` mit Collection-`platformProjectId` filtert unbound Staging-Captures auf **[]** — Server strippt die ID; Agent darf sie dort nicht setzen.',
   );
   lines.push(
     '- Collection-Search (`spirion_screens_search` / `spirion_references_search`) braucht `platformProjectId` (wird injiziert wenn bekannt). 0 Treffer bei unbound Captures = häufig — **nicht** als „Corpus leer“ werten; Captures-Pfad nutzen.',
