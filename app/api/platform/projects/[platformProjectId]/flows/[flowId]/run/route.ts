@@ -16,7 +16,7 @@ import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { platformJson } from '@/lib/platform-contract';
 
 export const runtime = 'nodejs';
-/** Dual-layer EQC flow runs — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+/** Next segment config literal only — long EQC work is not sized to this value. */
 export const maxDuration = 900;
 
 export async function POST(

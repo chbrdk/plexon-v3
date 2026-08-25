@@ -36,7 +36,7 @@ import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-w
 import { hasDomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
 
 export const runtime = 'nodejs';
-/** Dual-layer GEO — keep in sync with `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+/** Next segment config literal only — long work uses 202 + in-process poll (`domainScanPollMaxMs`). */
 export const maxDuration = 900;
 
 function seedDomainFromCheckpoint(

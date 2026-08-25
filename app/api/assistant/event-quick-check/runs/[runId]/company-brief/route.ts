@@ -4,7 +4,10 @@ import { persistCompanyBriefConfirmation } from '@/lib/assistant/event-quick-che
 import { executeEventQuickCheckRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 
 export const runtime = 'nodejs';
-/** Must be a numeric literal (Next segment config). Same as `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+/**
+ * Next segment config literal only (short persist + kickoff after 202).
+ * Domain-scan poll budget is independent — see `domainScanPollMaxMs`.
+ */
 export const maxDuration = 900;
 
 export async function POST(

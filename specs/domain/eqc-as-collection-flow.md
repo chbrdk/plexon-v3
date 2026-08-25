@@ -78,7 +78,7 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 **Cited share hydration:** Magazine compare strip and GEO Score MUST resolve `citedShare` from CHECKION presence/solo (or reconstruct from citation dossier / own SoV) when the catalog scalar is null or draft `0`. Never leave Layer compare as `—` when citations show the brand on rank 1.
 
-**Domain-scan poll budget:** Plexon MUST poll CHECKION `domain_scan` with a maxPages-scaled budget (`domainScanPollMaxMs`), floored at 6 min and capped at 14 min (under the 900 s EQC / Flow `maxDuration`). A fixed 12 min budget is insufficient for EQC quick (~50 pages).
+**Domain-scan poll budget:** Plexon MUST poll CHECKION `domain_scan` with a maxPages-scaled budget (`domainScanPollMaxMs`), floored at 6 min. Budget is **not** capped by HTTP `maxDuration` (confirm routes return **202** and finish in-process). Hang-safety ceiling = scaled budget for product max pages (`EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX`).
 
 EQC confirm routes that kick off long work (`POST …/company-brief`, `…/competitors`, `…/geo-questions`) return **202** immediately and finish the flow in-process; the client polls `GET …/runs/:id` until `completed`, the next human gate (`awaitingCompetitors` / `awaitingGeoQuestions` / `awaitingDeepScan`), or `failed` (avoids proxy timeout on domain scan + dual-layer GEO).
 

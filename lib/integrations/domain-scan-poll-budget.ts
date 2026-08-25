@@ -1,4 +1,4 @@
-import { EQC_LONG_RUNNING_MAX_DURATION_SEC } from '@/lib/assistant/event-quick-check/eqc-api-limits'
+import { EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX } from '@/lib/paths/assistant-workflows'
 
 /** Default CHECKION domain-scan concurrency (spider env DOMAIN_SCAN_CONCURRENCY). */
 const DOMAIN_SCAN_CONCURRENCY_ASSUMED = 3
@@ -10,24 +10,23 @@ const MS_PER_PAGE_WAVE = 45_000
 const DOMAIN_POLL_MIN_MS = 6 * 60 * 1000
 
 /**
- * Leave headroom under the EQC / Collection Flow route maxDuration (900s)
- * so the poll fails with a clear error before the platform kills the request.
+ * Hang-safety only (stuck CHECKION job) — NOT tied to HTTP `maxDuration`.
+ * Sized for the product max page count so large crawls are not truncated.
  */
-const DOMAIN_POLL_MAX_MS = Math.max(
-  DOMAIN_POLL_MIN_MS,
-  (EQC_LONG_RUNNING_MAX_DURATION_SEC - 60) * 1000
-)
+export const DOMAIN_SCAN_POLL_ABSOLUTE_MAX_MS =
+  Math.ceil(EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX / DOMAIN_SCAN_CONCURRENCY_ASSUMED) *
+  MS_PER_PAGE_WAVE
 
 /**
  * Poll budget for CHECKION domain crawls.
- * Fixed 12 min was too short for EQC quick (~50 pages × ~45s / concurrency 3).
+ * Scales with maxPages; Confirm routes return 202 so HTTP lifetime must not cap this.
  */
 export function domainScanPollMaxMs(maxPages?: number): number {
   const pages =
     typeof maxPages === 'number' && Number.isFinite(maxPages) && maxPages > 0
-      ? Math.floor(maxPages)
+      ? Math.min(EVENT_QUICK_CHECK_SCAN_MAX_PAGES_MAX, Math.floor(maxPages))
       : 50
   const waves = Math.ceil(pages / DOMAIN_SCAN_CONCURRENCY_ASSUMED)
   const scaled = waves * MS_PER_PAGE_WAVE
-  return Math.min(DOMAIN_POLL_MAX_MS, Math.max(DOMAIN_POLL_MIN_MS, scaled))
+  return Math.min(DOMAIN_SCAN_POLL_ABSOLUTE_MAX_MS, Math.max(DOMAIN_POLL_MIN_MS, scaled))
 }

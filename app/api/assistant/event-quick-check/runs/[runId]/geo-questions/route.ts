@@ -8,7 +8,10 @@ import type { PersonaGeoQuestionGroup } from '@/lib/assistant/geo/build-persona-
 import type { GeoMeasurement } from '@/lib/geo/measurement';
 
 export const runtime = 'nodejs';
-/** Must be a numeric literal (Next segment config). Same as `EQC_LONG_RUNNING_MAX_DURATION_SEC`. */
+/**
+ * Next segment config literal only (short persist + kickoff after 202).
+ * Domain-scan / GEO poll budgets are independent — see `domainScanPollMaxMs`.
+ */
 export const maxDuration = 900;
 
 export async function POST(
