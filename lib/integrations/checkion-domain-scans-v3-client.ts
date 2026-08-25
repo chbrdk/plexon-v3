@@ -18,6 +18,7 @@ import {
   type DomainScanV3IssueRow,
 } from '@/lib/integrations/map-domain-scan-v3-preview';
 import { mapDomainOverviewToDistributions } from '@/lib/integrations/map-domain-scan-distributions';
+import { domainScanPollMaxMs } from '@/lib/integrations/domain-scan-poll-budget';
 export type CheckionDomainScanSummary = {
   id: string;
   projectId: string;
@@ -230,15 +231,18 @@ export async function pollCheckionDomainScanV3(
   options?: {
     intervalMs?: number;
     maxMs?: number;
+    /** Used to scale default poll budget when maxMs is omitted. */
+    maxPages?: number;
     onProgress?: (status: string, progress?: number) => void | Promise<void>;
   }
 ): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string }
 > {
-  return pollUntil({
+  let lastScan: CheckionDomainScanSummary | undefined;
+  const polled = await pollUntil({
     intervalMs: options?.intervalMs ?? 3000,
-    maxMs: options?.maxMs ?? 12 * 60 * 1000,
+    maxMs: options?.maxMs ?? domainScanPollMaxMs(options?.maxPages),
     onTick: async (tick) => {
       if (tick.status) {
         await options?.onProgress?.(tick.status, tick.progress);
@@ -247,6 +251,7 @@ export async function pollCheckionDomainScanV3(
     fetch: async () => {
       const res = await fetchCheckionDomainScanV3Detail(domainScanId);
       if (!res.ok) return { done: true, error: res.error, status: 'error' };
+      lastScan = res.scan;
       const status = res.scan.status.toLowerCase();
       if (status === 'failed' || status === 'error' || status === 'cancelled') {
         return {
@@ -259,10 +264,24 @@ export async function pollCheckionDomainScanV3(
         return { done: true, value: res.scan, status };
       }
       const progress =
-        status === 'running' ? 50 : status === 'queued' ? 10 : undefined;
+        status === 'running' || status === 'scanning'
+          ? 50
+          : status === 'queued'
+            ? 10
+            : undefined;
       return { done: false, status, progress };
     },
   });
+  if (!polled.ok) {
+    const bits: string[] = [];
+    if (polled.lastStatus) bits.push(`Status ${polled.lastStatus}`);
+    if (lastScan?.pageCount != null) bits.push(`${lastScan.pageCount} Seiten`);
+    return {
+      ok: false,
+      error: bits.length ? `${polled.error} (${bits.join(', ')})` : polled.error,
+    };
+  }
+  return { ok: true, scan: polled.value };
 }
 
 /** Detail + issues → DomainScanPreview for EQC / assistant report model. */
@@ -341,7 +360,9 @@ export async function runCheckionDomainScanV3(input: {
   if (TERMINAL.has(started.scan.status.toLowerCase())) {
     return { ok: true, scan: started.scan };
   }
-  const polled = await pollCheckionDomainScanV3(started.scan.id);
+  const polled = await pollCheckionDomainScanV3(started.scan.id, {
+    maxPages: input.maxPages,
+  });
   if (!polled.ok) return { ok: false, error: polled.error, scan: started.scan };
   return { ok: true, scan: polled.value };
 }
