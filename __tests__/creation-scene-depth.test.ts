@@ -90,6 +90,8 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#RRGGBB|background/)
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_preview')
+    expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/var\(--|Hex\/rem\/px/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('freistehende HTML')
 
     const plan = planAssistantTurnHeuristic({
       prompt: 'Erstelle eine Hero-Section',

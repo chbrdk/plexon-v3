@@ -49,7 +49,9 @@ export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): st
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
-**Greenfield Landing/Homepage:** Bevorzuge **ein** vollständiges HTML (inline CSS oder einfache \`.class\` / \`body\` / \`:root\`-Regeln in \`<style>\`) → \`creation_scene_import_html\` → audit → preview. **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\` (inline oder Klasse). Benefits/Metrics 3-spaltig: \`display:grid\` oder row-flex. **Page-BG** auf \`body\`/\`:root\` setzen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`360°\`, \`MSQ DX\`) — nie Zahl und Suffix splitten. Danach nur kleine \`apply_ops\`-Fixes.
+**Greenfield Landing/Homepage:** Entwirf wie eine **freistehende HTML-Seite** (Spirion nur als Inspiration für Rhythm/Look — kein Token-/Site-Kit-First). Liefere **ein** vollständiges HTML mit **Hex/rem/px-Literalen** in Inline-Styles oder einfachen \`.class\`/\`body\`/\`:root\`-Regeln → \`creation_scene_import_html\` → audit → preview.
+**VERBOTEN im Import-HTML:** \`var(--…)\`, Site-Kit-\`--site-*\`, Brandion-Token-Namen, Fixture-Chrome als Endlook. Wenn \`:root\` Custom Props hat, müssen **dieselben** Namen in Styles vorkommen **oder** besser direkt Hex schreiben.
+**Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`, nicht \`var(--bg)\`). **Page-BG** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen (\`Was wir mitbringen\`, nie \`Was\`+\`wir\`+\`mitbringen\` ohne Space). **Metriken/Logos als ein Textknoten** (\`3+\`, \`360°\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
 Phasen (eigene Batches; Import zählt als Schreib-Runde):
 0. Optional Brand-Pack — \`creation_brand_tokens_get\` (wenn Collection-Pack sinnvoll). **Nicht blockierend** — freies Styling geht ohne Pack/ohne neue Tokens.
 1. Inspiration (wenn Spirion-Tools verfügbar) — **Primärpfad:**
@@ -57,7 +59,7 @@ Phasen (eigene Batches; Import zählt als Schreib-Runde):
    b. 1–2 starke Homepage/Landing-Captures → \`spirion_capture_prompt_pack\` (\`output_contract: both\`).
    c. Optional \`spirion_compose_brief\` zum Mergen.
    d. Optional \`spirion_screens_search\` / \`spirion_references_search\` (mit Collection-\`platformProjectId\`) — **0 Treffer hier ist häufig**; Captures-Pfad trotzdem nutzen.
-   e. Import setzt \`look_contract\` / \`page_rhythm\` / gemessene Farben/Type aus dem Pack um (Struktur+Craft; **kein** Fremdmarken-Copy-Clone).
+   e. Import setzt Pack-Craft um (**gemessene Hex-Werte / Rhythm in Literale** — kein \`var(--site-*)\`, kein Fremdmarken-Copy-Clone).
    **Editorial-Fallback nur** wenn Captures/Packs wirklich leer (siehe unten) — **nicht** nach einer Search-Runde.
 ${buildEditorialLandingFallbackBrief()}
 2. **Erstentwurf** — greenfield: \`creation_scene_import_html\` mit einem HTML-Dokument (\`pageName\` optional für neue Seite). Sonst: add_page / SiteStack / Sections via ops.

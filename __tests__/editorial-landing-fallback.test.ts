@@ -17,6 +17,7 @@ describe('editorial landing fallback', () => {
     expect(brief).toContain('flex-direction:row');
     expect(brief).toContain('grid-template-columns:repeat(3,1fr)');
     expect(brief).toContain('creation_scene_import_html');
+    expect(brief).toMatch(/Hex-Literale|kein `var\(--/);
   });
 
   it('is embedded in creation scene depth prompt as last resort after captures', () => {

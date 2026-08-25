@@ -22,7 +22,7 @@ WENN \`spirion_captures_list\` **leer** ist **und** \`capture_prompt_pack\` / Se
 7. **CTA-Band (column, centered):** kurze Headline + Button
 8. **Footer (row oder 2-row grid):** Link-Gruppen + Copyright
 
-**Look (Services/B2B):** dunkler Hintergrund (#0a0a0a–#141414), helle Typo, eine Accent-Farbe (Orange o.ä.) nur für Badge/Primary-CTA — Literale in HTML, kein Fremd-Logo-Clone.
+**Look (Services/B2B):** dunkler Hintergrund (#0a0a0a–#141414), helle Typo (#f8f8f8), muted (#6b6b6b), eine Accent-Farbe nur für Badge/Primary-CTA — **Hex-Literale überall**, kein \`var(--…)\`, kein Site-Kit-\`--site-*\`, kein Fremd-Logo-Clone.
 **Copy:** produktspezifisch (MSQDX Services o. Nutzerprompt) — keine Seed-Labels.
 Melde dem User kurz: „Spirion Library leer → ${EDITORIAL_LANDING_FALLBACK_LABEL}.“ Dann sofort Import.
 **Nicht** nach einer einzigen leeren \`screens_search\`/\`references_search\` hierhin springen — zuerst Captures/Prompt-Pack.`.trim();
