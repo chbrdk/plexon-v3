@@ -34,6 +34,7 @@ import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-q
 import { pathCheckionDomainScan } from '@/lib/paths/checkion-api';
 import { resolveEventQuickCheckProfileFromStored } from '@/lib/paths/assistant-workflows';
 import { hasDomainScanDistributions } from '@/lib/integrations/map-domain-scan-distributions';
+import { maybeReconcileEqcDomainScan } from '@/lib/assistant/event-quick-check/reconcile-eqc-domain-scan';
 
 export const runtime = 'nodejs';
 /** Next segment config literal only — long work uses 202 + in-process poll (`domainScanPollMaxMs`). */
@@ -80,7 +81,12 @@ export async function GET(
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 
-  const stored = (run.result ?? {}) as Record<string, unknown>;
+  // Checkion may already be done while the 202 poller died — resume to GEO on poll.
+  await maybeReconcileEqcDomainScan({ user, run });
+  const refreshed = await getAssistantWorkflowRunById(runId);
+  const live = refreshed && refreshed.id === run.id ? refreshed : run;
+
+  const stored = (live.result ?? {}) as Record<string, unknown>;
   const profile = resolveEventQuickCheckProfileFromStored(stored);
   const awaitingGeoQuestions = Boolean(stored[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]);
   const checkpoint = stored[EVENT_QUICK_CHECK_CHECKPOINT_KEY] as
@@ -91,7 +97,7 @@ export async function GET(
       ? await resolveEventQuickCheckDeepScanStatus(stored)
       : { deepScanStarted: false as const };
 
-  const seeded = seedDomainFromCheckpoint(reportFromWorkflowRun(run), checkpoint);
+  const seeded = seedDomainFromCheckpoint(reportFromWorkflowRun(live), checkpoint);
   const fallbackScanId = resolveEqcDomainScanIdFromStored(stored);
   const withDomain = await hydrateEventQuickCheckReportDomainPages(seeded, fallbackScanId);
   const withDist = await hydrateEventQuickCheckReportDistributions(withDomain, fallbackScanId);
@@ -121,7 +127,7 @@ export async function GET(
     !hasDomainScanDistributions(seeded?.distributions) &&
     hasDomainScanDistributions(report?.distributions);
   if ((domainImproved || geoImproved || distributionsImproved) && report) {
-    await updateAssistantWorkflowRun(run.id, {
+    await updateAssistantWorkflowRun(live.id, {
       result: {
         ...stored,
         [EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY]: report,
@@ -130,9 +136,9 @@ export async function GET(
   }
 
   return Response.json({
-    workflowRunId: run.id,
-    status: run.status,
-    steps: run.steps,
+    workflowRunId: live.id,
+    status: live.status,
+    steps: live.steps,
     url: stored.url,
     projectName: stored.projectName,
     platformProjectId: stored.platformProjectId,

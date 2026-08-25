@@ -30,6 +30,7 @@ import {
   EVENT_QUICK_CHECK_COMPETITORS_CHECKPOINT_KEY,
   EVENT_QUICK_CHECK_DEEP_SCAN_STARTED_KEY,
   EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY,
+  EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY,
   EVENT_QUICK_CHECK_FLOW_STATE_KEY,
 } from '@/lib/paths/event-quick-check-page';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID, resolveEventQuickCheckProfile, resolveEventQuickCheckProfileFromStored, type EventQuickCheckDepth } from '@/lib/paths/assistant-workflows';
@@ -65,6 +66,10 @@ import type { CheckionProjectDeepScanStarted } from '@/lib/integrations/checkion
 import { resolveDeepScanForQuickCheck } from '@/lib/assistant/event-quick-check/resolve-deep-scan-for-quick-check';
 import { listPersonasFromPreview } from '@/lib/assistant/event-quick-check/persona-bootstrap-preview';
 import { userCanAccessEventQuickCheckRun } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
+import {
+  releaseEqcExecuteLock,
+  tryAcquireEqcExecuteLock,
+} from '@/lib/assistant/event-quick-check/eqc-execute-lock';
 import {
   rewriteEqcGeoRecommendations,
   withRewrittenGeoRecommendations,
@@ -113,6 +118,8 @@ export type ExecuteEventQuickCheckRunInput = {
   competitorsConfirmed?: string[];
   /** Resume Komplettscan after CHECKION deep scans finished. */
   continueAfterDeepScan?: boolean;
+  /** Adopt existing CHECKION domain scan (GET reconcile after stuck Domain). */
+  preferDomainScanId?: string;
 };
 
 export type ExecuteEventQuickCheckRunResult = {
@@ -264,6 +271,35 @@ export async function executeEventQuickCheckRun(
     throw new Error('INVALID_RUN');
   }
 
+  const storedEarly = (run.result ?? {}) as Record<string, unknown>;
+  // Another in-process execute (202 background) still owns this run — avoid double persona/GEO.
+  if (!tryAcquireEqcExecuteLock(run.id)) {
+    return {
+      ok: true,
+      workflowRunId: run.id,
+      steps: run.steps,
+      platformProjectId:
+        typeof storedEarly.platformProjectId === 'string'
+          ? storedEarly.platformProjectId
+          : undefined,
+      awaitingCompanyBrief: Boolean(storedEarly[EVENT_QUICK_CHECK_AWAITING_COMPANY_BRIEF_KEY]),
+      awaitingCompetitors: Boolean(storedEarly[EVENT_QUICK_CHECK_AWAITING_COMPETITORS_KEY]),
+      awaitingGeoQuestions: Boolean(storedEarly[EVENT_QUICK_CHECK_AWAITING_GEO_QUESTIONS_KEY]),
+      awaitingDeepScan: Boolean(storedEarly[EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY]),
+    };
+  }
+
+  try {
+    return await executeEventQuickCheckRunLocked(input, run);
+  } finally {
+    releaseEqcExecuteLock(run.id);
+  }
+}
+
+async function executeEventQuickCheckRunLocked(
+  input: ExecuteEventQuickCheckRunInput,
+  run: NonNullable<Awaited<ReturnType<typeof getAssistantWorkflowRunById>>>
+): Promise<ExecuteEventQuickCheckRunResult> {
   const stored = run.result ?? {};
   const url = typeof stored.url === 'string' ? stored.url : undefined;
   const projectName = typeof stored.projectName === 'string' ? stored.projectName : undefined;
@@ -448,6 +484,22 @@ export async function executeEventQuickCheckRun(
       eqcFlowState: stored[EVENT_QUICK_CHECK_FLOW_STATE_KEY] as
         | EventQuickCheckResult['eqcFlowState']
         | undefined,
+      preferDomainScanId:
+        input.preferDomainScanId?.trim() ||
+        (typeof stored[EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY] === 'string'
+          ? String(stored[EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY]).trim()
+          : undefined) ||
+        undefined,
+      onDomainScanStarted: async (scan) => {
+        const latest = await getAssistantWorkflowRunById(run.id);
+        const prior = (latest?.result ?? stored) as Record<string, unknown>;
+        await updateAssistantWorkflowRun(run.id, {
+          result: {
+            ...prior,
+            [EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY]: scan.id,
+          },
+        });
+      },
     }
   );
 

@@ -60,6 +60,14 @@ export const EVENT_QUICK_CHECK_AWAITING_DEEP_SCAN_KEY = 'awaitingDeepScan' as co
 /** Wave 23 — Collection Flow pause/resume handles on workflow run result. */
 export const EVENT_QUICK_CHECK_FLOW_STATE_KEY = 'eqcFlowState' as const;
 
+/**
+ * CHECKION domain-scan id persisted as soon as the crawl starts (or is adopted).
+ * Lets GET poll reconcile when the in-process poller died after Checkion completed.
+ */
+export const EVENT_QUICK_CHECK_DOMAIN_SCAN_ID_KEY = 'eqcDomainScanId' as const;
+/** ISO timestamp of last domain→persona resume kick from GET reconcile (cooldown). */
+export const EVENT_QUICK_CHECK_DOMAIN_RECONCILE_KICKED_AT_KEY = 'eqcDomainReconcileKickedAt' as const;
+
 export const apiEventQuickCheckRunCompetitors = (runId: string): string =>
   `${apiEventQuickCheckRun(runId)}/competitors`;
 

@@ -82,6 +82,8 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 EQC confirm routes that kick off long work (`POST …/company-brief`, `…/competitors`, `…/geo-questions`) return **202** immediately and finish the flow in-process; the client polls `GET …/runs/:id` until `completed`, the next human gate (`awaitingCompetitors` / `awaitingGeoQuestions` / `awaitingDeepScan`), or `failed` (avoids proxy timeout on domain scan + dual-layer GEO). Background execute failures MUST mark the workflow run `failed` (not only console.error) so the UI leaves the Domain step. When pausing at GEO, steps through `domain_scan` MUST be marked `done` before `geo_questions_confirm` is `running`.
 
+**Domain-scan id + GET reconcile:** Persist `eqcDomainScanId` on the workflow result as soon as CHECKION returns a scan id (before the long poll). `GET …/runs/:id` MUST, when status is `running`, no human gate is open, competitors/brief are already confirmed, and CHECKION reports that scan (or a host-matched completed scan) as completed, resume `continue_after_*` with `preferDomainScanId` so persona + GEO confirm run without starting a duplicate crawl. Skip reconcile while an in-process execute lock is held; cooldown via `eqcDomainReconcileKickedAt`.
+
 The GEO-questions confirm panel **must** show the same layer switch as CHECKION `/scan` (multi-select). Edited questions must appear in the magazine GEO chapter (even when a persona exists) and in the new CHECKION job(s).
 
 ## Template

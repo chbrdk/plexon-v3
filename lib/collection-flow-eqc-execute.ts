@@ -129,6 +129,8 @@ export async function executeEqcCollectionFlowRun(input: {
   doc: CollectionTestFlowDocument;
   body: Record<string, unknown>;
   historyRunId?: string | null;
+  /** Persist CHECKION scan id as soon as known (before long poll). */
+  onDomainScanStarted?: (scan: { id: string; status: string; url?: string }) => void | Promise<void>;
 }): Promise<ExecuteCollectionFlowRunSuccess | ExecuteCollectionFlowRunFailure> {
   const id = input.platformProjectId;
   const fid = input.flowId;
@@ -344,6 +346,12 @@ export async function executeEqcCollectionFlowRun(input: {
       const maxPages =
         typeof qualityNode.maxPages === 'number' ? qualityNode.maxPages : profile.scanMaxPages;
 
+      const preferDomainScanId =
+        (typeof body.preferDomainScanId === 'string' && body.preferDomainScanId.trim()) ||
+        (typeof runContext.outputs.domain?.scanId === 'string' &&
+          String(runContext.outputs.domain.scanId).trim()) ||
+        '';
+
       let domainScan: {
         id: string;
         status: string;
@@ -353,9 +361,22 @@ export async function executeEqcCollectionFlowRun(input: {
       } | null = null;
       let domainError: string | undefined;
 
+      const onStarted = async (scan: {
+        id: string;
+        status: string;
+        url?: string;
+      }) => {
+        await input.onDomainScanStarted?.(scan);
+      };
+
       if (isCapabilityCatalogRuntimeEnabled()) {
         const cap = await executeCheckionDomainScanCapability(
-          { url: scanUrl, maxPages },
+          {
+            url: scanUrl,
+            maxPages,
+            ...(preferDomainScanId ? { existingScanId: preferDomainScanId } : {}),
+            onStarted,
+          },
           {
             source: 'flow',
             checkionProjectId: boundCheckion,
@@ -375,6 +396,8 @@ export async function executeEqcCollectionFlowRun(input: {
           projectId: boundCheckion,
           url: scanUrl,
           maxPages,
+          ...(preferDomainScanId ? { existingScanId: preferDomainScanId } : {}),
+          onStarted,
         });
         if (!domainResult.ok) {
           domainError = domainResult.error;

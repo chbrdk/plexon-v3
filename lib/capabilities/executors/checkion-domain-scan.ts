@@ -46,8 +46,20 @@ export async function executeCheckionDomainScanCapability(
     typeof input.maxPages === 'number' && Number.isFinite(input.maxPages)
       ? input.maxPages
       : undefined;
+  const existingScanId =
+    typeof input.existingScanId === 'string' ? input.existingScanId.trim() : undefined;
+  const onStarted =
+    typeof input.onStarted === 'function'
+      ? (input.onStarted as (scan: CheckionDomainScanSummary) => void | Promise<void>)
+      : undefined;
 
-  const result = await runCheckionDomainScanV3({ projectId, url, maxPages });
+  const result = await runCheckionDomainScanV3({
+    projectId,
+    url,
+    maxPages,
+    ...(existingScanId ? { existingScanId } : {}),
+    ...(onStarted ? { onStarted } : {}),
+  });
   if (!result.ok) {
     return {
       ok: false,

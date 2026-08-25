@@ -160,6 +160,9 @@ export type EventQuickCheckRunOptions = {
   competitorsCheckpoint?: EventQuickCheckCompetitorsCheckpoint;
   /** Wave 23 — prior Flow pause state for resume. */
   eqcFlowState?: EventQuickCheckResult['eqcFlowState'];
+  /** Adopt existing CHECKION domain scan (reconcile / resume). */
+  preferDomainScanId?: string;
+  onDomainScanStarted?: (scan: { id: string; status: string; url?: string }) => void | Promise<void>;
 };
 
 function normalizeUrl(url: string): string {

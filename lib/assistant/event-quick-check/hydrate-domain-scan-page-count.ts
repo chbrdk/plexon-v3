@@ -215,6 +215,10 @@ export async function hydrateEventQuickCheckReportDistributions(
 export function resolveEqcDomainScanIdFromStored(stored: Record<string, unknown> | null | undefined): string | null {
   if (!stored || typeof stored !== 'object') return null;
 
+  if (isRealScanId(typeof stored.eqcDomainScanId === 'string' ? stored.eqcDomainScanId : null)) {
+    return String(stored.eqcDomainScanId).trim();
+  }
+
   const report = stored.report;
   if (report && typeof report === 'object') {
     const domain = (report as { domain?: { scanId?: string }; appendix?: { scanId?: string } }).domain;

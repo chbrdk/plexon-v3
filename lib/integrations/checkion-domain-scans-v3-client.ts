@@ -130,18 +130,36 @@ function hostKey(raw: string): string {
   }
 }
 
+const COMPLETED = new Set(['completed', 'complete']);
+const FAILED = new Set(['failed', 'error', 'cancelled']);
+
+function isCompletedStatus(status: string): boolean {
+  return COMPLETED.has(String(status ?? '').toLowerCase());
+}
+
+function isFailedStatus(status: string): boolean {
+  return FAILED.has(String(status ?? '').toLowerCase());
+}
+
 /** Best-effort match when EQC stored scanId is missing/unknown. */
 export async function findCheckionDomainScanIdByUrl(input: {
   url?: string | null;
   domain?: string | null;
   score?: number | null;
+  projectId?: string | null;
+  /** Prefer terminal completed scans (for stuck-run reconcile). */
+  preferCompleted?: boolean;
 }): Promise<string | null> {
   const want = hostKey(input.url || input.domain || '');
   if (!want) return null;
-  const listed = await listCheckionDomainScansV3();
+  const listed = await listCheckionDomainScansV3(input.projectId?.trim() || undefined);
   if (!listed.ok || !listed.scans.length) return null;
-  const sameHost = listed.scans.filter((s) => hostKey(s.url) === want);
+  let sameHost = listed.scans.filter((s) => hostKey(s.url) === want);
   if (!sameHost.length) return null;
+  if (input.preferCompleted) {
+    const done = sameHost.filter((s) => isCompletedStatus(s.status));
+    if (done.length) sameHost = done;
+  }
   const score = typeof input.score === 'number' && Number.isFinite(input.score) ? input.score : null;
   if (score != null) {
     const scored = sameHost.find(
@@ -348,23 +366,60 @@ export async function runCheckionDomainScanV3(input: {
   projectId: string;
   url: string;
   maxPages?: number;
+  /** Adopt an already-started CHECKION scan (skip duplicate POST). */
+  existingScanId?: string;
+  /** Fired once the scan id is known (start or adopt) — persist before long poll. */
+  onStarted?: (scan: CheckionDomainScanSummary) => void | Promise<void>;
 }): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string; scan?: CheckionDomainScanSummary }
 > {
+  const existingId = input.existingScanId?.trim();
+  if (existingId) {
+    const detail = await fetchCheckionDomainScanV3Detail(existingId);
+    if (!detail.ok) return { ok: false, error: detail.error };
+    await input.onStarted?.(detail.scan);
+    const status = String(detail.scan.status ?? '').toLowerCase();
+    if (isFailedStatus(status)) {
+      return {
+        ok: false,
+        error: detail.scan.error ?? `Domain-Scan ${status}`,
+        scan: detail.scan,
+      };
+    }
+    if (isCompletedStatus(status)) {
+      return { ok: true, scan: detail.scan };
+    }
+    const polled = await pollCheckionDomainScanV3(detail.scan.id, {
+      maxPages: input.maxPages,
+    });
+    if (!polled.ok) return { ok: false, error: polled.error, scan: detail.scan };
+    return { ok: true, scan: polled.scan };
+  }
+
   const started = await startCheckionDomainScanV3({
-    ...input,
+    projectId: input.projectId,
+    url: input.url,
+    maxPages: input.maxPages,
     waitForCompletion: false,
   });
   if (!started.ok) return started;
+  await input.onStarted?.(started.scan);
   if (TERMINAL.has(String(started.scan.status ?? '').toLowerCase())) {
+    if (isFailedStatus(String(started.scan.status ?? ''))) {
+      return {
+        ok: false,
+        error: started.scan.error ?? `Domain-Scan ${started.scan.status}`,
+        scan: started.scan,
+      };
+    }
     return { ok: true, scan: started.scan };
   }
   const polled = await pollCheckionDomainScanV3(started.scan.id, {
     maxPages: input.maxPages,
   });
   if (!polled.ok) return { ok: false, error: polled.error, scan: started.scan };
-  return { ok: true, scan: polled.value };
+  return { ok: true, scan: polled.scan };
 }
 
 export async function fetchCheckionDomainScanV3Issues(

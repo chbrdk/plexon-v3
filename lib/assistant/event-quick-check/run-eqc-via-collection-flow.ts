@@ -415,6 +415,9 @@ export async function runEqcViaCollectionFlow(
     maxCompetitors: profile.maxCompetitors,
     targetGroupCount: profile.targetGroupCount,
     scanMaxPages: profile.scanMaxPages,
+    ...(options.preferDomainScanId
+      ? { preferDomainScanId: options.preferDomainScanId }
+      : {}),
   };
 
   const resumeFrom = options.eqcFlowState?.awaitingNodeId ?? null;
@@ -469,6 +472,7 @@ export async function runEqcViaCollectionFlow(
     doc,
     body,
     historyRunId,
+    onDomainScanStarted: options.onDomainScanStarted,
   });
 
   if (!result.ok) {
