@@ -138,7 +138,7 @@ Siehe `knowledge/event-quick-check-report-template.md`.
 - CHECKION speichert pro Competitive-Query `answerText` (Prosa, max. 4000 Zeichen) + `rawAnswerExcerpt` (JSON, max. 8000 Zeichen) in `payload.competitiveByModel[].runs`.
 - PLEXON mappt das in `geo.citationHighlightsByModel[].runs` und persistiert es im `EventQuickCheckReportModel` (Historie / Dialog „Antwort anzeigen“).
 - Limits: `GEO_COMPETITIVE_*` in CHECKION `apps/web/lib/geo-eeat/competitive-response.ts` (`GEO_COMPETITIVE_CITATION_TARGET` = 20) und PLEXON `lib/integrations/geo-competitive-answer-limits.ts` (same citation target + answer caps).
-- Default GEO models: `lib/integrations/eqc-geo-default-models.ts` — GPT-5.6 luna/terra/sol + **all catalog Claude ids** + Gemini 3.6 Flash.
+- Default GEO models: `lib/integrations/eqc-geo-default-models.ts` — Layer 1 (`recall`): GPT-5.6 luna/terra/sol + Claude Opus/Sonnet/Haiku + Gemini Flash; Layer 2 (`live`): terra + Claude Sonnet + Gemini Flash only.
 - Alte Runs ohne `answerText`: Fallback über `formatGeoLlmAnswerForDisplay` (JSON-`answer` oder formatierte Zitierungen).
 
 ## AUDION Persona auf Deutsch (2026-06)

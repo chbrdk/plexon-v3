@@ -146,7 +146,7 @@ export async function startCheckionGeoJobV3(input: {
     input.queries && input.queries.length > 0
       ? input.queries
       : defaultGeoQueries({ url, companyName });
-  const models = sanitizeEqcGeoModels(input.models);
+  const models = sanitizeEqcGeoModels(input.models, input.measurement);
 
   try {
     const res = await fetch(checkionApiGeoJobs(), {

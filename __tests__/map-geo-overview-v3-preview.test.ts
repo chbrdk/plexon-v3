@@ -26,4 +26,25 @@ describe('mapGeoOverviewV3ToPreview citation placements', () => {
     expect(preview.citationHighlightsByModel?.[0]?.runs?.[0]?.citations).toHaveLength(20)
     expect(preview.citationHighlightsByModel?.[0]?.citations?.[19]?.position).toBe(20)
   })
+
+  it('prefers presence.solo.citedShare over draft job.citedShare 0', () => {
+    const preview = mapGeoOverviewV3ToPreview(
+      {
+        job: {
+          id: 'geo-1',
+          url: 'https://brand.test',
+          status: 'completed',
+          citedShare: 0,
+        },
+        presence: { solo: { citedShare: 67 } },
+        shareOfVoice: [
+          { domain: 'brand.test', shareOfVoice: 0.67, isTarget: true },
+          { domain: 'rival.example', shareOfVoice: 0.33, isTarget: false },
+        ],
+      },
+      'geo-1'
+    )
+    expect(preview.citedShare).toBe(67)
+    expect(preview.competitors?.some((c) => c.name === 'brand.test')).toBe(true)
+  })
 })

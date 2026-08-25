@@ -57,7 +57,7 @@
   - Wave 23 EQC as Flow: `specs/domain/eqc-as-collection-flow.md` — Event Quick Check (no ECHON) on Collection Flow runtime; env `EQC_FLOW_RUNTIME` (default **on**; set `0`/`false` for legacy playbook); template `eqc-quality-v1`
   - EQC → Persona chat overlay (Wave C6): `knowledge/eqc-persona-chat.md` · native `PersonaChatWorkspace` in `EqcPersonaChatOverlay` · BFF `/api/capabilities/audion/*` → Audion platform API · fallback `resolveEqcPersonaChatHref` → `/chat` · CTA `eqc-persona-chat-cta` · Audion guest budgets (`guest-budget.ts`)
   - EQC GEO voice spider: `knowledge/eqc-geo-voice-radar.md` · `components/event-quick-check/EventQuickCheckVoiceRadar.tsx` · `lib/assistant/reports/event-quick-check/eqc-radar-geometry.ts`
-  - EQC GEO models: `lib/integrations/eqc-geo-default-models.ts` (GPT-5.6 + all Claude catalog ids + Gemini 3.6 Flash)
+  - EQC GEO models: `lib/integrations/eqc-geo-default-models.ts` — Layer 1 recall = GPT-5.6 luna/terra/sol + Claude Opus/Sonnet/Haiku + Gemini Flash; Layer 2 live = terra + Claude Sonnet + Gemini Flash trio
   - EQC GEO citation placements: `GEO_COMPETITIVE_CITATION_TARGET` = 20 in `lib/integrations/geo-competitive-answer-limits.ts` (aligned with CHECKION `apps/web/lib/geo-eeat/competitive-response.ts`)
   - EQC GEO question rerun: `knowledge/plexon-quick-check-geo-rerun.md` · confirmed `queries.items` win over `n-suggest-q`
   - EQC results scrollytelling: `knowledge/eqc-results-scrollytelling.md` · cover `70svh` · bands `100svh` · adaptive gap via `data-eqc-chapter` (`lib/assistant/event-quick-check/eqc-results-chapter-heights.ts`)

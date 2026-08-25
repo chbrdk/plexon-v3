@@ -49,4 +49,30 @@ describe('buildEqcGeoLayerCompare', () => {
     ])
     expect(compare?.winner).toBeNull()
   })
+
+  it('recovers citedShare from dossier runs for the compare strip', () => {
+    const compare = buildEqcGeoLayerCompare([
+      layer({
+        measurement: 'recall',
+        url: 'https://brand.test',
+        citedShare: null,
+        citationHighlightsByModel: [
+          {
+            modelId: 'gpt-5.6-terra',
+            modelLabel: 'Terra',
+            citations: [],
+            runs: [
+              {
+                query: 'q1',
+                citations: [{ domain: 'brand.test', position: 1 }],
+              },
+            ],
+          },
+        ],
+      }),
+      layer({ measurement: 'live', citedShare: 30 }),
+    ])
+    expect(compare?.layers[0]?.citedShare).toBe(100)
+    expect(compare?.winner).toBe('recall')
+  })
 })

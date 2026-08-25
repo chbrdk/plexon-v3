@@ -96,9 +96,9 @@ export function mapGeoOverviewV3ToPreview(
 
   const competitors: NonNullable<GeoEeatJobPreview['competitors']> = []
   for (const row of shareRows) {
-    if (row.isTarget) continue
     const domain = String(row.domain ?? '').trim()
     if (!domain) continue
+    // Keep target rows — magazine SoV + citedShare fallbacks need own domain.
     competitors.push({
       name: domain,
       score:
@@ -180,25 +180,23 @@ export function mapGeoOverviewV3ToPreview(
 
   const citationHighlights = citationHighlightsByModel[0]?.citations ?? []
 
-  const citedFromJob =
-    typeof job.citedShare === 'number' && Number.isFinite(job.citedShare)
-      ? job.citedShare <= 1
-        ? Math.round(job.citedShare * 100)
-        : Math.round(job.citedShare)
-      : null
+  const asPct = (value: number): number =>
+    value <= 1 ? Math.round(value * 100) : Math.round(value)
+
+  // Solo presence is the CHECKION SSOT; job.citedShare may still be the draft 0.
   const citedFromSolo =
     typeof overview.presence?.solo?.citedShare === 'number' &&
     Number.isFinite(overview.presence.solo.citedShare)
-      ? overview.presence.solo.citedShare <= 1
-        ? Math.round(overview.presence.solo.citedShare * 100)
-        : Math.round(overview.presence.solo.citedShare)
+      ? asPct(overview.presence.solo.citedShare)
+      : null
+  const citedFromJob =
+    typeof job.citedShare === 'number' && Number.isFinite(job.citedShare) && job.citedShare > 0
+      ? asPct(job.citedShare)
       : null
   const targetShare = shareRows.find((row) => row.isTarget)
   const citedFromTargetShare =
     typeof targetShare?.shareOfVoice === 'number' && Number.isFinite(targetShare.shareOfVoice)
-      ? targetShare.shareOfVoice <= 1
-        ? Math.round(targetShare.shareOfVoice * 100)
-        : Math.round(targetShare.shareOfVoice)
+      ? asPct(targetShare.shareOfVoice)
       : null
 
   return {
@@ -206,7 +204,7 @@ export function mapGeoOverviewV3ToPreview(
     url,
     status,
     overallScore: job.overallScore ?? null,
-    citedShare: citedFromJob ?? citedFromSolo ?? citedFromTargetShare,
+    citedShare: citedFromSolo ?? citedFromJob ?? citedFromTargetShare,
     geoFitnessScore,
     eeatScores: eeat
       ? {

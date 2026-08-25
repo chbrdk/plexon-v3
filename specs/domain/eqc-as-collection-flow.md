@@ -70,7 +70,13 @@ Knowledge: `knowledge/eqc-persona-chat.md`.
 
 **Magazine (dual layers):** WHEN `geoLayers.length > 1`, the report MUST render **one** GEO band with (1) a compact Layer-1 vs Layer-2 compare strip (`citedShare` / fitness + winner verdict) and (2) an exclusive layer `ToggleGroup` that switches SoV, radar, and the citation dossier. The **snapshot dials** MUST stay fixed and MUST NOT follow the layer switch: large **GEO Score** (= cross-layer citation / `citedShare`, never collapsed onto fitness) and **GEO Fitness** (on-page only). No Prompts dial. Do **not** stack two full GEO chapters. Confirm tiles and parallel jobs are unchanged. PDF stays on primary `report.geo`.
 
-**Plexon EQC model budget (locked):** GEO jobs from `/event-quick-check` MUST use only the curated cross-provider trio `gpt-5.6-terra`, `claude-sonnet-5`, and `gemini-3.6-flash`. Broader CHECKION model catalogs may exist elsewhere, but EQC keeps one mid-tier OpenAI model, one mid-tier Claude model, and one Gemini model for stable cost, latency, and report comparability.
+**Plexon EQC model budget:** GEO jobs from `/event-quick-check` are measurement-scoped:
+- **Layer 1 (`recall`):** broader multi-provider set — GPT-5.6 `luna` / `terra` / `sol`, Claude Opus 5 / Sonnet 5 / Haiku 4.5, Gemini 3.6 Flash (`EQC_GEO_RECALL_MODELS`).
+- **Layer 2 (`live`):** curated cost/latency trio only — `gpt-5.6-terra`, `claude-sonnet-5`, `gemini-3.6-flash` (`EQC_GEO_LIVE_MODELS`).
+
+`sanitizeEqcGeoModels(models, measurement)` enforces the allow-list per layer. Broader CHECKION catalogs may exist elsewhere; EQC must not send live Layer-2 jobs with the full Layer-1 set.
+
+**Cited share hydration:** Magazine compare strip and GEO Score MUST resolve `citedShare` from CHECKION presence/solo (or reconstruct from citation dossier / own SoV) when the catalog scalar is null or draft `0`. Never leave Layer compare as `—` when citations show the brand on rank 1.
 
 GEO confirm `POST …/geo-questions` returns **202** immediately and finishes the flow in-process; the client polls `GET …/runs/:id` until `completed` (avoids proxy timeout on dual-layer runs).
 

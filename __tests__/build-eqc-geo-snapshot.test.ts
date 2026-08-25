@@ -61,6 +61,42 @@ describe('buildEqcGeoSnapshot', () => {
     })
   })
 
+  it('recovers geoScore from citation dossier when scalar is missing', () => {
+    expect(
+      buildEqcGeoSnapshot([
+        layer({
+          measurement: 'recall',
+          url: 'https://brand.test',
+          citedShare: null,
+          geoFitnessScore: 48,
+          questions: ['a', 'b'],
+          citationHighlightsByModel: [
+            {
+              modelId: 'gpt-5.6-terra',
+              modelLabel: 'Terra',
+              citations: [],
+              runs: [
+                {
+                  query: 'a',
+                  citations: [{ domain: 'brand.test', position: 1 }],
+                },
+                {
+                  query: 'b',
+                  citations: [{ domain: 'rival.example', position: 2 }],
+                },
+              ],
+            },
+          ],
+        }),
+      ])
+    ).toEqual({
+      geoScore: 50,
+      citedShare: 50,
+      geoFitnessScore: 48,
+      promptCount: 2,
+    })
+  })
+
   it('leaves geoScore null when citation is missing instead of copying fitness', () => {
     expect(
       buildEqcGeoSnapshot([layer({ measurement: 'recall', geoFitnessScore: 48, questions: ['a'] })])

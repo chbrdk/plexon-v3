@@ -7,6 +7,7 @@ import { EventQuickCheckVoiceRadar } from '@/components/event-quick-check/EventQ
 import type { EventQuickCheckReportModel } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 import type { EqcGeoSnapshot } from '@/lib/assistant/reports/event-quick-check/build-eqc-geo-snapshot'
+import { resolveEqcCitedShare } from '@/lib/assistant/reports/event-quick-check/resolve-eqc-cited-share'
 import { buildEqcVoiceRadarPoints } from '@/lib/assistant/reports/event-quick-check/eqc-radar-geometry'
 import { normalizeGeoDomain } from '@/lib/integrations/normalize-geo-domain'
 
@@ -47,7 +48,7 @@ export function EventQuickCheckGeoMagazineSection({
   const snapshot: EqcGeoSnapshot =
     snapshotOverride ??
     (() => {
-      const citedShare = sharePct(geo.citedShare)
+      const citedShare = resolveEqcCitedShare(geo)
       const geoFitnessScore =
         typeof geo.geoFitnessScore === 'number' && Number.isFinite(geo.geoFitnessScore)
           ? Math.round(geo.geoFitnessScore)
@@ -75,7 +76,7 @@ export function EventQuickCheckGeoMagazineSection({
       })
       .filter((r) => r.domain)
     if (ownHost && !rows.some((r) => r.isOwn)) {
-      const ownPct = sharePct(geo.citedShare)
+      const ownPct = resolveEqcCitedShare(geo)
       if (ownPct != null) {
         rows.unshift({
           domain: ownHost,

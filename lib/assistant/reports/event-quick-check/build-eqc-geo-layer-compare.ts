@@ -1,6 +1,10 @@
 import type { EventQuickCheckReportGeoSection } from '@/lib/assistant/reports/event-quick-check-report-types'
 import type { GeoMeasurement } from '@/lib/geo/measurement'
 import { GEO_MEASUREMENT_ORDER } from '@/lib/geo/measurement'
+import {
+  resolveEqcCitedShare,
+  scoreOrNullEqc,
+} from '@/lib/assistant/reports/event-quick-check/resolve-eqc-cited-share'
 
 export type EqcGeoLayerCompareRow = {
   measurement: GeoMeasurement
@@ -12,11 +16,6 @@ export type EqcGeoLayerCompare = {
   layers: EqcGeoLayerCompareRow[]
   /** Higher citedShare wins; null when fewer than two scored layers. */
   winner: GeoMeasurement | 'tie' | null
-}
-
-function scoreOrNull(value: number | null | undefined): number | null {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return null
-  return value <= 1 ? Math.round(value * 100) : Math.round(value)
 }
 
 /**
@@ -35,8 +34,8 @@ export function buildEqcGeoLayerCompare(
     if (byMeasurement.has(measurement)) continue
     byMeasurement.set(measurement, {
       measurement,
-      citedShare: scoreOrNull(layer.citedShare),
-      geoFitnessScore: scoreOrNull(layer.geoFitnessScore),
+      citedShare: resolveEqcCitedShare(layer),
+      geoFitnessScore: scoreOrNullEqc(layer.geoFitnessScore),
     })
   }
 

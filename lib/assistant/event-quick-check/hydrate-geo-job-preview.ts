@@ -10,9 +10,11 @@ function isRealGeoJobId(id: string | null | undefined): id is string {
 
 function needsGeoHydration(geo: EventQuickCheckReportModel['geo'] | GeoEeatJobPreview | undefined): boolean {
   if (!geo) return false;
+  const citedMissing = !('citedShare' in geo) || geo.citedShare == null;
   const byModel = 'citationHighlightsByModel' in geo ? geo.citationHighlightsByModel : undefined;
-  // Per-model query runs already present (answers included when CHECKION had them).
-  if (byModel?.some((s) => (s.runs?.length ?? 0) > 0)) return false;
+  const hasRuns = byModel?.some((s) => (s.runs?.length ?? 0) > 0) ?? false;
+  // Refetch when citation scalar is missing even if dossier runs are already present.
+  if (hasRuns && !citedMissing) return false;
   return true;
 }
 
@@ -178,87 +180,119 @@ export async function hydrateGeoJobPreview(
   return mergeGeoPreviewIntoJob(job, preview.job);
 }
 
+function applyMergedPreviewToGeoSection(
+  section: EventQuickCheckReportModel['geo'],
+  merged: GeoEeatJobPreview,
+  metaUrl: string
+): EventQuickCheckReportModel['geo'] {
+  return {
+    ...section,
+    status: section.status === 'failed' ? 'failed' : 'complete',
+    overallScore: merged.overallScore ?? section.overallScore,
+    citedShare: merged.citedShare ?? section.citedShare ?? null,
+    geoFitnessScore: merged.geoFitnessScore ?? section.geoFitnessScore,
+    jobId: merged.jobId || section.jobId,
+    url: merged.url || section.url || metaUrl,
+    competitors: merged.competitors?.length ? merged.competitors : section.competitors,
+    recommendations: merged.recommendations?.length
+      ? merged.recommendations
+      : section.recommendations,
+    citationHighlights: merged.citationHighlights?.length
+      ? merged.citationHighlights
+      : section.citationHighlights,
+    citationHighlightsByModel:
+      merged.citationHighlightsByModel?.length
+        ? merged.citationHighlightsByModel
+        : section.citationHighlightsByModel,
+    questions: merged.queries?.length ? merged.queries : section.questions,
+    eeatMissingElements: merged.missingGeoElements?.length
+      ? merged.missingGeoElements
+      : section.eeatMissingElements,
+    geoFitnessReasoning: merged.geoFitnessReasoning || section.geoFitnessReasoning,
+    eeatDimensions: (() => {
+      const fromPreview = merged.eeatScores
+        ? (
+            [
+              ['trust', 'Trust'],
+              ['experience', 'Experience'],
+              ['expertise', 'Expertise'],
+              ['authoritativeness', 'Authoritativeness'],
+            ] as const
+          )
+            .map(([key, label]) => {
+              const dim = merged.eeatScores?.[key];
+              if (!dim) return null;
+              return { key, label, score: dim.score, reasoning: dim.reasoning };
+            })
+            .filter((d): d is NonNullable<typeof d> => Boolean(d))
+        : [];
+      if (!section.eeatDimensions.length) return fromPreview;
+      if (!fromPreview.length) return section.eeatDimensions;
+      return section.eeatDimensions.map((d) => {
+        const richer = fromPreview.find((p) => p.key === d.key);
+        if (!richer) return d;
+        return {
+          ...d,
+          score: richer.score ?? d.score,
+          reasoning: richer.reasoning || d.reasoning,
+        };
+      });
+    })(),
+  };
+}
+
+async function hydrateOneGeoSection(
+  section: EventQuickCheckReportModel['geo'],
+  metaUrl: string,
+  fallbackJobId?: string | null
+): Promise<EventQuickCheckReportModel['geo']> {
+  if (!needsGeoHydration(section)) return section;
+  const jobId = section.jobId || fallbackJobId;
+  if (!isRealGeoJobId(jobId)) return section;
+
+  const preview = await fetchCheckionGeoJobV3Preview(jobId);
+  if (!preview.ok) return section;
+  const merged = mergeGeoPreviewIntoJob(
+    {
+      jobId,
+      url: section.url || metaUrl,
+      status: section.status === 'complete' ? 'completed' : section.status,
+      overallScore: section.overallScore,
+      citedShare: section.citedShare ?? null,
+      geoFitnessScore: section.geoFitnessScore,
+      competitors: section.competitors,
+      recommendations: section.recommendations,
+      citationHighlights: section.citationHighlights,
+      citationHighlightsByModel: section.citationHighlightsByModel,
+      queries: section.questions,
+    },
+    preview.job
+  );
+  return applyMergedPreviewToGeoSection(section, merged, metaUrl);
+}
+
 export async function hydrateEventQuickCheckReportGeo(
   report: EventQuickCheckReportModel | null
 ): Promise<EventQuickCheckReportModel | null> {
   if (!report?.geo) return report;
-  if (!needsGeoHydration(report.geo)) return report;
-  const jobId = report.geo.jobId || report.appendix?.geoJobId;
-  if (!isRealGeoJobId(jobId)) return report;
 
-  const preview = await fetchCheckionGeoJobV3Preview(jobId);
-  if (!preview.ok) return report;
-  const merged = mergeGeoPreviewIntoJob(
-    {
-      jobId,
-      url: report.geo.url || report.meta.url,
-      status: report.geo.status === 'complete' ? 'completed' : report.geo.status,
-      overallScore: report.geo.overallScore,
-      geoFitnessScore: report.geo.geoFitnessScore,
-      competitors: report.geo.competitors,
-      recommendations: report.geo.recommendations,
-      citationHighlights: report.geo.citationHighlights,
-      citationHighlightsByModel: report.geo.citationHighlightsByModel,
-      queries: report.geo.questions,
-    },
-    preview.job
+  const geo = await hydrateOneGeoSection(
+    report.geo,
+    report.meta.url,
+    report.appendix?.geoJobId
   );
+
+  const geoLayers = report.geoLayers?.length
+    ? await Promise.all(
+        report.geoLayers.map((layer) =>
+          hydrateOneGeoSection(layer, report.meta.url, layer.jobId)
+        )
+      )
+    : report.geoLayers;
 
   return {
     ...report,
-    geo: {
-      ...report.geo,
-      status: report.geo.status === 'failed' ? 'failed' : 'complete',
-      overallScore: merged.overallScore ?? report.geo.overallScore,
-      geoFitnessScore: merged.geoFitnessScore ?? report.geo.geoFitnessScore,
-      jobId: merged.jobId || report.geo.jobId,
-      url: merged.url || report.geo.url,
-      competitors: merged.competitors?.length ? merged.competitors : report.geo.competitors,
-      recommendations: merged.recommendations?.length
-        ? merged.recommendations
-        : report.geo.recommendations,
-      citationHighlights: merged.citationHighlights?.length
-        ? merged.citationHighlights
-        : report.geo.citationHighlights,
-      citationHighlightsByModel:
-        merged.citationHighlightsByModel?.length
-          ? merged.citationHighlightsByModel
-          : report.geo.citationHighlightsByModel,
-      questions: merged.queries?.length ? merged.queries : report.geo.questions,
-      eeatMissingElements: merged.missingGeoElements?.length
-        ? merged.missingGeoElements
-        : report.geo.eeatMissingElements,
-      geoFitnessReasoning:
-        merged.geoFitnessReasoning || report.geo.geoFitnessReasoning,
-      eeatDimensions: (() => {
-        const fromPreview = merged.eeatScores
-          ? (
-              [
-                ['trust', 'Trust'],
-                ['experience', 'Experience'],
-                ['expertise', 'Expertise'],
-                ['authoritativeness', 'Authoritativeness'],
-              ] as const
-            )
-              .map(([key, label]) => {
-                const dim = merged.eeatScores?.[key];
-                if (!dim) return null;
-                return { key, label, score: dim.score, reasoning: dim.reasoning };
-              })
-              .filter((d): d is NonNullable<typeof d> => Boolean(d))
-          : [];
-        if (!report.geo.eeatDimensions.length) return fromPreview;
-        if (!fromPreview.length) return report.geo.eeatDimensions;
-        return report.geo.eeatDimensions.map((d) => {
-          const richer = fromPreview.find((p) => p.key === d.key);
-          if (!richer) return d;
-          return {
-            ...d,
-            score: richer.score ?? d.score,
-            reasoning: richer.reasoning || d.reasoning,
-          };
-        });
-      })(),
-    },
+    geo,
+    ...(geoLayers ? { geoLayers } : {}),
   };
 }
