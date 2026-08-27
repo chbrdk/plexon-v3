@@ -19,7 +19,8 @@ export type RequestUser = { id: string; role: string };
 export async function getUserFromBearerToken(request: Request): Promise<RequestUser | null> {
   const authHeader = request.headers.get('Authorization');
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-  if (!token || !token.startsWith('plexon_') || token.length !== 9 + 64) return null;
+  // plexon_ (7) + 32 bytes hex (64) = 71 — do not use a magic 9+64
+  if (!token || !token.startsWith('plexon_') || token.length !== 7 + 64) return null;
   const userId = await getUserByTokenHash(hashToken(token));
   if (!userId) return null;
   if (!process.env.DATABASE_URL) return { id: userId, role: USER_ROLE.USER };
