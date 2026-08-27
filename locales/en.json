@@ -16,7 +16,8 @@
     "board": "Board",
     "designSystem": "Design System",
     "settings": "Settings",
-    "adminConsole": "Admin"
+    "adminConsole": "Admin",
+    "back": "Back"
   },
   "admin": {
     "title": "Administration",

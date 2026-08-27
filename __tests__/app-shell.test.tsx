@@ -2,7 +2,7 @@ import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../components/AppShell'
-import { PATH_ASSISTANT, PATH_HOME, PATH_LOGIN, PATH_PRODUCTS, PATH_SETTINGS } from '../lib/constants'
+import { PATH_AGENCY_DEMO, PATH_ASSISTANT, PATH_HOME, PATH_LOGIN, PATH_PRODUCTS, PATH_SETTINGS } from '../lib/constants'
 
 const { pathnameRef } = vi.hoisted(() => ({
   pathnameRef: { current: '/' as string },
@@ -10,6 +10,7 @@ const { pathnameRef } = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
   usePathname: () => pathnameRef.current,
+  useRouter: () => ({ back: vi.fn() }),
 }))
 
 vi.mock('next-auth/react', () => ({
@@ -32,6 +33,7 @@ vi.mock('@/components/i18n/I18nProvider', () => ({
         'nav.board': 'Board',
         'nav.adminConsole': 'Admin',
         'nav.settings': 'Settings',
+        'nav.back': 'Back',
       }
       return map[key] ?? key
     },
@@ -41,6 +43,10 @@ vi.mock('@/components/i18n/I18nProvider', () => ({
 
 vi.mock('@/components/settings/BrandColorInitializer', () => ({
   BrandColorInitializer: () => null,
+}))
+
+vi.mock('@/components/PlatformAssistantHost', () => ({
+  PlatformAssistantHost: () => null,
 }))
 
 vi.mock('@msqdx/ui', () => ({
@@ -53,20 +59,29 @@ vi.mock('@/lib/msqdx-ui-shell', () => ({
     rail,
     topbar,
     brandCorner,
+    backCorner,
   }: {
     children: React.ReactNode
     rail: React.ReactNode
     topbar: React.ReactNode
     brandCorner?: React.ReactNode
+    backCorner?: React.ReactNode
   }) => (
     <div>
       <nav data-testid="nav-rail">{rail}</nav>
+      {backCorner}
       {brandCorner}
       <header>{topbar}</header>
       {children}
     </div>
   ),
   BrandCorner: ({ label }: { label: string }) => <div>{label}</div>,
+  BrandCornerProductMenu: ({ label }: { label: string }) => <div>{label}</div>,
+  ShellBackButton: ({ label }: { label: string }) => (
+    <button type="button" aria-label={label}>
+      {label}
+    </button>
+  ),
   NavRail: ({
     items,
     footerItems,
@@ -128,5 +143,16 @@ describe('app shell', () => {
     )
     expect(document.querySelector('.nav-rail')).toBeNull()
     expect(screen.getByText('Login only')).toBeInTheDocument()
+  })
+
+  it('skips shell chrome on the public agency demo', () => {
+    pathnameRef.current = PATH_AGENCY_DEMO
+    render(
+      <AppShell>
+        <div>Agency landing</div>
+      </AppShell>,
+    )
+    expect(document.querySelector('.nav-rail')).toBeNull()
+    expect(screen.getByText('Agency landing')).toBeInTheDocument()
   })
 })

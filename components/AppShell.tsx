@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ReactNode } from 'react'
 import {
@@ -10,6 +10,7 @@ import {
   MsqdxLogoMark,
   NavRail,
   PageTitle,
+  ShellBackButton,
   shellFrameStyle,
   type RailDockEdge,
 } from '@/lib/msqdx-ui-shell'
@@ -29,6 +30,7 @@ import { AssistantPageContextProvider } from '@/components/assistant/AssistantPa
 import { shellPaths } from '@/lib/shell-paths'
 import {
   PATH_ADMIN,
+  PATH_AGENCY_DEMO,
   PATH_ASSISTANT,
   PATH_ASSISTANT_EMBED,
   PATH_BOARD,
@@ -94,6 +96,7 @@ export function AppShell({
   status?: ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { t } = useI18n()
   const { data: session } = useSession()
   const [railEdge, setRailEdge] = useState<RailDockEdge>(shellPaths.railDockEdge)
@@ -108,6 +111,7 @@ export function AppShell({
   const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
   const isEmbedPage = isAssistantEmbedPath(pathname)
   const isSharePage = isPublicSharePath(pathname)
+  const isAgencyDemoPage = pathname === PATH_AGENCY_DEMO
 
   const frameStyle = useMemo(
     () =>
@@ -139,7 +143,7 @@ export function AppShell({
         ? t(resolvedTitle)
         : resolvedTitle
 
-  if (isAuthPage || isEmbedPage || isSharePage) {
+  if (isAuthPage || isEmbedPage || isSharePage || isAgencyDemoPage) {
     return <>{children}</>
   }
 
@@ -240,6 +244,7 @@ export function AppShell({
           />
         }
         brandCorner={<ShellBrandCorner currentProductId="plexon" label="PLEXON" />}
+        backCorner={<ShellBackButton label={t('nav.back')} onClick={() => router.back()} />}
         topbar={
           <>
             <div className="topbar-brand">{brandContent}</div>

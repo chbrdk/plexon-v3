@@ -2,7 +2,7 @@
 
 **Status:** Accepted — 2026-07-31; Central Assistant flyout — 2026-08-10  
 **Implements:** `components/AppShell.tsx` · `components/ShellBrandCorner.tsx` · `components/PlatformAssistantHost.tsx` · `lib/shell-paths.ts`  
-**DS:** `AppFrame`, `NavRail`, `BrandCornerProductMenu`, `PageTitle`, `ChatOverlay` from `@msqdx/ui`  
+**DS:** `AppFrame`, `NavRail`, `BrandCornerProductMenu`, `ShellBackButton`, `PageTitle`, `ChatOverlay` from `@msqdx/ui`  
 **Index:** `specs/domain/ui-migrate.md` · `specs/domain/central-assistant-flyout.md`
 
 ## Rules
