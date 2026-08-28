@@ -14,6 +14,20 @@ export const PATH_LOGIN = '/login';
 export const PATH_REGISTER = '/register';
 export const PATH_FORGOT_PASSWORD = '/forgot-password';
 export const PATH_RESET_PASSWORD = '/reset-password';
+/** Public standalone typography-led agency landing prototype. */
+export const PATH_AGENCY_DEMO = '/agency';
+/** Public standalone city-tourism HTML prototype. */
+export const PATH_LINDENAU_DEMO = '/lindenau.html';
+/** Public standalone global machinery HTML prototype. */
+export const PATH_KERNWERK_DEMO = '/kernwerk.html';
+/** Public standalone classic corporate machinery HTML prototype. */
+export const PATH_KERNWERK_CLASSIC_DEMO = '/kernwerk-classic.html';
+/** Public standalone natural and tactile machinery HTML prototype. */
+export const PATH_KERNWERK_NATURAL_DEMO = '/kernwerk-natural.html';
+/** Public standalone expressive social-brand HTML prototype. */
+export const PATH_LOUDER_DEMO = '/louder.html';
+/** Public standalone monochrome CARO tribute HTML prototype. */
+export const PATH_CARO_DEMO = '/caro.html';
 export const PATH_PRODUCTS = '/products';
 export const PATH_PROJECTS = '/projects';
 export const PATH_SETTINGS = '/settings';
@@ -406,6 +420,17 @@ export const API_PLATFORM_PROVISIONING_PROJECT_SYNC =
 
 export function apiPlatformProvisioningProjectSync(platformProjectId: string): string {
   return `/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}/sync`;
+}
+
+/**
+ * Service + X-Plexon-User-Id: archive / restore Collection from product BFFs.
+ * Body `{ status: 'active' | 'archived' }` — same fan-out as company PATCH.
+ */
+export const API_PLATFORM_PROVISIONING_PROJECT =
+  '/api/platform/provisioning/projects/:platformProjectId';
+
+export function apiPlatformProvisioningProject(platformProjectId: string): string {
+  return `/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}`;
 }
 
 /** Session: list Collections the user can see (picker; same directory as Sync). */

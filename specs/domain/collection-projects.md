@@ -75,14 +75,15 @@ Lifecycle lives on `platform_projects.status` (`active` | `archived`). **No** `d
 
 | Action | Who | Behavior |
 |--------|-----|----------|
-| **Archive** | Company owner/admin (hub + detail) | `PATCH` status → `archived`, then `syncPlatformProjectToProducts` (upsert `status: archived` to CHECKION / AUDION / BRANDION / CREATION when configured). |
-| **Restore** | Company owner/admin | Same path with `status: active`. |
+| **Archive** | Company owner/admin (Plexon hub) **or** product BFF (creator / Collection admin assignment / company manager) | `PATCH` status → `archived`, then `syncPlatformProjectToProducts` (upsert `status: archived` to CHECKION / AUDION / BRANDION / CREATION / SPIRION when configured). Product UIs must **not** hard-delete mirrors — they call this path. |
+| **Restore** | Same as Archive | Same path with `status: active`. |
 | **Hard-Delete** | Plexon **global admin** only | Best-effort archive+sync, then `deletePlatformProject` (local cascade of bindings / packs / flows / assignments). Product mirrors stay **archived orphans** — no product DELETE in this wave. |
 
-**Lists:** Default hub, insights, and home preview show **active** Collections only. Hub may opt in with `?includeArchived=1` / UI “Archivierte anzeigen” for restore. Admin company detail lists all statuses.
+**Lists:** Default hub, insights, and home preview show **active** Collections only. Hub may opt in with `?includeArchived=1` / UI “Archivierte anzeigen” for restore. Admin company detail lists all statuses. Product hubs hide `archived` mirrors.
 
 **APIs:**
 - Company: `PATCH /api/platform/projects/:platformProjectId` — body `{ status: 'active' | 'archived' }` (`canManageCompany`).
+- Product BFF: `PATCH /api/platform/provisioning/projects/:platformProjectId` — service secret + contract + `X-Plexon-User-Id`; auth = company manager **or** Collection admin assignment **or** creator (`userCanManageCollectionLifecycle`). Same lifecycle helper + fan-out.
 - Admin: `PATCH /api/admin/platform-projects/:id` auto-syncs when status changes; `DELETE` requires global admin and archive-then-cascade.
 
 ## Canonical hub UX
