@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK } from '@/lib/constants';
+import { PATH_AGENCY_DEMO, PATH_CARO_DEMO, PATH_KERNWERK_CLASSIC_DEMO, PATH_KERNWERK_DEMO, PATH_KERNWERK_NATURAL_DEMO, PATH_LINDENAU_DEMO, PATH_LOUDER_DEMO, PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK } from '@/lib/constants';
 
 const authPaths = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD];
 
@@ -38,6 +38,8 @@ export function middleware(req: NextRequest) {
     if (pathname.startsWith('/api/')) return NextResponse.next();
 
     if (isPublicSharePath(pathname)) return NextResponse.next();
+
+    if (pathname === PATH_AGENCY_DEMO || pathname === PATH_LINDENAU_DEMO || pathname === PATH_KERNWERK_DEMO || pathname === PATH_KERNWERK_CLASSIC_DEMO || pathname === PATH_KERNWERK_NATURAL_DEMO || pathname === PATH_LOUDER_DEMO || pathname === PATH_CARO_DEMO) return NextResponse.next();
 
     if (isAuthPath(pathname)) {
       if (hasSession) return redirectTo(req.nextUrl, '/');

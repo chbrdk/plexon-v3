@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="KERNWERK builds dependable production systems with engineering care and worldwide lifecycle support.">
+    <title>KERNWERK — Built with care. Made to work.</title>
+    <style>
+      :root {
+        --paper: #f4f0e7;
+        --cream: #fffdf8;
+        --sand: #ded4c2;
+        --forest: #263b31;
+        --forest-soft: #375347;
+        --sage: #91a38f;
+        --sage-pale: #dce4d8;
+        --clay: #b9664e;
+        --ochre: #d0a65b;
+        --ink: #302e29;
+        --muted: #6d6a62;
+        --line: rgba(48, 46, 41, .13);
+        --shadow-sm: 0 6px 16px rgba(55, 47, 37, .08), 0 1px 2px rgba(55, 47, 37, .08);
+        --shadow-md: 0 18px 45px rgba(55, 47, 37, .12), 0 4px 10px rgba(55, 47, 37, .06);
+        --shadow-lg: 0 34px 80px rgba(55, 47, 37, .17), 0 8px 18px rgba(55, 47, 37, .08);
+        --radius-sm: 14px;
+        --radius-md: 24px;
+        --radius-lg: 38px;
+        --page: min(1240px, calc(100% - 48px));
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 7% 4%, rgba(220, 228, 216, .68), transparent 27rem),
+          var(--paper);
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: inherit; text-decoration: none; }
+      button, a { -webkit-tap-highlight-color: transparent; }
+      :focus-visible { outline: 3px solid var(--clay); outline-offset: 4px; }
+      .skip-link {
+        position: fixed; left: 18px; top: 18px; z-index: 100;
+        padding: 11px 16px; border-radius: 12px; background: var(--forest); color: white;
+        transform: translateY(-160%); transition: transform .2s ease;
+      }
+      .skip-link:focus { transform: translateY(0); }
+      .shell { width: var(--page); margin-inline: auto; }
+      .topbar {
+        position: sticky; top: 16px; z-index: 20; margin-top: 16px;
+        display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        min-height: 68px; padding: 10px 12px 10px 22px;
+        background: rgba(255, 253, 248, .95); border: 1px solid rgba(255,255,255,.76);
+        border-radius: 22px; box-shadow: var(--shadow-sm);
+      }
+      .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+      .brand-mark { position: relative; width: 31px; height: 31px; border-radius: 10px 10px 10px 3px; background: var(--forest); }
+      .brand-mark::after { content: ""; position: absolute; inset: 8px; border: 2px solid var(--cream); border-radius: 50%; }
+      .nav { display: flex; align-items: center; gap: 27px; font-size: 14px; font-weight: 650; }
+      .nav a:not(.nav-cta) { color: #4f504a; }
+      .nav a:hover { color: var(--clay); }
+      .nav-cta, .button {
+        display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        min-height: 46px; padding: 0 20px; border: 1px solid currentColor; border-radius: 999px;
+        font-size: 14px; font-weight: 750; transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      }
+      .nav-cta { background: var(--forest); color: var(--cream) !important; border-color: var(--forest); }
+      .button:hover, .nav-cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+      .button-primary { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+      .button-light { background: var(--cream); color: var(--ink); border-color: var(--line); }
+      .arrow { font-size: 17px; line-height: 1; }
+
+      .hero { padding: 34px 0 42px; animation: settle .7s ease both; }
+      .hero-card {
+        position: relative; overflow: hidden; min-height: 650px; padding: clamp(38px, 6vw, 78px);
+        display: grid; grid-template-columns: .93fr 1.07fr; align-items: center; gap: clamp(34px, 6vw, 78px);
+        background: var(--cream); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+      }
+      .hero-copy { position: relative; z-index: 2; }
+      .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 24px; color: var(--clay); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      .eyebrow::before { content: ""; width: 25px; height: 2px; background: currentColor; border-radius: 2px; }
+      h1 { max-width: 640px; margin: 0; color: var(--forest); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(53px, 6.4vw, 88px); font-weight: 500; letter-spacing: -.055em; line-height: .94; }
+      .hero-lede { max-width: 520px; margin: 27px 0 31px; color: var(--muted); font-size: clamp(17px, 1.7vw, 20px); line-height: 1.55; }
+      .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+      .hero-note { display: flex; gap: 9px; align-items: center; margin-top: 34px; color: var(--muted); font-size: 12px; }
+      .hero-note span { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); box-shadow: 0 0 0 6px var(--sage-pale); }
+
+      .hero-media { position: relative; min-height: 510px; }
+      .machine-scene {
+        position: absolute; inset: 0 0 34px 18px; overflow: hidden; border-radius: 34px 34px 80px 34px;
+        background: linear-gradient(152deg, #afbead 0 31%, #798b77 31% 50%, #5b6f61 50% 100%);
+        box-shadow: var(--shadow-lg);
+      }
+      .machine-scene::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,.22), transparent 34%), linear-gradient(0deg, rgba(31,49,41,.25), transparent 48%); }
+      .machine { position: absolute; left: 16%; right: 9%; bottom: 12%; height: 52%; filter: drop-shadow(0 22px 18px rgba(29,40,34,.28)); }
+      .machine-base { position: absolute; left: 2%; right: 0; bottom: 0; height: 23%; border-radius: 8px 8px 20px 20px; background: #d9d2c4; }
+      .machine-body { position: absolute; left: 23%; right: 8%; bottom: 18%; height: 68%; border-radius: 20px 20px 9px 9px; background: #ece8dc; border: 5px solid #ddd5c7; }
+      .machine-window { position: absolute; left: 35%; right: 18%; top: 12%; bottom: 35%; border-radius: 12px; background: #334a40; box-shadow: inset 0 0 0 4px #89968b; }
+      .machine-side { position: absolute; left: 0; bottom: 17%; width: 29%; height: 49%; border-radius: 13px 4px 4px 13px; background: #c8bca9; }
+      .machine-light { position: absolute; right: 14%; top: 9%; width: 9px; height: 9px; border-radius: 50%; background: #d6a14b; box-shadow: 0 0 0 5px rgba(214,161,75,.2); }
+      .image-label { position: absolute; left: 26px; bottom: 24px; z-index: 2; color: rgba(255,255,255,.88); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+      .floating-card {
+        position: absolute; left: -9px; bottom: 0; z-index: 3; width: 210px; padding: 19px;
+        background: var(--cream); border-radius: 20px; box-shadow: var(--shadow-md);
+      }
+      .floating-card small { color: var(--clay); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .floating-card strong { display: block; margin: 8px 0 3px; color: var(--forest); font-family: Georgia, serif; font-size: 22px; font-weight: 500; }
+      .floating-card span { color: var(--muted); font-size: 12px; }
+      .material-chip { position: absolute; right: -17px; top: 55px; width: 78px; height: 78px; border: 9px solid var(--cream); border-radius: 24px; background: repeating-linear-gradient(110deg, #b56c4e 0 7px, #c77a59 7px 12px); box-shadow: var(--shadow-sm); transform: rotate(7deg); }
+
+      .proof-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 17px; }
+      .proof-item { padding: 20px 23px; display: flex; gap: 15px; align-items: center; background: rgba(255,253,248,.7); border-radius: 19px; border: 1px solid rgba(255,255,255,.7); box-shadow: var(--shadow-sm); }
+      .proof-icon { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 13px; background: var(--sage-pale); color: var(--forest); font-weight: 800; }
+      .proof-item strong { display: block; margin-bottom: 3px; font-size: 14px; }
+      .proof-item span { color: var(--muted); font-size: 12px; }
+
+      .section { padding: 92px 0; }
+      .section-tight { padding-top: 48px; }
+      .section-head { display: grid; grid-template-columns: .75fr 1.25fr; gap: 50px; align-items: start; margin-bottom: 42px; }
+      .section-kicker { margin: 8px 0 0; color: var(--clay); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+      h2 { max-width: 820px; margin: 0; color: var(--forest); font-family: Georgia, 'Times New Roman', serif; font-size: clamp(39px, 4.5vw, 62px); font-weight: 500; letter-spacing: -.045em; line-height: 1.02; }
+      h3 { margin: 0; color: var(--forest); font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 500; letter-spacing: -.03em; line-height: 1.08; }
+      .section-intro { max-width: 650px; margin: 18px 0 0; color: var(--muted); font-size: 17px; line-height: 1.65; }
+
+      .solutions-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+      .solution-card {
+        position: relative; overflow: hidden; min-height: 490px; padding: 32px;
+        display: flex; flex-direction: column; justify-content: space-between;
+        background: var(--cream); border-radius: 30px; box-shadow: var(--shadow-sm);
+        transition: transform .25s ease, box-shadow .25s ease;
+      }
+      .solution-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+      .solution-card-wide { grid-column: span 7; }
+      .solution-card-narrow { grid-column: span 5; background: var(--sage-pale); }
+      .solution-card-long { grid-column: 1 / -1; min-height: 330px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 46px; align-items: center; }
+      .card-no { width: max-content; padding: 7px 10px; color: var(--clay); border: 1px solid currentColor; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .09em; }
+      .solution-card p { max-width: 430px; margin: 13px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+      .solution-link { margin-top: 22px; display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 800; }
+      .solution-visual { position: relative; overflow: hidden; height: 248px; margin: 20px -7px -7px; border-radius: 23px; background: #c9c2b3; }
+      .solution-card-narrow .solution-visual { background: #9dad99; }
+      .solution-visual::after { content: "Image placeholder"; position: absolute; left: 18px; bottom: 16px; color: rgba(255,255,255,.88); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .line-machine { position: absolute; left: 12%; right: 8%; bottom: 13%; height: 55%; border-radius: 10px 10px 18px 18px; background: #eae5da; box-shadow: 0 17px 22px rgba(44,48,43,.2); }
+      .line-machine::before { content: ""; position: absolute; left: 10%; right: 28%; top: 15%; height: 38%; border-radius: 7px; background: #334a40; box-shadow: inset 0 0 0 5px #8b978e; }
+      .line-machine::after { content: ""; position: absolute; right: 8%; top: 18%; width: 12%; height: 50%; border-radius: 5px; background: #d3a85c; }
+      .automation-ring { position: absolute; width: 168px; height: 168px; left: 50%; top: 47%; border: 27px solid #f0ece2; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 16px 18px 0 rgba(37,59,48,.18); }
+      .automation-ring::after { content: ""; position: absolute; width: 72px; height: 72px; left: 21px; top: 20px; border-radius: 22px; background: var(--ochre); }
+      .service-visual { position: relative; overflow: hidden; min-height: 250px; border-radius: 25px; background: linear-gradient(140deg, #8b9b89 0 45%, #687b6d 45%); }
+      .service-visual::before { content: ""; position: absolute; width: 52%; height: 74%; left: 23%; bottom: 0; border-radius: 100px 100px 20px 20px; background: #d9c4a7; box-shadow: 0 20px 30px rgba(34,50,42,.24); }
+      .service-visual::after { content: "Image placeholder · Service specialist"; position: absolute; left: 20px; bottom: 17px; color: white; font-size: 9px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+
+      .approach-wrap {
+        position: relative; overflow: hidden; display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(42px, 7vw, 90px); align-items: center;
+        min-height: 660px; padding: clamp(42px, 7vw, 88px); color: var(--cream); background: var(--forest); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+      }
+      .approach-wrap::after { content: ""; position: absolute; right: -140px; bottom: -150px; width: 380px; height: 380px; border: 1px solid rgba(255,255,255,.09); border-radius: 50%; box-shadow: 0 0 0 65px rgba(255,255,255,.025), 0 0 0 130px rgba(255,255,255,.02); }
+      .approach-visual { position: relative; z-index: 2; min-height: 460px; }
+      .people-image { position: absolute; inset: 0 36px 32px 0; overflow: hidden; border-radius: 34px 34px 34px 84px; background: linear-gradient(147deg, #b8aa93 0 33%, #776b5c 33% 100%); box-shadow: 0 28px 50px rgba(11,24,17,.35); }
+      .people-image::before { content: ""; position: absolute; width: 42%; height: 62%; left: 30%; bottom: 0; border-radius: 90px 90px 10px 10px; background: #d5c1a5; }
+      .people-image::after { content: "Image placeholder · Workshop dialogue"; position: absolute; left: 23px; bottom: 19px; color: rgba(255,255,255,.82); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .material-note { position: absolute; right: 0; bottom: 0; z-index: 3; width: 175px; padding: 19px; color: var(--ink); background: var(--ochre); border-radius: 22px; box-shadow: 0 18px 38px rgba(11,24,17,.34); transform: rotate(2deg); }
+      .material-note small { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .material-note strong { display: block; margin-top: 9px; font-family: Georgia, serif; font-size: 19px; font-weight: 500; line-height: 1.2; }
+      .approach-copy { position: relative; z-index: 2; }
+      .approach-copy .section-kicker { color: #e1b97c; }
+      .approach-copy h2 { color: var(--cream); }
+      .approach-copy > p { margin: 24px 0 32px; color: rgba(255,253,248,.68); font-size: 16px; line-height: 1.65; }
+      .principles { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(255,255,255,.18); }
+      .principle { padding: 20px 18px 14px 0; border-bottom: 1px solid rgba(255,255,255,.18); }
+      .principle:nth-child(even) { padding-left: 18px; border-left: 1px solid rgba(255,255,255,.18); }
+      .principle strong { display: block; margin-bottom: 6px; font-size: 13px; }
+      .principle span { color: rgba(255,253,248,.6); font-size: 12px; line-height: 1.45; }
+
+      .lifecycle-card { padding: clamp(34px, 5vw, 62px); background: var(--cream); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+      .lifecycle-top { display: grid; grid-template-columns: 1fr .8fr; gap: 48px; align-items: end; }
+      .lifecycle-top p { max-width: 480px; margin: 0 0 6px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+      .stages { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 48px; border-top: 1px solid var(--line); }
+      .stage { position: relative; padding: 28px 26px 0 0; }
+      .stage::before { content: ""; position: absolute; left: 0; top: -6px; width: 11px; height: 11px; border: 4px solid var(--cream); border-radius: 50%; background: var(--clay); box-shadow: 0 0 0 1px var(--clay); }
+      .stage:not(:last-child)::after { content: ""; position: absolute; right: 22px; top: 36px; width: 22px; height: 1px; background: var(--line); }
+      .stage small { color: var(--clay); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+      .stage strong { display: block; margin: 9px 0 8px; color: var(--forest); font-family: Georgia, serif; font-size: 21px; font-weight: 500; }
+      .stage span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+      .global-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; }
+      .map-card { position: relative; overflow: hidden; min-height: 480px; padding: 38px; background: #d9d0bf; border-radius: 34px; box-shadow: var(--shadow-sm); }
+      .map-card h3 { max-width: 360px; position: relative; z-index: 2; }
+      .map-surface { position: absolute; inset: 108px 34px 34px; opacity: .82; }
+      .land { position: absolute; background: var(--sage); box-shadow: inset -12px -12px 20px rgba(38,59,49,.13); }
+      .land-one { left: 3%; top: 8%; width: 31%; height: 40%; border-radius: 54% 42% 58% 36%; transform: rotate(-12deg); }
+      .land-two { left: 35%; top: 12%; width: 26%; height: 31%; border-radius: 34% 65% 42% 58%; transform: rotate(8deg); }
+      .land-three { right: 2%; top: 18%; width: 27%; height: 36%; border-radius: 62% 38% 55% 46%; transform: rotate(-7deg); }
+      .land-four { left: 24%; bottom: 4%; width: 18%; height: 29%; border-radius: 42% 58% 62% 36%; transform: rotate(9deg); }
+      .map-dot { position: absolute; width: 12px; height: 12px; border: 3px solid #f8f4eb; border-radius: 50%; background: var(--clay); box-shadow: 0 5px 12px rgba(57,47,40,.25); }
+      .dot-1 { left: 25%; top: 26%; } .dot-2 { left: 48%; top: 24%; } .dot-3 { right: 20%; top: 31%; } .dot-4 { left: 35%; bottom: 19%; }
+      .regions-card { padding: 36px; display: flex; flex-direction: column; justify-content: space-between; background: var(--clay); color: var(--cream); border-radius: 34px; box-shadow: var(--shadow-md); }
+      .regions-card h3 { color: var(--cream); font-size: 38px; }
+      .regions-card p { color: rgba(255,253,248,.75); font-size: 14px; line-height: 1.6; }
+      .regions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 30px; }
+      .regions span { padding: 10px 13px; border: 1px solid rgba(255,255,255,.38); border-radius: 999px; font-size: 11px; font-weight: 750; }
+
+      .contact-card { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; align-items: end; padding: clamp(40px, 7vw, 82px); background: var(--forest-soft); color: var(--cream); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+      .contact-card::before { content: ""; position: absolute; right: -80px; top: -120px; width: 330px; height: 330px; border-radius: 50%; background: rgba(220,228,216,.08); }
+      .contact-card h2 { color: var(--cream); }
+      .contact-card p { max-width: 520px; color: rgba(255,253,248,.69); font-size: 16px; line-height: 1.6; }
+      .contact-action { position: relative; display: flex; justify-content: flex-end; }
+      .contact-action .button { min-height: 58px; padding-inline: 27px; background: var(--ochre); color: var(--ink); border-color: var(--ochre); }
+      .footer { padding: 28px 0 36px; display: flex; justify-content: space-between; align-items: center; gap: 24px; color: var(--muted); font-size: 11px; }
+      .footer-links { display: flex; flex-wrap: wrap; gap: 20px; }
+      @keyframes settle { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+      @media (max-width: 930px) {
+        .nav a:not(.nav-cta) { display: none; }
+        .hero-card { grid-template-columns: 1fr; }
+        .hero-media { min-height: 480px; }
+        .proof-strip { grid-template-columns: 1fr; }
+        .section-head, .approach-wrap, .lifecycle-top, .global-grid, .contact-card { grid-template-columns: 1fr; }
+        .solution-card-wide, .solution-card-narrow { grid-column: 1 / -1; }
+        .solution-card-long { grid-template-columns: 1fr; }
+        .stages { grid-template-columns: 1fr 1fr; row-gap: 22px; }
+        .contact-action { justify-content: flex-start; }
+      }
+      @media (max-width: 580px) {
+        :root { --page: min(100% - 24px, 1240px); }
+        .topbar { top: 8px; margin-top: 8px; min-height: 60px; border-radius: 18px; }
+        .nav-cta { min-height: 40px; padding-inline: 14px; }
+        .hero { padding-top: 16px; }
+        .hero-card { min-height: auto; padding: 34px 22px 28px; border-radius: 28px; }
+        h1 { font-size: clamp(49px, 16vw, 68px); }
+        .hero-media { min-height: 370px; }
+        .machine-scene { left: 0; border-radius: 26px 26px 58px 26px; }
+        .material-chip { right: -8px; }
+        .section { padding: 66px 0; }
+        .section-head { gap: 18px; margin-bottom: 30px; }
+        .solution-card { padding: 25px; min-height: 450px; }
+        .solution-card-long { min-height: auto; }
+        .approach-wrap { padding: 32px 22px; border-radius: 28px; }
+        .approach-visual { min-height: 380px; }
+        .principles { grid-template-columns: 1fr; }
+        .principle:nth-child(even) { padding-left: 0; border-left: 0; }
+        .stages { grid-template-columns: 1fr; }
+        .stage:not(:last-child)::after { display: none; }
+        .map-card { min-height: 410px; padding: 28px; }
+        .regions-card { min-height: 380px; padding: 28px; }
+        .contact-card { border-radius: 28px; }
+        .footer { align-items: flex-start; flex-direction: column; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="shell topbar" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="KERNWERK home"><span class="brand-mark" aria-hidden="true"></span>KERNWERK</a>
+      <nav class="nav" aria-label="Main menu">
+        <a href="#solutions">Solutions</a><a href="#approach">Our approach</a><a href="#global">Global network</a>
+        <a class="nav-cta" href="#contact">Talk to us <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="shell hero" aria-labelledby="hero-title">
+        <div class="hero-card">
+          <div class="hero-copy">
+            <p class="eyebrow">Engineering with perspective</p>
+            <h1 id="hero-title">Built with care.<br>Made to work.</h1>
+            <p class="hero-lede">Production systems shaped around your people, your process and what comes next. Reliable engineering, supported for a lifetime.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#solutions">Explore our solutions <span class="arrow" aria-hidden="true">→</span></a>
+              <a class="button button-light" href="#approach">How we work</a>
+            </div>
+            <p class="hero-note"><span aria-hidden="true"></span>Designed in Germany · supported worldwide</p>
+          </div>
+          <div class="hero-media" role="img" aria-label="Image placeholder: KERNWERK production machine in warm natural daylight">
+            <div class="machine-scene">
+              <div class="machine" aria-hidden="true"><i class="machine-base"></i><i class="machine-body"></i><i class="machine-window"></i><i class="machine-side"></i><i class="machine-light"></i></div>
+              <span class="image-label">Image placeholder · Production system</span>
+            </div>
+            <div class="material-chip" aria-hidden="true"></div>
+            <aside class="floating-card" aria-label="Lifecycle support">
+              <small>Built around you</small><strong>One lifecycle partner</strong><span>From first sketch to daily output.</span>
+            </aside>
+          </div>
+        </div>
+        <div class="proof-strip" aria-label="Company strengths">
+          <div class="proof-item"><span class="proof-icon" aria-hidden="true">01</span><div><strong>Deep process knowledge</strong><span>Engineering grounded in your reality.</span></div></div>
+          <div class="proof-item"><span class="proof-icon" aria-hidden="true">02</span><div><strong>Long-life systems</strong><span>Made to adapt, maintain and improve.</span></div></div>
+          <div class="proof-item"><span class="proof-icon" aria-hidden="true">03</span><div><strong>Close, worldwide support</strong><span>Local teams with shared standards.</span></div></div>
+        </div>
+      </section>
+      <section class="shell section section-tight" id="solutions" aria-labelledby="solutions-title">
+        <div class="section-head">
+          <p class="section-kicker">What we make</p>
+          <div><h2 id="solutions-title">Engineering that feels considered.</h2><p class="section-intro">Every system begins with the same question: what will make production more dependable for the people who run it? The answer becomes machinery built around your process.</p></div>
+        </div>
+        <div class="solutions-grid">
+          <article class="solution-card solution-card-wide">
+            <span class="card-no">01 · PRODUCTION</span>
+            <div><h3>Precision systems</h3><p>Robust, adaptable lines for demanding production environments — developed to stay productive over time.</p><a class="solution-link" href="#contact">Explore production systems <span aria-hidden="true">→</span></a></div>
+            <div class="solution-visual" role="img" aria-label="Image placeholder: precision production line"><span class="line-machine" aria-hidden="true"></span></div>
+          </article>
+          <article class="solution-card solution-card-narrow">
+            <span class="card-no">02 · AUTOMATION</span>
+            <div><h3>Useful automation</h3><p>Technology that removes friction, supports operators and makes complexity easier to manage.</p><a class="solution-link" href="#contact">Explore automation <span aria-hidden="true">→</span></a></div>
+            <div class="solution-visual" role="img" aria-label="Image placeholder: circular automation cell"><span class="automation-ring" aria-hidden="true"></span></div>
+          </article>
+          <article class="solution-card solution-card-long">
+            <div><span class="card-no">03 · SERVICES</span><h3 style="margin-top: 20px">Performance for the long run</h3><p>Connected service, thoughtful upgrades and people who know your system. So your investment keeps earning its place.</p><a class="solution-link" href="#approach">See lifecycle services <span aria-hidden="true">→</span></a></div>
+            <div class="service-visual" role="img" aria-label="Image placeholder: KERNWERK service specialist in a production facility"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell section" id="approach" aria-labelledby="approach-title">
+        <div class="approach-wrap">
+          <div class="approach-visual" role="img" aria-label="Image placeholder: engineer and customer in a workshop">
+            <div class="people-image"></div>
+            <aside class="material-note"><small>Our way of working</small><strong>Listen closely.<br>Build honestly.</strong></aside>
+          </div>
+          <div class="approach-copy">
+            <p class="section-kicker">A more human kind of engineering</p>
+            <h2 id="approach-title">Complex work. Clear partnership.</h2>
+            <p>The strongest machines grow from shared understanding. Our teams bring process expertise, curiosity and practical judgement to the table — from the first workshop to everyday operation.</p>
+            <div class="principles">
+              <div class="principle"><strong>Start with reality</strong><span>We learn your process before proposing the system.</span></div>
+              <div class="principle"><strong>Design for people</strong><span>Operators and maintenance teams shape our decisions.</span></div>
+              <div class="principle"><strong>Build for change</strong><span>Modular thinking keeps tomorrow within reach.</span></div>
+              <div class="principle"><strong>Stay accountable</strong><span>One partner remains close across the lifecycle.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="shell section section-tight" aria-labelledby="lifecycle-title">
+        <div class="lifecycle-card">
+          <div class="lifecycle-top">
+            <div><p class="section-kicker">One connected lifecycle</p><h2 id="lifecycle-title">Good engineering keeps giving.</h2></div>
+            <p>We think beyond installation day. Knowledge, service and improvement stay connected, helping your system respond as products, teams and markets evolve.</p>
+          </div>
+          <div class="stages" aria-label="KERNWERK lifecycle stages">
+            <div class="stage"><small>01</small><strong>Understand</strong><span>Process study, workshops and a shared target picture.</span></div>
+            <div class="stage"><small>02</small><strong>Create</strong><span>Collaborative engineering, testing and transparent delivery.</span></div>
+            <div class="stage"><small>03</small><strong>Support</strong><span>Responsive local service and connected expertise.</span></div>
+            <div class="stage"><small>04</small><strong>Improve</strong><span>Upgrades, optimization and new possibilities over time.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="shell section" id="global" aria-labelledby="global-title">
+        <div class="section-head">
+          <p class="section-kicker">Global network</p>
+          <div><h2 id="global-title">Worldwide capability. Familiar faces.</h2><p class="section-intro">Shared standards connect every KERNWERK team. Local specialists bring the context, language and proximity that make support personal.</p></div>
+        </div>
+        <div class="global-grid">
+          <article class="map-card">
+            <h3>One network, shaped around your operations.</h3>
+            <div class="map-surface" role="img" aria-label="Abstract world map placeholder showing four KERNWERK regions">
+              <span class="land land-one"></span><span class="land land-two"></span><span class="land land-three"></span><span class="land land-four"></span>
+              <span class="map-dot dot-1"></span><span class="map-dot dot-2"></span><span class="map-dot dot-3"></span><span class="map-dot dot-4"></span>
+            </div>
+          </article>
+          <article class="regions-card">
+            <div><p class="section-kicker" style="color: #ffe1b1">Wherever production happens</p><h3>Close when it matters.</h3><p>Regional engineering and service teams connect directly to a global knowledge network.</p></div>
+            <div class="regions" aria-label="Service regions"><span>Europe</span><span>Americas</span><span>Asia Pacific</span><span>Middle East &amp; Africa</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell section section-tight" id="contact" aria-labelledby="contact-title">
+        <div class="contact-card">
+          <div><p class="section-kicker" style="color: #e1b97c">Begin with a conversation</p><h2 id="contact-title">What should your next system make possible?</h2><p>Tell us where production needs to go. We will bring the questions, experience and engineering care to move it forward.</p></div>
+          <div class="contact-action"><a class="button" href="mailto:hello@kernwerk.example">Talk to an engineer <span class="arrow" aria-hidden="true">↗</span></a></div>
+        </div>
+      </section>
+    </main>
+    <footer class="shell footer">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>KERNWERK</a>
+      <div class="footer-links"><span>© 2026 KERNWERK</span><a href="#">Imprint</a><a href="#">Privacy</a><a href="#">LinkedIn</a></div>
+    </footer>
+  </body>
+</html>

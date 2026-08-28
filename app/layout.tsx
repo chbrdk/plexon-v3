@@ -4,6 +4,7 @@ import { Providers } from '@/components/Providers'
 import { I18nProvider } from '@/components/i18n/I18nProvider'
 import { getServerLocale } from '@/lib/i18n/server'
 import { shellPaths } from '@/lib/shell-paths'
+import { resolveThemeId } from '@msqdx/ui'
 import { FONT_URL_ASSISTANT_UI } from '@/lib/constants'
 import '@/styles/globals.css'
 
@@ -18,7 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={locale}
-      data-theme={shellPaths.defaultTheme}
+      data-theme={resolveThemeId(shellPaths.defaultTheme)}
       suppressHydrationWarning
     >
       <head>

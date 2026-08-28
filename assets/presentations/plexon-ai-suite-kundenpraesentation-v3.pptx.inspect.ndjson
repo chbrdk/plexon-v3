@@ -1,0 +1,437 @@
+{"kind":"deck","id":"pr/64ys9g","name":"Deck"}
+{"kind":"layout","layoutId":"241db497-49bb-443b-b2d1-56ef6daaa6b6","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"60e85c55-3986-47d2-bf42-d2d2939a1ca6","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/gn7yff","slide":1,"title":"PLEXON AI SUITE","textShapes":5}
+{"kind":"shape","id":"sh/i9g3idk7","slide":1,"bbox":[0,0,520,720]}
+{"kind":"textbox","id":"sh/jupkrilc","slide":1,"text":"PLEXON AI SUITE","textPreview":"PLEXON AI SUITE","textChars":15,"textLines":1,"bbox":[48,40,350,18]}
+{"kind":"textbox","id":"sh/x872p83m","slide":1,"text":"Spezialisierte\nFähigkeiten.\nGemeinsame\nIntelligenz.","textPreview":"Spezialisierte | Fähigkeiten. | Gemeinsame | Intelligenz.","textChars":51,"textLines":4,"bbox":[48,130,500,270]}
+{"kind":"textbox","id":"sh/a5gjedkv","slide":1,"text":"PLEXON verbindet Wissen in agentischen Workflows – und macht neue Zusammenhänge nutzbar.","textPreview":"PLEXON verbindet Wissen in agentischen Workflows – und macht neue Zusammenhänge nutzbar.","textChars":88,"textLines":1,"bbox":[48,438,445,70]}
+{"kind":"shape","id":"sh/v6pknylg","slide":1,"bbox":[48,560,170,4]}
+{"kind":"textbox","id":"sh/g3ils725","slide":1,"text":"MSQ DX · 2026","textPreview":"MSQ DX · 2026","textChars":13,"textLines":1,"bbox":[48,580,220,18]}
+{"kind":"textbox","id":"sh/h4b21c3q","slide":1,"text":"KUNDENPRÄSENTATION","textPreview":"KUNDENPRÄSENTATION","textChars":18,"textLines":1,"bbox":[48,676,260,16]}
+{"kind":"image","id":"im/oj6hszmt","slide":1,"name":"","alt":"Abstract network of connected knowledge streams","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/x8zyp4na","slide":1,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/gn7yff","slide":1,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/l6ures","slide":2,"title":"AUSGANGSLAGE","textShapes":22}
+{"kind":"textbox","id":"sh/x0fapcfu","slide":2,"text":"AUSGANGSLAGE","textPreview":"AUSGANGSLAGE","textChars":12,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/vexsnmho","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/k36t0ry5","slide":2,"text":"Mehr Tools schaffen noch keinen gemeinsamen Kontext.","textPreview":"Mehr Tools schaffen noch keinen gemeinsamen Kontext.","textChars":52,"textLines":1,"bbox":[48,82,1110,62]}
+{"kind":"textbox","id":"sh/54zatwfq","slide":2,"text":"MaFo, Marktsignale, Brandwissen, Kreation und Qualitätsdaten liegen oft nebeneinander. Die Übergaben kosten Herkunft, Tempo und Wirkung.","textPreview":"MaFo, Marktsignale, Brandwissen, Kreation und Qualitätsdaten liegen oft nebeneinander. Die Übergaben kosten Herkunft, Tempo und Wirkung.","textChars":136,"textLines":1,"bbox":[48,156,1040,52]}
+{"kind":"shape","id":"sh/i1oryhgf","slide":2,"bbox":[226,468,20,3]}
+{"kind":"shape","id":"sh/j2xsrmxk","slide":2,"bbox":[430,490,20,3]}
+{"kind":"shape","id":"sh/07m9ony1","slide":2,"bbox":[634,468,20,3]}
+{"kind":"shape","id":"sh/l8vahszm","slide":2,"bbox":[838,490,20,3]}
+{"kind":"shape","id":"sh/tkfel4bu","slide":2,"bbox":[48,296,178,218]}
+{"kind":"textbox","id":"sh/8jmdsza9","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[64,312,40,18]}
+{"kind":"textbox","id":"sh/7idwjut4","slide":2,"text":"MaFo","textPreview":"MaFo","textChars":4,"textLines":1,"bbox":[64,374,146,42]}
+{"kind":"textbox","id":"sh/6h4vq9sj","slide":2,"text":"Studien · Segmente","textPreview":"Studien · Segmente","textChars":18,"textLines":1,"bbox":[64,444,146,42]}
+{"kind":"shape","id":"sh/h8fepob6","slide":2,"bbox":[252,338,178,218]}
+{"kind":"textbox","id":"sh/g76dwjal","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[268,354,40,18]}
+{"kind":"textbox","id":"sh/v6xwnet0","slide":2,"text":"Markt","textPreview":"Markt","textChars":5,"textLines":1,"bbox":[268,416,146,42]}
+{"kind":"textbox","id":"sh/ulovu9sf","slide":2,"text":"Signale · Szenarien","textPreview":"Signale · Szenarien","textChars":19,"textLines":1,"bbox":[268,486,146,42]}
+{"kind":"shape","id":"sh/5czetob2","slide":2,"bbox":[456,274,178,218]}
+{"kind":"textbox","id":"sh/4bqd0jah","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[472,290,40,18]}
+{"kind":"textbox","id":"sh/ofyxw7it","slide":2,"text":"Marke","textPreview":"Marke","textChars":5,"textLines":1,"bbox":[472,352,146,42]}
+{"kind":"textbox","id":"sh/pg7ypcze","slide":2,"text":"Regeln · Assets","textPreview":"Regeln · Assets","textChars":15,"textLines":1,"bbox":[472,422,146,42]}
+{"kind":"shape","id":"sh/2dwfux0n","slide":2,"bbox":[660,328,178,218]}
+{"kind":"textbox","id":"sh/3e5gn2h8","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[676,344,40,18]}
+{"kind":"textbox","id":"sh/cjyx07ip","slide":2,"text":"Kreation","textPreview":"Kreation","textChars":8,"textLines":1,"bbox":[676,406,146,42]}
+{"kind":"textbox","id":"sh/xk7ytcza","slide":2,"text":"Ideen · Prototypen","textPreview":"Ideen · Prototypen","textChars":18,"textLines":1,"bbox":[676,476,146,42]}
+{"kind":"shape","id":"sh/ahgfyx0z","slide":2,"bbox":[864,288,178,218]}
+{"kind":"textbox","id":"sh/bipgr2hk","slide":2,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[880,304,40,18]}
+{"kind":"textbox","id":"sh/snuxonil","slide":2,"text":"Qualität","textPreview":"Qualität","textChars":8,"textLines":1,"bbox":[880,366,146,42]}
+{"kind":"textbox","id":"sh/tonyhsz6","slide":2,"text":"SEO · GEO · Content","textPreview":"SEO · GEO · Content","textChars":19,"textLines":1,"bbox":[880,436,146,42]}
+{"kind":"shape","id":"sh/vedsja50","slide":2,"bbox":[1070,296,162,250]}
+{"kind":"textbox","id":"sh/ut4ra5of","slide":2,"text":"KONTEXT\nVERLUST","textPreview":"KONTEXT | VERLUST","textChars":15,"textLines":2,"bbox":[1085,338,132,74]}
+{"kind":"textbox","id":"sh/hgvalkn6","slide":2,"text":"an jeder\nÜbergabe","textPreview":"an jeder | Übergabe","textChars":17,"textLines":2,"bbox":[1092,452,118,48]}
+{"kind":"textbox","id":"sh/gfm9cf6l","slide":2,"text":"Das Problem ist nicht das einzelne Tool. Sondern der fehlende gemeinsame Arbeitskreislauf.","textPreview":"Das Problem ist nicht das einzelne Tool. Sondern der fehlende gemeinsame Arbeitskreislauf.","textChars":90,"textLines":1,"bbox":[48,620,1040,32]}
+{"kind":"image","id":"im/zmhozapg","slide":2,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/l6ures","slide":2,"text":""}
+{"kind":"slide","id":"sl/hqv5yg","slide":3,"title":"HERO USE CASE","textShapes":15}
+{"kind":"textbox","id":"sh/43etkjql","slide":3,"text":"HERO USE CASE","textPreview":"HERO USE CASE","textChars":13,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/21wbi98f","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/ds7uh8r2","slide":3,"text":"Vom Signal oder Briefing zur optimierten Landingpage.","textPreview":"Vom Signal oder Briefing zur optimierten Landingpage.","textChars":53,"textLines":1,"bbox":[48,82,1100,58]}
+{"kind":"textbox","id":"sh/cryto3qh","slide":3,"text":"Zwei Einstiegspunkte. Ein gemeinsamer Kontext. Nur die Fähigkeiten, die der Use Case wirklich braucht.","textPreview":"Zwei Einstiegspunkte. Ein gemeinsamer Kontext. Nur die Fähigkeiten, die der Use Case wirklich braucht.","textChars":102,"textLines":1,"bbox":[48,150,1000,40]}
+{"kind":"shape","id":"sh/rqpsfy9w","slide":3,"bbox":[226,306,130,6]}
+{"kind":"shape","id":"sh/q5gbmt8r","slide":3,"bbox":[226,482,130,6]}
+{"kind":"shape","id":"sh/tw3a54ry","slide":3,"bbox":[356,306,48,182]}
+{"kind":"shape","id":"sh/svutczqd","slide":3,"bbox":[404,394,196,6]}
+{"kind":"shape","id":"sh/qlc32xgj","slide":3,"bbox":[600,394,360,6]}
+{"kind":"textbox","id":"sh/rmlkb2h4","slide":3,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[936,365,58,54]}
+{"kind":"shape","id":"sh/snul47yp","slide":3,"bbox":[48,254,178,110]}
+{"kind":"textbox","id":"sh/do32dcza","slide":3,"text":"MARKTSIGNAL\nECHON","textPreview":"MARKTSIGNAL | ECHON","textChars":17,"textLines":2,"bbox":[58,262,158,94]}
+{"kind":"shape","id":"sh/epw36hgv","slide":3,"bbox":[48,430,178,110]}
+{"kind":"textbox","id":"sh/fq5kfmh0","slide":3,"text":"KUNDEN-\nBRIEFING","textPreview":"KUNDEN- | BRIEFING","textChars":16,"textLines":2,"bbox":[58,438,158,94]}
+{"kind":"shape","id":"sh/0bel8ryl","slide":3,"bbox":[356,335,188,118]}
+{"kind":"textbox","id":"sh/1cn2hwz6","slide":3,"text":"PLEXON","textPreview":"PLEXON","textChars":6,"textLines":1,"bbox":[366,343,168,102]}
+{"kind":"shape","id":"sh/2dw3ahgr","slide":3,"bbox":[570,300,100,58]}
+{"kind":"textbox","id":"sh/ne5kjmhc","slide":3,"text":"PERSONA","textPreview":"PERSONA","textChars":7,"textLines":1,"bbox":[580,308,80,42]}
+{"kind":"shape","id":"sh/zipk7mdk","slide":3,"bbox":[684,300,100,58]}
+{"kind":"textbox","id":"sh/yhgjy1wz","slide":3,"text":"PROTOTYP","textPreview":"PROTOTYP","textChars":8,"textLines":1,"bbox":[694,308,80,42]}
+{"kind":"shape","id":"sh/lk729wva","slide":3,"bbox":[798,300,100,58]}
+{"kind":"textbox","id":"sh/kjy10rep","slide":3,"text":"MARKE","textPreview":"MARKE","textChars":5,"textLines":1,"bbox":[808,308,80,42]}
+{"kind":"shape","id":"sh/be5k3md8","slide":3,"bbox":[912,300,100,58]}
+{"kind":"textbox","id":"sh/adwjuhwn","slide":3,"text":"QUALITÄT","textPreview":"QUALITÄT","textChars":8,"textLines":1,"bbox":[922,308,80,42]}
+{"kind":"shape","id":"sh/xg725wve","slide":3,"bbox":[1000,238,232,326]}
+{"kind":"shape","id":"sh/cfe1wret","slide":3,"bbox":[1025,270,120,5]}
+{"kind":"shape","id":"sh/nq5kz2dc","slide":3,"bbox":[1025,306,182,72]}
+{"kind":"textbox","id":"sh/2pwjqhwr","slide":3,"text":"LANDINGPAGE","textPreview":"LANDINGPAGE","textChars":11,"textLines":1,"bbox":[1040,328,152,22]}
+{"kind":"shape","id":"sh/svah03up","slide":3,"bbox":[1025,402,182,2]}
+{"kind":"shape","id":"sh/dw3y98bu","slide":3,"bbox":[1025,424,142,2]}
+{"kind":"shape","id":"sh/qtszydcj","slide":3,"bbox":[1025,446,165,2]}
+{"kind":"shape","id":"sh/ru1g7yt4","slide":3,"bbox":[1025,490,110,36]}
+{"kind":"textbox","id":"sh/0juh4nul","slide":3,"text":"CMS-READY","textPreview":"CMS-READY","textChars":9,"textLines":1,"bbox":[1035,498,90,20]}
+{"kind":"textbox","id":"sh/1k3ydsb6","slide":3,"text":"VALIDIERT · MARKENKONFORM · PRÜFBAR","textPreview":"VALIDIERT · MARKENKONFORM · PRÜFBAR","textChars":35,"textLines":1,"bbox":[48,624,850,20]}
+{"kind":"image","id":"im/y9g7ydc7","slide":3,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/hqv5yg","slide":3,"text":""}
+{"kind":"slide","id":"sl/40ixgf","slide":4,"title":"END-TO-END JOURNEY","textShapes":21}
+{"kind":"textbox","id":"sh/m1kb29sj","slide":4,"text":"END-TO-END JOURNEY","textPreview":"END-TO-END JOURNEY","textChars":18,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/o32t4jap","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/bqtczet0","slide":4,"text":"Ein Prozess. Viele Spezialisten. Ein lernender Loop.","textPreview":"Ein Prozess. Viele Spezialisten. Ein lernender Loop.","textChars":52,"textLines":1,"bbox":[48,78,1090,58]}
+{"kind":"shape","id":"sh/a5kb69sf","slide":4,"bbox":[155,195,3,65]}
+{"kind":"shape","id":"sh/xsvu1ob6","slide":4,"bbox":[155,195,200,3]}
+{"kind":"shape","id":"sh/wrmt8jal","slide":4,"bbox":[355,170,3,25]}
+{"kind":"shape","id":"sh/ru9snutw","slide":4,"bbox":[355,170,235,3]}
+{"kind":"shape","id":"sh/q90bupcb","slide":4,"bbox":[590,170,3,35]}
+{"kind":"shape","id":"sh/wnal4ja9","slide":4,"bbox":[590,205,240,3]}
+{"kind":"shape","id":"sh/xojmdobu","slide":4,"bbox":[830,205,3,100]}
+{"kind":"shape","id":"sh/als329sj","slide":4,"bbox":[830,305,200,3]}
+{"kind":"shape","id":"sh/vm1kbeto","slide":4,"bbox":[1030,305,3,175]}
+{"kind":"shape","id":"sh/krul83al","slide":4,"bbox":[890,480,140,3]}
+{"kind":"shape","id":"sh/5s3mhob6","slide":4,"bbox":[890,480,3,40]}
+{"kind":"shape","id":"sh/ipc36tsf","slide":4,"bbox":[620,520,270,3]}
+{"kind":"shape","id":"sh/jql4fyt0","slide":4,"bbox":[620,470,3,50]}
+{"kind":"shape","id":"sh/0vqlwza1","slide":4,"bbox":[350,470,270,3]}
+{"kind":"shape","id":"sh/lwz254bm","slide":4,"bbox":[350,260,3,210]}
+{"kind":"shape","id":"sh/1g7adwze","slide":4,"bbox":[155,260,195,3]}
+{"kind":"textbox","id":"sh/gfy9krit","slide":4,"text":"ERGEBNISSE\nZURÜCK","textPreview":"ERGEBNISSE | ZURÜCK","textChars":17,"textLines":2,"bbox":[205,412,110,52]}
+{"kind":"shape","id":"sh/fepsbmh8","slide":4,"bbox":[90,225,130,58]}
+{"kind":"textbox","id":"sh/edgri10n","slide":4,"text":"ECHON","textPreview":"ECHON","textChars":5,"textLines":1,"bbox":[100,233,110,42]}
+{"kind":"textbox","id":"sh/p4rahgza","slide":4,"text":"Research Brief","textPreview":"Research Brief","textChars":14,"textLines":1,"bbox":[80,293,150,20]}
+{"kind":"shape","id":"sh/o3i9obip","slide":4,"bbox":[290,160,130,58]}
+{"kind":"textbox","id":"sh/329sf6hk","slide":4,"text":"AUDION","textPreview":"AUDION","textChars":6,"textLines":1,"bbox":[300,168,110,42]}
+{"kind":"textbox","id":"sh/210rm10z","slide":4,"text":"Evidence Matrix","textPreview":"Evidence Matrix","textChars":15,"textLines":1,"bbox":[280,228,150,20]}
+{"kind":"shape","id":"sh/d8balgzm","slide":4,"bbox":[525,135,130,58]}
+{"kind":"textbox","id":"sh/c7itsby1","slide":4,"text":"PLEXON","textPreview":"PLEXON","textChars":6,"textLines":1,"bbox":[535,143,110,42]}
+{"kind":"textbox","id":"sh/adc7mdgj","slide":4,"text":"Orchestrierter Flow","textPreview":"Orchestrierter Flow","textChars":19,"textLines":1,"bbox":[515,203,150,20]}
+{"kind":"shape","id":"sh/velofix4","slide":4,"bbox":[765,170,130,58]}
+{"kind":"textbox","id":"sh/wfuponyp","slide":4,"text":"CREATION","textPreview":"CREATION","textChars":8,"textLines":1,"bbox":[775,178,110,42]}
+{"kind":"textbox","id":"sh/xg36hsfu","slide":4,"text":"Prototyp","textPreview":"Prototyp","textChars":8,"textLines":1,"bbox":[755,238,150,20]}
+{"kind":"shape","id":"sh/ihw7qxgf","slide":4,"bbox":[965,270,130,58]}
+{"kind":"textbox","id":"sh/ji58jix0","slide":4,"text":"BRANDION","textPreview":"BRANDION","textChars":8,"textLines":1,"bbox":[975,278,110,42]}
+{"kind":"textbox","id":"sh/kjepsnyl","slide":4,"text":"Freigabe","textPreview":"Freigabe","textChars":8,"textLines":1,"bbox":[955,338,150,20]}
+{"kind":"shape","id":"sh/5knqlsf6","slide":4,"bbox":[825,445,130,58]}
+{"kind":"textbox","id":"sh/6lw7uxgr","slide":4,"text":"CMS","textPreview":"CMS","textChars":3,"textLines":1,"bbox":[835,453,110,42]}
+{"kind":"textbox","id":"sh/7m58n2xc","slide":4,"text":"Live-Seite","textPreview":"Live-Seite","textChars":10,"textLines":1,"bbox":[815,513,150,20]}
+{"kind":"shape","id":"sh/f21o72pg","slide":4,"bbox":[555,485,130,58]}
+{"kind":"textbox","id":"sh/e1s7ex8v","slide":4,"text":"CHECKION","textPreview":"CHECKION","textChars":8,"textLines":1,"bbox":[565,493,110,42]}
+{"kind":"textbox","id":"sh/14369c76","slide":4,"text":"Findings","textPreview":"Findings","textChars":8,"textLines":1,"bbox":[545,553,150,20]}
+{"kind":"textbox","id":"sh/03apg761","slide":4,"text":"KONTEXT","textPreview":"KONTEXT","textChars":7,"textLines":1,"bbox":[474,292,332,52]}
+{"kind":"textbox","id":"sh/n6lob2pc","slide":4,"text":"Quellen · Entscheidungen · Ergebnisse","textPreview":"Quellen · Entscheidungen · Ergebnisse","textChars":37,"textLines":1,"bbox":[424,350,432,22]}
+{"kind":"textbox","id":"sh/25c7ixor","slide":4,"text":"Kein Pflichtparcours: Jede Journey ist modular und wird pro Prozess zusammengestellt.","textPreview":"Kein Pflichtparcours: Jede Journey ist modular und wird pro Prozess zusammengestellt.","textChars":85,"textLines":1,"bbox":[48,646,1030,24]}
+{"kind":"image","id":"im/w36dwnad","slide":4,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/40ixgf","slide":4,"text":""}
+{"kind":"slide","id":"sl/arcfne","slide":5,"title":"PLEXON · ORCHESTRATION","textShapes":12}
+{"kind":"textbox","id":"sh/8r2h0fu9","slide":5,"text":"PLEXON · ORCHESTRATION","textPreview":"PLEXON · ORCHESTRATION","textChars":22,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/yl0fu5c7","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/zm9gnats","slide":5,"text":"Aus verteiltem Wissen wird handlungsfähige Intelligenz.","textPreview":"Aus verteiltem Wissen wird handlungsfähige Intelligenz.","textChars":55,"textLines":1,"bbox":[48,88,530,112]}
+{"kind":"textbox","id":"sh/0nixwfud","slide":5,"text":"PLEXON verknüpft Quellen, Personas, Apps, Ergebnisse und Entscheidungen in ausgelösten oder konfigurierten agentischen Workflows.","textPreview":"PLEXON verknüpft Quellen, Personas, Apps, Ergebnisse und Entscheidungen in ausgelösten oder konfigurierten agentischen Workflows.","textChars":129,"textLines":1,"bbox":[48,224,450,96]}
+{"kind":"textbox","id":"sh/lorypkby","slide":5,"text":"KONTEXT","textPreview":"KONTEXT","textChars":7,"textLines":1,"bbox":[48,355,350,32]}
+{"kind":"textbox","id":"sh/ihkz69cb","slide":5,"text":"ORCHESTRIERUNG","textPreview":"ORCHESTRIERUNG","textChars":14,"textLines":1,"bbox":[48,403,350,32]}
+{"kind":"textbox","id":"sh/jitgzutw","slide":5,"text":"NACHWEIS","textPreview":"NACHWEIS","textChars":8,"textLines":1,"bbox":[48,451,350,32]}
+{"kind":"shape","id":"sh/zutsby5o","slide":5,"bbox":[790,314,122,38]}
+{"kind":"textbox","id":"sh/y9krito3","slide":5,"text":"NEW INSIGHT","textPreview":"NEW INSIGHT","textChars":11,"textLines":1,"bbox":[800,325,102,15]}
+{"kind":"shape","id":"sh/lwbadonu","slide":5,"bbox":[48,552,520,2]}
+{"kind":"textbox","id":"sh/kv29kj69","slide":5,"text":"PRODUKTNAH","textPreview":"PRODUKTNAH","textChars":10,"textLines":1,"bbox":[48,562,520,16]}
+{"kind":"textbox","id":"sh/7ydsfy5k","slide":5,"text":"Run-Historie · Freigaben · MCP / API / Webhook","textPreview":"Run-Historie · Freigaben · MCP / API / Webhook","textChars":46,"textLines":1,"bbox":[48,582,520,24]}
+{"kind":"shape","id":"sh/mxkrmtof","slide":5,"bbox":[48,624,260,2]}
+{"kind":"textbox","id":"sh/90vah8nq","slide":5,"text":"PILOT-KPI","textPreview":"PILOT-KPI","textChars":9,"textLines":1,"bbox":[48,634,260,16]}
+{"kind":"textbox","id":"sh/8zmto3m5","slide":5,"text":"Time-to-Insight","textPreview":"Time-to-Insight","textChars":15,"textLines":1,"bbox":[48,654,260,24]}
+{"kind":"image","id":"im/axw7atcn","slide":5,"name":"","alt":"Knowledge network with a central PLEXON insight node","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/czypc3ut","slide":5,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/arcfne","slide":5,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/6k9ghe","slide":6,"title":"PLEXON · WORKFLOW BUILDER","textShapes":30}
+{"kind":"textbox","id":"sh/65sru5oz","slide":6,"text":"PLEXON · WORKFLOW BUILDER","textPreview":"PLEXON · WORKFLOW BUILDER","textChars":25,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/s7a9wf6p","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/jihszqp8","slide":6,"text":"Autonomie, die sich steuern lässt.","textPreview":"Autonomie, die sich steuern lässt.","textChars":34,"textLines":1,"bbox":[48,82,950,58]}
+{"kind":"textbox","id":"sh/ih8rqlon","slide":6,"text":"Trigger, Spezialfähigkeiten, Freigaben und Wiederholungen werden zu einem nachvollziehbaren Ablauf.","textPreview":"Trigger, Spezialfähigkeiten, Freigaben und Wiederholungen werden zu einem nachvollziehbaren Ablauf.","textChars":99,"textLines":1,"bbox":[48,148,980,40]}
+{"kind":"shape","id":"sh/54ja107e","slide":6,"bbox":[116,317,1000,5]}
+{"kind":"textbox","id":"sh/kjq9sv6t","slide":6,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[1094,286,62,56]}
+{"kind":"shape","id":"sh/3elsbupc","slide":6,"bbox":[66,248,184,142]}
+{"kind":"textbox","id":"sh/2dcb2po7","slide":6,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[80,262,30,18]}
+{"kind":"textbox","id":"sh/g3ipk7ex","slide":6,"text":"TRIGGER","textPreview":"TRIGGER","textChars":7,"textLines":1,"bbox":[80,294,156,28]}
+{"kind":"textbox","id":"sh/1or6dcfi","slide":6,"text":"UI · Assistant\nWebhook · Service","textPreview":"UI · Assistant | Webhook · Service","textChars":32,"textLines":2,"bbox":[80,338,156,38]}
+{"kind":"shape","id":"sh/e107ixw7","slide":6,"bbox":[290,248,184,142]}
+{"kind":"textbox","id":"sh/f29ob2xc","slide":6,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[304,262,30,18]}
+{"kind":"textbox","id":"sh/szipgne1","slide":6,"text":"AGENTS + TOOLS","textPreview":"AGENTS + TOOLS","textChars":14,"textLines":1,"bbox":[304,294,156,28]}
+{"kind":"textbox","id":"sh/t0r69sfm","slide":6,"text":"PLEXON Apps\nAPIs · MCP","textPreview":"PLEXON Apps | APIs · MCP","textChars":22,"textLines":2,"bbox":[304,338,156,38]}
+{"kind":"shape","id":"sh/6xg7edwv","slide":6,"bbox":[544,248,184,142]}
+{"kind":"textbox","id":"sh/ry9o7ixg","slide":6,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[558,262,30,18]}
+{"kind":"textbox","id":"sh/kvypcnep","slide":6,"text":"FREIGABE","textPreview":"FREIGABE","textChars":8,"textLines":1,"bbox":[558,294,156,28]}
+{"kind":"textbox","id":"sh/5w7658fa","slide":6,"text":"Rolle · Gate\nEntscheidung","textPreview":"Rolle · Gate | Entscheidung","textChars":25,"textLines":2,"bbox":[558,338,156,38]}
+{"kind":"shape","id":"sh/lgzetk32","slide":6,"bbox":[768,248,184,142]}
+{"kind":"textbox","id":"sh/0f6dkfmh","slide":6,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[782,262,30,18]}
+{"kind":"textbox","id":"sh/zexwralw","slide":6,"text":"AKTION","textPreview":"AKTION","textChars":6,"textLines":1,"bbox":[782,294,156,28]}
+{"kind":"textbox","id":"sh/ydovi54b","slide":6,"text":"Brief · Prototype\nCheck · Handoff","textPreview":"Brief · Prototype | Check · Handoff","textChars":33,"textLines":2,"bbox":[782,338,156,38]}
+{"kind":"shape","id":"sh/dcfep03q","slide":6,"bbox":[992,248,184,142]}
+{"kind":"textbox","id":"sh/cb6dgvm5","slide":6,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1006,262,30,18]}
+{"kind":"textbox","id":"sh/baxwnql0","slide":6,"text":"WIEDERHOLUNG","textPreview":"WIEDERHOLUNG","textChars":12,"textLines":1,"bbox":[1006,294,156,28]}
+{"kind":"textbox","id":"sh/qpove54f","slide":6,"text":"Re-Run\nexterner Trigger","textPreview":"Re-Run | externer Trigger","textChars":23,"textLines":2,"bbox":[1006,338,156,38]}
+{"kind":"textbox","id":"sh/x8je143a","slide":6,"text":"VORSCHLAGEN","textPreview":"VORSCHLAGEN","textChars":11,"textLines":1,"bbox":[70,438,150,20]}
+{"kind":"shape","id":"sh/w7qdsz2p","slide":6,"bbox":[178,448,805,3]}
+{"kind":"textbox","id":"sh/etkbm1k7","slide":6,"text":"ANALYSIEREN","textPreview":"ANALYSIEREN","textChars":11,"textLines":1,"bbox":[318,438,150,20]}
+{"kind":"textbox","id":"sh/futsv61s","slide":6,"text":"MIT FREIGABE HANDELN","textPreview":"MIT FREIGABE HANDELN","textChars":20,"textLines":1,"bbox":[590,438,190,20]}
+{"kind":"textbox","id":"sh/gv2tor2x","slide":6,"text":"BEGRENZT AUTONOM","textPreview":"BEGRENZT AUTONOM","textChars":16,"textLines":1,"bbox":[944,438,180,20]}
+{"kind":"shape","id":"sh/1gbaxwji","slide":6,"bbox":[48,506,376,112]}
+{"kind":"shape","id":"sh/6p0bihkv","slide":6,"bbox":[64,521,74,25]}
+{"kind":"textbox","id":"sh/rqtsrm1g","slide":6,"text":"HEUTE","textPreview":"HEUTE","textChars":5,"textLines":1,"bbox":[71,526,60,15]}
+{"kind":"textbox","id":"sh/sr2tkr21","slide":6,"text":"Definierte Flows · Gates · Run-Historie","textPreview":"Definierte Flows · Gates · Run-Historie","textChars":39,"textLines":1,"bbox":[64,558,330,36]}
+{"kind":"shape","id":"sh/tsbatwjm","slide":6,"bbox":[452,506,376,112]}
+{"kind":"shape","id":"sh/ql4bulkf","slide":6,"bbox":[468,521,128,25]}
+{"kind":"textbox","id":"sh/bmdc3q10","slide":6,"text":"KONFIGURIERBAR","textPreview":"KONFIGURIERBAR","textChars":14,"textLines":1,"bbox":[475,526,114,15]}
+{"kind":"textbox","id":"sh/betoji50","slide":6,"text":"Adapter · externe Zeitsteuerung","textPreview":"Adapter · externe Zeitsteuerung","textChars":31,"textLines":1,"bbox":[468,558,330,36]}
+{"kind":"shape","id":"sh/adk7qd4v","slide":6,"bbox":[856,506,376,112]}
+{"kind":"shape","id":"sh/xgb6lsn6","slide":6,"bbox":[872,521,86,25]}
+{"kind":"textbox","id":"sh/wf2psnml","slide":6,"text":"ROADMAP","textPreview":"ROADMAP","textChars":7,"textLines":1,"bbox":[879,526,72,15]}
+{"kind":"textbox","id":"sh/na9ofy54","slide":6,"text":"Native Pläne · universelle Tool-Nodes · Dauer-Loops","textPreview":"Native Pläne · universelle Tool-Nodes · Dauer-Loops","textChars":51,"textLines":1,"bbox":[872,558,330,42]}
+{"kind":"image","id":"im/kbi5gf6d","slide":6,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/6k9ghe","slide":6,"text":""}
+{"kind":"slide","id":"sl/8mcg84","slide":7,"title":"ECHON · MARKET INTELLIGENCE","textShapes":16}
+{"kind":"shape","id":"sh/y107mts3","slide":7,"bbox":[0,0,505,720]}
+{"kind":"textbox","id":"sh/z298fyt8","slide":7,"text":"ECHON · MARKET INTELLIGENCE","textPreview":"ECHON · MARKET INTELLIGENCE","textChars":27,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/98rql8bq","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/m50rqtsz","slide":7,"text":"Aus Marktbewegungen werden Entscheidungen.","textPreview":"Aus Marktbewegungen werden Entscheidungen.","textChars":42,"textLines":1,"bbox":[48,92,470,112]}
+{"kind":"textbox","id":"sh/7698jytk","slide":7,"text":"ECHON verdichtet Markt- und Pressesignale zu Watchlists, Szenarien und zitierbaren Research Briefings.","textPreview":"ECHON verdichtet Markt- und Pressesignale zu Watchlists, Szenarien und zitierbaren Research Briefings.","textChars":102,"textLines":1,"bbox":[48,224,410,82]}
+{"kind":"textbox","id":"sh/obypgzal","slide":7,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[48,348,28,18]}
+{"kind":"textbox","id":"sh/pc7qp4b6","slide":7,"text":"BEOBACHTEN","textPreview":"BEOBACHTEN","textChars":10,"textLines":1,"bbox":[88,344,250,24]}
+{"kind":"textbox","id":"sh/dcjex8vq","slide":7,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[48,390,28,18]}
+{"kind":"textbox","id":"sh/cbqd43e5","slide":7,"text":"VERDICHTEN","textPreview":"VERDICHTEN","textChars":10,"textLines":1,"bbox":[88,386,250,24]}
+{"kind":"textbox","id":"sh/rahcvydk","slide":7,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[48,432,28,18]}
+{"kind":"textbox","id":"sh/q98v2twz","slide":7,"text":"PRIORISIEREN","textPreview":"PRIORISIEREN","textChars":12,"textLines":1,"bbox":[88,428,250,24]}
+{"kind":"textbox","id":"sh/1gje1svm","slide":7,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[48,474,28,18]}
+{"kind":"textbox","id":"sh/0fad8ne1","slide":7,"text":"BRIEFEN","textPreview":"BRIEFEN","textChars":7,"textLines":1,"bbox":[88,470,250,24]}
+{"kind":"shape","id":"sh/ze1wzidw","slide":7,"bbox":[48,534,350,70]}
+{"kind":"textbox","id":"sh/edsv6dwb","slide":7,"text":"RESEARCH BRIEF","textPreview":"RESEARCH BRIEF","textChars":14,"textLines":1,"bbox":[64,548,180,22]}
+{"kind":"textbox","id":"sh/943e5svy","slide":7,"text":"Priorität · Szenario · Quellen","textPreview":"Priorität · Szenario · Quellen","textChars":30,"textLines":1,"bbox":[64,574,300,16]}
+{"kind":"shape","id":"sh/ojadcned","slide":7,"bbox":[48,628,330,2]}
+{"kind":"textbox","id":"sh/8z2pov6l","slide":7,"text":"PRODUKTNAH","textPreview":"PRODUKTNAH","textChars":10,"textLines":1,"bbox":[48,638,330,16]}
+{"kind":"textbox","id":"sh/t0b6x076","slide":7,"text":"Signale · Quellen · Briefings","textPreview":"Signale · Quellen · Briefings","textChars":29,"textLines":1,"bbox":[48,658,330,24]}
+{"kind":"image","id":"im/ojqx8za1","slide":7,"name":"","alt":"Market signals converging into a prioritized direction","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/xojy54bi","slide":7,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/8mcg84","slide":7,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/ev33wo","slide":8,"title":"AUDION · PERSONA INTELLIGENCE","textShapes":18}
+{"kind":"textbox","id":"sh/w7ipgzix","slide":8,"text":"AUDION · PERSONA INTELLIGENCE","textPreview":"AUDION · PERSONA INTELLIGENCE","textChars":29,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/it07i90n","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/ju9obeh8","slide":8,"text":"Zielgruppenwissen wird zum Gesprächspartner.","textPreview":"Zielgruppenwissen wird zum Gesprächspartner.","textChars":44,"textLines":1,"bbox":[48,88,520,108]}
+{"kind":"textbox","id":"sh/kvipkjit","slide":8,"text":"MaFo und Quellen werden zu research-basierten Personas – für konkrete Fragen, Ideenchecks und Zielgruppenkontext in der gesamten Suite.","textPreview":"MaFo und Quellen werden zu research-basierten Personas – für konkrete Fragen, Ideenchecks und Zielgruppenkontext in der gesamten Suite.","textChars":135,"textLines":1,"bbox":[48,214,480,90]}
+{"kind":"shape","id":"sh/5wb6doze","slide":8,"bbox":[48,346,130,25]}
+{"kind":"textbox","id":"sh/yxgn6p0j","slide":8,"text":"TEXT · HEUTE","textPreview":"TEXT · HEUTE","textChars":12,"textLines":1,"bbox":[55,351,116,15]}
+{"kind":"shape","id":"sh/zypozah4","slide":8,"bbox":[188,346,184,25]}
+{"kind":"textbox","id":"sh/72lwbuxg","slide":8,"text":"VIDEO · KONFIGURIERT","textPreview":"VIDEO · KONFIGURIERT","textChars":20,"textLines":1,"bbox":[195,351,170,15]}
+{"kind":"shape","id":"sh/m1cv2pgv","slide":8,"bbox":[382,346,196,25]}
+{"kind":"textbox","id":"sh/943ex4fm","slide":8,"text":"VOICE · IN VORBEREITUNG","textPreview":"VOICE · IN VORBEREITUNG","textChars":23,"textLines":1,"bbox":[389,351,182,15]}
+{"kind":"textbox","id":"sh/83ud4zy1","slide":8,"text":"EVIDENCE CHAIN","textPreview":"EVIDENCE CHAIN","textChars":14,"textLines":1,"bbox":[48,418,180,18]}
+{"kind":"textbox","id":"sh/zy1w7uxk","slide":8,"text":"QUELLE","textPreview":"QUELLE","textChars":6,"textLines":1,"bbox":[48,452,95,25]}
+{"kind":"textbox","id":"sh/yxsvypgz","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[140,449,34,28]}
+{"kind":"textbox","id":"sh/l03e9kfq","slide":8,"text":"INTERPRETATION","textPreview":"INTERPRETATION","textChars":14,"textLines":1,"bbox":[174,452,155,25]}
+{"kind":"textbox","id":"sh/kzud0zy5","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[330,449,34,28]}
+{"kind":"textbox","id":"sh/ba1w3ax8","slide":8,"text":"SIMULATION","textPreview":"SIMULATION","textChars":10,"textLines":1,"bbox":[366,452,130,25]}
+{"kind":"textbox","id":"sh/a9svu5g3","slide":8,"text":"Personas ergänzen empirische Forschung. Sie ersetzen sie nicht.","textPreview":"Personas ergänzen empirische Forschung. Sie ersetzen sie nicht.","textChars":63,"textLines":1,"bbox":[48,496,470,32]}
+{"kind":"shape","id":"sh/e58f650v","slide":8,"bbox":[48,570,500,2]}
+{"kind":"textbox","id":"sh/f6hwfa1g","slide":8,"text":"CROSS-APP","textPreview":"CROSS-APP","textChars":9,"textLines":1,"bbox":[48,580,500,16]}
+{"kind":"textbox","id":"sh/07qx8fi1","slide":8,"text":"GEO-Fragen · Markt-Relevanz · Resonanzfeedback","textPreview":"GEO-Fragen · Markt-Relevanz · Resonanzfeedback","textChars":46,"textLines":1,"bbox":[48,600,500,24]}
+{"kind":"shape","id":"sh/18jehkj6","slide":8,"bbox":[48,636,500,2]}
+{"kind":"textbox","id":"sh/29sfap0r","slide":8,"text":"PILOT-KPI","textPreview":"PILOT-KPI","textChars":9,"textLines":1,"bbox":[48,646,500,16]}
+{"kind":"textbox","id":"sh/nu1wja1c","slide":8,"text":"Validierungszeit · Evidence Coverage","textPreview":"Validierungszeit · Evidence Coverage","textChars":36,"textLines":1,"bbox":[48,666,500,24]}
+{"kind":"image","id":"im/6pwb6hgf","slide":8,"name":"","alt":"Synthetic persona built from evidence layers and conversational signals","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/8ryt87yl","slide":8,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/ev33wo","slide":8,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/bog6y2","slide":9,"title":"CREATION · RAPID PROTOTYPING","textShapes":14}
+{"kind":"textbox","id":"sh/2dwzmhkv","slide":9,"text":"CREATION · RAPID PROTOTYPING","textPreview":"CREATION · RAPID PROTOTYPING","textChars":28,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/cjy1sr2x","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"shape","id":"sh/xk7ilwji","slide":9,"bbox":[0,70,560,220]}
+{"kind":"textbox","id":"sh/ahwjq1kr","slide":9,"text":"Ideen werden sichtbar, bevor Produktion beginnt.","textPreview":"Ideen werden sichtbar, bevor Produktion beginnt.","textChars":48,"textLines":1,"bbox":[48,96,490,94]}
+{"kind":"textbox","id":"sh/bip0j61c","slide":9,"text":"CREATION visualisiert Landingpages und PDPs – und überführt ausgewählte Varianten in wiederverwendbare React-/Storybook-Bausteine.","textPreview":"CREATION visualisiert Landingpages und PDPs – und überführt ausgewählte Varianten in wiederverwendbare React-/Storybook-Bausteine.","textChars":130,"textLines":1,"bbox":[48,204,480,64]}
+{"kind":"shape","id":"sh/k7y1wb2t","slide":9,"bbox":[0,588,1280,94]}
+{"kind":"textbox","id":"sh/l87ipgje","slide":9,"text":"BRIEF","textPreview":"BRIEF","textChars":5,"textLines":1,"bbox":[48,611,150,20]}
+{"kind":"textbox","id":"sh/p0n6povq","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[198,603,28,28]}
+{"kind":"textbox","id":"sh/ozepgju5","slide":9,"text":"VARIANTEN","textPreview":"VARIANTEN","textChars":9,"textLines":1,"bbox":[226,611,150,20]}
+{"kind":"textbox","id":"sh/nylonedk","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[376,603,28,28]}
+{"kind":"textbox","id":"sh/2xc7etcz","slide":9,"text":"PERSONA + BRAND","textPreview":"PERSONA + BRAND","textChars":15,"textLines":1,"bbox":[404,611,190,20]}
+{"kind":"textbox","id":"sh/x4n6t8vm","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[594,603,28,28]}
+{"kind":"textbox","id":"sh/c3epk3u1","slide":9,"text":"FREIGABE","textPreview":"FREIGABE","textChars":8,"textLines":1,"bbox":[622,611,150,20]}
+{"kind":"textbox","id":"sh/b25orydw","slide":9,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[772,603,28,28]}
+{"kind":"textbox","id":"sh/a1w7itcb","slide":9,"text":"REACT / STORYBOOK","textPreview":"REACT / STORYBOOK","textChars":17,"textLines":1,"bbox":[800,611,150,20]}
+{"kind":"textbox","id":"sh/d836h4vi","slide":9,"text":"CMS-Anbindungen werden projektspezifisch ergänzt.","textPreview":"CMS-Anbindungen werden projektspezifisch ergänzt.","textChars":49,"textLines":1,"bbox":[842,650,390,18]}
+{"kind":"image","id":"im/w3axc3y1","slide":9,"name":"","alt":"Landing-page prototypes turning into modular experience components","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/u1sfatgv","slide":9,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/bog6y2","slide":9,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/u1xzkt","slide":10,"title":"BRANDION · BRAND GOVERNANCE","textShapes":10}
+{"kind":"shape","id":"sh/0by1k7ut","slide":10,"bbox":[0,0,505,720]}
+{"kind":"textbox","id":"sh/1c7itcve","slide":10,"text":"BRANDION · BRAND GOVERNANCE","textPreview":"BRANDION · BRAND GOVERNANCE","textChars":27,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/rmp0n2dc","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/s7y1g7ux","slide":10,"text":"Marke wird anwendbar. Und überprüfbar.","textPreview":"Marke wird anwendbar. Und überprüfbar.","textChars":38,"textLines":1,"bbox":[48,92,430,102]}
+{"kind":"textbox","id":"sh/d87ipcvi","slide":10,"text":"Brandwissen, Tokens und Guidelines stehen als gemeinsamer Kontext bereit – für digitale und druckfertige PDF-/Bild-Assets.","textPreview":"Brandwissen, Tokens und Guidelines stehen als gemeinsamer Kontext bereit – für digitale und druckfertige PDF-/Bild-Assets.","textChars":122,"textLines":1,"bbox":[48,214,408,90]}
+{"kind":"textbox","id":"sh/ah0jqhcv","slide":10,"text":"01  COMPLIANCE","textPreview":"01  COMPLIANCE","textChars":14,"textLines":1,"bbox":[48,348,190,20]}
+{"kind":"textbox","id":"sh/bi90zmdg","slide":10,"text":"Farbe · Typografie · Layout\nSprache · Logo","textPreview":"Farbe · Typografie · Layout | Sprache · Logo","textChars":42,"textLines":2,"bbox":[48,382,320,54]}
+{"kind":"shape","id":"sh/3ilsj65c","slide":10,"bbox":[48,460,360,2]}
+{"kind":"textbox","id":"sh/ihcba1or","slide":10,"text":"02  RESONANZ","textPreview":"02  RESONANZ","textChars":12,"textLines":1,"bbox":[48,486,190,20]}
+{"kind":"textbox","id":"sh/5k3algni","slide":10,"text":"Persona-Wirkung optional\nüber PLEXON + AUDION","textPreview":"Persona-Wirkung optional | über PLEXON + AUDION","textChars":45,"textLines":2,"bbox":[48,520,330,54]}
+{"kind":"shape","id":"sh/4jutcb6x","slide":10,"bbox":[48,622,390,2]}
+{"kind":"textbox","id":"sh/rm5sn65o","slide":10,"text":"PRODUKTNAH","textPreview":"PRODUKTNAH","textChars":10,"textLines":1,"bbox":[48,632,390,16]}
+{"kind":"textbox","id":"sh/qlwbelo3","slide":10,"text":"Pass-Rate · Issues · Regelabdeckung","textPreview":"Pass-Rate · Issues · Regelabdeckung","textChars":35,"textLines":1,"bbox":[48,652,390,24]}
+{"kind":"image","id":"im/ih4zapob","slide":10,"name":"","alt":"Digital and print brand assets under inspection grids","bbox":[0,0,1280,720]}
+{"kind":"image","id":"im/rmx0nu5s","slide":10,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/u1xzkt","slide":10,"text":"[Sources]\n- AI-generated visual asset created specifically for this deck.\n[/Sources]"}
+{"kind":"slide","id":"sl/o667fb","slide":11,"title":"CHECKION · CONTINUOUS QUALITY","textShapes":13}
+{"kind":"textbox","id":"sh/cr690ji5","slide":11,"text":"CHECKION · CONTINUOUS QUALITY","textPreview":"CHECKION · CONTINUOUS QUALITY","textChars":29,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/apory90z","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/lgzadojm","slide":11,"text":"Qualität endet nicht beim Launch.","textPreview":"Qualität endet nicht beim Launch.","textChars":33,"textLines":1,"bbox":[48,84,470,58]}
+{"kind":"textbox","id":"sh/kfq94jih","slide":11,"text":"CHECKION macht Website-Qualität wiederholbar messbar – vor dem Release, im Re-Run und über ganze Portfolios.","textPreview":"CHECKION macht Website-Qualität wiederholbar messbar – vor dem Release, im Re-Run und über ganze Portfolios.","textChars":108,"textLines":1,"bbox":[48,152,440,72]}
+{"kind":"shape","id":"sh/zehsbe1w","slide":11,"bbox":[48,272,28,4]}
+{"kind":"textbox","id":"sh/yt8r290b","slide":11,"text":"SEO","textPreview":"SEO","textChars":3,"textLines":1,"bbox":[86,260,145,24]}
+{"kind":"shape","id":"sh/9kjah8jy","slide":11,"bbox":[233,272,28,4]}
+{"kind":"textbox","id":"sh/8ja983id","slide":11,"text":"GEO","textPreview":"GEO","textChars":3,"textLines":1,"bbox":[271,260,145,24]}
+{"kind":"shape","id":"sh/mlwjyt0z","slide":11,"bbox":[48,330,28,4]}
+{"kind":"textbox","id":"sh/7m5k7y1k","slide":11,"text":"CONTENT","textPreview":"CONTENT","textChars":7,"textLines":1,"bbox":[86,318,145,24]}
+{"kind":"shape","id":"sh/8ne103ip","slide":11,"bbox":[233,330,28,4]}
+{"kind":"textbox","id":"sh/98n298ja","slide":11,"text":"ACCESSIBILITY","textPreview":"ACCESSIBILITY","textChars":13,"textLines":1,"bbox":[271,318,145,24]}
+{"kind":"shape","id":"sh/u9gj2d0v","slide":11,"bbox":[48,388,28,4]}
+{"kind":"textbox","id":"sh/vapkbi1g","slide":11,"text":"PERFORMANCE","textPreview":"PERFORMANCE","textChars":11,"textLines":1,"bbox":[86,376,145,24]}
+{"kind":"shape","id":"sh/wby14ni1","slide":11,"bbox":[233,388,28,4]}
+{"kind":"textbox","id":"sh/hc72dsjm","slide":11,"text":"TECHNIK","textPreview":"TECHNIK","textChars":7,"textLines":1,"bbox":[271,376,145,24]}
+{"kind":"shape","id":"sh/adcjq90r","slide":11,"bbox":[548,116,644,356]}
+{"kind":"shape","id":"sh/fi1g7ah4","slide":11,"bbox":[720,420,448,220]}
+{"kind":"shape","id":"sh/1kjy9kzu","slide":11,"bbox":[500,456,314,174]}
+{"kind":"shape","id":"sh/ruhg3ahs","slide":11,"bbox":[48,500,402,124]}
+{"kind":"textbox","id":"sh/qt8fu5g7","slide":11,"text":"RELEASE GATE  ·  RE-RUN  ·  PORTFOLIO","textPreview":"RELEASE GATE  ·  RE-RUN  ·  PORTFOLIO","textChars":37,"textLines":1,"bbox":[66,520,366,20]}
+{"kind":"textbox","id":"sh/dwzy5kzy","slide":11,"text":"Zeitsteuerung über PLEXON oder externe Trigger konfigurierbar. Native Pläne: Roadmap.","textPreview":"Zeitsteuerung über PLEXON oder externe Trigger konfigurierbar. Native Pläne: Roadmap.","textChars":85,"textLines":1,"bbox":[66,556,350,50]}
+{"kind":"textbox","id":"sh/svqxwfyd","slide":11,"text":"Produkt: Issues · Coverage · Pass-Rate     Pilot: Lösungszeit · Regressionen","textPreview":"Produkt: Issues · Coverage · Pass-Rate     Pilot: Lösungszeit · Regressionen","textChars":76,"textLines":1,"bbox":[48,658,880,18]}
+{"kind":"image","id":"im/214bixsr","slide":11,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"image","id":"im/wfudcjuh","slide":11,"name":"","alt":"CHECKION SEO launch screen","bbox":[558,126,624,336]}
+{"kind":"image","id":"im/9c76hsnu","slide":11,"name":"","alt":"CHECKION GEO model memory screen","bbox":[730,430,428,200]}
+{"kind":"image","id":"im/napofi5o","slide":11,"name":"","alt":"CHECKION WCAG deep scan screen","bbox":[510,466,294,154]}
+{"kind":"notes","id":"nt/o667fb","slide":11,"text":"[Sources]\n- Local CHECKION product tutorial screenshots from knowledge/tutorials/assets/checkion-article/.\n[/Sources]"}
+{"kind":"slide","id":"sl/dgcy9o","slide":12,"title":"OFFENES ÖKOSYSTEM","textShapes":21}
+{"kind":"textbox","id":"sh/5432d0ja","slide":12,"text":"OFFENES ÖKOSYSTEM","textPreview":"OFFENES ÖKOSYSTEM","textChars":17,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/32lkba1k","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/gzu1gv2t","slide":12,"text":"PLEXON arbeitet mit Ihrem Stack. Nicht gegen ihn.","textPreview":"PLEXON arbeitet mit Ihrem Stack. Nicht gegen ihn.","textChars":49,"textLines":1,"bbox":[48,82,1060,58]}
+{"kind":"textbox","id":"sh/h032903e","slide":12,"text":"Neue Systeme werden über MCP, APIs oder Webhooks angebunden – mit Adapter, Berechtigung und Projektkonfiguration.","textPreview":"Neue Systeme werden über MCP, APIs oder Webhooks angebunden – mit Adapter, Berechtigung und Projektkonfiguration.","textChars":113,"textLines":1,"bbox":[48,148,1020,38]}
+{"kind":"shape","id":"sh/uxsjelkn","slide":12,"bbox":[320,280,228,3]}
+{"kind":"shape","id":"sh/vylk7ql8","slide":12,"bbox":[320,432,228,3]}
+{"kind":"shape","id":"sh/0ve1sz2x","slide":12,"bbox":[320,584,228,3]}
+{"kind":"shape","id":"sh/1wn2lkji","slide":12,"bbox":[732,280,174,3]}
+{"kind":"shape","id":"sh/lgratsra","slide":12,"bbox":[732,432,174,3]}
+{"kind":"shape","id":"sh/kfit07qp","slide":12,"bbox":[732,584,174,3]}
+{"kind":"shape","id":"sh/je9sr29k","slide":12,"bbox":[548,304,184,184]}
+{"kind":"textbox","id":"sh/yd0ryx8z","slide":12,"text":"PLEXON","textPreview":"PLEXON","textChars":6,"textLines":1,"bbox":[568,360,144,36]}
+{"kind":"textbox","id":"sh/xcrapsre","slide":12,"text":"KONTEXT + FLOWS","textPreview":"KONTEXT + FLOWS","textChars":15,"textLines":1,"bbox":[570,406,140,18]}
+{"kind":"shape","id":"sh/wbi9wnqt","slide":12,"bbox":[70,238,250,84]}
+{"kind":"textbox","id":"sh/bq9sni98","slide":12,"text":"MARKT / RESEARCH","textPreview":"MARKT / RESEARCH","textChars":16,"textLines":1,"bbox":[84,252,222,21]}
+{"kind":"textbox","id":"sh/apgrud8n","slide":12,"text":"Brandwatch · Qualtrics","textPreview":"Brandwatch · Qualtrics","textChars":22,"textLines":1,"bbox":[84,286,222,18]}
+{"kind":"shape","id":"sh/h8ba1cri","slide":12,"bbox":[70,390,250,84]}
+{"kind":"textbox","id":"sh/g72t8rqx","slide":12,"text":"DESIGN / BRAND","textPreview":"DESIGN / BRAND","textChars":14,"textLines":1,"bbox":[84,404,222,21]}
+{"kind":"textbox","id":"sh/03ulkf2l","slide":12,"text":"Figma · Frontify · Bynder","textPreview":"Figma · Frontify · Bynder","textChars":25,"textLines":1,"bbox":[84,438,222,18]}
+{"kind":"shape","id":"sh/1o3mtkj6","slide":12,"bbox":[70,542,250,84]}
+{"kind":"textbox","id":"sh/e1c3ipkf","slide":12,"text":"CMS / EXPERIENCE","textPreview":"CMS / EXPERIENCE","textChars":16,"textLines":1,"bbox":[84,556,222,21]}
+{"kind":"textbox","id":"sh/f2l4rul0","slide":12,"text":"Contentful · Storyblok · AEM","textPreview":"Contentful · Storyblok · AEM","textChars":28,"textLines":1,"bbox":[84,590,222,18]}
+{"kind":"shape","id":"sh/szulgf29","slide":12,"bbox":[906,238,250,84]}
+{"kind":"textbox","id":"sh/d03mpk3u","slide":12,"text":"ANALYTICS / QUALITY","textPreview":"ANALYTICS / QUALITY","textChars":19,"textLines":1,"bbox":[920,252,222,21]}
+{"kind":"textbox","id":"sh/qxs3e5kj","slide":12,"text":"Search Console · Siteimprove","textPreview":"Search Console · Siteimprove","textChars":28,"textLines":1,"bbox":[920,286,222,18]}
+{"kind":"shape","id":"sh/ryl4nalo","slide":12,"bbox":[906,390,250,84]}
+{"kind":"textbox","id":"sh/4valcv2d","slide":12,"text":"COLLABORATION","textPreview":"COLLABORATION","textChars":13,"textLines":1,"bbox":[920,404,222,21]}
+{"kind":"textbox","id":"sh/5wj2l03y","slide":12,"text":"SharePoint · Teams · Slack","textPreview":"SharePoint · Teams · Slack","textChars":26,"textLines":1,"bbox":[920,438,222,18]}
+{"kind":"shape","id":"sh/76h4vq5k","slide":12,"bbox":[906,542,250,84]}
+{"kind":"textbox","id":"sh/658nml4z","slide":12,"text":"EIGENE SYSTEME","textPreview":"EIGENE SYSTEME","textChars":14,"textLines":1,"bbox":[920,556,222,21]}
+{"kind":"textbox","id":"sh/tsjmx0nq","slide":12,"text":"DWH · DAM · PIM · CRM","textPreview":"DWH · DAM · PIM · CRM","textChars":21,"textLines":1,"bbox":[920,590,222,18]}
+{"kind":"textbox","id":"sh/8ra5ovm5","slide":12,"text":"DATEN HINEIN","textPreview":"DATEN HINEIN","textChars":12,"textLines":1,"bbox":[510,226,260,18]}
+{"kind":"textbox","id":"sh/vu14za5w","slide":12,"text":"AKTIONEN HINAUS · ERKENNTNISSE ZURÜCK","textPreview":"AKTIONEN HINAUS · ERKENNTNISSE ZURÜCK","textChars":37,"textLines":1,"bbox":[438,520,404,20]}
+{"kind":"textbox","id":"sh/utsnq54b","slide":12,"text":"Toolnamen sind Integrationsbeispiele, keine pauschale Zusage einer produktiven Standardintegration.","textPreview":"Toolnamen sind Integrationsbeispiele, keine pauschale Zusage einer produktiven Standardintegration.","textChars":99,"textLines":1,"bbox":[48,674,1050,16]}
+{"kind":"image","id":"im/7y1sve9w","slide":12,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/dgcy9o","slide":12,"text":"[Sources]\n- https://developers.brandwatch.com/\n- https://developer.meltwater.com/docs/\n- https://developers.similarweb.com/docs/similarweb-web-traffic-api\n- https://api.qualtrics.com/\n- https://www.typeform.com/developers/\n- https://developer.surveymonkey.com/api/v3/\n- https://developers.google.com/webmaster-tools/v1/api_reference_index\n- https://developers.google.com/speed/docs/insights/v5/get-started\n- https://developer.siteimprove.com/\n- https://developers.figma.com/docs/rest-api/\n- https://developer.frontify.com/\n- https://developers.bynder.com/\n- https://www.contentful.com/developers/docs/references/api-basics/\n- https://www.storyblok.com/docs/api/management\n- https://experienceleague.adobe.com/en/docs/experience-manager-cloud-service/content/headless/introduction\n- https://developers.webflow.com/data/reference/content-management\n[/Sources]"}
+{"kind":"slide","id":"sl/70fjxn","slide":13,"title":"GOVERNANCE","textShapes":24}
+{"kind":"textbox","id":"sh/do3qx0fu","slide":13,"text":"GOVERNANCE","textPreview":"GOVERNANCE","textChars":10,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/r2l8vqxo","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/0ru9sfy5","slide":13,"text":"Mehr Autonomie braucht bessere Nachvollziehbarkeit.","textPreview":"Mehr Autonomie braucht bessere Nachvollziehbarkeit.","textChars":51,"textLines":1,"bbox":[48,82,1070,58]}
+{"kind":"textbox","id":"sh/1snq1kfq","slide":13,"text":"Jede belastbare Entscheidung braucht Herkunft, Einordnung, Verantwortlichkeit und einen sichtbaren Verlauf.","textPreview":"Jede belastbare Entscheidung braucht Herkunft, Einordnung, Verantwortlichkeit und einen sichtbaren Verlauf.","textChars":107,"textLines":1,"bbox":[48,150,980,38]}
+{"kind":"shape","id":"sh/epcrq5gz","slide":13,"bbox":[110,335,1010,4]}
+{"kind":"shape","id":"sh/zql8zaxk","slide":13,"bbox":[70,282,176,116]}
+{"kind":"textbox","id":"sh/ove9wfyh","slide":13,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[82,294,30,18]}
+{"kind":"textbox","id":"sh/9wnq5kfm","slide":13,"text":"QUELLE","textPreview":"QUELLE","textChars":6,"textLines":1,"bbox":[82,326,152,22]}
+{"kind":"textbox","id":"sh/po7up4n2","slide":13,"text":"Herkunft\n+ Aktualität","textPreview":"Herkunft | + Aktualität","textChars":21,"textLines":2,"bbox":[82,356,152,34]}
+{"kind":"shape","id":"sh/onydwz6h","slide":13,"bbox":[296,282,176,116]}
+{"kind":"textbox","id":"sh/3mpcnu5w","slide":13,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[308,294,30,18]}
+{"kind":"textbox","id":"sh/2lgvupor","slide":13,"text":"EINORDNUNG","textPreview":"EINORDNUNG","textChars":10,"textLines":1,"bbox":[308,326,152,22]}
+{"kind":"textbox","id":"sh/xs7et4ne","slide":13,"text":"Fakt oder\nInterpretation","textPreview":"Fakt oder | Interpretation","textChars":24,"textLines":2,"bbox":[308,356,152,34]}
+{"kind":"shape","id":"sh/cryd0z6t","slide":13,"bbox":[522,282,176,116]}
+{"kind":"textbox","id":"sh/bqpwru58","slide":13,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[534,294,30,18]}
+{"kind":"textbox","id":"sh/apgvypon","slide":13,"text":"SIMULATION","textPreview":"SIMULATION","textChars":10,"textLines":1,"bbox":[534,326,152,22]}
+{"kind":"textbox","id":"sh/twnuhknu","slide":13,"text":"Hypothese oder\nPersona-Sicht","textPreview":"Hypothese oder | Persona-Sicht","textChars":28,"textLines":2,"bbox":[534,356,152,34]}
+{"kind":"shape","id":"sh/svedof69","slide":13,"bbox":[748,282,176,116]}
+{"kind":"textbox","id":"sh/kzid4fe5","slide":13,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[760,294,30,18]}
+{"kind":"textbox","id":"sh/50redkvq","slide":13,"text":"FREIGABE","textPreview":"FREIGABE","textChars":8,"textLines":1,"bbox":[760,326,152,22]}
+{"kind":"textbox","id":"sh/idgv25wf","slide":13,"text":"Rolle · Gate\nEntscheidung","textPreview":"Rolle · Gate | Entscheidung","textChars":25,"textLines":2,"bbox":[760,356,152,34]}
+{"kind":"shape","id":"sh/jepcbadk","slide":13,"bbox":[974,282,176,116]}
+{"kind":"textbox","id":"sh/s3id8feh","slide":13,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[986,294,30,18]}
+{"kind":"textbox","id":"sh/t4rehkv2","slide":13,"text":"AUDIT TRAIL","textPreview":"AUDIT TRAIL","textChars":11,"textLines":1,"bbox":[986,326,152,22]}
+{"kind":"textbox","id":"sh/610v6pwb","slide":13,"text":"Run · Ergebnis\nVersion","textPreview":"Run · Ergebnis | Version","textChars":22,"textLines":2,"bbox":[986,356,152,34]}
+{"kind":"shape","id":"sh/729wfudw","slide":13,"bbox":[48,474,1184,130]}
+{"kind":"textbox","id":"sh/g72dczed","slide":13,"text":"KLARE GRENZEN","textPreview":"KLARE GRENZEN","textChars":13,"textLines":1,"bbox":[66,492,160,18]}
+{"kind":"textbox","id":"sh/h8bel4vy","slide":13,"text":"Modellantwort ≠ Fakt","textPreview":"Modellantwort ≠ Fakt","textChars":20,"textLines":1,"bbox":[66,532,300,24]}
+{"kind":"textbox","id":"sh/bexori1c","slide":13,"text":"Persona ≠ empirischer Nachweis","textPreview":"Persona ≠ empirischer Nachweis","textChars":30,"textLines":1,"bbox":[410,532,340,24]}
+{"kind":"textbox","id":"sh/ado7yxkr","slide":13,"text":"Automation ≠ unbeschränkte Autonomie","textPreview":"Automation ≠ unbeschränkte Autonomie","textChars":36,"textLines":1,"bbox":[796,532,390,24]}
+{"kind":"textbox","id":"sh/x0fqtsji","slide":13,"text":"Rollen · Freigaben · Quellenstatus · Statuskennzeichnung · Run-Historie","textPreview":"Rollen · Freigaben · Quellenstatus · Statuskennzeichnung · Run-Historie","textChars":71,"textLines":1,"bbox":[48,646,1000,18]}
+{"kind":"image","id":"im/jih4jap0","slide":13,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/70fjxn","slide":13,"text":""}
+{"kind":"slide","id":"sl/rblhac","slide":14,"title":"WIRKUNG + KPIS","textShapes":20}
+{"kind":"textbox","id":"sh/mxcv2p87","slide":14,"text":"WIRKUNG + KPIS","textPreview":"WIRKUNG + KPIS","textChars":14,"textLines":1,"bbox":[48,28,760,18]}
+{"kind":"textbox","id":"sh/8zud4zqd","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"textbox","id":"sh/v25czepo","slide":14,"text":"Was kontinuierlich lernt, muss kontinuierlich messbar sein.","textPreview":"Was kontinuierlich lernt, muss kontinuierlich messbar sein.","textChars":59,"textLines":1,"bbox":[48,80,1080,58]}
+{"kind":"textbox","id":"sh/u1wv6983","slide":14,"text":"Produkt-KPIs zeigen Leistung. Pilot-KPIs zeigen den gewünschten Business-Effekt.","textPreview":"Produkt-KPIs zeigen Leistung. Pilot-KPIs zeigen den gewünschten Business-Effekt.","textChars":80,"textLines":1,"bbox":[48,146,940,32]}
+{"kind":"shape","id":"sh/honu1o7u","slide":14,"bbox":[48,216,1184,112]}
+{"kind":"textbox","id":"sh/wned8jq9","slide":14,"text":"SCHNELLER\nENTSCHEIDEN","textPreview":"SCHNELLER | ENTSCHEIDEN","textChars":21,"textLines":2,"bbox":[70,238,370,70]}
+{"kind":"textbox","id":"sh/b61cnapk","slide":14,"text":"PRODUKT-KPI","textPreview":"PRODUKT-KPI","textChars":11,"textLines":1,"bbox":[490,238,140,16]}
+{"kind":"textbox","id":"sh/a5sbu58z","slide":14,"text":"Signal → Research Brief","textPreview":"Signal → Research Brief","textChars":23,"textLines":1,"bbox":[490,266,310,34]}
+{"kind":"textbox","id":"sh/szihs7u5","slide":14,"text":"PILOT-KPI","textPreview":"PILOT-KPI","textChars":9,"textLines":1,"bbox":[850,238,140,16]}
+{"kind":"textbox","id":"sh/d0bi1cvq","slide":14,"text":"Time-to-Insight","textPreview":"Time-to-Insight","textChars":15,"textLines":1,"bbox":[850,266,340,34]}
+{"kind":"shape","id":"sh/qx0zqxcz","slide":14,"bbox":[48,352,1184,112]}
+{"kind":"textbox","id":"sh/ry90z2dk","slide":14,"text":"RELEVANTER\nGESTALTEN","textPreview":"RELEVANTER | GESTALTEN","textChars":20,"textLines":2,"bbox":[70,374,370,70]}
+{"kind":"textbox","id":"sh/0321wru1","slide":14,"text":"PRODUKT-KPI","textPreview":"PRODUKT-KPI","textChars":11,"textLines":1,"bbox":[490,374,140,16]}
+{"kind":"textbox","id":"sh/14bi5cvm","slide":14,"text":"Evidence Coverage · Persona-Feedback","textPreview":"Evidence Coverage · Persona-Feedback","textChars":36,"textLines":1,"bbox":[490,402,310,34]}
+{"kind":"textbox","id":"sh/e1kjuhcv","slide":14,"text":"PILOT-KPI","textPreview":"PILOT-KPI","textChars":9,"textLines":1,"bbox":[850,374,140,16]}
+{"kind":"textbox","id":"sh/f2t03mdg","slide":14,"text":"Validierungszeit · späte Änderungen","textPreview":"Validierungszeit · späte Änderungen","textChars":35,"textLines":1,"bbox":[850,402,340,34]}
+{"kind":"shape","id":"sh/g7yhknex","slide":14,"bbox":[48,488,1184,112]}
+{"kind":"textbox","id":"sh/h87itsvi","slide":14,"text":"SICHERER\nAUSSPIELEN","textPreview":"SICHERER | AUSSPIELEN","textChars":19,"textLines":2,"bbox":[70,510,370,70]}
+{"kind":"textbox","id":"sh/x4zyxon6","slide":14,"text":"PRODUKT-KPI","textPreview":"PRODUKT-KPI","textChars":11,"textLines":1,"bbox":[490,510,140,16]}
+{"kind":"textbox","id":"sh/w3qxoj6l","slide":14,"text":"Pass-Rate · Issues · Coverage","textPreview":"Pass-Rate · Issues · Coverage","textChars":29,"textLines":1,"bbox":[490,538,310,34]}
+{"kind":"textbox","id":"sh/v2hgve50","slide":14,"text":"PILOT-KPI","textPreview":"PILOT-KPI","textChars":9,"textLines":1,"bbox":[850,510,140,16]}
+{"kind":"textbox","id":"sh/a18fm9of","slide":14,"text":"Freigabedauer · Regressionen","textPreview":"Freigabedauer · Regressionen","textChars":28,"textLines":1,"bbox":[850,538,340,34]}
+{"kind":"textbox","id":"sh/5sjy1on2","slide":14,"text":"Zielkorridore werden nach der Baseline im Pilot festgelegt – nicht vorher behauptet.","textPreview":"Zielkorridore werden nach der Baseline im Pilot festgelegt – nicht vorher behauptet.","textChars":84,"textLines":1,"bbox":[48,650,980,22]}
+{"kind":"image","id":"im/c7q18b2t","slide":14,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/rblhac","slide":14,"text":""}
+{"kind":"slide","id":"sl/ohpfoh","slide":15,"title":"EINSTIEG","textShapes":18}
+{"kind":"textbox","id":"sh/nehob6dc","slide":15,"text":"EINSTIEG","textPreview":"EINSTIEG","textChars":8,"textLines":1,"bbox":[48,40,240,18]}
+{"kind":"textbox","id":"sh/2d87ilw7","slide":15,"text":"Nicht mit allen Tools starten.\nMit einem echten Prozess.","textPreview":"Nicht mit allen Tools starten. | Mit einem echten Prozess.","textChars":56,"textLines":2,"bbox":[48,108,780,126]}
+{"kind":"textbox","id":"sh/xkj6h0vu","slide":15,"text":"Ein Pilot macht Wert, Grenzen und Erweiterungsbedarf sichtbar – bevor skaliert wird.","textPreview":"Ein Pilot macht Wert, Grenzen und Erweiterungsbedarf sichtbar – bevor skaliert wird.","textChars":84,"textLines":1,"bbox":[48,250,760,40]}
+{"kind":"shape","id":"sh/cjapovu9","slide":15,"bbox":[112,420,980,5]}
+{"kind":"shape","id":"sh/bi1ofqdo","slide":15,"bbox":[62,360,216,132]}
+{"kind":"textbox","id":"sh/ahs7mlw3","slide":15,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[76,374,28,18]}
+{"kind":"textbox","id":"sh/l836l0vq","slide":15,"text":"ECHTER\nPROZESS","textPreview":"ECHTER | PROZESS","textChars":14,"textLines":2,"bbox":[76,406,188,46]}
+{"kind":"textbox","id":"sh/k7apsvu5","slide":15,"text":"Eine relevante Frage","textPreview":"Eine relevante Frage","textChars":20,"textLines":1,"bbox":[76,466,188,18]}
+{"kind":"shape","id":"sh/mpk7u1kj","slide":15,"bbox":[342,360,216,132]}
+{"kind":"textbox","id":"sh/nqdon614","slide":15,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[356,374,28,18]}
+{"kind":"textbox","id":"sh/ormpwb2p","slide":15,"text":"BASELINE +\nZIELKORRIDOR","textPreview":"BASELINE + | ZIELKORRIDOR","textChars":23,"textLines":2,"bbox":[356,406,188,46]}
+{"kind":"textbox","id":"sh/9sv6pgja","slide":15,"text":"Messbar starten","textPreview":"Messbar starten","textChars":15,"textLines":1,"bbox":[356,466,188,18]}
+{"kind":"shape","id":"sh/at47ylkf","slide":15,"bbox":[622,360,216,132]}
+{"kind":"textbox","id":"sh/bedor610","slide":15,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[636,374,28,18]}
+{"kind":"textbox","id":"sh/wfmp0b2l","slide":15,"text":"MESSBARER\nWORKFLOW","textPreview":"MESSBARER | WORKFLOW","textChars":18,"textLines":2,"bbox":[636,406,188,46]}
+{"kind":"textbox","id":"sh/xgv6tgj6","slide":15,"text":"Loop im Alltag","textPreview":"Loop im Alltag","textChars":14,"textLines":1,"bbox":[636,466,188,18]}
+{"kind":"shape","id":"sh/qx0nmhkb","slide":15,"bbox":[902,360,216,132]}
+{"kind":"textbox","id":"sh/rytofmlw","slide":15,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[916,374,28,18]}
+{"kind":"textbox","id":"sh/v2p4ni1o","slide":15,"text":"SKALIEREN\nODER STOPPEN","textPreview":"SKALIEREN | ODER STOPPEN","textChars":22,"textLines":2,"bbox":[916,406,188,46]}
+{"kind":"textbox","id":"sh/u1g3ed03","slide":15,"text":"Evidenz statt Hype","textPreview":"Evidenz statt Hype","textChars":18,"textLines":1,"bbox":[916,466,188,18]}
+{"kind":"textbox","id":"sh/h47mpsju","slide":15,"text":"Welchen Prozess nehmen wir zuerst?","textPreview":"Welchen Prozess nehmen wir zuerst?","textChars":34,"textLines":1,"bbox":[48,572,760,48]}
+{"kind":"textbox","id":"sh/g3ylgni9","slide":15,"text":"PLEXON AI Suite · MSQ DX","textPreview":"PLEXON AI Suite · MSQ DX","textChars":24,"textLines":1,"bbox":[48,674,320,18]}
+{"kind":"textbox","id":"sh/7y54jy1s","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1186,678,50,16]}
+{"kind":"image","id":"im/5o7q5cry","slide":15,"name":"","alt":"MSQ DX","bbox":[1164,27,72,29]}
+{"kind":"notes","id":"nt/ohpfoh","slide":15,"text":""}

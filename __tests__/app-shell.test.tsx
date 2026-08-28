@@ -10,7 +10,7 @@ const { pathnameRef } = vi.hoisted(() => ({
 
 vi.mock('next/navigation', () => ({
   usePathname: () => pathnameRef.current,
-  useRouter: () => ({ back: vi.fn() }),
+  useRouter: () => ({ back: vi.fn(), forward: vi.fn() }),
 }))
 
 vi.mock('next-auth/react', () => ({

@@ -1,19 +1,23 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import {
   Alert,
+  applyThemePreference,
   Avatar,
   Button,
   Field,
   Hint,
   Input,
-  SectionChrome,
+  migrateLegacyThemeId,
+  SettingsBand,
+  SettingsShell,
   Spinner,
   Text,
   ToggleGroup,
+  type ThemePreference,
 } from '@msqdx/ui'
 import { BrandColorSelector } from '@/components/settings/BrandColorSelector'
 import { useI18n } from '@/components/i18n/I18nProvider'
@@ -33,25 +37,16 @@ type ProfileUser = {
   company?: string
   avatar_url?: string
   locale?: string
+  themePreference?: ThemePreference
 }
 
 type ApiTokenRow = { id: string; name?: string; createdAt: string }
 
-const THEME_STORAGE_KEY = 'plexon.v3.theme'
-const THEME_LABELS: Record<(typeof shellPaths.themeChoices)[number], string> = {
-  msqdx: 'Light',
-  'msqdx-dark': 'Dark',
-  'msqdx-v2': 'V2 light',
-  'msqdx-v2-dark': 'V2 dark',
-}
+const THEME_STORAGE_KEY = shellPaths.themeStorageKey
 
-function readStoredTheme(): (typeof shellPaths.themeChoices)[number] {
+function readStoredThemePreference(): ThemePreference {
   if (typeof window === 'undefined') return shellPaths.defaultTheme
-  const raw = window.localStorage.getItem(THEME_STORAGE_KEY)
-  if (raw && (shellPaths.themeChoices as readonly string[]).includes(raw)) {
-    return raw as (typeof shellPaths.themeChoices)[number]
-  }
-  return shellPaths.defaultTheme
+  return migrateLegacyThemeId(window.localStorage.getItem(THEME_STORAGE_KEY))
 }
 
 export default function SettingsPage() {
@@ -59,6 +54,7 @@ export default function SettingsPage() {
   const { data: session, status } = useSession()
   const { t, setLocale: setUiLocale } = useI18n()
   const [mounted, setMounted] = useState(false)
+  const themeCleanup = useRef<(() => void) | undefined>(undefined)
 
   const [profile, setProfile] = useState<ProfileUser | null>(null)
   const [name, setName] = useState('')
@@ -66,7 +62,7 @@ export default function SettingsPage() {
   const [company, setCompany] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [locale, setLocale] = useState('de')
-  const [theme, setTheme] = useState<(typeof shellPaths.themeChoices)[number]>(shellPaths.defaultTheme)
+  const [themePreference, setThemePreference] = useState<ThemePreference>(shellPaths.defaultTheme)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -84,12 +80,23 @@ export default function SettingsPage() {
   const [tokenName, setTokenName] = useState('')
   const [newToken, setNewToken] = useState<string | null>(null)
 
+  const paintTheme = useCallback((next: ThemePreference) => {
+    themeCleanup.current?.()
+    themeCleanup.current = applyThemePreference(next)
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, next)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
   useEffect(() => {
     setMounted(true)
-    const next = readStoredTheme()
-    setTheme(next)
-    document.documentElement.setAttribute('data-theme', next)
-  }, [])
+    const next = readStoredThemePreference()
+    setThemePreference(next)
+    paintTheme(next)
+    return () => themeCleanup.current?.()
+  }, [paintTheme])
 
   const fetchApiTokens = useCallback(() => {
     setLoadingTokens(true)
@@ -113,21 +120,53 @@ export default function SettingsPage() {
           setEmail(data.user.email ?? '')
           setCompany(data.user.company ?? '')
           setAvatarUrl(data.user.avatar_url ?? '')
-          setLocale(data.user.locale ?? 'de')
+          const nextLocale = data.user.locale ?? 'de'
+          setLocale(nextLocale)
+          setUiLocale(nextLocale)
+          const pref = migrateLegacyThemeId(data.user.themePreference)
+          setThemePreference(pref)
+          paintTheme(pref)
         }
       })
       .catch(() => setProfile(null))
     fetchApiTokens()
-  }, [status, session?.user?.id, fetchApiTokens])
+  }, [status, session?.user?.id, fetchApiTokens, paintTheme, setUiLocale])
 
   const avatarName = (name || profile?.email || session?.user?.email || 'P').trim()
 
-  function applyTheme(next: string) {
-    if (!(shellPaths.themeChoices as readonly string[]).includes(next)) return
-    const themeId = next as (typeof shellPaths.themeChoices)[number]
-    setTheme(themeId)
-    document.documentElement.setAttribute('data-theme', themeId)
-    window.localStorage.setItem(THEME_STORAGE_KEY, themeId)
+  async function patchPrefs(body: Record<string, unknown>) {
+    const res = await fetch(API_AUTH_PROFILE, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileSaveFailed'))
+    if (data.user) setProfile(data.user)
+    return data.user as ProfileUser | undefined
+  }
+
+  async function handleThemeChange(next: string) {
+    const pref = migrateLegacyThemeId(next)
+    setThemePreference(pref)
+    paintTheme(pref)
+    if (status !== 'authenticated') return
+    try {
+      await patchPrefs({ themePreference: pref })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
+    }
+  }
+
+  async function handleLocaleChange(next: string) {
+    setLocale(next)
+    setUiLocale(next)
+    if (status !== 'authenticated') return
+    try {
+      await patchPrefs({ locale: next })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
+    }
   }
 
   async function handleSaveProfile() {
@@ -135,20 +174,14 @@ export default function SettingsPage() {
     setSuccess(null)
     setSavingProfile(true)
     try {
-      const res = await fetch(API_AUTH_PROFILE, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim() || undefined,
-          email: email.trim() || undefined,
-          company: company.trim() || undefined,
-          avatar_url: avatarUrl.trim() || null,
-          locale: locale || undefined,
-        }),
+      await patchPrefs({
+        name: name.trim() || undefined,
+        email: email.trim() || undefined,
+        company: company.trim() || undefined,
+        avatar_url: avatarUrl.trim() || null,
+        locale: locale || undefined,
+        themePreference,
       })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error ?? t('settings.messages.profileSaveFailed'))
-      setProfile(data.user)
       setSuccess(t('settings.messages.profileUpdated'))
       setUiLocale(locale)
     } catch (err) {
@@ -251,202 +284,212 @@ export default function SettingsPage() {
     )
   }
 
+  const themeLabels: Record<ThemePreference, string> = {
+    light: t('settings.appearance.light') || 'Light',
+    dark: t('settings.appearance.dark') || 'Dark',
+    auto: t('settings.appearance.auto') || 'Auto',
+  }
+
   return (
     <div className="plexon-magazine plexon-settings">
-      <SectionChrome
-        title={t('settings.title')}
-        meta={<Text role="meta">{t('settings.subtitle')}</Text>}
-      />
+      {error ? <Alert tone="error">{error}</Alert> : null}
+      {success ? <Alert tone="ok">{success}</Alert> : null}
 
-      <Hint panel>{t('settings.subtitle')}</Hint>
-
-      {error ? (
-        <Alert tone="error">{error}</Alert>
-      ) : null}
-      {success ? (
-        <Alert tone="ok">{success}</Alert>
-      ) : null}
-
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.profile.title')} as="h2" />
-        <Text role="meta">{t('settings.profile.subtitle')}</Text>
-        <div className="plexon-settings-profile-row">
-          <Avatar name={avatarName} src={avatarUrl || undefined} size="lg" />
-          <div className="plexon-settings-fields">
-            <Field label={t('settings.profile.name')} size="md">
-              <Input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('settings.profile.namePlaceholder')}
-                block
-              />
-            </Field>
-            <Field label={t('settings.profile.email')} size="md">
-              <Input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('settings.profile.emailPlaceholder')}
-                block
-              />
-            </Field>
-            <Field label={t('settings.profile.company')} size="md">
-              <Input
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                placeholder={t('settings.profile.companyPlaceholder')}
-                block
-              />
-            </Field>
-            <Field label={t('settings.profile.avatarUrl')} size="md">
-              <Input
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder={t('settings.profile.avatarUrlPlaceholder')}
-                block
-              />
-            </Field>
-            <Button type="button" variant="primary" onClick={handleSaveProfile} disabled={savingProfile}>
-              {savingProfile ? t('settings.profile.saving') : t('settings.profile.save')}
+      <SettingsShell
+        labels={{
+          account: t('settings.session.title'),
+          profile: t('settings.profile.title'),
+          appearance: t('settings.appearance.title'),
+          language: t('settings.profile.language'),
+        }}
+        lede={<Hint panel>{t('settings.subtitle')}</Hint>}
+        accountHelp={<Text role="meta">{t('settings.session.subtitle')}</Text>}
+        account={
+          <>
+            <dl className="ds-settings-account-dl">
+              {session?.user?.email ? (
+                <>
+                  <dt>{t('settings.profile.email')}</dt>
+                  <dd>{session.user.email}</dd>
+                </>
+              ) : null}
+            </dl>
+            <Button type="button" variant="subtle" onClick={handleLogout} disabled={loggingOut}>
+              {loggingOut ? t('common.loading') : t('settings.session.logout')}
             </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.profile.language')} as="h2" />
-        <ToggleGroup
-          aria-label={t('settings.profile.language')}
-          value={locale}
-          onChange={(next) => {
-            setLocale(next)
-            setUiLocale(next)
-          }}
-          options={[
-            { value: 'de', label: t('language.de') },
-            { value: 'en', label: t('language.en') },
-          ]}
-        />
-      </section>
-
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.appearance.title')} as="h2" />
-        <Text role="meta">{t('settings.appearance.subtitle')}</Text>
-        <ToggleGroup
-          className="theme-toggle"
-          aria-label="Theme"
-          value={theme}
-          onChange={applyTheme}
-          options={shellPaths.themeChoices.map((id) => ({
-            value: id,
-            label: THEME_LABELS[id],
-          }))}
-        />
-        <div className="plexon-settings-brand">
-          <BrandColorSelector />
-        </div>
-      </section>
-
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.password.title')} as="h2" />
-        <div className="plexon-settings-fields">
-          <Field label={t('settings.password.current')} size="md">
-            <Input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              block
-            />
-          </Field>
-          <Field label={t('settings.password.new')} hint={t('settings.password.newRequirements')} size="md">
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              block
-            />
-          </Field>
-          <Field label={t('settings.password.confirm')} size="md">
-            <Input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              block
-            />
-          </Field>
-          <Button type="button" variant="ghost" onClick={handlePasswordUpdate} disabled={savingPassword}>
-            {savingPassword ? t('settings.password.ctaSaving') : t('settings.password.cta')}
-          </Button>
-        </div>
-      </section>
-
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.apiTokens.title')} as="h2" />
-        <Text role="meta">{t('settings.apiTokens.subtitle')}</Text>
-
-        {newToken ? (
-          <div className="plexon-settings-token-reveal">
-            <Text role="title">{t('settings.apiTokens.newTokenTitle')}</Text>
-            <code className="plexon-settings-token-code">{newToken}</code>
-            <Text role="hint">{t('settings.apiTokens.newTokenWarning')}</Text>
-            <div className="plexon-settings-actions">
-              <Button type="button" variant="ghost" size="sm" onClick={handleCopyToken}>
-                {t('settings.apiTokens.newTokenCopy')}
-              </Button>
-              <Button type="button" variant="link" size="sm" onClick={() => setNewToken(null)}>
-                {t('common.close')}
+          </>
+        }
+        profileHelp={<Text role="meta">{t('settings.profile.subtitle')}</Text>}
+        profile={
+          <div className="ds-settings-profile-row plexon-settings-profile-row">
+            <Avatar name={avatarName} src={avatarUrl || undefined} size="lg" />
+            <div className="plexon-settings-fields">
+              <Field label={t('settings.profile.name')} size="md">
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('settings.profile.namePlaceholder')}
+                  block
+                />
+              </Field>
+              <Field label={t('settings.profile.email')} size="md">
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('settings.profile.emailPlaceholder')}
+                  block
+                />
+              </Field>
+              <Field label={t('settings.profile.company')} size="md">
+                <Input
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder={t('settings.profile.companyPlaceholder')}
+                  block
+                />
+              </Field>
+              <Field label={t('settings.profile.avatarUrl')} size="md">
+                <Input
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                  placeholder={t('settings.profile.avatarUrlPlaceholder')}
+                  block
+                />
+              </Field>
+              <Button type="button" variant="primary" onClick={handleSaveProfile} disabled={savingProfile}>
+                {savingProfile ? t('settings.profile.saving') : t('settings.profile.save')}
               </Button>
             </div>
           </div>
-        ) : (
-          <div className="plexon-settings-token-create">
-            <Field label={t('settings.apiTokens.nameLabel')} size="sm">
-              <Input
-                value={tokenName}
-                onChange={(e) => setTokenName(e.target.value)}
-                placeholder={t('settings.apiTokens.namePlaceholder')}
-                block
-              />
-            </Field>
-            <Button type="button" variant="primary" onClick={handleCreateToken} disabled={creatingToken}>
-              {creatingToken ? t('settings.apiTokens.creating') : t('settings.apiTokens.create')}
-            </Button>
-          </div>
-        )}
+        }
+        appearanceHelp={<Text role="meta">{t('settings.appearance.subtitle')}</Text>}
+        appearance={
+          <ToggleGroup
+            className="theme-toggle"
+            aria-label={t('settings.appearance.title')}
+            value={themePreference}
+            onChange={handleThemeChange}
+            options={shellPaths.themeChoices.map((id) => ({
+              value: id,
+              label: themeLabels[id],
+            }))}
+          />
+        }
+        language={
+          <ToggleGroup
+            aria-label={t('settings.profile.language')}
+            value={locale}
+            onChange={handleLocaleChange}
+            options={[
+              { value: 'de', label: t('language.de') },
+              { value: 'en', label: t('language.en') },
+            ]}
+          />
+        }
+        extras={
+          <>
+            <SettingsBand title="Brand">
+              <div className="plexon-settings-brand">
+                <BrandColorSelector />
+              </div>
+            </SettingsBand>
 
-        <Text role="label">{t('settings.apiTokens.listTitle')}</Text>
-        {loadingTokens ? (
-          <Text role="meta">{t('common.loading')}</Text>
-        ) : apiTokens.length === 0 ? (
-          <Text role="meta">{t('settings.apiTokens.empty')}</Text>
-        ) : (
-          <ul className="plexon-settings-token-list">
-            {apiTokens.map((token) => (
-              <li key={token.id} className="plexon-settings-token-row">
-                <div>
-                  <Text role="body">{token.name || token.id.slice(0, 8)}</Text>
-                  <Text role="meta">{new Date(token.createdAt).toLocaleString()}</Text>
-                </div>
-                <Button type="button" variant="danger" size="sm" onClick={() => handleRevokeToken(token.id)}>
-                  {t('settings.apiTokens.revoke')}
+            <SettingsBand title={t('settings.password.title')}>
+              <div className="plexon-settings-fields">
+                <Field label={t('settings.password.current')} size="md">
+                  <Input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    block
+                  />
+                </Field>
+                <Field label={t('settings.password.new')} hint={t('settings.password.newRequirements')} size="md">
+                  <Input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    block
+                  />
+                </Field>
+                <Field label={t('settings.password.confirm')} size="md">
+                  <Input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    block
+                  />
+                </Field>
+                <Button type="button" variant="ghost" onClick={handlePasswordUpdate} disabled={savingPassword}>
+                  {savingPassword ? t('settings.password.ctaSaving') : t('settings.password.cta')}
                 </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              </div>
+            </SettingsBand>
 
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.session.title')} as="h2" />
-        <Text role="meta">{t('settings.session.subtitle')}</Text>
-        <Button type="button" variant="subtle" onClick={handleLogout} disabled={loggingOut}>
-          {loggingOut ? t('common.loading') : t('settings.session.logout')}
-        </Button>
-      </section>
+            <SettingsBand title={t('settings.apiTokens.title')} help={t('settings.apiTokens.subtitle')}>
+              {newToken ? (
+                <div className="plexon-settings-token-reveal">
+                  <Text role="title">{t('settings.apiTokens.newTokenTitle')}</Text>
+                  <code className="plexon-settings-token-code">{newToken}</code>
+                  <Text role="hint">{t('settings.apiTokens.newTokenWarning')}</Text>
+                  <div className="plexon-settings-actions">
+                    <Button type="button" variant="ghost" size="sm" onClick={handleCopyToken}>
+                      {t('settings.apiTokens.newTokenCopy')}
+                    </Button>
+                    <Button type="button" variant="link" size="sm" onClick={() => setNewToken(null)}>
+                      {t('common.close')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="plexon-settings-token-create">
+                  <Field label={t('settings.apiTokens.nameLabel')} size="sm">
+                    <Input
+                      value={tokenName}
+                      onChange={(e) => setTokenName(e.target.value)}
+                      placeholder={t('settings.apiTokens.namePlaceholder')}
+                      block
+                    />
+                  </Field>
+                  <Button type="button" variant="primary" onClick={handleCreateToken} disabled={creatingToken}>
+                    {creatingToken ? t('settings.apiTokens.creating') : t('settings.apiTokens.create')}
+                  </Button>
+                </div>
+              )}
 
-      <section className="plexon-settings-section">
-        <SectionChrome quiet title={t('settings.about.title')} as="h2" />
-        <Text role="body">{t('settings.about.body')}</Text>
-      </section>
+              <Text role="label">{t('settings.apiTokens.listTitle')}</Text>
+              {loadingTokens ? (
+                <Text role="meta">{t('common.loading')}</Text>
+              ) : apiTokens.length === 0 ? (
+                <Text role="meta">{t('settings.apiTokens.empty')}</Text>
+              ) : (
+                <ul className="plexon-settings-token-list">
+                  {apiTokens.map((token) => (
+                    <li key={token.id} className="plexon-settings-token-row">
+                      <div>
+                        <Text role="body">{token.name || token.id.slice(0, 8)}</Text>
+                        <Text role="meta">{new Date(token.createdAt).toLocaleString()}</Text>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleRevokeToken(token.id)}
+                      >
+                        {t('settings.apiTokens.revoke')}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SettingsBand>
+
+            <SettingsBand title={t('settings.about.title')}>
+              <Text role="body">{t('settings.about.body')}</Text>
+            </SettingsBand>
+          </>
+        }
+      />
     </div>
   )
 }

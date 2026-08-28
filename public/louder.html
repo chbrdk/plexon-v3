@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="LOUDER is a social-first creative network making culture-moving campaigns, creator collaborations and content worlds.">
+    <meta property="og:title" content="LOUDER — Make the feed feel something.">
+    <meta property="og:description" content="Social-first ideas for brands that want to move at the speed of culture.">
+    <meta name="twitter:card" content="summary">
+    <title>LOUDER — Make the feed feel something.</title>
+    <style>
+      :root {
+        --ink: #111111;
+        --paper: #fffdf2;
+        --acid: #e9ff45;
+        --pink: #ff4fb7;
+        --blue: #2f5cff;
+        --orange: #ff6b1b;
+        --mint: #61efb8;
+        --purple: #8f58ff;
+        --white: #ffffff;
+        --border: 3px solid var(--ink);
+        --hard-shadow: 9px 9px 0 var(--ink);
+        --page: min(1440px, calc(100% - 36px));
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; overflow-x: hidden; color: var(--ink); background: var(--acid); font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+      a { color: inherit; text-decoration: none; }
+      :focus-visible { outline: 4px solid var(--blue); outline-offset: 5px; }
+      .skip-link { position: fixed; left: 16px; top: 16px; z-index: 100; padding: 10px 15px; color: white; background: var(--ink); transform: translateY(-180%); }
+      .skip-link:focus { transform: translateY(0); }
+      .shell { width: var(--page); margin-inline: auto; }
+      .nav { position: relative; z-index: 30; min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 28px; border-bottom: var(--border); }
+      .logo { display: inline-flex; align-items: center; font-family: Impact, 'Arial Narrow', sans-serif; font-size: 32px; letter-spacing: -.02em; }
+      .logo-dot { color: var(--pink); }
+      .nav-links { display: flex; align-items: center; gap: 28px; font-size: 13px; font-weight: 900; text-transform: uppercase; }
+      .nav-links a:not(.nav-cta):hover { text-decoration: underline 3px; text-underline-offset: 5px; }
+      .nav-cta, .button { display: inline-flex; min-height: 46px; padding: 0 20px; align-items: center; justify-content: center; gap: 10px; border: var(--border); background: var(--paper); font-size: 12px; font-weight: 900; text-transform: uppercase; box-shadow: 5px 5px 0 var(--ink); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+      .nav-cta:hover, .button:hover { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); background: var(--pink); }
+
+      .hero { position: relative; min-height: 810px; padding: 34px 0 52px; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+      .hero-top { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; }
+      .hero-kicker { max-width: 270px; margin: 5px 0 0; font-size: 13px; font-weight: 900; line-height: 1.35; text-transform: uppercase; }
+      .availability { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 900; text-transform: uppercase; transform: rotate(2deg); }
+      .availability::before { content: ""; width: 13px; height: 13px; border: 2px solid var(--ink); border-radius: 50%; background: var(--pink); animation: blink 1.8s steps(2) infinite; }
+      .hero-title { position: relative; z-index: 1; align-self: center; margin: 0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(130px, 21vw, 330px); font-weight: 900; letter-spacing: -.055em; line-height: .72; text-align: center; text-transform: uppercase; }
+      .hero-title .outline { color: transparent; -webkit-text-stroke: 4px var(--ink); }
+      .hero-collage { position: absolute; inset: 80px 8% 40px; z-index: 5; pointer-events: none; }
+      .social-card { position: absolute; overflow: hidden; border: var(--border); box-shadow: var(--hard-shadow); animation: card-in .7s cubic-bezier(.2,.8,.2,1) both; }
+      .card-one { width: clamp(180px, 20vw, 285px); aspect-ratio: .78; left: 8%; top: 24%; background: var(--pink); transform: rotate(-9deg); animation-delay: .1s; }
+      .card-two { width: clamp(205px, 23vw, 330px); aspect-ratio: .87; left: 40%; top: 16%; background: var(--blue); transform: rotate(4deg); animation-delay: .22s; }
+      .card-three { width: clamp(170px, 18vw, 260px); aspect-ratio: .74; right: 5%; top: 29%; background: var(--orange); transform: rotate(10deg); animation-delay: .34s; }
+      .portrait { position: absolute; inset: 0; overflow: hidden; }
+      .portrait::before { content: ""; position: absolute; width: 55%; aspect-ratio: 1; left: 23%; top: 15%; border: var(--border); border-radius: 50%; background: var(--acid); }
+      .portrait::after { content: ""; position: absolute; width: 74%; height: 59%; left: 13%; bottom: -13%; border: var(--border); border-radius: 48% 48% 0 0; background: var(--mint); }
+      .card-two .portrait::before { background: var(--orange); }
+      .card-two .portrait::after { background: var(--paper); }
+      .card-three .portrait::before { background: var(--pink); }
+      .card-three .portrait::after { background: var(--purple); }
+      .card-caption { position: absolute; z-index: 2; left: 11px; right: 11px; bottom: 11px; padding: 9px 10px; border: 2px solid var(--ink); background: var(--paper); font-size: 9px; font-weight: 900; text-transform: uppercase; }
+      .sticker { position: absolute; z-index: 8; display: grid; place-items: center; border: var(--border); background: var(--paper); box-shadow: 5px 5px 0 var(--ink); font-weight: 900; text-align: center; text-transform: uppercase; }
+      .sticker-wow { width: 112px; height: 112px; left: 27%; top: 15%; border-radius: 50%; background: var(--acid); font-size: 24px; transform: rotate(13deg); }
+      .sticker-play { width: 86px; height: 51px; right: 25%; bottom: 13%; background: var(--mint); transform: rotate(-8deg); font-size: 11px; }
+      .hero-bottom { position: relative; z-index: 12; display: flex; justify-content: space-between; align-items: end; gap: 30px; }
+      .hero-copy { max-width: 390px; margin: 0; font-size: clamp(18px, 2vw, 27px); font-weight: 900; letter-spacing: -.035em; line-height: 1.06; text-transform: uppercase; }
+      .hero-bottom .button { min-height: 58px; padding-inline: 27px; background: var(--pink); transform: rotate(-2deg); }
+
+      .ticker { overflow: hidden; border-block: var(--border); background: var(--ink); color: var(--paper); }
+      .ticker-track { width: max-content; display: flex; align-items: center; animation: ticker 24s linear infinite; }
+      .ticker-item { padding: 16px 18px; display: flex; align-items: center; gap: 28px; font-family: Impact, 'Arial Narrow', sans-serif; font-size: 29px; letter-spacing: .02em; text-transform: uppercase; }
+      .ticker-star { color: var(--acid); }
+
+      .section { padding: 110px 0; }
+      .section-label { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 26px; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+      .section-label::before { content: ""; width: 12px; height: 12px; border: 2px solid var(--ink); background: currentColor; }
+      .display-title { max-width: 1100px; margin: 0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(72px, 10vw, 160px); font-weight: 900; letter-spacing: -.045em; line-height: .84; text-transform: uppercase; }
+
+      .manifesto { position: relative; overflow: hidden; background: var(--pink); border-bottom: var(--border); }
+      .manifesto::before, .manifesto::after { content: "✦"; position: absolute; font-size: 270px; line-height: 1; color: var(--orange); -webkit-text-stroke: 3px var(--ink); transform: rotate(19deg); }
+      .manifesto::before { left: -65px; top: -90px; }
+      .manifesto::after { right: -70px; bottom: -100px; color: var(--blue); }
+      .manifesto-inner { position: relative; z-index: 2; display: grid; grid-template-columns: .62fr 1.38fr; gap: 70px; align-items: end; }
+      .manifesto-note { max-width: 330px; padding: 23px; border: var(--border); background: var(--paper); box-shadow: var(--hard-shadow); transform: rotate(-3deg); }
+      .manifesto-note strong { display: block; font-size: 20px; line-height: 1; text-transform: uppercase; }
+      .manifesto-note p { margin: 12px 0 0; font-size: 13px; font-weight: 700; line-height: 1.45; }
+      .manifesto h2 { margin: 0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(78px, 12vw, 180px); font-weight: 900; letter-spacing: -.04em; line-height: .8; text-transform: uppercase; }
+      .scribble { display: inline-block; position: relative; color: var(--acid); -webkit-text-stroke: 3px var(--ink); transform: rotate(-2deg); }
+      .scribble::after { content: ""; position: absolute; left: 2%; right: 0; bottom: -3px; height: 8px; background: var(--ink); transform: rotate(1deg); }
+
+      .work { background: var(--paper); border-bottom: var(--border); }
+      .work-head { display: grid; grid-template-columns: 1.35fr .65fr; gap: 60px; align-items: end; margin-bottom: 64px; }
+      .work-head p { max-width: 430px; margin: 0; font-size: 19px; font-weight: 800; line-height: 1.25; text-transform: uppercase; }
+      .case-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 27px 22px; }
+      .case { position: relative; }
+      .case-a { grid-column: 1 / span 8; }
+      .case-b { grid-column: 9 / span 4; margin-top: 92px; }
+      .case-c { grid-column: 1 / span 5; margin-top: 30px; }
+      .case-d { grid-column: 6 / span 7; margin-top: 30px; }
+      .case-media { position: relative; overflow: hidden; min-height: 520px; border: var(--border); box-shadow: var(--hard-shadow); transition: transform .22s ease, box-shadow .22s ease; }
+      .case:hover .case-media { transform: translate(-4px, -4px); box-shadow: 14px 14px 0 var(--ink); }
+      .case-b .case-media { min-height: 460px; }
+      .case-c .case-media { min-height: 430px; }
+      .case-d .case-media { min-height: 430px; }
+      .case-a .case-media { background: var(--blue); }
+      .case-b .case-media { background: var(--orange); }
+      .case-c .case-media { background: var(--mint); }
+      .case-d .case-media { background: var(--purple); }
+      .case-copy { display: flex; justify-content: space-between; gap: 24px; padding-top: 17px; }
+      .case-copy h3 { margin: 0; font-size: clamp(24px, 3vw, 42px); line-height: .95; text-transform: uppercase; }
+      .case-copy span { flex: 0 0 auto; font-size: 10px; font-weight: 900; text-align: right; text-transform: uppercase; }
+      .media-label { position: absolute; left: 14px; top: 14px; z-index: 5; padding: 7px 9px; border: 2px solid var(--ink); background: var(--paper); font-size: 9px; font-weight: 900; text-transform: uppercase; }
+      .phone { position: absolute; width: 32%; height: 74%; left: 34%; top: 12%; border: var(--border); border-radius: 28px; background: var(--ink); box-shadow: 13px 14px 0 rgba(17,17,17,.28); transform: rotate(5deg); }
+      .phone::before { content: ""; position: absolute; inset: 10px; border-radius: 18px; background: var(--pink); }
+      .phone::after { content: "SOUND\A ON"; white-space: pre; position: absolute; inset: 0; display: grid; place-items: center; color: var(--acid); font-family: Impact, sans-serif; font-size: clamp(36px, 6vw, 87px); line-height: .73; text-align: center; transform: rotate(-5deg); }
+      .burst { position: absolute; width: 160px; height: 160px; right: 8%; top: 10%; display: grid; place-items: center; border: var(--border); border-radius: 50%; background: var(--acid); box-shadow: 7px 7px 0 var(--ink); font-size: 18px; font-weight: 900; text-align: center; text-transform: uppercase; transform: rotate(13deg); }
+      .product-can { position: absolute; width: 42%; height: 67%; left: 29%; top: 18%; border: var(--border); border-radius: 48% 48% 20% 20%; background: var(--acid); box-shadow: 16px 16px 0 rgba(17,17,17,.24); transform: rotate(-7deg); }
+      .product-can::before { content: "FIZZZ"; position: absolute; inset: 0; display: grid; place-items: center; font-family: Impact, sans-serif; font-size: clamp(38px, 5vw, 68px); transform: rotate(90deg); }
+      .product-can::after { content: ""; position: absolute; left: 21%; right: 21%; top: -8%; height: 10%; border: var(--border); border-radius: 50%; background: #aaa; }
+      .face { position: absolute; width: 55%; aspect-ratio: 1; left: 22%; top: 14%; border: var(--border); border-radius: 48% 52% 45% 55%; background: var(--pink); }
+      .face::before, .face::after { content: ""; position: absolute; width: 17%; aspect-ratio: 1; top: 36%; border: 10px solid var(--ink); border-top: 0; border-left: 0; border-radius: 0 0 100% 0; transform: rotate(45deg); }
+      .face::before { left: 19%; } .face::after { right: 19%; }
+      .face-mouth { position: absolute; z-index: 2; width: 28%; height: 11%; left: 36%; top: 68%; border: var(--border); border-radius: 0 0 80px 80px; background: white; }
+      .chat-stack { position: absolute; inset: 16% 10%; }
+      .bubble { position: absolute; padding: 17px 21px; border: var(--border); box-shadow: 7px 7px 0 var(--ink); font-size: clamp(17px, 2vw, 28px); font-weight: 900; text-transform: uppercase; }
+      .bubble-one { left: 2%; top: 3%; background: var(--acid); transform: rotate(-5deg); }
+      .bubble-two { right: 0; top: 34%; background: var(--pink); transform: rotate(4deg); }
+      .bubble-three { left: 16%; bottom: 2%; background: var(--paper); transform: rotate(-2deg); }
+
+      .culture { position: relative; overflow: hidden; background: var(--blue); color: var(--white); border-bottom: var(--border); }
+      .culture-grid { display: grid; grid-template-columns: .42fr 1.58fr; gap: 60px; align-items: start; }
+      .culture-side { position: sticky; top: 30px; padding: 16px; border: 2px solid white; font-size: 11px; font-weight: 900; text-transform: uppercase; transform: rotate(-4deg); }
+      .culture-quote { margin: 0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(67px, 10vw, 150px); line-height: .83; letter-spacing: -.035em; text-transform: uppercase; }
+      .culture-quote span { color: var(--acid); -webkit-text-stroke: 2px var(--ink); }
+      .culture-bottom { margin-top: 55px; display: grid; grid-template-columns: 1fr 1fr; gap: 45px; align-items: end; }
+      .culture-bottom p { max-width: 550px; margin: 0; font-size: 17px; font-weight: 750; line-height: 1.45; }
+      .culture-stamp { justify-self: end; width: 148px; aspect-ratio: 1; display: grid; place-items: center; border: 3px solid white; border-radius: 50%; font-size: 13px; font-weight: 900; text-align: center; text-transform: uppercase; transform: rotate(11deg); }
+
+      .capabilities { background: var(--ink); color: var(--white); border-bottom: var(--border); }
+      .capabilities .section-label::before { border-color: white; }
+      .cap-head { display: flex; justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 50px; }
+      .cap-head h2 { max-width: 850px; margin: 0; font-family: Impact, sans-serif; font-size: clamp(76px, 10vw, 145px); line-height: .82; text-transform: uppercase; }
+      .cap-head p { max-width: 330px; margin: 0; color: #ccc; font-size: 14px; font-weight: 700; line-height: 1.45; }
+      .cap-list { border-top: 2px solid white; }
+      .cap-row { min-height: 106px; display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 20px; border-bottom: 2px solid white; transition: color .2s ease, background .2s ease, padding .2s ease; }
+      .cap-row:hover { padding-inline: 24px; color: var(--ink); background: var(--acid); }
+      .cap-row small { font-size: 10px; font-weight: 900; }
+      .cap-row strong { font-size: clamp(30px, 4.5vw, 66px); letter-spacing: -.04em; line-height: .9; text-transform: uppercase; }
+      .cap-arrow { width: 52px; aspect-ratio: 1; display: grid; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-size: 22px; }
+
+      .creators { overflow: hidden; background: var(--orange); border-bottom: var(--border); }
+      .creators-head { display: grid; grid-template-columns: 1.2fr .8fr; gap: 60px; align-items: end; }
+      .creators-head p { max-width: 430px; margin: 0; font-size: 18px; font-weight: 850; line-height: 1.25; text-transform: uppercase; }
+      .creator-fan { position: relative; min-height: 640px; margin-top: 70px; }
+      .creator-card { position: absolute; width: min(290px, 24vw); aspect-ratio: .75; overflow: hidden; border: var(--border); background: var(--paper); box-shadow: var(--hard-shadow); transition: transform .25s ease; }
+      .creator-card:nth-child(1) { left: 2%; top: 14%; transform: rotate(-12deg); }
+      .creator-card:nth-child(2) { left: 21%; top: 2%; transform: rotate(-5deg); }
+      .creator-card:nth-child(3) { left: 41%; top: 10%; transform: rotate(3deg); }
+      .creator-card:nth-child(4) { left: 61%; top: 0; transform: rotate(9deg); }
+      .creator-card:nth-child(5) { right: 1%; top: 15%; transform: rotate(14deg); }
+      .creator-card:hover { z-index: 10; transform: translateY(-24px) rotate(0deg); }
+      .creator-picture { height: 77%; position: relative; border-bottom: var(--border); }
+      .creator-card:nth-child(1) .creator-picture { background: var(--pink); }
+      .creator-card:nth-child(2) .creator-picture { background: var(--blue); }
+      .creator-card:nth-child(3) .creator-picture { background: var(--mint); }
+      .creator-card:nth-child(4) .creator-picture { background: var(--purple); }
+      .creator-card:nth-child(5) .creator-picture { background: var(--acid); }
+      .creator-picture::before { content: ""; position: absolute; width: 52%; aspect-ratio: 1; left: 24%; top: 12%; border: var(--border); border-radius: 50%; background: var(--paper); }
+      .creator-picture::after { content: ""; position: absolute; width: 72%; height: 46%; left: 14%; bottom: 0; border: var(--border); border-bottom: 0; border-radius: 50% 50% 0 0; background: var(--ink); }
+      .creator-meta { padding: 13px 14px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+      .creator-meta strong { font-size: 14px; text-transform: uppercase; }
+      .creator-meta span { font-size: 9px; font-weight: 900; text-align: right; text-transform: uppercase; }
+
+      .signal-ticker { overflow: hidden; border-bottom: var(--border); background: var(--paper); }
+      .signal-track { width: max-content; display: flex; animation: ticker-reverse 28s linear infinite; }
+      .signal-track span { padding: 22px 26px; font-family: Impact, sans-serif; font-size: clamp(44px, 6vw, 84px); text-transform: uppercase; }
+      .signal-track i { color: var(--pink); font-style: normal; }
+
+      .contact { position: relative; overflow: hidden; min-height: 760px; display: grid; place-items: center; background: var(--acid); text-align: center; }
+      .contact::before, .contact::after { content: ""; position: absolute; width: 300px; aspect-ratio: 1; border: var(--border); box-shadow: var(--hard-shadow); }
+      .contact::before { left: -115px; top: 80px; background: var(--pink); transform: rotate(24deg); }
+      .contact::after { right: -120px; bottom: 65px; border-radius: 50%; background: var(--blue); }
+      .contact-inner { position: relative; z-index: 2; padding: 80px 0; }
+      .contact h2 { max-width: 1150px; margin: 0 auto; font-family: Impact, sans-serif; font-size: clamp(95px, 15vw, 230px); letter-spacing: -.05em; line-height: .75; text-transform: uppercase; }
+      .contact h2 span { color: var(--pink); -webkit-text-stroke: 3px var(--ink); }
+      .contact p { max-width: 550px; margin: 40px auto 30px; font-size: 18px; font-weight: 900; line-height: 1.25; text-transform: uppercase; }
+      .contact .button { min-height: 64px; padding-inline: 31px; background: var(--blue); color: white; transform: rotate(-2deg); }
+      .footer { padding: 25px 0 30px; display: flex; justify-content: space-between; align-items: center; gap: 25px; background: var(--ink); color: white; }
+      .footer-wrap { background: var(--ink); }
+      .footer .logo { font-size: 38px; }
+      .footer-links { display: flex; flex-wrap: wrap; gap: 22px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+      @keyframes ticker { to { transform: translateX(-50%); } }
+      @keyframes ticker-reverse { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+      @keyframes blink { 50% { background: var(--blue); } }
+      @keyframes card-in { from { opacity: 0; translate: 0 50px; rotate: -12deg; } }
+
+      @media (max-width: 850px) {
+        .nav-links a:not(.nav-cta) { display: none; }
+        .hero { min-height: 740px; }
+        .hero-title { margin-top: 60px; font-size: clamp(115px, 28vw, 230px); line-height: .78; }
+        .hero-collage { inset: 120px 1% 90px; }
+        .card-one { left: 2%; } .card-two { left: 34%; } .card-three { right: 1%; }
+        .sticker-wow { left: 18%; }
+        .manifesto-inner, .work-head, .culture-grid, .creators-head { grid-template-columns: 1fr; }
+        .manifesto-note { order: 2; }
+        .case-a { grid-column: 1 / span 8; }
+        .case-b { grid-column: 9 / span 4; }
+        .case-c { grid-column: 1 / span 6; }
+        .case-d { grid-column: 7 / span 6; }
+        .culture-side { position: static; width: max-content; }
+        .cap-head { align-items: flex-start; flex-direction: column; }
+        .creator-card { width: 30vw; }
+        .creator-fan { min-height: 530px; }
+      }
+      @media (max-width: 560px) {
+        :root { --page: calc(100% - 22px); --border: 2px solid var(--ink); --hard-shadow: 6px 6px 0 var(--ink); }
+        .nav { min-height: 70px; }
+        .logo { font-size: 27px; }
+        .nav-cta { min-height: 39px; padding-inline: 12px; font-size: 10px; }
+        .hero { min-height: 700px; padding-top: 24px; }
+        .hero-top { align-items: center; }
+        .availability { display: none; }
+        .hero-title { margin-top: 80px; font-size: clamp(92px, 31vw, 170px); line-height: .82; }
+        .hero-collage { inset: 150px 0 118px; }
+        .card-one { width: 45%; left: -4%; top: 25%; }
+        .card-two { width: 50%; left: 28%; top: 10%; }
+        .card-three { width: 40%; right: -5%; top: 36%; }
+        .sticker-wow { width: 78px; height: 78px; left: 8%; top: 8%; font-size: 17px; }
+        .sticker-play { right: 11%; bottom: 1%; }
+        .hero-bottom { align-items: flex-start; flex-direction: column; }
+        .hero-copy { max-width: 300px; font-size: 19px; }
+        .hero-bottom .button { align-self: flex-end; min-height: 50px; }
+        .section { padding: 75px 0; }
+        .manifesto-inner { gap: 38px; }
+        .manifesto h2 { font-size: clamp(69px, 23vw, 118px); }
+        .work-head { gap: 25px; margin-bottom: 42px; }
+        .case-grid { display: block; }
+        .case { margin: 0 0 54px; }
+        .case-media, .case-b .case-media, .case-c .case-media, .case-d .case-media { min-height: 390px; }
+        .case-copy { align-items: flex-start; flex-direction: column; gap: 9px; }
+        .case-copy span { text-align: left; }
+        .burst { width: 105px; height: 105px; right: 4%; font-size: 13px; }
+        .phone { width: 48%; left: 26%; }
+        .culture-grid { gap: 35px; }
+        .culture-quote { font-size: clamp(61px, 19vw, 98px); }
+        .culture-bottom { grid-template-columns: 1fr; }
+        .culture-stamp { justify-self: start; }
+        .cap-row { grid-template-columns: 38px 1fr auto; min-height: 90px; }
+        .cap-arrow { width: 40px; }
+        .creator-fan { min-height: 580px; margin-top: 45px; }
+        .creator-card { width: 49vw; }
+        .creator-card:nth-child(1) { left: -18%; top: 12%; }
+        .creator-card:nth-child(2) { left: 3%; top: 2%; }
+        .creator-card:nth-child(3) { left: 27%; top: 13%; }
+        .creator-card:nth-child(4) { left: 51%; top: 1%; }
+        .creator-card:nth-child(5) { right: -20%; top: 15%; }
+        .creator-meta span { display: none; }
+        .contact { min-height: 650px; }
+        .contact h2 { font-size: clamp(84px, 27vw, 150px); }
+        .footer { align-items: flex-start; flex-direction: column; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="shell nav" aria-label="Primary navigation">
+      <a class="logo" href="#top" aria-label="LOUDER home">LOUDER<span class="logo-dot">.</span></a>
+      <nav class="nav-links" aria-label="Main menu"><a href="#work">Work</a><a href="#about">Why LOUDER</a><a href="#creators">Creators</a><a class="nav-cta" href="#contact">Start something ↗</a></nav>
+    </header>
+    <main id="main">
+      <section class="shell hero" aria-labelledby="hero-title">
+        <div class="hero-top"><p class="hero-kicker">A social-first creative network for brands that refuse to scroll by.</p><span class="availability">Ideas are live</span></div>
+        <h1 class="hero-title" id="hero-title">LOU<span class="outline">DER</span></h1>
+        <div class="hero-collage" aria-label="Collage of colorful social campaign image placeholders">
+          <div class="social-card card-one" role="img" aria-label="Image placeholder: creator portrait in pink campaign"><div class="portrait"></div><span class="card-caption">Drop 01 · Beauty unfiltered</span></div>
+          <div class="social-card card-two" role="img" aria-label="Image placeholder: creator portrait in blue campaign"><div class="portrait"></div><span class="card-caption">Drop 02 · Sound on</span></div>
+          <div class="social-card card-three" role="img" aria-label="Image placeholder: creator portrait in orange campaign"><div class="portrait"></div><span class="card-caption">Drop 03 · Zero chill</span></div>
+          <span class="sticker sticker-wow" aria-hidden="true">WOW<br>IRL</span><span class="sticker sticker-play" aria-hidden="true">▶ Play it loud</span>
+        </div>
+        <div class="hero-bottom"><p class="hero-copy">Make the feed feel something. Then make it move.</p><a class="button" href="#work">See the loud stuff <span aria-hidden="true">↓</span></a></div>
+      </section>
+      <div class="ticker" aria-label="LOUDER capabilities">
+        <div class="ticker-track" aria-hidden="true">
+          <div class="ticker-item">Strategy <span class="ticker-star">✦</span> Social worlds <span class="ticker-star">✦</span> Creator collabs <span class="ticker-star">✦</span> Content at speed <span class="ticker-star">✦</span> Community energy <span class="ticker-star">✦</span></div>
+          <div class="ticker-item">Strategy <span class="ticker-star">✦</span> Social worlds <span class="ticker-star">✦</span> Creator collabs <span class="ticker-star">✦</span> Content at speed <span class="ticker-star">✦</span> Community energy <span class="ticker-star">✦</span></div>
+        </div>
+      </div>
+      <section class="manifesto" id="about" aria-labelledby="manifesto-title">
+        <div class="shell section manifesto-inner">
+          <aside class="manifesto-note"><strong>Not more content.<br>More reaction.</strong><p>We mix cultural instinct, platform craft and creator energy to make brand ideas people actually pass around.</p></aside>
+          <h2 id="manifesto-title">Social isn't a channel. It's the <span class="scribble">whole room.</span></h2>
+        </div>
+      </section>
+
+      <section class="work" id="work" aria-labelledby="work-title">
+        <div class="shell section">
+          <p class="section-label">Selected loud stuff · 2026</p>
+          <div class="work-head"><h2 class="display-title" id="work-title">Built for the group chat.</h2><p>Campaign worlds made to be remixed, reacted to and remembered — fictional work for this design concept.</p></div>
+          <div class="case-grid">
+            <article class="case case-a">
+              <div class="case-media" role="img" aria-label="Image placeholder: mobile-first music campaign in electric blue"><span class="media-label">Image placeholder · Social launch film</span><div class="phone"></div><span class="burst">2M moods<br>one drop</span></div>
+              <div class="case-copy"><h3>Turn it up</h3><span>Music · Global launch<br>Social world + creators</span></div>
+            </article>
+            <article class="case case-b">
+              <div class="case-media" role="img" aria-label="Image placeholder: colorful sparkling drink can"><span class="media-label">Image placeholder · Product loop</span><div class="product-can"></div></div>
+              <div class="case-copy"><h3>Fizz mode</h3><span>Drinks · Gen Z<br>TikTok-native system</span></div>
+            </article>
+            <article class="case case-c">
+              <div class="case-media" role="img" aria-label="Image placeholder: playful beauty campaign face"><span class="media-label">Image placeholder · Creator portrait</span><div class="face"></div><span class="face-mouth"></span></div>
+              <div class="case-copy"><h3>Face value</h3><span>Beauty · Community<br>Creator casting</span></div>
+            </article>
+            <article class="case case-d">
+              <div class="case-media" role="img" aria-label="Image placeholder: stacked social comment bubbles"><span class="media-label">Image placeholder · Community reactions</span><div class="chat-stack"><span class="bubble bubble-one">Wait. What? 👀</span><span class="bubble bubble-two">Send this now!</span><span class="bubble bubble-three">Main character energy ✦</span></div></div>
+              <div class="case-copy"><h3>Comments on</h3><span>Fashion · Always-on<br>Community playbook</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="culture" aria-labelledby="culture-title">
+        <div class="shell section culture-grid">
+          <p class="culture-side">Our point of view · 01</p>
+          <div><h2 class="culture-quote" id="culture-title">Culture doesn't wait for the <span>approval chain.</span></h2><div class="culture-bottom"><p>So our strategists, makers, community minds and creators work as one room. Fewer handovers. Faster instincts. Better work in the wild.</p><span class="culture-stamp">Move quick<br>Stay sharp<br>Be human</span></div></div>
+        </div>
+      </section>
+
+      <section class="capabilities" aria-labelledby="capabilities-title">
+        <div class="shell section">
+          <p class="section-label">What we bring</p>
+          <div class="cap-head"><h2 id="capabilities-title">One team.<br>All signal.</h2><p>From the big platform thought to tomorrow morning's post. Strategy and making stay connected.</p></div>
+          <div class="cap-list">
+            <a class="cap-row" href="#contact"><small>01</small><strong>Social strategy</strong><span class="cap-arrow" aria-hidden="true">↗</span></a>
+            <a class="cap-row" href="#contact"><small>02</small><strong>Campaign worlds</strong><span class="cap-arrow" aria-hidden="true">↗</span></a>
+            <a class="cap-row" href="#contact"><small>03</small><strong>Creator collabs</strong><span class="cap-arrow" aria-hidden="true">↗</span></a>
+            <a class="cap-row" href="#contact"><small>04</small><strong>Always-on content</strong><span class="cap-arrow" aria-hidden="true">↗</span></a>
+            <a class="cap-row" href="#contact"><small>05</small><strong>Community energy</strong><span class="cap-arrow" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="creators" id="creators" aria-labelledby="creators-title">
+        <div class="shell section">
+          <p class="section-label">The LOUDER circle</p>
+          <div class="creators-head"><h2 class="display-title" id="creators-title">Made with people, not personas.</h2><p>A living network of directors, artists, editors, meme minds and community voices — assembled around the idea, never a roster.</p></div>
+          <div class="creator-fan" aria-label="Creator profile image placeholders">
+            <article class="creator-card"><div class="creator-picture" role="img" aria-label="Image placeholder: creator Ayo"></div><div class="creator-meta"><strong>Ayo</strong><span>Film + movement</span></div></article>
+            <article class="creator-card"><div class="creator-picture" role="img" aria-label="Image placeholder: creator Mia"></div><div class="creator-meta"><strong>Mia</strong><span>Beauty + culture</span></div></article>
+            <article class="creator-card"><div class="creator-picture" role="img" aria-label="Image placeholder: creator Leo"></div><div class="creator-meta"><strong>Leo</strong><span>Sound + remix</span></div></article>
+            <article class="creator-card"><div class="creator-picture" role="img" aria-label="Image placeholder: creator Noor"></div><div class="creator-meta"><strong>Noor</strong><span>Art + fashion</span></div></article>
+            <article class="creator-card"><div class="creator-picture" role="img" aria-label="Image placeholder: creator Jay"></div><div class="creator-meta"><strong>Jay</strong><span>Comedy + community</span></div></article>
+          </div>
+        </div>
+      </section>
+
+      <div class="signal-ticker" aria-label="LOUDER brand statement">
+        <div class="signal-track" aria-hidden="true"><span>Less noise. <i>More signal.</i> Less polish. <i>More pulse.</i> Less watching. <i>More joining.</i> ✦</span><span>Less noise. <i>More signal.</i> Less polish. <i>More pulse.</i> Less watching. <i>More joining.</i> ✦</span></div>
+      </div>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="shell contact-inner"><p class="section-label">Your move</p><h2 id="contact-title">Got a quiet brief? Let's make it <span>loud.</span></h2><p>Send the challenge. Bring the ambition. We will bring the internet energy.</p><a class="button" href="mailto:hello@louder.example">Hello@louder.example <span aria-hidden="true">↗</span></a></div>
+      </section>
+    </main>
+    <div class="footer-wrap"><footer class="shell footer"><a class="logo" href="#top">LOUDER<span class="logo-dot">.</span></a><div class="footer-links"><span>Berlin · London · Everywhere</span><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">LinkedIn</a><span>© 2026</span></div></footer></div>
+  </body>
+</html>

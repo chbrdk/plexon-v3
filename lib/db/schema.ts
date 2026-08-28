@@ -31,6 +31,8 @@ export const users = pgTable('users', {
   company: text('company'),
   avatarUrl: text('avatar_url'),
   locale: text('locale'),
+  /** light | dark | auto — UI appearance preference (cross-app SSOT). */
+  themePreference: text('theme_preference'),
   role: text('role').notNull().default(USER_ROLE.USER), // 'user' | 'admin'
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

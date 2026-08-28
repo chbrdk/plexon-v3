@@ -1,36 +1,29 @@
 # UI rebuild — Settings
 
-**Status:** Accepted — Wave 2 done — 2026-07-31 (challenge + reuse)  
+**Status:** Accepted — Wave 2 done — 2026-07-31 · **Reshape 2026-08-28** (SettingsShell + cross-app prefs)  
 **Route:** `/settings`  
-**Reference:** `audion-v3` settings · `knowledge/ui-rebuild-reuse.md`  
-**DS:** `SectionChrome`, `Field`, `Input`, `Select`, `Switch`, `ToggleGroup`, `Text`, `Panel`, `Button`, `Avatar`
+**Reference:** `@msqdx/ui` `SettingsShell` · product settings · `specs/api/auth-profile-theme-preference.md`  
+**DS:** `SettingsShell`, `SettingsBand`, `SectionChrome`, `Field`, `Input`, `ToggleGroup`, `Text`, `Button`, `Avatar`
 
 ## Challenge — keep / reshape / drop
 
 | Capability | Decision | Notes |
 |------------|----------|-------|
-| Profile name / avatar | **keep** | Field + Avatar like Audion |
-| Locale | **reshape** | `ToggleGroup` (en/de), not legacy select chrome |
-| Brand / accent color | **keep** | Rebuild selector on `@msqdx/ui` (auth selector pattern) |
-| Theme | **reshape** | Align with Audion `data-theme` + ToggleGroup if present; drop MUI theme leftovers |
-| Password / security | **keep** if API exists | Panel + Button; challenge copy/UX |
-| API tokens | **keep** if present | List + create/revoke on Field/Dialog — mirror Audion tokens band if any |
-| Legacy Msqdx/MUI form chrome | **drop** | No bridge imports |
+| Profile name / avatar | **keep** | Compact Profile band |
+| Locale | **reshape** | ToggleGroup en/de; PATCH profile immediately |
+| Theme | **reshape** | Only light / dark / auto → `themePreference` on profile |
+| Brand / accent color | **keep** | Extras slot |
+| Password / security | **keep** | Extras slot, denser magazine band |
+| API tokens | **keep** | Extras slot |
+| Four theme IDs / V2 | **drop** | Migrate stored ids via `migrateLegacyThemeId` |
 
-## Reuse map
+## Composition
 
-- Audion `settings-page` composition: SectionChrome bands, Field stack, ToggleGroup.
-- Plexon auth `AuthBrandColorSelector` pattern for brand (already `@msqdx/ui`).
-
-## File set
-
-- `app/settings/page.tsx`
-- `components/settings/**`
+Mount `SettingsShell` with band order: Account → Profile → Appearance → Language → extras (password, tokens, brand, about).
 
 ## Acceptance
 
-1. Keep/reshape/drop table above reflected in UI.
-2. Zero `@mui` / `@msqdx/react` in file set.
-3. Prefs persist as today where kept.
-4. Smoke: settings heading + one field.
-5. Progress Wave 2 → done.
+1. Settings uses `SettingsShell` from `@msqdx/ui`.
+2. Appearance offers only light / dark / auto; applies via `applyThemePreference`.
+3. Locale + themePreference persist via `PATCH /api/auth/profile` on change.
+4. Smoke: settings headings + preference toggles.

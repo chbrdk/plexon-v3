@@ -523,7 +523,10 @@
     },
     "appearance": {
       "title": "Erscheinungsbild",
-      "subtitle": "Akzentfarbe für Sidebar und Buttons.",
+      "subtitle": "Hell, Dunkel oder System — wird app-übergreifend gespeichert.",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "auto": "Auto",
       "colorSelectAria": "Farbe {label} wählen"
     },
     "password": {

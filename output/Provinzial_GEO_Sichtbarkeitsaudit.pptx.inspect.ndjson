@@ -1,0 +1,180 @@
+{"kind":"deck","id":"pr/bb9zgs","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"DEFAULT"}
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"GEO-SICHTBARKEITS-AUDIT · PROVINZIAL","textShapes":3}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"name":"Text 0","text":"GEO-SICHTBARKEITS-AUDIT · PROVINZIAL","textPreview":"GEO-SICHTBARKEITS-AUDIT · PROVINZIAL","textChars":36,"textLines":1,"bbox":[48,163.2,768,28.8]}
+{"kind":"textbox","id":"sh/7qp4be9c","slide":1,"name":"Text 1","text":"Sichtbar, aber kaum zitierbar","textPreview":"Sichtbar, aber kaum zitierbar","textChars":29,"textLines":1,"bbox":[48,192,864,153.6]}
+{"kind":"textbox","id":"sh/65g3298r","slide":1,"name":"Text 2","text":"Quick Check für provinzial.de/west: Domainqualität, GEO-Wettbewerb und konkrete Content-Hebel","textPreview":"Quick Check für provinzial.de/west: Domainqualität, GEO-Wettbewerb und konkrete Content-Hebel","textChars":93,"textLines":1,"bbox":[48,340.8,816,48]}
+{"kind":"image","id":"im/cj21o7ed","slide":1,"name":"Image 0","bbox":[48,28.8,105.6,42.24]}
+{"kind":"notes","id":"nt/y90nupkv","slide":1,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 1, 6–9\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"QUICK CHECK","textShapes":12}
+{"kind":"textbox","id":"sh/9072xkry","slide":2,"name":"Text 0","text":"QUICK CHECK","textPreview":"QUICK CHECK","textChars":11,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":2,"name":"Text 1","text":"Ein Quick Check, drei Perspektiven","textPreview":"Ein Quick Check, drei Perspektiven","textChars":34,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/a10jqpsj","slide":2,"name":"Text 2","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[48,206.4,67.2,48]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":2,"name":"Text 3","text":"Untersuchte Domain","textPreview":"Untersuchte Domain","textChars":18,"textLines":1,"bbox":[124.8,203.52,288,48]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":2,"name":"Text 4","text":"provinzial.de/west · 50 Seiten · Domain-Score 73 · 6 A11y-Fehler","textPreview":"provinzial.de/west · 50 Seiten · Domain-Score 73 · 6 A11y-Fehler","textChars":64,"textLines":1,"bbox":[422.4,203.52,480,67.2]}
+{"kind":"textbox","id":"sh/r65knqtk","slide":2,"name":"Text 5","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[48,297.6,67.2,48]}
+{"kind":"textbox","id":"sh/q5wjelsz","slide":2,"name":"Text 6","text":"Analyse-Bausteine","textPreview":"Analyse-Bausteine","textChars":17,"textLines":1,"bbox":[124.8,294.72,288,48]}
+{"kind":"textbox","id":"sh/ove9o7yd","slide":2,"name":"Text 7","text":"Domain-Scan, 4 Personas und GEO-Audit mit 8 Prompts in 7 Modellen","textPreview":"Domain-Scan, 4 Personas und GEO-Audit mit 8 Prompts in 7 Modellen","textChars":65,"textLines":1,"bbox":[422.4,294.72,480,67.2]}
+{"kind":"textbox","id":"sh/9wnqhczy","slide":2,"name":"Text 8","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[48,388.8,67.2,48]}
+{"kind":"textbox","id":"sh/mtwrmxg7","slide":2,"name":"Text 9","text":"Leitfrage","textPreview":"Leitfrage","textChars":9,"textLines":1,"bbox":[124.8,385.92,288,48]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"name":"Text 10","text":"Wie wird Provinzial zur zitierfähigen Quelle statt nur zur sichtbaren Marke?","textPreview":"Wie wird Provinzial zur zitierfähigen Quelle statt nur zur sichtbaren Marke?","textChars":76,"textLines":1,"bbox":[422.4,385.92,480,67.2]}
+{"kind":"textbox","id":"sh/wjy9sry9","slide":2,"name":"Text 11","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/atwv650n","slide":2,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/hwbqtkby","slide":2,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 1, 6\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/ofy9wn61","slide":3,"title":"PERSONA-PORTFOLIO","textShapes":17}
+{"kind":"textbox","id":"sh/cza94vmx","slide":3,"name":"Text 0","text":"PERSONA-PORTFOLIO","textPreview":"PERSONA-PORTFOLIO","textChars":17,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/d0jax03i","slide":3,"name":"Text 1","text":"Vier Personas, zwei Suchwelten","textPreview":"Vier Personas, zwei Suchwelten","textChars":30,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/3ah8rqlg","slide":3,"name":"Text 2","text":"PRIVATKUNDEN","textPreview":"PRIVATKUNDEN","textChars":12,"textLines":1,"bbox":[48,148.8,403.2,28.8]}
+{"kind":"textbox","id":"sh/obq90bml","slide":3,"name":"Text 3","text":"Sabrina Weber","textPreview":"Sabrina Weber","textChars":13,"textLines":1,"bbox":[48,187.2,384,28.8]}
+{"kind":"textbox","id":"sh/pcjqtg36","slide":3,"name":"Text 4","text":"Sicherheitsorientiert; sucht verständliche Beratung, transparente Kosten und lokale Nähe.","textPreview":"Sicherheitsorientiert; sucht verständliche Beratung, transparente Kosten und lokale Nähe.","textChars":89,"textLines":1,"bbox":[48,214.08,384,62.4]}
+{"kind":"textbox","id":"sh/m5cra54z","slide":3,"name":"Text 5","text":"Markus Klein","textPreview":"Markus Klein","textChars":12,"textLines":1,"bbox":[48,297.6,384,28.8]}
+{"kind":"textbox","id":"sh/n6ls3alk","slide":3,"name":"Text 6","text":"Zeitknapp, datenbasiert; will Prioritäten, Vergleichbarkeit und digitale Unterlagen.","textPreview":"Zeitknapp, datenbasiert; will Prioritäten, Vergleichbarkeit und digitale Unterlagen.","textChars":84,"textLines":1,"bbox":[48,324.48,384,62.4]}
+{"kind":"textbox","id":"sh/n2l4fq98","slide":3,"name":"Text 7","text":"Gemeinsamer Suchmodus","textPreview":"Gemeinsamer Suchmodus","textChars":21,"textLines":1,"bbox":[48,408,384,28.8]}
+{"kind":"textbox","id":"sh/m1c3mlsn","slide":3,"name":"Text 8","text":"Familie und Eigenheim, regionale Beratung und klare nächste Schritte.","textPreview":"Familie und Eigenheim, regionale Beratung und klare nächste Schritte.","textChars":69,"textLines":1,"bbox":[48,434.88,384,62.4]}
+{"kind":"textbox","id":"sh/943mhgre","slide":3,"name":"Text 9","text":"GEWERBEKUNDEN","textPreview":"GEWERBEKUNDEN","textChars":13,"textLines":1,"bbox":[508.8,148.8,403.2,28.8]}
+{"kind":"textbox","id":"sh/83ulovat","slide":3,"name":"Text 10","text":"Markus Schneider","textPreview":"Markus Schneider","textChars":16,"textLines":1,"bbox":[508.8,187.2,384,28.8]}
+{"kind":"textbox","id":"sh/v6l4jq94","slide":3,"name":"Text 11","text":"Risikoabwägend; braucht klare Deckungsgrenzen und wenig Verwaltung.","textPreview":"Risikoabwägend; braucht klare Deckungsgrenzen und wenig Verwaltung.","textChars":67,"textLines":1,"bbox":[508.8,214.08,384,62.4]}
+{"kind":"textbox","id":"sh/a5c3ql8z","slide":3,"name":"Text 12","text":"Sabrina Köhler","textPreview":"Sabrina Köhler","textChars":14,"textLines":1,"bbox":[508.8,297.6,384,28.8]}
+{"kind":"textbox","id":"sh/x8nml0ra","slide":3,"name":"Text 13","text":"Zeitkritisch; erwartet flexible Deckung und einen schnellen Start.","textPreview":"Zeitkritisch; erwartet flexible Deckung und einen schnellen Start.","textChars":66,"textLines":1,"bbox":[508.8,324.48,384,62.4]}
+{"kind":"textbox","id":"sh/w7ulsvqp","slide":3,"name":"Text 14","text":"Gemeinsamer Suchmodus","textPreview":"Gemeinsamer Suchmodus","textChars":21,"textLines":1,"bbox":[508.8,408,384,28.8]}
+{"kind":"textbox","id":"sh/ja54na9g","slide":3,"name":"Text 15","text":"Gewerbeschutz, fester Ansprechpartner und skalierbare Prozesse.","textPreview":"Gewerbeschutz, fester Ansprechpartner und skalierbare Prozesse.","textChars":63,"textLines":1,"bbox":[508.8,434.88,384,62.4]}
+{"kind":"shape","id":"sh/i9w3u58v","slide":3,"name":"Shape 16","bbox":[484.8,148.8,0.96,340.8]}
+{"kind":"textbox","id":"sh/e10f2twf","slide":3,"name":"Text 17","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/o32dw321","slide":3,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/ofy9wn61","slide":3,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 4–5\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"KERNZAHLEN","textShapes":24}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":4,"name":"Text 0","text":"KERNZAHLEN","textPreview":"KERNZAHLEN","textChars":10,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/0ba143al","slide":4,"name":"Text 1","text":"Solide Basis, schwache GEO-Präsenz","textPreview":"Solide Basis, schwache GEO-Präsenz","textChars":34,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/ql8jytsj","slide":4,"name":"Shape 2","bbox":[48,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/doj29oba","slide":4,"name":"Text 3","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[67.2,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/sna103ap","slide":4,"name":"Text 4","text":"Domain-Score","textPreview":"Domain-Score","textChars":12,"textLines":1,"bbox":[67.2,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/3ihk3et8","slide":4,"name":"Text 5","text":"provinzial.de","textPreview":"provinzial.de","textChars":13,"textLines":1,"bbox":[67.2,264,235.2,24]}
+{"kind":"textbox","id":"sh/ih8ju9sn","slide":4,"name":"Text 6","text":"73 / 100","textPreview":"73 / 100","textChars":8,"textLines":1,"bbox":[67.2,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/kbm987y5","slide":4,"name":"Text 7","text":"50 Seiten","textPreview":"50 Seiten","textChars":9,"textLines":1,"bbox":[67.2,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/5cva1cfq","slide":4,"name":"Text 8","text":"6 Fehler","textPreview":"6 Fehler","textChars":8,"textLines":1,"bbox":[67.2,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/i94r6xgz","slide":4,"name":"Text 9","text":"Solide technische Basis.","textPreview":"Solide technische Basis.","textChars":24,"textLines":1,"bbox":[67.2,417.6,235.2,52.8]}
+{"kind":"shape","id":"sh/jadsz2xk","slide":4,"name":"Shape 10","bbox":[343.2,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/w72947yt","slide":4,"name":"Text 11","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[362.4,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/x8vaxsfe","slide":4,"name":"Text 12","text":"GEO-Score","textPreview":"GEO-Score","textChars":9,"textLines":1,"bbox":[362.4,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/a5kr2xg3","slide":4,"name":"Text 13","text":"Provinzial","textPreview":"Provinzial","textChars":10,"textLines":1,"bbox":[362.4,264,235.2,24]}
+{"kind":"textbox","id":"sh/v6tsv2xo","slide":4,"name":"Text 14","text":"46 / 100","textPreview":"46 / 100","textChars":8,"textLines":1,"bbox":[362.4,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/g36tgryd","slide":4,"name":"Text 15","text":"Wettbewerbs-Schnitt","textPreview":"Wettbewerbs-Schnitt","textChars":19,"textLines":1,"bbox":[362.4,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/h4fa9wfy","slide":4,"name":"Text 16","text":"14 / 100","textPreview":"14 / 100","textChars":8,"textLines":1,"bbox":[362.4,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/p0batw72","slide":4,"name":"Text 17","text":"Provinzial liegt 32 Punkte darüber.","textPreview":"Provinzial liegt 32 Punkte darüber.","textChars":35,"textLines":1,"bbox":[362.4,417.6,235.2,52.8]}
+{"kind":"shape","id":"sh/oz29krqh","slide":4,"name":"Shape 18","bbox":[638.4,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/3ytsrmpw","slide":4,"name":"Text 19","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[657.6,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/2xkrih8b","slide":4,"name":"Text 20","text":"Sichtbarkeitsanteil","textPreview":"Sichtbarkeitsanteil","textChars":19,"textLines":1,"bbox":[657.6,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/1wbapc7q","slide":4,"name":"Text 21","text":"Provinzial","textPreview":"Provinzial","textChars":10,"textLines":1,"bbox":[657.6,264,235.2,24]}
+{"kind":"textbox","id":"sh/gv29g7q5","slide":4,"name":"Text 22","text":"3 %","textPreview":"3 %","textChars":3,"textLines":1,"bbox":[657.6,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/fu9sn2p0","slide":4,"name":"Text 23","text":"Ø Position","textPreview":"Ø Position","textChars":10,"textLines":1,"bbox":[657.6,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/et0reh8f","slide":4,"name":"Text 24","text":"4,4","textPreview":"4,4","textChars":3,"textLines":1,"bbox":[657.6,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/tsrqlc7u","slide":4,"name":"Text 25","text":"Rang 6 im Wettbewerberfeld.","textPreview":"Rang 6 im Wettbewerberfeld.","textChars":27,"textLines":1,"bbox":[657.6,417.6,235.2,52.8]}
+{"kind":"textbox","id":"sh/sri9s7q9","slide":4,"name":"Text 26","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/tona5s3y","slide":4,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/jyx0ra1s","slide":4,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 1, 6, 9\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"KERNERKENNTNIS","textShapes":3}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"name":"Text 0","text":"KERNERKENNTNIS","textPreview":"KERNERKENNTNIS","textChars":14,"textLines":1,"bbox":[48,28.8,480,24]}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":5,"name":"Text 1","text":"77 % der Antworten verweisen auf „other“ — trotz solider Basis.\n\nProvinzial erreicht GEO-Score 46 und liegt 32 Punkte über dem Wettbewerbs-Schnitt. Trotzdem beträgt der Sichtbarkeitsanteil nur 3 %; bei 2 von 8 Prompts wird die Domain gar nicht zitiert.","textPreview":"77 % der Antworten verweisen auf „other“ — trotz solider Basis. |  | Provinzial erreicht GEO-Score 46 und liegt 32 Punkte über dem Wettbe...","textChars":252,"textLines":3,"bbox":[67.2,153.6,825.6,307.2]}
+{"kind":"textbox","id":"sh/yhkbe1o7","slide":5,"name":"Text 2","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/g7atobq5","slide":5,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/i107q5of","slide":5,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 6, 9\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"PROVINZIAL.DE · ERGEBNIS JE FRAGE","textShapes":20}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"name":"Text 0","text":"PROVINZIAL.DE · ERGEBNIS JE FRAGE","textPreview":"PROVINZIAL.DE · ERGEBNIS JE FRAGE","textChars":33,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"name":"Text 1","text":"Acht Fragen, zwei Mal unsichtbar","textPreview":"Acht Fragen, zwei Mal unsichtbar","textChars":32,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/98rqt4r6","slide":6,"name":"Text 2","text":"Junge Familie & Eigenheim","textPreview":"Junge Familie & Eigenheim","textChars":25,"textLines":1,"bbox":[48,168,288,40.32]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"name":"Text 3","text":"Platz 10","textPreview":"Platz 10","textChars":8,"textLines":1,"bbox":[336,168,115.2,40.32]}
+{"kind":"textbox","id":"sh/7m98ru9g","slide":6,"name":"Text 4","text":"Regionaler Berater in Düren","textPreview":"Regionaler Berater in Düren","textChars":27,"textLines":1,"bbox":[48,227.52,288,40.32]}
+{"kind":"textbox","id":"sh/oryp8fah","slide":6,"name":"Text 5","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,227.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/pc76hkr2","slide":6,"name":"Text 6","text":"Lokal vs. bundesweit (Bonn)","textPreview":"Lokal vs. bundesweit (Bonn)","textChars":27,"textLines":1,"bbox":[48,287.04,288,40.32]}
+{"kind":"textbox","id":"sh/h4bupgn6","slide":6,"name":"Text 7","text":"Platz 1","textPreview":"Platz 1","textChars":7,"textLines":1,"bbox":[336,287.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/w32twb6l","slide":6,"name":"Text 8","text":"Pflichtschutz beim Hauskauf","textPreview":"Pflichtschutz beim Hauskauf","textChars":27,"textLines":1,"bbox":[48,346.56,288,40.32]}
+{"kind":"textbox","id":"sh/v2tcn650","slide":6,"name":"Text 9","text":"Platz 14","textPreview":"Platz 14","textChars":8,"textLines":1,"bbox":[336,346.56,115.2,40.32]}
+{"kind":"textbox","id":"sh/u1kbu1ov","slide":6,"name":"Text 10","text":"Regionaler Berater in Hürth","textPreview":"Regionaler Berater in Hürth","textChars":27,"textLines":1,"bbox":[508.8,168,288,40.32]}
+{"kind":"textbox","id":"sh/5svutgni","slide":6,"name":"Text 11","text":"Platz 17","textPreview":"Platz 17","textChars":8,"textLines":1,"bbox":[796.8,168,115.2,40.32]}
+{"kind":"textbox","id":"sh/47mt0b6x","slide":6,"name":"Text 12","text":"Anbietervergleich für Familien","textPreview":"Anbietervergleich für Familien","textChars":30,"textLines":1,"bbox":[508.8,227.52,288,40.32]}
+{"kind":"textbox","id":"sh/j6dcr65c","slide":6,"name":"Text 13","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[796.8,227.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/i54bylor","slide":6,"name":"Text 14","text":"Gewerbeschutz für Mittelstand","textPreview":"Gewerbeschutz für Mittelstand","textChars":29,"textLines":1,"bbox":[508.8,287.04,288,40.32]}
+{"kind":"textbox","id":"sh/twfux0ne","slide":6,"name":"Text 15","text":"Platz 14","textPreview":"Platz 14","textChars":8,"textLines":1,"bbox":[796.8,287.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/svmt4v6t","slide":6,"name":"Text 16","text":"Gewerbeversicherer in Münster","textPreview":"Gewerbeversicherer in Münster","textChars":29,"textLines":1,"bbox":[508.8,346.56,288,40.32]}
+{"kind":"textbox","id":"sh/cbe5g3ih","slide":6,"name":"Text 17","text":"Platz 1","textPreview":"Platz 1","textChars":7,"textLines":1,"bbox":[796.8,346.56,115.2,40.32]}
+{"kind":"shape","id":"sh/dcnm98zm","slide":6,"name":"Shape 18","bbox":[484.8,168,0.96,244.8]}
+{"kind":"textbox","id":"sh/qpwnet0b","slide":6,"name":"Text 19","text":"Stark bei lokalen und spezifischen Fragen, unsichtbar bei Beratungssuche und Anbietervergleich. Basis: 8 Prompts × 7 Modelle.","textPreview":"Stark bei lokalen und spezifischen Fragen, unsichtbar bei Beratungssuche und Anbietervergleich. Basis: 8 Prompts × 7 Modelle.","textChars":125,"textLines":1,"bbox":[48,436.8,864,48]}
+{"kind":"textbox","id":"sh/bq547yhw","slide":6,"name":"Text 20","text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/neh8na9g","slide":6,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/x8f69ofe","slide":6,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 6\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/gnmp4jqx","slide":7,"title":"MUSTER IM PROMPT-SET","textShapes":22}
+{"kind":"textbox","id":"sh/cb2tkvap","slide":7,"name":"Text 0","text":"MUSTER IM PROMPT-SET","textPreview":"MUSTER IM PROMPT-SET","textChars":20,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/dcbud0ra","slide":7,"name":"Text 1","text":"Lokalität gewinnt, Vergleich verliert","textPreview":"Lokalität gewinnt, Vergleich verliert","textChars":37,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/zedcfa9g","slide":7,"name":"Text 2","text":"VERGLEICH & MAINSTREAM","textPreview":"VERGLEICH & MAINSTREAM","textChars":22,"textLines":1,"bbox":[48,182.4,403.2,28.8]}
+{"kind":"textbox","id":"sh/kzmdova1","slide":7,"name":"Text 3","text":"Regionaler Berater in Düren","textPreview":"Regionaler Berater in Düren","textChars":27,"textLines":1,"bbox":[48,220.8,288,40.32]}
+{"kind":"textbox","id":"sh/l0vuh0rm","slide":7,"name":"Text 4","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,220.8,115.2,40.32]}
+{"kind":"textbox","id":"sh/eh0ba1sr","slide":7,"name":"Text 5","text":"Anbietervergleich für Familien","textPreview":"Anbietervergleich für Familien","textChars":30,"textLines":1,"bbox":[48,263.04,288,40.32]}
+{"kind":"textbox","id":"sh/fi9c369c","slide":7,"name":"Text 6","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,263.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/baxkjqlk","slide":7,"name":"Text 7","text":"Pflichtschutz beim Hauskauf","textPreview":"Pflichtschutz beim Hauskauf","textChars":27,"textLines":1,"bbox":[48,305.28,288,40.32]}
+{"kind":"textbox","id":"sh/a9ojq5kz","slide":7,"name":"Text 8","text":"Platz 14","textPreview":"Platz 14","textChars":8,"textLines":1,"bbox":[336,305.28,115.2,40.32]}
+{"kind":"textbox","id":"sh/xcz2l03q","slide":7,"name":"Text 9","text":"Gewerbeschutz Mittelstand","textPreview":"Gewerbeschutz Mittelstand","textChars":25,"textLines":1,"bbox":[48,347.52,288,40.32]}
+{"kind":"textbox","id":"sh/cbq1sv25","slide":7,"name":"Text 10","text":"Platz 14","textPreview":"Platz 14","textChars":8,"textLines":1,"bbox":[336,347.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/n6x0fqlo","slide":7,"name":"Text 11","text":"Regionaler Berater in Hürth","textPreview":"Regionaler Berater in Hürth","textChars":27,"textLines":1,"bbox":[48,389.76,288,40.32]}
+{"kind":"textbox","id":"sh/25ojml43","slide":7,"name":"Text 12","text":"Platz 17","textPreview":"Platz 17","textChars":8,"textLines":1,"bbox":[336,389.76,115.2,40.32]}
+{"kind":"textbox","id":"sh/p8fih03e","slide":7,"name":"Text 13","text":"LOKAL & SPEZIFISCH","textPreview":"LOKAL & SPEZIFISCH","textChars":18,"textLines":1,"bbox":[508.8,182.4,403.2,28.8]}
+{"kind":"textbox","id":"sh/o761ov2t","slide":7,"name":"Text 14","text":"Bonn: lokal vs. bundesweit","textPreview":"Bonn: lokal vs. bundesweit","textChars":26,"textLines":1,"bbox":[508.8,220.8,288,40.32]}
+{"kind":"textbox","id":"sh/f2d0b6lc","slide":7,"name":"Text 15","text":"Platz 1","textPreview":"Platz 1","textChars":7,"textLines":1,"bbox":[796.8,220.8,115.2,40.32]}
+{"kind":"textbox","id":"sh/eh4jil4r","slide":7,"name":"Text 16","text":"Münster: fester Ansprechpartner","textPreview":"Münster: fester Ansprechpartner","textChars":31,"textLines":1,"bbox":[508.8,263.04,288,40.32]}
+{"kind":"textbox","id":"sh/id4ju1oz","slide":7,"name":"Text 17","text":"Platz 1","textPreview":"Platz 1","textChars":7,"textLines":1,"bbox":[796.8,263.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/jedkn654","slide":7,"name":"Text 18","text":"Junge Familie & Eigenheim","textPreview":"Junge Familie & Eigenheim","textChars":25,"textLines":1,"bbox":[508.8,305.28,288,40.32]}
+{"kind":"textbox","id":"sh/4fm1wb6p","slide":7,"name":"Text 19","text":"Platz 10","textPreview":"Platz 10","textChars":8,"textLines":1,"bbox":[796.8,305.28,115.2,40.32]}
+{"kind":"shape","id":"sh/50v2pgna","slide":7,"name":"Shape 20","bbox":[484.8,182.4,0.96,283.2]}
+{"kind":"textbox","id":"sh/q143ylov","slide":7,"name":"Text 21","text":"Die besten Rankings entstehen dort, wo Region und konkrete Lebens- oder Betriebslage zusammentreffen; generische Vergleichsfragen besetzen Wettbewerber.","textPreview":"Die besten Rankings entstehen dort, wo Region und konkrete Lebens- oder Betriebslage zusammentreffen; generische Vergleichsfragen besetze...","textChars":152,"textLines":1,"bbox":[48,475.2,864,43.2]}
+{"kind":"textbox","id":"sh/r2dkrq5g","slide":7,"name":"Text 22","text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/3ydory5k","slide":7,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/gnmp4jqx","slide":7,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 6\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":8,"title":"WARUM DAS SO IST","textShapes":9}
+{"kind":"textbox","id":"sh/18byd4zy","slide":8,"name":"Text 0","text":"WARUM DAS SO IST","textPreview":"WARUM DAS SO IST","textChars":16,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/g72x4zyd","slide":8,"name":"Text 1","text":"„other“ dominiert, E-E-A-T-Lücken bremsen","textPreview":"„other“ dominiert, E-E-A-T-Lücken bremsen","textChars":41,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/6h0fypgb","slide":8,"name":"Shape 2","bbox":[48,187.2,403.2,288]}
+{"kind":"textbox","id":"sh/tkby9kzm","slide":8,"name":"Text 3","text":"WETTBEWERBSBILD","textPreview":"WETTBEWERBSBILD","textChars":15,"textLines":1,"bbox":[67.2,206.4,345.6,24]}
+{"kind":"textbox","id":"sh/sjix0zy1","slide":8,"name":"Text 4","text":"77 % Sichtbarkeit entfallen auf „other“","textPreview":"77 % Sichtbarkeit entfallen auf „other“","textChars":39,"textLines":1,"bbox":[67.2,235.2,364.8,57.6]}
+{"kind":"textbox","id":"sh/je9g3ahk","slide":8,"name":"Text 5","text":"Provinzial: 3 % Sichtbarkeit · Ø Position 4,4\n\nAllianz / check24: 5 % / 3 % Sichtbarkeit im Wettbewerberfeld\n\nDie Konkurrenz ist fragmentiert — konkrete Quellen gewinnen.","textPreview":"Provinzial: 3 % Sichtbarkeit · Ø Position 4,4 |  | Allianz / check24: 5 % / 3 % Sichtbarkeit im Wettbewerberfeld |  | Die Konkurrenz ist ...","textChars":170,"textLines":5,"bbox":[67.2,307.2,364.8,158.4]}
+{"kind":"shape","id":"sh/id0fu50z","slide":8,"name":"Shape 6","bbox":[508.8,187.2,403.2,288]}
+{"kind":"textbox","id":"sh/o7ydoret","slide":8,"name":"Text 7","text":"E-E-A-T-LÜCKE","textPreview":"E-E-A-T-LÜCKE","textChars":13,"textLines":1,"bbox":[528,206.4,345.6,24]}
+{"kind":"textbox","id":"sh/98rehwve","slide":8,"name":"Text 8","text":"Struktur gut, Details nicht zitierbar","textPreview":"Struktur gut, Details nicht zitierbar","textChars":37,"textLines":1,"bbox":[528,235.2,364.8,57.6]}
+{"kind":"textbox","id":"sh/m5gvmhwn","slide":8,"name":"Text 9","text":"Vertrauen & Erfahrung — 40/100: kaum sichtbare Trust-Signale, keine Fälle oder Prozesse\n\nFachkompetenz & Autorität — 60/100: gute Cluster, aber 0 FAQ-/Zitiersignale und keine HowTo-/Breadcrumb-Struktur","textPreview":"Vertrauen & Erfahrung — 40/100: kaum sichtbare Trust-Signale, keine Fälle oder Prozesse |  | Fachkompetenz & Autorität — 60/100: gute Clu...","textChars":201,"textLines":3,"bbox":[528,307.2,364.8,158.4]}
+{"kind":"textbox","id":"sh/n6pwfmd8","slide":8,"name":"Text 10","text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/zqd8fe18","slide":8,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/fu1gfa1s","slide":8,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 6–7\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/udsvah03","slide":9,"title":"EINORDNUNG","textShapes":4}
+{"kind":"shape","id":"sh/0b65obm9","slide":9,"name":"Shape 0","bbox":[86.4,105.6,787.2,345.6]}
+{"kind":"textbox","id":"sh/nex4jq5k","slide":9,"name":"Text 1","text":"EINORDNUNG","textPreview":"EINORDNUNG","textChars":10,"textLines":1,"bbox":[115.2,134.4,480,24]}
+{"kind":"textbox","id":"sh/mdonql4z","slide":9,"name":"Text 2","text":"Die Technik trägt — der Content begrenzt die Sichtbarkeit","textPreview":"Die Technik trägt — der Content begrenzt die Sichtbarkeit","textChars":57,"textLines":1,"bbox":[115.2,168,729.6,105.6]}
+{"kind":"textbox","id":"sh/9gzml0nq","slide":9,"name":"Text 3","text":"Domain-Score 73 und 50 geprüfte Seiten zeigen eine belastbare Basis. Doch 86 % des Corpus sind sehr komplex; FAQ, HowTo, Breadcrumbs, Author-Bios und zitierfähige Detailblöcke fehlen. So bleibt Provinzial für generative Modelle schwer zusammenzufassen.","textPreview":"Domain-Score 73 und 50 geprüfte Seiten zeigen eine belastbare Basis. Doch 86 % des Corpus sind sehr komplex; FAQ, HowTo, Breadcrumbs, Aut...","textChars":252,"textLines":1,"bbox":[115.2,292.8,729.6,144]}
+{"kind":"textbox","id":"sh/ofq5svm5","slide":9,"name":"Text 4","text":"9","textPreview":"9","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/ytkjutwz","slide":9,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/udsvah03","slide":9,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 2–3, 7\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"HANDLUNGSEMPFEHLUNGEN","textShapes":13}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"name":"Text 0","text":"HANDLUNGSEMPFEHLUNGEN","textPreview":"HANDLUNGSEMPFEHLUNGEN","textChars":21,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"name":"Text 1","text":"Drei Prioritäten, klarer Hebel","textPreview":"Drei Prioritäten, klarer Hebel","textChars":30,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/ydcnatkn","slide":10,"name":"Shape 2","bbox":[48,158.4,67.2,67.2]}
+{"kind":"textbox","id":"sh/l036l83y","slide":10,"name":"Text 3","text":"P1","textPreview":"P1","textChars":2,"textLines":1,"bbox":[48,164.16,67.2,55.68]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"name":"Text 4","text":"Zitierbare Antwortblöcke","textPreview":"Zitierbare Antwortblöcke","textChars":24,"textLines":1,"bbox":[134.4,156.48,220.8,67.2]}
+{"kind":"textbox","id":"sh/725onyl4","slide":10,"name":"Text 5","text":"Für Kernfragen kurze Blöcke aus Definition, 1–2 belastbaren Fakten, Quelle und Ansprechpartner veröffentlichen.","textPreview":"Für Kernfragen kurze Blöcke aus Definition, 1–2 belastbaren Fakten, Quelle und Ansprechpartner veröffentlichen.","textChars":111,"textLines":1,"bbox":[364.8,156.48,537.6,81.6]}
+{"kind":"shape","id":"sh/m1cnetkj","slide":10,"name":"Shape 6","bbox":[48,257.28,67.2,67.2]}
+{"kind":"textbox","id":"sh/s7yt4b21","slide":10,"name":"Text 7","text":"P2","textPreview":"P2","textChars":2,"textLines":1,"bbox":[48,263.04,67.2,55.68]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"name":"Text 8","text":"FAQ & Schema","textPreview":"FAQ & Schema","textChars":12,"textLines":1,"bbox":[134.4,255.36,220.8,67.2]}
+{"kind":"textbox","id":"sh/q5gb21kb","slide":10,"name":"Text 9","text":"FAQPage, HowTo, BreadcrumbList und semantische Definitionen ergänzen; bestehende Themen-Cluster maschinenlesbar auszeichnen.","textPreview":"FAQPage, HowTo, BreadcrumbList und semantische Definitionen ergänzen; bestehende Themen-Cluster maschinenlesbar auszeichnen.","textChars":124,"textLines":1,"bbox":[364.8,255.36,537.6,81.6]}
+{"kind":"shape","id":"sh/r6pcv6lw","slide":10,"name":"Shape 10","bbox":[48,356.16,67.2,67.2]}
+{"kind":"textbox","id":"sh/0bit8b2d","slide":10,"name":"Text 11","text":"P3","textPreview":"P3","textChars":2,"textLines":1,"bbox":[48,361.92,67.2,55.68]}
+{"kind":"textbox","id":"sh/1cru1g3y","slide":10,"name":"Text 12","text":"Trust & Experience","textPreview":"Trust & Experience","textChars":18,"textLines":1,"bbox":[134.4,354.24,220.8,67.2]}
+{"kind":"textbox","id":"sh/e9gb61k7","slide":10,"name":"Text 13","text":"Author-Bios, qualifizierte Kontakte, Fallbeispiele und nachprüfbare Prozesse sichtbar machen und mit Organization/WebPage-Signalen verbinden.","textPreview":"Author-Bios, qualifizierte Kontakte, Fallbeispiele und nachprüfbare Prozesse sichtbar machen und mit Organization/WebPage-Signalen verbin...","textChars":141,"textLines":1,"bbox":[364.8,354.24,537.6,81.6]}
+{"kind":"textbox","id":"sh/fapcz6ls","slide":10,"name":"Text 14","text":"Startpunkt: die zwei unzitierten Prompts plus Fragen mit Rang 14–17 — hier ist der größte kurzfristige Hebel.","textPreview":"Startpunkt: die zwei unzitierten Prompts plus Fragen mit Rang 14–17 — hier ist der größte kurzfristige Hebel.","textChars":109,"textLines":1,"bbox":[48,465.6,864,38.4]}
+{"kind":"textbox","id":"sh/ozitcv29","slide":10,"name":"Text 15","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/q90jedkz","slide":10,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/m90b6t0r","slide":10,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 8–9\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}
+{"kind":"slide","id":"sl/jetc3ut0","slide":11,"title":"FAZIT","textShapes":5}
+{"kind":"textbox","id":"sh/wbih4b6d","slide":11,"name":"Text 0","text":"FAZIT","textPreview":"FAZIT","textChars":5,"textLines":1,"bbox":[48,28.8,480,24]}
+{"kind":"textbox","id":"sh/n69grmpw","slide":11,"name":"Text 1","text":"Provinzial muss nicht sichtbarer werden —\nsondern zitierbarer.","textPreview":"Provinzial muss nicht sichtbarer werden — | sondern zitierbarer.","textChars":62,"textLines":2,"bbox":[67.2,163.2,825.6,182.4]}
+{"kind":"textbox","id":"sh/250zy18b","slide":11,"name":"Text 2","text":"Die technische Basis ist solide und der GEO-Score überdurchschnittlich. Der nächste Sprung entsteht durch strukturierte Antworten, belastbare Vertrauenssignale und lokale Evidenz — genau dort, wo die Personas konkret suchen.","textPreview":"Die technische Basis ist solide und der GEO-Score überdurchschnittlich. Der nächste Sprung entsteht durch strukturierte Antworten, belast...","textChars":224,"textLines":1,"bbox":[67.2,369.6,825.6,115.2]}
+{"kind":"textbox","id":"sh/98rytw72","slide":11,"name":"Text 3","text":"Quelle: PLEXON Quick Check Provinzial · 50 Seiten · 8 Prompts · 7 Modelle · Stand 25.08.2026","textPreview":"Quelle: PLEXON Quick Check Provinzial · 50 Seiten · 8 Prompts · 7 Modelle · Stand 25.08.2026","textChars":92,"textLines":1,"bbox":[67.2,480,825.6,28.8]}
+{"kind":"textbox","id":"sh/o7ih0r6h","slide":11,"name":"Text 4","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/2lcz2l0n","slide":11,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"notes","id":"nt/jetc3ut0","slide":11,"text":"[Sources]\n- /Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf — Seiten 1, 6–9\n- /Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx — Designreferenz und MSQDX-Logo\n[/Sources]"}

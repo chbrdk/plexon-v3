@@ -350,7 +350,7 @@ export default function DashboardPage() {
       <section className="plexon-dash-band" data-section="checkion-users">
         <header className="plexon-dash-band-head">
           <Text role="title" as="h2" className="plexon-dash-band-title">
-            {t('dashboard.centralUsers') ?? 'Zentrale Nutzer'}
+          {t('dashboard.centralUsers') ?? 'Zentrale Nutzer'}
           </Text>
           <Text role="meta" as="p" className="plexon-dash-band-deck">
             {t('dashboard.centralUsersSubtitle') ??
@@ -360,7 +360,7 @@ export default function DashboardPage() {
 
         {notConfigured && (
           <Text role="meta" as="p" className="plexon-dash-band-status">
-            {error?.includes('Database not configured') ? t('dashboard.centralNotConfigured') : error}
+              {error?.includes('Database not configured') ? t('dashboard.centralNotConfigured') : error}
           </Text>
         )}
 
@@ -413,11 +413,11 @@ export default function DashboardPage() {
                       <div className="plexon-dash-row-actions">
                         <Link href={pathAdminUser(u.id)}>
                           <Button variant="ghost" size="md">
-                            {t('dashboard.edit')}
+                        {t('dashboard.edit')}
                           </Button>
                         </Link>
                         <Button variant="danger" size="md" onClick={() => handleDelete(u.id)}>
-                          {t('dashboard.delete')}
+                        {t('dashboard.delete')}
                         </Button>
                       </div>
                     </td>
@@ -435,7 +435,7 @@ export default function DashboardPage() {
         <section className="plexon-dash-band" data-section="usage">
           <header className="plexon-dash-band-head">
             <Text role="title" as="h2" className="plexon-dash-band-title">
-              {t('dashboard.usage') ?? 'Nutzung'}
+            {t('dashboard.usage') ?? 'Nutzung'}
             </Text>
             <Text role="meta" as="p" className="plexon-dash-band-deck">
               {isAdmin
@@ -490,93 +490,93 @@ export default function DashboardPage() {
               {isAdmin ? (
                 <div className="plexon-dash-subband" data-section="usage-admin-events">
                   <Text role="title" as="h3" className="plexon-dash-subband-title">
-                    {t('dashboard.usageAdminEventsTitle')}
+                {t('dashboard.usageAdminEventsTitle')}
                   </Text>
                   <Text role="meta" as="p" className="plexon-dash-subband-deck">
-                    {t('dashboard.usageAdminEventsSubtitle')}
+                {t('dashboard.usageAdminEventsSubtitle')}
                   </Text>
-                  {adminUsageEvents.length === 0 ? (
+              {adminUsageEvents.length === 0 ? (
                     <Text role="meta" as="p" className="plexon-dash-band-status">
-                      {t('dashboard.usageAdminEventsEmpty')}
+                  {t('dashboard.usageAdminEventsEmpty')}
                     </Text>
-                  ) : (
-                    <>
+              ) : (
+                <>
                       <div className="plexon-dash-table-wrap is-scroll">
                         <table className="plexon-dash-table">
-                          <thead>
-                            <tr>
+                      <thead>
+                        <tr>
                               <th scope="col">{t('dashboard.usageHistoryTime')}</th>
                               <th scope="col">{t('dashboard.usageUser')}</th>
                               <th scope="col">{t('dashboard.usageService')}</th>
                               <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
                               <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
                               <th scope="col" className="plexon-dash-table-num is-end">
-                                {t('dashboard.usageTokens')}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {adminUsageEvents.map((ev) => {
-                              const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
-                              return (
+                            {t('dashboard.usageTokens')}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminUsageEvents.map((ev) => {
+                          const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
+                          return (
                                 <tr key={ev.id}>
                                   <td className="plexon-dash-table-num">
-                                    {new Date(ev.createdAt).toLocaleString(undefined, {
-                                      dateStyle: 'short',
-                                      timeStyle: 'short',
-                                    })}
-                                  </td>
+                                {new Date(ev.createdAt).toLocaleString(undefined, {
+                                  dateStyle: 'short',
+                                  timeStyle: 'short',
+                                })}
+                              </td>
                                   <td style={{ maxWidth: 200, wordBreak: 'break-word' }}>
-                                    {ev.userEmail || ev.userId}
-                                  </td>
+                                {ev.userEmail || ev.userId}
+                              </td>
                                   <td>{ev.service}</td>
                                   <td>{ev.eventType}</td>
                                   <td className="plexon-dash-table-detail" title={detail || undefined}>
-                                    {detail || '—'}
-                                  </td>
+                                {detail || '—'}
+                              </td>
                                   <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                       </div>
-                      {adminUsageEventsHasMore && (
+                  {adminUsageEventsHasMore && (
                         <div>
                           <Button
                             variant="subtle"
                             size="md"
-                            onClick={() => void loadMoreAdminUsageEvents()}
-                            disabled={adminUsageEventsLoading}
-                          >
-                            {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
+                        onClick={() => void loadMoreAdminUsageEvents()}
+                        disabled={adminUsageEventsLoading}
+                      >
+                        {adminUsageEventsLoading ? t('common.loading') : t('dashboard.usageLoadMore')}
                           </Button>
                         </div>
-                      )}
-                    </>
                   )}
+                </>
+              )}
                 </div>
               ) : null}
 
               {usageRecentEvents.length > 0 ? (
                 <div className="plexon-dash-subband" data-section="usage-history">
                   <Text role="title" as="h3" className="plexon-dash-subband-title">
-                    {t('dashboard.usageHistory')}
+                {t('dashboard.usageHistory')}
                   </Text>
                   <div className="plexon-dash-table-wrap is-scroll">
                     <table className="plexon-dash-table">
-                      <thead>
-                        <tr>
+                  <thead>
+                    <tr>
                           <th scope="col">{t('dashboard.usageHistoryTime')}</th>
                           <th scope="col">{t('dashboard.usageService')}</th>
                           <th scope="col">{t('dashboard.usageHistoryEvent')}</th>
                           <th scope="col">{t('dashboard.usageHistoryDetail')}</th>
                           <th scope="col" className="plexon-dash-table-num is-end">
-                            {t('dashboard.usageTokens')}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                        {t('dashboard.usageTokens')}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
                         {usageRecentEvents.map((ev) => {
                           const detail = formatUsageEventDetail(ev.eventType, ev.rawUnits);
                           return (
@@ -586,18 +586,18 @@ export default function DashboardPage() {
                                   dateStyle: 'short',
                                   timeStyle: 'short',
                                 })}
-                              </td>
+                        </td>
                               <td>{ev.service}</td>
                               <td>{ev.eventType}</td>
                               <td className="plexon-dash-table-detail" title={detail || undefined}>
                                 {detail || '—'}
-                              </td>
+                        </td>
                               <td className="plexon-dash-table-num is-end">{ev.tokens.toLocaleString()}</td>
-                            </tr>
+                      </tr>
                           );
                         })}
-                      </tbody>
-                    </table>
+                  </tbody>
+                </table>
                   </div>
                 </div>
               ) : null}

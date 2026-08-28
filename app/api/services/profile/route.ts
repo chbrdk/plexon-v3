@@ -2,7 +2,7 @@
 /*  PLEXON – GET/PATCH /api/services/profile (für CHECKION/AUDION)     */
 /* ------------------------------------------------------------------ */
 /* Services holen/schreiben Profil (name, company, avatar_url, locale,
-   optional default_platform_company_id) per X-Service-Secret und user_id. */
+   themePreference, optional default_platform_company_id) per X-Service-Secret und user_id. */
 
 import { NextResponse } from 'next/server';
 import { asc, eq } from 'drizzle-orm';
@@ -11,6 +11,11 @@ import { getDb } from '@/lib/db';
 import { companyUsers, users } from '@/lib/db/schema';
 import { apiError, API_STATUS } from '@/lib/api-error-handler';
 import { platformJson, readServiceSecret } from '@/lib/platform-contract';
+import {
+  normalizeThemePreference,
+  parseThemePreference,
+} from '@/lib/theme-preference';
+import { ensureUsersThemePreferenceColumn } from '@/lib/ensure-theme-preference-column';
 
 function checkSecret(request: Request): boolean {
   const SERVICE_SECRET = process.env.PLEXON_SERVICE_SECRET ?? '';
@@ -31,6 +36,30 @@ async function defaultPlatformCompanyIdForUser(userId: string): Promise<string |
   return id || undefined;
 }
 
+function serializeServiceUser(
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+    company: string | null;
+    avatarUrl: string | null;
+    locale: string | null;
+    themePreference: string | null;
+  },
+  defaultPlatformCompanyId?: string,
+) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name ?? undefined,
+    company: user.company ?? undefined,
+    avatar_url: user.avatarUrl ?? undefined,
+    locale: user.locale ?? undefined,
+    themePreference: normalizeThemePreference(user.themePreference),
+    ...(defaultPlatformCompanyId ? { default_platform_company_id: defaultPlatformCompanyId } : {}),
+  };
+}
+
 export async function GET(request: Request) {
   if (!checkSecret(request)) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);
@@ -39,6 +68,7 @@ export async function GET(request: Request) {
   const email = url.searchParams.get('email')?.trim()?.toLowerCase();
   if (!userId && !email) return apiError('user_id or email required', API_STATUS.BAD_REQUEST);
 
+  await ensureUsersThemePreferenceColumn();
   const db = getDb();
   const [user] = await db
     .select({
@@ -48,6 +78,7 @@ export async function GET(request: Request) {
       company: users.company,
       avatarUrl: users.avatarUrl,
       locale: users.locale,
+      themePreference: users.themePreference,
     })
     .from(users)
     .where(userId ? eq(users.id, userId) : eq(users.email, email!))
@@ -55,15 +86,7 @@ export async function GET(request: Request) {
   if (!user) return apiError('User not found', API_STATUS.NOT_FOUND);
   const defaultPlatformCompanyId = await defaultPlatformCompanyIdForUser(user.id);
   return platformJson({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name ?? undefined,
-      company: user.company ?? undefined,
-      avatar_url: user.avatarUrl ?? undefined,
-      locale: user.locale ?? undefined,
-      ...(defaultPlatformCompanyId ? { default_platform_company_id: defaultPlatformCompanyId } : {}),
-    },
+    user: serializeServiceUser(user, defaultPlatformCompanyId),
   });
 }
 
@@ -79,6 +102,8 @@ export async function PATCH(request: Request) {
   const userId = typeof body.user_id === 'string' ? body.user_id.trim() : undefined;
   if (!userId) return apiError('user_id required', API_STATUS.BAD_REQUEST);
 
+  await ensureUsersThemePreferenceColumn();
+
   const name = typeof body.name === 'string' ? body.name.trim() || null : undefined;
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : undefined;
   const company = typeof body.company === 'string' ? body.company.trim() || null : undefined;
@@ -89,6 +114,12 @@ export async function PATCH(request: Request) {
         ? null
         : undefined;
   const locale = typeof body.locale === 'string' ? body.locale.trim() || null : undefined;
+  let themePreference: string | undefined;
+  if (body.themePreference !== undefined) {
+    const parsed = parseThemePreference(body.themePreference);
+    if (!parsed) return apiError('Invalid themePreference', API_STATUS.BAD_REQUEST);
+    themePreference = parsed;
+  }
 
   const db = getDb();
   if (email !== undefined) {
@@ -103,21 +134,26 @@ export async function PATCH(request: Request) {
   if (company !== undefined) updates.company = company;
   if (avatar_url !== undefined) updates.avatarUrl = avatar_url;
   if (locale !== undefined) updates.locale = locale;
+  if (themePreference !== undefined) updates.themePreference = themePreference;
 
   if (Object.keys(updates).length === 0) {
-    const [u] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [u] = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        company: users.company,
+        avatarUrl: users.avatarUrl,
+        locale: users.locale,
+        themePreference: users.themePreference,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
     if (!u) return apiError('User not found', API_STATUS.NOT_FOUND);
     const defaultPlatformCompanyId = await defaultPlatformCompanyIdForUser(u.id);
     return platformJson({
-      user: {
-        id: u.id,
-        email: u.email,
-        name: u.name ?? undefined,
-        company: u.company ?? undefined,
-        avatar_url: u.avatarUrl ?? undefined,
-        locale: u.locale ?? undefined,
-        ...(defaultPlatformCompanyId ? { default_platform_company_id: defaultPlatformCompanyId } : {}),
-      },
+      user: serializeServiceUser(u, defaultPlatformCompanyId),
     });
   }
 
@@ -132,18 +168,11 @@ export async function PATCH(request: Request) {
       company: users.company,
       avatarUrl: users.avatarUrl,
       locale: users.locale,
+      themePreference: users.themePreference,
     });
   if (!updated) return apiError('User not found', API_STATUS.NOT_FOUND);
   const defaultPlatformCompanyId = await defaultPlatformCompanyIdForUser(updated.id);
   return platformJson({
-    user: {
-      id: updated.id,
-      email: updated.email,
-      name: updated.name ?? undefined,
-      company: updated.company ?? undefined,
-      avatar_url: updated.avatarUrl ?? undefined,
-      locale: updated.locale ?? undefined,
-      ...(defaultPlatformCompanyId ? { default_platform_company_id: defaultPlatformCompanyId } : {}),
-    },
+    user: serializeServiceUser(updated, defaultPlatformCompanyId),
   });
 }

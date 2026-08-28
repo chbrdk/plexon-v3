@@ -7,5 +7,6 @@ describe('db schema', () => {
     expect(users).toBeTruthy();
     expect(USER_ROLE.USER).toBe('user');
     expect(USER_ROLE.ADMIN).toBe('admin');
+    expect(users.themePreference).toBeTruthy();
   });
 });

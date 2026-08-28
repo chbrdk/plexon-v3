@@ -8,8 +8,33 @@ import { apiError, API_STATUS } from '@/lib/api-error-handler';
 import { getDb } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import {
+  normalizeThemePreference,
+  parseThemePreference,
+} from '@/lib/theme-preference';
+import { ensureUsersThemePreferenceColumn } from '@/lib/ensure-theme-preference-column';
 
 const DEMO_EMAIL = process.env.PLEXON_DEMO_EMAIL;
+
+function serializeUser(user: {
+  id: string;
+  email: string;
+  name: string | null;
+  company: string | null;
+  avatarUrl: string | null;
+  locale: string | null;
+  themePreference: string | null;
+}) {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name ?? undefined,
+    company: user.company ?? undefined,
+    avatar_url: user.avatarUrl ?? undefined,
+    locale: user.locale ?? undefined,
+    themePreference: normalizeThemePreference(user.themePreference),
+  };
+}
 
 export async function GET(request: Request) {
   const requestUser = await getRequestUser(request);
@@ -23,10 +48,12 @@ export async function GET(request: Request) {
         company: undefined,
         avatar_url: undefined,
         locale: 'de',
+        themePreference: 'dark' as const,
       },
     });
   }
   const db = getDb();
+  await ensureUsersThemePreferenceColumn();
   const [user] = await db
     .select({
       id: users.id,
@@ -35,21 +62,13 @@ export async function GET(request: Request) {
       company: users.company,
       avatarUrl: users.avatarUrl,
       locale: users.locale,
+      themePreference: users.themePreference,
     })
     .from(users)
     .where(eq(users.id, requestUser.id))
     .limit(1);
   if (!user) return apiError('User not found', API_STATUS.NOT_FOUND);
-  return NextResponse.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name ?? undefined,
-      company: user.company ?? undefined,
-      avatar_url: user.avatarUrl ?? undefined,
-      locale: user.locale ?? undefined,
-    },
-  });
+  return NextResponse.json({ user: serializeUser(user) });
 }
 
 export async function PATCH(request: Request) {
@@ -74,8 +93,15 @@ export async function PATCH(request: Request) {
         ? null
         : undefined;
   const locale = typeof body.locale === 'string' ? body.locale.trim() || null : undefined;
+  let themePreference: string | undefined;
+  if (body.themePreference !== undefined) {
+    const parsed = parseThemePreference(body.themePreference);
+    if (!parsed) return apiError('Invalid themePreference', API_STATUS.BAD_REQUEST);
+    themePreference = parsed;
+  }
 
   const db = getDb();
+  await ensureUsersThemePreferenceColumn();
   if (email !== undefined) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return apiError('Invalid email', API_STATUS.BAD_REQUEST);
     const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
@@ -88,20 +114,24 @@ export async function PATCH(request: Request) {
   if (company !== undefined) updates.company = company;
   if (avatar_url !== undefined) updates.avatarUrl = avatar_url;
   if (locale !== undefined) updates.locale = locale;
+  if (themePreference !== undefined) updates.themePreference = themePreference;
 
   if (Object.keys(updates).length === 0) {
-    const [u] = await db.select().from(users).where(eq(users.id, requestUser.id)).limit(1);
+    const [u] = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        company: users.company,
+        avatarUrl: users.avatarUrl,
+        locale: users.locale,
+        themePreference: users.themePreference,
+      })
+      .from(users)
+      .where(eq(users.id, requestUser.id))
+      .limit(1);
     if (!u) return apiError('User not found', API_STATUS.NOT_FOUND);
-    return NextResponse.json({
-      user: {
-        id: u.id,
-        email: u.email,
-        name: u.name ?? undefined,
-        company: u.company ?? undefined,
-        avatar_url: u.avatarUrl ?? undefined,
-        locale: u.locale ?? undefined,
-      },
-    });
+    return NextResponse.json({ user: serializeUser(u) });
   }
 
   const [updated] = await db
@@ -115,16 +145,8 @@ export async function PATCH(request: Request) {
       company: users.company,
       avatarUrl: users.avatarUrl,
       locale: users.locale,
+      themePreference: users.themePreference,
     });
   if (!updated) return apiError('User not found', API_STATUS.NOT_FOUND);
-  return NextResponse.json({
-    user: {
-      id: updated.id,
-      email: updated.email,
-      name: updated.name ?? undefined,
-      company: updated.company ?? undefined,
-      avatar_url: updated.avatarUrl ?? undefined,
-      locale: updated.locale ?? undefined,
-    },
-  });
+  return NextResponse.json({ user: serializeUser(updated) });
 }

@@ -28,9 +28,10 @@ export const shellPaths = {
   brandCornerRadiusPx: 32,
   devPort: 3334,
   defaultDisplayName: 'PLEXON',
-  defaultTheme: 'msqdx-dark' as const,
+  defaultTheme: 'dark' as const,
   defaultLocale: 'en' as const,
-  themeChoices: ['msqdx', 'msqdx-dark', 'msqdx-v2', 'msqdx-v2-dark'] as const,
+  themeChoices: ['light', 'dark', 'auto'] as const,
+  themeStorageKey: 'plexon.v3.themePreference',
   localeChoices: ['en', 'de'] as const,
   routes: {
     home: PATH_HOME,

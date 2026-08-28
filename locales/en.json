@@ -523,7 +523,10 @@
     },
     "appearance": {
       "title": "Appearance",
-      "subtitle": "Accent color for sidebar and buttons.",
+      "subtitle": "Choose light, dark, or match your system. Syncs across MSQ DX apps.",
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto",
       "colorSelectAria": "Select color {label}"
     },
     "password": {

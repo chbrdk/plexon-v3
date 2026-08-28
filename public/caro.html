@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A bold monochrome tribute to CARO — the best person on the planet.">
+    <meta property="og:title" content="CARO — The best person on the planet">
+    <meta property="og:description" content="One name. Infinite good energy. A typographic tribute to CARO.">
+    <meta name="twitter:card" content="summary">
+    <title>CARO — The best person on the planet</title>
+    <style>
+      :root {
+        --black: #0a0a0a;
+        --white: #f5f4ef;
+        --grey: #aaa9a3;
+        --line-dark: rgba(245, 244, 239, .28);
+        --line-light: rgba(10, 10, 10, .22);
+        --page: min(1480px, calc(100% - 44px));
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body { margin: 0; overflow-x: hidden; color: var(--white); background: var(--black); font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased; }
+      a { color: inherit; text-decoration: none; }
+      :focus-visible { outline: 3px solid currentColor; outline-offset: 6px; }
+      .skip-link { position: fixed; left: 16px; top: 16px; z-index: 100; padding: 10px 15px; color: var(--black); background: var(--white); transform: translateY(-180%); transition: transform .2s ease; }
+      .skip-link:focus { transform: translateY(0); }
+      .shell { width: var(--page); margin-inline: auto; }
+
+      .nav { position: relative; z-index: 30; height: 78px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--line-dark); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      .nav-center { font-size: 12px; letter-spacing: .2em; }
+      .nav-right { justify-self: end; display: flex; gap: 26px; }
+      .nav a:hover { text-decoration: underline; text-underline-offset: 5px; }
+
+      .hero { position: relative; min-height: 870px; height: calc(100vh - 78px); overflow: hidden; display: grid; grid-template-rows: 1fr auto; }
+      .hero-meta { position: absolute; inset: 28px 0 auto; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 24px; color: var(--grey); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+      .hero-meta span:last-child { text-align: right; }
+      .hero-stage { position: relative; display: grid; place-items: center; }
+      .hero-word { position: relative; z-index: 2; margin: 10px 0 0; font-family: Arial Black, Arial, Helvetica, sans-serif; font-size: clamp(180px, 30vw, 455px); font-weight: 900; letter-spacing: -.095em; line-height: .68; text-align: center; text-transform: uppercase; white-space: nowrap; }
+      .hero-word span { display: inline-block; animation: letter-rise .75s cubic-bezier(.2,.8,.2,1) both; }
+      .hero-word span:nth-child(2) { animation-delay: .06s; }
+      .hero-word span:nth-child(3) { animation-delay: .12s; }
+      .hero-word span:nth-child(4) { animation-delay: .18s; }
+      .hero-word-outline { position: absolute; left: 50%; top: 50%; z-index: 1; margin: 0; color: transparent; font-family: Arial Black, Arial, sans-serif; font-size: clamp(180px, 30vw, 455px); font-weight: 900; letter-spacing: -.095em; line-height: .68; white-space: nowrap; -webkit-text-stroke: 1px rgba(245,244,239,.2); transform: translate(-49.4%, -39%); }
+      .orbit { position: absolute; z-index: 3; width: clamp(150px, 15vw, 230px); aspect-ratio: 1; right: 8%; top: 16%; display: grid; place-items: center; border: 1px solid var(--white); border-radius: 50%; animation: orbit 18s linear infinite; }
+      .orbit::before, .orbit::after { content: ""; position: absolute; background: var(--white); }
+      .orbit::before { width: 22px; height: 1px; }
+      .orbit::after { width: 1px; height: 22px; }
+      .orbit-text { position: absolute; inset: 13px; border: 1px dashed var(--line-dark); border-radius: 50%; }
+      .orbit-label { width: 108px; font-size: 9px; font-weight: 800; letter-spacing: .13em; line-height: 1.5; text-align: center; text-transform: uppercase; }
+      .hero-statement { position: absolute; z-index: 5; left: 4%; bottom: 15%; width: 250px; margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-style: italic; line-height: 1.05; transform: rotate(-6deg); }
+      .hero-index { position: absolute; z-index: 5; right: 3%; bottom: 14%; color: var(--grey); font-size: 10px; letter-spacing: .1em; line-height: 1.55; text-align: right; text-transform: uppercase; }
+      .scroll-cue { position: absolute; left: 50%; bottom: 19%; z-index: 5; width: 34px; height: 60px; border: 1px solid var(--white); border-radius: 999px; transform: translateX(-50%); }
+      .scroll-cue::after { content: ""; position: absolute; left: 50%; top: 9px; width: 4px; height: 4px; border-radius: 50%; background: var(--white); transform: translateX(-50%); animation: scroll-dot 1.8s ease-in-out infinite; }
+
+      .hero-curve { position: relative; z-index: 8; height: 180px; margin-inline: -5vw; display: grid; place-items: end center; overflow: hidden; color: var(--black); background: var(--white); border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+      .curve-copy { width: min(760px, 70vw); margin: 0 0 28px; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(30px, 4vw, 57px); font-style: italic; font-weight: 400; letter-spacing: -.04em; line-height: .95; text-align: center; }
+      .curve-copy strong { font-family: Arial, Helvetica, sans-serif; font-style: normal; font-weight: 900; text-transform: uppercase; }
+
+      .ticker { overflow: hidden; color: var(--black); background: var(--white); border-block: 1px solid var(--line-light); }
+      .ticker-track { width: max-content; display: flex; animation: ticker 24s linear infinite; }
+      .ticker-track span { padding: 17px 13px; font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+      .ticker-track i { margin-inline: 19px; font-family: Georgia, serif; font-size: 16px; font-weight: 400; }
+
+      .section { padding: 120px 0; }
+      .section-label { margin: 0; font-size: 10px; font-weight: 800; letter-spacing: .14em; line-height: 1.5; text-transform: uppercase; }
+      .intro { position: relative; overflow: hidden; min-height: 850px; color: var(--black); background: var(--white); }
+      .intro::after { content: ""; position: absolute; width: 520px; height: 520px; right: -240px; top: 120px; border: 1px solid var(--line-light); border-radius: 50%; box-shadow: 0 0 0 90px transparent, 0 0 0 91px var(--line-light), 0 0 0 180px transparent, 0 0 0 181px var(--line-light); }
+      .intro-head { position: relative; z-index: 2; display: grid; grid-template-columns: .3fr 1.7fr; gap: 60px; align-items: start; }
+      .intro h2 { max-width: 1200px; margin: -12px 0 0; font-family: Arial Black, Arial, sans-serif; font-size: clamp(78px, 11vw, 176px); font-weight: 900; letter-spacing: -.065em; line-height: .84; text-transform: uppercase; }
+      .intro h2 em { display: block; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; letter-spacing: -.075em; text-align: right; text-transform: none; }
+      .intro-bottom { position: relative; z-index: 2; margin-top: 100px; display: grid; grid-template-columns: 1fr .75fr .75fr; gap: 45px; align-items: end; }
+      .intro-big { margin: 0; font-size: clamp(28px, 4vw, 58px); font-weight: 800; letter-spacing: -.045em; line-height: 1.02; }
+      .intro-copy { margin: 0; font-size: 15px; line-height: 1.55; }
+      .intro-mark { justify-self: end; width: 160px; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--black); border-radius: 50%; font-family: Georgia, serif; font-size: 58px; font-style: italic; }
+
+      .reasons { position: relative; color: var(--white); background: var(--black); border-radius: 50% 50% 0 0 / 5% 5% 0 0; }
+      .reasons-top { padding-top: 140px; padding-bottom: 70px; display: flex; align-items: end; justify-content: space-between; gap: 40px; }
+      .reasons-top h2 { max-width: 870px; margin: 0; font-family: Arial Black, Arial, sans-serif; font-size: clamp(75px, 10vw, 155px); letter-spacing: -.065em; line-height: .83; text-transform: uppercase; }
+      .reasons-top h2 span { color: transparent; -webkit-text-stroke: 1px var(--white); }
+      .reasons-top p { max-width: 290px; margin: 0; color: var(--grey); font-family: Georgia, serif; font-size: 23px; font-style: italic; line-height: 1.08; }
+      .reason { min-height: 430px; padding: 56px 0; display: grid; grid-template-columns: .22fr 1.25fr .53fr; gap: 36px; align-items: center; border-top: 1px solid var(--line-dark); }
+      .reason:last-child { border-bottom: 1px solid var(--line-dark); }
+      .reason-no { align-self: start; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+      .reason h3 { margin: 0; font-family: Arial Black, Arial, sans-serif; font-size: clamp(74px, 10vw, 150px); font-weight: 900; letter-spacing: -.07em; line-height: .78; text-transform: uppercase; transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+      .reason:hover h3 { transform: translateX(18px); }
+      .reason h3 em { display: block; color: transparent; font-family: Georgia, serif; font-weight: 400; font-style: italic; letter-spacing: -.05em; -webkit-text-stroke: 1px var(--white); text-transform: none; }
+      .reason-copy { align-self: end; max-width: 330px; }
+      .reason-copy strong { display: block; margin-bottom: 12px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+      .reason-copy p { margin: 0; color: var(--grey); font-size: 14px; line-height: 1.55; }
+
+      .flow { position: relative; min-height: 760px; display: grid; place-items: center; overflow: hidden; color: var(--black); background: var(--white); }
+      .flow-rings { position: absolute; width: min(78vw, 1060px); aspect-ratio: 2.2; border: 1px solid var(--black); border-radius: 50%; transform: rotate(-7deg); }
+      .flow-rings::before, .flow-rings::after { content: ""; position: absolute; inset: 8%; border: 1px solid var(--line-light); border-radius: 50%; }
+      .flow-rings::after { inset: 17%; }
+      .flow-copy { position: relative; z-index: 2; max-width: 1050px; margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(58px, 8vw, 120px); font-weight: 400; font-style: italic; letter-spacing: -.065em; line-height: .9; text-align: center; }
+      .flow-copy strong { display: block; font-family: Arial Black, Arial, sans-serif; font-size: .9em; font-style: normal; font-weight: 900; text-transform: uppercase; }
+      .flow-meta { position: absolute; left: 50%; bottom: 50px; display: flex; align-items: center; gap: 18px; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; transform: translateX(-50%); white-space: nowrap; }
+      .flow-meta::before, .flow-meta::after { content: ""; width: 90px; height: 1px; background: var(--black); }
+
+      .large-ticker { overflow: hidden; color: var(--white); background: var(--black); border-block: 1px solid var(--line-dark); }
+      .large-track { width: max-content; display: flex; animation: ticker-reverse 30s linear infinite; }
+      .large-track span { padding: 18px 20px; font-family: Arial Black, Arial, sans-serif; font-size: clamp(70px, 10vw, 150px); letter-spacing: -.055em; line-height: .78; text-transform: uppercase; }
+      .large-track i { color: transparent; font-family: Georgia, serif; font-style: italic; font-weight: 400; -webkit-text-stroke: 1px var(--white); }
+
+      .quote { color: var(--black); background: var(--white); }
+      .quote-grid { display: grid; grid-template-columns: .3fr 1.4fr .3fr; gap: 35px; align-items: start; }
+      .quote-mark { font-family: Georgia, serif; font-size: clamp(100px, 15vw, 220px); line-height: .6; }
+      blockquote { margin: 0; }
+      blockquote p { margin: 0; font-size: clamp(43px, 6.4vw, 96px); font-weight: 700; letter-spacing: -.055em; line-height: .97; text-align: center; }
+      blockquote p em { font-family: Georgia, serif; font-weight: 400; }
+      blockquote footer { margin-top: 40px; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-align: center; text-transform: uppercase; }
+      .quote-end { justify-self: end; align-self: end; transform: rotate(180deg); }
+
+      .finale { position: relative; min-height: 880px; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; color: var(--white); background: var(--black); }
+      .finale-top { padding-top: 38px; display: flex; justify-content: space-between; gap: 30px; color: var(--grey); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+      .finale-stage { position: relative; display: grid; place-items: center; }
+      .finale-title { position: relative; z-index: 2; margin: 0; font-family: Arial Black, Arial, sans-serif; font-size: clamp(135px, 28vw, 430px); letter-spacing: -.105em; line-height: .68; text-transform: uppercase; white-space: nowrap; }
+      .finale-script { position: absolute; z-index: 3; left: 50%; top: 49%; margin: 0; font-family: Georgia, serif; font-size: clamp(60px, 11vw, 170px); font-style: italic; font-weight: 400; letter-spacing: -.06em; white-space: nowrap; transform: translate(-50%, -50%) rotate(-8deg); }
+      .finale-ring { position: absolute; width: min(65vw, 850px); aspect-ratio: 1.8; border: 1px solid var(--line-dark); border-radius: 50%; transform: rotate(6deg); }
+      .finale-bottom { padding-bottom: 32px; display: flex; align-items: end; justify-content: space-between; gap: 30px; }
+      .finale-bottom p { max-width: 450px; margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+      .replay { display: inline-flex; align-items: center; gap: 30px; padding-bottom: 7px; border-bottom: 1px solid var(--white); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; transition: gap .25s ease; }
+      .replay:hover { gap: 55px; }
+      .credits { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 25px; border-top: 1px solid var(--line-dark); color: var(--grey); font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+      @keyframes ticker-reverse { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+      @keyframes letter-rise { from { opacity: 0; transform: translateY(120px); } }
+      @keyframes orbit { to { rotate: 360deg; } }
+      @keyframes scroll-dot { 50% { top: 42px; opacity: .3; } }
+      @keyframes ticker { to { transform: translateX(-50%); } }
+
+      @media (max-width: 800px) {
+        .nav { grid-template-columns: 1fr 1fr; }
+        .nav-center { display: none; }
+        .hero { min-height: 760px; }
+        .orbit { right: 2%; top: 18%; }
+        .hero-statement { left: 2%; bottom: 16%; font-size: 20px; }
+        .intro-head, .quote-grid { grid-template-columns: 1fr; }
+        .intro h2 em { text-align: left; }
+        .intro-bottom { grid-template-columns: 1fr 1fr; }
+        .intro-big { grid-column: 1 / -1; }
+        .reason { grid-template-columns: .18fr 1.2fr .62fr; }
+        .quote-mark { display: none; }
+      }
+      @media (max-width: 560px) {
+        :root { --page: calc(100% - 24px); }
+        .nav { height: 66px; }
+        .nav-right a:first-child { display: none; }
+        .hero { height: calc(100svh - 66px); min-height: 680px; }
+        .hero-meta { top: 20px; }
+        .hero-word, .hero-word-outline { font-size: clamp(104px, 35vw, 190px); }
+        .hero-word { letter-spacing: -.1em; }
+        .orbit { width: 125px; right: -10%; top: 21%; }
+        .hero-statement { width: 180px; bottom: 19%; font-size: 17px; }
+        .hero-index { display: none; }
+        .scroll-cue { bottom: 20%; width: 28px; height: 49px; }
+        .hero-curve { height: 145px; margin-inline: -20vw; }
+        .curve-copy { width: 72vw; margin-bottom: 25px; font-size: 28px; }
+        .section { padding: 80px 0; }
+        .intro { min-height: auto; }
+        .intro-head { gap: 26px; }
+        .intro h2 { font-size: clamp(67px, 21vw, 108px); }
+        .intro-bottom { margin-top: 65px; grid-template-columns: 1fr; gap: 28px; }
+        .intro-mark { justify-self: start; width: 110px; font-size: 40px; }
+        .reasons { border-radius: 50% 50% 0 0 / 2% 2% 0 0; }
+        .reasons-top { padding-top: 90px; padding-bottom: 50px; align-items: flex-start; flex-direction: column; }
+        .reasons-top h2 { font-size: clamp(66px, 21vw, 108px); }
+        .reason { min-height: 470px; grid-template-columns: 1fr; gap: 24px; align-content: center; }
+        .reason h3 { font-size: clamp(66px, 21vw, 108px); }
+        .reason-copy { align-self: auto; }
+        .flow { min-height: 620px; }
+        .flow-rings { width: 130vw; }
+        .flow-copy { font-size: clamp(53px, 17vw, 84px); }
+        .flow-meta::before, .flow-meta::after { width: 34px; }
+        .quote-grid { gap: 0; }
+        blockquote p { font-size: clamp(41px, 13vw, 68px); }
+        .finale { min-height: 720px; }
+        .finale-title { font-size: clamp(105px, 34vw, 185px); }
+        .finale-script { top: 51%; font-size: clamp(55px, 20vw, 100px); }
+        .finale-ring { width: 115vw; }
+        .finale-bottom { align-items: flex-start; flex-direction: column; }
+        .credits { align-items: flex-start; flex-direction: column; justify-content: center; padding-block: 18px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="shell nav" aria-label="Primary navigation">
+      <a href="#top">C — 001</a><span class="nav-center">A tribute in type</span><nav class="nav-right" aria-label="Main menu"><a href="#reasons">Reasons</a><a href="#finale">For CARO ↘</a></nav>
+    </header>
+    <main id="main">
+      <section class="shell hero" aria-labelledby="hero-title">
+        <div class="hero-meta"><span>One name<br>Infinite good energy</span><span>The world, officially improved<br>By her presence</span></div>
+        <div class="hero-stage">
+          <h1 class="hero-word" id="hero-title" aria-label="CARO"><span>C</span><span>A</span><span>R</span><span>O</span></h1>
+          <p class="hero-word-outline" aria-hidden="true">CARO</p>
+          <div class="orbit" aria-hidden="true"><span class="orbit-text"></span><span class="orbit-label">The best person on the planet</span></div>
+          <p class="hero-statement">Bold heart.<br>Soft edges.<br>Entirely unforgettable.</p>
+          <p class="hero-index">Current ranking<br>01 / everyone<br>Still undefeated</p>
+          <span class="scroll-cue" aria-hidden="true"></span>
+        </div>
+        <div class="hero-curve"><p class="curve-copy">Some people enter a room. <strong>CARO changes its gravity.</strong></p></div>
+      </section>
+      <div class="ticker" aria-label="CARO qualities"><div class="ticker-track" aria-hidden="true"><span>Kindness with range <i>✦</i> Main character, zero ego <i>✦</i> Excellent human energy <i>✦</i> Naturally iconic <i>✦</i></span><span>Kindness with range <i>✦</i> Main character, zero ego <i>✦</i> Excellent human energy <i>✦</i> Naturally iconic <i>✦</i></span></div></div>
+      <section class="intro" aria-labelledby="intro-title">
+        <div class="shell section">
+          <div class="intro-head"><p class="section-label">The official statement<br>Issued with complete certainty</p><h2 id="intro-title">The best person <em>on the planet.</em></h2></div>
+          <div class="intro-bottom"><p class="intro-big">Not a campaign line.<br>Just an observable fact.</p><p class="intro-copy">Caro has the rare kind of presence that makes ordinary moments feel like the part you will remember later.</p><span class="intro-mark" aria-label="Number one">№1</span></div>
+        </div>
+      </section>
+
+      <section class="reasons" id="reasons" aria-labelledby="reasons-title">
+        <div class="shell">
+          <div class="reasons-top"><h2 id="reasons-title">Three reasons.<br><span>Infinite proof.</span></h2><p>A very incomplete list of what makes CARO completely CARO.</p></div>
+          <article class="reason"><span class="reason-no">01 — 03</span><h3>Kindness<em>with range.</em></h3><div class="reason-copy"><strong>Soft, never small</strong><p>The sort of care that notices, remembers and quietly makes everything around it better.</p></div></article>
+          <article class="reason"><span class="reason-no">02 — 03</span><h3>Sharp mind.<em>Warm heart.</em></h3><div class="reason-copy"><strong>The unbeatable combination</strong><p>Smart without making noise about it. Funny without trying too hard. Always exactly enough.</p></div></article>
+          <article class="reason"><span class="reason-no">03 — 03</span><h3>Main character.<em>Zero ego.</em></h3><div class="reason-copy"><strong>Presence, naturally</strong><p>Not asking for the spotlight — somehow becoming the reason the whole scene works.</p></div></article>
+        </div>
+      </section>
+
+      <section class="flow" aria-labelledby="flow-title">
+        <span class="flow-rings" aria-hidden="true"></span><h2 class="flow-copy" id="flow-title">She makes the ordinary <strong>feel important.</strong></h2><p class="flow-meta">Good energy in continuous motion</p>
+      </section>
+
+      <div class="large-ticker" aria-label="CARO forever"><div class="large-track" aria-hidden="true"><span>CARO forever <i>and ever</i> CARO forever <i>and ever</i> ✦</span><span>CARO forever <i>and ever</i> CARO forever <i>and ever</i> ✦</span></div></div>
+
+      <section class="quote" aria-labelledby="quote-title">
+        <div class="shell section quote-grid"><span class="quote-mark" aria-hidden="true">“</span><blockquote><p id="quote-title">If the world has felt a little more human lately, <em>CARO probably had something to do with it.</em></p><footer>— The planet, unanimously</footer></blockquote><span class="quote-mark quote-end" aria-hidden="true">“</span></div>
+      </section>
+
+      <section class="finale" id="finale" aria-labelledby="finale-title">
+        <div class="shell finale-top"><span>Final dedication · 2026</span><span>Location: everywhere she goes</span></div>
+        <div class="finale-stage"><span class="finale-ring" aria-hidden="true"></span><h2 class="finale-title" id="finale-title">CARO</h2><p class="finale-script">always.</p></div>
+        <div class="shell finale-bottom"><p>For the best person on the planet — and the person who makes this planet better.</p><a class="replay" href="#top">Experience again <span aria-hidden="true">↑</span></a></div>
+      </section>
+    </main>
+    <footer class="shell credits"><span>Made in black, white &amp; absolute admiration</span><span>CARO® · Officially undefeated</span></footer>
+  </body>
+</html>
