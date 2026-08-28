@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/db/companies', () => ({
-  getCompanyIdsForUser: vi.fn(),
-}));
 vi.mock('@/lib/db/platform-projects', () => ({
-  listPlatformProjectsForCompanies: vi.fn(),
+  listPlatformProjectsCreatedByUser: vi.fn(),
   getPlatformProjectById: vi.fn(),
 }));
 vi.mock('@/lib/db/user-platform-project-assignments', () => ({
@@ -17,13 +14,15 @@ vi.mock('@/lib/db/platform-project-bindings', () => ({
   findPlatformProjectIdByProductExternal: vi.fn(),
 }));
 
-import { getCompanyIdsForUser } from '@/lib/db/companies';
 import { findPlatformProjectIdByProductExternal } from '@/lib/db/platform-project-bindings';
 import { listUserProductProjectAssignments } from '@/lib/db/product-project-assignments';
-import { getPlatformProjectById, listPlatformProjectsForCompanies } from '@/lib/db/platform-projects';
+import {
+  getPlatformProjectById,
+  listPlatformProjectsCreatedByUser,
+} from '@/lib/db/platform-projects';
 import { listUserPlatformProjectAssignments } from '@/lib/db/user-platform-project-assignments';
 
-const sampleProject = (id: string) => {
+const sampleProject = (id: string, createdByUserId = 'u0') => {
   const now = new Date();
   return {
     id,
@@ -32,7 +31,7 @@ const sampleProject = (id: string) => {
     domain: null,
     metadata: null,
     status: 'active' as const,
-    createdByUserId: 'u0',
+    createdByUserId,
     createdAt: now,
     updatedAt: now,
   };
@@ -41,10 +40,19 @@ const sampleProject = (id: string) => {
 describe('listAccessiblePlatformProjectsForUser', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.mocked(getCompanyIdsForUser).mockResolvedValue([]);
-    vi.mocked(listPlatformProjectsForCompanies).mockResolvedValue([]);
+    vi.mocked(listPlatformProjectsCreatedByUser).mockResolvedValue([]);
     vi.mocked(listUserPlatformProjectAssignments).mockResolvedValue([]);
     vi.mocked(listUserProductProjectAssignments).mockResolvedValue([]);
+  });
+
+  it('includes collections the user created', async () => {
+    vi.mocked(listPlatformProjectsCreatedByUser).mockResolvedValue([sampleProject('pp-created', 'u1')]);
+
+    const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
+    const rows = await listAccessiblePlatformProjectsForUser('u1');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].id).toBe('pp-created');
+    expect(listPlatformProjectsCreatedByUser).toHaveBeenCalledWith('u1', { includeArchived: false });
   });
 
   it('merges legacy entitlement product assignments when bindings resolve to a platform project', async () => {
@@ -68,9 +76,8 @@ describe('listAccessiblePlatformProjectsForUser', () => {
     expect(findPlatformProjectIdByProductExternal).toHaveBeenCalledWith('checkion', 'chk-99');
   });
 
-  it('dedupes when company list and legacy resolve to same platform', async () => {
-    vi.mocked(getCompanyIdsForUser).mockResolvedValue(['c1']);
-    vi.mocked(listPlatformProjectsForCompanies).mockResolvedValue([sampleProject('pp-1')]);
+  it('dedupes when creator and legacy resolve to same platform', async () => {
+    vi.mocked(listPlatformProjectsCreatedByUser).mockResolvedValue([sampleProject('pp-1', 'u1')]);
     vi.mocked(listUserProductProjectAssignments).mockResolvedValue([
       {
         userId: 'u1',
@@ -88,14 +95,39 @@ describe('listAccessiblePlatformProjectsForUser', () => {
     expect(rows).toHaveLength(1);
   });
 
-  it('passes includeArchived to company list helper', async () => {
-    vi.mocked(getCompanyIdsForUser).mockResolvedValue(['c1']);
-    vi.mocked(listPlatformProjectsForCompanies).mockResolvedValue([sampleProject('pp-arch')]);
+  it('does not grant access via company membership alone', async () => {
+    vi.mocked(listUserPlatformProjectAssignments).mockResolvedValue([]);
+    vi.mocked(listPlatformProjectsCreatedByUser).mockResolvedValue([]);
+
+    const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
+    const rows = await listAccessiblePlatformProjectsForUser('u1');
+    expect(rows).toHaveLength(0);
+  });
+
+  it('passes includeArchived to creator list helper', async () => {
+    vi.mocked(listPlatformProjectsCreatedByUser).mockResolvedValue([sampleProject('pp-arch', 'u1')]);
 
     const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
     await listAccessiblePlatformProjectsForUser('u1', { includeArchived: true });
-    expect(listPlatformProjectsForCompanies).toHaveBeenCalledWith(['c1'], {
+    expect(listPlatformProjectsCreatedByUser).toHaveBeenCalledWith('u1', {
       includeArchived: true,
     });
+  });
+
+  it('includes explicit assignment when not creator', async () => {
+    vi.mocked(listUserPlatformProjectAssignments).mockResolvedValue([
+      {
+        userId: 'u1',
+        platformProjectId: 'pp-assigned',
+        role: 'member',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+    vi.mocked(getPlatformProjectById).mockResolvedValue(sampleProject('pp-assigned', 'other'));
+
+    const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
+    const rows = await listAccessiblePlatformProjectsForUser('u1');
+    expect(rows.map((r) => r.id)).toEqual(['pp-assigned']);
   });
 });

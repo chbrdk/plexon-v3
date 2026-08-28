@@ -102,17 +102,31 @@ export async function listPlatformProjectsForCompanies(
     );
 }
 
+/** Collections created by this user (access model B — creator grant). */
+export async function listPlatformProjectsCreatedByUser(
+  userId: string,
+  options: ListPlatformProjectsOptions = {}
+) {
+  const db = getDb();
+  const includeArchived = options.includeArchived === true;
+  if (includeArchived) {
+    return db
+      .select()
+      .from(platformProjects)
+      .where(eq(platformProjects.createdByUserId, userId));
+  }
+  return db
+    .select()
+    .from(platformProjects)
+    .where(
+      and(
+        eq(platformProjects.createdByUserId, userId),
+        ne(platformProjects.status, PLATFORM_PROJECT_STATUS.ARCHIVED)
+      )
+    );
+}
+
 export async function deletePlatformProject(platformProjectId: string) {
   const db = getDb();
   await db.delete(platformProjects).where(eq(platformProjects.id, platformProjectId));
-}
-
-export async function userHasPlatformProjectAccess(
-  userId: string,
-  platformProjectId: string,
-  companyIds: string[]
-): Promise<boolean> {
-  const project = await getPlatformProjectById(platformProjectId);
-  if (!project) return false;
-  return companyIds.includes(project.companyId);
 }

@@ -7,9 +7,7 @@ import {
   users,
 } from '@/lib/db/schema';
 import type { StoredAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
-import { getCompanyIdsForUser } from '@/lib/db/companies';
-import { listPlatformProjectsForCompanies } from '@/lib/db/platform-projects';
-import { listUserPlatformProjectAssignments } from '@/lib/db/user-platform-project-assignments';
+import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
 
 export type EventQuickCheckRunListRow = StoredAssistantWorkflowRun & {
@@ -33,17 +31,10 @@ function mapRunRow(
   };
 }
 
-/** Platform project ids the user can view via company membership or assignment. */
+/** Platform project ids the user can view (access model B — creator / assignment). */
 export async function listVisiblePlatformProjectIdsForUser(userId: string): Promise<string[]> {
-  const companyIds = await getCompanyIdsForUser(userId);
-  const companyProjects = await listPlatformProjectsForCompanies(companyIds);
-  const assignments = await listUserPlatformProjectAssignments(userId);
-  return [
-    ...new Set([
-      ...companyProjects.map((p) => p.id),
-      ...assignments.map((a) => a.platformProjectId),
-    ]),
-  ];
+  const projects = await listAccessiblePlatformProjectsForUser(userId);
+  return projects.map((p) => p.id);
 }
 
 /**

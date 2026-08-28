@@ -76,8 +76,11 @@ export async function GET(request: Request, ctx: { params: Promise<{ id: string 
   if (!(await canViewCompany(user, companyId))) {
     return apiError('Forbidden', API_STATUS.FORBIDDEN);
   }
-  const { listPlatformProjectsForCompany } = await import('@/lib/db/platform-projects');
   const includeArchived = new URL(request.url).searchParams.get('includeArchived') === '1';
-  const items = await listPlatformProjectsForCompany(companyId, { includeArchived });
+  // Access model B: members only see Collections they created or are assigned to (within company).
+  // Full company catalog stays on admin company detail (`canManageCompany`).
+  const { listAccessiblePlatformProjectsForUser } = await import('@/lib/platform-project-directory');
+  const accessible = await listAccessiblePlatformProjectsForUser(user.id, { includeArchived });
+  const items = accessible.filter((p) => p.companyId === companyId);
   return Response.json({ items });
 }

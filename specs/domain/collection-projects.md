@@ -25,7 +25,12 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
 2. Create always ensures bindings for **checkion**, **audion**, **brandion**, **creation**, and **spirion**, then syncs them (brandion/creation/spirion upsert skipped while their public/service URL is unset — placeholder stays `pending`). Missing/failing sync → `pending` / `failed`, not a product-only project.
 3. User copy never says “Audion project” / “Checkion project” / “Brandion project” / “Creation project” / “SPIRION project” as a type. Prefer “Projekt” + capability labels.
 4. Product UIs stay product-local (surface ownership unchanged); deep links always carry Collection context (`platformProjectId` / company hint) when available. Includes BRANDION/CREATION: `{PRODUCT}/projects?platformProjectId={id}` (not Checkion’s `platformProjectHint`). Cross-product capability handoff (e.g. AUDION explore URL → CHECKION `mode: single` scan) stays product-local APIs + bindings — see audion-v3 `specs/domain/checkion-single-scan-trigger.md` / checkion-v3 `specs/domain/audion-journey-scan-trigger.md`.
-5. Access is Collection-scoped (`user_platform_project_assignments`), then expanded to product assignments via bindings.
+5. **Access model B (member visibility):** a user may **see / open / edit work** on a Collection only when at least one of:
+   - they are the **creator** (`platform_projects.created_by_user_id`), or
+   - they have an explicit **`user_platform_project_assignments`** row, or
+   - a legacy **`user_product_project_assignments`** row resolves (via binding) to that Collection.
+   **Company membership alone does not grant Collection visibility.** Global Plexon admins see all. Company owner/admin may still **archive/restore** company Collections (lifecycle) and list them in **admin** company detail — that is not the member hub/product picker catalog.
+   Assignments expand to product-local `projectAssignments` via bindings for provisioning; product UIs must filter capability lists to the same accessible set (P71 `accessible-collections` and/or local `ownerPlexonUserId` + assignment sync).
 6. **Insights list Collections only** — no synthetic product-only cards (v3 fresh DB).
 
 ## What users see vs internal

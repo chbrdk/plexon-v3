@@ -20,8 +20,10 @@ import {
   platformJson,
   readServiceSecret,
 } from '@/lib/platform-contract';
+import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning';
 import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service';
 import { resolveProductOriginOwner } from '@/lib/resolve-product-origin-owner';
+import { upsertUserPlatformProjectAssignment } from '@/lib/db/user-platform-project-assignments';
 
 function checkSecret(request: Request): boolean {
   const serviceSecret = process.env.PLEXON_SERVICE_SECRET ?? '';
@@ -139,6 +141,11 @@ export async function POST(request: Request) {
       createdByUserId: ownerId,
     });
     await ensureBindingPlaceholders(platformProjectId);
+    await upsertUserPlatformProjectAssignment(
+      ownerId,
+      platformProjectId,
+      PLATFORM_PROJECT_ASSIGNMENT_ROLE.ADMIN
+    );
     await upsertPlatformProjectBinding({
       platformProjectId,
       productId: 'checkion',
