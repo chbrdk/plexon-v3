@@ -12,9 +12,25 @@ import {
   normalizeThemePreference,
   parseThemePreference,
 } from '@/lib/theme-preference';
+import {
+  normalizeAccentPreference,
+  parseAccentPreference,
+} from '@/lib/accent-preference';
 import { ensureUsersThemePreferenceColumn } from '@/lib/ensure-theme-preference-column';
+import { ensureUsersAccentPreferenceColumn } from '@/lib/ensure-accent-preference-column';
 
 const DEMO_EMAIL = process.env.PLEXON_DEMO_EMAIL;
+
+const userSelect = {
+  id: users.id,
+  email: users.email,
+  name: users.name,
+  company: users.company,
+  avatarUrl: users.avatarUrl,
+  locale: users.locale,
+  themePreference: users.themePreference,
+  accentPreference: users.accentPreference,
+} as const;
 
 function serializeUser(user: {
   id: string;
@@ -24,6 +40,7 @@ function serializeUser(user: {
   avatarUrl: string | null;
   locale: string | null;
   themePreference: string | null;
+  accentPreference: string | null;
 }) {
   return {
     id: user.id,
@@ -33,7 +50,13 @@ function serializeUser(user: {
     avatar_url: user.avatarUrl ?? undefined,
     locale: user.locale ?? undefined,
     themePreference: normalizeThemePreference(user.themePreference),
+    accentPreference: normalizeAccentPreference(user.accentPreference),
   };
+}
+
+async function ensurePrefColumns() {
+  await ensureUsersThemePreferenceColumn();
+  await ensureUsersAccentPreferenceColumn();
 }
 
 export async function GET(request: Request) {
@@ -49,21 +72,14 @@ export async function GET(request: Request) {
         avatar_url: undefined,
         locale: 'de',
         themePreference: 'dark' as const,
+        accentPreference: 'green' as const,
       },
     });
   }
   const db = getDb();
-  await ensureUsersThemePreferenceColumn();
+  await ensurePrefColumns();
   const [user] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      company: users.company,
-      avatarUrl: users.avatarUrl,
-      locale: users.locale,
-      themePreference: users.themePreference,
-    })
+    .select(userSelect)
     .from(users)
     .where(eq(users.id, requestUser.id))
     .limit(1);
@@ -99,9 +115,15 @@ export async function PATCH(request: Request) {
     if (!parsed) return apiError('Invalid themePreference', API_STATUS.BAD_REQUEST);
     themePreference = parsed;
   }
+  let accentPreference: string | undefined;
+  if (body.accentPreference !== undefined) {
+    const parsed = parseAccentPreference(body.accentPreference);
+    if (!parsed) return apiError('Invalid accentPreference', API_STATUS.BAD_REQUEST);
+    accentPreference = parsed;
+  }
 
   const db = getDb();
-  await ensureUsersThemePreferenceColumn();
+  await ensurePrefColumns();
   if (email !== undefined) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return apiError('Invalid email', API_STATUS.BAD_REQUEST);
     const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
@@ -115,18 +137,11 @@ export async function PATCH(request: Request) {
   if (avatar_url !== undefined) updates.avatarUrl = avatar_url;
   if (locale !== undefined) updates.locale = locale;
   if (themePreference !== undefined) updates.themePreference = themePreference;
+  if (accentPreference !== undefined) updates.accentPreference = accentPreference;
 
   if (Object.keys(updates).length === 0) {
     const [u] = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        company: users.company,
-        avatarUrl: users.avatarUrl,
-        locale: users.locale,
-        themePreference: users.themePreference,
-      })
+      .select(userSelect)
       .from(users)
       .where(eq(users.id, requestUser.id))
       .limit(1);
@@ -138,15 +153,7 @@ export async function PATCH(request: Request) {
     .update(users)
     .set(updates)
     .where(eq(users.id, requestUser.id))
-    .returning({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      company: users.company,
-      avatarUrl: users.avatarUrl,
-      locale: users.locale,
-      themePreference: users.themePreference,
-    });
+    .returning(userSelect);
   if (!updated) return apiError('User not found', API_STATUS.NOT_FOUND);
   return NextResponse.json({ user: serializeUser(updated) });
 }

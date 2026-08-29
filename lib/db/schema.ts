@@ -33,6 +33,8 @@ export const users = pgTable('users', {
   locale: text('locale'),
   /** light | dark | auto — UI appearance preference (cross-app SSOT). */
   themePreference: text('theme_preference'),
+  /** purple|blue|pink|orange|green|yellow|grey|ink — UI accent (cross-app SSOT). */
+  accentPreference: text('accent_preference'),
   role: text('role').notNull().default(USER_ROLE.USER), // 'user' | 'admin'
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

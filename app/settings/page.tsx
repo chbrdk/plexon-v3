@@ -5,21 +5,25 @@ import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import {
   Alert,
+  AccentSwatchGroup,
+  applyAccentPreference,
   applyThemePreference,
   Avatar,
   Button,
   Field,
-  Hint,
   Input,
+  migrateLegacyAccent,
   migrateLegacyThemeId,
+  resolveAccentOption,
   SettingsBand,
   SettingsShell,
   Spinner,
   Text,
   ToggleGroup,
+  type AccentPreference,
   type ThemePreference,
 } from '@msqdx/ui'
-import { BrandColorSelector } from '@/components/settings/BrandColorSelector'
+import { persistAccentPreference } from '@/lib/brand-color-utils'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_AUTH_CHANGE_PASSWORD,
@@ -38,6 +42,7 @@ type ProfileUser = {
   avatar_url?: string
   locale?: string
   themePreference?: ThemePreference
+  accentPreference?: AccentPreference
 }
 
 type ApiTokenRow = { id: string; name?: string; createdAt: string }
@@ -63,6 +68,7 @@ export default function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [locale, setLocale] = useState('de')
   const [themePreference, setThemePreference] = useState<ThemePreference>(shellPaths.defaultTheme)
+  const [accentPreference, setAccentPreference] = useState<AccentPreference>('green')
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -90,13 +96,23 @@ export default function SettingsPage() {
     }
   }, [])
 
+  const paintAccent = useCallback((next: AccentPreference) => {
+    applyAccentPreference(next)
+    persistAccentPreference(next)
+  }, [])
+
   useEffect(() => {
     setMounted(true)
     const next = readStoredThemePreference()
     setThemePreference(next)
     paintTheme(next)
+    const accent = migrateLegacyAccent(
+      typeof window !== 'undefined' ? window.localStorage.getItem('plexon-sidebar-color') : null,
+    )
+    setAccentPreference(accent)
+    paintAccent(accent)
     return () => themeCleanup.current?.()
-  }, [paintTheme])
+  }, [paintTheme, paintAccent])
 
   const fetchApiTokens = useCallback(() => {
     setLoadingTokens(true)
@@ -126,13 +142,17 @@ export default function SettingsPage() {
           const pref = migrateLegacyThemeId(data.user.themePreference)
           setThemePreference(pref)
           paintTheme(pref)
+          const accent = migrateLegacyAccent(data.user.accentPreference)
+          setAccentPreference(accent)
+          paintAccent(accent)
         }
       })
       .catch(() => setProfile(null))
     fetchApiTokens()
-  }, [status, session?.user?.id, fetchApiTokens, paintTheme, setUiLocale])
+  }, [status, session?.user?.id, fetchApiTokens, paintTheme, paintAccent, setUiLocale])
 
   const avatarName = (name || profile?.email || session?.user?.email || 'P').trim()
+  const accentOption = resolveAccentOption(accentPreference)
 
   async function patchPrefs(body: Record<string, unknown>) {
     const res = await fetch(API_AUTH_PROFILE, {
@@ -153,6 +173,17 @@ export default function SettingsPage() {
     if (status !== 'authenticated') return
     try {
       await patchPrefs({ themePreference: pref })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
+    }
+  }
+
+  async function handleAccentChange(next: AccentPreference) {
+    setAccentPreference(next)
+    paintAccent(next)
+    if (status !== 'authenticated') return
+    try {
+      await patchPrefs({ accentPreference: next })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('settings.messages.profileError'))
     }
@@ -302,8 +333,6 @@ export default function SettingsPage() {
           appearance: t('settings.appearance.title'),
           language: t('settings.profile.language'),
         }}
-        lede={<Hint panel>{t('settings.subtitle')}</Hint>}
-        accountHelp={<Text role="meta">{t('settings.session.subtitle')}</Text>}
         account={
           <>
             <dl className="ds-settings-account-dl">
@@ -319,10 +348,25 @@ export default function SettingsPage() {
             </Button>
           </>
         }
-        profileHelp={<Text role="meta">{t('settings.profile.subtitle')}</Text>}
         profile={
           <div className="ds-settings-profile-row plexon-settings-profile-row">
-            <Avatar name={avatarName} src={avatarUrl || undefined} size="lg" />
+            <div className="ds-settings-profile-mark">
+              <Avatar
+                name={avatarName}
+                src={avatarUrl || undefined}
+                size="lg"
+                accent={accentOption.preview}
+                accentContrast={accentOption.textColor}
+              />
+              <Field label={t('settings.profile.avatarUrl')} size="sm">
+                <Input
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                  placeholder={t('settings.profile.avatarUrlPlaceholder')}
+                  block
+                />
+              </Field>
+            </div>
             <div className="plexon-settings-fields">
               <Field label={t('settings.profile.name')} size="md">
                 <Input
@@ -348,32 +392,40 @@ export default function SettingsPage() {
                   block
                 />
               </Field>
-              <Field label={t('settings.profile.avatarUrl')} size="md">
-                <Input
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder={t('settings.profile.avatarUrlPlaceholder')}
-                  block
-                />
-              </Field>
               <Button type="button" variant="primary" onClick={handleSaveProfile} disabled={savingProfile}>
                 {savingProfile ? t('settings.profile.saving') : t('settings.profile.save')}
               </Button>
             </div>
           </div>
         }
-        appearanceHelp={<Text role="meta">{t('settings.appearance.subtitle')}</Text>}
         appearance={
-          <ToggleGroup
-            className="theme-toggle"
-            aria-label={t('settings.appearance.title')}
-            value={themePreference}
-            onChange={handleThemeChange}
-            options={shellPaths.themeChoices.map((id) => ({
-              value: id,
-              label: themeLabels[id],
-            }))}
-          />
+          <div className="ds-settings-appearance-stack">
+            <ToggleGroup
+              className="theme-toggle"
+              aria-label={t('settings.appearance.title')}
+              value={themePreference}
+              onChange={handleThemeChange}
+              options={shellPaths.themeChoices.map((id) => ({
+                value: id,
+                label: themeLabels[id],
+              }))}
+            />
+            <AccentSwatchGroup
+              value={accentPreference}
+              onChange={handleAccentChange}
+              aria-label={t('settings.appearance.colorTitle') || 'Accent'}
+              labels={{
+                purple: 'Purple',
+                blue: 'Blue',
+                pink: 'Pink',
+                orange: 'Orange',
+                green: 'Green',
+                yellow: 'Yellow',
+                grey: 'Grey',
+                ink: 'Ink',
+              }}
+            />
+          </div>
         }
         language={
           <ToggleGroup
@@ -388,12 +440,6 @@ export default function SettingsPage() {
         }
         extras={
           <>
-            <SettingsBand title="Brand">
-              <div className="plexon-settings-brand">
-                <BrandColorSelector />
-              </div>
-            </SettingsBand>
-
             <SettingsBand title={t('settings.password.title')}>
               <div className="plexon-settings-fields">
                 <Field label={t('settings.password.current')} size="md">
@@ -426,7 +472,7 @@ export default function SettingsPage() {
               </div>
             </SettingsBand>
 
-            <SettingsBand title={t('settings.apiTokens.title')} help={t('settings.apiTokens.subtitle')}>
+            <SettingsBand title={t('settings.apiTokens.title')}>
               {newToken ? (
                 <div className="plexon-settings-token-reveal">
                   <Text role="title">{t('settings.apiTokens.newTokenTitle')}</Text>
@@ -485,7 +531,7 @@ export default function SettingsPage() {
             </SettingsBand>
 
             <SettingsBand title={t('settings.about.title')}>
-              <Text role="body">{t('settings.about.body')}</Text>
+              <Text role="meta">{t('settings.about.body')}</Text>
             </SettingsBand>
           </>
         }

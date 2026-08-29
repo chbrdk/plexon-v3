@@ -2,7 +2,8 @@
 /*  PLEXON – GET/PATCH /api/services/profile (für CHECKION/AUDION)     */
 /* ------------------------------------------------------------------ */
 /* Services holen/schreiben Profil (name, company, avatar_url, locale,
-   themePreference, optional default_platform_company_id) per X-Service-Secret und user_id. */
+   themePreference, accentPreference, optional default_platform_company_id)
+   per X-Service-Secret und user_id. */
 
 import { NextResponse } from 'next/server';
 import { asc, eq } from 'drizzle-orm';
@@ -15,12 +16,33 @@ import {
   normalizeThemePreference,
   parseThemePreference,
 } from '@/lib/theme-preference';
+import {
+  normalizeAccentPreference,
+  parseAccentPreference,
+} from '@/lib/accent-preference';
 import { ensureUsersThemePreferenceColumn } from '@/lib/ensure-theme-preference-column';
+import { ensureUsersAccentPreferenceColumn } from '@/lib/ensure-accent-preference-column';
+
+const userSelect = {
+  id: users.id,
+  email: users.email,
+  name: users.name,
+  company: users.company,
+  avatarUrl: users.avatarUrl,
+  locale: users.locale,
+  themePreference: users.themePreference,
+  accentPreference: users.accentPreference,
+} as const;
 
 function checkSecret(request: Request): boolean {
   const SERVICE_SECRET = process.env.PLEXON_SERVICE_SECRET ?? '';
   const secret = readServiceSecret(request);
   return Boolean(SERVICE_SECRET && secret === SERVICE_SECRET);
+}
+
+async function ensurePrefColumns() {
+  await ensureUsersThemePreferenceColumn();
+  await ensureUsersAccentPreferenceColumn();
 }
 
 /** First platform company membership (oldest join) — same id AUDION sends as `platform_company_id`. */
@@ -45,6 +67,7 @@ function serializeServiceUser(
     avatarUrl: string | null;
     locale: string | null;
     themePreference: string | null;
+    accentPreference: string | null;
   },
   defaultPlatformCompanyId?: string,
 ) {
@@ -56,6 +79,7 @@ function serializeServiceUser(
     avatar_url: user.avatarUrl ?? undefined,
     locale: user.locale ?? undefined,
     themePreference: normalizeThemePreference(user.themePreference),
+    accentPreference: normalizeAccentPreference(user.accentPreference),
     ...(defaultPlatformCompanyId ? { default_platform_company_id: defaultPlatformCompanyId } : {}),
   };
 }
@@ -68,18 +92,10 @@ export async function GET(request: Request) {
   const email = url.searchParams.get('email')?.trim()?.toLowerCase();
   if (!userId && !email) return apiError('user_id or email required', API_STATUS.BAD_REQUEST);
 
-  await ensureUsersThemePreferenceColumn();
+  await ensurePrefColumns();
   const db = getDb();
   const [user] = await db
-    .select({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      company: users.company,
-      avatarUrl: users.avatarUrl,
-      locale: users.locale,
-      themePreference: users.themePreference,
-    })
+    .select(userSelect)
     .from(users)
     .where(userId ? eq(users.id, userId) : eq(users.email, email!))
     .limit(1);
@@ -102,7 +118,7 @@ export async function PATCH(request: Request) {
   const userId = typeof body.user_id === 'string' ? body.user_id.trim() : undefined;
   if (!userId) return apiError('user_id required', API_STATUS.BAD_REQUEST);
 
-  await ensureUsersThemePreferenceColumn();
+  await ensurePrefColumns();
 
   const name = typeof body.name === 'string' ? body.name.trim() || null : undefined;
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : undefined;
@@ -120,6 +136,12 @@ export async function PATCH(request: Request) {
     if (!parsed) return apiError('Invalid themePreference', API_STATUS.BAD_REQUEST);
     themePreference = parsed;
   }
+  let accentPreference: string | undefined;
+  if (body.accentPreference !== undefined) {
+    const parsed = parseAccentPreference(body.accentPreference);
+    if (!parsed) return apiError('Invalid accentPreference', API_STATUS.BAD_REQUEST);
+    accentPreference = parsed;
+  }
 
   const db = getDb();
   if (email !== undefined) {
@@ -135,18 +157,11 @@ export async function PATCH(request: Request) {
   if (avatar_url !== undefined) updates.avatarUrl = avatar_url;
   if (locale !== undefined) updates.locale = locale;
   if (themePreference !== undefined) updates.themePreference = themePreference;
+  if (accentPreference !== undefined) updates.accentPreference = accentPreference;
 
   if (Object.keys(updates).length === 0) {
     const [u] = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        company: users.company,
-        avatarUrl: users.avatarUrl,
-        locale: users.locale,
-        themePreference: users.themePreference,
-      })
+      .select(userSelect)
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
@@ -161,15 +176,7 @@ export async function PATCH(request: Request) {
     .update(users)
     .set(updates)
     .where(eq(users.id, userId))
-    .returning({
-      id: users.id,
-      email: users.email,
-      name: users.name,
-      company: users.company,
-      avatarUrl: users.avatarUrl,
-      locale: users.locale,
-      themePreference: users.themePreference,
-    });
+    .returning(userSelect);
   if (!updated) return apiError('User not found', API_STATUS.NOT_FOUND);
   const defaultPlatformCompanyId = await defaultPlatformCompanyIdForUser(updated.id);
   return platformJson({
