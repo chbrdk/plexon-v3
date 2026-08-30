@@ -11,7 +11,7 @@ import '@/styles/globals.css'
 export const metadata: Metadata = {
   title: 'PLEXON',
   description: 'PLEXON – MSQDX platform control plane (v3).',
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.ico' },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
