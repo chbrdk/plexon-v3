@@ -115,10 +115,14 @@ export async function ensureVaillantGroupInstallerDualFlow(input: {
     };
   }
 
+  const customerUrl = input.customerUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL;
+  const installerUrl = input.installerUrl ?? VAILLANT_GROUP_B2B_FACHPARTNER_URL;
+  const scanUrl = input.scanUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL;
+
   const template = createVaillantInstallerDualPerspectiveTemplate({
-    customerUrl: input.customerUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
-    installerUrl: input.installerUrl ?? VAILLANT_GROUP_B2B_FACHPARTNER_URL,
-    scanUrl: input.scanUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
+    customerUrl,
+    installerUrl,
+    scanUrl,
     guidelineId: VAILLANT_GROUP_BRANDION_GUIDELINE_ID,
   });
 
@@ -137,6 +141,18 @@ export async function ensureVaillantGroupInstallerDualFlow(input: {
         ? {
             ...current,
             templateId: COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
+            nodes: current.nodes.map((n) => {
+              if (n.id === 'n-start-ek') {
+                return { ...n, url: customerUrl, urlKey: customerUrl };
+              }
+              if (n.id === 'n-start-inst') {
+                return { ...n, url: installerUrl, urlKey: installerUrl };
+              }
+              if (n.kind === 'scan') {
+                return { ...n, url: scanUrl, urlKey: scanUrl };
+              }
+              return n;
+            }),
           }
         : template;
     await patchCollectionTestFlow({

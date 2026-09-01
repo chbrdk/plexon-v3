@@ -711,7 +711,7 @@ export function createVaillantBarrierResearchTemplate(input?: {
   scanUrl?: string;
   guidelineId?: string;
 }): CollectionTestFlowDocument {
-  const journeyUrl = input?.journeyUrl?.trim() || 'https://www.vaillant.de/heizung/waermepumpe/';
+  const journeyUrl = input?.journeyUrl?.trim() || 'https://www.vaillant.de/produkte/waermepumpen/';
   const scanUrl = input?.scanUrl?.trim() || journeyUrl;
   const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
 
@@ -879,8 +879,8 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
   scanUrl?: string;
   guidelineId?: string;
 }): CollectionTestFlowDocument {
-  const customerUrl = input?.customerUrl?.trim() || 'https://www.vaillant.de/heizung/waermepumpe/';
-  const installerUrl = input?.installerUrl?.trim() || 'https://www.vaillant.de/fachpartner/';
+  const customerUrl = input?.customerUrl?.trim() || 'https://www.vaillant.de/produkte/waermepumpen/';
+  const installerUrl = input?.installerUrl?.trim() || 'https://www.myvaillantpro.de/';
   const scanUrl = input?.scanUrl?.trim() || customerUrl;
   const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
 

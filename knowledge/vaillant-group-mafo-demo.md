@@ -9,8 +9,8 @@
 | BRANDION mirror | `proj-mtb6qr7q` · Guideline `gl-mtinudb1` |
 | CREATION mirror | `proj-mtb6qr9e` |
 | Corporate URL | `https://www.vaillant-group.com/` |
-| B2C research URL (UC1) | `https://www.vaillant.de/heizung/waermepumpe/` |
-| B2B Fachpartner URL (UC2) | `https://www.vaillant.de/fachpartner/` |
+| B2C research URL (UC1) | `https://www.vaillant.de/produkte/waermepumpen/` |
+| B2B Fachpartner URL (UC2) | `https://www.myvaillantpro.de/` (Redirect von `/fachpartner/`) |
 
 Code SSOT: `lib/demo/vaillant-group-mafo.ts` · Briefing: `PLEXON___Vaillant_Group.md`
 
@@ -63,7 +63,7 @@ Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 S
 | Schritt | Wo | Was |
 |--------|-----|-----|
 | 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Barrier Research (UC1)** | Flow `14ce6052-ff76-42a0-8725-f2a13daf121e` öffnen |
-| 2 | Board · **Testen** | Journey auf `vaillant.de/heizung/waermepumpe/` — Persona aus UC1-Set (6 Segmente) |
+| 2 | Board · **Testen** | Journey auf `vaillant.de/produkte/waermepumpen/` — Persona aus UC1-Set (6 Segmente) |
 | 3 | AUDION | [Personas](https://audion-v3.projects-a.plygrnd.tech/projects/proj-vaillant-group-mtb6qr6b) — z. B. Sandra (Altbau), Thomas (Tausch) |
 | 4 | CHECKION | Scan der B2C-URL — Qualitäts-Spine im Flow |
 | 5 | BRANDION | Guideline `gl-mtinudb1` · Brand Measure |
@@ -76,13 +76,13 @@ Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 S
 | Schritt | Wo | Was |
 |--------|-----|-----|
 | 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Installer Dual Perspective (UC2)** | Flow `66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a` |
-| 2 | Board · **Testen** | **Endkunde:** B2C Touchpoint → Prompt → **Installateur:** Fachpartner-URL → Opportunity |
+| 2 | Board · **Testen** | **Endkunde:** B2C Touchpoint → Prompt → **Installateur:** myVaillant Pro → Opportunity |
 | 3 | AUDION | UC2-Personas: Klaus (Meister), Sandra (Planung), Tim (Monteur) |
 | 4 | CHECKION + BRANDION | wie UC1 — Scan + Brand Measure auf B2C-Spine |
 
 **Fragestellung:** *Was braucht der Fachhandwerker, damit er Vaillant empfiehlt?*
 
-UC2 startet beim **ersten Container-Boot** automatisch im Hintergrund, solange noch kein completed Run existiert (`scripts/run-vaillant-group-mafo-flow.ts --uc2 --if-pending`).
+UC1 + UC2 starten beim **Container-Boot** sequentiell im Hintergrund, solange noch kein completed Run existiert (`scripts/run-vaillant-group-mafo-flow.ts --all --if-pending`).
 
 ### Flow-IDs (Staging)
 

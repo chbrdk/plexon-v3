@@ -23,12 +23,12 @@ export const VAILLANT_GROUP_CORPORATE_URL = 'https://www.vaillant-group.com/' as
 
 /** B2C touchpoint for UC1 homeowner barrier research (vaillant.de — not a separate Collection). */
 export const VAILLANT_GROUP_B2C_TOUCHPOINT_URL = 'https://www.vaillant.de/' as const;
+/** B2C Wärmepumpen hub (live vaillant.de — `/heizung/waermepumpe/` returns 404 since IA move). */
 export const VAILLANT_GROUP_B2C_WAERMEPUMPE_URL =
-  'https://www.vaillant.de/heizung/waermepumpe/' as const;
+  'https://www.vaillant.de/produkte/waermepumpen/' as const;
 
-/** B2B touchpoint for UC2 installer dual-perspective research. */
-export const VAILLANT_GROUP_B2B_FACHPARTNER_URL =
-  'https://www.vaillant.de/fachpartner/' as const;
+/** B2B installer portal (vaillant.de/fachpartner/ redirects here). */
+export const VAILLANT_GROUP_B2B_FACHPARTNER_URL = 'https://www.myvaillantpro.de/' as const;
 
 export const VAILLANT_GROUP_FLOW_TEMPLATE_ID = 'vaillant-barrier-research-v1' as const;
 export const VAILLANT_GROUP_FLOW_UC2_TEMPLATE_ID = 'vaillant-installer-dual-v1' as const;

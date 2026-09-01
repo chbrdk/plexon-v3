@@ -9,6 +9,7 @@ import {
 } from '@/lib/collection-test-flow';
 import { buildVaillantGroupResearchBriefSeed } from '@/lib/demo/vaillant-group-knowledge-seed';
 import {
+  VAILLANT_GROUP_B2B_FACHPARTNER_URL,
   VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
   VAILLANT_GROUP_BRANDION_GUIDELINE_ID,
   VAILLANT_GROUP_PLATFORM_PROJECT_ID,
@@ -63,17 +64,17 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     const doc = createVaillantInstallerDualPerspectiveTemplate();
     const endkunde = extractJourneyFlowFromDocument(
       doc,
-      'https://www.vaillant.de/heizung/waermepumpe/',
+      VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
       { personaNodeId: 'n-persona-ek' },
     );
     const installer = extractJourneyFlowFromDocument(
       doc,
-      'https://www.vaillant.de/fachpartner/',
+      VAILLANT_GROUP_B2B_FACHPARTNER_URL,
       { personaNodeId: 'n-persona-inst' },
     );
     expect(endkunde?.nodes.filter((n) => n.kind === 'start')).toHaveLength(1);
     expect(installer?.nodes.filter((n) => n.kind === 'start')).toHaveLength(1);
-    expect(endkunde?.nodes[0]?.urlKey).toContain('waermepumpe');
-    expect(installer?.nodes[0]?.urlKey).toContain('fachpartner');
+    expect(endkunde?.nodes[0]?.urlKey).toContain('produkte/waermepumpen');
+    expect(installer?.nodes[0]?.urlKey).toContain('myvaillantpro.de');
   });
 });
