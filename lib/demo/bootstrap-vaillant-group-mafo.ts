@@ -126,25 +126,11 @@ export async function ensureVaillantGroupInstallerDualFlow(input: {
 
   if (row) {
     const current = ensureFlowDocument(row.flow);
-    const next =
-      current.lastRun || current.nodes.length > 0
-        ? {
-            ...current,
-            templateId: COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
-            nodes: current.nodes.map((n) => {
-              if (n.id === 'n-start-ek') {
-                return { ...n, url: customerUrl, urlKey: customerUrl };
-              }
-              if (n.id === 'n-start-inst') {
-                return { ...n, url: installerUrl, urlKey: installerUrl };
-              }
-              if (n.kind === 'scan') {
-                return { ...n, url: scanUrl, urlKey: scanUrl };
-              }
-              return n;
-            }),
-          }
-        : template;
+    const next = {
+      ...template,
+      lastRun: current.lastRun,
+      lastVerdict: current.lastVerdict,
+    };
     await patchCollectionTestFlow({
       platformProjectId,
       flowId: row.id,

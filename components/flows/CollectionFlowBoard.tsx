@@ -78,6 +78,7 @@ import {
   flowNodesToCollisionRects,
   resolveFlowNodePositions,
 } from '@/lib/collection-flow-collision'
+import { layoutCollectionFlowNodes } from '@/lib/collection-flow-layout'
 import {
   formatValidationIssues,
   validateCollectionFlowForRun,
@@ -109,6 +110,7 @@ import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import {
   IconDelete,
   IconDuplicate,
+  IconLayout,
   IconPlay,
   IconReset,
   IconSave,
@@ -1145,6 +1147,23 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setSaveMsg(null)
   }, [runBusy, nodes, edges, setNodes, setEdges, pushHistory])
 
+  const autoLayout = useCallback(() => {
+    if (runBusy) return
+    const doc = getSnapshot()
+    const layout = layoutCollectionFlowNodes(doc.nodes, doc.edges)
+    if (layout.size === 0) return
+    pushHistory()
+    setNodes((nds) =>
+      nds.map((n) => {
+        const pos = layout.get(n.id)
+        if (!pos) return n
+        return { ...n, position: pos }
+      })
+    )
+    setDirty(true)
+    setSaveMsg(null)
+  }, [getSnapshot, pushHistory, runBusy, setNodes])
+
   const duplicateSelected = useCallback(() => {
     if (runBusy) return
     const ids = new Set<string>()
@@ -1582,6 +1601,20 @@ function BoardInner({ platformProjectId, initial }: Props) {
                   >
                     WH
                   </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="msqdx-flow-toolbar-btn"
+                    aria-label="Anordnen"
+                    title="Nodes automatisch anordnen"
+                    icon={<IconLayout />}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                    }}
+                    onClick={autoLayout}
+                    disabled={runBusy || nodes.length === 0}
+                  />
                   <Button
                     type="button"
                     size="sm"

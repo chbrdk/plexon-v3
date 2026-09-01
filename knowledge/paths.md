@@ -100,6 +100,7 @@
     - Helpers `apiPlatformProjectFlowTriggerWebhook` / `…Service` / `…FlowRunStatus` / `…FlowWebhookRotate`
     - Tables: webhook columns on `collection_test_flows` + `collection_flow_runs` (migration `0006_collection_flow_triggers.sql`)
     - Collision: `lib/collection-flow-collision.ts` on board drag-stop / place
+    - Auto-layout: `lib/collection-flow-layout.ts` — toolbar **Anordnen**
     - Wave 16 Context menu: `@msqdx/ui` ContextMenu on CollectionFlowBoard (node + pane)
     - Wave 17 Run history: UI Testen → `collection_flow_runs` (`trigger: ui`); `GET …/flows/:flowId/runs` · helper `apiPlatformProjectFlowRuns`; Historie dock on board
     - Wave 18–20 Open expressions: `lib/collection-flow-expression.ts`; JsonTree/ExpressionField (`@msqdx/ui`); `set` node aliases

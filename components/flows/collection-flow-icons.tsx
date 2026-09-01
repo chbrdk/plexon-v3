@@ -145,6 +145,17 @@ export function IconDuplicate({ size = 16 }: { size?: number }) {
   )
 }
 
+export function IconLayout({ size = 16 }: { size?: number }) {
+  return (
+    <FlowSvg size={size}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </FlowSvg>
+  )
+}
+
 /** Wave 24 — Brandion guideline / brand measure glyphs. */
 export function IconGuideline({ size = 18 }: { size?: number }) {
   return (

@@ -448,6 +448,7 @@ Do not place this on legacy `/board` Prismion island.
 - Table `collection_flow_runs` + flow columns `webhook_enabled`, `webhook_secret_hash`, `webhook_secret_hint`. Rotate via `POST …/webhook/rotate`; enable via `PATCH` `{ webhookEnabled }`.
 - Shared executor `lib/collection-flow-execute.ts` (UI sync `…/run` + async worker). Still updates flow `lastVerdict`/`lastRun`.
 - **Node collision:** `lib/collection-flow-collision.ts` — on drag-stop / palette / duplicate / ‖P, snap AABB with gap so nodes cannot stack. Free move while dragging.
+- **Auto-layout:** Toolbar **Anordnen** — `lib/collection-flow-layout.ts` layers nodes left-to-right along control edges (`then` / `parallel` / `when` / `otherwise`), stacks branches vertically with gap; `start` nodes sit lower (template rhythm). Undoable; marks flow dirty.
 
 ## Wave 16 implementation notes
 
