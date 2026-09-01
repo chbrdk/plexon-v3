@@ -48,3 +48,58 @@ UC2 (3 Fachhandwerker): `VAILLANT_GROUP_UC2_INSTALLER_PERSONAS` — auto-seed on
 Editor: `https://creation-v3.projects-a.plygrnd.tech/editor?platformProjectId=f3d27e9f-d14c-4880-82be-3ca31c051173`
 
 Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 Schritte) + Kontakt.
+
+## Demo-Walkthrough (Staging)
+
+**Collection:** [Vaillant Group · Plexon](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173)
+
+### 0 · Kontext (Knowledge Pack)
+
+1. [Knowledge Pack öffnen](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/knowledge)
+2. Facet **`research_brief`** — UC1-Hypothesen + UC2 Opportunity Map (Revision ≥ 3)
+
+### UC1 · Kaufbarrieren (Eigenheimbesitzer)
+
+| Schritt | Wo | Was |
+|--------|-----|-----|
+| 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Barrier Research (UC1)** | Flow `14ce6052-ff76-42a0-8725-f2a13daf121e` öffnen |
+| 2 | Board · **Testen** | Journey auf `vaillant.de/heizung/waermepumpe/` — Persona aus UC1-Set (6 Segmente) |
+| 3 | AUDION | [Personas](https://audion-v3.projects-a.plygrnd.tech/projects/proj-vaillant-group-mtb6qr6b) — z. B. Sandra (Altbau), Thomas (Tausch) |
+| 4 | CHECKION | Scan der B2C-URL — Qualitäts-Spine im Flow |
+| 5 | BRANDION | Guideline `gl-mtinudb1` · Brand Measure |
+| 6 | CREATION | [Editor](https://creation-v3.projects-a.plygrnd.tech/editor?platformProjectId=f3d27e9f-d14c-4880-82be-3ca31c051173) — Scene `scene-vaillant-landing` + Insight-Varianten |
+
+**Fragestellung:** *Warum entscheidet sich ein Eigenheimbesitzer gegen eine Wärmepumpe?*
+
+### UC2 · Fachhandwerker Dual Perspective
+
+| Schritt | Wo | Was |
+|--------|-----|-----|
+| 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Installer Dual Perspective (UC2)** | Flow `66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a` |
+| 2 | Board · **Testen** | **Endkunde:** B2C Touchpoint → Prompt → **Installateur:** Fachpartner-URL → Opportunity |
+| 3 | AUDION | UC2-Personas: Klaus (Meister), Sandra (Planung), Tim (Monteur) |
+| 4 | CHECKION + BRANDION | wie UC1 — Scan + Brand Measure auf B2C-Spine |
+
+**Fragestellung:** *Was braucht der Fachhandwerker, damit er Vaillant empfiehlt?*
+
+UC2 startet beim **ersten Container-Boot** automatisch im Hintergrund, solange noch kein completed Run existiert (`scripts/run-vaillant-group-mafo-flow.ts --uc2 --if-pending`).
+
+### Flow-IDs (Staging)
+
+| Flow | UUID |
+|------|------|
+| UC1 Barrier Research | `14ce6052-ff76-42a0-8725-f2a13daf121e` |
+| UC2 Installer Dual | `66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a` |
+
+Direktlinks Board:
+
+- UC1: `…/flows/14ce6052-ff76-42a0-8725-f2a13daf121e`
+- UC2: `…/flows/66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a`
+
+### Operator
+
+```bash
+# Flow manuell (Container oder lokal mit Staging DATABASE_URL)
+DATABASE_URL=… npx tsx scripts/run-vaillant-group-mafo-flow.ts --uc2
+DATABASE_URL=… npx tsx scripts/run-vaillant-group-mafo-flow.ts --uc1 --if-pending
+```
