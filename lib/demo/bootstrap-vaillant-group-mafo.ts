@@ -66,24 +66,11 @@ export async function ensureVaillantGroupBarrierResearchFlow(input: {
 
   if (row) {
     const current = ensureFlowDocument(row.flow);
-    const next =
-      current.lastRun || current.nodes.length > 0
-        ? {
-            ...current,
-            templateId: COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
-            nodes: current.nodes.map((n) =>
-              n.kind === 'start' || n.kind === 'scan'
-                ? {
-                    ...n,
-                    url:
-                      n.url?.trim() ||
-                      input.journeyUrl?.trim() ||
-                      VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
-                  }
-                : n,
-            ),
-          }
-        : template;
+    const next = {
+      ...template,
+      lastRun: current.lastRun,
+      lastVerdict: current.lastVerdict,
+    };
     await patchCollectionTestFlow({
       platformProjectId,
       flowId: row.id,
