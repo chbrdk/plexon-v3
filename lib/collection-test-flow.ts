@@ -1052,7 +1052,7 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
     lastVerdict: null,
     lastRun: null,
   };
-  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, customerUrl) };
+  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, customerUrl, { personaNodeId: 'n-persona-ek' }) };
 }
 
 /**
@@ -1562,6 +1562,58 @@ export function listJourneyPersonaSlots(doc: CollectionTestFlowDocument): Journe
   return slots;
 }
 
+function startNodeForPersona(
+  doc: CollectionTestFlowDocument,
+  candidateNodes: CollectionFlowNode[],
+  personaNodeId: string,
+): CollectionFlowNode | null {
+  const candidateIds = new Set(candidateNodes.map((n) => n.id));
+  for (const e of doc.edges) {
+    if (e.source !== personaNodeId || (e.edgeKind ?? 'then') !== 'then') continue;
+    if (!candidateIds.has(e.target)) continue;
+    const target = candidateNodes.find((n) => n.id === e.target && n.kind === 'start');
+    if (target) return target;
+  }
+  return null;
+}
+
+function upstreamZielgruppeForPersona(
+  doc: CollectionTestFlowDocument,
+  personaNodeId: string,
+): CollectionFlowNode | null {
+  const inEdge = doc.edges.find(
+    (e) => e.target === personaNodeId && (e.edgeKind ?? 'then') === 'then',
+  );
+  if (!inEdge) return null;
+  return doc.nodes.find((n) => n.id === inEdge.source && n.kind === 'zielgruppe') ?? null;
+}
+
+/** Walk `then` edges from a start until the next zielgruppe (sequential dual-journey chains). */
+function reachableJourneyChainIds(
+  doc: CollectionTestFlowDocument,
+  candidateNodes: CollectionFlowNode[],
+  startId: string,
+): Set<string> {
+  const candidateIds = new Set(candidateNodes.map((n) => n.id));
+  const ids = new Set<string>();
+  const queue = [startId];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    if (ids.has(id)) continue;
+    const node = candidateNodes.find((n) => n.id === id);
+    if (!node) continue;
+    ids.add(id);
+    for (const e of doc.edges) {
+      if (e.source !== id || (e.edgeKind ?? 'then') !== 'then') continue;
+      if (!candidateIds.has(e.target)) continue;
+      const targetNode = candidateNodes.find((n) => n.id === e.target);
+      if (targetNode?.kind === 'zielgruppe') continue;
+      queue.push(e.target);
+    }
+  }
+  return ids;
+}
+
 /**
  * Build an embedded Audion-shaped journey subgraph from first-class journey nodes on the
  * canvas (Wave 5 / 11 / 14). Config kinds `persona` / `zielgruppe` merge onto `start` and are
@@ -1582,22 +1634,62 @@ export function extractJourneyFlowFromDocument(
   }
 
   const configKinds = new Set<CollectionFlowNodeKind>(['persona', 'zielgruppe', 'guideline']);
-  const agentNodes = candidateNodes.filter((n) => !configKinds.has(n.kind));
+  const allStarts = candidateNodes.filter((n) => n.kind === 'start');
+  const slots = listJourneyPersonaSlots(doc);
+  const forcedId = opts?.personaNodeId?.trim() || null;
+
+  let activeStart = allStarts[0] ?? null;
+  let pageUrlForStart = pageUrl;
+  if (forcedId) {
+    const mapped = startNodeForPersona(doc, candidateNodes, forcedId);
+    if (mapped) {
+      activeStart = mapped;
+      pageUrlForStart = mapped.url?.trim() || mapped.urlKey?.trim() || pageUrl;
+    }
+  } else if (allStarts.length > 1) {
+    const primarySlot = slots.find((s) => s.primary) ?? slots[0];
+    if (primarySlot?.nodeId) {
+      const mapped = startNodeForPersona(doc, candidateNodes, primarySlot.nodeId);
+      if (mapped) {
+        activeStart = mapped;
+        pageUrlForStart = mapped.url?.trim() || mapped.urlKey?.trim() || pageUrl;
+      }
+    }
+  } else if (allStarts.length === 1) {
+    pageUrlForStart =
+      allStarts[0]!.url?.trim() || allStarts[0]!.urlKey?.trim() || pageUrl;
+  }
+
+  if (!activeStart) {
+    if (doc.journeyFlow?.nodes?.length) return patchJourneyFlowUrl(doc.journeyFlow, pageUrl);
+    return null;
+  }
+
+  const chainIds =
+    allStarts.length > 1
+      ? reachableJourneyChainIds(doc, candidateNodes, activeStart.id)
+      : new Set(
+          candidateNodes.filter((n) => !configKinds.has(n.kind)).map((n) => n.id),
+        );
+
+  const agentNodes = candidateNodes.filter(
+    (n) => !configKinds.has(n.kind) && chainIds.has(n.id),
+  );
   const start = agentNodes.find((n) => n.kind === 'start');
   if (!start) {
     if (doc.journeyFlow?.nodes?.length) return patchJourneyFlowUrl(doc.journeyFlow, pageUrl);
     return null;
   }
 
-  const slots = listJourneyPersonaSlots(doc);
-  const forcedId = opts?.personaNodeId?.trim() || null;
   const allPersonas = doc.nodes.filter((n) => n.kind === 'persona');
   const personaCfg = forcedId
     ? allPersonas.find((n) => n.id === forcedId)
     : slots.find((s) => s.primary)
       ? allPersonas.find((n) => n.id === slots.find((s) => s.primary)!.nodeId)
       : [...allPersonas].reverse()[0];
-  const zielCfg = [...doc.nodes].reverse().find((n) => n.kind === 'zielgruppe');
+  const zielCfg = forcedId
+    ? upstreamZielgruppeForPersona(doc, forcedId)
+    : doc.nodes.find((n) => n.kind === 'zielgruppe');
   const mergedPersonaId = start.personaId?.trim() || personaCfg?.personaId?.trim() || null;
   const mergedPersonaName =
     start.personaName?.trim() || personaCfg?.personaName?.trim() || null;
@@ -1629,7 +1721,7 @@ export function extractJourneyFlowFromDocument(
         kind: n.kind,
         label: n.label,
         text: n.text ?? null,
-        urlKey: pageUrl,
+        urlKey: pageUrlForStart,
         maxSteps: n.maxSteps ?? 8,
         personaId: mergedPersonaId,
         personaName: mergedPersonaName,

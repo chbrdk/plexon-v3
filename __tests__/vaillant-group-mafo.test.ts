@@ -5,6 +5,7 @@ import {
   createVaillantBarrierResearchTemplate,
   createVaillantInstallerDualPerspectiveTemplate,
   documentHasBrandMeasure,
+  extractJourneyFlowFromDocument,
 } from '@/lib/collection-test-flow';
 import { buildVaillantGroupResearchBriefSeed } from '@/lib/demo/vaillant-group-knowledge-seed';
 import {
@@ -56,5 +57,23 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     expect(kinds.filter((k) => k === 'persona').length).toBe(2);
     expect(kinds).toContain('scan');
     expect(documentHasBrandMeasure(doc)).toBe(true);
+  });
+
+  it('extracts one Audion start per UC2 persona chain', () => {
+    const doc = createVaillantInstallerDualPerspectiveTemplate();
+    const endkunde = extractJourneyFlowFromDocument(
+      doc,
+      'https://www.vaillant.de/heizung/waermepumpe/',
+      { personaNodeId: 'n-persona-ek' },
+    );
+    const installer = extractJourneyFlowFromDocument(
+      doc,
+      'https://www.vaillant.de/fachpartner/',
+      { personaNodeId: 'n-persona-inst' },
+    );
+    expect(endkunde?.nodes.filter((n) => n.kind === 'start')).toHaveLength(1);
+    expect(installer?.nodes.filter((n) => n.kind === 'start')).toHaveLength(1);
+    expect(endkunde?.nodes[0]?.urlKey).toContain('waermepumpe');
+    expect(installer?.nodes[0]?.urlKey).toContain('fachpartner');
   });
 });
