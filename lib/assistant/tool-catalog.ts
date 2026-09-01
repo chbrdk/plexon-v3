@@ -177,6 +177,42 @@ export function filterToolsByFamilies(
   });
 }
 
+/**
+ * Full platform MCP surface for cross-app assistant (any shell host).
+ * Read families + write families — writes still gated by allowWriteTools on the plan.
+ */
+export const PLATFORM_ASSISTANT_FAMILIES: ToolFamily[] = [
+  'checkion_project',
+  'checkion_scan_read',
+  'checkion_scan_write',
+  'checkion_geo',
+  'checkion_tools',
+  'checkion_journey',
+  'audion_project',
+  'audion_audience_write',
+  'audion_knowledge',
+  'audion_persona',
+  'audion_journey',
+  'audion_ux_journey',
+  'audion_chat',
+  'audion_documents',
+  'brandion_guidelines',
+  'brandion_tokens',
+  'creation_library',
+  'creation_compositions',
+  'creation_projects',
+  'creation_scene',
+  'creation_scene_write',
+  'spirion_references',
+  'spirion_screens',
+  'echon_ops',
+  'echon_research',
+  'echon_signals',
+  'echon_waves',
+  'echon_foresight',
+  'echon_corpus',
+];
+
 /** Safe read-only families for generic project Q&A. */
 export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'checkion_project',

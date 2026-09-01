@@ -258,5 +258,39 @@ describe('assistant-planner heuristic', () => {
     );
     expect(plan.skipTools).toBe(false);
     expect(toolAllowedByPlan('brandion_tokens_list', plan)).toBe(true);
+    expect(plan.allowWriteTools).toBe(false);
+    expect(toolAllowedByPlan('brandion_guideline_create', plan)).toBe(false);
+  });
+
+  it('allows brandion write tools on explicit guideline create (cross-app)', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Guideline anlegen für MSQ DX',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: true,
+      compactContextLoaded: false,
+    });
+    expect(plan.intent).toBe('brandion_brand');
+    expect(plan.allowWriteTools).toBe(true);
+    expect(toolAllowedByPlan('brandion_guideline_create', plan)).toBe(true);
+    expect(toolAllowedByPlan('brandion_token_upsert', plan)).toBe(true);
+  });
+
+  it('action_write includes brandion families when MCP is on', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Erstelle Target Group und importiere DTCG tokens',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: true,
+      hasBrandionMcp: true,
+      hasCreationMcp: true,
+      compactContextLoaded: false,
+    });
+    expect(plan.intent).toBe('action_write');
+    expect(plan.allowWriteTools).toBe(true);
+    expect(plan.toolFamilies).toEqual(expect.arrayContaining(['brandion_guidelines', 'brandion_tokens']));
+    expect(toolAllowedByPlan('brandion_guideline_import_dtcg', plan)).toBe(true);
   });
 });

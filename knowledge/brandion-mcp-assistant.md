@@ -21,7 +21,7 @@ Do **not** set `http://brandion-mcp:3100` on plexon-v3 (different Coolify projec
 
 ## System prompt
 
-`buildBrandionIntegrationContextBlock` — when active, instruct model to call `brandion_tokens_list` / guidelines tools for CD colors.
+`buildBrandionIntegrationContextBlock` — when active, instruct model to call `brandion_tokens_list` / guidelines tools for CD colors. Write tools (`brandion_guideline_create`, `brandion_token_upsert`, …) are available from any platform shell when the user explicitly asks to create/update/import brand assets.
 
 ## Content cards
 

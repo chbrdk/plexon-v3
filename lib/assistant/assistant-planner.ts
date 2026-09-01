@@ -5,6 +5,7 @@ import {
   KNOWLEDGE_QA_FAMILIES,
   PERSONA_FAMILIES,
   UX_JOURNEY_FAMILIES,
+  PLATFORM_ASSISTANT_FAMILIES,
   READ_ONLY_QA_FAMILIES,
   SCAN_FAMILIES,
   ECHON_MARKET_FAMILIES,
@@ -118,6 +119,7 @@ const PERSONA_PATTERNS = [
 
 const WRITE_PATTERNS = [
   /\b(starte|start|erstelle|create|generiere|generate|lösche|delete|anleg\w*|ableit\w*)\b/i,
+  /\b(upsert|import|aktualisier\w*|update|ersetz\w*|replace|archiv\w*|evaluate|publish)\b/i,
   /\bscanne\s+https?:\/\//i,
 ];
 
@@ -260,11 +262,12 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       intent: 'brandion_brand',
       mode: 'tools',
       toolFamilies: [...BRANDION_BRAND_FAMILIES, 'plexon_ui'],
-      allowWriteTools: false,
+      allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
-      reasoning:
-        'Marken-/Farb-/Guideline-Intent – BRANDION guidelines + tokens (live, nicht erfinden).',
+      reasoning: writeIntent
+        ? 'Marken-/Guideline-Schreib-Intent – BRANDION guidelines + tokens (cross-app, live).'
+        : 'Marken-/Farb-/Guideline-Intent – BRANDION guidelines + tokens (live, nicht erfinden).',
     });
   }
 
@@ -286,7 +289,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       intent: 'creation_design',
       mode: 'tools',
       toolFamilies: [...CREATION_DESIGN_FAMILIES, 'plexon_ui'],
-      allowWriteTools: false,
+      allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
       reasoning:
@@ -375,6 +378,15 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     if (input.hasAudionMcp) {
       families.push(...AUDION_WRITE_FAMILIES);
     }
+    if (input.hasBrandionMcp) {
+      families.push(...BRANDION_BRAND_FAMILIES);
+    }
+    if (input.hasCreationMcp) {
+      families.push(...CREATION_DESIGN_FAMILIES, 'creation_scene_write');
+    }
+    if (input.hasCheckionMcp) {
+      families.push('checkion_journey');
+    }
     return buildPlan({
       intent: 'action_write',
       mode: 'tools',
@@ -383,7 +395,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       maxToolRounds: 6,
       skipTools: false,
       reasoning:
-        'Schreib-/Ableit-Intent erkannt – CHECKION lesen + AUDION anlegen (audion_audience_write inkl. target_group_create).',
+        'Schreib-/Ableit-Intent – platform write families (CHECKION/AUDION/BRANDION/CREATION, cross-app).',
     });
   }
 
@@ -483,8 +495,8 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'project_knowledge',
       mode: input.compactContextLoaded ? 'embedded_context' : 'hybrid',
-      toolFamilies: KNOWLEDGE_QA_FAMILIES,
-      allowWriteTools: false,
+      toolFamilies: writeIntent ? PLATFORM_ASSISTANT_FAMILIES : KNOWLEDGE_QA_FAMILIES,
+      allowWriteTools: writeIntent,
       maxToolRounds: input.compactContextLoaded ? 2 : 4,
       skipTools: input.compactContextLoaded && !hasMcp(input),
       reasoning: input.compactContextLoaded
@@ -497,8 +509,8 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'general_chat',
       mode: 'hybrid',
-      toolFamilies: READ_ONLY_QA_FAMILIES,
-      allowWriteTools: false,
+      toolFamilies: writeIntent ? PLATFORM_ASSISTANT_FAMILIES : READ_ONLY_QA_FAMILIES,
+      allowWriteTools: writeIntent,
       maxToolRounds: 3,
       skipTools: !hasMcp(input),
       reasoning: 'Projektkontext aktiv – eingebettete Kurzinfo + read-only Tools.',
@@ -509,8 +521,8 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'general_chat',
       mode: 'tools',
-      toolFamilies: READ_ONLY_QA_FAMILIES,
-      allowWriteTools: false,
+      toolFamilies: writeIntent ? PLATFORM_ASSISTANT_FAMILIES : READ_ONLY_QA_FAMILIES,
+      allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
       reasoning: 'Allgemeiner Chat – read-only Tool-Subset.',
@@ -647,7 +659,8 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 }
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
-- Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag.
+- Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten).
+- Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
 - toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, plexon_ui.`;
 
   const userContent = JSON.stringify({

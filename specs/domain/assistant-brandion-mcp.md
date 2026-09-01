@@ -33,13 +33,16 @@ Connectivity blocks: `buildBrandionIntegrationContextBlock` / Audion equivalent 
 | `brandion_guidelines` | `^brandion_guidelines_`, `^brandion_guideline_`, `^brandion_health$`, `^brandion_projects?_`, `^brandion_export_`, `^brandion_rules?_`, `^brandion_analysis_` |
 | `brandion_tokens` | `^brandion_tokens_`, `^brandion_token_upsert$` |
 
-Read tools stay in `READ_ONLY_QA_FAMILIES` / `KNOWLEDGE_QA_FAMILIES`. Write tools (`create`, `update`, `delete`, `upsert`, `replace`, `evaluate`, `archive`, `import`) are gated by `filterToolsByFamilies` unless `allowWrite: true`.
+Read tools stay in `READ_ONLY_QA_FAMILIES` / `KNOWLEDGE_QA_FAMILIES`. Write tools are available on **any platform shell host** (Audion, Checkion, Brandion, Plexon, …) when the planner sets `allowWriteTools: true` (explicit create/update/import/upsert/delete/archive verbs in the user prompt).
 
 ## Planner
 
-Heuristic intent `brandion_brand` (or route via `project_knowledge` with brandion families) when prompt matches Farbe|Farben|color|colours?|Guideline|Marke|Brandion|Design.?Token|CD\b|Corporate.?Design and `hasBrandionMcp`.
+Heuristic intent `brandion_brand` when prompt matches Farbe|Farben|color|colours?|Guideline|Marke|Brandion|Design.?Token|CD|Corporate.?Design and `hasBrandionMcp`.
 
-Prefer `brandion_tokens` + `brandion_guidelines` + generative Brandion cards (below). For **brand management** (create guideline, upsert token, import DTCG, evaluate rules), planner may include write families when the user explicitly asks to change/update/create brand assets.
+- **Read** (default): `brandion_tokens` + `brandion_guidelines` + generative Brandion cards.
+- **Write** (`allowWriteTools: true`): same families + `brandion_guideline_create`, `brandion_token_upsert`, rules/import/analysis tools — triggered by write verbs (erstelle, anlegen, import, upsert, …). Works from any product FAB, not only Brandion UI.
+
+Generic `general_chat` / `project_knowledge` / `action_write` intents use `PLATFORM_ASSISTANT_FAMILIES` when write intent is detected (cross-product parity).
 
 ## Content cards (generative UI)
 
