@@ -12,6 +12,9 @@ export const COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES =
   'journey-quality-issues' as const;
 /** Wave 23 — Event Quick Check quality spine (no ECHON). */
 export const COLLECTION_FLOW_TEMPLATE_EQC_QUALITY = 'eqc-quality-v1' as const;
+/** Vaillant Group MaFo UC1 — barrier research validate loop (AUDION + CHECKION + BRANDION). */
+export const COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH =
+  'vaillant-barrier-research-v1' as const;
 
 /**
  * Wave 5: Audion journey kinds (closed set, semantics owned by AUDION) plus PLEXON/CHECKION
@@ -698,6 +701,173 @@ export function createJourneyQualityIssuesTemplate(url: string): CollectionTestF
     lastRun: null,
   };
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
+}
+
+/** Vaillant Group UC1 — homeowner barrier research + page quality + Brandion measure. */
+export function createVaillantBarrierResearchTemplate(input?: {
+  journeyUrl?: string;
+  scanUrl?: string;
+  guidelineId?: string;
+}): CollectionTestFlowDocument {
+  const journeyUrl = input?.journeyUrl?.trim() || 'https://www.vaillant.de/heizung/waermepumpe/';
+  const scanUrl = input?.scanUrl?.trim() || journeyUrl;
+  const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
+
+  const journeyNodes: CollectionFlowNode[] = [
+    {
+      id: 'n-zielgruppe',
+      kind: 'zielgruppe',
+      label: 'Altbau-Familie',
+      segment: 'altbau_familie',
+      position: { x: 0, y: 40 },
+    },
+    {
+      id: 'n-persona',
+      kind: 'persona',
+      label: 'Persona',
+      position: { x: 200, y: 40 },
+    },
+    {
+      id: 'n-start',
+      kind: 'start',
+      label: 'Start',
+      url: journeyUrl,
+      urlKey: journeyUrl,
+      maxSteps: 10,
+      position: { x: 400, y: 120 },
+    },
+    {
+      id: 'n-prompt',
+      kind: 'prompt',
+      label: 'Barriere-Frage',
+      text: 'Was würde dich aktuell davon abhalten, eine Wärmepumpe zu kaufen? Denke laut auf Deutsch.',
+      position: { x: 620, y: 40 },
+    },
+    {
+      id: 'n-observe',
+      kind: 'observe',
+      label: 'Seite erkunden',
+      text: 'Schau dir die Wärmepumpen-Informationen an. Welche Risiken und Unsicherheiten siehst du?',
+      observeSeconds: 45,
+      position: { x: 840, y: 40 },
+    },
+    {
+      id: 'n-message',
+      kind: 'message',
+      label: 'Vertiefung',
+      text: 'Welche Information würde dir bei der Entscheidung am meisten helfen — Kosten, Förderung oder Eignung für dein Haus?',
+      position: { x: 1060, y: 40 },
+    },
+    {
+      id: 'n-measure',
+      kind: 'measure',
+      label: 'Klarheit',
+      measureKey: 'clarity',
+      text: 'Wie klar ist dir nach dieser Seite, ob eine Wärmepumpe für dich infrage kommt?',
+      position: { x: 1280, y: 40 },
+    },
+    {
+      id: 'n-success',
+      kind: 'success',
+      label: 'Research done',
+      text: 'Danke — fasse kurz deine größte Barriere und deinen Informationsbedarf zusammen.',
+      position: { x: 1500, y: 40 },
+    },
+  ];
+  const journeyEdges: CollectionFlowEdge[] = [
+    { id: 'e-zg-persona', source: 'n-zielgruppe', target: 'n-persona', edgeKind: 'then' },
+    { id: 'e-persona-start', source: 'n-persona', target: 'n-start', edgeKind: 'then' },
+    { id: 'e-start-prompt', source: 'n-start', target: 'n-prompt', edgeKind: 'then' },
+    { id: 'e-prompt-observe', source: 'n-prompt', target: 'n-observe', edgeKind: 'then' },
+    { id: 'e-observe-message', source: 'n-observe', target: 'n-message', edgeKind: 'then' },
+    { id: 'e-message-measure', source: 'n-message', target: 'n-measure', edgeKind: 'then' },
+    { id: 'e-measure-success', source: 'n-measure', target: 'n-success', edgeKind: 'then' },
+  ];
+
+  const spine = qualitySpineWithIssueGate(scanUrl, 1720);
+  const brandNodes: CollectionFlowNode[] = [
+    {
+      id: 'n-guideline',
+      kind: 'guideline',
+      label: 'Vaillant Group CD',
+      guidelineId,
+      position: { x: 2380, y: 40 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Brand Measure',
+      guidelineId,
+      fixtureId: 'demo-landing-pass',
+      adapter: 'fixture',
+      position: { x: 2600, y: 120 },
+    },
+    {
+      id: 'n-brand-pass',
+      kind: 'compare',
+      label: 'Brand: keine Fails',
+      path: 'brand.failCount',
+      op: 'eq',
+      value: 0,
+      position: { x: 2820, y: 120 },
+    },
+    {
+      id: 'n-ok-final',
+      kind: 'quality_ok',
+      label: 'Loop OK',
+      position: { x: 3040, y: 40 },
+    },
+    {
+      id: 'n-abandon-brand',
+      kind: 'abandon',
+      label: 'Brand fail',
+      position: { x: 3040, y: 200 },
+    },
+  ];
+  const brandEdges: CollectionFlowEdge[] = [
+    { id: 'e-issues-guideline', source: 'n-issues', target: 'n-guideline', edgeKind: 'then' },
+    { id: 'e-guideline-brand', source: 'n-guideline', target: 'n-brand', edgeKind: 'then' },
+    { id: 'e-brand-compare', source: 'n-brand', target: 'n-brand-pass', edgeKind: 'then' },
+    {
+      id: 'e-brand-ok',
+      source: 'n-brand-pass',
+      target: 'n-ok-final',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e-brand-abandon',
+      source: 'n-brand-pass',
+      target: 'n-abandon-brand',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+  ];
+
+  // Rewire quality spine terminal: issues pass → brand (not n-ok)
+  const spineEdges = spine.edges.map((e) =>
+    e.id === 'e-issues-ok' ? { ...e, target: 'n-guideline' } : e,
+  );
+  const nodes = [...journeyNodes, ...spine.nodes, ...brandNodes];
+  const edges: CollectionFlowEdge[] = [
+    ...journeyEdges,
+    { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
+    ...spineEdges,
+    ...brandEdges,
+  ];
+
+  const base: CollectionTestFlowDocument = {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, journeyUrl) };
 }
 
 /**

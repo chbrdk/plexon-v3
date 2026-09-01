@@ -10,11 +10,13 @@ import {
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
+  COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
   createEqcQualityTemplate,
   createJourneyQualityIssuesTemplate,
   createJourneyQualityTemplate,
   createPageQualityIssuesTemplate,
   createPageQualityTemplate,
+  createVaillantBarrierResearchTemplate,
 } from '@/lib/collection-test-flow';
 import { resolveEventQuickCheckProfile } from '@/lib/paths/assistant-workflows';
 import {
@@ -98,6 +100,7 @@ export async function POST(
       COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
       COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
       COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+      COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
     ]);
     const templateId = knownTemplates.has(rawTemplate)
       ? rawTemplate
@@ -105,13 +108,15 @@ export async function POST(
     const defaultName =
       templateId === COLLECTION_FLOW_TEMPLATE_EQC_QUALITY
         ? 'Event Quick Check'
-        : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
-          ? 'Journey + quality + issues'
-          : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
-            ? 'Page quality + issues'
-            : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
-              ? 'Journey + quality'
-              : 'Page quality';
+        : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH
+          ? 'Vaillant Group · Barrier Research (UC1)'
+          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+            ? 'Journey + quality + issues'
+            : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
+              ? 'Page quality + issues'
+              : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
+                ? 'Journey + quality'
+                : 'Page quality';
     const name =
       typeof body?.name === 'string' && body.name.trim()
         ? body.name.trim()
@@ -126,13 +131,15 @@ export async function POST(
             maxPages: eqcProfile.scanMaxPages,
             includeCompetitors: eqcProfile.scanCompetitors,
           })
-        : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
-          ? createJourneyQualityIssuesTemplate(url)
-          : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
-            ? createPageQualityIssuesTemplate(url)
-            : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
-              ? createJourneyQualityTemplate(url)
-              : createPageQualityTemplate(url);
+        : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH
+          ? createVaillantBarrierResearchTemplate({ journeyUrl: url, scanUrl: url })
+          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+            ? createJourneyQualityIssuesTemplate(url)
+            : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
+              ? createPageQualityIssuesTemplate(url)
+              : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY
+                ? createJourneyQualityTemplate(url)
+                : createPageQualityTemplate(url);
 
     const row = await createCollectionTestFlow({
       platformProjectId: id,

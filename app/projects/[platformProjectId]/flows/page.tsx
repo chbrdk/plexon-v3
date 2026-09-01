@@ -15,7 +15,9 @@ import {
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
+  COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
 } from '@/lib/collection-test-flow'
+import { isVaillantGroupCollection, VAILLANT_GROUP_B2C_WAERMEPUMPE_URL } from '@/lib/demo/vaillant-group-mafo'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
 
 const CREATE_OPTIONS: Array<{ id: string; label: string; depth?: 'quick' | 'complete' }> = [
@@ -31,6 +33,10 @@ const CREATE_OPTIONS: Array<{ id: string; label: string; depth?: 'quick' | 'comp
   {
     id: COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
     label: 'Journey + quality + issues',
+  },
+  {
+    id: COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+    label: 'Vaillant Group · Barrier Research (UC1)',
   },
 ]
 
@@ -66,6 +72,12 @@ export default function CollectionFlowsGalleryPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (isVaillantGroupCollection(platformProjectId) && !url.trim()) {
+      setUrl(VAILLANT_GROUP_B2C_WAERMEPUMPE_URL)
+    }
+  }, [platformProjectId, url])
 
   const create = useCallback(
     async (opt: { id: string; label: string; depth?: 'quick' | 'complete' }) => {
