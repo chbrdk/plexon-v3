@@ -30,16 +30,16 @@ Connectivity blocks: `buildBrandionIntegrationContextBlock` / Audion equivalent 
 
 | Family | Anthropic name patterns |
 |--------|-------------------------|
-| `brandion_guidelines` | `^brandion_guidelines_`, `^brandion_guideline_`, `^brandion_health$` |
-| `brandion_tokens` | `^brandion_tokens_` |
+| `brandion_guidelines` | `^brandion_guidelines_`, `^brandion_guideline_`, `^brandion_health$`, `^brandion_projects?_`, `^brandion_export_`, `^brandion_rules?_`, `^brandion_analysis_` |
+| `brandion_tokens` | `^brandion_tokens_`, `^brandion_token_upsert$` |
 
-Both are read-only in v1. Include in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_FAMILIES`.
+Read tools stay in `READ_ONLY_QA_FAMILIES` / `KNOWLEDGE_QA_FAMILIES`. Write tools (`create`, `update`, `delete`, `upsert`, `replace`, `evaluate`, `archive`, `import`) are gated by `filterToolsByFamilies` unless `allowWrite: true`.
 
 ## Planner
 
 Heuristic intent `brandion_brand` (or route via `project_knowledge` with brandion families) when prompt matches Farbe|Farben|color|colours?|Guideline|Marke|Brandion|Design.?Token|CD\b|Corporate.?Design and `hasBrandionMcp`.
 
-Prefer `brandion_tokens` + `brandion_guidelines` + generative Brandion cards (below).
+Prefer `brandion_tokens` + `brandion_guidelines` + generative Brandion cards (below). For **brand management** (create guideline, upsert token, import DTCG, evaluate rules), planner may include write families when the user explicitly asks to change/update/create brand assets.
 
 ## Content cards (generative UI)
 
@@ -62,10 +62,10 @@ Hook: after `tokens_list` tool result → parse JSON → append `color_swatch_gr
 
 ## Non-goals
 
-- Write tools / confirmation flows
 - Dumping full token graphs into system prompt
 - Treating `@msqdx/ui-tokens` as Brandion guideline truth
 - Loading remote webfonts into the chat specimen
+- Settings API token CRUD via MCP
 
 ## Acceptance
 

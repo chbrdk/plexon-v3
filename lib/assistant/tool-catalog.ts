@@ -100,8 +100,14 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^brandion_health$/,
     /^brandion_guidelines_/,
     /^brandion_guideline_/,
+    /^brandion_projects_/,
+    /^brandion_project_/,
+    /^brandion_export_/,
+    /^brandion_analysis_/,
+    /^brandion_rules_/,
+    /^brandion_rule_/,
   ],
-  brandion_tokens: [/^brandion_tokens_/],
+  brandion_tokens: [/^brandion_tokens_/, /^brandion_token_upsert$/],
   creation_library: [/^creation_health$/, /^creation_library_/],
   creation_compositions: [/^creation_compositions_/],
   creation_projects: [/^creation_projects_/, /^creation_project_/],
@@ -140,8 +146,9 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   plexon_ui: [/^plexon_ui_/],
 };
 
-const DESTRUCTIVE = /(?:^|_)(delete|revoke)(?:_|$)/i;
-const WRITE_ACTION = /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import)(?:_|$)/i;
+const DESTRUCTIVE = /(?:^|_)(delete|revoke|archive)(?:_|$)/i;
+const WRITE_ACTION =
+  /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import|update|upsert|replace|evaluate)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS) as [ToolFamily, RegExp[]][]) {
