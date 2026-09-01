@@ -20,7 +20,9 @@ Code SSOT: `lib/demo/vaillant-group-mafo.ts`
 3. URL vorausgefüllt: B2C-Wärmepumpen-Seite (Research-Touchpoint, nicht Corporate-Site)
 4. Flow starten → AUDION (Barrieren) → CHECKION (Scan) → BRANDION (Measure)
 
-Programmatisch: `ensureVaillantGroupBarrierResearchFlow()` in `lib/demo/bootstrap-vaillant-group-mafo.ts`
+Programmatisch: `ensureVaillantGroupBarrierResearchFlow()` in `lib/demo/bootstrap-vaillant-group-mafo.ts`  
+Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`  
+Staging: idempotent bootstrap on container start (after `db:push`).
 
 ## Knowledge Pack (ECHON-Facet)
 

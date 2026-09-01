@@ -17,6 +17,13 @@ if [ -n "$DATABASE_URL" ]; then
     echo "[PLEXON] drizzle-kit push failed (DB unreachable or schema error). Refusing to start."
     exit 1
   fi
+
+  echo "[PLEXON] Vaillant Group MaFo flow bootstrap (idempotent)..."
+  if npx tsx scripts/bootstrap-vaillant-group-mafo.ts; then
+    echo "[PLEXON] Vaillant Group flow bootstrap complete."
+  else
+    echo "[PLEXON] Vaillant Group flow bootstrap failed (non-fatal)."
+  fi
 else
   echo "[PLEXON] DATABASE_URL not set, skipping schema push."
 fi
