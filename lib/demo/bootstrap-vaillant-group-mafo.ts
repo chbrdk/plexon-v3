@@ -47,9 +47,12 @@ export async function ensureVaillantGroupBarrierResearchFlow(input: {
     };
   }
 
+  const journeyUrl = input.journeyUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL;
+  const scanUrl = input.scanUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL;
+
   const template = createVaillantBarrierResearchTemplate({
-    journeyUrl: input.journeyUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
-    scanUrl: input.scanUrl ?? VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
+    journeyUrl,
+    scanUrl,
     guidelineId: VAILLANT_GROUP_BRANDION_GUIDELINE_ID,
   });
 
