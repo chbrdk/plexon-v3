@@ -104,6 +104,7 @@ COPY --from=builder /workspace/plexon-v3/scripts/docker-entrypoint.sh ./scripts/
 COPY --from=builder /workspace/plexon-v3/scripts/check-database-url.mjs ./scripts/check-database-url.mjs
 COPY --from=builder /workspace/plexon-v3/scripts/migrate-checkion-users-to-plexon.mjs ./scripts/migrate-checkion-users-to-plexon.mjs
 COPY --from=builder /workspace/plexon-v3/scripts/bootstrap-vaillant-group-mafo.ts ./scripts/bootstrap-vaillant-group-mafo.ts
+COPY --from=builder /workspace/plexon-v3/scripts/run-vaillant-group-mafo-flow.ts ./scripts/run-vaillant-group-mafo-flow.ts
 COPY --from=builder /workspace/msqdx-ui /workspace/msqdx-ui
 COPY --from=builder /workspace/msqdx-design-system /workspace/msqdx-design-system
 RUN chmod +x ./scripts/docker-entrypoint.sh ./scripts/check-database-url.mjs
