@@ -33,10 +33,48 @@ export const VAILLANT_GROUP_UC1_SPIRION_CLUSTERS = [
   'Operating cost uncertainty',
 ] as const;
 
+export const VAILLANT_GROUP_UC2_BUSINESS_QUESTION =
+  'Was braucht der Fachhandwerker, damit er Vaillant empfiehlt?' as const;
+
+export const VAILLANT_GROUP_UC2_CUSTOMER_NEEDS = [
+  'Passt die Wärmepumpe überhaupt zu meinem Haus?',
+  'Was kostet mich das langfristig?',
+  'Kann ich mich auf die Technik verlassen?',
+  'Wer hilft mir bei Problemen?',
+  'Wie kompliziert wird der Umbau?',
+] as const;
+
+export const VAILLANT_GROUP_UC2_INSTALLER_NEEDS = [
+  'Einfache Planung',
+  'Schnelle Installation',
+  'Zuverlässige Inbetriebnahme',
+  'Geringe Servicekomplexität',
+  'Gute Diagnosemöglichkeiten',
+  'Sichere Produktempfehlung',
+  'Verständliche Kundenberatung',
+  'Kalkulierbarer Projektaufwand',
+] as const;
+
+export const VAILLANT_GROUP_UC2_OPPORTUNITIES = [
+  'Gemeinsame Planung — Endkunde braucht Eignung, Installateur valide Planungsdaten',
+  'Bessere Beratung — Endkunde braucht Wirtschaftlichkeit, Installateur muss sie erklären',
+  'Vertrauen & Service — Endkunde braucht Zuverlässigkeit, Installateur wenig Serviceaufwand',
+  'Remote Support — Endkunde braucht Hilfe später, Installateur kann nicht überall hinfahren',
+  'Geführte Journey — Endkunde braucht Klarheit, Installateur will Prozesse vereinfachen',
+] as const;
+
 export function buildVaillantGroupResearchBriefSeed(): ResearchBriefData {
   return {
-    summary: `${VAILLANT_GROUP_COLLECTION_NAME} · MaFo UC1 — Kaufbarrieren Wärmepumpe (Eigenheimbesitzer).`,
-    topics: ['Wärmepumpe', 'Eigenheim', 'Kaufbarrieren', 'Förderung', 'Installateur'],
+    summary: `${VAILLANT_GROUP_COLLECTION_NAME} · MaFo UC1+UC2 — Kaufbarrieren & Fachhandwerker-Dual-Perspektive.`,
+    topics: [
+      'Wärmepumpe',
+      'Eigenheim',
+      'Kaufbarrieren',
+      'Förderung',
+      'Installateur',
+      'Fachhandwerker',
+      'Opportunity Map',
+    ],
     sourceRunId: null,
     sourceProjectId: null,
     sections: [
@@ -72,6 +110,33 @@ export function buildVaillantGroupResearchBriefSeed(): ResearchBriefData {
         title: 'SPIRION Cluster (Ziel)',
         plainText: 'Erwartete Muster-Dimensionen nach Qual-Research.',
         bullets: [...VAILLANT_GROUP_UC1_SPIRION_CLUSTERS],
+      },
+      {
+        id: 'uc2-question',
+        title: 'UC2 · Business-Frage',
+        plainText: VAILLANT_GROUP_UC2_BUSINESS_QUESTION,
+        bullets: [
+          'Welche Faktoren bestimmen die Produktempfehlung?',
+          'Endkunden- vs. Installateur-Perspektive verbinden',
+        ],
+      },
+      {
+        id: 'uc2-customer-needs',
+        title: 'UC2 · Endkundenperspektive (AUDION)',
+        plainText: 'Typische Bedürfnisse entlang der Empfehlungsentscheidung.',
+        bullets: [...VAILLANT_GROUP_UC2_CUSTOMER_NEEDS],
+      },
+      {
+        id: 'uc2-installer-needs',
+        title: 'UC2 · Fachhandwerkerperspektive (AUDION)',
+        plainText: 'Anforderungen an Planung, Installation und Beratung.',
+        bullets: [...VAILLANT_GROUP_UC2_INSTALLER_NEEDS],
+      },
+      {
+        id: 'uc2-opportunity-map',
+        title: 'UC2 · Opportunity Map (SPIRION)',
+        plainText: 'Customer Need × Installer Need × Vaillant Capability',
+        bullets: [...VAILLANT_GROUP_UC2_OPPORTUNITIES],
       },
     ],
   };

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+  COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
   createVaillantBarrierResearchTemplate,
+  createVaillantInstallerDualPerspectiveTemplate,
   documentHasBrandMeasure,
 } from '@/lib/collection-test-flow';
 import { buildVaillantGroupResearchBriefSeed } from '@/lib/demo/vaillant-group-knowledge-seed';
@@ -38,5 +40,21 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     const brief = buildVaillantGroupResearchBriefSeed();
     expect(brief.sections.some((s) => s.id === 'uc1-hypotheses')).toBe(true);
     expect(brief.sections.find((s) => s.id === 'uc1-hypotheses')?.bullets?.length).toBeGreaterThan(3);
+  });
+
+  it('seeds UC2 opportunity map sections', () => {
+    const brief = buildVaillantGroupResearchBriefSeed();
+    expect(brief.sections.some((s) => s.id === 'uc2-opportunity-map')).toBe(true);
+    expect(brief.sections.some((s) => s.id === 'uc2-installer-needs')).toBe(true);
+  });
+
+  it('creates UC2 installer dual-perspective flow template', () => {
+    const doc = createVaillantInstallerDualPerspectiveTemplate();
+    expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL);
+    const kinds = doc.nodes.map((n) => n.kind);
+    expect(kinds.filter((k) => k === 'zielgruppe').length).toBe(2);
+    expect(kinds.filter((k) => k === 'persona').length).toBe(2);
+    expect(kinds).toContain('scan');
+    expect(documentHasBrandMeasure(doc)).toBe(true);
   });
 });

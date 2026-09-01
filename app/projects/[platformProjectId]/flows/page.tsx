@@ -16,8 +16,13 @@ import {
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+  COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
 } from '@/lib/collection-test-flow'
-import { isVaillantGroupCollection, VAILLANT_GROUP_B2C_WAERMEPUMPE_URL } from '@/lib/demo/vaillant-group-mafo'
+import {
+  isVaillantGroupCollection,
+  VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
+  VAILLANT_GROUP_B2B_FACHPARTNER_URL,
+} from '@/lib/demo/vaillant-group-mafo'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
 
 const CREATE_OPTIONS: Array<{ id: string; label: string; depth?: 'quick' | 'complete' }> = [
@@ -37,6 +42,10 @@ const CREATE_OPTIONS: Array<{ id: string; label: string; depth?: 'quick' | 'comp
   {
     id: COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
     label: 'Vaillant Group · Barrier Research (UC1)',
+  },
+  {
+    id: COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
+    label: 'Vaillant Group · Installer Dual Perspective (UC2)',
   },
 ]
 

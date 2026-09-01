@@ -1,4 +1,4 @@
-# Vaillant Group · MaFo Demo (UC1)
+# Vaillant Group · MaFo Demo (UC1 + UC2)
 
 **Collection only:** `Vaillant Group` — **not** a separate consumer „Vaillant“-Projekt.
 
@@ -10,28 +10,38 @@
 | CREATION mirror | `proj-mtb6qr9e` |
 | Corporate URL | `https://www.vaillant-group.com/` |
 | B2C research URL (UC1) | `https://www.vaillant.de/heizung/waermepumpe/` |
+| B2B Fachpartner URL (UC2) | `https://www.vaillant.de/fachpartner/` |
 
-Code SSOT: `lib/demo/vaillant-group-mafo.ts`
+Code SSOT: `lib/demo/vaillant-group-mafo.ts` · Briefing: `PLEXON___Vaillant_Group.md`
 
-## Flow anlegen (Plexon)
+## UC1 — Kaufbarrieren (Eigenheimbesitzer)
 
-1. Collection öffnen: `/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows`
-2. Template **Vaillant Group · Barrier Research (UC1)** wählen
-3. URL vorausgefüllt: B2C-Wärmepumpen-Seite (Research-Touchpoint, nicht Corporate-Site)
-4. Flow starten → AUDION (Barrieren) → CHECKION (Scan) → BRANDION (Measure)
+Flow-Template: **`vaillant-barrier-research-v1`**  
+AUDION → CHECKION (B2C Scan) → BRANDION
 
-Programmatisch: `ensureVaillantGroupBarrierResearchFlow()` in `lib/demo/bootstrap-vaillant-group-mafo.ts`  
-Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`  
-Staging: idempotent bootstrap on container start (after `db:push`).
+## UC2 — Fachhandwerker Dual Perspective
 
-## Knowledge Pack (ECHON-Facet)
+Flow-Template: **`vaillant-installer-dual-v1`**  
+Endkunde-Journey (B2C) → Installateur-Journey (Fachpartner) → CHECKION → BRANDION
 
-Hypothesen-Seed: `lib/demo/vaillant-group-knowledge-seed.ts` → Facet `research_brief` manuell oder via Assistant publizieren.
+## Bootstrap (Staging)
+
+Idempotent on container start (after `db:push`):
+
+- Knowledge Pack `research_brief` (UC1 Hypothesen + UC2 Opportunity Map)
+- Flow UC1 + Flow UC2
+
+Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`
+
+## Knowledge Pack
+
+Seed: `lib/demo/vaillant-group-knowledge-seed.ts` → Facet `research_brief`  
+Bootstrap: `ensureVaillantGroupKnowledgePackSeed()` in `lib/demo/bootstrap-vaillant-group-knowledge-pack.ts`
 
 ## AUDION Personas
 
-Seed-Definitionen: `audion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  
-Operator: Personas per API in Projekt `proj-vaillant-group-mtb6qr6b` anlegen (6 Segmente UC1).
+UC1 (6 Segmente): `audion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  
+UC2 (3 Fachhandwerker): `VAILLANT_GROUP_UC2_INSTALLER_PERSONAS` — auto-seed on audion container boot
 
 ## CREATION
 

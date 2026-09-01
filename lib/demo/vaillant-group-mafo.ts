@@ -26,9 +26,17 @@ export const VAILLANT_GROUP_B2C_TOUCHPOINT_URL = 'https://www.vaillant.de/' as c
 export const VAILLANT_GROUP_B2C_WAERMEPUMPE_URL =
   'https://www.vaillant.de/heizung/waermepumpe/' as const;
 
+/** B2B touchpoint for UC2 installer dual-perspective research. */
+export const VAILLANT_GROUP_B2B_FACHPARTNER_URL =
+  'https://www.vaillant.de/fachpartner/' as const;
+
 export const VAILLANT_GROUP_FLOW_TEMPLATE_ID = 'vaillant-barrier-research-v1' as const;
+export const VAILLANT_GROUP_FLOW_UC2_TEMPLATE_ID = 'vaillant-installer-dual-v1' as const;
+
 export const VAILLANT_GROUP_FLOW_DEFAULT_NAME =
   'Vaillant Group · Barrier Research (UC1)' as const;
+export const VAILLANT_GROUP_FLOW_UC2_DEFAULT_NAME =
+  'Vaillant Group · Installer Dual Perspective (UC2)' as const;
 
 export function isVaillantGroupCollection(platformProjectId: string | null | undefined): boolean {
   return platformProjectId?.trim() === VAILLANT_GROUP_PLATFORM_PROJECT_ID;

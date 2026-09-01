@@ -15,6 +15,8 @@ export const COLLECTION_FLOW_TEMPLATE_EQC_QUALITY = 'eqc-quality-v1' as const;
 /** Vaillant Group MaFo UC1 — barrier research validate loop (AUDION + CHECKION + BRANDION). */
 export const COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH =
   'vaillant-barrier-research-v1' as const;
+export const COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL =
+  'vaillant-installer-dual-v1' as const;
 
 /**
  * Wave 5: Audion journey kinds (closed set, semantics owned by AUDION) plus PLEXON/CHECKION
@@ -868,6 +870,189 @@ export function createVaillantBarrierResearchTemplate(input?: {
     lastRun: null,
   };
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, journeyUrl) };
+}
+
+/** Vaillant Group UC2 — Endkunde + Fachhandwerker dual perspective, then scan + brand. */
+export function createVaillantInstallerDualPerspectiveTemplate(input?: {
+  customerUrl?: string;
+  installerUrl?: string;
+  scanUrl?: string;
+  guidelineId?: string;
+}): CollectionTestFlowDocument {
+  const customerUrl = input?.customerUrl?.trim() || 'https://www.vaillant.de/heizung/waermepumpe/';
+  const installerUrl = input?.installerUrl?.trim() || 'https://www.vaillant.de/fachpartner/';
+  const scanUrl = input?.scanUrl?.trim() || customerUrl;
+  const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
+
+  const journeyNodes: CollectionFlowNode[] = [
+    {
+      id: 'n-zg-endkunde',
+      kind: 'zielgruppe',
+      label: 'Endkunde',
+      segment: 'homeowner_decision',
+      position: { x: 0, y: 40 },
+    },
+    {
+      id: 'n-persona-ek',
+      kind: 'persona',
+      label: 'Endkunden-Persona',
+      position: { x: 200, y: 40 },
+    },
+    {
+      id: 'n-start-ek',
+      kind: 'start',
+      label: 'B2C Touchpoint',
+      url: customerUrl,
+      urlKey: customerUrl,
+      maxSteps: 8,
+      position: { x: 400, y: 120 },
+    },
+    {
+      id: 'n-prompt-ek',
+      kind: 'prompt',
+      label: 'Endkunden-Bedarf',
+      text: 'Was brauchst du als Endkunde, um eine Wärmepumpen-Empfehlung anzunehmen? Denke laut auf Deutsch.',
+      position: { x: 620, y: 40 },
+    },
+    {
+      id: 'n-success-ek',
+      kind: 'success',
+      label: 'Endkunde done',
+      text: 'Fasse kurz zusammen, was dir für eine Empfehlung fehlt.',
+      position: { x: 840, y: 40 },
+    },
+    {
+      id: 'n-zg-installer',
+      kind: 'zielgruppe',
+      label: 'Fachhandwerker',
+      segment: 'installer_recommendation',
+      position: { x: 1060, y: 40 },
+    },
+    {
+      id: 'n-persona-inst',
+      kind: 'persona',
+      label: 'Installateur-Persona',
+      position: { x: 1260, y: 40 },
+    },
+    {
+      id: 'n-start-inst',
+      kind: 'start',
+      label: 'Profi Touchpoint',
+      url: installerUrl,
+      urlKey: installerUrl,
+      maxSteps: 8,
+      position: { x: 1480, y: 120 },
+    },
+    {
+      id: 'n-prompt-inst',
+      kind: 'prompt',
+      label: 'Installateur-Bedarf',
+      text: 'Was brauchst du, um Vaillant Deinem Kunden sicher empfehlen zu können?',
+      position: { x: 1700, y: 40 },
+    },
+    {
+      id: 'n-success-inst',
+      kind: 'success',
+      label: 'Installateur done',
+      text: 'Welche Opportunity siehst du, wenn Endkunde und Fachhandwerker zusammenarbeiten?',
+      position: { x: 1920, y: 40 },
+    },
+  ];
+  const journeyEdges: CollectionFlowEdge[] = [
+    { id: 'e-zg-ek', source: 'n-zg-endkunde', target: 'n-persona-ek', edgeKind: 'then' },
+    { id: 'e-ek-start', source: 'n-persona-ek', target: 'n-start-ek', edgeKind: 'then' },
+    { id: 'e-start-prompt-ek', source: 'n-start-ek', target: 'n-prompt-ek', edgeKind: 'then' },
+    { id: 'e-prompt-success-ek', source: 'n-prompt-ek', target: 'n-success-ek', edgeKind: 'then' },
+    { id: 'e-ek-zg-inst', source: 'n-success-ek', target: 'n-zg-installer', edgeKind: 'then' },
+    { id: 'e-zg-inst-persona', source: 'n-zg-installer', target: 'n-persona-inst', edgeKind: 'then' },
+    { id: 'e-inst-start', source: 'n-persona-inst', target: 'n-start-inst', edgeKind: 'then' },
+    { id: 'e-start-prompt-inst', source: 'n-start-inst', target: 'n-prompt-inst', edgeKind: 'then' },
+    { id: 'e-prompt-success-inst', source: 'n-prompt-inst', target: 'n-success-inst', edgeKind: 'then' },
+  ];
+
+  const spine = qualitySpineWithIssueGate(scanUrl, 2140);
+  const brandNodes: CollectionFlowNode[] = [
+    {
+      id: 'n-guideline',
+      kind: 'guideline',
+      label: 'Vaillant Group CD',
+      guidelineId,
+      position: { x: 2800, y: 40 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Brand Measure',
+      guidelineId,
+      fixtureId: 'demo-landing-pass',
+      adapter: 'fixture',
+      position: { x: 3020, y: 120 },
+    },
+    {
+      id: 'n-brand-pass',
+      kind: 'compare',
+      label: 'Brand: keine Fails',
+      path: 'brand.failCount',
+      op: 'eq',
+      value: 0,
+      position: { x: 3240, y: 120 },
+    },
+    {
+      id: 'n-ok-final',
+      kind: 'quality_ok',
+      label: 'Loop OK',
+      position: { x: 3460, y: 40 },
+    },
+    {
+      id: 'n-abandon-brand',
+      kind: 'abandon',
+      label: 'Brand fail',
+      position: { x: 3460, y: 200 },
+    },
+  ];
+  const brandEdges: CollectionFlowEdge[] = [
+    { id: 'e-issues-guideline', source: 'n-issues', target: 'n-guideline', edgeKind: 'then' },
+    { id: 'e-guideline-brand', source: 'n-guideline', target: 'n-brand', edgeKind: 'then' },
+    { id: 'e-brand-compare', source: 'n-brand', target: 'n-brand-pass', edgeKind: 'then' },
+    {
+      id: 'e-brand-ok',
+      source: 'n-brand-pass',
+      target: 'n-ok-final',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e-brand-abandon',
+      source: 'n-brand-pass',
+      target: 'n-abandon-brand',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+  ];
+
+  const spineEdges = spine.edges.map((e) =>
+    e.id === 'e-issues-ok' ? { ...e, target: 'n-guideline' } : e,
+  );
+  const nodes = [...journeyNodes, ...spine.nodes, ...brandNodes];
+  const edges: CollectionFlowEdge[] = [
+    ...journeyEdges,
+    { id: 'e-success-inst-scan', source: 'n-success-inst', target: 'n-scan', edgeKind: 'then' },
+    ...spineEdges,
+    ...brandEdges,
+  ];
+
+  const base: CollectionTestFlowDocument = {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, customerUrl) };
 }
 
 /**

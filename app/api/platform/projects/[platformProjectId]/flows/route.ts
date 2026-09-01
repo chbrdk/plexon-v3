@@ -11,12 +11,14 @@ import {
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+  COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
   createEqcQualityTemplate,
   createJourneyQualityIssuesTemplate,
   createJourneyQualityTemplate,
   createPageQualityIssuesTemplate,
   createPageQualityTemplate,
   createVaillantBarrierResearchTemplate,
+  createVaillantInstallerDualPerspectiveTemplate,
 } from '@/lib/collection-test-flow';
 import { resolveEventQuickCheckProfile } from '@/lib/paths/assistant-workflows';
 import {
@@ -101,6 +103,7 @@ export async function POST(
       COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
       COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
       COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
+      COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
     ]);
     const templateId = knownTemplates.has(rawTemplate)
       ? rawTemplate
@@ -110,7 +113,9 @@ export async function POST(
         ? 'Event Quick Check'
         : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH
           ? 'Vaillant Group · Barrier Research (UC1)'
-          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+          : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL
+            ? 'Vaillant Group · Installer Dual Perspective (UC2)'
+            : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
             ? 'Journey + quality + issues'
             : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
               ? 'Page quality + issues'
@@ -133,7 +138,12 @@ export async function POST(
           })
         : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH
           ? createVaillantBarrierResearchTemplate({ journeyUrl: url, scanUrl: url })
-          : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
+          : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL
+            ? createVaillantInstallerDualPerspectiveTemplate({
+                customerUrl: url,
+                scanUrl: url,
+              })
+            : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
             ? createJourneyQualityIssuesTemplate(url)
             : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES
               ? createPageQualityIssuesTemplate(url)
