@@ -34,6 +34,16 @@ describe('persona page relevance intent', () => {
     }
   });
 
+  it('routes singular seite + lowercase full name (demo chat phrasing)', () => {
+    const intent = routeAssistantIntent(
+      'welche seite wäre denn für jana schmitt aus dem vaillant group projekt besonders relevant',
+    );
+    expect(intent.type).toBe('persona_page_relevance');
+    if (intent.type === 'persona_page_relevance') {
+      expect(intent.personaName?.toLowerCase()).toBe('jana schmitt');
+    }
+  });
+
   it('does not steal persona bootstrap intents', () => {
     expect(routeAssistantIntent('Generiere Persona für Zielgruppe Eltern').type).toBe('persona_bootstrap');
   });

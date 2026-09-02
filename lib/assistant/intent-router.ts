@@ -138,12 +138,14 @@ const QUICK_SCAN_SUMMARIZE_INLINE = /\b(und\s+)?(fasse|fasst)\b.*\bzusammen\b/i;
 const PAGESPEED_PATTERNS = [/\bpagespeed\b/i, /\bperformance\s*score\b/i];
 
 const PERSONA_PAGE_RELEVANCE_PATTERNS = [
-  /\brelevante\s+seiten\b/i,
-  /\bwelche\s+seiten\b/i,
+  /\brelevante\s+seiten?\b/i,
+  /\bwelche\s+seiten?\b/i,
   /\bpage\s+relevance\b/i,
   /\btouchpoints?\b.*\bpersona\b/i,
   /\bpersona\b.*\b(seiten|urls|seite|website|webseite)\b/i,
   /\b(seiten|urls|webseiten)\b.*\bpersona\b/i,
+  /\b(seite|seiten|urls|webseiten)\b.*\brelevant\b/i,
+  /\brelevant\b.*\b(seite|seiten|urls|webseiten)\b/i,
   /\bwo\s+landet\b.*\bpersona\b/i,
 ];
 
@@ -174,17 +176,15 @@ const JOURNEY_OUTLINE_PATTERNS = [
 function extractPersonaName(text: string): string | undefined {
   const quoted = text.match(/["„“]([^"„“]{2,80})["„“]/);
   if (quoted?.[1]?.trim()) return quoted[1].trim();
-  const withPersonaKeyword = text.match(
-    /\bfür\s+persona\s+([A-ZÄÖÜ][\wÄÖÜäöüß-]{1,40})(?:\s|\(|,|\.|$)/i,
-  );
-  if (withPersonaKeyword?.[1]?.trim()) return withPersonaKeyword[1].trim();
+  // "für Jana Schmitt aus …" / "für persona Sandra" — case-insensitive (chat often lowercase).
+  // Cap at first+last; never swallow stop words like "besonders"/"relevant" as surname.
   const named = text.match(
-    /\bfür\s+([A-ZÄÖÜ][\wÄÖÜäöüß-]{1,40})(?:\s|\(|,|\.|$)/,
+    /\bfür\s+(?:persona\s+)?([A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40}(?:\s+(?!(?:aus|auf|mit|besonders|relevant|und|checkion|metriken)\b)[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40})?)(?=\s|$|[,.(—–-])/i,
   );
   const candidate = named?.[1]?.trim();
   if (candidate && !/^persona$/i.test(candidate)) return candidate;
-  const paren = text.match(/\(([A-ZÄÖÜ][\wÄÖÜäöüß\s-]{2,80})\)/);
-  if (paren?.[1]?.trim()) return paren[1].trim().split(/\s+/)[0];
+  const paren = text.match(/\(([A-Za-zÄÖÜäöüß][\wÄÖÜäöüß\s-]{2,80})\)/);
+  if (paren?.[1]?.trim()) return paren[1].trim();
   return undefined;
 }
 
