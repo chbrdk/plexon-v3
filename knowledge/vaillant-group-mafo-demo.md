@@ -33,6 +33,7 @@ Idempotent on container start (after `db:push`):
 - Knowledge Pack `research_brief` (UC1 Hypothesen + UC2 Opportunity Map)
 - Flow UC1 + Flow UC2
 - CHECKION B2C/B2B Deep-Scan-Corpus (Wave 2 Epic D) — **reuse** vorhandener completed Scans; Neuscan nur bei `--force-corpus-refresh`
+- AUDION personas/TGs (audion-v3 entrypoint) · BRANDION CD guideline `gl-mtinudb1` (brandion-v3 entrypoint)
 
 Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`  
 Ohne Poll-Wartezeit (Container): `… bootstrap-vaillant-group-mafo.ts --corpus-no-wait`  
@@ -56,6 +57,15 @@ Store-Seed (Container): `seedVaillantGroupMafoStore()` — 9 Personas + 8 Zielgr
 - UC2: `tg-vg-homeowner-decision` (6 UC1-Personas) + `tg-vg-fachhandwerker` (3 Installateur-Personas)
 
 Details: `audion-v3/knowledge/vaillant-group-mafo-seed.md`
+
+## BRANDION Corporate Design
+
+Fixtures: `brandion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  
+Store-Seed (Container): `seedVaillantGroupMafoStore()` — Project `proj-mtb6qr7q` + active Guideline `gl-mtinudb1`  
+Details: `brandion-v3/knowledge/vaillant-group-mafo-seed.md`
+
+Studio: `https://brandion-v3.projects-a.plygrnd.tech/guidelines/gl-mtinudb1`  
+Active pack: `…/api/guidelines/active-pack?platformProjectId=f3d27e9f-d14c-4880-82be-3ca31c051173`
 
 ### Flow-Board · voreingestellte AUDION-IDs
 
