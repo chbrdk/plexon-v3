@@ -78,6 +78,16 @@ const LAZY_HANDLERS: Record<AssistantIntent['type'], () => Promise<IntentDispatc
     return (ctx, intent) =>
       handlePersonaBootstrapIntent(ctx, intent as Extract<AssistantIntent, { type: 'persona_bootstrap' }>);
   },
+  persona_page_relevance: async () => {
+    const { handlePersonaPageRelevanceIntent } = await import(
+      '@/lib/assistant/handlers/persona-page-relevance'
+    );
+    return (ctx, intent) =>
+      handlePersonaPageRelevanceIntent(
+        ctx,
+        intent as Extract<AssistantIntent, { type: 'persona_page_relevance' }>,
+      );
+  },
   journey_outline: async () => {
     const { handleJourneyOutlineIntent } = await import('@/lib/assistant/handlers/journey-outline');
     return (ctx, intent) =>

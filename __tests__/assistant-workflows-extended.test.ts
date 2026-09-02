@@ -31,6 +31,14 @@ describe('extended intent router', () => {
     );
   });
 
+  it('routes persona_page_relevance', () => {
+    const intent = routeAssistantIntent('Welche Seiten sind für Persona Sandra relevant?');
+    expect(intent.type).toBe('persona_page_relevance');
+    if (intent.type === 'persona_page_relevance') {
+      expect(intent.personaName).toBe('Sandra');
+    }
+  });
+
   it('routes journey_outline', () => {
     const intent = routeAssistantIntent('Zeige Journey Outline für "Checkout"');
     expect(intent.type).toBe('journey_outline');

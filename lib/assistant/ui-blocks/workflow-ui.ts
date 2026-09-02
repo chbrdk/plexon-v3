@@ -117,6 +117,7 @@ export function workflowStepListTitle(workflowType?: string): string {
   if (workflowType === 'quick_scan') return 'Accessibility-Scan';
   if (workflowType === 'pagespeed_check') return 'PageSpeed';
   if (workflowType === 'persona_bootstrap') return 'Persona-Bootstrap';
+  if (workflowType === 'persona_page_relevance') return 'Persona → Seiten';
   if (workflowType === 'journey_outline') return 'Journey Outline';
   if (workflowType === 'journey_generate') return 'Journey generieren';
   if (workflowType === 'sync_diagnose') return 'Sync-Diagnose';

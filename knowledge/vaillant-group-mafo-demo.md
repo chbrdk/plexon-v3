@@ -71,6 +71,12 @@ Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 S
 
 **Fragestellung:** *Warum entscheidet sich ein Eigenheimbesitzer gegen eine Wärmepumpe?*
 
+**Assistant (Wave 1 — Persona→Seiten):** Im Collection-Chat fragen:
+
+> *Welche Seiten auf vaillant.de sind für **Sandra** (Altbau-Eigenheimbesitzerin) besonders relevant — mit den wichtigsten CHECKION-Metriken?*
+
+Erwartung: Ranked-Liste aus CHECKION Deep Scan (Score, A11y, SEO, Issues) + kurze Relevanz-Begründung aus AUDION-Persona. Spec: `specs/domain/assistant-persona-page-relevance.md`.
+
 ### UC2 · Fachhandwerker Dual Perspective
 
 | Schritt | Wo | Was |

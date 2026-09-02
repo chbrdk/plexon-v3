@@ -23,6 +23,14 @@ export type AssistantIntent =
   | { type: 'sync_diagnose' }
   | { type: 'persona_bootstrap'; name?: string; targetGroupName?: string }
   | {
+      type: 'persona_page_relevance';
+      personaId?: string;
+      personaName?: string;
+      domainScanId?: string;
+      urlHint?: string;
+      topK?: number;
+    }
+  | {
       type: 'journey_outline';
       journeyId?: string;
       journeyName?: string;
@@ -128,6 +136,16 @@ const QUICK_SCAN_SUMMARIZE_INLINE = /\b(und\s+)?(fasse|fasst)\b.*\bzusammen\b/i;
 
 const PAGESPEED_PATTERNS = [/\bpagespeed\b/i, /\bperformance\s*score\b/i];
 
+const PERSONA_PAGE_RELEVANCE_PATTERNS = [
+  /\brelevante\s+seiten\b/i,
+  /\bwelche\s+seiten\b/i,
+  /\bpage\s+relevance\b/i,
+  /\btouchpoints?\b.*\bpersona\b/i,
+  /\bpersona\b.*\b(seiten|urls|seite|website|webseite)\b/i,
+  /\b(seiten|urls|webseiten)\b.*\bpersona\b/i,
+  /\bwo\s+landet\b.*\bpersona\b/i,
+];
+
 const PERSONA_BOOTSTRAP_PATTERNS = [
   /\bpersona\b.*\b(generier\w*|erstell\w*|bootstrap|anlegen)\b/i,
   /\b(generier\w*|erstell\w*|bootstrap)\b.*\bpersona\b/i,
@@ -151,6 +169,45 @@ const JOURNEY_OUTLINE_PATTERNS = [
   /\b(journey|nutzerreise)\b.*\bvalidier\w*\b/i,
   /\bvalidier\w*\b.*\b(journey|nutzerreise)\b/i,
 ];
+
+function extractPersonaName(text: string): string | undefined {
+  const quoted = text.match(/["„“]([^"„“]{2,80})["„“]/);
+  if (quoted?.[1]?.trim()) return quoted[1].trim();
+  const withPersonaKeyword = text.match(
+    /\bfür\s+persona\s+([A-ZÄÖÜ][\wÄÖÜäöüß-]{1,40})(?:\s|\(|,|\.|$)/i,
+  );
+  if (withPersonaKeyword?.[1]?.trim()) return withPersonaKeyword[1].trim();
+  const named = text.match(
+    /\bfür\s+([A-ZÄÖÜ][\wÄÖÜäöüß-]{1,40})(?:\s|\(|,|\.|$)/,
+  );
+  const candidate = named?.[1]?.trim();
+  if (candidate && !/^persona$/i.test(candidate)) return candidate;
+  const paren = text.match(/\(([A-ZÄÖÜ][\wÄÖÜäöüß\s-]{2,80})\)/);
+  if (paren?.[1]?.trim()) return paren[1].trim().split(/\s+/)[0];
+  return undefined;
+}
+
+function extractTopK(text: string): number | undefined {
+  const m = text.match(/\btop\s+(\d{1,2})\b/i);
+  if (!m?.[1]) return undefined;
+  const n = Number(m[1]);
+  return Number.isFinite(n) && n >= 1 && n <= 20 ? n : undefined;
+}
+
+function extractPersonaId(text: string): string | undefined {
+  const slug = text.match(/\b(persona-[a-z0-9][a-z0-9-]*)\b/i);
+  if (slug?.[1]) return slug[1];
+  const uuid = text.match(
+    /\b([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\b/i,
+  );
+  return uuid?.[1];
+}
+
+function extractDomainScanId(text: string): string | undefined {
+  const explicit = text.match(/\bdomain[-\s]?scan\s+([a-z0-9-]{4,})\b/i);
+  if (explicit?.[1]) return explicit[1];
+  return extractScanIdFromText(text);
+}
 
 function extractJourneyId(text: string): string | undefined {
   const slug = text.match(/\b(journey-[a-z0-9][a-z0-9-]*)\b/i);
@@ -438,6 +495,18 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
   if (url && GEO_PATTERNS.some((p) => p.test(trimmed))) {
     const deep = /\bdeep\b|\bvollständig\b|\bcompetitive\b|\bwettbewerb\s*analyse\b/i.test(trimmed);
     return { type: 'geo_analysis', url, deep };
+  }
+
+  if (PERSONA_PAGE_RELEVANCE_PATTERNS.some((p) => p.test(trimmed))) {
+    const urlHint = extractUrlFromText(trimmed);
+    return {
+      type: 'persona_page_relevance',
+      personaId: extractPersonaId(trimmed),
+      personaName: extractPersonaName(trimmed),
+      domainScanId: extractDomainScanId(trimmed),
+      urlHint,
+      topK: extractTopK(trimmed),
+    };
   }
 
   if (PERSONA_BOOTSTRAP_PATTERNS.some((p) => p.test(trimmed))) {

@@ -40,6 +40,7 @@
   - Shared chat blocks (metric / kv / steps): `knowledge/assistant-chat-blocks-msqdx-ui.md` · Storybook `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chatcatalog--inventory`
   - Journey outline blocks: `phase_strip` / `moment_list` / `quote_list` · builder `lib/assistant/ui-blocks/build-journey-outline-ui.ts`
   - Journey outline intent: `journey_outline` · `specs/domain/assistant-journey-outline.md` · `knowledge/assistant-journey-outline.md` · client `lib/integrations/audion-journey-outline-client.ts` · paths `audionPlatformJourneyById` / `audionPlatformJourneyValidate`
+  - Persona → page relevance: `persona_page_relevance` · `specs/domain/assistant-persona-page-relevance.md` · client `lib/integrations/persona-page-relevance-client.ts` · CHECKION `checkionApiDomainScanPages` · ranker `lib/assistant/persona-page-relevance/rank-corpus-pages.ts`
   - Journey generate intent: `journey_generate` · `specs/domain/assistant-journey-generate.md` · path `audionPlatformJourneyGenerate`
   - Interactive phase→moments: `knowledge/assistant-journey-interactive.md` · `UiPhaseStrip` embeds moments
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`

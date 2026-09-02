@@ -9,6 +9,7 @@ import {
   checkionApiDomainScanDetail,
   checkionApiDomainScanIssues,
   checkionApiDomainScanOverview,
+  checkionApiDomainScanPages,
   checkionApiDomainScans,
 } from '@/lib/paths/checkion-api';
 import type { IssueGateSignals } from '@/lib/collection-test-flow';
@@ -473,6 +474,120 @@ export async function fetchCheckionDomainScanV3Issues(
       },
       items,
     };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export type CheckionCorpusPageRow = {
+  url: string;
+  scanId: string;
+  overallScore: number | null;
+  errors: number;
+  warnings: number;
+  scores?: Partial<
+    Record<'accessibility' | 'seo' | 'performance' | 'ux' | 'eco' | 'generative' | 'best_practices', number>
+  >;
+  classification?: {
+    shortSummary: string;
+    tags: string[];
+  } | null;
+  resultsPath: string;
+};
+
+export type CheckionDomainCorpusPagesResult = {
+  domainScanId: string;
+  rootUrl: string;
+  status: string;
+  pageCount: number;
+  items: CheckionCorpusPageRow[];
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  sort: string;
+};
+
+function parseCorpusPages(body: unknown): CheckionDomainCorpusPagesResult | null {
+  if (!body || typeof body !== 'object') return null;
+  const o = body as Record<string, unknown>;
+  const itemsRaw = Array.isArray(o.items) ? o.items : [];
+  const items: CheckionCorpusPageRow[] = itemsRaw
+    .map((row) => {
+      if (!row || typeof row !== 'object') return null;
+      const r = row as Record<string, unknown>;
+      const url = typeof r.url === 'string' ? r.url : '';
+      const scanId = typeof r.scanId === 'string' ? r.scanId : '';
+      if (!url || !scanId) return null;
+      const classification =
+        r.classification && typeof r.classification === 'object'
+          ? (r.classification as CheckionCorpusPageRow['classification'])
+          : null;
+      return {
+        url,
+        scanId,
+        overallScore:
+          typeof r.overallScore === 'number' && Number.isFinite(r.overallScore)
+            ? r.overallScore
+            : null,
+        errors: Number(r.errors ?? 0),
+        warnings: Number(r.warnings ?? 0),
+        scores:
+          r.scores && typeof r.scores === 'object'
+            ? (r.scores as CheckionCorpusPageRow['scores'])
+            : undefined,
+        classification,
+        resultsPath: typeof r.resultsPath === 'string' ? r.resultsPath : `/results/${scanId}/overview`,
+      };
+    })
+    .filter((row): row is CheckionCorpusPageRow => row != null);
+  const domainScanId = typeof o.domainScanId === 'string' ? o.domainScanId : '';
+  if (!domainScanId) return null;
+  return {
+    domainScanId,
+    rootUrl: typeof o.rootUrl === 'string' ? o.rootUrl : '',
+    status: typeof o.status === 'string' ? o.status : 'unknown',
+    pageCount: Number(o.pageCount ?? items.length),
+    items,
+    page: Number(o.page ?? 1),
+    pageSize: Number(o.pageSize ?? items.length),
+    totalPages: Number(o.totalPages ?? 1),
+    sort: typeof o.sort === 'string' ? o.sort : 'score_asc',
+  };
+}
+
+export async function fetchCheckionDomainCorpusPages(
+  domainScanId: string,
+  query?: {
+    page?: number;
+    pageSize?: number;
+    sort?: 'score_asc' | 'score_desc' | 'url_asc' | 'issues_desc';
+    q?: string;
+  },
+): Promise<
+  | { ok: true; data: CheckionDomainCorpusPagesResult; corpusMode?: string }
+  | { ok: false; error: string }
+> {
+  const auth = requireAuthHeaders();
+  if (!auth.ok) return auth;
+  try {
+    const res = await fetch(checkionApiDomainScanPages(domainScanId, query), {
+      headers: auth.headers,
+      cache: 'no-store',
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      return { ok: false, error: `CHECKION domain pages: HTTP ${res.status}` };
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: 'CHECKION domain pages: ungültiges JSON' };
+    }
+    const data = parseCorpusPages(json);
+    if (!data) return { ok: false, error: 'CHECKION domain pages: ungültige Antwort' };
+    const corpusMode = res.headers.get('X-Checkion-Corpus-Mode') ?? undefined;
+    return { ok: true, data, corpusMode };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }

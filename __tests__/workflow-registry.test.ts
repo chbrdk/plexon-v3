@@ -18,6 +18,7 @@ describe('workflow-registry', () => {
       'journey_outline',
       'pagespeed_check',
       'persona_bootstrap',
+      'persona_page_relevance',
       'project_status',
       'promote_capability_sequence',
       'quick_scan',

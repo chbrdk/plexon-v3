@@ -95,6 +95,27 @@ export function checkionApiDomainScanOverview(domainScanId: string): string {
   return `${checkionApiDomainScanDetail(domainScanId)}/overview`;
 }
 
+/** GET /api/domain-scans/:id/pages — corpus slim list. */
+export function checkionApiDomainScanPages(
+  domainScanId: string,
+  query?: {
+    page?: number;
+    pageSize?: number;
+    sort?: 'score_asc' | 'score_desc' | 'url_asc' | 'issues_desc';
+    q?: string;
+  },
+): string {
+  const base = `${checkionApiDomainScanDetail(domainScanId)}/pages`;
+  if (!query) return base;
+  const sp = new URLSearchParams();
+  if (query.page != null) sp.set('page', String(query.page));
+  if (query.pageSize != null) sp.set('pageSize', String(query.pageSize));
+  if (query.sort) sp.set('sort', query.sort);
+  if (query.q) sp.set('q', query.q);
+  const qs = sp.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
 /** POST/GET /api/geo-jobs — contracts GeoOverview (v3). Wave 8B. */
 export function checkionApiGeoJobs(): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
