@@ -16,13 +16,15 @@ Code SSOT: `lib/demo/vaillant-group-mafo.ts` · Briefing: `PLEXON___Vaillant_Gro
 
 ## UC1 — Kaufbarrieren (Eigenheimbesitzer)
 
-Flow-Template: **`vaillant-barrier-research-v1`**  
-AUDION → CHECKION (B2C Scan) → BRANDION
+Flow-Template: **`vaillant-barrier-research-v1`** (Showcase-Lite)  
+`Zielgruppe → Persona → Touchpoint → eine Frage → Scan → Marke`
 
 ## UC2 — Fachhandwerker Dual Perspective
 
-Flow-Template: **`vaillant-installer-dual-v1`**  
-Endkunde-Journey (B2C) → Installateur-Journey (Fachpartner) → CHECKION → BRANDION
+Flow-Template: **`vaillant-installer-dual-v1`** (Showcase-Lite)  
+Endkunde-Frage → Installateur-Frage → Scan → Marke (keine Score/Issue-Gates)
+
+Spec: `specs/domain/vaillant-mafo-showcase-lite.md`
 
 ## Bootstrap (Staging)
 
@@ -84,39 +86,22 @@ Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 S
 
 | Schritt | Wo | Was |
 |--------|-----|-----|
-| 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Barrier Research (UC1)** | Flow `14ce6052-ff76-42a0-8725-f2a13daf121e` öffnen |
-| 2 | Board · **Testen** | Journey auf `vaillant.de/produkte/waermepumpen/` — Persona aus UC1-Set (6 Segmente) |
-| 3 | AUDION | [Personas](https://audion-v3.projects-a.plygrnd.tech/projects/proj-vaillant-group-mtb6qr6b) — z. B. Sandra (Altbau), Thomas (Tausch) |
-| 4 | CHECKION | Scan der B2C-URL — Qualitäts-Spine im Flow |
-| 5 | BRANDION | Guideline `gl-mtinudb1` · Brand Measure |
-| 6 | CREATION | [Editor](https://creation-v3.projects-a.plygrnd.tech/editor?platformProjectId=f3d27e9f-d14c-4880-82be-3ca31c051173) — Scene `scene-vaillant-landing` + Insight-Varianten |
+| 1 | [Flow UC1](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows/14ce6052-ff76-42a0-8725-f2a13daf121e) | Board: **Wer?** Sandra · **Frage?** Barriere · **Prüfen?** Scan + Marke |
+| 2 | Optional | [AUDION Personas](https://audion-v3.projects-a.plygrnd.tech/projects/proj-vaillant-group-mtb6qr6b) / CREATION Scene |
 
 **Fragestellung:** *Warum entscheidet sich ein Eigenheimbesitzer gegen eine Wärmepumpe?*
 
-**Assistant (Wave 1 — Persona→Seiten):** Im Collection-Chat fragen:
-
-> *Welche Seiten auf vaillant.de sind für **Sandra** (Altbau-Eigenheimbesitzerin) besonders relevant — mit den wichtigsten CHECKION-Metriken?*
-
-Erwartung: Ranked-Liste aus CHECKION Deep Scan (Score, A11y, SEO, Issues) + kurze Relevanz-Begründung aus AUDION-Persona. Spec: `specs/domain/assistant-persona-page-relevance.md`.
+Demo-Tipp: abgeschlossenen Run zeigen; Gates gibt es bewusst nicht — Prozess vor Korrektheit.
 
 ### UC2 · Fachhandwerker Dual Perspective
 
 | Schritt | Wo | Was |
 |--------|-----|-----|
-| 1 | [Flow-Galerie](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows) → **Installer Dual Perspective (UC2)** | Flow `66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a` |
-| 2 | Board · **Testen** | **Endkunde:** B2C Touchpoint → Prompt → **Installateur:** myVaillant Pro → Opportunity |
-| 3 | AUDION | UC2-Personas: Klaus (Meister), Sandra (Planung), Tim (Monteur) |
-| 4 | CHECKION + BRANDION | wie UC1 — Scan + Brand Measure auf B2C-Spine |
+| 1 | [Flow UC2](https://plexon-v3.projects-a.plygrnd.tech/projects/f3d27e9f-d14c-4880-82be-3ca31c051173/flows/66a3a3d0-f2e3-4312-b1f9-25c892dc8e4a) | Board: Endkunde-Frage → Installateur-Frage → Opportunity → Scan + Marke |
 
 **Fragestellung:** *Was braucht der Fachhandwerker, damit er Vaillant empfiehlt?*
 
-**Assistant (Wave 2 — Persona→Seiten, Fachpartner-Spine):** Im Collection-Chat fragen:
-
-> *Welche Seiten sind für **Klaus** (Heizungsbaumeister) besonders relevant — CHECKION-Metriken auf dem Fachpartner-Spine?*
-
-Erwartung: Ranking gegen `myvaillantpro.de`-Corpus (B2B Deep Scan). Spec: `specs/domain/assistant-persona-page-relevance.md`.
-
-UC1 + UC2 starten beim **Container-Boot** sequentiell im Hintergrund, solange noch kein completed Run existiert (`scripts/run-vaillant-group-mafo-flow.ts --all --if-pending`).
+Optional Assistant: *Welche Seiten sind für **Klaus** relevant?* (B2B-Corpus) — Spec `assistant-persona-page-relevance.md`.
 
 ### Flow-IDs (Staging)
 

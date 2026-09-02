@@ -676,6 +676,56 @@ function qualitySpineWithIssueGate(pageUrl: string, xScan: number): {
   return { nodes, edges };
 }
 
+/**
+ * Vaillant MaFo showcase — linear validate tail (no score/issue gates, no abandon).
+ * Story: scan → brand guideline → brand measure → done.
+ * @see specs/domain/vaillant-mafo-showcase-lite.md
+ */
+function vaillantShowcaseValidateTail(
+  pageUrl: string,
+  guidelineId: string,
+  xScan: number,
+): { nodes: CollectionFlowNode[]; edges: CollectionFlowEdge[] } {
+  const nodes: CollectionFlowNode[] = [
+    {
+      id: 'n-scan',
+      kind: 'scan',
+      label: 'Seite prüfen',
+      url: pageUrl,
+      scanMode: 'single',
+      position: { x: xScan, y: 120 },
+    },
+    {
+      id: 'n-guideline',
+      kind: 'guideline',
+      label: 'Vaillant Group CD',
+      guidelineId,
+      position: { x: xScan + 220, y: 40 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Marke prüfen',
+      guidelineId,
+      fixtureId: 'demo-landing-pass',
+      adapter: 'fixture',
+      position: { x: xScan + 440, y: 120 },
+    },
+    {
+      id: 'n-ok-final',
+      kind: 'quality_ok',
+      label: 'Fertig',
+      position: { x: xScan + 660, y: 40 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e-scan-guideline', source: 'n-scan', target: 'n-guideline', edgeKind: 'then' },
+    { id: 'e-guideline-brand', source: 'n-guideline', target: 'n-brand', edgeKind: 'then' },
+    { id: 'e-brand-ok', source: 'n-brand', target: 'n-ok-final', edgeKind: 'then' },
+  ];
+  return { nodes, edges };
+}
+
 /** Wave 3: page quality + issue_gate after score. */
 export function createPageQualityIssuesTemplate(url: string): CollectionTestFlowDocument {
   const pageUrl = url.trim() || 'https://example.com';
@@ -718,7 +768,7 @@ export function createJourneyQualityIssuesTemplate(url: string): CollectionTestF
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
 }
 
-/** Vaillant Group UC1 — homeowner barrier research + page quality + Brandion measure. */
+/** Vaillant Group UC1 — showcase-lite: Wer? → eine Frage → Scan + Marke. */
 export function createVaillantBarrierResearchTemplate(input?: {
   journeyUrl?: string;
   scanUrl?: string;
@@ -756,137 +806,45 @@ export function createVaillantBarrierResearchTemplate(input?: {
       personaId,
       personaName,
       segment,
-      position: { x: 200, y: 40 },
+      position: { x: 220, y: 40 },
     },
     {
       id: 'n-start',
       kind: 'start',
-      label: 'Start',
+      label: 'Touchpoint',
       url: journeyUrl,
       urlKey: journeyUrl,
-      maxSteps: 10,
-      position: { x: 400, y: 120 },
+      maxSteps: 6,
+      position: { x: 440, y: 120 },
     },
     {
       id: 'n-prompt',
       kind: 'prompt',
       label: 'Barriere-Frage',
       text: 'Was würde dich aktuell davon abhalten, eine Wärmepumpe zu kaufen? Denke laut auf Deutsch.',
-      position: { x: 620, y: 40 },
-    },
-    {
-      id: 'n-observe',
-      kind: 'observe',
-      label: 'Seite erkunden',
-      text: 'Schau dir die Wärmepumpen-Informationen an. Welche Risiken und Unsicherheiten siehst du?',
-      observeSeconds: 45,
-      position: { x: 840, y: 40 },
-    },
-    {
-      id: 'n-message',
-      kind: 'message',
-      label: 'Vertiefung',
-      text: 'Welche Information würde dir bei der Entscheidung am meisten helfen — Kosten, Förderung oder Eignung für dein Haus?',
-      position: { x: 1060, y: 40 },
-    },
-    {
-      id: 'n-measure',
-      kind: 'measure',
-      label: 'Klarheit',
-      measureKey: 'clarity',
-      text: 'Wie klar ist dir nach dieser Seite, ob eine Wärmepumpe für dich infrage kommt?',
-      position: { x: 1280, y: 40 },
+      position: { x: 660, y: 40 },
     },
     {
       id: 'n-success',
       kind: 'success',
-      label: 'Research done',
-      text: 'Danke — fasse kurz deine größte Barriere und deinen Informationsbedarf zusammen.',
-      position: { x: 1500, y: 40 },
+      label: 'Insight',
+      text: 'Fasse in einem Satz deine größte Barriere zusammen.',
+      position: { x: 880, y: 40 },
     },
   ];
   const journeyEdges: CollectionFlowEdge[] = [
     { id: 'e-zg-persona', source: 'n-zielgruppe', target: 'n-persona', edgeKind: 'then' },
     { id: 'e-persona-start', source: 'n-persona', target: 'n-start', edgeKind: 'then' },
     { id: 'e-start-prompt', source: 'n-start', target: 'n-prompt', edgeKind: 'then' },
-    { id: 'e-prompt-observe', source: 'n-prompt', target: 'n-observe', edgeKind: 'then' },
-    { id: 'e-observe-message', source: 'n-observe', target: 'n-message', edgeKind: 'then' },
-    { id: 'e-message-measure', source: 'n-message', target: 'n-measure', edgeKind: 'then' },
-    { id: 'e-measure-success', source: 'n-measure', target: 'n-success', edgeKind: 'then' },
+    { id: 'e-prompt-success', source: 'n-prompt', target: 'n-success', edgeKind: 'then' },
   ];
 
-  const spine = qualitySpineWithIssueGate(scanUrl, 1720);
-  const brandNodes: CollectionFlowNode[] = [
-    {
-      id: 'n-guideline',
-      kind: 'guideline',
-      label: 'Vaillant Group CD',
-      guidelineId,
-      position: { x: 2380, y: 40 },
-    },
-    {
-      id: 'n-brand',
-      kind: 'brand_measure',
-      label: 'Brand Measure',
-      guidelineId,
-      fixtureId: 'demo-landing-pass',
-      adapter: 'fixture',
-      position: { x: 2600, y: 120 },
-    },
-    {
-      id: 'n-brand-pass',
-      kind: 'compare',
-      label: 'Brand: keine Fails',
-      path: 'brand.failCount',
-      op: 'eq',
-      value: 0,
-      position: { x: 2820, y: 120 },
-    },
-    {
-      id: 'n-ok-final',
-      kind: 'quality_ok',
-      label: 'Loop OK',
-      position: { x: 3040, y: 40 },
-    },
-    {
-      id: 'n-abandon-brand',
-      kind: 'abandon',
-      label: 'Brand fail',
-      position: { x: 3040, y: 200 },
-    },
-  ];
-  const brandEdges: CollectionFlowEdge[] = [
-    { id: 'e-issues-guideline', source: 'n-issues', target: 'n-guideline', edgeKind: 'then' },
-    { id: 'e-guideline-brand', source: 'n-guideline', target: 'n-brand', edgeKind: 'then' },
-    { id: 'e-brand-compare', source: 'n-brand', target: 'n-brand-pass', edgeKind: 'then' },
-    {
-      id: 'e-brand-ok',
-      source: 'n-brand-pass',
-      target: 'n-ok-final',
-      when: 'pass',
-      edgeKind: 'when',
-      label: 'pass',
-    },
-    {
-      id: 'e-brand-abandon',
-      source: 'n-brand-pass',
-      target: 'n-abandon-brand',
-      when: 'fail',
-      edgeKind: 'otherwise',
-      label: 'fail',
-    },
-  ];
-
-  // Rewire quality spine terminal: issues pass → brand (not n-ok)
-  const spineEdges = spine.edges.map((e) =>
-    e.id === 'e-issues-ok' ? { ...e, target: 'n-guideline' } : e,
-  );
-  const nodes = [...journeyNodes, ...spine.nodes, ...brandNodes];
+  const tail = vaillantShowcaseValidateTail(scanUrl, guidelineId, 1100);
+  const nodes = [...journeyNodes, ...tail.nodes];
   const edges: CollectionFlowEdge[] = [
     ...journeyEdges,
     { id: 'e-success-scan', source: 'n-success', target: 'n-scan', edgeKind: 'then' },
-    ...spineEdges,
-    ...brandEdges,
+    ...tail.edges,
   ];
 
   const base: CollectionTestFlowDocument = {
@@ -901,7 +859,7 @@ export function createVaillantBarrierResearchTemplate(input?: {
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, journeyUrl) };
 }
 
-/** Vaillant Group UC2 — Endkunde + Fachhandwerker dual perspective, then scan + brand. */
+/** Vaillant Group UC2 — showcase-lite dual perspective, then scan + brand. */
 export function createVaillantInstallerDualPerspectiveTemplate(input?: {
   customerUrl?: string;
   installerUrl?: string;
@@ -956,7 +914,7 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
       personaId: homeownerPersonaId,
       personaName: homeownerPersonaName,
       segment: 'homeowner_decision',
-      position: { x: 200, y: 40 },
+      position: { x: 220, y: 40 },
     },
     {
       id: 'n-start-ek',
@@ -964,22 +922,15 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
       label: 'B2C Touchpoint',
       url: customerUrl,
       urlKey: customerUrl,
-      maxSteps: 8,
-      position: { x: 400, y: 120 },
+      maxSteps: 6,
+      position: { x: 440, y: 120 },
     },
     {
       id: 'n-prompt-ek',
       kind: 'prompt',
       label: 'Endkunden-Bedarf',
       text: 'Was brauchst du als Endkunde, um eine Wärmepumpen-Empfehlung anzunehmen? Denke laut auf Deutsch.',
-      position: { x: 620, y: 40 },
-    },
-    {
-      id: 'n-success-ek',
-      kind: 'success',
-      label: 'Endkunde done',
-      text: 'Fasse kurz zusammen, was dir für eine Empfehlung fehlt.',
-      position: { x: 840, y: 40 },
+      position: { x: 660, y: 40 },
     },
     {
       id: 'n-zg-installer',
@@ -988,7 +939,7 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
       segment: 'installer_recommendation',
       targetGroupId: installerTargetGroupId,
       targetGroupName: installerTargetGroupName,
-      position: { x: 1060, y: 40 },
+      position: { x: 880, y: 40 },
     },
     {
       id: 'n-persona-inst',
@@ -997,7 +948,7 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
       personaId: installerPersonaId,
       personaName: installerPersonaName,
       segment: 'installer_recommendation',
-      position: { x: 1260, y: 40 },
+      position: { x: 1100, y: 40 },
     },
     {
       id: 'n-start-inst',
@@ -1005,107 +956,41 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
       label: 'Profi Touchpoint',
       url: installerUrl,
       urlKey: installerUrl,
-      maxSteps: 8,
-      position: { x: 1480, y: 120 },
+      maxSteps: 6,
+      position: { x: 1320, y: 120 },
     },
     {
       id: 'n-prompt-inst',
       kind: 'prompt',
       label: 'Installateur-Bedarf',
       text: 'Was brauchst du, um Vaillant Deinem Kunden sicher empfehlen zu können?',
-      position: { x: 1700, y: 40 },
+      position: { x: 1540, y: 40 },
     },
     {
       id: 'n-success-inst',
       kind: 'success',
-      label: 'Installateur done',
-      text: 'Welche Opportunity siehst du, wenn Endkunde und Fachhandwerker zusammenarbeiten?',
-      position: { x: 1920, y: 40 },
+      label: 'Opportunity',
+      text: 'Welche Chance siehst du, wenn Endkunde und Fachhandwerker zusammenarbeiten?',
+      position: { x: 1760, y: 40 },
     },
   ];
   const journeyEdges: CollectionFlowEdge[] = [
     { id: 'e-zg-ek', source: 'n-zg-endkunde', target: 'n-persona-ek', edgeKind: 'then' },
     { id: 'e-ek-start', source: 'n-persona-ek', target: 'n-start-ek', edgeKind: 'then' },
     { id: 'e-start-prompt-ek', source: 'n-start-ek', target: 'n-prompt-ek', edgeKind: 'then' },
-    { id: 'e-prompt-success-ek', source: 'n-prompt-ek', target: 'n-success-ek', edgeKind: 'then' },
-    { id: 'e-ek-zg-inst', source: 'n-success-ek', target: 'n-zg-installer', edgeKind: 'then' },
+    { id: 'e-ek-zg-inst', source: 'n-prompt-ek', target: 'n-zg-installer', edgeKind: 'then' },
     { id: 'e-zg-inst-persona', source: 'n-zg-installer', target: 'n-persona-inst', edgeKind: 'then' },
     { id: 'e-inst-start', source: 'n-persona-inst', target: 'n-start-inst', edgeKind: 'then' },
     { id: 'e-start-prompt-inst', source: 'n-start-inst', target: 'n-prompt-inst', edgeKind: 'then' },
     { id: 'e-prompt-success-inst', source: 'n-prompt-inst', target: 'n-success-inst', edgeKind: 'then' },
   ];
 
-  const spine = qualitySpineWithIssueGate(scanUrl, 2140);
-  const brandNodes: CollectionFlowNode[] = [
-    {
-      id: 'n-guideline',
-      kind: 'guideline',
-      label: 'Vaillant Group CD',
-      guidelineId,
-      position: { x: 2800, y: 40 },
-    },
-    {
-      id: 'n-brand',
-      kind: 'brand_measure',
-      label: 'Brand Measure',
-      guidelineId,
-      fixtureId: 'demo-landing-pass',
-      adapter: 'fixture',
-      position: { x: 3020, y: 120 },
-    },
-    {
-      id: 'n-brand-pass',
-      kind: 'compare',
-      label: 'Brand: keine Fails',
-      path: 'brand.failCount',
-      op: 'eq',
-      value: 0,
-      position: { x: 3240, y: 120 },
-    },
-    {
-      id: 'n-ok-final',
-      kind: 'quality_ok',
-      label: 'Loop OK',
-      position: { x: 3460, y: 40 },
-    },
-    {
-      id: 'n-abandon-brand',
-      kind: 'abandon',
-      label: 'Brand fail',
-      position: { x: 3460, y: 200 },
-    },
-  ];
-  const brandEdges: CollectionFlowEdge[] = [
-    { id: 'e-issues-guideline', source: 'n-issues', target: 'n-guideline', edgeKind: 'then' },
-    { id: 'e-guideline-brand', source: 'n-guideline', target: 'n-brand', edgeKind: 'then' },
-    { id: 'e-brand-compare', source: 'n-brand', target: 'n-brand-pass', edgeKind: 'then' },
-    {
-      id: 'e-brand-ok',
-      source: 'n-brand-pass',
-      target: 'n-ok-final',
-      when: 'pass',
-      edgeKind: 'when',
-      label: 'pass',
-    },
-    {
-      id: 'e-brand-abandon',
-      source: 'n-brand-pass',
-      target: 'n-abandon-brand',
-      when: 'fail',
-      edgeKind: 'otherwise',
-      label: 'fail',
-    },
-  ];
-
-  const spineEdges = spine.edges.map((e) =>
-    e.id === 'e-issues-ok' ? { ...e, target: 'n-guideline' } : e,
-  );
-  const nodes = [...journeyNodes, ...spine.nodes, ...brandNodes];
+  const tail = vaillantShowcaseValidateTail(scanUrl, guidelineId, 1980);
+  const nodes = [...journeyNodes, ...tail.nodes];
   const edges: CollectionFlowEdge[] = [
     ...journeyEdges,
     { id: 'e-success-inst-scan', source: 'n-success-inst', target: 'n-scan', edgeKind: 'then' },
-    ...spineEdges,
-    ...brandEdges,
+    ...tail.edges,
   ];
 
   const base: CollectionTestFlowDocument = {
@@ -1117,7 +1002,10 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
     lastVerdict: null,
     lastRun: null,
   };
-  return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, customerUrl, { personaNodeId: 'n-persona-ek' }) };
+  return {
+    ...base,
+    journeyFlow: extractJourneyFlowFromDocument(base, customerUrl, { personaNodeId: 'n-persona-ek' }),
+  };
 }
 
 /**

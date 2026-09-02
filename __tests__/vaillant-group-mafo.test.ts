@@ -27,17 +27,23 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     expect(isVaillantGroupCollection('00000000-0000-0000-0000-000000000099')).toBe(false);
   });
 
-  it('creates barrier research flow template with journey + scan + brand', () => {
+  it('creates showcase-lite UC1 barrier flow (Wer → Frage → Scan + Marke)', () => {
     const doc = createVaillantBarrierResearchTemplate({
       journeyUrl: VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
       guidelineId: VAILLANT_GROUP_BRANDION_GUIDELINE_ID,
     });
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH);
     const kinds = doc.nodes.map((n) => n.kind);
-    expect(kinds).toContain('prompt');
+    expect(kinds.filter((k) => k === 'prompt')).toHaveLength(1);
     expect(kinds).toContain('scan');
     expect(kinds).toContain('guideline');
     expect(kinds).toContain('brand_measure');
+    expect(kinds).not.toContain('observe');
+    expect(kinds).not.toContain('message');
+    expect(kinds).not.toContain('measure');
+    expect(kinds).not.toContain('abandon');
+    expect(kinds).not.toContain('compare');
+    expect(doc.nodes.length).toBeLessThanOrEqual(10);
     expect(documentHasBrandMeasure(doc)).toBe(true);
     const start = doc.nodes.find((n) => n.kind === 'start');
     expect(start?.url).toContain('vaillant.de');
@@ -59,13 +65,18 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     expect(brief.sections.some((s) => s.id === 'uc2-installer-needs')).toBe(true);
   });
 
-  it('creates UC2 installer dual-perspective flow template', () => {
+  it('creates showcase-lite UC2 dual-perspective flow', () => {
     const doc = createVaillantInstallerDualPerspectiveTemplate();
     expect(doc.templateId).toBe(COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL);
     const kinds = doc.nodes.map((n) => n.kind);
     expect(kinds.filter((k) => k === 'zielgruppe').length).toBe(2);
     expect(kinds.filter((k) => k === 'persona').length).toBe(2);
+    expect(kinds.filter((k) => k === 'start').length).toBe(2);
+    expect(kinds.filter((k) => k === 'prompt').length).toBe(2);
     expect(kinds).toContain('scan');
+    expect(kinds).not.toContain('abandon');
+    expect(kinds).not.toContain('compare');
+    expect(doc.nodes.length).toBeLessThanOrEqual(14);
     expect(documentHasBrandMeasure(doc)).toBe(true);
     const endkundeZg = doc.nodes.find((n) => n.id === 'n-zg-endkunde');
     const installerZg = doc.nodes.find((n) => n.id === 'n-zg-installer');
