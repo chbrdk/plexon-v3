@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { createAssistantWorkflowRun, updateAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
 import type { WorkflowStep } from '@/lib/db/assistant-workflow-runs';
+import { updateAssistantConversation } from '@/lib/db/assistant-conversations';
 import { ASSISTANT_MESSAGE_CONTENT_TYPE } from '@/lib/assistant/capabilities-overview';
 import { buildPersonaPageRelevanceLayout } from '@/lib/assistant/ui-blocks/build-persona-page-relevance-ui';
 import { metadataWithWorkflowSteps } from '@/lib/assistant/ui-blocks/build-workflow-ui';
@@ -56,6 +57,13 @@ export const handlePersonaPageRelevanceIntent: IntentHandler<'persona_page_relev
     topK: intent.topK,
   });
 
+  if (result.ok && result.inferredPlatformProjectId) {
+    const inferred = result.inferredPlatformProjectId;
+    if (ctx.conversation.platformProjectId !== inferred) {
+      await updateAssistantConversation(ctx.conversationId, { platformProjectId: inferred });
+    }
+  }
+
   const steps = markSteps(result.ok);
   let assistantText: string;
   let metadata: Record<string, unknown> | undefined;
@@ -63,7 +71,10 @@ export const handlePersonaPageRelevanceIntent: IntentHandler<'persona_page_relev
   if (result.ok) {
     const { preview } = result;
     const layout = buildPersonaPageRelevanceLayout(preview);
-    assistantText = `## Seiten-Relevanz\n\n**${preview.persona.name}** — ${preview.rankedPages.length} Seiten aus CHECKION mit Metriken und kurzer Begründung.`;
+    const collectionNote = preview.collectionName
+      ? ` · Collection **${preview.collectionName}**`
+      : '';
+    assistantText = `## Seiten-Relevanz\n\n**${preview.persona.name}** — ${preview.rankedPages.length} Seiten aus CHECKION mit Metriken und kurzer Begründung${collectionNote}.`;
     metadata = metadataWithWorkflowSteps(
       {
         contentType: ASSISTANT_MESSAGE_CONTENT_TYPE.UI_COMPOSED,
@@ -72,6 +83,8 @@ export const handlePersonaPageRelevanceIntent: IntentHandler<'persona_page_relev
         uiLayout: layout,
         personaId: preview.persona.id,
         domainScanId: preview.domainScan.id,
+        platformProjectId: preview.platformProjectId,
+        collectionName: preview.collectionName,
       },
       steps,
       'Persona → Seiten',

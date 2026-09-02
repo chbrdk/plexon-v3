@@ -8,6 +8,7 @@ import {
   fetchAudionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
   type AudionCatalogPersona,
+  type AudionProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import { extractUrlFromText } from '@/lib/assistant/conversation-context';
 import {
@@ -19,13 +20,7 @@ import {
 import { pathAudionAdminProject } from '@/lib/paths/audion-api';
 import { pathCheckionDomainResult } from '@/lib/paths/checkion-api';
 import { getCheckionUrl } from '@/lib/constants';
-import {
-  matchesVaillantGroupMafoPersonaName,
-  mentionsVaillantGroupCollection,
-  VAILLANT_GROUP_PLATFORM_PROJECT_ID,
-} from '@/lib/demo/vaillant-group-mafo';
 import { listAccessibleCollectionsForUser } from '@/lib/list-accessible-collections';
-import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 
 export type PersonaPageRelevancePreview = {
   persona: PersonaPageRelevancePersona;
@@ -36,12 +31,40 @@ export type PersonaPageRelevancePreview = {
   rankedPages: RankedCorpusPage[];
   audionHref: string;
   checkionDomainHref: string;
+  /** Collection used (may have been inferred from persona). */
+  platformProjectId: string;
+  collectionName?: string;
 };
 
+export type PersonaCollectionMatch = {
+  platformProjectId: string;
+  collectionName: string;
+  persona: AudionCatalogPersona;
+  exactName: boolean;
+  summary: AudionProjectSummary;
+};
+
+export type ResolvePersonaPageContextResult =
+  | {
+      ok: true;
+      platformProjectId: string;
+      collectionName?: string;
+      personaId?: string;
+      summary?: AudionProjectSummary;
+      inferred: boolean;
+    }
+  | { ok: false; error: string };
+
 const COMPLETED = new Set(['completed', 'complete']);
+const PERSONA_SCAN_CONCURRENCY = 5;
 
 function normalizeName(value: string): string {
   return value.trim().toLowerCase();
+}
+
+function isExactPersonaNameMatch(persona: AudionCatalogPersona, personaName?: string): boolean {
+  if (!personaName?.trim()) return Boolean(persona.id);
+  return normalizeName(persona.name) === normalizeName(personaName);
 }
 
 /** Infer B2C/B2B spine URL when the prompt names a spine but no explicit URL. */
@@ -61,53 +84,6 @@ export function inferPersonaPageSpineUrlHint(text: string): string | undefined {
   return undefined;
 }
 
-/**
- * Resolve Collection when the chat has no project selected (global Assistant).
- * Prefer explicit id → Vaillant demo cues → name match against accessible Collections.
- */
-export async function resolvePersonaPagePlatformProjectId(input: {
-  plexonUserId: string;
-  platformProjectId?: string | null;
-  prompt?: string;
-  personaName?: string;
-  userRole?: string | null;
-}): Promise<string | null> {
-  const explicit = input.platformProjectId?.trim();
-  if (explicit) return explicit;
-
-  const prompt = input.prompt?.trim() || '';
-  const personaName = input.personaName?.trim() || '';
-
-  const wantsVaillant =
-    mentionsVaillantGroupCollection(prompt) ||
-    matchesVaillantGroupMafoPersonaName(personaName) ||
-    matchesVaillantGroupMafoPersonaName(
-      prompt.match(
-        /\bfür\s+(?:persona\s+)?([A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40}(?:\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40})?)/i,
-      )?.[1],
-    );
-
-  if (wantsVaillant) {
-    const allowed = await userCanViewPlatformProject(
-      input.plexonUserId,
-      input.userRole ?? 'user',
-      VAILLANT_GROUP_PLATFORM_PROJECT_ID,
-    );
-    if (allowed) return VAILLANT_GROUP_PLATFORM_PROJECT_ID;
-  }
-
-  if (!prompt) return null;
-
-  const collections = await listAccessibleCollectionsForUser(input.plexonUserId);
-  const lower = prompt.toLowerCase();
-  const byName = collections.items.find((c) => {
-    const name = c.name.trim().toLowerCase();
-    if (name.length < 3) return false;
-    return lower.includes(name);
-  });
-  return byName?.id ?? null;
-}
-
 export function resolvePersonaFromCatalog(
   personas: AudionCatalogPersona[],
   opts: { personaId?: string; personaName?: string },
@@ -121,7 +97,225 @@ export function resolvePersonaFromCatalog(
   const needle = normalizeName(name);
   const exact = personas.find((p) => normalizeName(p.name) === needle);
   if (exact) return exact;
-  return personas.find((p) => normalizeName(p.name).includes(needle) || needle.includes(normalizeName(p.name))) ?? null;
+  return (
+    personas.find(
+      (p) => normalizeName(p.name).includes(needle) || needle.includes(normalizeName(p.name)),
+    ) ?? null
+  );
+}
+
+export function pickBestPersonaCollectionMatch(
+  matches: PersonaCollectionMatch[],
+  prompt?: string,
+): PersonaCollectionMatch | null {
+  if (!matches.length) return null;
+  const lower = (prompt ?? '').toLowerCase();
+  const exact = matches.filter((m) => m.exactName);
+  const pool = exact.length ? exact : matches;
+  if (pool.length === 1) return pool[0]!;
+  const named = pool.find((m) => {
+    const name = m.collectionName.trim().toLowerCase();
+    return name.length >= 3 && lower.includes(name);
+  });
+  return named ?? pool[0]!;
+}
+
+async function mapPool<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  let index = 0;
+  async function worker() {
+    while (index < items.length) {
+      const i = index++;
+      results[i] = await fn(items[i]!);
+    }
+  }
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
+/**
+ * Find a persona in AUDION catalogs of Collections the user can access.
+ * Exact name beats partial; among ties, prefer Collection name mentioned in the prompt.
+ */
+export async function findPersonaAcrossAccessibleCollections(input: {
+  plexonUserId: string;
+  personaId?: string;
+  personaName?: string;
+  prompt?: string;
+}): Promise<
+  | { ok: true; match: PersonaCollectionMatch }
+  | { ok: false; error: string; ambiguous?: Array<{ collectionName: string; platformProjectId: string }> }
+> {
+  const personaId = input.personaId?.trim();
+  const personaName = input.personaName?.trim();
+  if (!personaId && !personaName) {
+    return {
+      ok: false,
+      error: 'Persona-Name oder -ID fehlt — bitte eine Persona nennen oder eine Collection wählen.',
+    };
+  }
+
+  const collections = await listAccessibleCollectionsForUser(input.plexonUserId);
+  if (!collections.items.length) {
+    return { ok: false, error: 'Keine zugängliche Collection gefunden.' };
+  }
+
+  const scanned = await mapPool(collections.items, PERSONA_SCAN_CONCURRENCY, async (collection) => {
+    const summary = await fetchAudionPlatformProjectSummary(collection.id, input.plexonUserId);
+    if (!summary?.personas?.length) return null;
+    const persona = resolvePersonaFromCatalog(summary.personas, { personaId, personaName });
+    if (!persona) return null;
+    return {
+      platformProjectId: collection.id,
+      collectionName: collection.name,
+      persona,
+      exactName: Boolean(personaId) || isExactPersonaNameMatch(persona, personaName),
+      summary,
+    } satisfies PersonaCollectionMatch;
+  });
+
+  const matches = scanned.filter((m): m is PersonaCollectionMatch => Boolean(m));
+  if (!matches.length) {
+    return {
+      ok: false,
+      error: `Persona „${personaName || personaId}“ in keiner zugänglichen Collection gefunden.`,
+    };
+  }
+
+  const exact = matches.filter((m) => m.exactName);
+  const prompt = input.prompt?.trim() || '';
+  if (exact.length > 1) {
+    const lower = prompt.toLowerCase();
+    const hinted = exact.filter((m) => {
+      const name = m.collectionName.trim().toLowerCase();
+      return name.length >= 3 && lower.includes(name);
+    });
+    if (hinted.length === 1) {
+      return { ok: true, match: hinted[0]! };
+    }
+    if (hinted.length === 0) {
+      return {
+        ok: false,
+        error: `Persona „${personaName || personaId}“ kommt in mehreren Collections vor — bitte eine Collection wählen: ${exact
+          .slice(0, 5)
+          .map((m) => m.collectionName)
+          .join(', ')}.`,
+        ambiguous: exact.map((m) => ({
+          collectionName: m.collectionName,
+          platformProjectId: m.platformProjectId,
+        })),
+      };
+    }
+  }
+
+  const best = pickBestPersonaCollectionMatch(matches, prompt);
+  if (!best) {
+    return {
+      ok: false,
+      error: `Persona „${personaName || personaId}“ in keiner zugänglichen Collection gefunden.`,
+    };
+  }
+  return { ok: true, match: best };
+}
+
+function findCollectionNameInPrompt(
+  prompt: string,
+  collections: Array<{ id: string; name: string }>,
+): string | null {
+  const lower = prompt.toLowerCase();
+  const hit = collections.find((c) => {
+    const name = c.name.trim().toLowerCase();
+    if (name.length < 3) return false;
+    return lower.includes(name);
+  });
+  return hit?.id ?? null;
+}
+
+/**
+ * Resolve Collection for persona→pages.
+ * Prefer explicit id → persona catalog scan → Collection name in prompt.
+ */
+export async function resolvePersonaPageContext(input: {
+  plexonUserId: string;
+  platformProjectId?: string | null;
+  prompt?: string;
+  personaId?: string;
+  personaName?: string;
+  userRole?: string | null;
+}): Promise<ResolvePersonaPageContextResult> {
+  const explicit = input.platformProjectId?.trim();
+  if (explicit) {
+    return {
+      ok: true,
+      platformProjectId: explicit,
+      personaId: input.personaId?.trim() || undefined,
+      inferred: false,
+    };
+  }
+
+  const hasPersonaCue = Boolean(input.personaId?.trim() || input.personaName?.trim());
+  if (hasPersonaCue) {
+    const found = await findPersonaAcrossAccessibleCollections({
+      plexonUserId: input.plexonUserId,
+      personaId: input.personaId,
+      personaName: input.personaName,
+      prompt: input.prompt,
+    });
+    if (found.ok) {
+      return {
+        ok: true,
+        platformProjectId: found.match.platformProjectId,
+        collectionName: found.match.collectionName,
+        personaId: found.match.persona.id,
+        summary: found.match.summary,
+        inferred: true,
+      };
+    }
+    if (found.ambiguous?.length) {
+      return { ok: false, error: found.error };
+    }
+    // Persona cue present but no catalog hit — still try Collection name in prompt below.
+  }
+
+  const prompt = input.prompt?.trim() || '';
+  if (prompt) {
+    const collections = await listAccessibleCollectionsForUser(input.plexonUserId);
+    const byName = findCollectionNameInPrompt(prompt, collections.items);
+    if (byName) {
+      return { ok: true, platformProjectId: byName, inferred: true };
+    }
+  }
+
+  if (hasPersonaCue) {
+    return {
+      ok: false,
+      error: `Persona „${input.personaName?.trim() || input.personaId}“ in keiner zugänglichen Collection gefunden.`,
+    };
+  }
+
+  return {
+    ok: false,
+    error:
+      'Collection-Kontext fehlt — bitte eine Collection wählen oder eine Persona nennen, die in einer zugänglichen Collection liegt.',
+  };
+}
+
+/** @deprecated Use resolvePersonaPageContext — kept for call sites that only need an id. */
+export async function resolvePersonaPagePlatformProjectId(input: {
+  plexonUserId: string;
+  platformProjectId?: string | null;
+  prompt?: string;
+  personaId?: string;
+  personaName?: string;
+  userRole?: string | null;
+}): Promise<string | null> {
+  const resolved = await resolvePersonaPageContext(input);
+  return resolved.ok ? resolved.platformProjectId : null;
 }
 
 export function pickCompletedDomainScan(
@@ -184,29 +378,34 @@ export async function runPersonaPageRelevance(input: {
   urlHint?: string;
   prompt?: string;
   topK?: number;
-}): Promise<{ ok: true; preview: PersonaPageRelevancePreview } | { ok: false; error: string }> {
-  const platformProjectId = await resolvePersonaPagePlatformProjectId({
+}): Promise<
+  | { ok: true; preview: PersonaPageRelevancePreview; inferredPlatformProjectId?: string }
+  | { ok: false; error: string }
+> {
+  const resolved = await resolvePersonaPageContext({
     plexonUserId: input.plexonUserId,
     userRole: input.userRole,
     platformProjectId: input.platformProjectId,
     prompt: input.prompt,
+    personaId: input.personaId,
     personaName: input.personaName,
   });
-  if (!platformProjectId) {
-    return {
-      ok: false,
-      error:
-        'Collection-Kontext fehlt — bitte oben die Collection „Vaillant Group“ wählen (oder die Frage im Projekt-Chat stellen).',
-    };
+  if (!resolved.ok) {
+    return { ok: false, error: resolved.error };
   }
 
-  const audionSummary = await fetchAudionPlatformProjectSummary(platformProjectId, input.plexonUserId);
+  const platformProjectId = resolved.platformProjectId;
+  const personaId = resolved.personaId || input.personaId;
+
+  const audionSummary =
+    resolved.summary ??
+    (await fetchAudionPlatformProjectSummary(platformProjectId, input.plexonUserId));
   if (!audionSummary?.personas?.length) {
     return { ok: false, error: 'Keine AUDION-Personas in dieser Collection gefunden.' };
   }
 
   const personaCatalog = resolvePersonaFromCatalog(audionSummary.personas, {
-    personaId: input.personaId,
+    personaId,
     personaName: input.personaName,
   });
   if (!personaCatalog) {
@@ -217,10 +416,13 @@ export async function runPersonaPageRelevance(input: {
     };
   }
 
-  const checkionProjectId =
-    input.checkionProjectId?.trim() ||
-    (await fetchCheckionPlatformProjectSummary(platformProjectId, input.plexonUserId))?.externalProjectId ||
-    null;
+  const checkionProjectId = resolved.inferred
+    ? (await fetchCheckionPlatformProjectSummary(platformProjectId, input.plexonUserId))
+        ?.externalProjectId || null
+    : input.checkionProjectId?.trim() ||
+      (await fetchCheckionPlatformProjectSummary(platformProjectId, input.plexonUserId))
+        ?.externalProjectId ||
+      null;
   if (!checkionProjectId) {
     return { ok: false, error: 'CHECKION-Projekt für diese Collection ist nicht gebunden.' };
   }
@@ -264,10 +466,13 @@ export async function runPersonaPageRelevance(input: {
     rankCorpusPagesForPersona(allItems, persona, input.topK ?? 8),
   );
 
-  const audionProjectId = input.audionProjectId?.trim() || audionSummary.externalProjectId;
+  const audionProjectId = resolved.inferred
+    ? audionSummary.externalProjectId
+    : input.audionProjectId?.trim() || audionSummary.externalProjectId;
 
   return {
     ok: true,
+    inferredPlatformProjectId: resolved.inferred ? platformProjectId : undefined,
     preview: {
       persona,
       domainScan,
@@ -277,6 +482,8 @@ export async function runPersonaPageRelevance(input: {
       rankedPages,
       audionHref: pathAudionAdminProject(audionProjectId),
       checkionDomainHref: pathCheckionDomainResult(domainScan.id),
+      platformProjectId,
+      collectionName: resolved.collectionName,
     },
   };
 }

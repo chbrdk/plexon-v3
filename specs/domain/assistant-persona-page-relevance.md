@@ -30,7 +30,7 @@ Assistant returns a **ranked table** of CHECKION corpus pages with **coarse metr
 - `touchpoints` + persona + `website|seiten|urls`
 - `wo landet` + persona name
 
-**Requires:** Collection context with `platformProjectId` (or explicit `personaId` + `domainScanId`).
+**Requires:** Collection context with `platformProjectId`, **or** a resolvable persona name/id (scan across accessible Collections), or explicit `domainScanId`.
 
 ## Flow
 
@@ -42,12 +42,22 @@ sequenceDiagram
   participant C as CHECKION API
 
   U->>P: Welche Seiten für Sandra?
-  P->>A: persona_get / personas_list (resolve Sandra)
+  P->>A: personas catalog per accessible Collection
+  P->>P: match persona → platformProjectId
   P->>C: domain_scans_list (latest completed for project)
   P->>C: GET domain-scans/:id/pages?pageSize=100
-  P->>P: Rank top N (LLM) + attach metrics
+  P->>P: Rank top N + attach metrics
   P->>U: metric_grid + ranked_list + links
 ```
+
+### Step 0 — Resolve Collection (when missing)
+
+1. Explicit `platformProjectId` from chat / page context **wins**.
+2. Else scan AUDION persona catalogs of Collections the user can access (`listAccessibleCollectionsForUser` + `fetchAudionPlatformProjectSummary`, concurrency-limited).
+3. Match `personaId` or `personaName` (exact name preferred over partial).
+4. Multiple exact hits without a Collection name in the prompt → ask user to pick a Collection.
+5. Else fall back to Collection **name** mentioned in the prompt.
+6. On success, persist inferred `platformProjectId` on the conversation for follow-ups.
 
 ### Step 1 — Resolve persona
 
@@ -122,7 +132,9 @@ sequenceDiagram
 - **MUSS** Persona-Felder aus AUDION zitieren (Name, Segment, mindestens ein Goal oder Pain Point).
 - **SOLANGE** `classification.tags` leer sind, **MUSS** Ranking URL-Pfad + Scores + Persona-Kontext nutzen (degraded mode — kein Fehler).
 
-## Out of scope (Wave 1)
+## Wave 2
+
+See `specs/domain/persona-page-relevance-wave2.md` and `knowledge/persona-page-relevance-wave2-roadmap.md`.
 
 - AUDION `site-topics` port (Wave 2 — improves tag signal)
 - Real `classifyPageWithLlm` in CHECKION (Wave 2)

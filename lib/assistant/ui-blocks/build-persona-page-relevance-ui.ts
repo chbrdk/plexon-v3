@@ -12,12 +12,13 @@ function tierLabel(tier: 'high' | 'medium' | 'low'): string {
 
 export function buildPersonaPageRelevanceLayout(preview: PersonaPageRelevancePreview): UiLayout {
   const blocks: UiLayout['blocks'] = [];
-  const { persona, domainScan, rankedPages, corpusMetrics, corpusTruncated, corpusMode } = preview;
+  const { persona, domainScan, rankedPages, corpusMetrics, corpusTruncated, corpusMode, collectionName } =
+    preview;
 
   const intro = createUiBlock(
     'text',
     {
-      markdown: `## Relevante Seiten für **${persona.name}**\n\n${persona.role}${persona.targetGroupName ? ` · ${persona.targetGroupName}` : ''} · Corpus **${domainScan.url || domainScan.id}**${corpusMode ? ` (${corpusMode})` : ''}${corpusTruncated ? ' · Auszug (max. 100 Seiten)' : ''}`,
+      markdown: `## Relevante Seiten für **${persona.name}**\n\n${persona.role}${persona.targetGroupName ? ` · ${persona.targetGroupName}` : ''}${collectionName ? ` · Collection **${collectionName}**` : ''} · Corpus **${domainScan.url || domainScan.id}**${corpusMode ? ` (${corpusMode})` : ''}${corpusTruncated ? ' · Auszug (max. 100 Seiten)' : ''}`,
     },
     randomUUID(),
   );
