@@ -30,18 +30,37 @@ Idempotent on container start (after `db:push`):
 
 - Knowledge Pack `research_brief` (UC1 Hypothesen + UC2 Opportunity Map)
 - Flow UC1 + Flow UC2
+- CHECKION B2C/B2B Deep-Scan-Corpus (Wave 2 Epic D) — startet fehlende Crawls, Container-Boot mit `--corpus-no-wait`
 
-Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`
+Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`  
+Ohne Poll-Wartezeit (Container): `… bootstrap-vaillant-group-mafo.ts --corpus-no-wait`
 
 ## Knowledge Pack
 
 Seed: `lib/demo/vaillant-group-knowledge-seed.ts` → Facet `research_brief`  
 Bootstrap: `ensureVaillantGroupKnowledgePackSeed()` in `lib/demo/bootstrap-vaillant-group-knowledge-pack.ts`
 
-## AUDION Personas
+## AUDION Personas & Zielgruppen
 
-UC1 (6 Segmente): `audion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  
-UC2 (3 Fachhandwerker): `VAILLANT_GROUP_UC2_INSTALLER_PERSONAS` — auto-seed on audion container boot
+Fixtures: `audion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  
+Store-Seed (Container): `seedVaillantGroupMafoStore()` — 9 Personas + 8 Zielgruppen (`proj-vaillant-group-mtb6qr6b`)
+
+- UC1: 6 Segmente (je 1 Zielgruppe ↔ 1 Persona)
+- UC2: `tg-vg-homeowner-decision` (6 UC1-Personas) + `tg-vg-fachhandwerker` (3 Installateur-Personas)
+
+Details: `audion-v3/knowledge/vaillant-group-mafo-seed.md`
+
+### Flow-Board · voreingestellte AUDION-IDs
+
+Bootstrap re-applies Templates on container start (`ensureVaillantGroupBarrierResearchFlow` / `ensureVaillantGroupInstallerDualFlow`).
+
+| Flow | Zielgruppe-Node | `targetGroupId` | Persona-Node | `personaId` |
+|------|-----------------|-----------------|--------------|-------------|
+| UC1 | `n-zielgruppe` | `tg-vg-altbau-familie` | `n-persona` | `persona-vg-sandra-altbau` |
+| UC2 | `n-zg-endkunde` | `tg-vg-homeowner-decision` | `n-persona-ek` | `persona-vg-sandra-altbau` |
+| UC2 | `n-zg-installer` | `tg-vg-fachhandwerker` | `n-persona-inst` | `persona-vg-meister-klaus` |
+
+SSOT: `lib/demo/vaillant-group-mafo.ts` · Templates: `createVaillantBarrierResearchTemplate` / `createVaillantInstallerDualPerspectiveTemplate`
 
 ## CREATION
 
@@ -88,6 +107,12 @@ Erwartung: Ranked-Liste aus CHECKION Deep Scan (Score, A11y, SEO, Issues) + kurz
 
 **Fragestellung:** *Was braucht der Fachhandwerker, damit er Vaillant empfiehlt?*
 
+**Assistant (Wave 2 — Persona→Seiten, Fachpartner-Spine):** Im Collection-Chat fragen:
+
+> *Welche Seiten sind für **Klaus** (Heizungsbaumeister) besonders relevant — CHECKION-Metriken auf dem Fachpartner-Spine?*
+
+Erwartung: Ranking gegen `myvaillantpro.de`-Corpus (B2B Deep Scan). Spec: `specs/domain/assistant-persona-page-relevance.md`.
+
 UC1 + UC2 starten beim **Container-Boot** sequentiell im Hintergrund, solange noch kein completed Run existiert (`scripts/run-vaillant-group-mafo-flow.ts --all --if-pending`).
 
 ### Flow-IDs (Staging)
@@ -108,4 +133,16 @@ Direktlinks Board:
 # Flow manuell (Container oder lokal mit Staging DATABASE_URL)
 DATABASE_URL=… npx tsx scripts/run-vaillant-group-mafo-flow.ts --uc2
 DATABASE_URL=… npx tsx scripts/run-vaillant-group-mafo-flow.ts --uc1 --if-pending
+```
+
+## Wave 2 (Epic D — shipped)
+
+Bootstrap stellt B2C/B2B Deep Scans automatisch sicher; Flow-Runner wartet auf CHECKION-Corpus vor UC-Runs.  
+Spec: `specs/domain/vaillant-mafo-wave2-demo.md` · Roadmap: `knowledge/persona-page-relevance-wave2-roadmap.md`.
+
+Bootstrap-Logs:
+
+```
+[vaillant-mafo] CHECKION B2C corpus: domain-{id} completed pages=42
+[vaillant-mafo] CHECKION B2B corpus: …
 ```

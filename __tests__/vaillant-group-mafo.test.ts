@@ -12,7 +12,12 @@ import {
   VAILLANT_GROUP_B2B_FACHPARTNER_URL,
   VAILLANT_GROUP_B2C_WAERMEPUMPE_URL,
   VAILLANT_GROUP_BRANDION_GUIDELINE_ID,
+  VAILLANT_GROUP_PERSONA_MEISTER_KLAUS,
+  VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU,
   VAILLANT_GROUP_PLATFORM_PROJECT_ID,
+  VAILLANT_GROUP_TG_UC1_ALTBAU,
+  VAILLANT_GROUP_TG_UC2_HOMEOWNER,
+  VAILLANT_GROUP_TG_UC2_INSTALLER,
   isVaillantGroupCollection,
 } from '@/lib/demo/vaillant-group-mafo';
 
@@ -36,6 +41,10 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     expect(documentHasBrandMeasure(doc)).toBe(true);
     const start = doc.nodes.find((n) => n.kind === 'start');
     expect(start?.url).toContain('vaillant.de');
+    const ziel = doc.nodes.find((n) => n.kind === 'zielgruppe');
+    const persona = doc.nodes.find((n) => n.kind === 'persona');
+    expect(ziel?.targetGroupId).toBe(VAILLANT_GROUP_TG_UC1_ALTBAU);
+    expect(persona?.personaId).toBe(VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU);
   });
 
   it('seeds UC1 research brief hypotheses', () => {
@@ -58,6 +67,16 @@ describe('Vaillant Group MaFo demo (UC1)', () => {
     expect(kinds.filter((k) => k === 'persona').length).toBe(2);
     expect(kinds).toContain('scan');
     expect(documentHasBrandMeasure(doc)).toBe(true);
+    const endkundeZg = doc.nodes.find((n) => n.id === 'n-zg-endkunde');
+    const installerZg = doc.nodes.find((n) => n.id === 'n-zg-installer');
+    expect(endkundeZg?.targetGroupId).toBe(VAILLANT_GROUP_TG_UC2_HOMEOWNER);
+    expect(installerZg?.targetGroupId).toBe(VAILLANT_GROUP_TG_UC2_INSTALLER);
+    expect(doc.nodes.find((n) => n.id === 'n-persona-ek')?.personaId).toBe(
+      VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU,
+    );
+    expect(doc.nodes.find((n) => n.id === 'n-persona-inst')?.personaId).toBe(
+      VAILLANT_GROUP_PERSONA_MEISTER_KLAUS,
+    );
   });
 
   it('extracts one Audion start per UC2 persona chain', () => {

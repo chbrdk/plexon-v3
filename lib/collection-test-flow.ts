@@ -3,6 +3,19 @@
  * Spec: specs/domain/collection-test-flow.md
  */
 
+import {
+  VAILLANT_GROUP_PERSONA_MEISTER_KLAUS,
+  VAILLANT_GROUP_PERSONA_MEISTER_KLAUS_NAME,
+  VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU,
+  VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU_NAME,
+  VAILLANT_GROUP_TG_UC1_ALTBAU,
+  VAILLANT_GROUP_TG_UC1_ALTBAU_NAME,
+  VAILLANT_GROUP_TG_UC2_HOMEOWNER,
+  VAILLANT_GROUP_TG_UC2_HOMEOWNER_NAME,
+  VAILLANT_GROUP_TG_UC2_INSTALLER,
+  VAILLANT_GROUP_TG_UC2_INSTALLER_NAME,
+} from '@/lib/demo/vaillant-group-mafo';
+
 export const COLLECTION_FLOW_SCHEMA_VERSION = '2026-08-collection-flow-v1' as const;
 
 export const COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY = 'page-quality' as const;
@@ -710,23 +723,39 @@ export function createVaillantBarrierResearchTemplate(input?: {
   journeyUrl?: string;
   scanUrl?: string;
   guidelineId?: string;
+  targetGroupId?: string;
+  targetGroupName?: string;
+  personaId?: string;
+  personaName?: string;
+  segment?: string;
 }): CollectionTestFlowDocument {
   const journeyUrl = input?.journeyUrl?.trim() || 'https://www.vaillant.de/produkte/waermepumpen/';
   const scanUrl = input?.scanUrl?.trim() || journeyUrl;
   const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
 
+  const targetGroupId = input?.targetGroupId?.trim() || VAILLANT_GROUP_TG_UC1_ALTBAU;
+  const targetGroupName = input?.targetGroupName?.trim() || VAILLANT_GROUP_TG_UC1_ALTBAU_NAME;
+  const personaId = input?.personaId?.trim() || VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU;
+  const personaName = input?.personaName?.trim() || VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU_NAME;
+  const segment = input?.segment?.trim() || 'altbau_familie';
+
   const journeyNodes: CollectionFlowNode[] = [
     {
       id: 'n-zielgruppe',
       kind: 'zielgruppe',
-      label: 'Altbau-Familie',
-      segment: 'altbau_familie',
+      label: targetGroupName,
+      segment,
+      targetGroupId,
+      targetGroupName,
       position: { x: 0, y: 40 },
     },
     {
       id: 'n-persona',
       kind: 'persona',
-      label: 'Persona',
+      label: personaName,
+      personaId,
+      personaName,
+      segment,
       position: { x: 200, y: 40 },
     },
     {
@@ -878,24 +907,55 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
   installerUrl?: string;
   scanUrl?: string;
   guidelineId?: string;
+  homeownerTargetGroupId?: string;
+  homeownerTargetGroupName?: string;
+  homeownerPersonaId?: string;
+  homeownerPersonaName?: string;
+  installerTargetGroupId?: string;
+  installerTargetGroupName?: string;
+  installerPersonaId?: string;
+  installerPersonaName?: string;
 }): CollectionTestFlowDocument {
   const customerUrl = input?.customerUrl?.trim() || 'https://www.vaillant.de/produkte/waermepumpen/';
   const installerUrl = input?.installerUrl?.trim() || 'https://www.myvaillantpro.de/';
   const scanUrl = input?.scanUrl?.trim() || customerUrl;
   const guidelineId = input?.guidelineId?.trim() || 'gl-mtinudb1';
 
+  const homeownerTargetGroupId =
+    input?.homeownerTargetGroupId?.trim() || VAILLANT_GROUP_TG_UC2_HOMEOWNER;
+  const homeownerTargetGroupName =
+    input?.homeownerTargetGroupName?.trim() || VAILLANT_GROUP_TG_UC2_HOMEOWNER_NAME;
+  const homeownerPersonaId =
+    input?.homeownerPersonaId?.trim() || VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU;
+  const homeownerPersonaName =
+    input?.homeownerPersonaName?.trim() || VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU_NAME;
+
+  const installerTargetGroupId =
+    input?.installerTargetGroupId?.trim() || VAILLANT_GROUP_TG_UC2_INSTALLER;
+  const installerTargetGroupName =
+    input?.installerTargetGroupName?.trim() || VAILLANT_GROUP_TG_UC2_INSTALLER_NAME;
+  const installerPersonaId =
+    input?.installerPersonaId?.trim() || VAILLANT_GROUP_PERSONA_MEISTER_KLAUS;
+  const installerPersonaName =
+    input?.installerPersonaName?.trim() || VAILLANT_GROUP_PERSONA_MEISTER_KLAUS_NAME;
+
   const journeyNodes: CollectionFlowNode[] = [
     {
       id: 'n-zg-endkunde',
       kind: 'zielgruppe',
-      label: 'Endkunde',
+      label: homeownerTargetGroupName,
       segment: 'homeowner_decision',
+      targetGroupId: homeownerTargetGroupId,
+      targetGroupName: homeownerTargetGroupName,
       position: { x: 0, y: 40 },
     },
     {
       id: 'n-persona-ek',
       kind: 'persona',
-      label: 'Endkunden-Persona',
+      label: homeownerPersonaName,
+      personaId: homeownerPersonaId,
+      personaName: homeownerPersonaName,
+      segment: 'homeowner_decision',
       position: { x: 200, y: 40 },
     },
     {
@@ -924,14 +984,19 @@ export function createVaillantInstallerDualPerspectiveTemplate(input?: {
     {
       id: 'n-zg-installer',
       kind: 'zielgruppe',
-      label: 'Fachhandwerker',
+      label: installerTargetGroupName,
       segment: 'installer_recommendation',
+      targetGroupId: installerTargetGroupId,
+      targetGroupName: installerTargetGroupName,
       position: { x: 1060, y: 40 },
     },
     {
       id: 'n-persona-inst',
       kind: 'persona',
-      label: 'Installateur-Persona',
+      label: installerPersonaName,
+      personaId: installerPersonaId,
+      personaName: installerPersonaName,
+      segment: 'installer_recommendation',
       position: { x: 1260, y: 40 },
     },
     {

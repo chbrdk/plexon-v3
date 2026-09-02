@@ -41,3 +41,19 @@ export const VAILLANT_GROUP_FLOW_UC2_DEFAULT_NAME =
 export function isVaillantGroupCollection(platformProjectId: string | null | undefined): boolean {
   return platformProjectId?.trim() === VAILLANT_GROUP_PLATFORM_PROJECT_ID;
 }
+
+/** AUDION target-group ids — keep in sync with audion-v3 `vaillant-group-mafo-seed.ts`. */
+export const VAILLANT_GROUP_TG_UC1_ALTBAU = 'tg-vg-altbau-familie' as const;
+export const VAILLANT_GROUP_TG_UC2_HOMEOWNER = 'tg-vg-homeowner-decision' as const;
+export const VAILLANT_GROUP_TG_UC2_INSTALLER = 'tg-vg-fachhandwerker' as const;
+
+export const VAILLANT_GROUP_TG_UC1_ALTBAU_NAME =
+  'Familie · unsaniertes Bestandsgebäude' as const;
+export const VAILLANT_GROUP_TG_UC2_HOMEOWNER_NAME = 'Endkunden-Entscheider' as const;
+export const VAILLANT_GROUP_TG_UC2_INSTALLER_NAME = 'Fachhandwerker · SHK' as const;
+
+/** Default primary personas on flow templates (linked to target groups above). */
+export const VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU = 'persona-vg-sandra-altbau' as const;
+export const VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU_NAME = 'Sandra Müller' as const;
+export const VAILLANT_GROUP_PERSONA_MEISTER_KLAUS = 'persona-vg-meister-klaus' as const;
+export const VAILLANT_GROUP_PERSONA_MEISTER_KLAUS_NAME = 'Klaus Brenner' as const;
