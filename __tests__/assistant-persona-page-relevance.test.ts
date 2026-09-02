@@ -1,15 +1,32 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { routeAssistantIntent } from '@/lib/assistant/intent-router';
 import {
   pickCompletedDomainScan,
   resolvePersonaFromCatalog,
+  resolvePersonaPagePlatformProjectId,
 } from '@/lib/integrations/persona-page-relevance-client';
+import {
+  matchesVaillantGroupMafoPersonaName,
+  VAILLANT_GROUP_PLATFORM_PROJECT_ID,
+} from '@/lib/demo/vaillant-group-mafo';
 import {
   rankCorpusPagesForPersona,
   scorePageForPersona,
 } from '@/lib/assistant/persona-page-relevance/rank-corpus-pages';
 import { buildPersonaPageRelevanceLayout } from '@/lib/assistant/ui-blocks/build-persona-page-relevance-ui';
 import type { CheckionCorpusPageRow } from '@/lib/integrations/checkion-domain-scans-v3-client';
+import { userCanViewPlatformProject } from '@/lib/platform-project-access';
+
+vi.mock('@/lib/platform-project-access', () => ({
+  userCanViewPlatformProject: vi.fn(),
+}));
+vi.mock('@/lib/list-accessible-collections', () => ({
+  listAccessibleCollectionsForUser: vi.fn().mockResolvedValue({
+    items: [],
+    totalAccessible: 0,
+    truncated: false,
+  }),
+}));
 
 describe('persona page relevance intent', () => {
   it('routes persona + seiten questions', () => {
@@ -125,5 +142,27 @@ describe('persona page relevance helpers', () => {
       'https://vaillant.de/produkte/',
     );
     expect(picked?.id).toBe('d2');
+  });
+});
+
+describe('resolvePersonaPagePlatformProjectId', () => {
+  it('matches Jana Schmitt as Vaillant MaFo persona', () => {
+    expect(matchesVaillantGroupMafoPersonaName('Jana Schmitt')).toBe(true);
+    expect(matchesVaillantGroupMafoPersonaName('jana')).toBe(true);
+  });
+
+  it('infers Vaillant Group from known MaFo persona name when chat has no project', async () => {
+    vi.mocked(userCanViewPlatformProject).mockResolvedValue(true);
+    const id = await resolvePersonaPagePlatformProjectId({
+      plexonUserId: 'user-1',
+      personaName: 'Jana Schmitt',
+      prompt: 'Welche Seiten sind für Jana Schmitt besonders relevant?',
+    });
+    expect(id).toBe(VAILLANT_GROUP_PLATFORM_PROJECT_ID);
+    expect(userCanViewPlatformProject).toHaveBeenCalledWith(
+      'user-1',
+      'user',
+      VAILLANT_GROUP_PLATFORM_PROJECT_ID,
+    );
   });
 });

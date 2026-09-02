@@ -19,6 +19,13 @@ import {
 import { pathAudionAdminProject } from '@/lib/paths/audion-api';
 import { pathCheckionDomainResult } from '@/lib/paths/checkion-api';
 import { getCheckionUrl } from '@/lib/constants';
+import {
+  matchesVaillantGroupMafoPersonaName,
+  mentionsVaillantGroupCollection,
+  VAILLANT_GROUP_PLATFORM_PROJECT_ID,
+} from '@/lib/demo/vaillant-group-mafo';
+import { listAccessibleCollectionsForUser } from '@/lib/list-accessible-collections';
+import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 
 export type PersonaPageRelevancePreview = {
   persona: PersonaPageRelevancePersona;
@@ -52,6 +59,53 @@ export function inferPersonaPageSpineUrlHint(text: string): string | undefined {
     return 'https://www.vaillant.de/';
   }
   return undefined;
+}
+
+/**
+ * Resolve Collection when the chat has no project selected (global Assistant).
+ * Prefer explicit id → Vaillant demo cues → name match against accessible Collections.
+ */
+export async function resolvePersonaPagePlatformProjectId(input: {
+  plexonUserId: string;
+  platformProjectId?: string | null;
+  prompt?: string;
+  personaName?: string;
+  userRole?: string | null;
+}): Promise<string | null> {
+  const explicit = input.platformProjectId?.trim();
+  if (explicit) return explicit;
+
+  const prompt = input.prompt?.trim() || '';
+  const personaName = input.personaName?.trim() || '';
+
+  const wantsVaillant =
+    mentionsVaillantGroupCollection(prompt) ||
+    matchesVaillantGroupMafoPersonaName(personaName) ||
+    matchesVaillantGroupMafoPersonaName(
+      prompt.match(
+        /\bfür\s+(?:persona\s+)?([A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40}(?:\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß-]{1,40})?)/i,
+      )?.[1],
+    );
+
+  if (wantsVaillant) {
+    const allowed = await userCanViewPlatformProject(
+      input.plexonUserId,
+      input.userRole ?? 'user',
+      VAILLANT_GROUP_PLATFORM_PROJECT_ID,
+    );
+    if (allowed) return VAILLANT_GROUP_PLATFORM_PROJECT_ID;
+  }
+
+  if (!prompt) return null;
+
+  const collections = await listAccessibleCollectionsForUser(input.plexonUserId);
+  const lower = prompt.toLowerCase();
+  const byName = collections.items.find((c) => {
+    const name = c.name.trim().toLowerCase();
+    if (name.length < 3) return false;
+    return lower.includes(name);
+  });
+  return byName?.id ?? null;
 }
 
 export function resolvePersonaFromCatalog(
@@ -120,6 +174,7 @@ export function absolutizeRankedPageLinks(pages: RankedCorpusPage[]): RankedCorp
 
 export async function runPersonaPageRelevance(input: {
   plexonUserId: string;
+  userRole?: string | null;
   platformProjectId?: string;
   checkionProjectId?: string | null;
   audionProjectId?: string | null;
@@ -130,9 +185,19 @@ export async function runPersonaPageRelevance(input: {
   prompt?: string;
   topK?: number;
 }): Promise<{ ok: true; preview: PersonaPageRelevancePreview } | { ok: false; error: string }> {
-  const platformProjectId = input.platformProjectId?.trim();
+  const platformProjectId = await resolvePersonaPagePlatformProjectId({
+    plexonUserId: input.plexonUserId,
+    userRole: input.userRole,
+    platformProjectId: input.platformProjectId,
+    prompt: input.prompt,
+    personaName: input.personaName,
+  });
   if (!platformProjectId) {
-    return { ok: false, error: 'Collection-Kontext fehlt — bitte ein Projekt öffnen oder platformProjectId setzen.' };
+    return {
+      ok: false,
+      error:
+        'Collection-Kontext fehlt — bitte oben die Collection „Vaillant Group“ wählen (oder die Frage im Projekt-Chat stellen).',
+    };
   }
 
   const audionSummary = await fetchAudionPlatformProjectSummary(platformProjectId, input.plexonUserId);

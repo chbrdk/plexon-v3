@@ -57,3 +57,32 @@ export const VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU = 'persona-vg-sandra-altbau' a
 export const VAILLANT_GROUP_PERSONA_SANDRA_ALTBAU_NAME = 'Sandra Müller' as const;
 export const VAILLANT_GROUP_PERSONA_MEISTER_KLAUS = 'persona-vg-meister-klaus' as const;
 export const VAILLANT_GROUP_PERSONA_MEISTER_KLAUS_NAME = 'Klaus Brenner' as const;
+
+/**
+ * All MaFo demo persona display names (AUDION seed) — used to infer Collection
+ * when the Assistant chat has no platformProjectId selected.
+ */
+export const VAILLANT_GROUP_MAFO_PERSONA_NAMES = [
+  'Sandra Müller',
+  'Thomas Weber',
+  'Lisa Hartmann',
+  'Frank Meier',
+  'Helmut Krause',
+  'Jana Schmitt',
+  'Klaus Brenner',
+  'Sandra Vogt',
+  'Tim Schäfer',
+] as const;
+
+export function mentionsVaillantGroupCollection(text: string): boolean {
+  return /\bvaillant\s*group\b/i.test(text);
+}
+
+export function matchesVaillantGroupMafoPersonaName(name: string | null | undefined): boolean {
+  const needle = name?.trim().toLowerCase();
+  if (!needle) return false;
+  return VAILLANT_GROUP_MAFO_PERSONA_NAMES.some((n) => {
+    const hay = n.toLowerCase();
+    return hay === needle || hay.includes(needle) || needle.includes(hay);
+  });
+}

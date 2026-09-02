@@ -44,6 +44,7 @@ export const handlePersonaPageRelevanceIntent: IntentHandler<'persona_page_relev
 
   const result = await runPersonaPageRelevance({
     plexonUserId: ctx.user.id,
+    userRole: ctx.user.role,
     platformProjectId: ctx.platformProjectId,
     checkionProjectId: ctx.bindingIds?.checkionProjectId,
     audionProjectId: ctx.bindingIds?.audionProjectId,
