@@ -83,7 +83,8 @@ SSOT: `lib/demo/vaillant-group-mafo.ts` · Templates: `createVaillantBarrierRese
 
 Editor: `https://creation-v3.projects-a.plygrnd.tech/editor?platformProjectId=f3d27e9f-d14c-4880-82be-3ca31c051173`
 
-Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 Schritte) + Kontakt.
+Scene `scene-vaillant-landing` (**Jana Schmitt · Öko-Modernisierer**): Landing + 3 Insight-Seiten (Kosten, Eignung, 3 Schritte) + Kontakt.  
+Seed: `creation-v3/apps/web/lib/scene/vaillant-landing-scene.ts` — reseeds on editor boot when Jana-Marker fehlt.
 
 ## Demo-Walkthrough (Staging)
 

@@ -23,8 +23,9 @@ export function injectCreationSceneToolArgs(
   if (!isCreationSceneFamilyTool(toolName)) return input;
 
   const out = { ...input };
-  const actor = typeof out.actorUserId === 'string' ? out.actorUserId.trim() : '';
-  if (!actor && ctx.actorUserId.trim()) {
+  // Always use the authenticated session user — LLM-supplied display names
+  // (e.g. "cb") cause CREATION Collection ACL 403s.
+  if (ctx.actorUserId.trim()) {
     out.actorUserId = ctx.actorUserId.trim();
   }
 

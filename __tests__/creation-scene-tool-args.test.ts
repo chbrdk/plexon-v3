@@ -28,14 +28,14 @@ describe('injectCreationSceneToolArgs', () => {
     })
   })
 
-  it('injects sceneId for tree_index without overwriting explicit args', () => {
+  it('injects sceneId for tree_index but always forces session actorUserId', () => {
     const out = injectCreationSceneToolArgs(
       'creation_scene_tree_index',
-      { sceneId: 'explicit', actorUserId: 'u2' },
+      { sceneId: 'explicit', actorUserId: 'cb' },
       { pageContext: editorContext, actorUserId: 'user-1' },
     )
     expect(out.sceneId).toBe('explicit')
-    expect(out.actorUserId).toBe('u2')
+    expect(out.actorUserId).toBe('user-1')
   })
 
   it('leaves unrelated tools unchanged', () => {
