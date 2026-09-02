@@ -271,6 +271,16 @@ export type CollectionFlowLastRun = {
     validEvidence: boolean;
     finalUrl: string | null;
     error?: string | null;
+    /** Wave 25: truncated AUDION job steps for rehydrate / dossier. */
+    steps?: Array<{
+      step?: number;
+      action?: string | null;
+      target?: string | null;
+      result?: string | null;
+      reasoning?: string | null;
+      imageUrl?: string | null;
+      timestamp?: string | null;
+    }> | null;
   }> | null;
   issueCount?: number | null;
   criticalCount?: number | null;

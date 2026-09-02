@@ -98,6 +98,10 @@ import {
   type FlowNodeRunState,
   type FlowRunProgressInput,
 } from '@/lib/collection-flow-run-progress'
+import {
+  rehydrateFlowRunUi,
+  truncateJourneySteps,
+} from '@/lib/collection-flow-journey-context'
 import type { CollectionTestFlowResponse } from '@/lib/db/collection-test-flows'
 import type { CollectionFlowRunResponse } from '@/lib/db/collection-flow-runs'
 import type { AudionJourneyJobSnapshot } from '@/lib/integrations/audion-journey-client'
@@ -107,6 +111,7 @@ import { CollectionFlowNodeInspector } from './CollectionFlowNodeInspector'
 import { CollectionFlowWebhookPanel } from './CollectionFlowWebhookPanel'
 import { CollectionFlowHistoryPanel } from './CollectionFlowHistoryPanel'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
+import { CollectionFlowOutputsDossier } from './CollectionFlowOutputsDossier'
 import {
   IconDelete,
   IconDuplicate,
@@ -216,6 +221,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
       taskCompleted: boolean
       validEvidence: boolean
       finalUrl: string | null
+      steps?: ReturnType<typeof truncateJourneySteps>
     }>
   } | null>(null)
   const historyRef = useRef<GraphSnap[]>([])
@@ -304,16 +310,22 @@ function BoardInner({ platformProjectId, initial }: Props) {
           setRunStates(
             toRfRunStates(nodeStatesFromVerdict(ensureFlowDocument(flow.flow), liveVerdict, liveLastRun))
           )
+          const ui = rehydrateFlowRunUi(ensureFlowDocument(flow.flow), liveLastRun)
+          setRunOutputs(ui.runOutputs)
+          setInspectorByNode(ui.inspectorByNode)
         } else {
           setRunStates({})
+          setRunOutputs({})
+          setInspectorByNode({})
         }
         return
       }
-      setRunStates(
-        toRfRunStates(
-          nodeStatesFromVerdict(ensureFlowDocument(flow.flow), run.verdict, run.lastRun ?? undefined)
-        )
-      )
+      const doc = ensureFlowDocument(flow.flow)
+      const lr = run.lastRun ?? undefined
+      setRunStates(toRfRunStates(nodeStatesFromVerdict(doc, run.verdict, lr)))
+      const ui = rehydrateFlowRunUi(doc, lr)
+      setRunOutputs(ui.runOutputs)
+      setInspectorByNode(ui.inspectorByNode)
     },
     [flow.flow, liveLastRun, liveVerdict]
   )
@@ -404,15 +416,17 @@ function BoardInner({ platformProjectId, initial }: Props) {
     [inspectorByNode, nodes, onUpdateNode]
   )
 
-  const getJourneyFlowSnapshot = useCallback(() => {
-    const doc = getSnapshot()
-    const baseUrl = startNodeUrl(doc.nodes) ?? scanNodeUrl(doc.nodes) ?? 'https://example.com'
-    return resolveJourneyFlowForRun(doc, baseUrl)
-  }, [getSnapshot])
-
   const applyJobToStates = useCallback(
     (job: AudionJourneyJobSnapshot) => {
-      const journeyFlow = getJourneyFlowSnapshot()
+      const doc = getSnapshot()
+      const baseUrl = startNodeUrl(doc.nodes) ?? scanNodeUrl(doc.nodes) ?? 'https://example.com'
+      const meta = runMetaRef.current as {
+        pendingPersonaNodeId?: string
+      } | null
+      const journeyFlow =
+        resolveJourneyFlowForRun(doc, baseUrl, {
+          personaNodeId: meta?.pendingPersonaNodeId ?? null,
+        }) ?? resolveJourneyFlowForRun(doc, baseUrl)
       if (!journeyFlow) return
       const input: FlowRunProgressInput = {
         status: job.status,
@@ -423,13 +437,26 @@ function BoardInner({ platformProjectId, initial }: Props) {
         jobId: job.jobId,
         gateSignals: job.gateSignals,
       }
-      setRunStates(mapJobToFlowNodeStates(journeyFlow, input))
-      setRunOutputs(mapJobToFlowNodeOutputs(journeyFlow, input))
-      setInspectorByNode(mapJobToFlowNodeInspector(journeyFlow, input))
+      setRunStates((prev) => ({ ...prev, ...mapJobToFlowNodeStates(journeyFlow, input) }))
+      setRunOutputs((prev) => ({ ...prev, ...mapJobToFlowNodeOutputs(journeyFlow, input) }))
+      setInspectorByNode((prev) => {
+        const next = { ...prev }
+        const mapped = mapJobToFlowNodeInspector(journeyFlow, input)
+        for (const [nodeId, data] of Object.entries(mapped)) {
+          if (!next[nodeId]) next[nodeId] = data
+          else {
+            next[nodeId] = {
+              steps: [...(next[nodeId]?.steps ?? []), ...data.steps],
+              gateEvaluation: data.gateEvaluation ?? next[nodeId]?.gateEvaluation,
+            }
+          }
+        }
+        return next
+      })
       setJobSummary(buildJobRunSummary(input))
       setRunMeta((m) => (m ? { ...m, status: job.status, stepCount: job.steps?.length ?? 0 } : m))
     },
-    [getJourneyFlowSnapshot]
+    [getSnapshot]
   )
 
   const pollOnce = useCallback(
@@ -510,6 +537,15 @@ function BoardInner({ platformProjectId, initial }: Props) {
         if (!res.ok) throw new Error(json?.error || `Run failed (${res.status})`)
         if (json?.flow) setFlow(json.flow)
         if (json?.nodeStates) setRunStates((prev) => ({ ...prev, ...toRfRunStates(json.nodeStates!) }))
+        const completedLastRun = json?.lastRun ?? json?.flow?.flow.lastRun ?? null
+        if (completedLastRun) {
+          const ui = rehydrateFlowRunUi(
+            ensureFlowDocument(json?.flow?.flow ?? flow.flow),
+            completedLastRun,
+          )
+          setRunOutputs(ui.runOutputs)
+          setInspectorByNode(ui.inspectorByNode)
+        }
         if (json?.historyRunId) {
           historyRunIdRef.current = json.historyRunId
           setViewedRun({
@@ -520,7 +556,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
             trigger: 'ui',
             request: null,
             verdict: json.verdict ?? json.flow?.flow.lastVerdict ?? null,
-            lastRun: json.lastRun ?? json.flow?.flow.lastRun ?? null,
+            lastRun: completedLastRun,
             callbackUrl: null,
             callbackStatus: null,
             error: null,
@@ -651,6 +687,7 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     taskCompleted: job.taskCompleted,
                     validEvidence: job.validEvidence,
                     finalUrl: job.finalUrl,
+                    steps: truncateJourneySteps(job.steps ?? null),
                   },
                 ],
               }
@@ -1008,6 +1045,18 @@ function BoardInner({ platformProjectId, initial }: Props) {
       /* ignore */
     }
   }, [runBusy, flow.id])
+
+  // Wave 25: rehydrate outputs when opening a flow that already has lastRun.
+  useEffect(() => {
+    if (runBusy) return
+    const lr = viewedRun?.lastRun ?? flow.flow.lastRun
+    if (!lr) return
+    const ui = rehydrateFlowRunUi(ensureFlowDocument(flow.flow), lr)
+    if (Object.keys(ui.runOutputs).length === 0) return
+    setRunOutputs(ui.runOutputs)
+    setInspectorByNode(ui.inspectorByNode)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on flow id / lastRun identity
+  }, [flow.id, flow.flow.lastRun?.completedAt, viewedRun?.id, runBusy])
 
   const snapNodesAfterDrag = useCallback(
     (dragged: CollectionFlowRfNodeModel[]) => {
@@ -1937,6 +1986,13 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     }
                     verdict={<CollectionFlowVerdictCard verdict={verdict} />}
                   />
+                  {(lastRun || Object.keys(runOutputs).length > 0) && !runBusy ? (
+                    <CollectionFlowOutputsDossier
+                      nodes={ensureFlowDocument(flow.flow).nodes}
+                      runOutputs={runOutputs}
+                      onSelectNode={(nodeId) => setInspectorId(nodeId)}
+                    />
+                  ) : null}
                 </div>
               ) : null}
             </div>

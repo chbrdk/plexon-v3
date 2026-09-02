@@ -533,3 +533,32 @@ Do not place this on legacy `/board` Prismion island.
 - **Pause/resume:** run status `awaiting_input`; resume via `POST …/run` with `resume` + payload.
 - **Out:** ECHON, generic agent/code nodes, replacing EQC UI with Board.
 - **Flag:** `EQC_FLOW_RUNTIME`.
+
+## Wave 25 — Run outputs dossier (journey persistence)
+
+**Goal:** After a flow run ends (or when painting history), Persona-/Prompt-Ausgaben remain visible — not only live ephemerally in React state.
+
+### Persist
+
+- `lastRun.journeyPersonaRuns[]` **MUSS** optional `steps[]` tragen (AUDION job steps: `step`, `action`, `target`, `result`, `reasoning`, `imageUrl`).
+- Cap: max **40** steps per persona; `result` / `reasoning` each ≤ **2000** chars (truncate with `…`).
+- Quality-phase handoff from the board **MUSS** steps for **all** completed persona slots (not only the last job).
+
+### Seed (multi-persona)
+
+- After journey (sync or quality handoff), seed `context.outputs[nodeId]` from **each** persona run’s steps via that slot’s embedded journey subgraph (`extractJourneyFlowFromDocument` / `resolveJourneyFlowForRun` with `personaNodeId`).
+- Primary-only seeding (Wave 22) is insufficient for dual-perspective templates (UC2).
+
+### Rehydrate UI
+
+- Loading a flow with `lastRun` or selecting Historie **MUSS** rebuild board `runOutputs` + inspector step lists from persisted `journeyPersonaRuns[].steps` (+ `context.outputs` fallback for scan/brand nodes).
+- Soft-Q scores remain AUDION Wave (Deep-Link); not mirrored into `lastRun` in this wave.
+
+### Run-Dock dossier
+
+- Under the verdict strip, show **Prozess-Ausgaben**: board-order list of nodes that have output text (journey prompts/success + scan/brand summaries).
+- Clicking an entry focuses that node’s inspector.
+
+### Tests
+
+- Truncate + rehydrate roundtrip; dual-persona seed writes distinct node ids; dossier renders without crash when empty.

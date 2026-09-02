@@ -82,7 +82,7 @@ import {
   type CatalogIssueItem,
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
-import { seedJourneyNodeOutputsIntoContext } from '@/lib/collection-flow-journey-context';
+import { seedAllPersonaJourneyOutputsIntoContext, truncateJourneySteps } from '@/lib/collection-flow-journey-context';
 import type { FlowRunProgressStep } from '@/lib/collection-flow-run-progress';
 import { distillCollectionFlowToKnowledgePack } from '@/lib/collection-flow-knowledge-distillate';
 
@@ -267,9 +267,26 @@ export async function executeCollectionFlowRun(input: {
         journeyPersonaCount = Math.max(1, Math.floor(body.personaCount));
       }
       if (Array.isArray(body.journeyPersonaRuns)) {
-        journeyPersonaRuns = body.journeyPersonaRuns as NonNullable<
-          CollectionFlowLastRun['journeyPersonaRuns']
-        >;
+        journeyPersonaRuns = (
+          body.journeyPersonaRuns as NonNullable<CollectionFlowLastRun['journeyPersonaRuns']>
+        ).map((run) => ({
+          ...run,
+          steps: truncateJourneySteps(
+            Array.isArray(run.steps) && run.steps.length
+              ? (run.steps as FlowRunProgressStep[])
+              : null,
+          ),
+        }));
+        // Legacy handoff: top-level `steps` only → attach to last persona without steps
+        if (Array.isArray(body.steps) && body.steps.length && journeyPersonaRuns.length) {
+          const lastIdx = journeyPersonaRuns.length - 1;
+          if (!journeyPersonaRuns[lastIdx]!.steps?.length) {
+            journeyPersonaRuns[lastIdx] = {
+              ...journeyPersonaRuns[lastIdx]!,
+              steps: truncateJourneySteps(body.steps as FlowRunProgressStep[]),
+            };
+          }
+        }
       }
       if (Array.isArray(body.steps)) {
         journeySteps = body.steps as FlowRunProgressStep[];
@@ -330,6 +347,7 @@ export async function executeCollectionFlowRun(input: {
           validEvidence: journey.job?.validEvidence ?? false,
           finalUrl: journey.job?.finalUrl ?? null,
           error: journey.ok ? null : journey.error,
+          steps: truncateJourneySteps(journey.job?.steps ?? null),
         });
 
         if (!journey.ok) {
@@ -433,15 +451,18 @@ export async function executeCollectionFlowRun(input: {
         );
       }
 
-      // Wave 22: seed per-node outputs from agent steps, then re-resolve quality/geo params.
-      if (primaryJourneyFlow && journeySteps?.length) {
-        runContext = seedJourneyNodeOutputsIntoContext(
-          runContext,
-          primaryJourneyFlow,
-          journeySteps,
-          { jobId: audionJobId, status: 'complete' }
-        );
-      }
+      // Wave 22/25: seed per-node outputs from every persona chain's steps.
+      runContext = seedAllPersonaJourneyOutputsIntoContext(
+        runContext,
+        resolvedDoc,
+        runUrl,
+        journeyPersonaRuns,
+        {
+          journeyFlow: primaryJourneyFlow,
+          steps: journeySteps,
+          jobId: audionJobId,
+        },
+      );
       resolvedDoc = {
         ...doc,
         nodes: resolveDocumentStringParams(doc.nodes, runContext),
