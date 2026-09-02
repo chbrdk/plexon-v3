@@ -31,6 +31,7 @@ import {
   type KnowledgePackResponse,
   type ProfileData,
   type ResearchBriefData,
+  type MarketIntelligenceData,
   type SourcesData,
 } from '@/lib/collection-knowledge-pack'
 import type { KnowledgePackDrafts } from '@/lib/assistant/knowledge-pack/research-knowledge-pack'
@@ -105,6 +106,8 @@ function facetLabelKey(id: KnowledgeFacetId): string {
       return 'projects.detail.knowledgeFacetResearch'
     case 'geo_context':
       return 'projects.detail.knowledgeFacetGeo'
+    case 'market_intelligence':
+      return 'projects.detail.knowledgeFacetMarket'
     case 'brand':
       return 'projects.detail.knowledgeFacetBrand'
     case 'sources':
@@ -122,6 +125,8 @@ function facetDekKey(id: KnowledgeFacetId): string {
       return 'projects.detail.knowledgeFacetResearchDek'
     case 'geo_context':
       return 'projects.detail.knowledgeFacetGeoDek'
+    case 'market_intelligence':
+      return 'projects.detail.knowledgeFacetMarketDek'
     case 'brand':
       return 'projects.detail.knowledgeFacetBrandDek'
     case 'sources':
@@ -219,6 +224,28 @@ function GeoRead({ data, empty }: { data: GeoContextData; empty: string }) {
             </li>
           ))}
         </ul>
+      ) : null}
+    </div>
+  )
+}
+
+function MarketRead({ data, empty }: { data: MarketIntelligenceData; empty: string }) {
+  if (isFacetContentEmpty('market_intelligence', data)) return <EmptyState>{empty}</EmptyState>
+  return (
+    <div className="plexon-knowledge-facet-body">
+      {data.summary ? <Text role="body">{data.summary}</Text> : null}
+      {data.topics.length ? <Text role="meta">{data.topics.join(' · ')}</Text> : null}
+      {data.waveHighlights.length ? (
+        <ul className="plexon-knowledge-list">
+          {data.waveHighlights.map((h) => (
+            <li key={h}>
+              <Text role="body">{h}</Text>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {data.sourceThreadId ? (
+        <Text role="meta">thread: {data.sourceThreadId}</Text>
       ) : null}
     </div>
   )
@@ -691,6 +718,8 @@ export function CollectionKnowledgeBand({
         <ResearchRead data={facet.data as ResearchBriefData} empty={emptyCta} />
       ) : id === 'geo_context' ? (
         <GeoRead data={facet.data as GeoContextData} empty={emptyCta} />
+      ) : id === 'market_intelligence' ? (
+        <MarketRead data={facet.data as MarketIntelligenceData} empty={emptyCta} />
       ) : (
         <SourcesRead data={facet.data as SourcesData} empty={emptyCta} />
       )

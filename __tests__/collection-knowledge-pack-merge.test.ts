@@ -29,6 +29,7 @@ describe('collection knowledge pack merge', () => {
     expect(productMayPublishFacet('research_brief', 'audion')).toBe(true);
     expect(productMayPublishFacet('research_brief', 'checkion')).toBe(false);
     expect(productMayPublishFacet('geo_context', 'checkion')).toBe(true);
+    expect(productMayPublishFacet('market_intelligence', 'echon')).toBe(true);
     expect(productMayPublishFacet('brand', 'brandion')).toBe(false);
   });
 });

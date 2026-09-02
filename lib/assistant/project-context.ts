@@ -10,6 +10,12 @@ import {
   audionApiTargetGroups,
 } from '@/lib/paths/audion-api';
 import { formatAudionHttpFailure } from '@/lib/integrations/audion-connectivity';
+import {
+  ensureFacetsShape,
+  normalizeMarketIntelligenceData,
+  normalizeResearchBriefData,
+} from '@/lib/collection-knowledge-pack';
+import { getOrCreateKnowledgePack } from '@/lib/db/collection-knowledge-packs';
 
 type BindingIds = {
   checkionProjectId?: string | null;
@@ -157,6 +163,34 @@ async function fetchAudionProjectContext(
   return lines;
 }
 
+async function fetchKnowledgePackContext(platformProjectId: string): Promise<string[]> {
+  try {
+    const row = await getOrCreateKnowledgePack(platformProjectId);
+    const facets = ensureFacetsShape(row.facets);
+    const lines: string[] = ['### Collection Knowledge Pack'];
+
+    const brief = normalizeResearchBriefData(facets.research_brief.data);
+    if (brief.summary) lines.push(`Research brief: ${brief.summary.slice(0, 400)}`);
+    for (const section of brief.sections.slice(0, 4)) {
+      lines.push(`- ${section.title}: ${section.plainText.slice(0, 220)}`);
+    }
+
+    const market = normalizeMarketIntelligenceData(facets.market_intelligence.data);
+    if (market.summary || market.waveHighlights.length) {
+      lines.push('\n### ECHON Market Intelligence');
+      if (market.summary) lines.push(market.summary.slice(0, 500));
+      for (const h of market.waveHighlights.slice(0, 5)) {
+        lines.push(`- ${h.slice(0, 200)}`);
+      }
+      if (market.sourceThreadId) lines.push(`sourceThreadId: ${market.sourceThreadId}`);
+    }
+
+    return lines.length > 1 ? lines : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function buildCompactProjectContextBlock(
   platformProjectId: string,
   plexonUserId: string,
@@ -173,6 +207,8 @@ export async function buildCompactProjectContextBlock(
     bindings.checkionProjectId ? `checkionProjectId: ${bindings.checkionProjectId}` : null,
     bindings.audionProjectId ? `audionProjectId: ${bindings.audionProjectId}` : null,
   ].filter((l): l is string => Boolean(l));
+
+  sections.push(...(await fetchKnowledgePackContext(platformProjectId)));
 
   if (bindings.checkionProjectId) {
     sections.push('\n### CHECKION');

@@ -13,11 +13,13 @@ import {
   patchKnowledgePackFacet,
 } from '@/lib/db/collection-knowledge-packs';
 import { buildCollectionKnowledgeSection } from '@/lib/collection-flow-rollup';
+import { buildVaillantFlowKnowledgeSection } from '@/lib/demo/vaillant-flow-knowledge-distillate';
 import type { CollectionVerdict } from '@/lib/collection-test-flow';
 
 export async function distillCollectionFlowToKnowledgePack(input: {
   platformProjectId: string;
   flowId: string;
+  templateId?: string | null;
   verdict: CollectionVerdict;
   scanId?: string | null;
   overallScore?: number | null;
@@ -28,14 +30,26 @@ export async function distillCollectionFlowToKnowledgePack(input: {
     const at = new Date().toISOString();
     const facets = ensureFacetsShape(current.facets, at);
     const existing = facets.research_brief;
-    const section = buildCollectionKnowledgeSection({
-      verdict: input.verdict,
-      flowId: input.flowId,
-      scanId: input.scanId,
-      overallScore: input.overallScore,
-    });
+    const sections = [
+      buildCollectionKnowledgeSection({
+        verdict: input.verdict,
+        flowId: input.flowId,
+        scanId: input.scanId,
+        overallScore: input.overallScore,
+      }),
+    ];
+    if (input.templateId) {
+      const vaillantSection = buildVaillantFlowKnowledgeSection({
+        templateId: input.templateId,
+        flowId: input.flowId,
+        verdict: input.verdict,
+        scanId: input.scanId,
+        overallScore: input.overallScore,
+      });
+      if (vaillantSection) sections.push(vaillantSection);
+    }
     const incoming: Partial<ResearchBriefData> = {
-      sections: [section],
+      sections,
       topics: ['collection-test-flow'],
       sourceRunId: input.flowId,
       sourceProjectId: input.platformProjectId,

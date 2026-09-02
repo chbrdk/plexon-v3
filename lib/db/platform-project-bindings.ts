@@ -83,7 +83,14 @@ export async function findPlatformProjectIdByProductExternal(
 }
 
 export async function ensureBindingPlaceholders(platformProjectId: string) {
-  const products: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion'];
+  const products: PlatformProductId[] = [
+    'checkion',
+    'audion',
+    'brandion',
+    'creation',
+    'spirion',
+    'echon',
+  ];
   const db = getDb();
   const now = new Date();
   for (const productId of products) {
@@ -92,10 +99,17 @@ export async function ensureBindingPlaceholders(platformProjectId: string) {
       .values({
         platformProjectId,
         productId,
-        externalProjectId: null,
-        syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.PENDING,
-        syncMessage: null,
-        lastSyncAt: null,
+        // ECHON has no product-local project mirror — Collection id is the federation key.
+        externalProjectId: productId === 'echon' ? platformProjectId : null,
+        syncStatus:
+          productId === 'echon'
+            ? PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC
+            : PLATFORM_PROJECT_BINDING_SYNC_STATUS.PENDING,
+        syncMessage:
+          productId === 'echon'
+            ? 'ECHON Wave 2 — Collection-scoped (no product upsert)'
+            : null,
+        lastSyncAt: productId === 'echon' ? now : null,
         createdAt: now,
         updatedAt: now,
       })

@@ -45,6 +45,8 @@ Bootstrap: `ensureVaillantGroupKnowledgePackSeed()` in `lib/demo/bootstrap-vaill
 
 **Wave 1 — Collection Memory:** Abgeschlossene UC1/UC2-Flow-Runs mergen Distillate in `research_brief`-Sections `vaillant-uc1-flow-latest` / `vaillant-uc2-flow-latest`. Assistant-Reports auf dieser Collection mergen `assistant-report-latest`. Spec: `specs/domain/collection-memory-wave1.md`.
 
+**Wave 2 — ECHON:** Optional Collection-Binding + Facet `market_intelligence` (Publish aus ECHON research_ask / EQC Markt-Schritt). Spec: `specs/domain/echon-collection-binding.md`.
+
 ## AUDION Personas & Zielgruppen
 
 Fixtures: `audion-v3/apps/web/lib/fixtures/vaillant-group-mafo-seed.ts`  

@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '..')
 describe('collection knowledge pack (implementation)', () => {
   const required = [
     'specs/domain/collection-knowledge-pack.md',
+    'specs/domain/collection-memory-wave1.md',
     'specs/api/collection-knowledge-pack.md',
     'lib/collection-knowledge-pack.ts',
     'lib/db/collection-knowledge-packs.ts',
@@ -36,6 +37,7 @@ describe('collection knowledge pack (implementation)', () => {
     const upsert = readFileSync(path.join(root, 'lib/platform-project-upsert.ts'), 'utf8')
     expect(domain).toContain('research_brief')
     expect(domain).toContain('geo_context')
+    expect(domain).toContain('market_intelligence')
     expect(domain).toContain('reserved')
     expect(domain).toContain('collection_knowledge_packs')
     expect(schema).toContain('collectionKnowledgePacks')

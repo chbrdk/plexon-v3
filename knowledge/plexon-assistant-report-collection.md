@@ -55,5 +55,9 @@ POST Generate: `{ title?: string }` — nutzt alle Pins der Conversation.
 
 Client: `ReportPdfDownloadButton` prüft `%PDF`-Magic-Bytes und zeigt Fehler statt `pdf.json`.
 
+## Collection Memory (Wave 1)
+
+When the conversation is bound to a Collection (`platformProjectId`), report generate **best-effort** merges a distillate into Knowledge Pack `research_brief` section `assistant-report-latest`. Opt-out: `{ "publishToCollection": false }`. Spec: `specs/domain/collection-memory-wave1.md` · code: `lib/assistant/knowledge-pack/distill-assistant-report.ts`.
+
 **Print-Block-Mapping** (PLEXON `render-ui-block-pdf.tsx`, CHECKION `PlexonAssistantReportDocument.tsx`):
 `text`, `alert`, `metric_grid` (Stat-Tiles), `data_table` (echte Tabelle), `key_value_list`, `finding_list`, `recommendation_list`, `link_list`, `persona_card`, `target_group_card`, `summary_card`, `step_list`, `corner_tab_section`, `collapsible`, `chart` (Wertetabelle). Charts ohne Grafik — Daten als Tabelle.

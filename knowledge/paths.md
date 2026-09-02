@@ -40,7 +40,7 @@
   - Shared chat blocks (metric / kv / steps): `knowledge/assistant-chat-blocks-msqdx-ui.md` · Storybook `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chatcatalog--inventory`
   - Journey outline blocks: `phase_strip` / `moment_list` / `quote_list` · builder `lib/assistant/ui-blocks/build-journey-outline-ui.ts`
   - Journey outline intent: `journey_outline` · `specs/domain/assistant-journey-outline.md` · `knowledge/assistant-journey-outline.md` · client `lib/integrations/audion-journey-outline-client.ts` · paths `audionPlatformJourneyById` / `audionPlatformJourneyValidate`
-  - Persona → page relevance: `persona_page_relevance` · `specs/domain/assistant-persona-page-relevance.md` · client `lib/integrations/persona-page-relevance-client.ts` · CHECKION `checkionApiDomainScanPages` · ranker `lib/assistant/persona-page-relevance/rank-corpus-pages.ts`
+  - Persona → page relevance: `persona_page_relevance` · `specs/domain/assistant-persona-page-relevance.md` · Wave 2 `knowledge/persona-page-relevance-wave2-roadmap.md`
   - Journey generate intent: `journey_generate` · `specs/domain/assistant-journey-generate.md` · path `audionPlatformJourneyGenerate`
   - Interactive phase→moments: `knowledge/assistant-journey-interactive.md` · `UiPhaseStrip` embeds moments
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
@@ -84,6 +84,8 @@
 - Collection Test Flow Wave 4 (Study rollup):
   - After journey: `audionPlatformStudyWaveEvaluate` + PATCH wave (`audionPlatformStudyWave`)
   - Rollup helper `lib/collection-flow-rollup.ts`; KP distillate → `research_brief` section `collection-test-flow-latest`
+  - Wave 1 Collection Memory: `specs/domain/collection-memory-wave1.md` · Vaillant `vaillant-uc*-flow-latest` · Assistant `assistant-report-latest` · `lib/demo/vaillant-flow-knowledge-distillate.ts` · `lib/assistant/knowledge-pack/distill-assistant-report.ts`
+  - Wave 2 ECHON: `specs/domain/echon-collection-binding.md` · facet `market_intelligence` · `lib/assistant/knowledge-pack/distill-echon-market.ts` · optional `echon` binding placeholder
 - Collection Test Flow Waves 5–7 (Audion board parity):
   - Board chrome: `@msqdx/ui` flow organisms (`.msqdx-flow-*`, `flow-board-chrome.md`) via `components/flows/CollectionFlowBoard.tsx` + RF node / inspector / palette — no `plexon-flow-board.css`
   - Canvas helpers: `lib/collection-flow-canvas.ts`

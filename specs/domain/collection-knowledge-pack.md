@@ -153,6 +153,16 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | `sourceRunId` | string \| null | Audion research run id |
 | `sourceProjectId` | string \| null | Audion local project id |
 
+**Wave 1 section ids** (same facet, stable merge keys — see `specs/domain/collection-memory-wave1.md`):
+
+| Section id | Publisher |
+|------------|-----------|
+| `collection-test-flow-latest` | Plexon flow execute |
+| `vaillant-uc1-flow-latest` / `vaillant-uc2-flow-latest` | Vaillant MaFo templates |
+| `assistant-report-latest` | Plexon Assistant report generate |
+
+Future Wave 2 may split `assistant_insights` / `market_intelligence` into dedicated facets.
+
 ### 4. `geo_context`
 
 | | |
@@ -173,7 +183,26 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | `lastGeoJobId` | string \| null | |
 | `notes` | string \| null | |
 
-### 5. `brand` (reserved)
+### 5. `market_intelligence` (Wave 2 — ECHON)
+
+| | |
+|--|--|
+| **Purpose** | Cross-product market-intelligence distillate from ECHON |
+| **Owner** | **ECHON** publish; Plexon may lightly edit |
+| **Consume** | Assistant Collection context, Audion research seed, CREATION |
+| **Publish rules** | After research_ask / EQC market step — summary + highlights only. No signal dumps or chat transcripts. Spec: `specs/domain/echon-collection-binding.md` |
+
+**Fields:**
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `summary` | string \| null | Plain ≤ ~2k chars |
+| `topics` | string[] | Theme keywords |
+| `briefingRefs` | `{ briefingId, title, url? }[]` | Optional links |
+| `waveHighlights` | string[] | Short bullets |
+| `sourceThreadId` | string \| null | ECHON research thread id |
+
+### 6. `brand` (reserved)
 
 | | |
 |--|--|
@@ -193,7 +222,7 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | `tokenRefs` | `{ kind: 'color'\|'font'\|'logo', name, externalId? }[]` | Metadata only |
 | `activeGuidelineVersion` | string \| null | |
 
-### 6. `sources`
+### 7. `sources`
 
 | | |
 |--|--|

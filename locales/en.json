@@ -481,6 +481,8 @@
       "knowledgeFacetResearchDek": "Distillate from AUDION — plain text, not the full dossier.",
       "knowledgeFacetGeo": "GEO context",
       "knowledgeFacetGeoDek": "Findability themes from CHECKION GEO.",
+      "knowledgeFacetMarket": "Market intelligence",
+      "knowledgeFacetMarketDek": "ECHON distillate — signal/research brief for the Collection.",
       "knowledgeFacetBrand": "Brand",
       "knowledgeFacetBrandDek": "Guideline catalog from Brandion (pack distillates later).",
       "knowledgeFacetSources": "Sources",

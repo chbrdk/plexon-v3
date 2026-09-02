@@ -2,6 +2,7 @@ import { API_STATUS, apiError } from '@/lib/api-error-handler';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { getAssistantConversationById } from '@/lib/db/assistant-conversations';
 import { listReportPinsForConversation } from '@/lib/db/assistant-report-pins';
+import { distillAssistantReportToKnowledgePack } from '@/lib/assistant/knowledge-pack/distill-assistant-report';
 import { generateConversationReport } from '@/lib/assistant/reports/generate-conversation-report';
 import { runtimeEnv } from '@/lib/runtime-env';
 
@@ -22,13 +23,15 @@ export async function POST(
     return apiError('Not found', API_STATUS.NOT_FOUND);
   }
 
-  let body: { title?: unknown; pinIds?: unknown };
+  let body: { title?: unknown; pinIds?: unknown; publishToCollection?: unknown };
   try {
     body = await request.json().catch(() => ({}));
   } catch {
     body = {};
   }
 
+  const publishToCollection =
+    body.publishToCollection === false ? false : true;
   const titleHint = typeof body.title === 'string' ? body.title.trim() : undefined;
   const pinIds = Array.isArray(body.pinIds)
     ? body.pinIds.filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
@@ -56,6 +59,21 @@ export async function POST(
   const origin = new URL(request.url).origin;
   const shareUrl = `${origin}${result.sharePath}`;
 
+  let knowledgePackPublished = false;
+  let knowledgePackError: string | null = null;
+  if (publishToCollection && conversation.platformProjectId) {
+    const distill = await distillAssistantReportToKnowledgePack({
+      platformProjectId: conversation.platformProjectId,
+      conversationId: id,
+      reportId: result.reportId,
+      narrative: result.narrative,
+      sharePath: result.sharePath,
+      updatedByUserId: user.id,
+    });
+    knowledgePackPublished = distill.ok;
+    if (!distill.ok) knowledgePackError = distill.error;
+  }
+
   return Response.json({
     reportId: result.reportId,
     title: result.title,
@@ -64,5 +82,7 @@ export async function POST(
     sharePath: result.sharePath,
     shareUrl,
     shareToken: result.shareToken,
+    knowledgePackPublished,
+    ...(knowledgePackError ? { knowledgePackError } : {}),
   });
 }

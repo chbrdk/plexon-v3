@@ -10,13 +10,14 @@ export const KNOWLEDGE_FACET_IDS = [
   'competitive',
   'research_brief',
   'geo_context',
+  'market_intelligence',
   'brand',
   'sources',
 ] as const;
 
 export type KnowledgeFacetId = (typeof KNOWLEDGE_FACET_IDS)[number];
 
-export type KnowledgeProductId = 'plexon' | 'audion' | 'checkion' | 'brandion';
+export type KnowledgeProductId = 'plexon' | 'audion' | 'checkion' | 'brandion' | 'echon';
 
 export type FacetProvenance = {
   actorType: 'user' | 'service' | 'system';
@@ -96,6 +97,21 @@ export type BrandReservedData = {
   activeGuidelineVersion: string | null;
 };
 
+export type MarketBriefingRef = {
+  briefingId: string;
+  title: string;
+  url?: string | null;
+};
+
+/** ECHON Wave 2 — Collection-scoped market distillate. */
+export type MarketIntelligenceData = {
+  summary: string | null;
+  topics: string[];
+  briefingRefs: MarketBriefingRef[];
+  waveHighlights: string[];
+  sourceThreadId: string | null;
+};
+
 export type SourceItem = {
   id: string;
   title: string;
@@ -115,6 +131,7 @@ export type KnowledgePackFacets = {
   competitive: FacetDocument<CompetitiveData>;
   research_brief: FacetDocument<ResearchBriefData>;
   geo_context: FacetDocument<GeoContextData>;
+  market_intelligence: FacetDocument<MarketIntelligenceData>;
   brand: FacetDocument<BrandReservedData>;
   sources: FacetDocument<SourcesData>;
 };
@@ -134,6 +151,7 @@ export const FACET_SIZE_BUDGETS: Record<KnowledgeFacetId, number> = {
   competitive: 16 * 1024,
   research_brief: 64 * 1024,
   geo_context: 32 * 1024,
+  market_intelligence: 32 * 1024,
   brand: 16 * 1024,
   sources: 32 * 1024,
 };
@@ -191,6 +209,13 @@ export function createEmptyFacets(at = new Date().toISOString()): KnowledgePackF
       lastGeoJobId: null,
       notes: null,
     }, at),
+    market_intelligence: emptyEnvelope('market_intelligence', {
+      summary: null,
+      topics: [],
+      briefingRefs: [],
+      waveHighlights: [],
+      sourceThreadId: null,
+    }, at),
     brand: emptyEnvelope('brand', {
       status: 'reserved',
       guidelineRef: null,
@@ -212,8 +237,9 @@ export const FACET_PUBLISH_OWNERS: Record<KnowledgeFacetId, KnowledgeProductId[]
   competitive: ['plexon', 'checkion', 'audion'],
   research_brief: ['audion', 'plexon'],
   geo_context: ['checkion'],
+  market_intelligence: ['echon', 'plexon'],
   brand: ['brandion'],
-  sources: ['plexon', 'audion', 'checkion', 'brandion'],
+  sources: ['plexon', 'audion', 'checkion', 'brandion', 'echon'],
 };
 
 export function productMayPublishFacet(
@@ -355,6 +381,32 @@ export function normalizeGeoContextData(input: unknown): GeoContextData {
   };
 }
 
+export function normalizeMarketIntelligenceData(input: unknown): MarketIntelligenceData {
+  const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+  const refsRaw = Array.isArray(raw.briefingRefs) ? raw.briefingRefs : [];
+  const briefingRefs: MarketBriefingRef[] = [];
+  for (const item of refsRaw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.briefingId !== 'string' || typeof row.title !== 'string') continue;
+    briefingRefs.push({
+      briefingId: row.briefingId.trim(),
+      title: row.title.trim().slice(0, 200),
+      url: typeof row.url === 'string' ? row.url.trim() || null : null,
+    });
+    if (briefingRefs.length >= 12) break;
+  }
+  return {
+    summary:
+      typeof raw.summary === 'string' ? raw.summary.trim().slice(0, 2000) || null : null,
+    topics: asStringArray(raw.topics, 48),
+    briefingRefs,
+    waveHighlights: asStringArray(raw.waveHighlights, 24),
+    sourceThreadId:
+      typeof raw.sourceThreadId === 'string' ? raw.sourceThreadId.trim() || null : null,
+  };
+}
+
 export function normalizeBrandData(input: unknown): BrandReservedData {
   const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
   // Phase 1: always reserved — ignore attempts to activate
@@ -391,7 +443,8 @@ export function normalizeSourcesData(input: unknown): SourcesData {
         row.addedByProduct === 'plexon' ||
         row.addedByProduct === 'audion' ||
         row.addedByProduct === 'checkion' ||
-        row.addedByProduct === 'brandion'
+        row.addedByProduct === 'brandion' ||
+        row.addedByProduct === 'echon'
           ? row.addedByProduct
           : null,
       addedAt:
@@ -412,6 +465,8 @@ export function normalizeFacetData(facetId: KnowledgeFacetId, data: unknown): un
       return normalizeResearchBriefData(data);
     case 'geo_context':
       return normalizeGeoContextData(data);
+    case 'market_intelligence':
+      return normalizeMarketIntelligenceData(data);
     case 'brand':
       return normalizeBrandData(data);
     case 'sources':
@@ -498,6 +553,20 @@ export function mergeFacetData(
         notes: b.notes ?? a.notes,
       } satisfies GeoContextData;
     }
+    case 'market_intelligence': {
+      const a = normalizeMarketIntelligenceData(existing);
+      const b = normalizeMarketIntelligenceData(incoming);
+      const byId = new Map<string, MarketBriefingRef>();
+      for (const r of a.briefingRefs) byId.set(r.briefingId, r);
+      for (const r of b.briefingRefs) byId.set(r.briefingId, r);
+      return {
+        summary: b.summary ?? a.summary,
+        topics: uniqueStrings([...a.topics, ...b.topics], 48),
+        briefingRefs: [...byId.values()].slice(0, 12),
+        waveHighlights: uniqueStrings([...a.waveHighlights, ...b.waveHighlights], 24),
+        sourceThreadId: b.sourceThreadId ?? a.sourceThreadId,
+      } satisfies MarketIntelligenceData;
+    }
     case 'brand':
       return normalizeBrandData(incoming);
     case 'sources': {
@@ -528,7 +597,8 @@ export function normalizeProvenance(
     raw.productId === 'plexon' ||
     raw.productId === 'audion' ||
     raw.productId === 'checkion' ||
-    raw.productId === 'brandion'
+    raw.productId === 'brandion' ||
+    raw.productId === 'echon'
       ? raw.productId
       : fallback.productId ?? null;
   return {
@@ -613,6 +683,13 @@ export function facetPreview(facetId: KnowledgeFacetId, data: unknown): string {
       if (d.seedQueries.length) return `${d.seedQueries.length} seed queries`;
       return 'No GEO context';
     }
+    case 'market_intelligence': {
+      const d = normalizeMarketIntelligenceData(data);
+      if (d.summary) return d.summary.slice(0, 120);
+      if (d.waveHighlights.length) return `${d.waveHighlights.length} wave highlight(s)`;
+      if (d.topics.length) return d.topics.slice(0, 3).join(' · ');
+      return 'No market intelligence';
+    }
     case 'brand':
       return 'Coming with Brandion';
     case 'sources': {
@@ -656,6 +733,16 @@ export function isFacetContentEmpty(facetId: KnowledgeFacetId, data: unknown): b
         d.knownCompetitors.length ||
         d.targetHosts.length ||
         d.notes
+      );
+    }
+    case 'market_intelligence': {
+      const d = normalizeMarketIntelligenceData(data);
+      return !(
+        d.summary ||
+        d.topics.length ||
+        d.briefingRefs.length ||
+        d.waveHighlights.length ||
+        d.sourceThreadId
       );
     }
     case 'brand':

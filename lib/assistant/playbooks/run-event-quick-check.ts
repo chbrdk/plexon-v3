@@ -1165,6 +1165,15 @@ export async function runEventQuickCheck(
             findingCount: market.keyFindings?.length ?? 0,
           },
         });
+        if (platformProjectId) {
+          const { distillEchonMarketToKnowledgePack } = await import(
+            '@/lib/assistant/knowledge-pack/distill-echon-market'
+          );
+          void distillEchonMarketToKnowledgePack({
+            platformProjectId,
+            market,
+          });
+        }
       } else if (market.reason === 'echon_poll_timeout') {
         steps = await patchStep('echon_market_research', {
           status: 'done',
@@ -1642,6 +1651,15 @@ async function finishEventQuickCheckFromGeo(
             findingCount: market.keyFindings?.length ?? 0,
           },
         });
+        if (platformProjectId) {
+          const { distillEchonMarketToKnowledgePack } = await import(
+            '@/lib/assistant/knowledge-pack/distill-echon-market'
+          );
+          void distillEchonMarketToKnowledgePack({
+            platformProjectId,
+            market,
+          });
+        }
       } else if (market.reason === 'echon_poll_timeout') {
         steps = await patchStep('echon_market_research', {
           status: 'done',

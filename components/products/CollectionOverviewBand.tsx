@@ -53,6 +53,8 @@ function facetLabelKey(id: KnowledgeFacetId): string {
       return 'projects.detail.knowledgeFacetResearch'
     case 'geo_context':
       return 'projects.detail.knowledgeFacetGeo'
+    case 'market_intelligence':
+      return 'projects.detail.knowledgeFacetMarket'
     case 'brand':
       return 'projects.detail.knowledgeFacetBrand'
     case 'sources':

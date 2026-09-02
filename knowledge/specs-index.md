@@ -7,6 +7,8 @@
 | Collection projects | `specs/domain/collection-projects.md` |
 | Collection Test Flow | `specs/domain/collection-test-flow.md` |
 | Collection Knowledge Pack | `specs/domain/collection-knowledge-pack.md` |
+| Collection Memory (Wave 1) | `specs/domain/collection-memory-wave1.md` |
+| ECHON Collection binding (Wave 2) | `specs/domain/echon-collection-binding.md` |
 | UI migrate (index) | `specs/domain/ui-migrate.md` |
 | UI migrate — dashboard | `specs/domain/ui-migrate-dashboard.md` |
 | UI migrate — products | `specs/domain/ui-migrate-products.md` |
