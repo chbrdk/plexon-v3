@@ -45,14 +45,17 @@ WORKDIR /workspace/plexon-v3
 
 # ds stage is often Docker-cached with a stale msqdx-ui main — refresh after app COPY so
 # webpack aliases (lib/msqdx-ui.ts → ../msqdx-ui/packages/ui/src) match latest DS commits.
+# Fetch may fail without GH credentials in builder; keep the ds-stage clone in that case.
 RUN cd /workspace/msqdx-ui \
-    && git fetch origin "${MSQDX_UI_BRANCH}" --depth 1 \
-    && git reset --hard "origin/${MSQDX_UI_BRANCH}" \
+    && (git fetch origin "${MSQDX_UI_BRANCH}" --depth 1 \
+        && git reset --hard "origin/${MSQDX_UI_BRANCH}" \
+        || echo "msqdx-ui refresh skipped — using ds-stage clone") \
     && pnpm install --frozen-lockfile \
     && pnpm build \
     && cd /workspace/msqdx-design-system \
-    && git fetch origin "${MSQDX_DS_BRANCH}" --depth 1 \
-    && git reset --hard "origin/${MSQDX_DS_BRANCH}" \
+    && (git fetch origin "${MSQDX_DS_BRANCH}" --depth 1 \
+        && git reset --hard "origin/${MSQDX_DS_BRANCH}" \
+        || echo "msqdx-design-system refresh skipped — using ds-stage clone") \
     && npm install \
     && npm run build
 
