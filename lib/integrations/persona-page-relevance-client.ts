@@ -37,6 +37,23 @@ function normalizeName(value: string): string {
   return value.trim().toLowerCase();
 }
 
+/** Infer B2C/B2B spine URL when the prompt names a spine but no explicit URL. */
+export function inferPersonaPageSpineUrlHint(text: string): string | undefined {
+  const t = text.toLowerCase();
+  if (
+    /\bmyvaillant\s*pro\b/.test(t) ||
+    /\bmyvaillantpro\b/.test(t) ||
+    /\bfachpartner(?:-spine|-portal)?\b/.test(t) ||
+    (/\bb2b\b/.test(t) && /\b(fach(?:handwerker|partner)|installateur)\b/.test(t))
+  ) {
+    return 'https://www.myvaillantpro.de/';
+  }
+  if (/\bvaillant\.de\b/.test(t) || /\bb2c\b/.test(t)) {
+    return 'https://www.vaillant.de/';
+  }
+  return undefined;
+}
+
 export function resolvePersonaFromCatalog(
   personas: AudionCatalogPersona[],
   opts: { personaId?: string; personaName?: string },
@@ -156,6 +173,7 @@ export async function runPersonaPageRelevance(input: {
     const urlHint =
       input.urlHint?.trim() ||
       (input.prompt ? extractUrlFromText(input.prompt) : undefined) ||
+      (input.prompt ? inferPersonaPageSpineUrlHint(input.prompt) : undefined) ||
       undefined;
     domainScan = pickCompletedDomainScan(scans.scans, urlHint);
   }

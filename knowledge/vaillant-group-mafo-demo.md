@@ -30,15 +30,18 @@ Idempotent on container start (after `db:push`):
 
 - Knowledge Pack `research_brief` (UC1 Hypothesen + UC2 Opportunity Map)
 - Flow UC1 + Flow UC2
-- CHECKION B2C/B2B Deep-Scan-Corpus (Wave 2 Epic D) — startet fehlende Crawls, Container-Boot mit `--corpus-no-wait`
+- CHECKION B2C/B2B Deep-Scan-Corpus (Wave 2 Epic D) — **reuse** vorhandener completed Scans; Neuscan nur bei `--force-corpus-refresh`
 
 Operator: `DATABASE_URL=… npx tsx scripts/bootstrap-vaillant-group-mafo.ts`  
-Ohne Poll-Wartezeit (Container): `… bootstrap-vaillant-group-mafo.ts --corpus-no-wait`
+Ohne Poll-Wartezeit (Container): `… bootstrap-vaillant-group-mafo.ts --corpus-no-wait`  
+Corpus erzwingen neu crawlen: `… --force-corpus-refresh` oder `VAILLANT_MAFO_CORPUS_FORCE_REFRESH=1`
 
 ## Knowledge Pack
 
 Seed: `lib/demo/vaillant-group-knowledge-seed.ts` → Facet `research_brief`  
 Bootstrap: `ensureVaillantGroupKnowledgePackSeed()` in `lib/demo/bootstrap-vaillant-group-knowledge-pack.ts`
+
+**Wave 1 — Collection Memory:** Abgeschlossene UC1/UC2-Flow-Runs mergen Distillate in `research_brief`-Sections `vaillant-uc1-flow-latest` / `vaillant-uc2-flow-latest`. Assistant-Reports auf dieser Collection mergen `assistant-report-latest`. Spec: `specs/domain/collection-memory-wave1.md`.
 
 ## AUDION Personas & Zielgruppen
 

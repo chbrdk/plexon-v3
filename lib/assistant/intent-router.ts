@@ -7,6 +7,7 @@ import {
   extractScanIdFromText,
   extractUrlFromText,
 } from '@/lib/assistant/conversation-context';
+import { inferPersonaPageSpineUrlHint } from '@/lib/integrations/persona-page-relevance-client';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
 
 export type AssistantIntent =
@@ -498,7 +499,7 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
   }
 
   if (PERSONA_PAGE_RELEVANCE_PATTERNS.some((p) => p.test(trimmed))) {
-    const urlHint = extractUrlFromText(trimmed);
+    const urlHint = extractUrlFromText(trimmed) ?? inferPersonaPageSpineUrlHint(trimmed);
     return {
       type: 'persona_page_relevance',
       personaId: extractPersonaId(trimmed),

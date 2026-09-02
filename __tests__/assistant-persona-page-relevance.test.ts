@@ -23,6 +23,17 @@ describe('persona page relevance intent', () => {
     }
   });
 
+  it('infers B2B fachpartner spine when no URL is given', () => {
+    const intent = routeAssistantIntent(
+      'Welche Seiten sind für Klaus besonders relevant — CHECKION-Metriken auf dem Fachpartner-Spine?',
+    );
+    expect(intent.type).toBe('persona_page_relevance');
+    if (intent.type === 'persona_page_relevance') {
+      expect(intent.personaName).toBe('Klaus');
+      expect(intent.urlHint).toMatch(/myvaillantpro\.de/);
+    }
+  });
+
   it('does not steal persona bootstrap intents', () => {
     expect(routeAssistantIntent('Generiere Persona für Zielgruppe Eltern').type).toBe('persona_bootstrap');
   });

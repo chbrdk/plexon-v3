@@ -19,7 +19,7 @@ if [ -n "$DATABASE_URL" ]; then
   fi
 
   echo "[PLEXON] Vaillant Group MaFo flow bootstrap (idempotent)..."
-  if npx tsx scripts/bootstrap-vaillant-group-mafo.ts; then
+  if npx tsx scripts/bootstrap-vaillant-group-mafo.ts --corpus-no-wait; then
     echo "[PLEXON] Vaillant Group flow bootstrap complete."
     echo "[PLEXON] Vaillant Group MaFo auto-run UC1+UC2 (if pending, background)..."
     npx tsx scripts/run-vaillant-group-mafo-flow.ts --all --if-pending &

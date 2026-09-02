@@ -27,6 +27,8 @@ export type CheckionDomainScanSummary = {
   status: string;
   overallScore: number | null;
   pageCount?: number;
+  startedAt?: string;
+  completedAt?: string | null;
   error?: string;
   issueStats?: { errors: number; warnings: number; notices: number; total: number } | null;
 };
@@ -80,6 +82,13 @@ function parseDomain(body: unknown): CheckionDomainScanSummary | null {
     status: typeof scanRaw.status === 'string' ? scanRaw.status : 'queued',
     overallScore,
     pageCount: typeof scanRaw.pageCount === 'number' ? scanRaw.pageCount : undefined,
+    startedAt: typeof scanRaw.startedAt === 'string' ? scanRaw.startedAt : undefined,
+    completedAt:
+      typeof scanRaw.completedAt === 'string'
+        ? scanRaw.completedAt
+        : scanRaw.completedAt === null
+          ? null
+          : undefined,
     error: typeof scanRaw.error === 'string' ? scanRaw.error : undefined,
     issueStats,
   };
@@ -122,7 +131,7 @@ export async function listCheckionDomainScansV3(projectId?: string): Promise<
   }
 }
 
-function hostKey(raw: string): string {
+export function checkionDomainScanHostKey(raw: string): string {
   try {
     const u = new URL(raw.startsWith('http') ? raw : `https://${raw}`);
     return u.hostname.replace(/^www\./i, '').toLowerCase();
@@ -151,11 +160,11 @@ export async function findCheckionDomainScanIdByUrl(input: {
   /** Prefer terminal completed scans (for stuck-run reconcile). */
   preferCompleted?: boolean;
 }): Promise<string | null> {
-  const want = hostKey(input.url || input.domain || '');
+  const want = checkionDomainScanHostKey(input.url || input.domain || '');
   if (!want) return null;
   const listed = await listCheckionDomainScansV3(input.projectId?.trim() || undefined);
   if (!listed.ok || !listed.scans.length) return null;
-  let sameHost = listed.scans.filter((s) => hostKey(s.url) === want);
+  let sameHost = listed.scans.filter((s) => checkionDomainScanHostKey(s.url) === want);
   if (!sameHost.length) return null;
   if (input.preferCompleted) {
     const done = sameHost.filter((s) => isCompletedStatus(s.status));
@@ -369,13 +378,23 @@ export async function runCheckionDomainScanV3(input: {
   maxPages?: number;
   /** Adopt an already-started CHECKION scan (skip duplicate POST). */
   existingScanId?: string;
+  /** Reuse newest completed scan for the same host when no existingScanId is set. */
+  reuseExistingCompleted?: boolean;
   /** Fired once the scan id is known (start or adopt) — persist before long poll. */
   onStarted?: (scan: CheckionDomainScanSummary) => void | Promise<void>;
 }): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string; scan?: CheckionDomainScanSummary }
 > {
-  const existingId = input.existingScanId?.trim();
+  let existingId = input.existingScanId?.trim();
+  if (!existingId && input.reuseExistingCompleted) {
+    existingId =
+      (await findCheckionDomainScanIdByUrl({
+        url: input.url,
+        projectId: input.projectId,
+        preferCompleted: true,
+      })) ?? undefined;
+  }
   if (existingId) {
     const detail = await fetchCheckionDomainScanV3Detail(existingId);
     if (!detail.ok) return { ok: false, error: detail.error };

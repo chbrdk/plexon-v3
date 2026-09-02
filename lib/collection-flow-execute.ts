@@ -561,6 +561,7 @@ export async function executeCollectionFlowRun(input: {
             url: scanUrl,
             maxPages:
               typeof qualityNode?.maxPages === 'number' ? qualityNode.maxPages : undefined,
+            reuseExistingCompleted: true,
           });
           if (!domainResult.ok) {
             quality = {
@@ -1103,6 +1104,7 @@ export async function executeCollectionFlowRun(input: {
     const distillate = await distillCollectionFlowToKnowledgePack({
       platformProjectId: id,
       flowId: fid,
+      templateId: doc.templateId ?? null,
       verdict,
       scanId: quality?.pageScanId ?? quality?.id ?? geoJobId,
       overallScore: overallForVerdict,

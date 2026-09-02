@@ -85,6 +85,49 @@ describe('capability C4 executors + adapters', () => {
     const ctx = setContextBundle(emptyRunContext(), 'domain', result.catalogBundle!);
     expect(resolveCatalogPath(ctx, 'domain.overallScore')).toBe(71);
     expect(resolveCatalogPath(ctx, 'domain.url')).toBe('https://domain.test');
+    expect(runCheckionDomainScanV3).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reuseExistingCompleted: true,
+      }),
+    );
+  });
+
+  it('domain_scan capability does not reuse completed scans for agent source', async () => {
+    vi.mocked(runCheckionDomainScanV3).mockResolvedValue({
+      ok: true,
+      scan: {
+        id: 'ds-agent',
+        projectId: 'ck-1',
+        url: 'https://domain.test',
+        status: 'completed',
+        overallScore: 71,
+        pageCount: 12,
+      },
+    });
+    vi.mocked(fetchCheckionDomainScanV3Preview).mockResolvedValue({
+      ok: true,
+      preview: {
+        id: 'ds-agent',
+        domain: 'domain.test',
+        url: 'https://domain.test',
+        score: 71,
+        totalPages: 12,
+        status: 'completed',
+        stats: { errors: 0, warnings: 0, notices: 0, total: 0 },
+        topIssues: [],
+      },
+    });
+
+    await executeCheckionDomainScanCapability(
+      { url: 'https://domain.test' },
+      { source: 'agent', checkionProjectId: 'ck-1', platformProjectId: 'pp-1' },
+    );
+
+    expect(runCheckionDomainScanV3).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reuseExistingCompleted: false,
+      }),
+    );
   });
 
   it('geo_job capability writes geo.* catalog and signals', async () => {

@@ -16,10 +16,16 @@ import {
 } from '@/lib/db/collection-flow-runs';
 import { getCollectionTestFlow, listCollectionTestFlows } from '@/lib/db/collection-test-flows';
 import {
+  documentHasDomainScanNode,
+  ensureVaillantCheckionCorpus,
+  spinesForMafoFlowKind,
+} from '@/lib/demo/ensure-vaillant-checkion-corpus';
+import {
   VAILLANT_GROUP_FLOW_UC2_TEMPLATE_ID,
   VAILLANT_GROUP_FLOW_TEMPLATE_ID,
   isVaillantGroupCollection,
 } from '@/lib/demo/vaillant-group-mafo';
+import { fetchCheckionDomainScanV3Detail } from '@/lib/integrations/checkion-domain-scans-v3-client';
 
 export type VaillantMafoFlowKind = 'uc1' | 'uc2';
 
@@ -72,6 +78,36 @@ async function flowHasCompletedRun(
   return recent.some((r) => r.status === 'complete');
 }
 
+const DOMAIN_SCAN_TERMINAL_OK = new Set(['completed', 'complete']);
+
+async function domainScanStepReady(
+  domainScanId: string | null | undefined,
+  scanStatus: string | null | undefined,
+): Promise<{ ok: boolean; error?: string }> {
+  if (domainScanId) {
+    const detail = await fetchCheckionDomainScanV3Detail(domainScanId);
+    if (!detail.ok) {
+      return { ok: false, error: detail.error };
+    }
+    const status = String(detail.scan.status ?? '').toLowerCase();
+    if (DOMAIN_SCAN_TERMINAL_OK.has(status)) {
+      return { ok: true };
+    }
+    return {
+      ok: false,
+      error: `Domain scan ${domainScanId} not completed (status=${detail.scan.status})`,
+    };
+  }
+  const status = String(scanStatus ?? '').toLowerCase();
+  if (DOMAIN_SCAN_TERMINAL_OK.has(status)) {
+    return { ok: true };
+  }
+  return {
+    ok: false,
+    error: `Domain scan step not completed (status=${scanStatus ?? 'unknown'})`,
+  };
+}
+
 export async function runVaillantGroupMafoFlow(input: {
   platformProjectId: string;
   kind: VaillantMafoFlowKind;
@@ -104,6 +140,25 @@ export async function runVaillantGroupMafoFlow(input: {
   }
 
   const doc = ensureFlowDocument(row.flow);
+
+  const corpus = await ensureVaillantCheckionCorpus({
+    platformProjectId,
+    spines: spinesForMafoFlowKind(input.kind),
+    waitForCompletion: true,
+  });
+  if (!corpus.ok) {
+    const spineErrors = corpus.spines
+      .filter((s) => !s.ok)
+      .map((s) => `${s.spine}: ${s.error ?? 'failed'}`)
+      .join('; ');
+    return {
+      ok: false,
+      platformProjectId,
+      flowId,
+      error: spineErrors || corpus.error || 'CHECKION corpus not ready',
+    };
+  }
+
   const run = await createCollectionFlowRun({
     flowId,
     platformProjectId,
@@ -134,6 +189,30 @@ export async function runVaillantGroupMafoFlow(input: {
       historyRunId: run.id,
       error: result.message,
     };
+  }
+
+  if (documentHasDomainScanNode(doc.nodes)) {
+    const domainReady = await domainScanStepReady(
+      result.lastRun.domainScanId,
+      result.lastRun.status,
+    );
+    if (!domainReady.ok) {
+      await patchCollectionFlowRun({
+        runId: run.id,
+        status: 'error',
+        error: domainReady.error ?? 'Domain scan not completed',
+        verdict: result.verdict,
+        lastRun: result.lastRun,
+      });
+      return {
+        ok: false,
+        platformProjectId,
+        flowId,
+        historyRunId: run.id,
+        status: 'error',
+        error: domainReady.error,
+      };
+    }
   }
 
   const runStatus =

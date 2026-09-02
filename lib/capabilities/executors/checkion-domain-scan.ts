@@ -57,6 +57,7 @@ export async function executeCheckionDomainScanCapability(
     projectId,
     url,
     maxPages,
+    reuseExistingCompleted: ctx.source === 'flow',
     ...(existingScanId ? { existingScanId } : {}),
     ...(onStarted ? { onStarted } : {}),
   });

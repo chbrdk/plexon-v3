@@ -10,6 +10,7 @@ import {
   ensureVaillantGroupBarrierResearchFlow,
   ensureVaillantGroupInstallerDualFlow,
 } from '../lib/demo/bootstrap-vaillant-group-mafo';
+import { ensureVaillantCheckionCorpus } from '../lib/demo/ensure-vaillant-checkion-corpus';
 import { VAILLANT_GROUP_PLATFORM_PROJECT_ID } from '../lib/demo/vaillant-group-mafo';
 
 async function main() {
@@ -18,6 +19,10 @@ async function main() {
     process.exit(1);
   }
 
+  const corpusNoWait = process.argv.includes('--corpus-no-wait');
+  const forceCorpusRefresh =
+    process.argv.includes('--force-corpus-refresh') ||
+    process.env.VAILLANT_MAFO_CORPUS_FORCE_REFRESH === '1';
   const platformProjectId = VAILLANT_GROUP_PLATFORM_PROJECT_ID;
 
   const knowledge = await ensureVaillantGroupKnowledgePackSeed({ platformProjectId });
@@ -38,6 +43,20 @@ async function main() {
     process.exit(1);
   }
 
+  const corpus = await ensureVaillantCheckionCorpus({
+    platformProjectId,
+    waitForCompletion: !corpusNoWait,
+    forceRefresh: forceCorpusRefresh,
+  });
+  if (!corpus.ok) {
+    console.warn('[vaillant-mafo] CHECKION corpus bootstrap incomplete:', corpus.error);
+    for (const spine of corpus.spines) {
+      if (!spine.ok) {
+        console.warn(`  ${spine.spine}: ${spine.error ?? 'failed'}`);
+      }
+    }
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -50,6 +69,11 @@ async function main() {
         flows: {
           uc1: uc1.flowId,
           uc2: uc2.flowId,
+        },
+        corpus: {
+          ok: corpus.ok,
+          checkionProjectId: corpus.checkionProjectId,
+          spines: corpus.spines,
         },
         flowsUrl: `https://plexon-v3.projects-a.plygrnd.tech/projects/${platformProjectId}/flows`,
         knowledgeUrl: `https://plexon-v3.projects-a.plygrnd.tech/projects/${platformProjectId}/knowledge`,
