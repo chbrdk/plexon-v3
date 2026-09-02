@@ -191,6 +191,38 @@ export const collectionFlowRuns = pgTable(
   })
 );
 
+/** Pinned flow node outputs for curated Share reports (Wave 26). */
+export const collectionFlowReportPins = pgTable(
+  'collection_flow_report_pins',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    flowId: text('flow_id')
+      .notNull()
+      .references(() => collectionTestFlows.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Empty string when no run scope — never NULL (unique index). */
+    historyRunId: text('history_run_id').notNull().default(''),
+    nodeId: text('node_id').notNull(),
+    outputSnapshot: jsonb('output_snapshot').$type<Record<string, unknown>>().notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    flowUserIdx: index('collection_flow_report_pins_flow_user_idx').on(t.flowId, t.userId),
+    uniquePin: uniqueIndex('collection_flow_report_pins_unique_uidx').on(
+      t.flowId,
+      t.userId,
+      t.nodeId,
+      t.historyRunId,
+    ),
+  }),
+);
+
 /** Local product project id per platform project (CHECKION / AUDION mirror). */
 export const platformProjectProductBindings = pgTable(
   'platform_project_product_bindings',

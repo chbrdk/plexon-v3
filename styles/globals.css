@@ -6918,25 +6918,61 @@ main {
   gap: 0.35rem;
 }
 .msqdx-flow-outputs-dossier-item {
+  display: flex;
+  gap: 0.35rem;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border, #ccc) 60%, transparent);
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+  overflow: hidden;
+}
+.msqdx-flow-outputs-dossier-main {
   display: grid;
   grid-template-columns: 5.5rem 1fr;
   grid-template-rows: auto auto;
   gap: 0.15rem 0.5rem;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   text-align: left;
   padding: 0.45rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--border, #ccc) 60%, transparent);
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+  border: 0;
+  background: transparent;
   cursor: pointer;
   font: inherit;
   color: inherit;
+}
+.msqdx-flow-outputs-dossier-pin {
+  flex: 0 0 auto;
+  align-self: stretch;
+  padding: 0.35rem 0.55rem;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--border, #ccc) 50%, transparent);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  color: inherit;
+  opacity: 0.8;
+}
+.msqdx-flow-outputs-dossier-pin[aria-pressed='true'] {
+  opacity: 1;
+  font-weight: 600;
 }
 .msqdx-flow-outputs-dossier-item:hover {
   border-color: color-mix(in srgb, var(--accent, #3d6b9a) 50%, var(--border, #ccc));
 }
 .msqdx-flow-outputs-dossier-item--highlight {
   border-left: 3px solid color-mix(in srgb, var(--accent, #3d6b9a) 80%, transparent);
+}
+.plexon-flow-report-cart-bar {
+  margin-top: 0.65rem;
+}
+.plexon-report-cart-preview {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.8rem;
+  opacity: 0.85;
 }
 .msqdx-flow-outputs-dossier-kind {
   grid-row: 1;

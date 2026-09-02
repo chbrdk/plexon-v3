@@ -32,6 +32,7 @@ Make **research and chat outcomes** reusable across Plexon Assistant and product
 | `vaillant-uc1-flow-latest` | Vaillant UC1 template run | Each UC1 complete |
 | `vaillant-uc2-flow-latest` | Vaillant UC2 template run | Each UC2 complete |
 | `assistant-report-latest` | Plexon Assistant curated report | Each report generate (when Collection bound) |
+| `flow-report-latest` | Collection Flow curated report (pinned outputs) | Each flow report generate |
 
 Section shape = existing `ResearchSection` (`id`, `title`, `plainText`, `bullets?`).
 
@@ -53,7 +54,11 @@ When `POST …/assistant/conversations/:id/reports/generate` succeeds **and** th
 
 Opt-out: body `{ "publishToCollection": false }`.
 
-### 3. Audion research (unchanged)
+### 3. Flow report pins → pack
+
+When `POST …/flows/:flowId/reports/generate` succeeds: merge section `flow-report-latest` (opt-out `publishToCollection: false`). Spec: `collection-flow-report-pins.md`.
+
+### 4. Audion research (unchanged)
 
 Autosync distillate via `POST …/knowledge/facets/research_brief/publish` — see `audion-v3/specs/domain/knowledge-pack-publish.md`.
 

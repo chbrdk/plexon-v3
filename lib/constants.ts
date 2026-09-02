@@ -370,6 +370,11 @@ export const apiPlatformProjectFlowRunStatus = (
 /** Wave 17: list Collection Flow runs (newest first). */
 export const apiPlatformProjectFlowRuns = (platformProjectId: string, flowId: string) =>
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/runs`;
+/** Wave 26: pin flow outputs for curated Share reports. */
+export const apiPlatformProjectFlowReportPins = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/report-pins`;
+export const apiPlatformProjectFlowReportGenerate = (platformProjectId: string, flowId: string) =>
+  `${apiPlatformProjectFlow(platformProjectId, flowId)}/reports/generate`;
 /** Wave 15: rotate webhook secret (session edit). */
 export const apiPlatformProjectFlowWebhookRotate = (platformProjectId: string, flowId: string) =>
   `${apiPlatformProjectFlow(platformProjectId, flowId)}/webhook/rotate`;

@@ -108,6 +108,8 @@
     - Wave 17 Run history: UI Testen → `collection_flow_runs` (`trigger: ui`); `GET …/flows/:flowId/runs` · helper `apiPlatformProjectFlowRuns`; Historie dock on board
     - Wave 18–20 Open expressions: `lib/collection-flow-expression.ts`; JsonTree/ExpressionField (`@msqdx/ui`); `set` node aliases
     - Wave 21 Node editor: `@msqdx/ui` `FlowNodeEditorShell`; `lib/collection-flow-inspector-inputs.ts`; fullscreen on node select
+    - Wave 25 Process outputs dossier: rehydrate `journeyPersonaRuns[].steps` → Run-Dock
+    - Wave 26 Flow report pins: `GET/POST/DELETE …/flows/:flowId/report-pins` · `POST …/reports/generate` · helpers `apiPlatformProjectFlowReportPins` / `apiPlatformProjectFlowReportGenerate`; table `collection_flow_report_pins` (migration `0011_collection_flow_report_pins.sql`); KP section `flow-report-latest`
   - Live-Gate: `POST …/journey-jobs/:jobId/gate-branch` · Agent-Segment: `POST …/hybrid-segment`
   - Soft-Q read-only: `GET …/wave-summary`
 - Collection Knowledge Pack (domain): `specs/domain/collection-knowledge-pack.md`

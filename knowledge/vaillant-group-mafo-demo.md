@@ -103,7 +103,7 @@ Scene `scene-vaillant-landing`: Landing + 3 Insight-Seiten (Kosten, Eignung, 3 S
 
 **Fragestellung:** *Warum entscheidet sich ein Eigenheimbesitzer gegen eine Wärmepumpe?*
 
-Demo-Tipp: abgeschlossenen Run zeigen; Gates gibt es bewusst nicht — Prozess vor Korrektheit.
+Demo-Tipp: abgeschlossenen Run zeigen; Gates gibt es bewusst nicht — Prozess vor Korrektheit. Nach dem Lauf: Prozess-Ausgaben **pinnen** → Report-Warenkorb → Share-Link (Wave 26).
 
 ### UC2 · Fachhandwerker Dual Perspective
 

@@ -562,3 +562,10 @@ Do not place this on legacy `/board` Prismion island.
 ### Tests
 
 - Truncate + rehydrate roundtrip; dual-persona seed writes distinct node ids; dossier renders without crash when empty.
+
+## Wave 26 — Flow report pins (Warenkorb)
+
+@seealso [`collection-flow-report-pins.md`](./collection-flow-report-pins.md)
+
+- Pin process outputs from the run-dock dossier → cart → Share report (reuse Assistant report engine).
+- Persist `collection_flow_report_pins`; KP section `flow-report-latest`.

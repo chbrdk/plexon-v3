@@ -35,6 +35,7 @@ import {
   apiPlatformProjectFlowRunJourney,
   apiPlatformProjectFlowWaveSummary,
   apiPlatformProjectDashboard,
+  apiPlatformProjectFlowReportPins,
   getAudionWebOrigin,
   pathPlatformProjectFlows,
 } from '@/lib/constants'
@@ -112,6 +113,10 @@ import { CollectionFlowWebhookPanel } from './CollectionFlowWebhookPanel'
 import { CollectionFlowHistoryPanel } from './CollectionFlowHistoryPanel'
 import { CollectionFlowVerdictCard } from './CollectionFlowVerdictCard'
 import { CollectionFlowOutputsDossier } from './CollectionFlowOutputsDossier'
+import {
+  FlowReportCollectionBar,
+  type FlowReportPinItem,
+} from './FlowReportCollectionBar'
 import {
   IconDelete,
   IconDuplicate,
@@ -201,6 +206,8 @@ function BoardInner({ platformProjectId, initial }: Props) {
     softScoreKeys: string[]
     hasCollectionRollup: boolean
   } | null>(null)
+  const [reportPins, setReportPins] = useState<FlowReportPinItem[]>([])
+  const [pinBusyNodeId, setPinBusyNodeId] = useState<string | null>(null)
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const runMetaRef = useRef<{ studyId: string; waveId: string; jobId: string } | null>(null)
@@ -1057,6 +1064,75 @@ function BoardInner({ platformProjectId, initial }: Props) {
     setInspectorByNode(ui.inspectorByNode)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only on flow id / lastRun identity
   }, [flow.id, flow.flow.lastRun?.completedAt, viewedRun?.id, runBusy])
+
+  // Wave 26: load report pins for this flow.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(apiPlatformProjectFlowReportPins(platformProjectId, flow.id), {
+          credentials: 'same-origin',
+        })
+        if (!res.ok || cancelled) return
+        const data = (await res.json()) as { items?: FlowReportPinItem[] }
+        if (!cancelled && Array.isArray(data.items)) setReportPins(data.items)
+      } catch {
+        /* ignore */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [platformProjectId, flow.id])
+
+  const activeHistoryRunId = viewedRun?.id ?? historyRunIdRef.current
+
+  const onToggleReportPin = useCallback(
+    async (item: { nodeId: string; kind: string; label: string; text: string }) => {
+      const hr = activeHistoryRunId?.trim() || null
+      const existing = reportPins.find(
+        (p) =>
+          p.nodeId === item.nodeId &&
+          (p.historyRunId?.trim() || '') === (hr || ''),
+      )
+      setPinBusyNodeId(item.nodeId)
+      try {
+        if (existing) {
+          const res = await fetch(
+            `${apiPlatformProjectFlowReportPins(platformProjectId, flow.id)}?pinId=${encodeURIComponent(existing.id)}`,
+            { method: 'DELETE', credentials: 'same-origin' },
+          )
+          if (res.ok) {
+            setReportPins((prev) => prev.filter((p) => p.id !== existing.id))
+          }
+        } else {
+          const res = await fetch(apiPlatformProjectFlowReportPins(platformProjectId, flow.id), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nodeId: item.nodeId,
+              kind: item.kind,
+              label: item.label,
+              text: item.text,
+              historyRunId: hr,
+            }),
+          })
+          if (!res.ok) return
+          const data = (await res.json()) as { item?: FlowReportPinItem }
+          if (data.item) {
+            setReportPins((prev) => {
+              if (prev.some((p) => p.id === data.item!.id)) return prev
+              return [...prev, data.item!]
+            })
+          }
+        }
+      } finally {
+        setPinBusyNodeId(null)
+      }
+    },
+    [activeHistoryRunId, flow.id, platformProjectId, reportPins],
+  )
 
   const snapNodesAfterDrag = useCallback(
     (dragged: CollectionFlowRfNodeModel[]) => {
@@ -1987,11 +2063,23 @@ function BoardInner({ platformProjectId, initial }: Props) {
                     verdict={<CollectionFlowVerdictCard verdict={verdict} />}
                   />
                   {(lastRun || Object.keys(runOutputs).length > 0) && !runBusy ? (
-                    <CollectionFlowOutputsDossier
-                      nodes={ensureFlowDocument(flow.flow).nodes}
-                      runOutputs={runOutputs}
-                      onSelectNode={(nodeId) => setInspectorId(nodeId)}
-                    />
+                    <>
+                      <CollectionFlowOutputsDossier
+                        nodes={ensureFlowDocument(flow.flow).nodes}
+                        runOutputs={runOutputs}
+                        pins={reportPins}
+                        historyRunId={activeHistoryRunId}
+                        pinBusyNodeId={pinBusyNodeId}
+                        onSelectNode={(nodeId) => setInspectorId(nodeId)}
+                        onTogglePin={(item) => void onToggleReportPin(item)}
+                      />
+                      <FlowReportCollectionBar
+                        platformProjectId={platformProjectId}
+                        flowId={flow.id}
+                        pins={reportPins}
+                        onPinsChange={setReportPins}
+                      />
+                    </>
                   ) : null}
                 </div>
               ) : null}
