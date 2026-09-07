@@ -377,11 +377,12 @@ Rules:
 
 VIDEON describes media; Brandion owns brand guideline truth.
 
-1. After vision succeeds, VIDEON may enqueue a Collection-scoped `brand_compliance` stage.
-2. Input to Brandion: evidence frame references (signed/private), `brandCandidates`, scene time range, and Collection context — not a mirrored copy of Brandion guidelines.
-3. Output stored in VIDEON as `media_brand_checks` with status `queued_pending_brandion|running|pass|warn|fail|skipped`, optional Brandion request id, and result JSONB with provenance.
-4. Until a Brandion API contract is available, the stage records `queued_pending_brandion` / soft-skip — never a synthetic pass.
-5. UI may show a per-scene brand badge derived from the latest check; it must not invent compliance from vision alone.
+1. After vision succeeds, VIDEON enqueues a Collection-scoped `brand_compliance` stage.
+2. VIDEON resolves the Collection active guideline via Brandion `GET /api/guidelines/active-pack?platformProjectId=…` (service secret + federation contract headers).
+3. Evidence: re-extract JPEG keyframes from the source media at `frame_refs` / scene midpoint; send with OCR when `brandCandidates` are present.
+4. Check API: Brandion `POST /api/guidelines/:id/analysis-runs` with `input.kind: "image"` (same machine auth as CREATION consume).
+5. Output stored in VIDEON as `media_brand_checks` with status `queued_pending_brandion|running|pass|warn|fail|skipped`, Brandion run id, result JSONB, and provenance.
+6. Missing Brandion config or retryable upstream errors stay `queued_pending_brandion` — never a synthetic pass. No active guideline → `skipped`.
 
 Cross-product flow (V6): Creation asset → VIDEON analysis → Brandion guideline check, without moving domain state into PLEXON.
 
