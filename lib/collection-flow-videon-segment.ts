@@ -310,9 +310,17 @@ export async function runVideonExportSegment(input: {
     };
   }
 
+  const formatRaw = typeof node.format === 'string' ? node.format.trim() : '';
+  const format =
+    formatRaw === 'mp4' || formatRaw === 'premiere_xml' ? formatRaw : undefined;
+
   if (isCapabilityCatalogRuntimeEnabled()) {
     const cap = await executeVideonExportRunCapability(
-      { platformProjectId: input.platformProjectId, cutId },
+      {
+        platformProjectId: input.platformProjectId,
+        cutId,
+        ...(format ? { format } : {}),
+      },
       {
         source: 'flow',
         platformProjectId: input.platformProjectId,
@@ -348,6 +356,7 @@ export async function runVideonExportSegment(input: {
     platformProjectId: input.platformProjectId,
     cutId,
     actorUserId: input.plexonUserId ?? null,
+    format,
   });
   if (!res.ok) {
     const ctx = setMediaCatalogLeaf(

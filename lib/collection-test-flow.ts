@@ -190,6 +190,8 @@ export type CollectionFlowNode = {
   mediaAssetId?: string;
   /** VIDEON cut id on `videon_export_run` (V6); may come from upstream `media.cut.cutId`. */
   cutId?: string;
+  /** VIDEON export format on `videon_export_run` — `mp4` (default) | `premiere_xml`. */
+  format?: 'mp4' | 'premiere_xml' | (string & {});
   /** Palette preset id for action/measure factories (Wave 11). */
   presetId?: string;
   /** Wave 23 — `human_confirm` which draft to pause on. */

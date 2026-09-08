@@ -10,7 +10,7 @@
 | `videon_media` | Media | Config — `mediaAssetId` for downstream Media actions |
 | `videon_analysis_run` | Media | Enqueue analysis → `media.analysis.*` |
 | `videon_cut_create` | Media | Create Cut → `media.cut.*` (confirm / human gate) |
-| `videon_export_run` | Media | Enqueue export → `media.export.*` (**Flow first**) |
+| `videon_export_run` | Media | Enqueue export → `media.export.*` (**Flow first**; optional `format` mp4\|premiere_xml) |
 
 ## Auth
 

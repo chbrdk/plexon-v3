@@ -335,10 +335,12 @@ const PILOT: CapabilityRecord[] = [
     id: 'videon.export.run',
     owner: 'videon',
     title: 'Run cut export',
-    description: 'Enqueue VIDEON cut export (Flow-first); writes media.export catalog.',
+    description:
+      'Enqueue VIDEON cut export (Flow-first; format mp4|premiere_xml); writes media.export catalog.',
     inputFields: [
       { name: 'platformProjectId', required: true },
       { name: 'cutId', required: true },
+      { name: 'format', required: false },
     ],
     outputCatalogRoot: 'media.export',
     sideEffect: 'job',

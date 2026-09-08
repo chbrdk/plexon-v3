@@ -74,7 +74,7 @@ Assistant tools/workflows and Collection Flow nodes duplicate product jobs (scan
 | `videon.analysis.get` | — | Agent | `media.analysis` |
 | `videon.analysis.run` | `videon_analysis_run` | Agent + Flow | `media.analysis` |
 | `videon.cut.create` | `videon_cut_create` | Agent + Flow (`human_gate`) | `media.cut` |
-| `videon.export.run` | `videon_export_run` | Flow-first | `media.export` |
+| `videon.export.run` | `videon_export_run` | Flow-first · optional `format` | `media.export` |
 
 Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). Flow kinds also run via `lib/collection-flow-videon-segment.ts` + `lib/integrations/videon-product-client.ts`. Details: `knowledge/collection-flow-videon.md`.
 

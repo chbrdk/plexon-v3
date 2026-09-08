@@ -205,7 +205,7 @@ Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP r
 | `videon.analysis.run` | videon | `videon_analysis_run` | `videon_analysis_run` | job | `media.analysis` | Confirm writes in chat; Flow job |
 | `videon.cut.create` | videon | `videon_cut_create` | `videon_cut_create` | write | `media.cut` | `human_gate` / Hit-Card confirm; multi-source scenes |
 | `videon.cut.scenes.add` | videon | — (no Flow node) | `videon_cut_scenes_add` | write | `media.cut` | Agent/Catalog append batch; **no** Hit-Card |
-| `videon.export.run` | videon | `videon_export_run` | `videon_export_run` | job | `media.export` | **Flow first** — no Hit-Card export button |
+| `videon.export.run` | videon | `videon_export_run` | `videon_export_run` | job | `media.export` | **Flow first** — optional `format` `mp4`\|`premiere_xml`; no Hit-Card export button |
 | `videon.reframe.run` | videon | — (no Flow node yet) | `videon_reframe_run` | job | `media.reframe` | Agent/Catalog confirm; **no** Hit-Card; Robust CPU default |
 
 Companions: `videon-integration.md` · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `videon-v3/specs/domain/media-reframe.md` · `videon-v3/specs/domain/cut-multi-source-compose.md` · `knowledge/collection-flow-videon.md`.

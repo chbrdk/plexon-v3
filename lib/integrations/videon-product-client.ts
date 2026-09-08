@@ -219,19 +219,21 @@ export async function exportRun(input: {
   platformProjectId: string;
   cutId: string;
   actorUserId?: string | null;
+  format?: 'mp4' | 'premiere_xml';
   idempotencyKey?: string;
 }): Promise<VideonProductResult> {
   const pid = input.platformProjectId.trim();
   const cutId = input.cutId.trim();
   if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
   if (!cutId) return { ok: false, status: 400, error: 'cutId required' };
+  const body: Record<string, unknown> = {};
+  if (input.format) body.format = input.format;
+  if (input.idempotencyKey?.trim()) body.idempotencyKey = input.idempotencyKey.trim();
   return videonFetch({
     method: 'POST',
     path: `/api/cuts/${encodeURIComponent(cutId)}/exports?${platformQuery(pid)}`,
     actorUserId: input.actorUserId,
-    body: input.idempotencyKey?.trim()
-      ? { idempotencyKey: input.idempotencyKey.trim() }
-      : {},
+    body,
   });
 }
 

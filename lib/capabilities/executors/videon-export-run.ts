@@ -35,10 +35,15 @@ export async function executeVideonExportRunCapability(
     return { ok: false, error: 'cutId fehlt', catalogRoot: 'media.export' };
   }
 
+  const formatRaw = typeof input.format === 'string' ? input.format.trim() : '';
+  const format =
+    formatRaw === 'mp4' || formatRaw === 'premiere_xml' ? formatRaw : undefined;
+
   const res = await exportRun({
     platformProjectId,
     cutId,
     actorUserId: ctx.actorUserId,
+    format,
     idempotencyKey:
       typeof input.idempotencyKey === 'string' ? input.idempotencyKey : undefined,
   });
