@@ -38,6 +38,7 @@ describe('collection knowledge pack (implementation)', () => {
     expect(domain).toContain('research_brief')
     expect(domain).toContain('geo_context')
     expect(domain).toContain('market_intelligence')
+    expect(domain).toContain('media_insights')
     expect(domain).toContain('reserved')
     expect(domain).toContain('collection_knowledge_packs')
     expect(schema).toContain('collectionKnowledgePacks')

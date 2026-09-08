@@ -13,6 +13,7 @@ import { formatAudionHttpFailure } from '@/lib/integrations/audion-connectivity'
 import {
   ensureFacetsShape,
   normalizeMarketIntelligenceData,
+  normalizeMediaInsightsData,
   normalizeResearchBriefData,
 } from '@/lib/collection-knowledge-pack';
 import { getOrCreateKnowledgePack } from '@/lib/db/collection-knowledge-packs';
@@ -183,6 +184,17 @@ async function fetchKnowledgePackContext(platformProjectId: string): Promise<str
         lines.push(`- ${h.slice(0, 200)}`);
       }
       if (market.sourceThreadId) lines.push(`sourceThreadId: ${market.sourceThreadId}`);
+    }
+
+    const media = normalizeMediaInsightsData(facets.media_insights.data);
+    if (media.summary || media.highlights.length) {
+      lines.push('\n### VIDEON Media Insights');
+      if (media.summary) lines.push(media.summary.slice(0, 500));
+      for (const h of media.highlights.slice(0, 5)) {
+        lines.push(`- ${h.slice(0, 200)}`);
+      }
+      if (media.mediaCount != null) lines.push(`mediaCount: ${media.mediaCount}`);
+      if (media.lastAnalysisAt) lines.push(`lastAnalysisAt: ${media.lastAnalysisAt}`);
     }
 
     return lines.length > 1 ? lines : [];

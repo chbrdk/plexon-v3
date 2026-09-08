@@ -63,6 +63,34 @@ describe('injectVideonToolArgs', () => {
     expect(out.q).toBe('dashboard')
   })
 
+  it('injects platformProjectId onto media_search when page context has one', () => {
+    const out = injectVideonToolArgs(
+      'videon_media_search',
+      { q: 'dashboard' },
+      {
+        actorUserId: 'session-user',
+        pageContext: {
+          product: 'videon',
+          pathname: '/library',
+          platformProjectId: 'proj-embed',
+        },
+      },
+    )
+    expect(out.platformProjectId).toBe('proj-embed')
+  })
+
+  it('does not override explicit platformProjectId on media_search', () => {
+    const out = injectVideonToolArgs(
+      'videon.media_search',
+      { q: 'all', platformProjectId: 'caller-override' },
+      {
+        actorUserId: 'session-user',
+        platformProjectId: 'conv-proj',
+      },
+    )
+    expect(out.platformProjectId).toBe('caller-override')
+  })
+
   it('skips health', () => {
     const input = { ping: true }
     expect(

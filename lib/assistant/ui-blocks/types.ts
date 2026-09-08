@@ -49,6 +49,7 @@ export const UI_BLOCK_TYPES = [
   'moment_list',
   'quote_list',
   'video_hit_strip',
+  'video_status_card',
   'event_quick_check_report',
   'event_quick_check_review_gate',
 ] as const;

@@ -334,10 +334,59 @@ export const videoHitStripPropsSchema = z.object({
         snippet: medium.optional(),
         posterUrl: safeLinkHref.optional(),
         startMs: z.number().int().nonnegative().optional(),
+        mediaAssetId: short.optional(),
+        platformProjectId: short.optional(),
+        previewUrl: safeLinkHref.optional(),
+        filmstrip: z
+          .array(
+            z.object({
+              tMs: z.number().int().nonnegative(),
+              sceneKey: short.optional(),
+              posterUrl: safeLinkHref.optional(),
+            })
+          )
+          .max(8)
+          .optional(),
+        actions: z
+          .array(
+            z.object({
+              id: short,
+              label: short,
+              kind: z.enum(['open', 'analysis_run', 'brand_check_run']),
+            })
+          )
+          .max(6)
+          .optional(),
       })
     )
     .min(1)
     .max(UI_BLOCK_LIMITS.maxVideoHits),
+});
+
+export const videoStatusCardPropsSchema = z.object({
+  title: medium.optional(),
+  mediaAssetId: short.optional(),
+  platformProjectId: short.optional(),
+  href: safeLinkHref.optional(),
+  rows: z
+    .array(
+      z.object({
+        label: short,
+        value: medium,
+      })
+    )
+    .min(1)
+    .max(12),
+  steps: z
+    .array(
+      z.object({
+        id: short,
+        label: short,
+        status: z.enum(['pending', 'running', 'done', 'failed', 'skipped']).optional(),
+      })
+    )
+    .max(12)
+    .optional(),
 });
 
 export const eventQuickCheckReportPropsSchema = z.object({
@@ -388,6 +437,7 @@ export const UI_BLOCK_SCHEMAS = {
   moment_list: momentListPropsSchema,
   quote_list: quoteListPropsSchema,
   video_hit_strip: videoHitStripPropsSchema,
+  video_status_card: videoStatusCardPropsSchema,
   event_quick_check_report: eventQuickCheckReportPropsSchema,
   event_quick_check_review_gate: eventQuickCheckReviewGatePropsSchema,
 } as const;

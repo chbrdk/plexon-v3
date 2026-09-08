@@ -1,7 +1,7 @@
 # Assistant ↔ VIDEON MCP
 
-**Status:** Draft — 2026-09-08  
-**Depends:** `videon-v3/specs/domain/mcp-server.md` · `specs/domain/videon-integration.md` · `specs/api/videon-federation.md`  
+**Status:** Accepted — 2026-09-08 (feature waves)  
+**Depends:** `videon-v3/specs/domain/mcp-server.md` · `videon-v3/specs/domain/scene-hit-model.md` · `specs/domain/videon-integration.md` · `specs/api/videon-federation.md` · `assistant-videon-hit-chrome.md`  
 **Knowledge:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/videon-mcp-assistant.md` · `knowledge/paths.md`
 
 ## Purpose
@@ -27,6 +27,12 @@ Same pattern as CREATION:
 3. MCP → Product: `X-Service-Secret` + `X-Plexon-User-Id` → Access Model B for **that** user.
 
 Do **not** configure a fixed `VIDEON_API_TOKEN` / bootstrap owner for the assistant path.
+
+## Scoped search (`platformProjectId`)
+
+1. WHEN Embed / `pageContext.platformProjectId` (or orchestrator `platformProjectId`) is set THEN `injectVideonToolArgs` MUST set `platformProjectId` on `videon_media_search` / `videon.media_search` if the caller did not already supply a non-empty override.  
+2. WHEN the user explicitly asks for all projects / global search AND the tool arg omits scope THEN search MAY remain Collection-unscoped (Model B across accessible workspaces).  
+3. WHEN no page context project is set THEN inject MUST NOT invent a `platformProjectId`.
 
 ## Entitlement / host product
 
@@ -72,11 +78,25 @@ MCP fetch branch beside Brandion / Audion / Echon / … using `fetchCheckionMcpT
 
 WHEN `videon.media_search` / `videon_media_search` returns items THEN the orchestrator MUST auto-emit a generative UI block `video_hit_strip` (Brandion `tokens_list` pattern):
 
+- Hit fields follow `videon-v3/specs/domain/scene-hit-model.md`  
 - Absolute editor deep links via `getVideonUrl()` + MCP `href`  
 - Optional `posterUrl` = same-origin `/api/assistant/videon-frame?…` (Plexon proxies VIDEON `GET /api/media/:id/frame` with service secret + session actor)  
-- Organism: `UiVideoHitStrip` (`StepStrip` cards like VIDEON `/chat`)
+- Optional filmstrip / muted preview per `assistant-videon-hit-chrome.md`  
+- Organism: `UiVideoHitStrip` (`StepStrip` cards like VIDEON `/chat`)  
+- Optional per-item `actions`: `open` | `analysis_run` | `brand_check_run` (see Card actions)
 
 MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
+
+### Card actions
+
+1. WHEN `video_hit_strip` items include `actions` THEN `UiVideoHitStrip` MUST render them.  
+2. WHEN action `kind` is `open` THEN the UI MUST open the item `href` (new tab / same tab per shell).  
+3. WHEN action `kind` is `analysis_run` or `brand_check_run` THEN the UI MUST NOT fire silently — it MUST use the existing assistant confirm / write enqueue path (`allowWriteTools` + confirmation policy) with `mediaAssetId`, `platformProjectId`, and session `actorUserId`.  
+4. MCP tools remain unchanged; the UI triggers existing write tools after confirm.
+
+### Auto UI after `videon_media_get` / `videon_analysis_get`
+
+WHEN `videon_media_get` or `videon_analysis_get` succeeds THEN the orchestrator MUST auto-emit a compact status block (`video_status_card` or `key_value_list` + `step_list`): lifecycle / analysis stages + deep links — NOT a transcript dump.
 
 ## Capability catalog
 
@@ -106,6 +126,7 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 1. Unit: `tool-catalog` classifies `videon_media_search` → `videon_media`.  
 2. Gate: `resolveUseVideonMcp` mirrors Brandion/Echon rules with product `videon`.  
 3. Orchestrator loads tools when `VIDEON_MCP_URL` set and entitlement/host allows.  
-4. `injectVideonToolArgs` forces session `actorUserId` on all `videon_*` tools except health.  
-5. Auto-emit: successful `videon_media_search` appends `video_hit_strip` with absolute hrefs + poster proxy URLs.  
-6. Staging: scene Q&A shows hit cards scoped to the logged-in user’s Access Model B memberships.
+4. `injectVideonToolArgs` forces session `actorUserId` on all `videon_*` tools except health; injects `platformProjectId` onto `media_search` when page context has one and the arg is empty.  
+5. Auto-emit: successful `videon_media_search` appends `video_hit_strip` with absolute hrefs + poster proxy URLs + optional actions / filmstrip.  
+6. Auto-emit: successful `media_get` / `analysis_get` appends status UI.  
+7. Staging: scene Q&A shows hit cards scoped to the logged-in user’s Access Model B memberships.

@@ -51,6 +51,14 @@ import {
   isVideonMediaSearchToolName,
   parseVideonMediaSearchPayload,
 } from '@/lib/assistant/ui-blocks/build-videon-media-search-ui';
+import {
+  buildVideonAnalysisGetBlocks,
+  buildVideonMediaGetBlocks,
+  isVideonAnalysisGetToolName,
+  isVideonMediaGetToolName,
+  parseVideonAnalysisGetPayload,
+  parseVideonMediaGetPayload,
+} from '@/lib/assistant/ui-blocks/build-videon-status-ui';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -609,6 +617,42 @@ export async function runOrchestratorComplete(
         );
         if (payload) {
           const autoBlocks = buildVideonMediaSearchBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isVideonMediaGetToolName(mcpName) || isVideonMediaGetToolName(block.name)) {
+        const payload = parseVideonMediaGetPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildVideonMediaGetBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isVideonAnalysisGetToolName(mcpName) || isVideonAnalysisGetToolName(block.name)) {
+        const payload = parseVideonAnalysisGetPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildVideonAnalysisGetBlocks(payload, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });

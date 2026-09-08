@@ -32,6 +32,7 @@ import {
   type ProfileData,
   type ResearchBriefData,
   type MarketIntelligenceData,
+  type MediaInsightsData,
   type SourcesData,
 } from '@/lib/collection-knowledge-pack'
 import type { KnowledgePackDrafts } from '@/lib/assistant/knowledge-pack/research-knowledge-pack'
@@ -108,6 +109,8 @@ function facetLabelKey(id: KnowledgeFacetId): string {
       return 'projects.detail.knowledgeFacetGeo'
     case 'market_intelligence':
       return 'projects.detail.knowledgeFacetMarket'
+    case 'media_insights':
+      return 'projects.detail.knowledgeFacetMedia'
     case 'brand':
       return 'projects.detail.knowledgeFacetBrand'
     case 'sources':
@@ -127,6 +130,8 @@ function facetDekKey(id: KnowledgeFacetId): string {
       return 'projects.detail.knowledgeFacetGeoDek'
     case 'market_intelligence':
       return 'projects.detail.knowledgeFacetMarketDek'
+    case 'media_insights':
+      return 'projects.detail.knowledgeFacetMediaDek'
     case 'brand':
       return 'projects.detail.knowledgeFacetBrandDek'
     case 'sources':
@@ -246,6 +251,41 @@ function MarketRead({ data, empty }: { data: MarketIntelligenceData; empty: stri
       ) : null}
       {data.sourceThreadId ? (
         <Text role="meta">thread: {data.sourceThreadId}</Text>
+      ) : null}
+    </div>
+  )
+}
+
+function MediaRead({ data, empty }: { data: MediaInsightsData; empty: string }) {
+  if (isFacetContentEmpty('media_insights', data)) return <EmptyState>{empty}</EmptyState>
+  return (
+    <div className="plexon-knowledge-facet-body">
+      {data.summary ? <Text role="body">{data.summary}</Text> : null}
+      {data.mediaCount != null ? (
+        <Text role="meta">{data.mediaCount} Medien</Text>
+      ) : null}
+      {data.lastAnalysisAt ? (
+        <Text role="meta">letzte Analyse: {data.lastAnalysisAt}</Text>
+      ) : null}
+      {data.highlights.length ? (
+        <ul className="plexon-knowledge-list">
+          {data.highlights.map((h) => (
+            <li key={h}>
+              <Text role="body">{h}</Text>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {data.sceneRefs.length ? (
+        <ul className="plexon-knowledge-list">
+          {data.sceneRefs.map((ref) => (
+            <li key={`${ref.mediaAssetId}-${ref.sceneKey ?? ''}-${ref.href}`}>
+              <a href={ref.href} target="_blank" rel="noopener noreferrer">
+                {ref.title || ref.sceneKey || ref.mediaAssetId}
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   )
@@ -720,6 +760,8 @@ export function CollectionKnowledgeBand({
         <GeoRead data={facet.data as GeoContextData} empty={emptyCta} />
       ) : id === 'market_intelligence' ? (
         <MarketRead data={facet.data as MarketIntelligenceData} empty={emptyCta} />
+      ) : id === 'media_insights' ? (
+        <MediaRead data={facet.data as MediaInsightsData} empty={emptyCta} />
       ) : (
         <SourcesRead data={facet.data as SourcesData} empty={emptyCta} />
       )

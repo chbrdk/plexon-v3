@@ -56,7 +56,9 @@ describe('videon media search UI blocks', () => {
     const items = blocks[0].props.items as Array<{
       href: string
       posterUrl?: string
+      previewUrl?: string
       sceneLabel?: string
+      actions?: Array<{ kind: string }>
     }>
     expect(items[0].href).toBe(
       'https://videon.example/media/media-1?platformProjectId=proj-1&t=12500&scene=sc_03',
@@ -64,10 +66,49 @@ describe('videon media search UI blocks', () => {
     expect(items[0].posterUrl).toBe(
       '/api/assistant/videon-frame?mediaAssetId=media-1&platformProjectId=proj-1&t=12500',
     )
+    expect(items[0].previewUrl).toBe(
+      '/api/assistant/videon-preview?mediaAssetId=media-1&platformProjectId=proj-1&t=12500',
+    )
     expect(items[0].sceneLabel).toBe('Szene 3')
+    expect(items[0].actions?.map((a) => a.kind)).toEqual([
+      'open',
+      'analysis_run',
+      'brand_check_run',
+    ])
     const parsed = parseUiBlockProps('video_hit_strip', blocks[0].props)
     expect(parsed.ok).toBe(true)
     expect(blockToPlainText(blocks[0])).toContain('reel.mp4')
+  })
+
+  it('includes filmstrip when multiple hits share media', () => {
+    const blocks = buildVideonMediaSearchBlocks({
+      items: [
+        {
+          id: 'a',
+          mediaAssetId: 'media-1',
+          sceneKey: 'sc_01',
+          mediaFilename: 'reel.mp4',
+          startMs: 1000,
+          endMs: 2000,
+          platformProjectId: 'proj-1',
+          href: '/media/media-1?platformProjectId=proj-1&t=1000',
+        },
+        {
+          id: 'b',
+          mediaAssetId: 'media-1',
+          sceneKey: 'sc_02',
+          mediaFilename: 'reel.mp4',
+          startMs: 5000,
+          endMs: 6000,
+          platformProjectId: 'proj-1',
+          href: '/media/media-1?platformProjectId=proj-1&t=5000',
+        },
+      ],
+    })
+    const items = blocks[0].props.items as Array<{ filmstrip?: unknown[] }>
+    expect(items[0].filmstrip).toHaveLength(2)
+    const parsed = parseUiBlockProps('video_hit_strip', blocks[0].props)
+    expect(parsed.ok).toBe(true)
   })
 
   it('skips hits without href or project', () => {

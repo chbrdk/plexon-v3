@@ -455,9 +455,19 @@ Capabilities are registered progressively after their execution endpoints exist:
 
 ## Collection Knowledge Pack
 
-VIDEON may later publish a compact `media_insights` facet or a registered section within an accepted generic facet. It may contain campaign/media summaries, recurring themes, claims, observed scenes, and source deep links. It must not contain raw video, complete transcripts, signed object URLs, or unbounded per-frame data.
+VIDEON publishes a compact `media_insights` facet (registered in `specs/domain/collection-knowledge-pack.md` and `specs/api/collection-knowledge-pack.md`).
 
-No publisher ships until `specs/domain/collection-knowledge-pack.md` and `specs/api/collection-knowledge-pack.md` explicitly register its ownership, merge semantics, limits, and freshness behavior.
+| | |
+|--|--|
+| **Ownership** | VIDEON |
+| **Merge** | Replace-by-publisher; union `highlights` / `sceneRefs` by id with caps |
+| **Freshness** | Stale after 7 days without republish |
+| **Limits** | summary ≤ ~2k; highlights ≤ 12; sceneRefs ≤ 20; facet ≤ 32 KiB |
+
+Allowed: campaign/media summaries, recurring themes, claims, observed scene refs + deep links.  
+Forbidden: raw video, complete transcripts, signed object URLs, unbounded per-frame data.
+
+Publisher: VIDEON `POST …/knowledge/facets/media_insights/publish` (service) after analysis/search distillate jobs. Plexon Assistant may consume/cite the facet in Collection context.
 
 ## Observability and service levels
 
@@ -540,7 +550,7 @@ End-to-end analysis latency and cost objectives are set after the representative
 ### V6 — Cross-product flows and knowledge distillates
 
 - Register bounded Flow nodes for analysis/search/export where user journeys justify them.
-- Accept Knowledge Pack schema changes before publishing `media_insights`.
+- Publish `media_insights` distillates (facet registered; publisher + Assistant consume).
 - Exercise a cross-product flow, for example Creation asset → VIDEON analysis → Brandion guideline check, without moving domain state into PLEXON.
 
 **Gate:** reruns are idempotent, provenance is retained, payloads remain bounded, and product-local state ownership is intact.

@@ -62,11 +62,23 @@ export function injectAssistantMcpToolArgs(
   return injectVideonToolArgs(toolName, withSpirion, ctx);
 }
 
-/** Inject authenticated session user into all VIDEON MCP tools (Access Model B). */
+function isVideonMediaSearchTool(toolName: string): boolean {
+  return /videon[._]media_search$/i.test(toolName);
+}
+
+/**
+ * Inject authenticated session user into all VIDEON MCP tools (Access Model B).
+ * For media_search, also inject page/conversation platformProjectId when missing
+ * (scoped search — specs/domain/assistant-videon-mcp.md).
+ */
 export function injectVideonToolArgs(
   toolName: string,
   input: Record<string, unknown>,
-  ctx: { actorUserId: string },
+  ctx: {
+    actorUserId: string;
+    pageContext?: AssistantPageContext | null;
+    platformProjectId?: string | null;
+  },
 ): Record<string, unknown> {
   if (!/^videon[._]/.test(toolName)) return input;
   if (/^videon[._]health$/.test(toolName)) return input;
@@ -74,5 +86,17 @@ export function injectVideonToolArgs(
   if (ctx.actorUserId.trim()) {
     out.actorUserId = ctx.actorUserId.trim();
   }
+
+  if (isVideonMediaSearchTool(toolName)) {
+    const existing =
+      typeof out.platformProjectId === 'string' ? out.platformProjectId.trim() : '';
+    if (!existing) {
+      const fromPage = ctx.pageContext?.platformProjectId?.trim() || '';
+      const fromConv = ctx.platformProjectId?.trim() || '';
+      const id = fromPage || fromConv;
+      if (id) out.platformProjectId = id;
+    }
+  }
+
   return out;
 }

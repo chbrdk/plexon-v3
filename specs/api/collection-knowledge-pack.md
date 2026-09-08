@@ -82,6 +82,7 @@ type KnowledgePackResponse = {
     geo_context: FacetDocument<GeoContextData>
     brand: FacetDocument<BrandReservedData>  // status: 'reserved' until Brandion
     sources: FacetDocument<SourcesData>
+    media_insights: FacetDocument<MediaInsightsData>  // VIDEON
   }
 }
 ```
@@ -123,6 +124,7 @@ Conflicts: `409` when `expectedRevision` mismatches.
 | `geo_context` | `checkion` |
 | `brand` | `brandion` only when active; others → `403` |
 | `sources` | any authenticated publisher with URL allowlist rules |
+| `media_insights` | `videon` (primary), `plexon` (human edit) |
 
 ## Relation to thin upsert
 
@@ -172,6 +174,7 @@ Products needing shared brief call **GET knowledge** after resolving `platformPr
 | `geo_context` | 32 KiB |
 | `brand` | 16 KiB when active |
 | `sources` | 32 KiB (≤ 100 items) |
+| `media_insights` | 32 KiB |
 
 ## Implementation notes
 

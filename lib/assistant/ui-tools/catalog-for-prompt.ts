@@ -39,7 +39,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | \`phase_strip\` | \`title?\`, \`phases: [{ id, label, summary?, active?, status?, moments?: [{ kind, label }] }]\` — moments enable client phase switching |
 | \`moment_list\` | \`title?\`, \`items: [{ id?, kind: action\\|thought\\|feeling\\|pain\\|opportunity\\|other, label }]\` |
 | \`quote_list\` | \`title?\`, \`items: [{ quote, attribution?, context?, tone? }]\` |
-| \`video_hit_strip\` | \`title?\`, \`items: [{ id, title, href, sceneLabel?, timingLabel?, durationLabel?, projectName?, snippet?, posterUrl?, startMs? }]\` — Auto nach videon_media_search |
+| \`video_hit_strip\` | \`title?\`, \`items: [{ id, title, href, sceneLabel?, timingLabel?, durationLabel?, projectName?, snippet?, posterUrl?, startMs?, previewUrl?, filmstrip?, actions?: [{ id, label, kind: open\\|analysis_run\\|brand_check_run }] }]\` — Auto nach videon_media_search |
+| \`video_status_card\` | \`title?\`, \`mediaAssetId?\`, \`platformProjectId?\`, \`href?\`, \`rows: [{ label, value }]\`, \`steps?: [{ id, label, status? }]\` — Auto nach videon_media_get / videon_analysis_get |
 | \`finding_list\` | \`title?\`, \`items: [{ title, description, severity?, hex?, swatches? }]\` — Insights; bei Farben \`hex\`/\`swatches\` (keine Farb-Tabelle) |
 | \`recommendation_list\` | \`title?\`, \`items: [{ title, description?, priority?, category? }]\` |
 | \`corner_tab_section\` | \`tabLabel\`, \`title?\`, \`markdown\`, \`placement?\` |
@@ -64,7 +65,8 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | Journey validate (AUDION) | \`quote_list\` + \`finding_list\` + \`recommendation_list\` |
 | Sync-Diagnose | \`key_value_list\` + \`alert\` |
 | Brandion Farben/Fonts | MCP \`brandion_tokens_list\` → Auto \`color_swatch_grid\` / \`font_specimen_list\` |
-| VIDEON Szenen-Suche | MCP \`videon_media_search\` → Auto \`video_hit_strip\` |
+| VIDEON Szenen-Suche | MCP \`videon_media_search\` → Auto \`video_hit_strip\` (actions / filmstrip / preview) |
+| VIDEON Status | MCP \`videon_media_get\` / \`videon_analysis_get\` → Auto \`video_status_card\` |
 | Persona × Markenfarben | \`persona_card\` + \`finding_list\` (pro Fit \`hex\`/\`swatches\` + \`severity\`) — **kein** \`data_table\` |`;
 }
 

@@ -11,13 +11,20 @@ export const KNOWLEDGE_FACET_IDS = [
   'research_brief',
   'geo_context',
   'market_intelligence',
+  'media_insights',
   'brand',
   'sources',
 ] as const;
 
 export type KnowledgeFacetId = (typeof KNOWLEDGE_FACET_IDS)[number];
 
-export type KnowledgeProductId = 'plexon' | 'audion' | 'checkion' | 'brandion' | 'echon';
+export type KnowledgeProductId =
+  | 'plexon'
+  | 'audion'
+  | 'checkion'
+  | 'brandion'
+  | 'echon'
+  | 'videon';
 
 export type FacetProvenance = {
   actorType: 'user' | 'service' | 'system';
@@ -112,6 +119,23 @@ export type MarketIntelligenceData = {
   sourceThreadId: string | null;
 };
 
+export type MediaSceneRef = {
+  mediaAssetId: string;
+  sceneKey?: string | null;
+  title?: string | null;
+  href: string;
+  startMs?: number | null;
+};
+
+/** VIDEON — Collection-scoped media / scene distillate. */
+export type MediaInsightsData = {
+  summary: string | null;
+  highlights: string[];
+  sceneRefs: MediaSceneRef[];
+  mediaCount: number | null;
+  lastAnalysisAt: string | null;
+};
+
 export type SourceItem = {
   id: string;
   title: string;
@@ -132,6 +156,7 @@ export type KnowledgePackFacets = {
   research_brief: FacetDocument<ResearchBriefData>;
   geo_context: FacetDocument<GeoContextData>;
   market_intelligence: FacetDocument<MarketIntelligenceData>;
+  media_insights: FacetDocument<MediaInsightsData>;
   brand: FacetDocument<BrandReservedData>;
   sources: FacetDocument<SourcesData>;
 };
@@ -152,6 +177,7 @@ export const FACET_SIZE_BUDGETS: Record<KnowledgeFacetId, number> = {
   research_brief: 64 * 1024,
   geo_context: 32 * 1024,
   market_intelligence: 32 * 1024,
+  media_insights: 32 * 1024,
   brand: 16 * 1024,
   sources: 32 * 1024,
 };
@@ -216,6 +242,13 @@ export function createEmptyFacets(at = new Date().toISOString()): KnowledgePackF
       waveHighlights: [],
       sourceThreadId: null,
     }, at),
+    media_insights: emptyEnvelope('media_insights', {
+      summary: null,
+      highlights: [],
+      sceneRefs: [],
+      mediaCount: null,
+      lastAnalysisAt: null,
+    }, at),
     brand: emptyEnvelope('brand', {
       status: 'reserved',
       guidelineRef: null,
@@ -238,8 +271,9 @@ export const FACET_PUBLISH_OWNERS: Record<KnowledgeFacetId, KnowledgeProductId[]
   research_brief: ['audion', 'plexon'],
   geo_context: ['checkion'],
   market_intelligence: ['echon', 'plexon'],
+  media_insights: ['videon', 'plexon'],
   brand: ['brandion'],
-  sources: ['plexon', 'audion', 'checkion', 'brandion', 'echon'],
+  sources: ['plexon', 'audion', 'checkion', 'brandion', 'echon', 'videon'],
 };
 
 export function productMayPublishFacet(
@@ -407,6 +441,48 @@ export function normalizeMarketIntelligenceData(input: unknown): MarketIntellige
   };
 }
 
+export function normalizeMediaInsightsData(input: unknown): MediaInsightsData {
+  const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+  const refsRaw = Array.isArray(raw.sceneRefs) ? raw.sceneRefs : [];
+  const sceneRefs: MediaSceneRef[] = [];
+  const seen = new Set<string>();
+  for (const item of refsRaw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.mediaAssetId !== 'string' || typeof row.href !== 'string') continue;
+    const mediaAssetId = row.mediaAssetId.trim();
+    const href = row.href.trim();
+    if (!mediaAssetId || !href) continue;
+    const sceneKey = typeof row.sceneKey === 'string' ? row.sceneKey.trim() || null : null;
+    const id = `${mediaAssetId}:${sceneKey ?? ''}:${href}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    sceneRefs.push({
+      mediaAssetId,
+      sceneKey,
+      title: typeof row.title === 'string' ? row.title.trim().slice(0, 200) || null : null,
+      href: href.slice(0, 2000),
+      startMs:
+        typeof row.startMs === 'number' && Number.isFinite(row.startMs) && row.startMs >= 0
+          ? Math.floor(row.startMs)
+          : null,
+    });
+    if (sceneRefs.length >= 20) break;
+  }
+  return {
+    summary:
+      typeof raw.summary === 'string' ? raw.summary.trim().slice(0, 2000) || null : null,
+    highlights: asStringArray(raw.highlights, 12),
+    sceneRefs,
+    mediaCount:
+      typeof raw.mediaCount === 'number' && Number.isFinite(raw.mediaCount)
+        ? Math.max(0, Math.floor(raw.mediaCount))
+        : null,
+    lastAnalysisAt:
+      typeof raw.lastAnalysisAt === 'string' ? raw.lastAnalysisAt.trim() || null : null,
+  };
+}
+
 export function normalizeBrandData(input: unknown): BrandReservedData {
   const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
   // Phase 1: always reserved — ignore attempts to activate
@@ -444,7 +520,8 @@ export function normalizeSourcesData(input: unknown): SourcesData {
         row.addedByProduct === 'audion' ||
         row.addedByProduct === 'checkion' ||
         row.addedByProduct === 'brandion' ||
-        row.addedByProduct === 'echon'
+        row.addedByProduct === 'echon' ||
+        row.addedByProduct === 'videon'
           ? row.addedByProduct
           : null,
       addedAt:
@@ -467,6 +544,8 @@ export function normalizeFacetData(facetId: KnowledgeFacetId, data: unknown): un
       return normalizeGeoContextData(data);
     case 'market_intelligence':
       return normalizeMarketIntelligenceData(data);
+    case 'media_insights':
+      return normalizeMediaInsightsData(data);
     case 'brand':
       return normalizeBrandData(data);
     case 'sources':
@@ -567,6 +646,24 @@ export function mergeFacetData(
         sourceThreadId: b.sourceThreadId ?? a.sourceThreadId,
       } satisfies MarketIntelligenceData;
     }
+    case 'media_insights': {
+      const a = normalizeMediaInsightsData(existing);
+      const b = normalizeMediaInsightsData(incoming);
+      const byId = new Map<string, MediaSceneRef>();
+      for (const r of a.sceneRefs) {
+        byId.set(`${r.mediaAssetId}:${r.sceneKey ?? ''}`, r);
+      }
+      for (const r of b.sceneRefs) {
+        byId.set(`${r.mediaAssetId}:${r.sceneKey ?? ''}`, r);
+      }
+      return {
+        summary: b.summary ?? a.summary,
+        highlights: uniqueStrings([...a.highlights, ...b.highlights], 12),
+        sceneRefs: [...byId.values()].slice(0, 20),
+        mediaCount: b.mediaCount ?? a.mediaCount,
+        lastAnalysisAt: b.lastAnalysisAt ?? a.lastAnalysisAt,
+      } satisfies MediaInsightsData;
+    }
     case 'brand':
       return normalizeBrandData(incoming);
     case 'sources': {
@@ -598,7 +695,8 @@ export function normalizeProvenance(
     raw.productId === 'audion' ||
     raw.productId === 'checkion' ||
     raw.productId === 'brandion' ||
-    raw.productId === 'echon'
+    raw.productId === 'echon' ||
+    raw.productId === 'videon'
       ? raw.productId
       : fallback.productId ?? null;
   return {
@@ -690,6 +788,14 @@ export function facetPreview(facetId: KnowledgeFacetId, data: unknown): string {
       if (d.topics.length) return d.topics.slice(0, 3).join(' · ');
       return 'No market intelligence';
     }
+    case 'media_insights': {
+      const d = normalizeMediaInsightsData(data);
+      if (d.summary) return d.summary.slice(0, 120);
+      if (d.highlights.length) return `${d.highlights.length} highlight(s)`;
+      if (d.sceneRefs.length) return `${d.sceneRefs.length} scene ref(s)`;
+      if (d.mediaCount != null) return `${d.mediaCount} media`;
+      return 'No media insights';
+    }
     case 'brand':
       return 'Coming with Brandion';
     case 'sources': {
@@ -743,6 +849,16 @@ export function isFacetContentEmpty(facetId: KnowledgeFacetId, data: unknown): b
         d.briefingRefs.length ||
         d.waveHighlights.length ||
         d.sourceThreadId
+      );
+    }
+    case 'media_insights': {
+      const d = normalizeMediaInsightsData(data);
+      return !(
+        d.summary ||
+        d.highlights.length ||
+        d.sceneRefs.length ||
+        d.mediaCount != null ||
+        d.lastAnalysisAt
       );
     }
     case 'brand':

@@ -1521,6 +1521,67 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   color: var(--muted);
 }
 
+.plexon-video-hit-preview {
+  background: #0a0a0a;
+}
+
+.plexon-video-hit-filmstrip {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-block: 0.25rem;
+  margin-block: 0.15rem 0.35rem;
+}
+
+.plexon-video-hit-filmframe {
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--surface-2, var(--bg1));
+  cursor: pointer;
+}
+
+.plexon-video-hit-filmframe.is-active {
+  border-color: var(--accent, var(--fg));
+  outline: 1px solid var(--accent, var(--fg));
+}
+
+.plexon-video-hit-filmframe img,
+.plexon-video-hit-filmframe-empty {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plexon-video-hit-filmframe-empty {
+  background: color-mix(in srgb, var(--line) 40%, transparent);
+}
+
+.plexon-video-hit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.plexon-video-hit-action-error {
+  margin-bottom: 0.5rem;
+  color: var(--danger, #b42318);
+}
+
+.plexon-video-status-steps {
+  margin-top: 0.75rem;
+}
+
+.plexon-video-status-actions {
+  margin-top: 0.75rem;
+}
+
 .plexon-assistant-confirm {
   margin-top: 0.75rem;
   max-width: min(100%, 40rem);

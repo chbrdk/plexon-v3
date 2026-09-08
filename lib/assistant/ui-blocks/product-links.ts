@@ -44,6 +44,26 @@ export function buildVideonFramePosterUrl(input: {
   return `/api/assistant/videon-frame?${params.toString()}`;
 }
 
+/** Same-origin muted preview proxy for assistant video hit cards. */
+export function buildVideonPreviewUrl(input: {
+  mediaAssetId: string;
+  platformProjectId: string;
+  tMs?: number | null;
+  durationMs?: number | null;
+}): string {
+  const params = new URLSearchParams({
+    mediaAssetId: input.mediaAssetId,
+    platformProjectId: input.platformProjectId,
+  });
+  if (input.tMs != null && Number.isFinite(input.tMs) && input.tMs >= 0) {
+    params.set('t', String(Math.floor(input.tMs)));
+  }
+  if (input.durationMs != null && Number.isFinite(input.durationMs) && input.durationMs > 0) {
+    params.set('durationMs', String(Math.floor(input.durationMs)));
+  }
+  return `/api/assistant/videon-preview?${params.toString()}`;
+}
+
 export function buildCheckionProjectLink(
   platformProjectId: string,
   label = 'CHECKION öffnen'

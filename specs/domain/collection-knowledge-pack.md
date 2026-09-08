@@ -58,6 +58,7 @@ Collections accumulate **heterogeneous** knowledge over years: Audion research d
 | Research dossier + publish distillates → `research_brief` | **AUDION** |
 | GEO jobs + launch suggest; publish → `geo_context` / `competitive` | **CHECKION** |
 | Guideline / tokens / voice (future) → `brand` | **BRANDION** (reserved) |
+| Media / scene distillates → `media_insights` | **VIDEON** |
 | Identity (`name`, `domain`, bindings) | **PLEXON** (already) |
 
 Aligns with `knowledge/platform-surface-ownership.md`: cross-product shared brief = Plexon; deep dossiers stay product-local.
@@ -237,6 +238,28 @@ Future Wave 2 may split `assistant_insights` / `market_intelligence` into dedica
 |-------|------|-------|
 | `items` | SourceItem[] | `{ id, title, url, kind: 'link'\|'doc'\|'asset-ref', mime?, addedByProduct?, addedAt }` |
 
+### 8. `media_insights` (VIDEON)
+
+| | |
+|--|--|
+| **Purpose** | Collection-scoped media / scene distillate for Assistant cite + magazine teaser |
+| **Owner** | **VIDEON** publish; Plexon may lightly edit |
+| **Consume** | Assistant Collection context, Cross-product Flows, Collection magazine |
+| **Publish rules** | Bounded summaries + deep links only. No raw video, full transcripts, signed object URLs, or unbounded per-frame / heatmap dumps. Spec: `specs/domain/videon-integration.md` § Knowledge Pack |
+| **Merge** | Replace-by-publisher default; union `highlights` / `sceneRefs` by id, cap lists |
+| **Freshness** | Stale after 7 days without republish; consumers SHOULD show `updatedAt` |
+| **Limits** | `summary` ≤ ~2k chars; `highlights` ≤ 12; `sceneRefs` ≤ 20; facet ≤ 32 KiB |
+
+**Fields:**
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `summary` | string \| null | Plain ≤ ~2k chars |
+| `highlights` | string[] | Short bullets (themes / claims) |
+| `sceneRefs` | `{ mediaAssetId, sceneKey?, title?, href, startMs? }[]` | Deep links into VIDEON editor |
+| `mediaCount` | number \| null | Accessible media in Collection (approx) |
+| `lastAnalysisAt` | string \| null | ISO of newest succeeded analysis |
+
 ## Facet document envelope
 
 Every facet value is wrapped:
@@ -249,7 +272,7 @@ type FacetDocument<T> = {
   provenance: {
     actorType: 'user' | 'service' | 'system'
     actorUserId?: string | null
-    productId?: 'plexon' | 'audion' | 'checkion' | 'brandion' | null
+    productId?: 'plexon' | 'audion' | 'checkion' | 'brandion' | 'videon' | null
     runId?: string | null
     sourceUri?: string | null
     note?: string | null

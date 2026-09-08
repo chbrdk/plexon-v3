@@ -161,6 +161,18 @@ export function blockToPlainText(block: UiBlock): string {
           .join('\n')
       );
     }
+    case 'video_status_card': {
+      const rows = (p.rows as Array<{ label: string; value: string }>) ?? [];
+      const steps =
+        (p.steps as Array<{ label: string; status?: string }>) ?? [];
+      const title = p.title ? `${p.title}\n` : '';
+      const rowLines = rows.map((r) => `${r.label}: ${r.value}`).join('\n');
+      const stepLines = steps
+        .map((s) => `- ${s.label}${s.status ? ` [${s.status}]` : ''}`)
+        .join('\n');
+      const href = typeof p.href === 'string' ? p.href : '';
+      return [title.trimEnd(), rowLines, stepLines, href].filter(Boolean).join('\n');
+    }
     case 'event_quick_check_report': {
       const report = p.report as {
         meta?: { title?: string; url?: string };

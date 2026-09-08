@@ -26,6 +26,7 @@ import { UiPhaseStrip } from '@/components/assistant-ui/organisms/UiPhaseStrip'
 import { UiMomentList } from '@/components/assistant-ui/organisms/UiMomentList'
 import { UiQuoteList } from '@/components/assistant-ui/organisms/UiQuoteList'
 import { UiVideoHitStrip } from '@/components/assistant-ui/organisms/UiVideoHitStrip'
+import { UiVideoStatusCard } from '@/components/assistant-ui/organisms/UiVideoStatusCard'
 import { UiColorSwatchGrid } from '@/components/assistant-ui/organisms/UiColorSwatchGrid'
 import { UiFontSpecimenList } from '@/components/assistant-ui/organisms/UiFontSpecimenList'
 import { UiEventQuickCheckReviewGateBlock } from '@/components/assistant-ui/organisms/UiEventQuickCheckReviewGateBlock'
@@ -86,6 +87,8 @@ export function AssistantBlockRenderer({ block }: AssistantBlockRendererProps) {
       return <UiQuoteList {...(props as Parameters<typeof UiQuoteList>[0])} />
     case 'video_hit_strip':
       return <UiVideoHitStrip {...(props as Parameters<typeof UiVideoHitStrip>[0])} />
+    case 'video_status_card':
+      return <UiVideoStatusCard {...(props as Parameters<typeof UiVideoStatusCard>[0])} />
     case 'event_quick_check_report': {
       const report = (props as { report: EventQuickCheckReportModel }).report
       return <EventQuickCheckReportView report={report} />
