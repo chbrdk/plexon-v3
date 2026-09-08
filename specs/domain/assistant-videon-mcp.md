@@ -83,7 +83,7 @@ WHEN `videon.media_search` / `videon_media_search` returns items THEN the orches
 - Optional `posterUrl` = same-origin `/api/assistant/videon-frame?…` (Plexon proxies VIDEON `GET /api/media/:id/frame` with service secret + session actor)  
 - Optional filmstrip / muted preview per `assistant-videon-hit-chrome.md`  
 - Organism: `UiVideoHitStrip` (`StepStrip` cards like VIDEON `/chat`)  
-- Optional per-item `actions`: `open` | `analysis_run` | `brand_check_run` (see Card actions)
+- Optional per-item `actions`: `open` | `analysis_run` | `brand_check_run` | `cut_create` (see Card actions)
 
 MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
 
@@ -91,8 +91,11 @@ MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
 
 1. WHEN `video_hit_strip` items include `actions` THEN `UiVideoHitStrip` MUST render them.  
 2. WHEN action `kind` is `open` THEN the UI MUST open the item `href` (new tab / same tab per shell).  
-3. WHEN action `kind` is `analysis_run` or `brand_check_run` THEN the UI MUST NOT fire silently — it MUST use the existing assistant confirm / write enqueue path (`allowWriteTools` + confirmation policy) with `mediaAssetId`, `platformProjectId`, and session `actorUserId`.  
-4. MCP tools remain unchanged; the UI triggers existing write tools after confirm.
+3. WHEN action `kind` is `analysis_run`, `brand_check_run`, or `cut_create` THEN the UI MUST NOT fire silently — it MUST use the existing assistant confirm / write enqueue path (`allowWriteTools` + confirmation policy) with `mediaAssetId`, `platformProjectId`, and session `actorUserId`.  
+4. MCP tools remain unchanged; the UI triggers existing write tools after confirm (or same-origin `/api/assistant/videon-action` with `confirmed: true`).  
+5. WHEN action would be export THEN it MUST NOT appear on Hit-Cards — export is Flow-first (`videon.export.run` / node `videon_export_run`).
+
+Capability Catalog entries (V6) share the same ids; when `CAPABILITY_CATALOG_RUNTIME` is on, Agent/Flow adapters MAY call shared executors — free-chat MCP path stays available either way.
 
 ### Auto UI after `videon_media_get` / `videon_analysis_get`
 

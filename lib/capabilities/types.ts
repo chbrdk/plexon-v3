@@ -3,7 +3,14 @@
  * @see specs/domain/capability-catalog.md
  */
 
-export type CapabilityOwner = 'audion' | 'checkion' | 'brandion' | 'echon' | 'plexon' | 'spirion';
+export type CapabilityOwner =
+  | 'audion'
+  | 'checkion'
+  | 'brandion'
+  | 'echon'
+  | 'plexon'
+  | 'spirion'
+  | 'videon';
 
 export type CapabilitySideEffect = 'read' | 'write' | 'job';
 
@@ -21,7 +28,12 @@ export type CapabilityId =
   | 'spirion.enrich'
   | 'spirion.reference_search'
   | 'spirion.reference_pack'
-  | 'spirion.generate';
+  | 'spirion.generate'
+  | 'videon.media.search'
+  | 'videon.analysis.get'
+  | 'videon.analysis.run'
+  | 'videon.cut.create'
+  | 'videon.export.run';
 
 export type CapabilitySurfaces = {
   agent: boolean;
@@ -64,6 +76,8 @@ export type CapabilityExecuteContext = {
   checkionProjectId?: string | null;
   audionProjectId?: string | null;
   brandionGuidelineId?: string | null;
+  videonMediaAssetId?: string | null;
+  actorUserId?: string | null;
   source: CapabilityExecuteSource;
   nodeId?: string;
 };

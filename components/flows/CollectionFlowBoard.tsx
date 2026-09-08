@@ -72,7 +72,7 @@ import {
   type CollectionFlowRfEdge,
   type CollectionFlowRfNode as CollectionFlowRfNodeModel,
 } from '@/lib/collection-flow-canvas'
-import { PALETTE_BRAND_GROUPS, PALETTE_JOURNEY_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
+import { PALETTE_BRAND_GROUPS, PALETTE_JOURNEY_GROUPS, PALETTE_MEDIA_GROUPS, PALETTE_QUALITY_GROUPS } from '@/lib/collection-flow-presets'
 import {
   DEFAULT_FLOW_NODE_SIZE,
   findNonOverlappingFlowPosition,
@@ -1906,6 +1906,26 @@ function BoardInner({ platformProjectId, initial }: Props) {
                 </div>
               ))}
               {PALETTE_BRAND_GROUPS.map((group) => (
+                <div key={group.id}>
+                  <p className="msqdx-flow-canvas-hint">{group.title}</p>
+                  <div className="msqdx-flow-palette-row">
+                    {group.presets.map((preset) => (
+                      <Button
+                        key={preset.id}
+                        type="button"
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => addPreset(preset.id)}
+                        disabled={runBusy}
+                        data-testid={`flow-palette-${preset.id}`}
+                      >
+                        {preset.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {PALETTE_MEDIA_GROUPS.map((group) => (
                 <div key={group.id}>
                   <p className="msqdx-flow-canvas-hint">{group.title}</p>
                   <div className="msqdx-flow-palette-row">

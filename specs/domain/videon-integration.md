@@ -549,11 +549,11 @@ End-to-end analysis latency and cost objectives are set after the representative
 
 ### V6 — Cross-product flows and knowledge distillates
 
-- Register bounded Flow nodes for analysis/search/export where user journeys justify them.
+- Register bounded Flow nodes for analysis/cut/export (`videon_analysis_run`, `videon_cut_create`, `videon_export_run`) + Capability Catalog `videon.*` (see `capability-catalog.md` VIDEON set).
 - Publish `media_insights` distillates (facet registered; publisher + Assistant consume).
-- Exercise a cross-product flow, for example Creation asset → VIDEON analysis → Brandion guideline check, without moving domain state into PLEXON.
+- Cross-product template: Creation asset ref → VIDEON analysis → Brandion guideline check (`buildCreationVideonBrandFlowTemplate`), without moving domain state into PLEXON. Knowledge: `knowledge/collection-flow-videon.md`.
 
-**Gate:** reruns are idempotent, provenance is retained, payloads remain bounded, and product-local state ownership is intact.
+**Gate:** Catalog + Flow kinds accepted; reruns idempotent; provenance retained; payloads bounded; product-local state ownership intact; Hit-Card writes confirm-only (`cut_create` included; export Flow-first).
 
 ### V7 — Production rollout and legacy disposition
 

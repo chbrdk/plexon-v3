@@ -57,6 +57,7 @@ const DEFAULT_HIT_ACTIONS = [
   { id: 'open', label: 'Öffnen', kind: 'open' as const },
   { id: 'analysis_run', label: 'Analyse', kind: 'analysis_run' as const },
   { id: 'brand_check_run', label: 'Brand-Check', kind: 'brand_check_run' as const },
+  { id: 'cut_create', label: 'Cut', kind: 'cut_create' as const },
 ];
 
 /**

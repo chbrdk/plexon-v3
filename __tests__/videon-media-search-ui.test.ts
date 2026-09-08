@@ -74,6 +74,7 @@ describe('videon media search UI blocks', () => {
       'open',
       'analysis_run',
       'brand_check_run',
+      'cut_create',
     ])
     const parsed = parseUiBlockProps('video_hit_strip', blocks[0].props)
     expect(parsed.ok).toBe(true)

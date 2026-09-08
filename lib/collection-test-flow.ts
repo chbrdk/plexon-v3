@@ -62,6 +62,11 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   // Family D — BRANDION brand (Wave 24)
   'guideline',
   'brand_measure',
+  // Family E — VIDEON media (V6)
+  'videon_media',
+  'videon_analysis_run',
+  'videon_cut_create',
+  'videon_export_run',
   // Wave 23 — EQC typed actions (no generic agent)
   'research_brief',
   'competitors_suggest',
@@ -181,6 +186,10 @@ export type CollectionFlowNode = {
   fixtureId?: string;
   /** Brandion measure adapter on `brand_measure` — `fixture` default (Wave 24). */
   adapter?: 'fixture' | (string & {});
+  /** VIDEON media asset id on `videon_media` / analysis / cut nodes (V6). */
+  mediaAssetId?: string;
+  /** VIDEON cut id on `videon_export_run` (V6); may come from upstream `media.cut.cutId`. */
+  cutId?: string;
   /** Palette preset id for action/measure factories (Wave 11). */
   presetId?: string;
   /** Wave 23 — `human_confirm` which draft to pause on. */
@@ -778,6 +787,73 @@ export function createJourneyQualityIssuesTemplate(url: string): CollectionTestF
   return { ...base, journeyFlow: extractJourneyFlowFromDocument(base, pageUrl) };
 }
 
+/**
+ * V6 — Creation asset → VIDEON analysis → Brandion measure (cross-product spine).
+ * @see knowledge/collection-flow-videon.md
+ */
+export function buildCreationVideonBrandFlowTemplate(input: {
+  mediaAssetId?: string;
+  guidelineId?: string;
+}): CollectionTestFlowDocument {
+  const mediaAssetId = input.mediaAssetId?.trim() || '';
+  const guidelineId = input.guidelineId?.trim() || '';
+  return {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: 'creation-videon-brand-v1',
+    nodes: [
+      { id: 'n-start', kind: 'start', label: 'Start', position: { x: 0, y: 120 } },
+      {
+        id: 'n-videon-media',
+        kind: 'videon_media',
+        label: 'Media',
+        mediaAssetId,
+        position: { x: 220, y: 120 },
+      },
+      {
+        id: 'n-videon-analysis',
+        kind: 'videon_analysis_run',
+        label: 'Analysis',
+        mediaAssetId,
+        position: { x: 440, y: 120 },
+      },
+      {
+        id: 'n-brand',
+        kind: 'brand_measure',
+        label: 'Brand Measure',
+        guidelineId,
+        adapter: 'fixture',
+        fixtureId: 'demo-landing-pass',
+        position: { x: 660, y: 120 },
+      },
+      {
+        id: 'n-success',
+        kind: 'success',
+        label: 'Success',
+        position: { x: 880, y: 120 },
+      },
+    ],
+    edges: [
+      { id: 'e-start-media', source: 'n-start', target: 'n-videon-media', edgeKind: 'then' },
+      {
+        id: 'e-media-analysis',
+        source: 'n-videon-media',
+        target: 'n-videon-analysis',
+        edgeKind: 'then',
+      },
+      {
+        id: 'e-analysis-brand',
+        source: 'n-videon-analysis',
+        target: 'n-brand',
+        edgeKind: 'then',
+      },
+      { id: 'e-brand-success', source: 'n-brand', target: 'n-success', edgeKind: 'then' },
+    ],
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+}
+
 /** Vaillant Group UC1 — showcase-lite: Wer? → eine Frage → Scan + Marke. */
 export function createVaillantBarrierResearchTemplate(input?: {
   journeyUrl?: string;
@@ -1241,6 +1317,9 @@ const QUALITY_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
   'domain_scan',
   'geo_job',
   'brand_measure',
+  'videon_analysis_run',
+  'videon_cut_create',
+  'videon_export_run',
   'compare',
   'set',
   'score_gate',
@@ -1272,6 +1351,36 @@ export function mergeGuidelineConfigOntoBrandMeasure(
     if (n.kind !== 'brand_measure') return n;
     if (n.guidelineId?.trim()) return n;
     return { ...n, guidelineId };
+  });
+}
+
+/** VIDEON Family E kinds (V6 Media). */
+export const VIDEON_FAMILY_KINDS = new Set<CollectionFlowNodeKind>([
+  'videon_media',
+  'videon_analysis_run',
+  'videon_cut_create',
+  'videon_export_run',
+]);
+
+export function flowHasVideonNodes(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => VIDEON_FAMILY_KINDS.has(n.kind));
+}
+
+/** Merge upstream `videon_media` config onto Media action nodes missing mediaAssetId. */
+export function mergeVideonMediaAssetId(nodes: CollectionFlowNode[]): CollectionFlowNode[] {
+  const mediaCfg = [...nodes].reverse().find((n) => n.kind === 'videon_media');
+  const mediaAssetId = mediaCfg?.mediaAssetId?.trim() || null;
+  if (!mediaAssetId) return nodes;
+  return nodes.map((n) => {
+    if (
+      n.kind !== 'videon_analysis_run' &&
+      n.kind !== 'videon_cut_create' &&
+      n.kind !== 'videon_export_run'
+    ) {
+      return n;
+    }
+    if (n.mediaAssetId?.trim()) return n;
+    return { ...n, mediaAssetId };
   });
 }
 
@@ -1596,7 +1705,12 @@ export function extractJourneyFlowFromDocument(
     return null;
   }
 
-  const configKinds = new Set<CollectionFlowNodeKind>(['persona', 'zielgruppe', 'guideline']);
+  const configKinds = new Set<CollectionFlowNodeKind>([
+    'persona',
+    'zielgruppe',
+    'guideline',
+    'videon_media',
+  ]);
   const allStarts = candidateNodes.filter((n) => n.kind === 'start');
   const slots = listJourneyPersonaSlots(doc);
   const forcedId = opts?.personaNodeId?.trim() || null;

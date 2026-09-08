@@ -114,6 +114,9 @@ const ACTION_PORT_KINDS = new Set<CollectionFlowNodeKind>([
   'domain_scan',
   'geo_job',
   'brand_measure',
+  'videon_analysis_run',
+  'videon_cut_create',
+  'videon_export_run',
   'success',
   'journey',
   'research_brief',
@@ -696,6 +699,18 @@ export function newCollectionFlowNode(kind: CollectionFlowNodeKind, id?: string)
       adapter: 'fixture',
       fixtureId: 'demo-landing-pass',
     };
+  }
+  if (kind === 'videon_media') {
+    return { ...base, label: 'Media', mediaAssetId: '' };
+  }
+  if (kind === 'videon_analysis_run') {
+    return { ...base, label: 'Analysis' };
+  }
+  if (kind === 'videon_cut_create') {
+    return { ...base, label: 'Cut' };
+  }
+  if (kind === 'videon_export_run') {
+    return { ...base, label: 'Export', cutId: '' };
   }
   if (kind === 'measure') return { ...base, text: '', measureKey: 'overall' };
   if (kind === 'scan') return { ...base, url: '', scanMode: 'single' };

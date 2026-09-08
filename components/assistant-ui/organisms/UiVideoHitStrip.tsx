@@ -24,10 +24,12 @@ type HitAction = NonNullable<Hit['actions']>[number]
 type FilmFrame = NonNullable<Hit['filmstrip']>[number]
 
 type PendingWrite = {
-  kind: 'analysis_run' | 'brand_check_run'
+  kind: 'analysis_run' | 'brand_check_run' | 'cut_create'
   label: string
   mediaAssetId: string
   platformProjectId: string
+  title?: string
+  startMs?: number | null
 }
 
 function MetaRow({ icon, children }: { icon: ReactNode; children: ReactNode }) {
@@ -136,6 +138,14 @@ export function UiVideoHitStrip({ title, items }: Props) {
           mediaAssetId: write.mediaAssetId,
           platformProjectId: write.platformProjectId,
           confirmed: true,
+          ...(write.kind === 'cut_create'
+            ? {
+                name: write.title?.trim() || write.mediaAssetId,
+                ...(write.startMs != null && Number.isFinite(write.startMs)
+                  ? { startMs: Math.floor(write.startMs) }
+                  : {}),
+              }
+            : {}),
         }),
       })
       if (!res.ok) {
@@ -156,6 +166,7 @@ export function UiVideoHitStrip({ title, items }: Props) {
       openHitAt(hit, focusByHit[hit.id] ?? hit.startMs ?? null)
       return
     }
+    const writeKind = action.kind
     const mediaAssetId = hit.mediaAssetId?.trim() ?? ''
     const platformProjectId = hit.platformProjectId?.trim() ?? ''
     if (!mediaAssetId || !platformProjectId) {
@@ -164,10 +175,12 @@ export function UiVideoHitStrip({ title, items }: Props) {
     }
     setActionError(null)
     setPending({
-      kind: action.kind,
+      kind: writeKind,
       label: action.label,
       mediaAssetId,
       platformProjectId,
+      title: hit.title,
+      startMs: focusByHit[hit.id] ?? hit.startMs ?? null,
     })
   }
 

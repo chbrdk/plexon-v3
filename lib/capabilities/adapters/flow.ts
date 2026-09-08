@@ -32,6 +32,7 @@ export const FLOW_ORCHESTRATION_KINDS = new Set([
   'research_brief',
   'competitors_suggest',
   'suggest_queries',
+  'videon_media',
 ]);
 
 export function capabilityIdFromFlowNodeKind(kind: string): CapabilityId | null {

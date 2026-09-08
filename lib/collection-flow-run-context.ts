@@ -92,6 +92,19 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
   { path: 'brand.failCount', label: 'failCount', group: 'brand' },
   { path: 'brand.observationCount', label: 'observationCount', group: 'brand' },
   { path: 'brand.passRate', label: 'passRate', group: 'brand' },
+  { path: 'media.analysis.status', label: 'status', group: 'media.analysis' },
+  { path: 'media.analysis.mediaAssetId', label: 'mediaAssetId', group: 'media.analysis' },
+  { path: 'media.analysis.analysisRunId', label: 'analysisRunId', group: 'media.analysis' },
+  { path: 'media.analysis.platformProjectId', label: 'platformProjectId', group: 'media.analysis' },
+  { path: 'media.cut.status', label: 'status', group: 'media.cut' },
+  { path: 'media.cut.cutId', label: 'cutId', group: 'media.cut' },
+  { path: 'media.cut.mediaAssetId', label: 'mediaAssetId', group: 'media.cut' },
+  { path: 'media.cut.name', label: 'name', group: 'media.cut' },
+  { path: 'media.cut.platformProjectId', label: 'platformProjectId', group: 'media.cut' },
+  { path: 'media.export.status', label: 'status', group: 'media.export' },
+  { path: 'media.export.exportId', label: 'exportId', group: 'media.export' },
+  { path: 'media.export.cutId', label: 'cutId', group: 'media.export' },
+  { path: 'media.export.platformProjectId', label: 'platformProjectId', group: 'media.export' },
   { path: 'brief.displayName', label: 'displayName', group: 'brief' },
   { path: 'brief.industry', label: 'industry', group: 'brief' },
   { path: 'brief.summary', label: 'summary', group: 'brief' },
@@ -122,6 +135,9 @@ const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
   domain_scan: 'domain',
   geo_job: 'geo',
   brand_measure: 'brand',
+  videon_analysis_run: 'media.analysis',
+  videon_cut_create: 'media.cut',
+  videon_export_run: 'media.export',
   success: 'journey',
   journey: 'journey',
   research_brief: 'brief',
@@ -135,6 +151,9 @@ const ROOT_TO_ACTION_KIND: Record<string, string> = {
   domain: 'domain_scan',
   geo: 'geo_job',
   brand: 'brand_measure',
+  'media.analysis': 'videon_analysis_run',
+  'media.cut': 'videon_cut_create',
+  'media.export': 'videon_export_run',
   journey: 'success',
   brief: 'research_brief',
   competitors: 'competitors_suggest',
@@ -153,7 +172,14 @@ export function catalogPathFromOutHandle(handle: string | null | undefined): str
 }
 
 export function catalogRootFromPath(path: string): string | null {
-  const root = path.trim().split('.')[0];
+  const trimmed = path.trim();
+  if (!trimmed) return null;
+  // Prefer longer known roots (e.g. media.analysis before media).
+  const known = Object.keys(ROOT_TO_ACTION_KIND).sort((a, b) => b.length - a.length);
+  for (const root of known) {
+    if (trimmed === root || trimmed.startsWith(`${root}.`)) return root;
+  }
+  const root = trimmed.split('.')[0];
   return root || null;
 }
 
@@ -198,6 +224,70 @@ export function setContextBundle(
   const outputs = { ...ctx.outputs, [root]: bundle };
   if (nodeId) outputs[nodeId] = bundle;
   return { outputs };
+}
+
+/**
+ * Write a VIDEON media.* leaf under nested `outputs.media` while keeping nodeId = leaf bundle.
+ * Catalog paths like `media.analysis.status` resolve via resolveContextPath (dot segments).
+ */
+export function setMediaCatalogLeaf(
+  ctx: CollectionFlowRunContext,
+  leaf: 'analysis' | 'cut' | 'export',
+  bundle: Record<string, unknown>,
+  nodeId?: string | null
+): CollectionFlowRunContext {
+  const prev =
+    ctx.outputs.media && typeof ctx.outputs.media === 'object'
+      ? { ...(ctx.outputs.media as Record<string, unknown>) }
+      : {};
+  const media = { ...prev, [leaf]: bundle };
+  const outputs = { ...ctx.outputs, media };
+  if (nodeId) outputs[nodeId] = bundle;
+  return { outputs };
+}
+
+export function buildMediaAnalysisCatalogBundle(input: {
+  status: string;
+  mediaAssetId: string;
+  analysisRunId: string | null;
+  platformProjectId: string;
+}): Record<string, unknown> {
+  return {
+    status: input.status,
+    mediaAssetId: input.mediaAssetId,
+    analysisRunId: input.analysisRunId,
+    platformProjectId: input.platformProjectId,
+  };
+}
+
+export function buildMediaCutCatalogBundle(input: {
+  status: string;
+  cutId: string | null;
+  mediaAssetId: string;
+  name: string;
+  platformProjectId: string;
+}): Record<string, unknown> {
+  return {
+    status: input.status,
+    cutId: input.cutId,
+    mediaAssetId: input.mediaAssetId,
+    name: input.name,
+    platformProjectId: input.platformProjectId,
+  };
+}
+
+export function buildMediaExportCatalogBundle(input: {
+  status: string;
+  exportId: string | null;
+  cutId: string;
+  platformProjectId: string;
+}): Record<string, unknown> {
+  return {
+    status: input.status,
+    exportId: input.exportId,
+    cutId: input.cutId,
+    platformProjectId: input.platformProjectId,
+  };
 }
 
 /**

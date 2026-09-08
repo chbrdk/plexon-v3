@@ -21,6 +21,7 @@
 - BRANDION MCP (guidelines/tokens): `BRANDION_MCP_URL` → staging `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` · spec `specs/domain/assistant-brandion-mcp.md` · gate `knowledge/brandion-mcp-assistant.md` · product MCP `brandion-v3/mcp-server/`
 - VIDEON MCP (media/scenes/analysis/cuts): `VIDEON_MCP_URL` → staging `https://pjupngbkompeyfjqocgsi0jy.projects-a.plygrnd.tech` · Coolify `videon-mcp` `pjupngbkompeyfjqocgsi0jy` port **3103** · spec `specs/domain/assistant-videon-mcp.md` · hit chrome `specs/domain/assistant-videon-hit-chrome.md` · `knowledge/videon-mcp-assistant.md` · product `videon-v3/mcp-server/`
 - VIDEON assistant proxies (same-origin): `GET /api/assistant/videon-frame` · `GET /api/assistant/videon-preview` → Product frame/preview (Model B + service secret)
+- VIDEON Collection Flow (V6 Media): `knowledge/collection-flow-videon.md` · kinds `videon_analysis_run` / `videon_cut_create` / `videon_export_run` · catalog `media.*` · Capability Catalog `videon.*`
 - CREATION MCP (library/compositions): `CREATION_MCP_URL` → attach `creation-mcp` port **3102** · spec `specs/domain/assistant-creation-mcp.md` · `knowledge/creation-mcp-assistant.md` · product MCP `creation-v3/mcp-server/`
 - AUDION MCP: `AUDION_MCP_URL` → staging `https://mcp-audion.projects-a.plygrnd.tech` (`audion-mcp`)
 - BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`

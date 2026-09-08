@@ -13,6 +13,7 @@ import {
   documentHasGeoJob,
   documentHasIssueGate,
   documentHasJourneySegment,
+  flowHasVideonNodes,
   geoGateNode,
   geoJobNode,
   geoJobQueriesFromText,
@@ -40,6 +41,7 @@ import {
   executeBrandCollectionFlowRun,
 } from '@/lib/collection-flow-brand-execute';
 import { runBrandMeasureSegment } from '@/lib/collection-flow-brand-segment';
+import { runVideonMediaSegments } from '@/lib/collection-flow-videon-segment';
 import {
   persistFlowRunResult,
   toCollectionTestFlowResponse,
@@ -154,9 +156,10 @@ export async function executeCollectionFlowRun(input: {
     const hasPageQuality = Boolean(qualityNode);
     const hasGeo = documentHasGeoJob(doc);
     const hasBrand = documentHasBrandMeasure(doc);
+    const hasVideon = flowHasVideonNodes(doc);
 
-    // Wave 24 — Brand-only path (no Checkion quality).
-    if (hasBrand && !hasPageQuality && !hasGeo) {
+    // Wave 24 / V6 — Brand and/or VIDEON path (no Checkion quality).
+    if ((hasBrand || hasVideon) && !hasPageQuality && !hasGeo) {
       return executeBrandCollectionFlowRun({
         platformProjectId: id,
         flowId: fid,
@@ -189,7 +192,12 @@ export async function executeCollectionFlowRun(input: {
     });
 
     if (!hasPageQuality && !hasGeo) {
-      return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Quality path missing — add scan, domain_scan, geo_job, or brand_measure' };
+      return {
+        ok: false as const,
+        status: API_STATUS.BAD_REQUEST,
+        message:
+          'Quality path missing — add scan, domain_scan, geo_job, brand_measure, or videon Media nodes',
+      };
     }
     if (!baseUrl && !geoCompany) {
       return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'Scan URL missing — set domain, geo url/companyName, or pass url' };
@@ -1058,6 +1066,20 @@ export async function executeCollectionFlowRun(input: {
           }),
         geoNode?.id
       );
+    }
+
+    // V6 — optional VIDEON Media segments after Checkion quality (before brand / compares).
+    if (hasVideon) {
+      const media = await runVideonMediaSegments({
+        platformProjectId: id,
+        doc: resolvedDoc,
+        ctx: runContext,
+        plexonUserId: input.updatedByUserId ?? null,
+      });
+      runContext = media.ctx;
+      if (!media.ok) {
+        blockers.push(media.message);
+      }
     }
 
     // Wave 24 — optional Brandion measure after Checkion quality (before compares).

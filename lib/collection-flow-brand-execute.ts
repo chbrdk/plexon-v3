@@ -3,16 +3,8 @@
  */
 
 import { API_STATUS } from '@/lib/api-error-handler';
-import {
-  deriveCollectionVerdict,
-  documentHasJourneySegment,
-  nodeStatesFromVerdict,
-  type CollectionFlowLastRun,
-  type CollectionFlowNodeRunState,
-  type CollectionTestFlowDocument,
-  type CollectionVerdict,
-} from '@/lib/collection-test-flow';
 import { runBrandMeasureSegment } from '@/lib/collection-flow-brand-segment';
+import { runVideonMediaSegments } from '@/lib/collection-flow-videon-segment';
 import {
   applySetNodes,
   emptyRunContext,
@@ -20,6 +12,17 @@ import {
   seedStartNodeIntoContext,
   setContextBundle,
 } from '@/lib/collection-flow-run-context';
+import {
+  documentHasBrandMeasure,
+  documentHasJourneySegment,
+  flowHasVideonNodes,
+  nodeStatesFromVerdict,
+  type CollectionFlowLastRun,
+  type CollectionFlowNodeRunState,
+  type CollectionTestFlowDocument,
+  type CollectionVerdict,
+  deriveCollectionVerdict,
+} from '@/lib/collection-test-flow';
 import {
   persistFlowRunResult,
   toCollectionTestFlowResponse,
@@ -65,6 +68,152 @@ export async function executeBrandCollectionFlowRun(input: {
   const seeded = seedStartNodeIntoContext(runContext, doc.nodes);
   runContext = seeded.ctx;
   runContext = setContextBundle(runContext, 'run', { url: '', startedAt });
+
+  const hasVideon = flowHasVideonNodes(doc);
+  const hasBrand = documentHasBrandMeasure(doc);
+
+  if (hasVideon) {
+    const media = await runVideonMediaSegments({
+      platformProjectId: id,
+      doc,
+      ctx: runContext,
+      plexonUserId: input.updatedByUserId ?? null,
+    });
+    runContext = media.ctx;
+    if (!media.ok) {
+      const compareResults = evaluateAllCompares(doc.nodes, applySetNodes(doc.nodes, runContext)).map(
+        (r) => ({
+          nodeId: r.nodeId,
+          path: r.path,
+          passed: r.passed,
+          actual: r.actual ?? null,
+        })
+      );
+      const verdictBase = deriveCollectionVerdict({
+        scanStatus: 'failed',
+        overallScore: null,
+        gatedScore: null,
+        threshold: 0,
+        blockers: [media.message],
+        hasJourneySegment: false,
+        taskCompleted: true,
+        journeyValidEvidence: true,
+        compareResults: compareResults.length ? compareResults : null,
+        requirePageScore: false,
+      });
+      const verdict: CollectionVerdict = {
+        ...verdictBase,
+        status: 'error',
+        flowCompleted: false,
+        collectionReady: false,
+        pageEvidenceValid: false,
+        pageEvidenceCaveat: media.message,
+        summary: `Fehler — ${media.message}`,
+        blockers: [media.message],
+      };
+      const lastRun: CollectionFlowLastRun = {
+        startedAt,
+        completedAt: new Date().toISOString(),
+        scanId: null,
+        domainScanId: null,
+        geoJobId: null,
+        scanMode: null,
+        scoreKind: null,
+        url: '',
+        status: 'failed',
+        overallScore: null,
+        citedShare: null,
+        geoFitness: null,
+        error: media.message,
+        audionJobId: null,
+        audionStudyId: null,
+        audionWaveId: null,
+        stepUrl: null,
+        issueCount: null,
+        criticalCount: null,
+        context: runContext,
+        compareResults,
+      };
+      const saved = await persistFlowRunResult({
+        platformProjectId: id,
+        flowId: fid,
+        verdict,
+        lastRun,
+      });
+      return {
+        ok: true,
+        flow: saved ? toCollectionTestFlowResponse(saved) : null,
+        verdict,
+        lastRun,
+        nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
+      };
+    }
+  }
+
+  if (!hasBrand) {
+    runContext = applySetNodes(doc.nodes, runContext);
+    const compareEvals = evaluateAllCompares(doc.nodes, runContext);
+    const compareResults = compareEvals.map((r) => ({
+      nodeId: r.nodeId,
+      path: r.path,
+      passed: r.passed,
+      actual: r.actual ?? null,
+    }));
+    const hasCompare = compareResults.length > 0;
+    const mediaStatus =
+      typeof (runContext.outputs.media as { analysis?: { status?: string } } | undefined)?.analysis
+        ?.status === 'string'
+        ? (runContext.outputs.media as { analysis: { status: string } }).analysis.status
+        : 'completed';
+    const verdict = deriveCollectionVerdict({
+      scanStatus: mediaStatus,
+      overallScore: null,
+      gatedScore: null,
+      threshold: 0,
+      blockers: [],
+      hasJourneySegment: false,
+      taskCompleted: true,
+      journeyValidEvidence: true,
+      compareResults: hasCompare ? compareResults : null,
+      requirePageScore: false,
+    });
+    const lastRun: CollectionFlowLastRun = {
+      startedAt,
+      completedAt: new Date().toISOString(),
+      scanId: null,
+      domainScanId: null,
+      geoJobId: null,
+      scanMode: null,
+      scoreKind: null,
+      url: '',
+      status: mediaStatus,
+      overallScore: null,
+      citedShare: null,
+      geoFitness: null,
+      error: null,
+      audionJobId: null,
+      audionStudyId: null,
+      audionWaveId: null,
+      stepUrl: null,
+      issueCount: null,
+      criticalCount: null,
+      context: runContext,
+      compareResults,
+    };
+    const saved = await persistFlowRunResult({
+      platformProjectId: id,
+      flowId: fid,
+      verdict,
+      lastRun,
+    });
+    return {
+      ok: true,
+      flow: saved ? toCollectionTestFlowResponse(saved) : null,
+      verdict,
+      lastRun,
+      nodeStates: nodeStatesFromVerdict(doc, verdict, lastRun),
+    };
+  }
 
   const brand = await runBrandMeasureSegment({
     platformProjectId: id,

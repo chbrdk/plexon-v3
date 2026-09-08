@@ -66,6 +66,18 @@ Assistant tools/workflows and Collection Flow nodes duplicate product jobs (scan
 | `audion.persona_bootstrap` | `persona_bootstrap` | `persona_bootstrap` / EQC | AUDION bootstrap |
 | `plexon.collection_flow.run` | — (meta) | **new** (Wave C2) | `POST …/flows/:id/run` |
 
+### VIDEON Media (V6)
+
+| Capability id | Flow kind | Surfaces | Catalog root |
+|---------------|-----------|----------|--------------|
+| `videon.media.search` | — | Agent | `media.search` |
+| `videon.analysis.get` | — | Agent | `media.analysis` |
+| `videon.analysis.run` | `videon_analysis_run` | Agent + Flow | `media.analysis` |
+| `videon.cut.create` | `videon_cut_create` | Agent + Flow (`human_gate`) | `media.cut` |
+| `videon.export.run` | `videon_export_run` | Flow-first | `media.export` |
+
+Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). Flow kinds also run via `lib/collection-flow-videon-segment.ts` + `lib/integrations/videon-product-client.ts`. Details: `knowledge/collection-flow-videon.md`.
+
 ### Flow-only (orchestration / authoring)
 
 | Flow kind | Why not Agent tool |
@@ -73,7 +85,7 @@ Assistant tools/workflows and Collection Flow nodes duplicate product jobs (scan
 | `compare`, `set`, `quality_ok`, legacy `*_gate` | Branch / catalog algebra |
 | `human_confirm` | Pause/resume UX owned by Flow/EQC |
 | `start`, `prompt`, `observe`, `action`, `gate`, `message`, `success`, `abandon`, `measure` | Journey micro-graph → compiled Audion segment |
-| `persona`, `zielgruppe`, `guideline` | Config merge onto segment / measure |
+| `persona`, `zielgruppe`, `guideline`, `videon_media` | Config merge onto segment / measure / media |
 | `journey` (legacy) | Opaque embed |
 
 ### Agent-only (explore / UI) — until a Flow need appears

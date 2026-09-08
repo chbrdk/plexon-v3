@@ -141,6 +141,35 @@ Node fields (brand):
 
 **Extract rule:** `guideline` is authoring-only for the Audion agent graph; before Brandion execute, merge `guidelineId` onto `brand_measure` when the measure node omits it.
 
+### E — Media (VIDEON capability) — V6
+
+Collection-scoped media analysis / cut / export. Domain state stays in VIDEON; Flow writes bounded `media.*` catalog. Capability Catalog ids: `videon.analysis.run`, `videon.cut.create`, `videon.export.run` (+ Agent-only search/get).
+
+| Kind | Role | Wave |
+|------|------|------|
+| `videon_media` | **Config** — optional `mediaAssetId` / scope for downstream Media nodes | **V6** |
+| `videon_analysis_run` | Enqueue analysis job (`POST /api/media/:id/analysis`) — writes `media.analysis` | **V6** |
+| `videon_cut_create` | Create Cut (`POST /api/cuts`) — writes `media.cut`; confirm / human gate | **V6** |
+| `videon_export_run` | Enqueue export (`POST /api/cuts/:id/exports`) — writes `media.export`; **Flow first** | **V6** |
+
+#### Keep / reshape / drop (media)
+
+| Decision | Item |
+|----------|------|
+| **Keep** | Collection = `platformProjectId`; Model B via service secret + actor |
+| **Reshape** | Reuse `compare` over `media.*` (no media-specific gate kinds) |
+| **Drop as nodes** | Full NLE remote control; unbounded preview streams; `reframe` (Later) |
+
+Node fields (media):
+
+| Field | On | Notes |
+|-------|-----|-------|
+| `mediaAssetId` | `videon_media`, `videon_analysis_run`, `videon_cut_create` | Empty on action → merge from upstream `videon_media` |
+| `cutId` | `videon_export_run` | Required for export; may come from upstream `media.cut.cutId` |
+| `name` | `videon_cut_create` | Cut display name (default from media filename) |
+
+**Extract rule:** Before Media execute, merge `mediaAssetId` from upstream `videon_media` when the action node omits it.
+
 ### C — Orchestration (PLEXON)
 
 | Kind | Role | Status |
@@ -173,6 +202,9 @@ Actions write typed bundles into `lastRun.context.outputs` (also aliased by root
 | `journey` | Audion segment | `taskCompleted`, `validEvidence`, `finalUrl` |
 | `run` | orchestration | `url`, `startedAt` |
 | `brand` | `brand_measure` | `status`, `guidelineId`, `runId`, `adapter`, `passCount`, `failCount`, `observationCount`, `passRate` |
+| `media.analysis` | `videon_analysis_run` | `status`, `mediaAssetId`, `analysisRunId`, `platformProjectId` |
+| `media.cut` | `videon_cut_create` | `status`, `cutId`, `mediaAssetId`, `name`, `platformProjectId` |
+| `media.export` | `videon_export_run` | `status`, `exportId`, `cutId`, `platformProjectId` |
 
 Ops: `gte` \| `lte` \| `gt` \| `lt` \| `eq` \| `neq` \| `exists` \| `not_exists`.  
 **Open path expressions (Wave 18+):** `compare.path` / `compare.value` and **all ExpressionField params** (`start`/`scan`/`domain_scan`/`geo_job` URL, `text`, `note`, `pattern`, `companyName`, …) accept bare catalog paths **or** `{{ … }}` (whole-field or mixed with literals), resolved against `context.outputs` at segment start. **No JS `eval`.** Catalog list = recommended picker / port labels only — not a hard evaluate whitelist.
@@ -183,7 +215,7 @@ n8n-like I/O without open expressions:
 
 | Side | Node | Ports |
 |------|------|--------|
-| **Out** | `scan` / `domain_scan` / `geo_job` / `success` / `brand_measure` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, `out:journey.taskCompleted`, `out:brand.passRate`, …) |
+| **Out** | `scan` / `domain_scan` / `geo_job` / `success` / `brand_measure` / `videon_analysis_run` / `videon_cut_create` / `videon_export_run` | One labeled source handle per catalog leaf for that root (`out:scan.overallScore`, `out:journey.taskCompleted`, `out:brand.passRate`, `out:media.analysis.status`, …) |
 | **In** | `compare` | Control `in` (Ablauf) + bind target `bind:path` (Wert) |
 | **Out** | `compare` | Control `when` / `otherwise` (Pass/Fail) |
 | **Config** | `persona` / `zielgruppe` / `guideline` | Ablauf in + Weiter out only (no catalog dump) |

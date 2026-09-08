@@ -352,7 +352,7 @@ export const videoHitStripPropsSchema = z.object({
             z.object({
               id: short,
               label: short,
-              kind: z.enum(['open', 'analysis_run', 'brand_check_run']),
+              kind: z.enum(['open', 'analysis_run', 'brand_check_run', 'cut_create']),
             })
           )
           .max(6)

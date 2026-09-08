@@ -18,7 +18,8 @@ export type CollectionFlowPresetGroup =
   | 'qualität'
   | 'vergleich'
   | 'eqc'
-  | 'marke';
+  | 'marke'
+  | 'media';
 
 export type CollectionFlowPreset = {
   id: string;
@@ -397,6 +398,48 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
       value: 0,
     },
   },
+  // V6 — VIDEON Media
+  {
+    id: 'videon_media',
+    group: 'media',
+    label: 'Media',
+    kind: 'videon_media',
+    defaults: { label: 'Media', presetId: 'videon_media', mediaAssetId: '' },
+  },
+  {
+    id: 'videon_analysis_run',
+    group: 'media',
+    label: 'Analysis',
+    kind: 'videon_analysis_run',
+    defaults: { label: 'Analysis', presetId: 'videon_analysis_run' },
+  },
+  {
+    id: 'videon_cut_create',
+    group: 'media',
+    label: 'Cut',
+    kind: 'videon_cut_create',
+    defaults: { label: 'Cut', presetId: 'videon_cut_create' },
+  },
+  {
+    id: 'videon_export_run',
+    group: 'media',
+    label: 'Export',
+    kind: 'videon_export_run',
+    defaults: { label: 'Export', presetId: 'videon_export_run' },
+  },
+  {
+    id: 'compare-media-analysis-ok',
+    group: 'media',
+    label: 'Compare: Analysis status',
+    kind: 'compare',
+    defaults: {
+      label: 'Analysis status',
+      presetId: 'compare-media-analysis-ok',
+      path: 'media.analysis.status',
+      op: 'exists',
+      value: null,
+    },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{
@@ -437,6 +480,16 @@ export const PALETTE_BRAND_GROUPS: Array<{
   title: string;
   presets: CollectionFlowPreset[];
 }> = [{ id: 'marke' as const, title: 'Marke' }].map(({ id, title }) => ({
+  id,
+  title,
+  presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),
+}));
+
+export const PALETTE_MEDIA_GROUPS: Array<{
+  id: CollectionFlowPresetGroup;
+  title: string;
+  presets: CollectionFlowPreset[];
+}> = [{ id: 'media' as const, title: 'Media' }].map(({ id, title }) => ({
   id,
   title,
   presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),

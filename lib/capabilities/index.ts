@@ -60,6 +60,26 @@ export {
   type CollectionFlowRunAgentPayload,
 } from '@/lib/capabilities/executors/plexon-collection-flow-run';
 export {
+  executeVideonMediaSearch,
+  executeVideonMediaSearchCapability,
+} from '@/lib/capabilities/executors/videon-media-search';
+export {
+  executeVideonAnalysisGet,
+  executeVideonAnalysisGetCapability,
+} from '@/lib/capabilities/executors/videon-analysis-get';
+export {
+  executeVideonAnalysisRun,
+  executeVideonAnalysisRunCapability,
+} from '@/lib/capabilities/executors/videon-analysis-run';
+export {
+  executeVideonCutCreate,
+  executeVideonCutCreateCapability,
+} from '@/lib/capabilities/executors/videon-cut-create';
+export {
+  executeVideonExportRun,
+  executeVideonExportRunCapability,
+} from '@/lib/capabilities/executors/videon-export-run';
+export {
   classifyPromoteTrace,
   buildPlaybookRecipe,
   buildPromotedFlowDocument,

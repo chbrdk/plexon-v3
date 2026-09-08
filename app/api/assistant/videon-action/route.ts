@@ -12,12 +12,12 @@ export const dynamic = 'force-dynamic'
 
 const PLEXON_USER_HEADER = 'X-Plexon-User-Id'
 
-const WRITE_ACTIONS = new Set(['analysis_run', 'brand_check_run'])
-type WriteAction = 'analysis_run' | 'brand_check_run'
+const WRITE_ACTIONS = new Set(['analysis_run', 'brand_check_run', 'cut_create'])
+type WriteAction = 'analysis_run' | 'brand_check_run' | 'cut_create'
 
 /**
  * Confirmed write proxy for assistant video hit actions.
- * Forwards to VIDEON analysis / brand-check with service secret + session actor.
+ * Spec: assistant-videon-mcp.md § Card actions
  */
 export async function POST(request: NextRequest) {
   try {
@@ -39,9 +39,18 @@ export async function POST(request: NextRequest) {
     const platformProjectId =
       typeof row.platformProjectId === 'string' ? row.platformProjectId.trim() : ''
     const confirmed = row.confirmed === true
+    const cutName =
+      typeof row.name === 'string' && row.name.trim() ? row.name.trim() : mediaAssetId
+    const startMs =
+      typeof row.startMs === 'number' && Number.isFinite(row.startMs)
+        ? Math.max(0, Math.floor(row.startMs))
+        : undefined
 
     if (!WRITE_ACTIONS.has(actionRaw)) {
-      return apiError('action must be analysis_run or brand_check_run', API_STATUS.BAD_REQUEST)
+      return apiError(
+        'action must be analysis_run, brand_check_run, or cut_create',
+        API_STATUS.BAD_REQUEST,
+      )
     }
     if (!mediaAssetId || !platformProjectId) {
       return apiError('mediaAssetId and platformProjectId are required', API_STATUS.BAD_REQUEST)
@@ -56,22 +65,37 @@ export async function POST(request: NextRequest) {
     if (!base) return apiError('VIDEON URL not configured', 503)
     if (!secret) return apiError('Service secret not configured', 503)
 
-    const path =
-      action === 'analysis_run'
-        ? `/api/media/${encodeURIComponent(mediaAssetId)}/analysis`
-        : `/api/media/${encodeURIComponent(mediaAssetId)}/brand-check`
-    const upstream = `${base}${path}?platformProjectId=${encodeURIComponent(platformProjectId)}`
+    const headers: Record<string, string> = {
+      [PLEXON_SERVICE_SECRET_HEADER]: secret,
+      [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+      [PLEXON_USER_HEADER]: user.id,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    }
+
+    let upstream: string
+    let fetchBody: string
+    if (action === 'cut_create') {
+      upstream = `${base}/api/cuts`
+      fetchBody = JSON.stringify({
+        platformProjectId,
+        name: cutName.slice(0, 256),
+        mediaAssetId,
+        ...(startMs != null ? { startMs } : {}),
+      })
+    } else {
+      const path =
+        action === 'analysis_run'
+          ? `/api/media/${encodeURIComponent(mediaAssetId)}/analysis`
+          : `/api/media/${encodeURIComponent(mediaAssetId)}/brand-check`
+      upstream = `${base}${path}?platformProjectId=${encodeURIComponent(platformProjectId)}`
+      fetchBody = '{}'
+    }
 
     const res = await fetch(upstream, {
       method: 'POST',
-      headers: {
-        [PLEXON_SERVICE_SECRET_HEADER]: secret,
-        [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
-        [PLEXON_USER_HEADER]: user.id,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: '{}',
+      headers,
+      body: fetchBody,
       cache: 'no-store',
     })
 
