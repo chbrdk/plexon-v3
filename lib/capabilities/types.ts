@@ -33,6 +33,7 @@ export type CapabilityId =
   | 'videon.analysis.get'
   | 'videon.analysis.run'
   | 'videon.cut.create'
+  | 'videon.cut.scenes.add'
   | 'videon.export.run'
   | 'videon.reframe.run';
 

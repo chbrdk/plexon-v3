@@ -57,7 +57,7 @@ Connectivity block: `buildVideonIntegrationContextBlock` so the model knows MCP 
 
 Include `videon_ops`, `videon_projects`, `videon_media`, read `videon_analysis` / `videon_cuts` in `READ_ONLY_QA_FAMILIES` / platform assistant families as appropriate.
 
-Write/job tools (`analysis_run`, `cut_create`, `export_run`, `brand_check_run`) require planner `allowWriteTools: true` and confirmation policy consistent with other products.
+Write/job tools (`analysis_run`, `cut_create`, `cut_scenes_add`, `export_run`, `brand_check_run`) require planner `allowWriteTools: true` and confirmation policy consistent with other products.
 
 ## Planner
 
@@ -112,6 +112,7 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 | `videon.analysis.get` | `videon.analysis_get`, `videon.media_get` |
 | `videon.analysis.run` | `videon.analysis_run` |
 | `videon.cut.create` | `videon.cut_create` |
+| `videon.cut.scenes.add` | `videon.cut_scenes_add` |
 | `videon.export.run` | `videon.export_run` |
 | `videon.reframe.run` | `videon.reframe_run` |
 

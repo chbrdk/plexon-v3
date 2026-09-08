@@ -1,6 +1,6 @@
 /**
- * Shared `videon.cut.create` capability executor.
- * @see specs/domain/capability-catalog.md — VIDEON set (V6)
+ * Shared `videon.cut.create` capability executor — multi-source scenes supported.
+ * @see specs/domain/capability-catalog.md — VIDEON set
  */
 
 import type {
@@ -35,6 +35,7 @@ export async function executeVideonCutCreateCapability(
     (typeof input.platformProjectId === 'string' ? input.platformProjectId : null)?.trim() ||
     (ctx.platformProjectId ?? '').trim();
   const mediaAssetId = pickMediaAssetId(input, ctx);
+  const scenes = Array.isArray(input.scenes) ? input.scenes : undefined;
   const name =
     (typeof input.name === 'string' ? input.name : null)?.trim() ||
     (typeof input.label === 'string' ? input.label : null)?.trim() ||
@@ -42,18 +43,18 @@ export async function executeVideonCutCreateCapability(
   if (!platformProjectId) {
     return { ok: false, error: 'platformProjectId fehlt', catalogRoot: 'media.cut' };
   }
-  if (!mediaAssetId) {
-    return { ok: false, error: 'mediaAssetId fehlt', catalogRoot: 'media.cut' };
+  if (!mediaAssetId && !(scenes && scenes.length > 0)) {
+    return { ok: false, error: 'mediaAssetId oder scenes fehlen', catalogRoot: 'media.cut' };
   }
 
   const res = await cutCreate({
     platformProjectId,
-    mediaAssetId,
+    ...(mediaAssetId ? { mediaAssetId } : {}),
     name,
     actorUserId: ctx.actorUserId,
     startMs: typeof input.startMs === 'number' ? input.startMs : undefined,
     endMs: typeof input.endMs === 'number' ? input.endMs : undefined,
-    scenes: Array.isArray(input.scenes) ? input.scenes : undefined,
+    scenes,
   });
 
   if (!res.ok) {
@@ -64,7 +65,7 @@ export async function executeVideonCutCreateCapability(
       catalogBundle: {
         status: 'failed',
         cutId: null,
-        mediaAssetId,
+        mediaAssetId: mediaAssetId || null,
         name,
         platformProjectId,
       },
@@ -89,9 +90,10 @@ export async function executeVideonCutCreateCapability(
     catalogBundle: {
       status,
       cutId,
-      mediaAssetId,
+      mediaAssetId: mediaAssetId || null,
       name: (typeof cut.name === 'string' ? cut.name : null) || name,
       platformProjectId,
+      sceneCount: Array.isArray(row.scenes) ? row.scenes.length : null,
     },
     agentPayload: res.data,
   };

@@ -41,6 +41,7 @@ describe('VIDEON V6 capability catalog', () => {
         'videon.analysis.get',
         'videon.analysis.run',
         'videon.cut.create',
+        'videon.cut.scenes.add',
         'videon.export.run',
         'videon.reframe.run',
       ])
@@ -49,6 +50,8 @@ describe('VIDEON V6 capability catalog', () => {
     expect(getCapability('videon.export.run')?.surfaces).toEqual({ agent: false, flow: true });
     expect(getCapability('videon.reframe.run')?.surfaces).toEqual({ agent: true, flow: false });
     expect(getCapability('videon.reframe.run')?.agent?.toolNames).toContain('videon_reframe_run');
+    expect(getCapability('videon.cut.scenes.add')?.surfaces).toEqual({ agent: true, flow: false });
+    expect(getCapability('videon.cut.scenes.add')?.agent?.toolNames).toContain('videon_cut_scenes_add');
   });
 
   it('maps flow node kinds to videon capabilities; videon_media is orchestration', () => {

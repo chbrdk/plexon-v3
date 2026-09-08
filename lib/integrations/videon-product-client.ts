@@ -159,7 +159,7 @@ export async function analysisRun(input: {
 
 export async function cutCreate(input: {
   platformProjectId: string;
-  mediaAssetId: string;
+  mediaAssetId?: string;
   name: string;
   actorUserId?: string | null;
   startMs?: number;
@@ -167,22 +167,50 @@ export async function cutCreate(input: {
   scenes?: unknown[];
 }): Promise<VideonProductResult> {
   const pid = input.platformProjectId.trim();
-  const mid = input.mediaAssetId.trim();
+  const mid = input.mediaAssetId?.trim() || '';
   const name = input.name.trim();
   if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
-  if (!mid) return { ok: false, status: 400, error: 'mediaAssetId required' };
   if (!name) return { ok: false, status: 400, error: 'name required' };
+  if (!mid && !(Array.isArray(input.scenes) && input.scenes.length > 0)) {
+    return { ok: false, status: 400, error: 'mediaAssetId or scenes required' };
+  }
   return videonFetch({
     method: 'POST',
     path: '/api/cuts',
     actorUserId: input.actorUserId,
     body: {
       platformProjectId: pid,
-      mediaAssetId: mid,
       name,
+      ...(mid ? { mediaAssetId: mid } : {}),
       ...(typeof input.startMs === 'number' ? { startMs: input.startMs } : {}),
       ...(typeof input.endMs === 'number' ? { endMs: input.endMs } : {}),
       ...(input.scenes ? { scenes: input.scenes } : {}),
+    },
+  });
+}
+
+export async function cutScenesAdd(input: {
+  platformProjectId: string;
+  cutId: string;
+  actorUserId?: string | null;
+  afterSceneId?: string;
+  scenes: unknown[];
+}): Promise<VideonProductResult> {
+  const pid = input.platformProjectId.trim();
+  const cutId = input.cutId.trim();
+  if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
+  if (!cutId) return { ok: false, status: 400, error: 'cutId required' };
+  if (!Array.isArray(input.scenes) || input.scenes.length === 0) {
+    return { ok: false, status: 400, error: 'scenes required' };
+  }
+  return videonFetch({
+    method: 'PATCH',
+    path: `/api/cuts/${encodeURIComponent(cutId)}?${platformQuery(pid)}`,
+    actorUserId: input.actorUserId,
+    body: {
+      action: 'addScenes',
+      scenes: input.scenes,
+      ...(input.afterSceneId?.trim() ? { afterSceneId: input.afterSceneId.trim() } : {}),
     },
   });
 }

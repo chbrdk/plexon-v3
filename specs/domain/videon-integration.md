@@ -117,7 +117,7 @@ VIDEON workers
 | Search indexing | Reshape | Index structured scene insights and transcripts; tenant/Collection filters are mandatory. |
 | Saliency/reframing | Keep (this wave) | Durable `media.reframe` + Robust CPU saliency; SAM later. Spec: `videon-v3/specs/domain/media-reframe.md`. |
 | Audio stem separation | Keep later | Isolated optional job class with resource quotas. |
-| Timeline editor and NLE export | Reshape | Rename legacy Project to Cut; port behavior after Collection/library foundation. |
+| Timeline editor and NLE export | Reshape | Multi-source Cut compose (Bin scenes + batch add); export normalize. Spec: `videon-v3/specs/domain/cut-multi-source-compose.md`. |
 | Public shares | Reshape later | Signed, revocable, expiry-aware share records; never leak Collection membership. |
 | Svelte shell/custom design system | Drop | Rebuild with the v3 React/Next shell and `@msqdx/ui`. |
 | MLX Qwen service / Swift Vision production services | Drop | OpenRouter for production vision; local utilities may exist only during migration and are deleted after gate V4. |
@@ -447,7 +447,8 @@ Capabilities are registered progressively after their execution endpoints exist:
 | `videon.media.search` | read | Agent | bounded media/scene matches with deep links |
 | `videon.analysis.get` | read | Agent + Flow | structured run/scene summary |
 | `videon.analysis.run` | job | Agent + Flow | accepted job reference, then poll/subscription |
-| `videon.cut.create` | write | Agent + Flow | Cut id and editor link; explicit confirmation in chat |
+| `videon.cut.create` | write | Agent + Flow | Cut id and editor link; multi-source `scenes[]` with `mediaAssetId` |
+| `videon.cut.scenes.add` | write | Agent (+ Catalog); **no** Flow node | Append scene ranges to existing Cut |
 | `videon.export.run` | job | Flow first | export job and signed result reference |
 | `videon.reframe.run` | job | Agent (+ Catalog); **no** Flow node yet | reframe job and derivative deep link |
 

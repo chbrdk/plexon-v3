@@ -76,6 +76,10 @@ export {
   executeVideonCutCreateCapability,
 } from '@/lib/capabilities/executors/videon-cut-create';
 export {
+  executeVideonCutScenesAdd,
+  executeVideonCutScenesAddCapability,
+} from '@/lib/capabilities/executors/videon-cut-scenes-add';
+export {
   executeVideonExportRun,
   executeVideonExportRunCapability,
 } from '@/lib/capabilities/executors/videon-export-run';

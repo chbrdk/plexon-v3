@@ -290,11 +290,13 @@ const PILOT: CapabilityRecord[] = [
     id: 'videon.cut.create',
     owner: 'videon',
     title: 'Create cut',
-    description: 'Create a VIDEON Cut from media; writes media.cut catalog.',
+    description:
+      'Create a VIDEON Cut from media or multi-source scenes[]; writes media.cut catalog.',
     inputFields: [
       { name: 'platformProjectId', required: true },
-      { name: 'mediaAssetId', required: true },
+      { name: 'mediaAssetId', required: false },
       { name: 'name', required: false },
+      { name: 'scenes', required: false },
     ],
     outputCatalogRoot: 'media.cut',
     sideEffect: 'write',
@@ -306,6 +308,28 @@ const PILOT: CapabilityRecord[] = [
     },
     flow: { nodeKinds: ['videon_cut_create'] },
     executorId: 'videon-cut-create',
+  },
+  {
+    id: 'videon.cut.scenes.add',
+    owner: 'videon',
+    title: 'Add scenes to cut',
+    description:
+      'Append multi-source scene ranges to an existing Cut; writes media.cut catalog. No Flow node / no Hit-Card.',
+    inputFields: [
+      { name: 'platformProjectId', required: true },
+      { name: 'cutId', required: true },
+      { name: 'scenes', required: true },
+    ],
+    outputCatalogRoot: 'media.cut',
+    sideEffect: 'write',
+    confirmation: 'human_gate',
+    surfaces: { agent: true, flow: false },
+    agent: {
+      toolNames: ['videon_cut_scenes_add'],
+      intentTypes: [],
+    },
+    flow: { nodeKinds: [] },
+    executorId: 'videon-cut-scenes-add',
   },
   {
     id: 'videon.export.run',
