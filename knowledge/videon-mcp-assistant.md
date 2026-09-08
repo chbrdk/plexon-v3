@@ -6,11 +6,10 @@
 
 ## Summary
 
-VIDEON Phase 1 is wired into the free-chat orchestrator (code path). Runtime needs Coolify `videon-mcp` + `VIDEON_MCP_URL` on Plexon:
+VIDEON Phase 1+2 is wired into the free-chat orchestrator. Auth matches CREATION:
 
-1. Coolify `videon-mcp` → set `VIDEON_MCP_URL` on Plexon  
-2. `getVideonMcpUrl()` + `resolveUseVideonMcp` + `videon_*` families in `tool-catalog.ts`  
-3. Fetch branch in `orchestrator-complete.ts`  
-4. Planner intent `videon_media` for scene/video/cut/analysis questions  
+1. Coolify `videon-mcp` + `VIDEON_MCP_URL` on Plexon  
+2. MCP uses `PLEXON_SERVICE_SECRET`; Plexon injects `actorUserId` on every `videon_*` tool call  
+3. Product resolves actor via service secret + `X-Plexon-User-Id`, then Access Model B  
 
-Federation remains for provisioning/summary; MCP for agent tools. Auth on Product side: Settings API tokens (`videon_…`).
+Federation remains for provisioning/summary; MCP for agent tools. Settings API tokens are optional for Cursor only.

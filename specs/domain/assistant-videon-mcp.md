@@ -18,6 +18,16 @@ Federation (provisioning, Access Model B projection, summary card) stays separat
 
 Helper: `getVideonMcpUrl()` in `lib/constants.ts`.
 
+## Auth (per chat user)
+
+Same pattern as CREATION:
+
+1. `videon-mcp` holds `PLEXON_SERVICE_SECRET` (shared with Product).  
+2. Orchestrator injects session `actorUserId` into every `videon_*` tool call except `health` (`injectVideonToolArgs`).  
+3. MCP → Product: `X-Service-Secret` + `X-Plexon-User-Id` → Access Model B for **that** user.
+
+Do **not** configure a fixed `VIDEON_API_TOKEN` / bootstrap owner for the assistant path.
+
 ## Entitlement / host product
 
 `useVideonMcp` via `resolveUseVideonMcp` / `resolveUseProductMcp` when `VIDEON_MCP_URL` is set **and** any of:
@@ -88,4 +98,5 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 1. Unit: `tool-catalog` classifies `videon_media_search` → `videon_media`.  
 2. Gate: `resolveUseVideonMcp` mirrors Brandion/Echon rules with product `videon`.  
 3. Orchestrator loads tools when `VIDEON_MCP_URL` set and entitlement/host allows.  
-4. Staging: after `videon-mcp` Coolify service is live, scene Q&A returns tool-backed hits with editor deep links (`t` / `scene`).
+4. `injectVideonToolArgs` forces session `actorUserId` on all `videon_*` tools except health.  
+5. Staging: scene Q&A returns tool-backed hits scoped to the **logged-in** user’s Access Model B memberships (not a shared bootstrap owner).

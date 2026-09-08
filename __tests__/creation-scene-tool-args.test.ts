@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { injectCreationSceneToolArgs } from '@/lib/assistant/creation-scene-tool-args'
+import {
+  injectCreationSceneToolArgs,
+  injectVideonToolArgs,
+} from '@/lib/assistant/creation-scene-tool-args'
 import {
   ASSISTANT_CAPABILITY_CREATION_EDITOR,
   ASSISTANT_ENTITY_COMPOSITION_SCENE,
@@ -45,6 +48,25 @@ describe('injectCreationSceneToolArgs', () => {
         pageContext: editorContext,
         actorUserId: 'user-1',
       }),
+    ).toEqual(input)
+  })
+})
+
+describe('injectVideonToolArgs', () => {
+  it('forces session actorUserId on media_search', () => {
+    const out = injectVideonToolArgs(
+      'videon_media_search',
+      { q: 'dashboard', actorUserId: 'spoofed' },
+      { actorUserId: 'session-user' },
+    )
+    expect(out.actorUserId).toBe('session-user')
+    expect(out.q).toBe('dashboard')
+  })
+
+  it('skips health', () => {
+    const input = { ping: true }
+    expect(
+      injectVideonToolArgs('videon_health', input, { actorUserId: 'session-user' }),
     ).toEqual(input)
   })
 })

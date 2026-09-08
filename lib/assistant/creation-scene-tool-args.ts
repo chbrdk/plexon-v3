@@ -47,7 +47,7 @@ export function injectCreationSceneToolArgs(
   return out;
 }
 
-/** Creation scene args + Spirion search platformProjectId injection. */
+/** Creation scene args + Spirion search platformProjectId + VIDEON actor injection. */
 export function injectAssistantMcpToolArgs(
   toolName: string,
   input: Record<string, unknown>,
@@ -58,5 +58,21 @@ export function injectAssistantMcpToolArgs(
   },
 ): Record<string, unknown> {
   const withCreation = injectCreationSceneToolArgs(toolName, input, ctx);
-  return injectSpirionToolArgs(toolName, withCreation, ctx);
+  const withSpirion = injectSpirionToolArgs(toolName, withCreation, ctx);
+  return injectVideonToolArgs(toolName, withSpirion, ctx);
+}
+
+/** Inject authenticated session user into all VIDEON MCP tools (Access Model B). */
+export function injectVideonToolArgs(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: { actorUserId: string },
+): Record<string, unknown> {
+  if (!/^videon[._]/.test(toolName)) return input;
+  if (/^videon[._]health$/.test(toolName)) return input;
+  const out = { ...input };
+  if (ctx.actorUserId.trim()) {
+    out.actorUserId = ctx.actorUserId.trim();
+  }
+  return out;
 }
