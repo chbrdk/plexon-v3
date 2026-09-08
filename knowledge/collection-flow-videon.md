@@ -34,3 +34,13 @@ Assistant `video_hit_strip` may confirm `analysis_run`, `brand_check_run`, `cut_
 2. Collection with VIDEON binding → Flow → Bausteine **Media**.  
 3. `videon_media` (asset id) → `videon_analysis_run` → Compare `media.analysis.status`.  
 4. Assistant scene search → Hit-Card **Cut** → Confirm.
+
+## V7 (ops gate)
+
+Production rollout / legacy disposition lives in VIDEON:
+
+- Spec: `videon-v3/specs/domain/v7-production-rollout.md`
+- Runbook: `videon-v3/knowledge/v7-production-runbook.md`
+- Upstream checklist: `specs/domain/videon-integration.md` § V7
+
+Do not treat V6 Flow kinds as production-complete until V7 E1–E6 + sign-off.

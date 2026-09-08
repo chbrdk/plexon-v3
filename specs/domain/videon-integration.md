@@ -557,10 +557,48 @@ End-to-end analysis latency and cost objectives are set after the representative
 
 ### V7 — Production rollout and legacy disposition
 
-- Run staging load, security, restore, storage lifecycle, provider outage, and cost-budget exercises.
-- Canary by tenant/Collection, then expand with observed metrics.
-- Migrate only explicitly mapped legacy workspaces/cuts; quarantine unresolved ownership.
-- Archive the legacy runtime after export/rollback window and remove obsolete model services.
+Operator SoT (product): `videon-v3/knowledge/v7-production-runbook.md` ·
+legacy mapping: `videon-v3/knowledge/legacy-migration-opt-in.md` ·
+staging evidence log: `videon-v3/knowledge/v7-staging-exercise-log.md` ·
+domain acceptance: `videon-v3/specs/domain/v7-production-rollout.md`.
+
+#### Staging exercise matrix (must pass before canary)
+
+| ID | Exercise | Pass criteria | Evidence |
+|----|----------|---------------|----------|
+| E1 | Load | p95 sync API under 500 ms (excl. signed transfer/jobs); queue accepts under concurrent upload/analysis | metrics export or load-tool report |
+| E2 | Security | negative multi-tenant + signed-URL tests green; no public ops/Docker routes; secrets absent from logs | CI + spot-check |
+| E3 | Restore | Postgres + object-store restore into staging recovers Collections/media/cuts; federation binding healthy | restore checklist signed |
+| E4 | Storage lifecycle | archive → soft-hide → retention purge path documented; orphan derivative count does not grow unbounded | lifecycle procedure + sample run |
+| E5 | Provider outage | OpenRouter/vision unavailable → new analysis disabled/retryable; library/read/export remain; jobs persisted | drill log |
+| E6 | Cost budget | corpus run stays within approved OpenRouter budget; accounting events idempotent | budget report |
+
+#### Canary
+
+1. Enable VIDEON binding only for explicitly listed canary Collections (tenant/Collection allowlist — not all company members).
+2. Observe federation health, analysis success rate, cost/token burn, access denials, and storage errors for the observation window.
+3. Expand Collection set only after metrics stay within the objectives in § Observability; halt and roll vision back (disable new analysis / queue-later) on breach.
+4. Do **not** force-enable `CAPABILITY_CATALOG_RUNTIME` as part of canary unless separately signed.
+
+#### Legacy disposition (opt-in only)
+
+- Produce a versioned **ownership mapping report** (`videon.legacy-migration.v1`) before any import.
+- `decision=migrate` only when legacy workspace/cut maps 1:1 to a PLEXON Collection + owner under Access Model B.
+- `decision=quarantine` for ambiguous, ownerless, or cross-tenant rows — no automatic backfill.
+- Archive legacy `chbrdk/videon` runtime and remove obsolete local model services (MLX/Ollama/Swift ops) only after export + rollback window closes.
+
+#### Gate sign-off checklist
+
+| Artifact | Owner role | Status |
+|----------|------------|--------|
+| Production runbook | VIDEON on-call | ☐ |
+| On-call ownership named | Platform ops | ☐ |
+| Backup/restore evidence (E3) | VIDEON on-call | ☐ |
+| Deletion/retention procedure (E4) | VIDEON + security | ☐ |
+| Rollback drill signed (E5 + app rollback principles) | VIDEON on-call | ☐ |
+| Staging E1–E6 complete | Eng + ops | ☐ |
+| Canary Collections list + metrics window | Product + ops | ☐ |
+| Legacy mapping report + quarantine queue | Eng | ☐ / N/A if no migration |
 
 **Gate:** production runbook, on-call ownership, backup/restore evidence, deletion/retention procedure, and rollback drill are signed off.
 
