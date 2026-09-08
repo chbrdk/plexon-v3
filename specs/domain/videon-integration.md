@@ -451,7 +451,7 @@ Capabilities are registered progressively after their execution endpoints exist:
 | `videon.export.run` | job | Flow first | export job and signed result reference |
 | `videon.reframe.run` | job | Flow, later | reframe job and derivative reference |
 
-Catalog inputs must include `platformProjectId`; execution verifies access again. Agent results are bounded summaries and links, not video binaries or full transcripts. Write/job capabilities use idempotency keys and confirmation policy consistent with the central catalog.
+**Agent surface:** Product MCP (`videon-v3/specs/domain/mcp-server.md`) + Plexon wire-up (`specs/domain/assistant-videon-mcp.md`). Catalog inputs must include `platformProjectId`; execution verifies access again. Agent results are bounded summaries and links, not video binaries or full transcripts. Write/job capabilities use idempotency keys and confirmation policy consistent with the central catalog.
 
 ## Collection Knowledge Pack
 
