@@ -13,6 +13,7 @@ const baseFlags = {
   useBrandionMcp: true,
   useCreationMcp: true,
   useSpirionMcp: true,
+  useVideonMcp: true,
 }
 
 function plan(intent: AssistantPlan['intent']): AssistantPlan {
@@ -37,6 +38,7 @@ describe('resolveMcpFlagsForPlan', () => {
       useBrandionMcp: true,
       useCreationMcp: true,
       useSpirionMcp: true,
+      useVideonMcp: false,
     })
   })
 
@@ -48,6 +50,19 @@ describe('resolveMcpFlagsForPlan', () => {
       useBrandionMcp: false,
       useCreationMcp: false,
       useSpirionMcp: true,
+      useVideonMcp: false,
+    })
+  })
+
+  it('keeps only Videon for videon_media', () => {
+    expect(resolveMcpFlagsForPlan(plan('videon_media'), baseFlags)).toEqual({
+      useCheckionMcp: false,
+      useAudionMcp: false,
+      useEchonMcp: false,
+      useBrandionMcp: false,
+      useCreationMcp: false,
+      useSpirionMcp: false,
+      useVideonMcp: true,
     })
   })
 

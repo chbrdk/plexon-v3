@@ -614,3 +614,10 @@ export const getSpirionMcpUrl = (): string | undefined => {
     process.env.SPIRION_MCP_URL?.trim() || process.env.DIG_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for VIDEON media/scene/analysis/cut tools. Reads VIDEON_MCP_URL (e.g. http://videon-mcp:3103). */
+export const getVideonMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url = process.env.VIDEON_MCP_URL?.trim();
+  return url || undefined;
+};

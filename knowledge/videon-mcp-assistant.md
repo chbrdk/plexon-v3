@@ -6,11 +6,11 @@
 
 ## Summary
 
-VIDEON is not yet wired into the free-chat orchestrator. Target pattern matches Brandion/Echon:
+VIDEON Phase 1 is wired into the free-chat orchestrator (code path). Runtime needs Coolify `videon-mcp` + `VIDEON_MCP_URL` on Plexon:
 
 1. Coolify `videon-mcp` → set `VIDEON_MCP_URL` on Plexon  
 2. `getVideonMcpUrl()` + `resolveUseVideonMcp` + `videon_*` families in `tool-catalog.ts`  
 3. Fetch branch in `orchestrator-complete.ts`  
 4. Planner intent `videon_media` for scene/video/cut/analysis questions  
 
-Federation remains for provisioning/summary; MCP for agent tools.
+Federation remains for provisioning/summary; MCP for agent tools. Auth on Product side: Settings API tokens (`videon_…`).

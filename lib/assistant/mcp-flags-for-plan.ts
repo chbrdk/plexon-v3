@@ -7,6 +7,7 @@ export type AssistantMcpFlags = {
   useBrandionMcp: boolean;
   useCreationMcp: boolean;
   useSpirionMcp: boolean;
+  useVideonMcp: boolean;
 };
 
 /**
@@ -29,6 +30,7 @@ export function resolveMcpFlagsForPlan(
         useCreationMcp: flags.useCreationMcp,
         // Scene builds may pull Spirion references/screens for inspiration.
         useSpirionMcp: flags.useSpirionMcp,
+        useVideonMcp: false,
       };
     case 'spirion_research':
       return {
@@ -38,6 +40,7 @@ export function resolveMcpFlagsForPlan(
         useBrandionMcp: false,
         useCreationMcp: false,
         useSpirionMcp: flags.useSpirionMcp,
+        useVideonMcp: false,
       };
     case 'brandion_brand':
       return {
@@ -47,6 +50,17 @@ export function resolveMcpFlagsForPlan(
         useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: false,
         useSpirionMcp: false,
+        useVideonMcp: false,
+      };
+    case 'videon_media':
+      return {
+        useCheckionMcp: false,
+        useAudionMcp: false,
+        useEchonMcp: false,
+        useBrandionMcp: false,
+        useCreationMcp: false,
+        useSpirionMcp: false,
+        useVideonMcp: flags.useVideonMcp,
       };
     case 'echon_market':
     case 'echon_audience':
@@ -57,6 +71,7 @@ export function resolveMcpFlagsForPlan(
         useBrandionMcp: false,
         useCreationMcp: false,
         useSpirionMcp: false,
+        useVideonMcp: false,
       };
     case 'audion_persona':
     case 'audion_knowledge':
@@ -71,6 +86,7 @@ export function resolveMcpFlagsForPlan(
         useBrandionMcp: false,
         useCreationMcp: false,
         useSpirionMcp: false,
+        useVideonMcp: false,
       };
     case 'checkion_scan':
     case 'checkion_seo_geo':
@@ -82,6 +98,7 @@ export function resolveMcpFlagsForPlan(
         useBrandionMcp: false,
         useCreationMcp: false,
         useSpirionMcp: false,
+        useVideonMcp: false,
       };
     default:
       return flags;

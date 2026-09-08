@@ -16,7 +16,7 @@ Federation (provisioning, Access Model B projection, summary card) stays separat
 |-----|--------|--------|
 | `VIDEON_MCP_URL` | plexon-v3 Coolify | Public FQDN of `videon-mcp` or internal `http://videon-mcp:3103` when co-located |
 
-Helper (planned): `getVideonMcpUrl()` in `lib/constants.ts`.
+Helper: `getVideonMcpUrl()` in `lib/constants.ts`.
 
 ## Entitlement / host product
 
@@ -26,7 +26,7 @@ Helper (planned): `getVideonMcpUrl()` in `lib/constants.ts`.
 2. `pageContext.product` is `videon` **or** another platform shell (`plexon` / sibling Collection host), or  
 3. any sibling product entitlement is `active`
 
-Connectivity block (planned): `buildVideonIntegrationContextBlock` so the model knows MCP is available and must use tools for scene/media claims.
+Connectivity block: `buildVideonIntegrationContextBlock` so the model knows MCP is available and must use tools for scene/media claims.
 
 ## Tool families
 

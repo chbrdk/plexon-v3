@@ -16,6 +16,7 @@ import {
   resolveUseCreationMcp,
   resolveUseEchonMcp,
   resolveUseSpirionMcp,
+  resolveUseVideonMcp,
 } from '@/lib/assistant/product-mcp-gate';
 import {
   emitPhase,
@@ -73,6 +74,11 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     pageContext,
     hasAnyActiveEntitlement,
   });
+  const useVideonMcp = resolveUseVideonMcp({
+    // Phase 1: no dedicated entitlements.videon row yet — gate via URL + shell/sibling.
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
   const companies = await listUserCompanies(ctx.user.id);
 
   const effectivePrompt = ctx.body.confirmToolCall
@@ -100,6 +106,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       useBrandionMcp,
       useCreationMcp,
       useSpirionMcp,
+      useVideonMcp,
       pageContext: ctx.body.pageContext ?? null,
       onProgress: (ev) => {
         ctx.emit?.(ev);

@@ -5,6 +5,7 @@ import {
   getCreationMcpUrl,
   getEchonMcpUrl,
   getSpirionMcpUrl,
+  getVideonMcpUrl,
 } from '@/lib/constants';
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
@@ -19,7 +20,8 @@ export type AssistantProductMcpId =
   | 'brandion'
   | 'creation'
   | 'echon'
-  | 'spirion';
+  | 'spirion'
+  | 'videon';
 
 const PLATFORM_SHELL_HOSTS = new Set([
   'plexon',
@@ -29,6 +31,7 @@ const PLATFORM_SHELL_HOSTS = new Set([
   'creation',
   'echon',
   'spirion',
+  'videon',
 ]);
 
 /**
@@ -139,6 +142,21 @@ export function resolveUseSpirionMcp(input: {
     product: 'spirion',
     mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getSpirionMcpUrl(),
     productEntitlement: input.spirionEntitlement,
+    pageContext: input.pageContext,
+    hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
+  });
+}
+
+export function resolveUseVideonMcp(input: {
+  videonEntitlement?: ProductMcpEntitlementRow;
+  pageContext?: Pick<AssistantPageContext, 'product'> | null;
+  hasAnyActiveEntitlement?: boolean;
+  mcpUrl?: string | undefined;
+}): boolean {
+  return resolveUseProductMcp({
+    product: 'videon',
+    mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getVideonMcpUrl(),
+    productEntitlement: input.videonEntitlement,
     pageContext: input.pageContext,
     hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
   });

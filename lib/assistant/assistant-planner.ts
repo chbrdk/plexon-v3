@@ -15,6 +15,7 @@ import {
   CREATION_SCENE_EDIT_FAMILIES,
   CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
   SPIRION_RESEARCH_FAMILIES,
+  VIDEON_MEDIA_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -46,6 +47,7 @@ export type AssistantPlanIntent =
   | 'creation_design'
   | 'creation_scene_edit'
   | 'spirion_research'
+  | 'videon_media'
   | 'action_write'
   | 'general_chat';
 
@@ -73,6 +75,7 @@ export type PlannerInput = {
   hasBrandionMcp: boolean;
   hasCreationMcp: boolean;
   hasSpirionMcp?: boolean;
+  hasVideonMcp?: boolean;
   compactContextLoaded: boolean;
   pageContext?: AssistantPageContext | null;
 };
@@ -147,7 +150,15 @@ const MARKET_PATTERNS = [
 ];
 
 function hasMcp(input: PlannerInput): boolean {
-  return input.hasCheckionMcp || input.hasAudionMcp || input.hasEchonMcp || input.hasBrandionMcp || input.hasCreationMcp;
+  return (
+    input.hasCheckionMcp ||
+    input.hasAudionMcp ||
+    input.hasEchonMcp ||
+    input.hasBrandionMcp ||
+    input.hasCreationMcp ||
+    Boolean(input.hasSpirionMcp) ||
+    Boolean(input.hasVideonMcp)
+  );
 }
 
 function buildPlan(
@@ -231,6 +242,22 @@ const SPIRION_PATTERNS = [
   /\bdesign.?referenz/i,
 ];
 
+const VIDEON_PATTERNS = [
+  /\bvideon\b/i,
+  /\bszene(n)?\b/i,
+  /\bscenes?\b/i,
+  /\bvideo(s)?\b/i,
+  /\bclip(s)?\b/i,
+  /\bcuts?\b/i,
+  /\btimeline\b/i,
+  /\bmediathek\b/i,
+  /\bmedia\s*library\b/i,
+  /\btranscript/i,
+  /\banalyse\b/i,
+  /\banalysis\b/i,
+  /\bfootage\b/i,
+];
+
 function creationSceneEditFamilies(hasSpirionMcp: boolean): ToolFamily[] {
   return hasSpirionMcp
     ? [...CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES, 'plexon_ui']
@@ -307,6 +334,20 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       skipTools: false,
       reasoning:
         'SPIRION Research — references/screens search (live, Patterns nicht erfinden).',
+    });
+  }
+
+  if (VIDEON_PATTERNS.some((p) => p.test(text)) && input.hasVideonMcp) {
+    return buildPlan({
+      intent: 'videon_media',
+      mode: 'tools',
+      toolFamilies: [...VIDEON_MEDIA_FAMILIES, 'plexon_ui'],
+      allowWriteTools: writeIntent,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning: writeIntent
+        ? 'VIDEON Media — Szenen/Analyse/Cuts (Schreib-Intent Phase 2 gated).'
+        : 'VIDEON Media — Szenen-Suche / Analyse / Cuts (live, Timecodes nicht erfinden).',
     });
   }
 
@@ -567,6 +608,7 @@ const VALID_INTENTS = new Set<AssistantPlanIntent>([
   'creation_design',
   'creation_scene_edit',
   'spirion_research',
+  'videon_media',
   'action_write',
   'general_chat',
 ]);
@@ -602,6 +644,11 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'creation_scene_write',
   'spirion_references',
   'spirion_screens',
+  'videon_ops',
+  'videon_projects',
+  'videon_media',
+  'videon_analysis',
+  'videon_cuts',
   'plexon_ui',
 ]);
 
@@ -661,7 +708,7 @@ Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -672,6 +719,7 @@ Regeln:
     hasBrandionMcp: input.hasBrandionMcp,
     hasCreationMcp: input.hasCreationMcp,
     hasSpirionMcp: Boolean(input.hasSpirionMcp),
+    hasVideonMcp: Boolean(input.hasVideonMcp),
     compactContextLoaded: input.compactContextLoaded,
     heuristicSuggestion: {
       intent: heuristic.intent,
@@ -711,7 +759,16 @@ Regeln:
 
 /** Use LLM planner when heuristic is ambiguous (general_chat with MCP). */
 export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: PlannerInput): boolean {
-  if (!input.hasCheckionMcp && !input.hasAudionMcp && !input.hasEchonMcp && !input.hasBrandionMcp && !input.hasCreationMcp) return false;
+  if (
+    !input.hasCheckionMcp &&
+    !input.hasAudionMcp &&
+    !input.hasEchonMcp &&
+    !input.hasBrandionMcp &&
+    !input.hasCreationMcp &&
+    !input.hasSpirionMcp &&
+    !input.hasVideonMcp
+  )
+    return false;
   if (heuristic.intent !== 'general_chat') return false;
   if (input.hasProjectContext) return true;
   return input.prompt.trim().length > 120;
