@@ -80,6 +80,10 @@ export {
   executeVideonExportRunCapability,
 } from '@/lib/capabilities/executors/videon-export-run';
 export {
+  executeVideonReframeRun,
+  executeVideonReframeRunCapability,
+} from '@/lib/capabilities/executors/videon-reframe-run';
+export {
   classifyPromoteTrace,
   buildPlaybookRecipe,
   buildPromotedFlowDocument,

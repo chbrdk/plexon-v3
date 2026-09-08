@@ -206,3 +206,32 @@ export async function exportRun(input: {
       : {},
   });
 }
+
+export async function reframeRun(input: {
+  platformProjectId: string;
+  mediaAssetId: string;
+  actorUserId?: string | null;
+  aspectRatio?: string;
+  smoothingFactor?: number;
+  customWidth?: number;
+  customHeight?: number;
+  idempotencyKey?: string;
+}): Promise<VideonProductResult> {
+  const pid = input.platformProjectId.trim();
+  const mid = input.mediaAssetId.trim();
+  if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
+  if (!mid) return { ok: false, status: 400, error: 'mediaAssetId required' };
+  return videonFetch({
+    method: 'POST',
+    path: `/api/media/${encodeURIComponent(mid)}/reframe?${platformQuery(pid)}`,
+    actorUserId: input.actorUserId,
+    body: {
+      aspectRatio: input.aspectRatio ?? '9:16',
+      saliencyModel: 'robust_v1',
+      ...(typeof input.smoothingFactor === 'number' ? { smoothingFactor: input.smoothingFactor } : {}),
+      ...(typeof input.customWidth === 'number' ? { customWidth: input.customWidth } : {}),
+      ...(typeof input.customHeight === 'number' ? { customHeight: input.customHeight } : {}),
+      ...(input.idempotencyKey?.trim() ? { idempotencyKey: input.idempotencyKey.trim() } : {}),
+    },
+  });
+}

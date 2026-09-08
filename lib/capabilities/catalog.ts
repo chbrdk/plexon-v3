@@ -324,6 +324,29 @@ const PILOT: CapabilityRecord[] = [
     flow: { nodeKinds: ['videon_export_run'] },
     executorId: 'videon-export-run',
   },
+  {
+    id: 'videon.reframe.run',
+    owner: 'videon',
+    title: 'Run media reframe',
+    description:
+      'Enqueue VIDEON Robust-saliency aspect reframe; writes media.reframe catalog. No Flow node / no Hit-Card.',
+    inputFields: [
+      { name: 'platformProjectId', required: true },
+      { name: 'mediaAssetId', required: true },
+      { name: 'aspectRatio', required: false },
+      { name: 'smoothingFactor', required: false },
+    ],
+    outputCatalogRoot: 'media.reframe',
+    sideEffect: 'job',
+    confirmation: 'human_gate',
+    surfaces: { agent: true, flow: false },
+    agent: {
+      toolNames: ['videon_reframe_run'],
+      intentTypes: [],
+    },
+    flow: { nodeKinds: [] },
+    executorId: 'videon-reframe-run',
+  },
 ];
 
 const BY_ID = new Map<CapabilityId, CapabilityRecord>(PILOT.map((c) => [c.id, c]));

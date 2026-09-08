@@ -115,7 +115,7 @@ VIDEON workers
 | Whisper transcription | Reshape | Worker adapter with language/model provenance; implementation selected independently of vision. |
 | Qwen-VL descriptions | Rebuild | OpenRouter gateway, Qwen3.7 Flash default, application-validated versioned JSON, schema-enforcing fallback, privacy routing, cost capture. |
 | Search indexing | Reshape | Index structured scene insights and transcripts; tenant/Collection filters are mandatory. |
-| Saliency/reframing | Keep later | Worker capability after core pipeline reliability. |
+| Saliency/reframing | Keep (this wave) | Durable `media.reframe` + Robust CPU saliency; SAM later. Spec: `videon-v3/specs/domain/media-reframe.md`. |
 | Audio stem separation | Keep later | Isolated optional job class with resource quotas. |
 | Timeline editor and NLE export | Reshape | Rename legacy Project to Cut; port behavior after Collection/library foundation. |
 | Public shares | Reshape later | Signed, revocable, expiry-aware share records; never leak Collection membership. |
@@ -449,7 +449,7 @@ Capabilities are registered progressively after their execution endpoints exist:
 | `videon.analysis.run` | job | Agent + Flow | accepted job reference, then poll/subscription |
 | `videon.cut.create` | write | Agent + Flow | Cut id and editor link; explicit confirmation in chat |
 | `videon.export.run` | job | Flow first | export job and signed result reference |
-| `videon.reframe.run` | job | Flow, later | reframe job and derivative reference |
+| `videon.reframe.run` | job | Agent (+ Catalog); **no** Flow node yet | reframe job and derivative deep link |
 
 **Agent surface:** Product MCP (`videon-v3/specs/domain/mcp-server.md`) + Plexon wire-up (`specs/domain/assistant-videon-mcp.md`). Catalog inputs must include `platformProjectId`; execution verifies access again. Agent results are bounded summaries and links, not video binaries or full transcripts. Write/job capabilities use idempotency keys and confirmation policy consistent with the central catalog.
 

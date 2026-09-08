@@ -33,7 +33,8 @@ export type CapabilityId =
   | 'videon.analysis.get'
   | 'videon.analysis.run'
   | 'videon.cut.create'
-  | 'videon.export.run';
+  | 'videon.export.run'
+  | 'videon.reframe.run';
 
 export type CapabilitySurfaces = {
   agent: boolean;

@@ -194,9 +194,9 @@ Only these capabilities share Agent + Flow in the first implementation wave:
 | `audion.persona_bootstrap` | audion | `persona_bootstrap` | persona_bootstrap / EQC | Catalog `persona.*` |
 | `plexon.collection_flow.run` | plexon | — (meta) | **new** (Wave C2) | Start existing Flow by id; not a canvas node |
 
-### VIDEON set (V6 — Media)
+### VIDEON set (V6 — Media + reframe)
 
-Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP remains the free-chat tool surface; Catalog shares Agent+Flow executors when the flag is on. `reframe` stays Later.
+Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP remains the free-chat tool surface; Catalog shares Agent+Flow executors when the flag is on.
 
 | Capability id | Owner | Flow kind(s) | Agent / MCP | Side effect | Catalog root | Notes |
 |---------------|-------|--------------|-------------|-------------|--------------|-------|
@@ -205,8 +205,9 @@ Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP r
 | `videon.analysis.run` | videon | `videon_analysis_run` | `videon_analysis_run` | job | `media.analysis` | Confirm writes in chat; Flow job |
 | `videon.cut.create` | videon | `videon_cut_create` | `videon_cut_create` | write | `media.cut` | `human_gate` / Hit-Card confirm |
 | `videon.export.run` | videon | `videon_export_run` | `videon_export_run` | job | `media.export` | **Flow first** — no Hit-Card export button |
+| `videon.reframe.run` | videon | — (no Flow node yet) | `videon_reframe_run` | job | `media.reframe` | Agent/Catalog confirm; **no** Hit-Card; Robust CPU default |
 
-Companions: `videon-integration.md` V6 · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `knowledge/collection-flow-videon.md`.
+Companions: `videon-integration.md` · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `videon-v3/specs/domain/media-reframe.md` · `knowledge/collection-flow-videon.md`.
 
 **Planned Agent-only (not Flow):** `audion.persona_chat` — maps to Audion chat-api / MCP `audion_chat_*`; SoT UI remains Audion `/chat`. See Wave C5.
 

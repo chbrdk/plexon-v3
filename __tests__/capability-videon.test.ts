@@ -42,10 +42,13 @@ describe('VIDEON V6 capability catalog', () => {
         'videon.analysis.run',
         'videon.cut.create',
         'videon.export.run',
+        'videon.reframe.run',
       ])
     );
     expect(getCapability('videon.analysis.run')?.owner).toBe('videon');
     expect(getCapability('videon.export.run')?.surfaces).toEqual({ agent: false, flow: true });
+    expect(getCapability('videon.reframe.run')?.surfaces).toEqual({ agent: true, flow: false });
+    expect(getCapability('videon.reframe.run')?.agent?.toolNames).toContain('videon_reframe_run');
   });
 
   it('maps flow node kinds to videon capabilities; videon_media is orchestration', () => {

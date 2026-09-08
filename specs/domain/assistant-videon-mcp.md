@@ -93,7 +93,8 @@ MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
 2. WHEN action `kind` is `open` THEN the UI MUST open the item `href` (new tab / same tab per shell).  
 3. WHEN action `kind` is `analysis_run`, `brand_check_run`, or `cut_create` THEN the UI MUST NOT fire silently — it MUST use the existing assistant confirm / write enqueue path (`allowWriteTools` + confirmation policy) with `mediaAssetId`, `platformProjectId`, and session `actorUserId`.  
 4. MCP tools remain unchanged; the UI triggers existing write tools after confirm (or same-origin `/api/assistant/videon-action` with `confirmed: true`).  
-5. WHEN action would be export THEN it MUST NOT appear on Hit-Cards — export is Flow-first (`videon.export.run` / node `videon_export_run`).
+5. WHEN action would be export THEN it MUST NOT appear on Hit-Cards — export is Flow-first (`videon.export.run` / node `videon_export_run`).  
+6. WHEN action would be reframe THEN it MUST NOT appear on Hit-Cards — reframe is Agent/Catalog confirm (`videon.reframe.run`); no Flow node yet.
 
 Capability Catalog entries (V6) share the same ids; when `CAPABILITY_CATALOG_RUNTIME` is on, Agent/Flow adapters MAY call shared executors — free-chat MCP path stays available either way.
 
@@ -112,6 +113,7 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 | `videon.analysis.run` | `videon.analysis_run` |
 | `videon.cut.create` | `videon.cut_create` |
 | `videon.export.run` | `videon.export_run` |
+| `videon.reframe.run` | `videon.reframe_run` |
 
 ## Embed product
 
