@@ -13,3 +13,5 @@ VIDEON Phase 1+2 is wired into the free-chat orchestrator. Auth matches CREATION
 3. Product resolves actor via service secret + `X-Plexon-User-Id`, then Access Model B  
 
 Federation remains for provisioning/summary; MCP for agent tools. Settings API tokens are optional for Cursor only.
+
+After `videon_media_search`, Plexon auto-emits `video_hit_strip` (scene cards + poster proxy) — see `assistant-videon-mcp.md`.

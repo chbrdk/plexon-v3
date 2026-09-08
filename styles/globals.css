@@ -1420,6 +1420,107 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: 0.75rem;
 }
 
+.plexon-video-hits.ds-step-strip {
+  --ds-step-strip-compact: min(22rem, 86vw);
+  --ds-step-strip-expanded: min(22rem, 86vw);
+  max-width: none;
+  width: 100%;
+}
+
+.plexon-video-hits .ds-step-strip-scroller {
+  padding-block: 0.35rem 1.85rem;
+  padding-inline: 0.15rem;
+}
+
+.plexon-video-hit-card.ds-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2, var(--bg1)) 92%, transparent);
+}
+
+.plexon-video-hit-shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 10.5rem;
+  object-fit: cover;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  background: color-mix(in srgb, var(--ink) 8%, var(--bg0));
+}
+
+.plexon-video-hit-shot--empty {
+  min-height: 10.5rem;
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--line) 35%, transparent),
+    transparent 60%
+  );
+}
+
+.plexon-video-hit-body {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  align-content: start;
+  padding: 1rem 0.95rem 1.15rem;
+}
+
+.plexon-video-hit-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plexon-video-hit-facts {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.plexon-video-hit-row {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  align-items: start;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.plexon-video-hit-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-block-start: 0.12rem;
+  color: var(--accent);
+}
+
+.plexon-video-hit-row-text {
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.plexon-video-hit-snippet {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--muted);
+}
+
 .plexon-assistant-confirm {
   margin-top: 0.75rem;
   max-width: min(100%, 40rem);

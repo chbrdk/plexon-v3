@@ -146,6 +146,21 @@ export function blockToPlainText(block: UiBlock): string {
           .join('\n')
       );
     }
+    case 'video_hit_strip': {
+      const items =
+        (p.items as Array<{ title: string; href: string; sceneLabel?: string; timingLabel?: string }>) ??
+        [];
+      const title = p.title ? `${p.title}\n` : '';
+      return (
+        title +
+        items
+          .map((i) => {
+            const meta = [i.sceneLabel, i.timingLabel].filter(Boolean).join(' · ');
+            return `- ${i.title}${meta ? ` (${meta})` : ''}: ${i.href}`;
+          })
+          .join('\n')
+      );
+    }
     case 'event_quick_check_report': {
       const report = p.report as {
         meta?: { title?: string; url?: string };

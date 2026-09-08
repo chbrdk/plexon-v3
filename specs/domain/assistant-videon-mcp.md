@@ -66,9 +66,17 @@ and `hasVideonMcp`.
 
 ## Orchestrator
 
-Add a MCP fetch branch beside Brandion / Audion / Echon / … using the shared `fetchCheckionMcpTools` client against `getVideonMcpUrl()`.
+MCP fetch branch beside Brandion / Audion / Echon / … using `fetchCheckionMcpTools` against `getVideonMcpUrl()`.
 
-Hook (optional, later): after successful `videon.media_search` / `videon_media_search`, auto-emit generative UI blocks (e.g. scene hit cards / strip) — **do not** block Phase 1 wiring on UI cards; text + deep links are enough.
+### Auto UI after `videon_media_search`
+
+WHEN `videon.media_search` / `videon_media_search` returns items THEN the orchestrator MUST auto-emit a generative UI block `video_hit_strip` (Brandion `tokens_list` pattern):
+
+- Absolute editor deep links via `getVideonUrl()` + MCP `href`  
+- Optional `posterUrl` = same-origin `/api/assistant/videon-frame?…` (Plexon proxies VIDEON `GET /api/media/:id/frame` with service secret + session actor)  
+- Organism: `UiVideoHitStrip` (`StepStrip` cards like VIDEON `/chat`)
+
+MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
 
 ## Capability catalog
 
@@ -99,4 +107,5 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 2. Gate: `resolveUseVideonMcp` mirrors Brandion/Echon rules with product `videon`.  
 3. Orchestrator loads tools when `VIDEON_MCP_URL` set and entitlement/host allows.  
 4. `injectVideonToolArgs` forces session `actorUserId` on all `videon_*` tools except health.  
-5. Staging: scene Q&A returns tool-backed hits scoped to the **logged-in** user’s Access Model B memberships (not a shared bootstrap owner).
+5. Auto-emit: successful `videon_media_search` appends `video_hit_strip` with absolute hrefs + poster proxy URLs.  
+6. Staging: scene Q&A shows hit cards scoped to the logged-in user’s Access Model B memberships.

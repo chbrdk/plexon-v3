@@ -4,6 +4,7 @@ import {
   getAudionAdminUrl,
   getBrandionUrl,
   getCheckionUrl,
+  getVideonUrl,
   pathPlatformProjectDashboard,
 } from '@/lib/constants';
 import { pathAudionAdminProject } from '@/lib/paths/audion-api';
@@ -15,6 +16,33 @@ export type ProductLink = {
   href: string;
   external?: boolean;
 };
+
+/** Absolute VIDEON media/editor URL from a relative MCP href or path. */
+export function buildVideonMediaHref(relativeOrAbsolute: string): string | null {
+  const raw = relativeOrAbsolute.trim();
+  if (!raw) return null;
+  if (/^https:\/\//i.test(raw)) return raw;
+  const base = getVideonUrl()?.replace(/\/+$/, '') ?? '';
+  if (!base) return null;
+  const path = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${base}${path}`;
+}
+
+/** Same-origin poster proxy for assistant video hit cards. */
+export function buildVideonFramePosterUrl(input: {
+  mediaAssetId: string;
+  platformProjectId: string;
+  tMs?: number | null;
+}): string {
+  const params = new URLSearchParams({
+    mediaAssetId: input.mediaAssetId,
+    platformProjectId: input.platformProjectId,
+  });
+  if (input.tMs != null && Number.isFinite(input.tMs) && input.tMs >= 0) {
+    params.set('t', String(Math.floor(input.tMs)));
+  }
+  return `/api/assistant/videon-frame?${params.toString()}`;
+}
 
 export function buildCheckionProjectLink(
   platformProjectId: string,

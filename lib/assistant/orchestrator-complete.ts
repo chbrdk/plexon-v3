@@ -46,6 +46,11 @@ import {
   isBrandionTokensListToolName,
   parseBrandionTokensListPayload,
 } from '@/lib/assistant/ui-blocks/build-brandion-token-ui';
+import {
+  buildVideonMediaSearchBlocks,
+  isVideonMediaSearchToolName,
+  parseVideonMediaSearchPayload,
+} from '@/lib/assistant/ui-blocks/build-videon-media-search-ui';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -586,6 +591,24 @@ export async function runOrchestratorComplete(
         );
         if (payload) {
           const autoBlocks = buildBrandionTokenBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isVideonMediaSearchToolName(mcpName) || isVideonMediaSearchToolName(block.name)) {
+        const payload = parseVideonMediaSearchPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildVideonMediaSearchBlocks(payload, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });

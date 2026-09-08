@@ -319,6 +319,27 @@ export const quoteListPropsSchema = z.object({
     .max(UI_BLOCK_LIMITS.maxQuotes),
 });
 
+export const videoHitStripPropsSchema = z.object({
+  title: medium.optional(),
+  items: z
+    .array(
+      z.object({
+        id: short,
+        title: short,
+        href: safeLinkHref,
+        sceneLabel: short.optional(),
+        timingLabel: short.optional(),
+        durationLabel: short.optional(),
+        projectName: short.optional(),
+        snippet: medium.optional(),
+        posterUrl: safeLinkHref.optional(),
+        startMs: z.number().int().nonnegative().optional(),
+      })
+    )
+    .min(1)
+    .max(UI_BLOCK_LIMITS.maxVideoHits),
+});
+
 export const eventQuickCheckReportPropsSchema = z.object({
   report: z
     .object({
@@ -366,6 +387,7 @@ export const UI_BLOCK_SCHEMAS = {
   phase_strip: phaseStripPropsSchema,
   moment_list: momentListPropsSchema,
   quote_list: quoteListPropsSchema,
+  video_hit_strip: videoHitStripPropsSchema,
   event_quick_check_report: eventQuickCheckReportPropsSchema,
   event_quick_check_review_gate: eventQuickCheckReviewGatePropsSchema,
 } as const;

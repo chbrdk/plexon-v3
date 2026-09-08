@@ -22,6 +22,7 @@ export const UI_BLOCK_LIMITS = {
   maxQuotes: 16,
   maxColorSwatches: 24,
   maxFontSpecimens: 12,
+  maxVideoHits: 12,
   maxString: 2000,
   maxShort: 256,
 } as const;
@@ -47,6 +48,7 @@ export const UI_BLOCK_TYPES = [
   'phase_strip',
   'moment_list',
   'quote_list',
+  'video_hit_strip',
   'event_quick_check_report',
   'event_quick_check_review_gate',
 ] as const;
