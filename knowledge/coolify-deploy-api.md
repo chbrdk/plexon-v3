@@ -27,6 +27,8 @@ Force-deploy is fallback when a GitHub webhook missed. Default for Storybook (`r
 | audion-mcp | `oswkso8os4wc0o4soosgwwcc` | https://mcp-audion.projects-a.plygrnd.tech |
 | creation-mcp | `j1pmt4en25da2yp40f4827d7` | https://j1pmt4en25da2yp40f4827d7.projects-a.plygrnd.tech |
 | echon-mcp | `rgb7mzqnbi0n9qskbcp1tupk` | https://rgb7mzqnbi0n9qskbcp1tupk.projects-a.plygrnd.tech |
+| videon-mcp | `pjupngbkompeyfjqocgsi0jy` | https://pjupngbkompeyfjqocgsi0jy.projects-a.plygrnd.tech |
+| videon-v3 | `mi0j3pyjrel80jodebwvhgvi` | https://videon.projects-a.plygrnd.tech |
 | echon-v3 | `wckcahadnuy7vv4yrjxf6fbm` | https://echon-v3.projects-a.plygrnd.tech |
 
 ## Smoke after plexon deploy

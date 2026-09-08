@@ -38,6 +38,7 @@ export type ToolFamily =
   | 'videon_media'
   | 'videon_analysis'
   | 'videon_cuts'
+  | 'videon_export'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -154,6 +155,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   videon_media: [/^videon_media_/],
   videon_analysis: [/^videon_analysis_/],
   videon_cuts: [/^videon_cuts?_/, /^videon_cut_/],
+  videon_export: [/^videon_export_/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -227,6 +229,7 @@ export const PLATFORM_ASSISTANT_FAMILIES: ToolFamily[] = [
   'videon_media',
   'videon_analysis',
   'videon_cuts',
+  'videon_export',
 ];
 
 /** Safe read-only families for generic project Q&A. */
@@ -283,6 +286,13 @@ export const VIDEON_MEDIA_FAMILIES: ToolFamily[] = [
   'videon_media',
   'videon_analysis',
   'videon_cuts',
+];
+
+/** Write/job families — still gated by allowWriteTools on the plan. */
+export const VIDEON_WRITE_FAMILIES: ToolFamily[] = [
+  'videon_analysis',
+  'videon_cuts',
+  'videon_export',
 ];
 
 export const CREATION_DESIGN_FAMILIES: ToolFamily[] = [

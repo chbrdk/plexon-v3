@@ -16,6 +16,7 @@ import {
   CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
   SPIRION_RESEARCH_FAMILIES,
   VIDEON_MEDIA_FAMILIES,
+  VIDEON_WRITE_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -341,12 +342,14 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'videon_media',
       mode: 'tools',
-      toolFamilies: [...VIDEON_MEDIA_FAMILIES, 'plexon_ui'],
+      toolFamilies: writeIntent
+        ? [...VIDEON_MEDIA_FAMILIES, ...VIDEON_WRITE_FAMILIES, 'plexon_ui']
+        : [...VIDEON_MEDIA_FAMILIES, 'plexon_ui'],
       allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
       reasoning: writeIntent
-        ? 'VIDEON Media — Szenen/Analyse/Cuts (Schreib-Intent Phase 2 gated).'
+        ? 'VIDEON Media — Szenen/Analyse/Cuts inkl. Write/Jobs (Confirm).'
         : 'VIDEON Media — Szenen-Suche / Analyse / Cuts (live, Timecodes nicht erfinden).',
     });
   }
@@ -649,6 +652,7 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'videon_media',
   'videon_analysis',
   'videon_cuts',
+  'videon_export',
   'plexon_ui',
 ]);
 
@@ -708,7 +712,7 @@ Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, plexon_ui.`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,

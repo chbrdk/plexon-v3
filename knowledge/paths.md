@@ -19,7 +19,7 @@
 - ECHON staging companion: `https://echon-v3.projects-a.plygrnd.tech` (`NEXT_PUBLIC_ECHON_URL` / `getEchonUrl`)
 - ECHON MCP (signals/waves/foresight/research): `ECHON_MCP_URL` → Coolify `echon-mcp` `rgb7mzqnbi0n9qskbcp1tupk` port **3101** · FQDN `https://rgb7mzqnbi0n9qskbcp1tupk.projects-a.plygrnd.tech` · spec `specs/domain/assistant-echon-mcp.md` · product MCP `echon-v3/mcp-server/`
 - BRANDION MCP (guidelines/tokens): `BRANDION_MCP_URL` → staging `https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech` · spec `specs/domain/assistant-brandion-mcp.md` · gate `knowledge/brandion-mcp-assistant.md` · product MCP `brandion-v3/mcp-server/`
-- VIDEON MCP (media/scenes/analysis/cuts): `VIDEON_MCP_URL` · port **3103** · spec `specs/domain/assistant-videon-mcp.md` · `knowledge/videon-mcp-assistant.md` · product `videon-v3/mcp-server/` (orchestrator wired; Coolify FQDN TBD)
+- VIDEON MCP (media/scenes/analysis/cuts): `VIDEON_MCP_URL` → staging `https://pjupngbkompeyfjqocgsi0jy.projects-a.plygrnd.tech` · Coolify `videon-mcp` `pjupngbkompeyfjqocgsi0jy` port **3103** · spec `specs/domain/assistant-videon-mcp.md` · `knowledge/videon-mcp-assistant.md` · product `videon-v3/mcp-server/`
 - CREATION MCP (library/compositions): `CREATION_MCP_URL` → attach `creation-mcp` port **3102** · spec `specs/domain/assistant-creation-mcp.md` · `knowledge/creation-mcp-assistant.md` · product MCP `creation-v3/mcp-server/`
 - AUDION MCP: `AUDION_MCP_URL` → staging `https://mcp-audion.projects-a.plygrnd.tech` (`audion-mcp`)
 - BRANDION project origin (service): `POST /api/platform/provisioning/brandion-project-origin` · upsert target `{BRANDION}/api/platform/provisioning/projects/{platformProjectId}`
