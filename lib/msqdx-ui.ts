@@ -14,7 +14,19 @@ export type { ChipProps, ChipSize } from '../../msqdx-ui/packages/ui/src/compone
 export { DataTable } from '../../msqdx-ui/packages/ui/src/components/DataTable'
 export type { DataTableColumn, DataTableProps } from '../../msqdx-ui/packages/ui/src/components/DataTable'
 export { Dialog } from '../../msqdx-ui/packages/ui/src/components/Dialog'
+export { ConfirmDialog } from '../../msqdx-ui/packages/ui/src/components/ConfirmDialog'
+export type { ConfirmDialogProps } from '../../msqdx-ui/packages/ui/src/components/ConfirmDialog'
 export { EmptyState, LoadingText } from '../../msqdx-ui/packages/ui/src/components/LoadingText'
+export { StepStrip, StepStripItem } from '../../msqdx-ui/packages/ui/src/components/StepStrip'
+export type {
+  StepStripItemProps,
+  StepStripOrientation,
+  StepStripProps,
+} from '../../msqdx-ui/packages/ui/src/components/StepStrip'
+export { InspectDock } from '../../msqdx-ui/packages/ui/src/components/InspectDock'
+export type { InspectDockProps } from '../../msqdx-ui/packages/ui/src/components/InspectDock'
+export { EventFooter } from '../../msqdx-ui/packages/ui/src/components/EventFooter'
+export type { EventFooterProps } from '../../msqdx-ui/packages/ui/src/components/EventFooter'
 export { Field } from '../../msqdx-ui/packages/ui/src/components/Field'
 export { Input } from '../../msqdx-ui/packages/ui/src/components/Input'
 export { MetricChip } from '../../msqdx-ui/packages/ui/src/components/MetricChip'
@@ -191,4 +203,7 @@ export {
   IconCheck,
   IconClose,
   IconInfo,
+  IconClock,
+  IconProjects,
+  IconText,
 } from '../../msqdx-ui/packages/ui/src/components/icons'
