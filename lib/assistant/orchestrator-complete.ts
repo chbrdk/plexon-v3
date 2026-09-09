@@ -24,7 +24,7 @@ import {
   trimMessageHistory,
 } from '@/lib/assistant/context-budget';
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
-import { injectAssistantMcpToolArgs } from '@/lib/assistant/creation-scene-tool-args';
+import { injectAssistantMcpToolArgs, extractCreationSceneUpdatedAt } from '@/lib/assistant/creation-scene-tool-args';
 import {
   formatToolResultForAnthropic,
   isCreationScenePreviewToolName,
@@ -379,6 +379,9 @@ export async function runOrchestratorComplete(
       : 0;
   const useStream = Boolean(onTextDelta || onThinkingDelta);
 
+  /** Optimistic lock shared across tool rounds in this completion (CREATION scene writes). */
+  let turnSceneUpdatedAt = pageContext?.entityUpdatedAt?.trim() || null;
+
   for (let round = 0; round <= maxToolRounds; round++) {
     shrinkToolRoundsForBudget(toolRounds);
     const messages = buildMessages(history, prompt, toolRounds);
@@ -572,8 +575,11 @@ export async function runOrchestratorComplete(
         pageContext,
         actorUserId,
         platformProjectId,
+        sceneLockUpdatedAt: turnSceneUpdatedAt,
       });
       const result = await callCheckionMcpTool(baseUrl, mcpName, toolInput);
+      const nextLock = extractCreationSceneUpdatedAt(result);
+      if (nextLock) turnSceneUpdatedAt = nextLock;
       const compacted = maybeCompactSceneTreeToolResult(block.name, result);
       const multimodal =
         isCreationScenePreviewToolName(block.name) || isCreationScenePreviewToolName(mcpName)

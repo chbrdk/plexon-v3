@@ -79,9 +79,13 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 
 ## Non-goals
 
+- CRDT / live multiplayer cursors
+- Zaoly / Penpot import as agent ops
+- Idempotency cache for `clientBatchId` (optional later)
 - Live CEM / Host ops
 - Auto UI cards (v1 text JSON is enough)
-- Collection entitlement enforcement for service writes (phase 2 — logged in CREATION audit only)
+
+Collection ACL for service writes is **enforced fail-closed** in CREATION (`require-scene-collection-access`).
 
 ## Acceptance
 

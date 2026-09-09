@@ -11,6 +11,35 @@ function isCreationSceneFamilyTool(toolName: string): boolean {
   );
 }
 
+function needsOptimisticLock(toolName: string): boolean {
+  return /apply_ops|import_html/.test(toolName);
+}
+
+/** Extract scene updatedAt from CREATION ops/import tool JSON (success or stale 409). */
+export function extractCreationSceneUpdatedAt(toolResult: unknown): string | null {
+  const raw =
+    typeof toolResult === 'string'
+      ? toolResult
+      : toolResult != null
+        ? JSON.stringify(toolResult)
+        : '';
+  if (!raw.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed.updatedAt === 'string' && parsed.updatedAt.trim()) {
+      return parsed.updatedAt.trim();
+    }
+    const scene = parsed.scene;
+    if (scene && typeof scene === 'object' && !Array.isArray(scene)) {
+      const updatedAt = (scene as { updatedAt?: unknown }).updatedAt;
+      if (typeof updatedAt === 'string' && updatedAt.trim()) return updatedAt.trim();
+    }
+  } catch {
+    /* ignore non-JSON */
+  }
+  return null;
+}
+
 /** Inject sceneId, baseUpdatedAt, and actorUserId for CREATION MCP scene tools. */
 export function injectCreationSceneToolArgs(
   toolName: string,
@@ -18,6 +47,8 @@ export function injectCreationSceneToolArgs(
   ctx: {
     pageContext?: AssistantPageContext | null;
     actorUserId: string;
+    /** Turn-local lock from prior successful write / stale response in this completion. */
+    sceneLockUpdatedAt?: string | null;
   },
 ): Record<string, unknown> {
   if (!isCreationSceneFamilyTool(toolName)) return input;
@@ -32,15 +63,16 @@ export function injectCreationSceneToolArgs(
   if (!hasCreationEditorSceneContext(ctx.pageContext)) return out;
 
   const sceneId = ctx.pageContext!.entityId!.trim();
-  const sceneArg = typeof out.sceneId === 'string' ? out.sceneId.trim() : '';
-  if (!sceneArg) {
-    out.sceneId = sceneId;
-  }
+  // Prefer editor-bound scene — model-supplied ids often point at demos / stale chats.
+  out.sceneId = sceneId;
 
-  if (/apply_ops/.test(toolName)) {
+  if (needsOptimisticLock(toolName)) {
     const lock = typeof out.baseUpdatedAt === 'string' ? out.baseUpdatedAt.trim() : '';
-    if (!lock && ctx.pageContext!.entityUpdatedAt?.trim()) {
-      out.baseUpdatedAt = ctx.pageContext!.entityUpdatedAt.trim();
+    if (!lock) {
+      const turnLock = ctx.sceneLockUpdatedAt?.trim() || '';
+      const pageLock = ctx.pageContext!.entityUpdatedAt?.trim() || '';
+      const next = turnLock || pageLock;
+      if (next) out.baseUpdatedAt = next;
     }
   }
 
@@ -55,6 +87,7 @@ export function injectAssistantMcpToolArgs(
     pageContext?: AssistantPageContext | null;
     actorUserId: string;
     platformProjectId?: string | null;
+    sceneLockUpdatedAt?: string | null;
   },
 ): Record<string, unknown> {
   const withCreation = injectCreationSceneToolArgs(toolName, input, ctx);
