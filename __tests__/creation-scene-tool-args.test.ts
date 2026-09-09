@@ -96,6 +96,41 @@ describe('extractCreationSceneUpdatedAt', () => {
       ),
     ).toBe('2026-09-09T12:01:00.000Z')
   })
+
+  it('chains turn-local lock across two apply_ops calls', () => {
+    const pageLock = '2026-08-23T20:00:00.000Z'
+    const afterFirst = '2026-08-23T20:01:00.000Z'
+    let turnLock: string | null = pageLock
+
+    const first = injectCreationSceneToolArgs(
+      'creation_scene_apply_ops',
+      { ops: [{ op: 'add_page' }] },
+      {
+        pageContext: editorContext,
+        actorUserId: 'user-1',
+        sceneLockUpdatedAt: turnLock,
+      },
+    )
+    expect(first.baseUpdatedAt).toBe(pageLock)
+
+    const extracted = extractCreationSceneUpdatedAt(
+      JSON.stringify({ updatedAt: afterFirst, appliedCount: 1 }),
+    )
+    expect(extracted).toBe(afterFirst)
+    turnLock = extracted
+
+    const second = injectCreationSceneToolArgs(
+      'creation_scene_apply_ops',
+      { ops: [{ op: 'insert_child', parentId: 'root', child: { id: 'x', type: 'SiteText' } }] },
+      {
+        pageContext: editorContext,
+        actorUserId: 'user-1',
+        sceneLockUpdatedAt: turnLock,
+      },
+    )
+    expect(second.baseUpdatedAt).toBe(afterFirst)
+    expect(second.sceneId).toBe('scene-abc')
+  })
 })
 
 describe('injectVideonToolArgs', () => {
