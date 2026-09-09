@@ -113,7 +113,7 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 | `videon.analysis.run` | `videon.analysis_run` |
 | `videon.cut.create` | `videon.cut_create` |
 | `videon.cut.scenes.add` | `videon.cut_scenes_add` |
-| `videon.export.run` | `videon.export_run` (optional `format`: `mp4` \| `premiere_xml`) |
+| `videon.export.run` | `videon.export_run` (optional `format`: `mp4` \| `premiere_xml` ZIP) |
 | `videon.reframe.run` | `videon.reframe_run` |
 
 ## Embed product
