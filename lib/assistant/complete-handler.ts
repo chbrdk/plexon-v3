@@ -2,6 +2,10 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import type { RequestUser } from '@/lib/auth-request-user';
 import { API_STATUS } from '@/lib/api-error-handler';
+import {
+  ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
+  ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER,
+} from '@/lib/constants';
 import { routeAssistantIntent } from '@/lib/assistant/intent-router';
 import {
   extractPendingDomainFromHistory,
@@ -28,6 +32,17 @@ import { dispatchAssistantIntent } from '@/lib/assistant/workflow-registry';
 import { attachRecommendationsToMetadata } from '@/lib/assistant/insights/conversation-recommendations';
 import { normalizeAssistantTargetUrl } from '@/lib/assistant/project-target-url';
 import { parseAssistantPageContext } from '@/lib/assistant/page-context';
+import {
+  resolveAssistantImages,
+  type AssistantResolvedImage,
+} from '@/lib/assistant/image-upload-store';
+import {
+  resolveAssistantDocuments,
+  type AssistantResolvedDocument,
+} from '@/lib/assistant/document-upload-store';
+import { normalizeAssistantImageIds, countParseableAssistantImages } from '@/lib/assistant/user-turn-images';
+import { normalizeAssistantDocumentIds } from '@/lib/assistant/user-turn-documents';
+import { mergeUserMessageWithDocuments } from '@/lib/assistant/merge-documents';
 
 export type { AssistantCompleteBody, AssistantCompleteResult } from '@/lib/assistant/complete-types';
 
@@ -50,6 +65,12 @@ function emitPhase(
   emit?.({ type: 'phase', phase, detail });
 }
 
+function userMessagePlaceholder(images: unknown[], documents: unknown[]): string {
+  if (images.length > 0) return ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER;
+  if (documents.length > 0) return ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER;
+  return '';
+}
+
 export async function handleAssistantComplete(
   user: RequestUser,
   bodyInput: AssistantCompleteBody,
@@ -57,11 +78,42 @@ export async function handleAssistantComplete(
 ): Promise<AssistantCompleteResult> {
   let body = bodyInput;
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
-  if (!prompt && !body.confirmToolCall) {
+  const imageIds = body.confirmToolCall ? [] : normalizeAssistantImageIds(body.imageIds);
+  const documentIds = body.confirmToolCall ? [] : normalizeAssistantDocumentIds(body.documentIds);
+  if (!prompt && !body.confirmToolCall && imageIds.length === 0 && documentIds.length === 0) {
     const err = new Error('Missing or empty prompt') as Error & { status?: number };
     err.status = API_STATUS.BAD_REQUEST;
     throw err;
   }
+
+  let images: AssistantResolvedImage[] = [];
+  if (imageIds.length > 0) {
+    const resolved = await resolveAssistantImages(imageIds, user.id);
+    if (!resolved.ok) {
+      const err = new Error(resolved.error) as Error & { status?: number };
+      err.status = API_STATUS.BAD_REQUEST;
+      throw err;
+    }
+    images = resolved.images;
+    if (countParseableAssistantImages(images) === 0) {
+      const err = new Error('Attached images could not be decoded') as Error & { status?: number };
+      err.status = API_STATUS.BAD_REQUEST;
+      throw err;
+    }
+  }
+
+  let documents: AssistantResolvedDocument[] = [];
+  if (documentIds.length > 0) {
+    const resolved = await resolveAssistantDocuments(documentIds, user.id);
+    if (!resolved.ok) {
+      const err = new Error(resolved.error) as Error & { status?: number };
+      err.status = API_STATUS.BAD_REQUEST;
+      throw err;
+    }
+    documents = resolved.documents;
+  }
+
+  const modelPrompt = mergeUserMessageWithDocuments(prompt, documents);
 
   let conversationId = typeof body.conversationId === 'string' ? body.conversationId.trim() : '';
   let conversation = conversationId ? await getAssistantConversationById(conversationId) : null;
@@ -72,10 +124,13 @@ export async function handleAssistantComplete(
   }
 
   if (!conversation) {
+    const titleSeed =
+      prompt.slice(0, 80) ||
+      (documents.length ? 'Dokument-Anhang' : images.length ? 'Bild-Anhang' : 'Neuer Chat');
     conversation = await createAssistantConversation({
       id: randomUUID(),
       userId: user.id,
-      title: prompt.slice(0, 80) || 'Neuer Chat',
+      title: titleSeed,
     });
     conversationId = conversation.id;
   }
@@ -104,12 +159,22 @@ export async function handleAssistantComplete(
     }
   }
 
-  if (prompt) {
+  if (prompt || images.length > 0 || documents.length > 0) {
+    const metadata: Record<string, unknown> = {};
+    if (images.length > 0) metadata.images = images;
+    if (documents.length > 0) {
+      metadata.documents = documents.map((d) => ({
+        id: d.id,
+        filename: d.filename,
+        charCount: d.charCount,
+      }));
+    }
     await createAssistantMessage({
       id: randomUUID(),
       conversationId,
       role: 'user',
-      content: prompt,
+      content: prompt || userMessagePlaceholder(images, documents),
+      metadata: Object.keys(metadata).length ? metadata : null,
     });
   }
 
@@ -131,7 +196,13 @@ export async function handleAssistantComplete(
     projectDomain = project?.domain?.trim() || undefined;
   }
 
-  const intent = body.confirmToolCall ? { type: 'free_chat' as const } : routeAssistantIntent(prompt);
+  // Attachments must reach the model — don't drop them into a deterministic intent that ignores prompt body.
+  const hasAttachments = images.length > 0 || documents.length > 0;
+  const intent = body.confirmToolCall
+    ? { type: 'free_chat' as const }
+    : hasAttachments
+      ? { type: 'free_chat' as const }
+      : routeAssistantIntent(prompt);
 
   const handlerCtx: AssistantHandlerContext = {
     user,
@@ -146,7 +217,8 @@ export async function handleAssistantComplete(
     platformProjectId,
     bindingIds,
     history,
-    prompt,
+    prompt: modelPrompt,
+    images,
     profile,
     emit,
     resolvedName: (name?: string) =>

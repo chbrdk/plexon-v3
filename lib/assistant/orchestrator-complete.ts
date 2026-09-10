@@ -30,6 +30,11 @@ import {
   isCreationScenePreviewToolName,
   type AnthropicToolResultContent,
 } from '@/lib/assistant/tool-result-multimodal';
+import {
+  buildUserTurnContent,
+  type AnthropicUserContentPart,
+} from '@/lib/assistant/user-turn-images';
+import type { AssistantResolvedImage } from '@/lib/assistant/image-upload-store';
 import { parseAnthropicMessageStream } from '@/lib/assistant/anthropic-stream';
 import {
   getPlexonUiAnthropicTools,
@@ -68,13 +73,19 @@ export type ContentBlock =
   | { type: 'text'; text: string }
   | { type: 'thinking'; thinking: string; signature?: string }
   | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
-  | { type: 'tool_result'; tool_use_id: string; content: AnthropicToolResultContent };
+  | { type: 'tool_result'; tool_use_id: string; content: AnthropicToolResultContent }
+  | AnthropicUserContentPart;
 
-type AnthropicMessage = { role: 'user' | 'assistant'; content: string | ContentBlock[] };
+type AnthropicMessage = {
+  role: 'user' | 'assistant';
+  content: string | ContentBlock[] | AnthropicUserContentPart[];
+};
 
 export type OrchestratorCompleteOptions = {
   apiKey: string;
   prompt: string;
+  /** Current-turn Vision attachments (user uploads). */
+  images?: AssistantResolvedImage[];
   history?: OrchestratorMessage[];
   systemPrompt?: string;
   useCheckionMcp?: boolean;
@@ -176,13 +187,15 @@ export function normalizeMessageHistory(rawMessages: unknown[], maxHistory = 50)
   return trimMessageHistory(normalized);
 }
 
-function buildMessages(
+/** Exported for unit tests — current turn multimodal; history text-only. */
+export function buildMessages(
   history: OrchestratorMessage[],
   currentPrompt: string,
   toolRounds: Array<{
     assistantContent: ContentBlock[];
     toolResults: { id: string; content: AnthropicToolResultContent }[];
   }>,
+  images: AssistantResolvedImage[] = [],
 ): AnthropicMessage[] {
   const out: AnthropicMessage[] = [];
   if (history.length > 0) {
@@ -190,7 +203,7 @@ function buildMessages(
       out.push({ role: m.role, content: m.content });
     }
   }
-  out.push({ role: 'user', content: currentPrompt });
+  out.push({ role: 'user', content: buildUserTurnContent(currentPrompt, images) });
   for (const round of toolRounds) {
     out.push({ role: 'assistant', content: round.assistantContent });
     out.push({
@@ -255,6 +268,7 @@ export async function runOrchestratorComplete(
   const {
     apiKey,
     prompt,
+    images = [],
     history = [],
     systemPrompt,
     useCheckionMcp = false,
@@ -384,7 +398,7 @@ export async function runOrchestratorComplete(
 
   for (let round = 0; round <= maxToolRounds; round++) {
     shrinkToolRoundsForBudget(toolRounds);
-    const messages = buildMessages(history, prompt, toolRounds);
+    const messages = buildMessages(history, prompt, toolRounds, images);
     const maxTokens = thinkingBudget > 0 ? thinkingBudget + 8192 : 4096;
     const bodyPayload: Record<string, unknown> = {
       model,

@@ -32,6 +32,8 @@ export type AssistantHandlerContext = {
   bindingIds: ProjectBindingIds;
   history: AssistantMessageHistoryItem[];
   prompt: string;
+  /** Resolved Vision attachments for the current user turn (free chat). */
+  images?: import('@/lib/assistant/image-upload-store').AssistantResolvedImage[];
   profile: { name: string | null; email: string };
   emit?: (event: AssistantStreamEvent) => void;
   resolvedName: (name?: string) => string | undefined;

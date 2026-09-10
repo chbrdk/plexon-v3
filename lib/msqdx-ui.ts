@@ -198,6 +198,7 @@ export {
   IconMic,
   IconVideo,
   IconSend,
+  IconPaperclip,
   IconEdit,
   IconTrash,
   IconCheck,

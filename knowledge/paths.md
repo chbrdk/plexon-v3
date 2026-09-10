@@ -50,6 +50,8 @@
   - Expand: `PATH_ASSISTANT` = `/assistant` · `pathAssistantChat` / `pathAssistantWithProject`
   - Embed: `PATH_ASSISTANT_EMBED` = `/assistant/embed` · `pathAssistantEmbed` (+ `theme` via `ASSISTANT_EMBED_THEME_QUERY_PARAM`)
   - Hybrid: Plexon same-origin → native `AssistantChat` in `ChatOverlay`; products → iframe + `assistant:theme` (never hardcode Plexon URL)
+  - Image attachments: `specs/domain/assistant-image-attachments.md` · `POST /api/assistant/images/upload` (`API_ASSISTANT_IMAGES_UPLOAD`) · Complete `imageIds`
+  - Document attachments: `specs/domain/assistant-document-attachments.md` · `POST /api/assistant/documents/upload` (`API_ASSISTANT_DOCUMENTS_UPLOAD`) · Complete `documentIds`
   - Page context: `specs/domain/assistant-page-context.md` · `lib/assistant/page-context.ts` (`ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK`, `ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN`) · EQC URL `PATH_EVENT_QUICK_CHECK` + `EVENT_QUICK_CHECK_RUN_QUERY_PARAM`
   - Platform navigation (system prompt): `specs/domain/assistant-platform-navigation.md` · `lib/assistant/platform-navigation.ts` (`buildPlatformNavigationPromptBlock`)
 - DS tokens as Collection (program **DS-DEPOSIT**, D0–**D7** + **D5** consume map): `knowledge/ds-tokens-as-plexon-project.md` → canonical `brandion-v3/knowledge/ds-tokens-as-plexon-project.md` · drift CI `brandion-v3/knowledge/ds-deposit-d6-operator.md` · spacing roles `brandion-v3/knowledge/ds-deposit-d7-operator.md` · D5 map `brandion-v3/knowledge/ds-deposit-component-semantic-map.json` (Plexon hosts Collection only; Brandion owns pack; no token JSON here)

@@ -1,4 +1,5 @@
 import type { AssistantPageContext } from '@/lib/assistant/page-context'
+import type { AssistantResolvedImage } from '@/lib/assistant/image-upload-store'
 
 export type AssistantCompleteBody = {
   prompt?: string
@@ -7,6 +8,10 @@ export type AssistantCompleteBody = {
   /** Host page/entity context — specs/domain/assistant-page-context.md */
   pageContext?: AssistantPageContext
   confirmToolCall?: { toolName: string; input: Record<string, unknown> }
+  /** Temp upload IDs from POST /api/assistant/images/upload */
+  imageIds?: string[] | null
+  /** Temp upload IDs from POST /api/assistant/documents/upload */
+  documentIds?: string[] | null
 }
 
 export type AssistantCompleteResult = {
@@ -23,3 +28,5 @@ export type AssistantCompleteResult = {
   text: string;
   metadata?: Record<string, unknown>;
 };
+
+export type { AssistantResolvedImage };

@@ -36,13 +36,23 @@ import {
   patchStreamingMessageMetadata,
 } from '@/lib/assistant/streaming-ui-layout';
 import { AssistantPanel } from '@/components/assistant-ui/AssistantPanel';
-import { AssistantChatComposer } from '@/components/assistant/AssistantChatComposer';
+import { AssistantChatComposer, type AssistantPendingDocument, type AssistantPendingImage } from '@/components/assistant/AssistantChatComposer';
 import { ReportCollectionBar, type ReportPinItem } from '@/components/assistant/ReportCollectionBar';
 import { pinKey } from '@/lib/assistant/reports/block-pin-label';
 import { extractPendingProjectNameFromHistory } from '@/lib/assistant/conversation-context';
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url';
 import { postAssistantEmbedMessage } from '@/lib/assistant/embed-protocol';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
+import { compressAssistantImageFile } from '@/lib/assistant/compress-image';
+import { isAssistantDocumentFilename } from '@/lib/assistant/document-formats';
+import {
+  API_ASSISTANT_DOCUMENTS_UPLOAD,
+  API_ASSISTANT_IMAGES_UPLOAD,
+  ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
+  ASSISTANT_DOCUMENT_MAX_PER_TURN,
+  ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER,
+  ASSISTANT_IMAGE_MAX_PER_TURN,
+} from '@/lib/constants';
 
 const SUGGESTIONS = [
   'assistant.suggestCreateProject',
@@ -77,6 +87,9 @@ export function AssistantChat({
   const [messages, setMessages] = useState<AssistantChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<AssistantPendingImage[]>([]);
+  const [pendingDocuments, setPendingDocuments] = useState<AssistantPendingDocument[]>([]);
+  const [attachBusy, setAttachBusy] = useState(false);
   const [projects, setProjects] = useState<ProjectInsightOption[]>([]);
   const [platformProjectId, setPlatformProjectId] = useState<string | null>(null);
   const [agentTrace, setAgentTrace] = useState<AgentActivityTraceState>(emptyAgentActivityTrace);
@@ -505,10 +518,21 @@ export function AssistantChat({
   }, []);
 
   const sendMessage = useCallback(
-    async (text: string, confirmToolCall?: { toolName: string; input: Record<string, unknown> }) => {
+    async (
+      text: string,
+      confirmToolCall?: { toolName: string; input: Record<string, unknown> },
+      attachments?: {
+        images?: AssistantPendingImage[];
+        documents?: AssistantPendingDocument[];
+      },
+    ) => {
       const trimmed = text.trim();
-      if (!trimmed && !confirmToolCall) return;
+      const images = confirmToolCall ? [] : (attachments?.images ?? pendingImages);
+      const documents = confirmToolCall ? [] : (attachments?.documents ?? pendingDocuments);
+      if (!trimmed && !confirmToolCall && images.length === 0 && documents.length === 0) return;
+      if (loading || attachBusy) return;
 
+      const optimisticId = `local-${Date.now()}`;
       setLoading(true);
       setIsStreamingText(false);
       setShowActivityTrace(true);
@@ -519,11 +543,35 @@ export function AssistantChat({
       try {
         const cid = await ensureConversation();
 
-        if (trimmed) {
+        if (trimmed || images.length > 0 || documents.length > 0) {
+          const placeholder =
+            images.length > 0
+              ? ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER
+              : documents.length > 0
+                ? ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER
+                : '';
+          const metadata: Record<string, unknown> = {};
+          if (images.length > 0) metadata.images = images;
+          if (documents.length > 0) {
+            metadata.documents = documents.map((d) => ({
+              id: d.id,
+              filename: d.filename,
+              charCount: d.charCount,
+            }));
+          }
           setMessages((prev) => [
             ...prev,
-            { id: `local-${Date.now()}`, role: 'user', content: trimmed },
+            {
+              id: optimisticId,
+              role: 'user',
+              content: trimmed || placeholder,
+              metadata: Object.keys(metadata).length ? metadata : null,
+            },
           ]);
+          setInput('');
+          // Clear pending only after snapshot — restore on failure below.
+          setPendingImages([]);
+          setPendingDocuments([]);
         }
 
         const streamMessageId = `stream-${Date.now()}`;
@@ -536,6 +584,8 @@ export function AssistantChat({
             platformProjectId: platformProjectId ?? pageContext?.platformProjectId ?? undefined,
             ...(pageContext ? { pageContext } : {}),
             ...(confirmToolCall ? { confirmToolCall } : {}),
+            ...(images.length > 0 ? { imageIds: images.map((img) => img.id) } : {}),
+            ...(documents.length > 0 ? { documentIds: documents.map((d) => d.id) } : {}),
           },
           {
             onPhase: (phase, detail) => {
@@ -704,6 +754,27 @@ export function AssistantChat({
           watchWorkflow(done.workflowRunId);
         }
       } catch (e) {
+        // Roll back optimistic user turn and restore pending attachments for retry.
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+        if (images.length) {
+          setPendingImages((prev) => {
+            const known = new Set(prev.map((p) => p.id));
+            return [...prev, ...images.filter((img) => !known.has(img.id))].slice(
+              0,
+              ASSISTANT_IMAGE_MAX_PER_TURN,
+            );
+          });
+        }
+        if (documents.length) {
+          setPendingDocuments((prev) => {
+            const known = new Set(prev.map((p) => p.id));
+            return [...prev, ...documents.filter((doc) => !known.has(doc.id))].slice(
+              0,
+              ASSISTANT_DOCUMENT_MAX_PER_TURN,
+            );
+          });
+        }
+        if (trimmed) setInput(trimmed);
         setMessages((prev) => [
           ...prev,
           {
@@ -718,11 +789,124 @@ export function AssistantChat({
         setShowActivityTrace(false);
         setAgentTrace((prev) => ({ ...prev, phase: 'done', thinkingLive: false }));
         streamingMessageIdRef.current = null;
-        setInput('');
       }
     },
-    [appendStreamingUiBlock, clearStreamingUiBlocks, ensureConversation, loadConversation, pageContext, platformProjectId, presentation, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
+
+  const handleAttachFiles = useCallback(async (files: FileList | null) => {
+    if (!files?.length) return;
+    if (loading || attachBusy) return;
+    setAttachBusy(true);
+    try {
+      const imageSlots = Math.max(0, ASSISTANT_IMAGE_MAX_PER_TURN - pendingImages.length);
+      const docSlots = Math.max(0, ASSISTANT_DOCUMENT_MAX_PER_TURN - pendingDocuments.length);
+      const list = Array.from(files).filter((f) => f.size > 0);
+      const imageFiles = list
+        .filter((f) => {
+          const type = (f.type || '').toLowerCase();
+          const name = (f.name || '').toLowerCase();
+          if (type === 'image/svg+xml' || name.endsWith('.svg')) return false;
+          return type.startsWith('image/') || /\.(jpe?g|png|webp|gif)$/i.test(name);
+        })
+        .slice(0, imageSlots);
+      const docFiles = list
+        .filter((f) => isAssistantDocumentFilename(f.name))
+        .slice(0, docSlots);
+
+      if (!imageFiles.length && !docFiles.length) {
+        throw new Error(t('assistant.attachUnsupported'));
+      }
+
+      const uploadedImages: AssistantPendingImage[] = [];
+      for (const file of imageFiles) {
+        const dataUrl = await compressAssistantImageFile(file);
+        const res = await fetch(API_ASSISTANT_IMAGES_UPLOAD, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl }),
+        });
+        if (!res.ok) {
+          let message = res.statusText;
+          try {
+            const parsed = (await res.json()) as { error?: string };
+            message = parsed.error || message;
+          } catch {
+            /* raw */
+          }
+          throw new Error(message || 'Image upload failed');
+        }
+        const data = (await res.json()) as { imageId?: string };
+        if (!data.imageId) throw new Error('Upload failed');
+        uploadedImages.push({ id: data.imageId, dataUrl });
+      }
+
+      const uploadedDocs: AssistantPendingDocument[] = [];
+      for (const file of docFiles) {
+        const form = new FormData();
+        form.append('file', file, file.name);
+        const res = await fetch(API_ASSISTANT_DOCUMENTS_UPLOAD, {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: form,
+        });
+        if (!res.ok) {
+          let message = res.statusText;
+          try {
+            const parsed = (await res.json()) as { error?: string };
+            message = parsed.error || message;
+          } catch {
+            /* raw */
+          }
+          throw new Error(message || 'Document upload failed');
+        }
+        const data = (await res.json()) as {
+          documentId?: string;
+          filename?: string;
+          charCount?: number;
+          truncated?: boolean;
+          usedOcr?: boolean;
+        };
+        if (!data.documentId) throw new Error('Upload failed');
+        uploadedDocs.push({
+          id: data.documentId,
+          filename: data.filename || file.name,
+          charCount: data.charCount ?? 0,
+          truncated: Boolean(data.truncated),
+          usedOcr: Boolean(data.usedOcr),
+        });
+      }
+
+      if (uploadedImages.length) {
+        setPendingImages((prev) => [...prev, ...uploadedImages].slice(0, ASSISTANT_IMAGE_MAX_PER_TURN));
+      }
+      if (uploadedDocs.length) {
+        setPendingDocuments((prev) =>
+          [...prev, ...uploadedDocs].slice(0, ASSISTANT_DOCUMENT_MAX_PER_TURN),
+        );
+      }
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `err-attach-${Date.now()}`,
+          role: 'assistant',
+          content: e instanceof Error ? e.message : t('common.error'),
+        },
+      ]);
+    } finally {
+      setAttachBusy(false);
+    }
+  }, [attachBusy, loading, pendingDocuments.length, pendingImages.length, t]);
+
+  const handleRemovePendingImage = useCallback((imageId: string) => {
+    setPendingImages((prev) => prev.filter((img) => img.id !== imageId));
+  }, []);
+
+  const handleRemovePendingDocument = useCallback((documentId: string) => {
+    setPendingDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
+  }, []);
 
   const showEmpty = messages.length === 0 && !loading;
 
@@ -865,6 +1049,12 @@ export function AssistantChat({
           targetUrl={conversationTargetUrl}
           projectName={conversationProjectName}
           compact={presentation === 'overlay'}
+          pendingImages={pendingImages}
+          pendingDocuments={pendingDocuments}
+          attachBusy={attachBusy}
+          onAttachFiles={(files) => void handleAttachFiles(files)}
+          onRemoveImage={handleRemovePendingImage}
+          onRemoveDocument={handleRemovePendingDocument}
         />
         <ReportCollectionBar
           conversationId={conversationId}

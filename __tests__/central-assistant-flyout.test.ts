@@ -68,7 +68,9 @@ describe('central assistant flyout specs + mounts', () => {
     expect(composer).toContain("label={t('assistant.messageLabel')}")
     expect(composer).toContain('chat-send chat-send-icon')
     expect(composer).toContain('rows={1}')
+    expect(composer).toContain('IconPaperclip')
     expect(chat).toContain('compact={presentation === \'overlay\'}')
+    expect(chat).toContain('onAttachFiles')
   })
 
   it('overlay chat does not navigate to expand URL', () => {

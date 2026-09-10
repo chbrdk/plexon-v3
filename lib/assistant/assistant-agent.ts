@@ -42,6 +42,7 @@ export type RunAssistantAgentInput = {
   apiKey: string;
   user: RequestUser;
   prompt: string;
+  images?: OrchestratorCompleteOptions['images'];
   history: OrchestratorCompleteOptions['history'];
   platformProjectId?: string | null;
   checkionProjectId?: string | null;
@@ -203,6 +204,7 @@ export async function runAssistantAgent(
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
     prompt: input.prompt,
+    images: input.images,
     history: input.history,
     systemPrompt,
     useCheckionMcp: mcpFlags.useCheckionMcp,

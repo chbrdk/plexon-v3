@@ -15,6 +15,15 @@ const nextConfig = {
   assetPrefix: basePath ? `${basePath}/` : undefined,
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
+  serverExternalPackages: [
+    'pg',
+    'drizzle-orm',
+    'pdf-parse',
+    'pdfjs-dist',
+    'mammoth',
+    'tesseract.js',
+    '@napi-rs/canvas',
+  ],
   typescript: {
     // Temporary: generative UI + board still on @msqdx/react / MUI shims.
     // Inventory: knowledge/msqdx-shim-inventory.md — flip to false when that set is small + tsc clean.

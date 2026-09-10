@@ -93,6 +93,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       apiKey,
       user: ctx.user,
       prompt: effectivePrompt,
+      images: ctx.body.confirmToolCall ? undefined : ctx.images,
       history: normalizeMessageHistory(ctx.history.slice(0, -1)),
       platformProjectId: ctx.platformProjectId,
       checkionProjectId: ctx.bindingIds?.checkionProjectId,

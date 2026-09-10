@@ -483,6 +483,8 @@ export const API_BOARD_COMPLETE = '/api/board/complete';
 /** Assistant orchestrator chat APIs. */
 export const API_ASSISTANT_COMPLETE = '/api/assistant/complete';
 export const API_ASSISTANT_COMPLETE_STREAM = '/api/assistant/complete/stream';
+export const API_ASSISTANT_IMAGES_UPLOAD = '/api/assistant/images/upload';
+export const API_ASSISTANT_DOCUMENTS_UPLOAD = '/api/assistant/documents/upload';
 export const API_ASSISTANT_CONVERSATIONS = '/api/assistant/conversations';
 export const apiAssistantConversation = (id: string) =>
   `${API_ASSISTANT_CONVERSATIONS}/${encodeURIComponent(id)}`;
@@ -510,6 +512,62 @@ export const apiPublicReportPptx = (token: string, options?: { debugPlan?: boole
 export const API_ASSISTANT_WORKFLOWS = '/api/assistant/workflows';
 export const apiAssistantWorkflowStream = (runId: string) =>
   `${API_ASSISTANT_WORKFLOWS}/${encodeURIComponent(runId)}/stream`;
+
+/** Assistant image attachments — specs/domain/assistant-image-attachments.md */
+export const ASSISTANT_IMAGE_COMPRESS_MAX_EDGE_PX = 1024;
+export const ASSISTANT_IMAGE_COMPRESS_QUALITY = 0.7;
+export const ASSISTANT_IMAGE_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+export const ASSISTANT_IMAGE_UPLOAD_TTL_SECONDS = 3600;
+export const ASSISTANT_IMAGE_MAX_PER_TURN = 4;
+export const ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER = '(image attachment)';
+export const ASSISTANT_IMAGE_EMPTY_PROMPT_FALLBACK =
+  'Please review the attached image(s).';
+/** Raster formats only — SVG rejected (XSS if rendered as thumb). */
+export const ASSISTANT_IMAGE_ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+] as const;
+/** Soft cap on data-URL string length (~max bytes * 4/3 + header). */
+export const ASSISTANT_IMAGE_DATA_URL_MAX_CHARS =
+  Math.ceil((ASSISTANT_IMAGE_UPLOAD_MAX_BYTES * 4) / 3) + 128;
+export const ASSISTANT_IMAGE_MAX_ACTIVE_PER_USER = 40;
+export const ASSISTANT_IMAGE_UPLOAD_MAX_PER_HOUR = 60;
+
+/** Assistant document attachments — specs/domain/assistant-document-attachments.md */
+export const ASSISTANT_DOCUMENT_UPLOAD_MAX_BYTES = 15 * 1024 * 1024;
+export const ASSISTANT_DOCUMENT_UPLOAD_MAX_CHARS = 200_000;
+export const ASSISTANT_DOCUMENT_UPLOAD_TTL_SECONDS = 3600;
+export const ASSISTANT_DOCUMENT_MAX_PER_TURN = 4;
+export const ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER = '(document attachment)';
+/** Shared file picker accept list (images stay separate via image/*). */
+export const ASSISTANT_DOCUMENT_UPLOAD_ACCEPT =
+  '.docx,.pdf,.pptx,.md,.markdown,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/markdown,text/plain';
+export const ASSISTANT_DOCUMENT_EXTENSIONS = [
+  '.docx',
+  '.pdf',
+  '.pptx',
+  '.md',
+  '.markdown',
+  '.txt',
+] as const;
+/** Max stored/display filename length after sanitization. */
+export const ASSISTANT_DOCUMENT_FILENAME_MAX_CHARS = 180;
+/** Soft PPTX zip-bomb guard: max slide XML parts considered. */
+export const ASSISTANT_PPTX_MAX_SLIDES = 80;
+export const ASSISTANT_DOCUMENT_MAX_ACTIVE_PER_USER = 40;
+export const ASSISTANT_DOCUMENT_UPLOAD_MAX_PER_HOUR = 40;
+
+/**
+ * Scanned PDF OCR fallback when embedded text is thin.
+ * Uses pdf-parse getScreenshot + tesseract.js (eng+deu).
+ */
+export const ASSISTANT_PDF_OCR_MIN_TEXT_CHARS = 40;
+export const ASSISTANT_PDF_OCR_MAX_PAGES = 5;
+export const ASSISTANT_PDF_OCR_SCALE = 2;
+export const ASSISTANT_PDF_OCR_LANGS = 'eng+deu';
 
 /** User-facing platform project APIs (non-admin). */
 export const apiPlatformCompanyPlatformProjects = (companyId: string) =>

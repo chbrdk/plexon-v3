@@ -12,6 +12,10 @@ import type { ConversationRecommendation } from '@/lib/assistant/insights/follow
 import { applyConversationTargetToRecommendations } from '@/lib/assistant/project-target-url'
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url'
 import { messageUiBlocksForSurface } from '@/lib/assistant/ui-blocks/parse-metadata'
+import {
+  ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
+  ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER,
+} from '@/lib/constants'
 
 export type AssistantChatMessage = {
   id: string
@@ -69,9 +73,32 @@ export function AssistantMessageList({
           })
         )
         const uiBlocks = messageUiBlocksForSurface(msg.metadata, surface)
-        const hasText = msg.content.trim().length > 0
+        const messageImages = Array.isArray(
+          (msg.metadata as { images?: unknown } | undefined)?.images,
+        )
+          ? (
+              (msg.metadata as { images: { id: string; dataUrl: string }[] }).images ?? []
+            ).filter((img) => img?.id && img?.dataUrl)
+          : []
+        const messageDocuments = Array.isArray(
+          (msg.metadata as { documents?: unknown } | undefined)?.documents,
+        )
+          ? (
+              (msg.metadata as {
+                documents: { id: string; filename: string; charCount?: number }[]
+              }).documents ?? []
+            ).filter((doc) => doc?.id && doc?.filename)
+          : []
+        const isAttachmentPlaceholder =
+          msg.content.trim() === ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER ||
+          msg.content.trim() === ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER
+        const hasText =
+          msg.content.trim().length > 0 &&
+          !(isAttachmentPlaceholder && (messageImages.length > 0 || messageDocuments.length > 0))
         const hasBubbleBody =
           hasText ||
+          messageImages.length > 0 ||
+          messageDocuments.length > 0 ||
           uiBlocks.length > 0 ||
           Boolean(planner?.intent) ||
           (followUpPrompts.length > 0 && !isUser)
@@ -90,6 +117,27 @@ export function AssistantMessageList({
                 status={isStreaming && !isUser ? 'sending' : undefined}
               >
                 <div className="plexon-assistant-turn-body">
+                  {messageImages.length > 0 ? (
+                    <ul className="plexon-assistant-attach-thumbs" aria-label={t('assistant.pendingAttachmentsAria')}>
+                      {messageImages.map((img) => (
+                        <li key={img.id} className="plexon-assistant-attach-thumb">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.dataUrl} alt="" />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {messageDocuments.length > 0 ? (
+                    <ul className="plexon-assistant-attach-docs" aria-label={t('assistant.pendingDocumentsAria')}>
+                      {messageDocuments.map((doc) => (
+                        <li key={doc.id} className="plexon-assistant-attach-doc">
+                          <span className="plexon-assistant-attach-doc-name" title={doc.filename}>
+                            {doc.filename}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {hasText ? (
                     <AssistantMessageContent
                       role={msg.role}
