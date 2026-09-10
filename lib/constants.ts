@@ -89,6 +89,28 @@ export const apiPublicQuickCheckPdf = (token: string) =>
   `${apiPublicQuickCheck(token)}/pdf`;
 export const apiPublicQuickCheckPptx = (token: string) =>
   `${apiPublicQuickCheck(token)}/pptx`;
+
+/**
+ * Authenticated Collection invite accept page (session required).
+ * Spec: collection-invite-links.md
+ */
+export const PATH_COLLECTION_INVITE = '/invite';
+export const pathCollectionInvite = (token: string) =>
+  `${PATH_COLLECTION_INVITE}/${encodeURIComponent(token)}`;
+export const apiPlatformInviteAccept = (token: string) =>
+  `/api/platform/invites/${encodeURIComponent(token)}/accept`;
+export const API_PLATFORM_PROVISIONING_COLLECTION_INVITES =
+  '/api/platform/provisioning/collections/:platformProjectId/invites';
+export function apiPlatformProvisioningCollectionInvites(platformProjectId: string): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/invites`;
+}
+export function apiPlatformProvisioningCollectionInvite(
+  platformProjectId: string,
+  inviteId: string
+): string {
+  return `${apiPlatformProvisioningCollectionInvites(platformProjectId)}/${encodeURIComponent(inviteId)}`;
+}
+
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;

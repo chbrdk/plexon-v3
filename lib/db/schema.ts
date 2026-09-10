@@ -485,3 +485,33 @@ export const eventQuickCheckShares = pgTable(
     tokenHashIdx: uniqueIndex('event_quick_check_shares_token_hash_uidx').on(t.shareTokenHash),
   })
 );
+
+/**
+ * Authenticated Collection invite links (Access Model B).
+ * Spec: collection-invite-links.md — store token hash only.
+ */
+export const collectionInvites = pgTable(
+  'collection_invites',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    createdByUserId: text('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull(),
+    role: text('role').notNull().default(PLATFORM_PROJECT_ASSIGNMENT_ROLE.MEMBER),
+    sceneId: text('scene_id'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    maxUses: integer('max_uses'),
+    useCount: integer('use_count').notNull().default(0),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('collection_invites_project_idx').on(t.platformProjectId),
+    tokenHashIdx: uniqueIndex('collection_invites_token_hash_uidx').on(t.tokenHash),
+  })
+);

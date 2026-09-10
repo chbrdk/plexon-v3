@@ -7,6 +7,7 @@
 | Collection projects | `specs/domain/collection-projects.md` |
 | Collection Test Flow | `specs/domain/collection-test-flow.md` |
 | Collection Knowledge Pack | `specs/domain/collection-knowledge-pack.md` |
+| Collection invite links | `specs/domain/collection-invite-links.md` |
 | Collection Memory (Wave 1) | `specs/domain/collection-memory-wave1.md` |
 | ECHON Collection binding (Wave 2) | `specs/domain/echon-collection-binding.md` |
 | UI migrate (index) | `specs/domain/ui-migrate.md` |
@@ -30,6 +31,7 @@
 | Spec | Path |
 |------|------|
 | Collection Knowledge Pack | `specs/api/collection-knowledge-pack.md` |
+| Collection invites | `specs/api/collection-invites.md` |
 | Assistant embed protocol | `specs/api/assistant-embed.md` |
 
 ## Knowledge (related)
