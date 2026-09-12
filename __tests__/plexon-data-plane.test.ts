@@ -73,6 +73,10 @@ describe('plexon data plane program', () => {
   it('ships outbox scheduler + facet freshness route', () => {
     expect(existsSync(path.join(root, 'instrumentation.ts'))).toBe(true);
     expect(existsSync(path.join(root, 'lib/platform-outbox-scheduler.ts'))).toBe(true);
+    const instrumentation = readFileSync(path.join(root, 'instrumentation.ts'), 'utf8');
+    // Edge compile must not follow the pg/drizzle graph (Coolify build regression).
+    expect(instrumentation).toContain("NEXT_RUNTIME !== 'nodejs'");
+    expect(instrumentation).toContain('webpackIgnore: true');
     expect(
       existsSync(
         path.join(

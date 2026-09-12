@@ -45,7 +45,7 @@ Write (identity / pack / lifecycle)
 ### Wave A — Durable delivery
 
 - Table `platform_outbox` + drain worker (`lib/platform-outbox.ts`)
-- **Background drain:** `instrumentation.ts` starts `lib/platform-outbox-scheduler.ts` (default every 30s; `PLEXON_OUTBOX_DRAIN_ENABLED=0` to disable)
+- **Background drain:** `instrumentation.ts` starts `lib/platform-outbox-scheduler.ts` on Node only (`NEXT_RUNTIME === 'nodejs'` + `webpackIgnore`) so Edge/build does not pull `pg`/`crypto` (default every 30s; `PLEXON_OUTBOX_DRAIN_ENABLED=0` to disable)
 - Mirror sync failures enqueue retry; drain updates binding `sync_status`
 - Facet `freshness`: `fresh` | `publish_pending` | `publish_failed` | `stale`
 - Service mark: `POST …/knowledge/facets/:facetId/freshness` (Audion/Checkion soft-skip)
