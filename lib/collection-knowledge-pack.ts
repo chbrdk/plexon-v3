@@ -938,21 +938,35 @@ export type KnowledgeFacetReadinessStatus = 'filled' | 'empty' | 'reserved';
 export type KnowledgeFacetReadiness = {
   facetId: KnowledgeFacetId;
   status: KnowledgeFacetReadinessStatus;
+  freshness: FacetFreshness;
+  preview: string;
 };
 
 export function buildKnowledgeFacetReadiness(
   facets: KnowledgePackFacets
 ): KnowledgeFacetReadiness[] {
   return KNOWLEDGE_FACET_IDS.map((facetId) => {
+    const freshness = normalizeFacetFreshness(facets[facetId].freshness);
+    const preview = facetPreview(facetId, facets[facetId].data);
     if (facetId === 'brand') {
       const brand = normalizeBrandData(facets.brand.data);
       if (brand.status !== 'active') {
-        return { facetId, status: 'reserved' as const };
+        return { facetId, status: 'reserved' as const, freshness, preview };
       }
       const empty = isFacetContentEmpty('brand', brand);
-      return { facetId, status: empty ? ('empty' as const) : ('filled' as const) };
+      return {
+        facetId,
+        status: empty ? ('empty' as const) : ('filled' as const),
+        freshness,
+        preview,
+      };
     }
     const empty = isFacetContentEmpty(facetId, facets[facetId].data);
-    return { facetId, status: empty ? ('empty' as const) : ('filled' as const) };
+    return {
+      facetId,
+      status: empty ? ('empty' as const) : ('filled' as const),
+      freshness,
+      preview,
+    };
   });
 }

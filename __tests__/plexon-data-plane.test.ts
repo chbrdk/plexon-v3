@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, afterEach, vi } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
@@ -51,11 +51,14 @@ describe('plexon data plane program', () => {
     const index = readFileSync(path.join(root, 'knowledge/specs-index.md'), 'utf8');
     const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8');
     expect(paths).toContain('apiPlatformProjectProjection');
-    expect(paths).toContain('API_PLATFORM_OPS_OUTBOX_DRAIN');
+    expect(paths).toContain('outbox/drain');
+    expect(paths).toContain('platform-outbox-scheduler');
+    expect(paths).toContain('apiPlatformProjectKnowledgeFacetFreshness');
     expect(index).toContain('platform-outbox-delivery.md');
     expect(index).toContain('collection-read-model.md');
     expect(constants).toContain('apiPlatformProjectProjection');
     expect(constants).toContain('API_PLATFORM_OPS_DATA_PLANE');
+    expect(constants).toContain('apiPlatformProjectKnowledgeFacetFreshness');
   });
 
   it('outbox backoff grows and kinds are stable', () => {
@@ -65,6 +68,29 @@ describe('plexon data plane program', () => {
     expect(__testBackoffMs(20)).toBe(1000 * 2 ** 10);
     expect(PLATFORM_OUTBOX_KIND.CAPABILITY_MIRROR_SYNC).toBe('capability_mirror_sync');
     expect(PLATFORM_OUTBOX_KIND.CAPABILITY_TOMBSTONE).toBe('capability_tombstone');
+  });
+
+  it('ships outbox scheduler + facet freshness route', () => {
+    expect(existsSync(path.join(root, 'instrumentation.ts'))).toBe(true);
+    expect(existsSync(path.join(root, 'lib/platform-outbox-scheduler.ts'))).toBe(true);
+    expect(
+      existsSync(
+        path.join(
+          root,
+          'app/api/platform/projects/[platformProjectId]/knowledge/facets/[facetId]/freshness/route.ts'
+        )
+      )
+    ).toBe(true);
+    const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8');
+    expect(constants).toContain('apiPlatformProjectKnowledgeFacetFreshness');
+  });
+
+  it('scheduler respects disable env', async () => {
+    vi.stubEnv('DATABASE_URL', 'postgres://x');
+    vi.stubEnv('PLEXON_OUTBOX_DRAIN_ENABLED', '0');
+    const { __testDrainEnabled } = await import('@/lib/platform-outbox-scheduler');
+    expect(__testDrainEnabled()).toBe(false);
+    vi.unstubAllEnvs();
   });
 
   it('builds projection snapshot with brand + freshness teasers', () => {

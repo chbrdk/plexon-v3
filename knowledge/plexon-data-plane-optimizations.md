@@ -45,8 +45,10 @@ Write (identity / pack / lifecycle)
 ### Wave A — Durable delivery
 
 - Table `platform_outbox` + drain worker (`lib/platform-outbox.ts`)
+- **Background drain:** `instrumentation.ts` starts `lib/platform-outbox-scheduler.ts` (default every 30s; `PLEXON_OUTBOX_DRAIN_ENABLED=0` to disable)
 - Mirror sync failures enqueue retry; drain updates binding `sync_status`
 - Facet `freshness`: `fresh` | `publish_pending` | `publish_failed` | `stale`
+- Service mark: `POST …/knowledge/facets/:facetId/freshness` (Audion/Checkion soft-skip)
 - Append-only `collection_knowledge_pack_events` on facet writes
 - Soft-skip remains product-local, but Plexon surfaces freshness + ops metrics
 

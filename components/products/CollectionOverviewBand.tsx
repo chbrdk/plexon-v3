@@ -307,11 +307,19 @@ export function CollectionOverviewBand({
                       </span>
                       <span
                         className="plexon-collection-overview-ledger-mark"
-                        data-tone={f.status === 'filled' ? 'ok' : 'muted'}
+                        data-tone={
+                          f.freshness && f.freshness !== 'fresh'
+                            ? 'warn'
+                            : f.status === 'filled'
+                              ? 'ok'
+                              : 'muted'
+                        }
                       >
-                        {f.status === 'filled'
-                          ? t('projects.detail.overviewFacetFilled')
-                          : t('projects.detail.overviewFacetEmpty')}
+                        {f.freshness && f.freshness !== 'fresh'
+                          ? f.freshness.replace(/_/g, ' ')
+                          : f.status === 'filled'
+                            ? t('projects.detail.overviewFacetFilled')
+                            : t('projects.detail.overviewFacetEmpty')}
                       </span>
                     </button>
                   </li>

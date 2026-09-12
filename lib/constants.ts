@@ -349,6 +349,10 @@ export const apiPlatformProjectKnowledgeFacetPublish = (
   platformProjectId: string,
   facetId: string
 ) => `${apiPlatformProjectKnowledgeFacet(platformProjectId, facetId)}/publish`;
+export const apiPlatformProjectKnowledgeFacetFreshness = (
+  platformProjectId: string,
+  facetId: string
+) => `${apiPlatformProjectKnowledgeFacet(platformProjectId, facetId)}/freshness`;
 export const apiPlatformProjectKnowledgeSuggest = (platformProjectId: string) =>
   `${apiPlatformProjectKnowledge(platformProjectId)}/suggest`;
 

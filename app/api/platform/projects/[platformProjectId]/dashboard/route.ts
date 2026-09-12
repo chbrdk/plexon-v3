@@ -25,6 +25,7 @@ import {
   resolveCheckionCapability,
   resolveCreationCapability,
 } from '@/lib/platform-project-capability-summary';
+import { getCollectionProjection } from '@/lib/collection-projection';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
@@ -60,23 +61,35 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, brandionLive, creationLive, packRow, flowRows] = await Promise.all([
-    fetchCheckionPlatformProjectSummary(ppid, user.id),
-    fetchAudionPlatformProjectSummary(ppid, user.id),
-    fetchBrandionPlatformProjectSummary(ppid, user.id),
-    fetchCreationPlatformProjectSummary(ppid, user.id),
-    getOrCreateKnowledgePack(ppid),
-    listCollectionTestFlows(ppid),
-  ]);
+  const [checkionLive, audionLive, brandionLive, creationLive, packRow, flowRows, projection] =
+    await Promise.all([
+      fetchCheckionPlatformProjectSummary(ppid, user.id),
+      fetchAudionPlatformProjectSummary(ppid, user.id),
+      fetchBrandionPlatformProjectSummary(ppid, user.id),
+      fetchCreationPlatformProjectSummary(ppid, user.id),
+      getOrCreateKnowledgePack(ppid),
+      listCollectionTestFlows(ppid),
+      getCollectionProjection(ppid, { rebuildIfMissing: true }),
+    ]);
   const checkion = resolveCheckionCapability(checkionLive, bindings);
   const audion = resolveAudionCapability(audionLive, bindings);
   const brandion = resolveBrandionCapability(brandionLive, bindings);
   const creation = resolveCreationCapability(creationLive, bindings);
 
   const facets = ensureFacetsShape(packRow.facets, packRow.updatedAt.toISOString());
+  const readinessFromPack = buildKnowledgeFacetReadiness(facets);
+  // Prefer projection teasers when present (Wave B read model) — includes freshness.
   const knowledge = {
     revision: packRow.revision,
-    facets: buildKnowledgeFacetReadiness(facets),
+    facets:
+      projection?.snapshot.knowledgeTeasers?.length
+        ? projection.snapshot.knowledgeTeasers.map((t) => ({
+            facetId: t.facetId,
+            status: t.readiness,
+            freshness: t.freshness,
+            preview: t.preview,
+          }))
+        : readinessFromPack,
   };
 
   const flows = {
@@ -107,6 +120,14 @@ export async function GET(
     brandion,
     creation,
     knowledge,
+    /** Rebuildable Collection read model (Wave B) — magazine/Assistant prefer this. */
+    projection: projection
+      ? {
+          revision: projection.revision,
+          updatedAt: projection.updatedAt,
+          snapshot: projection.snapshot,
+        }
+      : null,
     flows,
     links: {
       checkionProject: checkion
