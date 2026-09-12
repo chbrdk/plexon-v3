@@ -3,23 +3,32 @@
  * AUDION `apps/web/lib/platform-company-context.ts` (`platformCompanyId`).
  */
 export const AUDION_LAUNCH_QUERY = {
+  PLATFORM_PROJECT_ID: 'platformProjectId',
+  /** Legacy alias — still set alongside canonical id. */
   PLATFORM_PROJECT_HINT: 'platformProjectHint',
   PLATFORM_COMPANY_ID: 'platformCompanyId',
 } as const;
 
 /**
- * Builds `…/admin/?platformProjectHint=…&platformCompanyId=…` (omit empty parts).
- * @param adminBaseTrimmed — return value of `getAudionAdminUrl().replace(/\/+$/, '')`
+ * Builds `…/admin/?platformProjectId=…&platformProjectHint=…&platformCompanyId=…`.
+ * Canonical key is `platformProjectId`; hint kept for legacy Audion admin.
  */
 export function buildAudionAdminLaunchUrl(
   adminBaseTrimmed: string,
-  opts: { platformProjectHint?: string | null; platformCompanyId?: string | null }
+  opts: {
+    platformProjectHint?: string | null;
+    platformProjectId?: string | null;
+    platformCompanyId?: string | null;
+  }
 ): string {
   const base = adminBaseTrimmed.replace(/\/+$/, '');
   const params = new URLSearchParams();
-  const hint = opts.platformProjectHint?.trim();
+  const id = (opts.platformProjectId ?? opts.platformProjectHint)?.trim();
   const company = opts.platformCompanyId?.trim();
-  if (hint) params.set(AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_HINT, hint);
+  if (id) {
+    params.set(AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_ID, id);
+    params.set(AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_HINT, id);
+  }
   if (company) params.set(AUDION_LAUNCH_QUERY.PLATFORM_COMPANY_ID, company);
   const qs = params.toString();
   return qs ? `${base}/?${qs}` : `${base}/`;

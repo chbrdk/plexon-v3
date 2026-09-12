@@ -166,6 +166,60 @@ async function fetchAudionProjectContext(
 
 async function fetchKnowledgePackContext(platformProjectId: string): Promise<string[]> {
   try {
+    // Wave B: prefer Collection projection teasers for boot context.
+    try {
+      const { getCollectionProjection } = await import('@/lib/collection-projection');
+      const projection = await getCollectionProjection(platformProjectId, {
+        rebuildIfMissing: true,
+      });
+      if (projection?.snapshot) {
+        const lines: string[] = ['### Collection Knowledge Pack (projection)'];
+        for (const teaser of projection.snapshot.knowledgeTeasers) {
+          if (teaser.readiness === 'empty' || teaser.readiness === 'reserved') continue;
+          lines.push(
+            `- ${teaser.facetId} [${teaser.freshness}]: ${teaser.preview.slice(0, 200)}`
+          );
+        }
+        const brand = projection.snapshot.brand;
+        if (brand.status === 'active') {
+          lines.push('\n### Brand (refs)');
+          if (brand.voiceSummary) lines.push(brand.voiceSummary.slice(0, 400));
+          if (brand.guidelineRef) {
+            lines.push(
+              `guidelineRef: ${brand.guidelineRef.guidelineId}@${brand.guidelineRef.version}`
+            );
+          }
+        }
+        // Still pull research / market / media bodies for assistant depth.
+        const row = await getOrCreateKnowledgePack(platformProjectId);
+        const facets = ensureFacetsShape(row.facets);
+        const brief = normalizeResearchBriefData(facets.research_brief.data);
+        if (brief.summary) lines.push(`\nResearch brief: ${brief.summary.slice(0, 400)}`);
+        for (const section of brief.sections.slice(0, 4)) {
+          lines.push(`- ${section.title}: ${section.plainText.slice(0, 220)}`);
+        }
+        const market = normalizeMarketIntelligenceData(facets.market_intelligence.data);
+        if (market.summary || market.waveHighlights.length) {
+          lines.push('\n### ECHON Market Intelligence');
+          if (market.summary) lines.push(market.summary.slice(0, 500));
+          for (const h of market.waveHighlights.slice(0, 5)) {
+            lines.push(`- ${h.slice(0, 200)}`);
+          }
+        }
+        const media = normalizeMediaInsightsData(facets.media_insights.data);
+        if (media.summary || media.highlights.length) {
+          lines.push('\n### VIDEON Media Insights');
+          if (media.summary) lines.push(media.summary.slice(0, 500));
+          for (const h of media.highlights.slice(0, 5)) {
+            lines.push(`- ${h.slice(0, 200)}`);
+          }
+        }
+        return lines.length > 1 ? lines : [];
+      }
+    } catch {
+      // fall through to pack-only path
+    }
+
     const row = await getOrCreateKnowledgePack(platformProjectId);
     const facets = ensureFacetsShape(row.facets);
     const lines: string[] = ['### Collection Knowledge Pack'];

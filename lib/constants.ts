@@ -352,6 +352,14 @@ export const apiPlatformProjectKnowledgeFacetPublish = (
 export const apiPlatformProjectKnowledgeSuggest = (platformProjectId: string) =>
   `${apiPlatformProjectKnowledge(platformProjectId)}/suggest`;
 
+/** Collection read model (Wave B). Spec: collection-read-model.md */
+export const apiPlatformProjectProjection = (platformProjectId: string) =>
+  `/api/platform/projects/${encodeURIComponent(platformProjectId)}/projection`;
+
+/** Data-plane ops (Wave A/D). Spec: platform-outbox-delivery.md · collection-read-model.md */
+export const API_PLATFORM_OPS_OUTBOX_DRAIN = '/api/platform/ops/outbox/drain';
+export const API_PLATFORM_OPS_DATA_PLANE = '/api/platform/ops/data-plane';
+
 /** Collection Test Flow CRUD + run (session). Spec: collection-test-flow.md Wave 1 */
 export const apiPlatformProjectFlows = (platformProjectId: string) =>
   `/api/platform/projects/${encodeURIComponent(platformProjectId)}/flows`;

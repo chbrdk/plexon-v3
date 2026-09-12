@@ -11,6 +11,7 @@ const PLEXON_USER_HEADER = 'X-Plexon-User-Id';
 /**
  * Service: list Collections a Plexon user can see (same directory as Sync).
  * Requires service secret + contract header + `X-Plexon-User-Id`.
+ * Query: `limit` (1–100, default 50), `cursor`.
  */
 export async function GET(request: Request) {
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503);
@@ -27,7 +28,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await listAccessibleCollectionsForUser(plexonUserId);
+    const url = new URL(request.url);
+    const limitRaw = url.searchParams.get('limit');
+    const limit = limitRaw ? Number(limitRaw) : undefined;
+    const cursor = url.searchParams.get('cursor');
+    const result = await listAccessibleCollectionsForUser(plexonUserId, {
+      limit: Number.isFinite(limit) ? limit : undefined,
+      cursor,
+    });
     return platformJson(result);
   } catch (e) {
     const message = e instanceof Error ? e.message : 'List failed';

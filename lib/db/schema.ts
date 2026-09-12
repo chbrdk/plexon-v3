@@ -515,3 +515,65 @@ export const collectionInvites = pgTable(
     tokenHashIdx: uniqueIndex('collection_invites_token_hash_uidx').on(t.tokenHash),
   })
 );
+
+/**
+ * Durable delivery outbox — Wave A data plane.
+ * Spec: specs/domain/platform-outbox-delivery.md
+ */
+export const platformOutbox = pgTable(
+  'platform_outbox',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
+    status: text('status').notNull().default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    maxAttempts: integer('max_attempts').notNull().default(8),
+    nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }).notNull().defaultNow(),
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    statusNextIdx: index('platform_outbox_status_next_attempt_idx').on(t.status, t.nextAttemptAt),
+  })
+);
+
+/**
+ * Append-only Knowledge Pack provenance events — Wave A.
+ * Spec: specs/domain/platform-outbox-delivery.md · collection-knowledge-pack.md
+ */
+export const collectionKnowledgePackEvents = pgTable(
+  'collection_knowledge_pack_events',
+  {
+    id: text('id').primaryKey(),
+    packId: text('pack_id')
+      .notNull()
+      .references(() => collectionKnowledgePacks.id, { onDelete: 'cascade' }),
+    facetId: text('facet_id').notNull(),
+    revision: integer('revision').notNull(),
+    actorType: text('actor_type').notNull(),
+    actorUserId: text('actor_user_id'),
+    productId: text('product_id'),
+    runId: text('run_id'),
+    sourceUri: text('source_uri'),
+    patchSummary: text('patch_summary'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    packIdx: index('collection_knowledge_pack_events_pack_id_idx').on(t.packId),
+  })
+);
+
+/**
+ * Rebuildable Collection read model — Wave B.
+ * Spec: specs/domain/collection-read-model.md
+ */
+export const collectionProjections = pgTable('collection_projections', {
+  platformProjectId: text('platform_project_id')
+    .primaryKey()
+    .references(() => platformProjects.id, { onDelete: 'cascade' }),
+  revision: integer('revision').notNull().default(1),
+  snapshot: jsonb('snapshot').$type<Record<string, unknown>>().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

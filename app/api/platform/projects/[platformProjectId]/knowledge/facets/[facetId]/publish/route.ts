@@ -47,9 +47,6 @@ export async function POST(
     if (!isKnowledgeFacetId(facetId)) {
       return apiError('Unknown facet', API_STATUS.UNPROCESSABLE);
     }
-    if (facetId === 'brand') {
-      return apiError('Brand facet is reserved until Brandion federates', API_STATUS.UNPROCESSABLE);
-    }
 
     const project = await getPlatformProjectById(id);
     if (!project) return apiError('Not found', API_STATUS.NOT_FOUND);
@@ -90,6 +87,7 @@ export async function POST(
       facetId,
       schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
       updatedAt: at,
+      freshness: 'fresh' as const,
       provenance: normalizeProvenance(provenance, {
         actorType: 'service',
         productId: productId as KnowledgeProductId,

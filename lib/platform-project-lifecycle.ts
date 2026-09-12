@@ -45,16 +45,32 @@ export async function setPlatformProjectLifecycleStatus(
 }
 
 /**
- * Admin hard-delete: best-effort archive+sync, then cascade-delete Plexon row.
- * Product mirrors remain archived orphans (no product DELETE).
+ * Admin hard-delete: enqueue capability tombstone, best-effort archive+sync, then cascade-delete.
+ * Spec: collection-projects.md Phase 5 · platform-outbox-delivery.md Wave D
  */
 export async function hardDeletePlatformProjectAfterArchive(
   platformProjectId: string,
   options: { source?: string } = {}
-): Promise<{ syncResults: SyncPlatformProjectResult[]; deleted: true }> {
+): Promise<{ syncResults: SyncPlatformProjectResult[]; deleted: true; tombstoneId?: string }> {
   const existing = await getPlatformProjectById(platformProjectId);
   if (!existing) {
     throw new Error('Platform project not found');
+  }
+
+  const source = options.source ?? 'plexon-admin-hard-delete';
+  let tombstoneId: string | undefined;
+  try {
+    const { enqueueCapabilityTombstone, snapshotBindingsForTombstone } = await import(
+      '@/lib/platform-outbox'
+    );
+    const products = await snapshotBindingsForTombstone(platformProjectId);
+    tombstoneId = await enqueueCapabilityTombstone({
+      platformProjectId,
+      products,
+      source,
+    });
+  } catch {
+    tombstoneId = undefined;
   }
 
   let syncResults: SyncPlatformProjectResult[] = [];
@@ -65,13 +81,12 @@ export async function hardDeletePlatformProjectAfterArchive(
       });
     }
     syncResults = await syncPlatformProjectToProducts(platformProjectId, {
-      source: options.source ?? 'plexon-admin-hard-delete',
+      source,
     });
   } catch {
-    // Best-effort: still delete Plexon row so admin teardown cannot be blocked by a product outage.
     syncResults = [];
   }
 
   await deletePlatformProject(platformProjectId);
-  return { syncResults, deleted: true };
+  return { syncResults, deleted: true, tombstoneId };
 }

@@ -12,7 +12,7 @@ Stand: Mai 2026
 - Produkt-Registry
 - Produktstatus und Health
 - Einstiegspunkte / Deep Links
-- **Collection Knowledge Pack** (facetierte Shared Briefs: Profile, Competitive, Research-Distillate, GEO-Kontext, reservierte Brandion-Facet) — SoT unter der Collection; siehe `specs/domain/collection-knowledge-pack.md`
+- **Collection Knowledge Pack** (facetierte Shared Briefs: Profile, Competitive, Research-Distillate, GEO-Kontext, Brandion-Refs, Media, Market) — SoT unter der Collection; siehe `specs/domain/collection-knowledge-pack.md` · data plane `knowledge/plexon-data-plane-optimizations.md`
 - **Central Assistant Flyout** (plattformweiter Orchestrator-Chat als Dock-End-Overlay in allen v3-Apps; Embed `/assistant/embed`; Expand `/assistant`) — siehe `specs/domain/central-assistant-flyout.md` · `knowledge/central-assistant-flyout.md`
 - spaeter: globale Suche, zentrale Boards, letzte Aktivitaeten, Read-only-Summaries
 

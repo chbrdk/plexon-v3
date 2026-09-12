@@ -36,11 +36,17 @@ export type SyncPlatformProjectResult = {
 
 /**
  * Ensures local CHECKION/AUDION/BRANDION/CREATION projects exist and updates PLEXON bindings.
- * @param options.onlyProducts — when set, only these products are upserted (e.g. `['checkion']` when AUDION already has the project row).
+ * On product failure, enqueues outbox retry unless `enqueueOnFailure: false`.
+ * @param options.onlyProducts — when set, only these products are upserted.
  */
 export async function syncPlatformProjectToProducts(
   platformProjectId: string,
-  options: { source?: string; onlyProducts?: PlatformProductId[] } = {}
+  options: {
+    source?: string;
+    onlyProducts?: PlatformProductId[];
+    /** Default true — enqueue Wave A outbox retry for failed products. */
+    enqueueOnFailure?: boolean;
+  } = {}
 ): Promise<SyncPlatformProjectResult[]> {
   const project = await getPlatformProjectById(platformProjectId);
   if (!project) {
@@ -60,6 +66,8 @@ export async function syncPlatformProjectToProducts(
   const results: SyncPlatformProjectResult[] = [];
   const source = options.source ?? 'plexon-platform-project-sync';
   const productLoop = options.onlyProducts?.length ? options.onlyProducts : PRODUCTS;
+  const enqueueOnFailure = options.enqueueOnFailure !== false;
+  const failedProductIds: PlatformProductId[] = [];
 
   for (const productId of productLoop) {
     if (!isProductUpsertConfigured(productId)) {
@@ -69,6 +77,7 @@ export async function syncPlatformProjectToProducts(
         ok: false,
         error: `${productId} API base not configured`,
       });
+      failedProductIds.push(productId);
       continue;
     }
 
@@ -93,6 +102,7 @@ export async function syncPlatformProjectToProducts(
         lastSyncAt: new Date(),
       });
       results.push({ platformProjectId, productId, ok: false, error: remote.error });
+      failedProductIds.push(productId);
       continue;
     }
 
@@ -107,6 +117,7 @@ export async function syncPlatformProjectToProducts(
         lastSyncAt: new Date(),
       });
       results.push({ platformProjectId, productId, ok: false, error: msg });
+      failedProductIds.push(productId);
       continue;
     }
 
@@ -124,6 +135,22 @@ export async function syncPlatformProjectToProducts(
       ok: true,
       externalProjectId: remote.data.externalProjectId,
     });
+  }
+
+  if (enqueueOnFailure && failedProductIds.length > 0) {
+    const { enqueueMirrorSyncRetry } = await import('@/lib/platform-outbox');
+    await enqueueMirrorSyncRetry({
+      platformProjectId,
+      productIds: failedProductIds,
+      source: `${source}:outbox-retry`,
+    });
+  }
+
+  try {
+    const { rebuildCollectionProjection } = await import('@/lib/collection-projection');
+    await rebuildCollectionProjection(platformProjectId);
+  } catch {
+    // Projection rebuild is best-effort after sync.
   }
 
   return results;

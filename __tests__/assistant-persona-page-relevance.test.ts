@@ -190,6 +190,8 @@ describe('findPersonaAcrossAccessibleCollections', () => {
       ],
       totalAccessible: 2,
       truncated: false,
+      nextCursor: null,
+      limit: 50,
     });
     vi.mocked(fetchAudionPlatformProjectSummary).mockImplementation(async (platformProjectId) => {
       if (platformProjectId === 'pp-vaillant') {
@@ -249,6 +251,8 @@ describe('findPersonaAcrossAccessibleCollections', () => {
       items: [{ id: 'pp-1', name: 'Only One', status: 'active', companyId: 'c1', domain: null }],
       totalAccessible: 1,
       truncated: false,
+      nextCursor: null,
+      limit: 50,
     });
     vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue({
       externalProjectId: 'aud-1',
@@ -280,6 +284,8 @@ describe('findPersonaAcrossAccessibleCollections', () => {
       ],
       totalAccessible: 2,
       truncated: false,
+      nextCursor: null,
+      limit: 50,
     });
     vi.mocked(fetchAudionPlatformProjectSummary).mockResolvedValue({
       externalProjectId: 'aud-x',

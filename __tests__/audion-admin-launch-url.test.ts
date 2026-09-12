@@ -12,13 +12,13 @@ import {
 } from '@/lib/audion-admin-launch-url';
 
 describe('buildAudionAdminLaunchUrl', () => {
-  it('adds project hint and company id', () => {
+  it('adds canonical project id, legacy hint, and company id', () => {
     const u = buildAudionAdminLaunchUrl('https://audion.example/admin', {
       platformProjectHint: 'pp-1',
       platformCompanyId: 'co-2',
     });
     expect(u).toBe(
-      `https://audion.example/admin/?${AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_HINT}=pp-1&${AUDION_LAUNCH_QUERY.PLATFORM_COMPANY_ID}=co-2`
+      `https://audion.example/admin/?${AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_ID}=pp-1&${AUDION_LAUNCH_QUERY.PLATFORM_PROJECT_HINT}=pp-1&${AUDION_LAUNCH_QUERY.PLATFORM_COMPANY_ID}=co-2`
     );
   });
 

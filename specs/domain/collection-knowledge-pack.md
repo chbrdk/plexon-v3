@@ -57,7 +57,7 @@ Collections accumulate **heterogeneous** knowledge over years: Audion research d
 | Pack CRUD, versioning, Collection Knowledge UI | **PLEXON** |
 | Research dossier + publish distillates → `research_brief` | **AUDION** |
 | GEO jobs + launch suggest; publish → `geo_context` / `competitive` | **CHECKION** |
-| Guideline / tokens / voice (future) → `brand` | **BRANDION** (reserved) |
+| Guideline / tokens / voice → `brand` | **BRANDION** (refs / distillates only) |
 | Media / scene distillates → `media_insights` | **VIDEON** |
 | Identity (`name`, `domain`, bindings) | **PLEXON** (already) |
 
@@ -203,17 +203,17 @@ Future Wave 2 may split `assistant_insights` / `market_intelligence` into dedica
 | `waveHighlights` | string[] | Short bullets |
 | `sourceThreadId` | string \| null | ECHON research thread id |
 
-### 6. `brand` (reserved)
+### 6. `brand`
 
 | | |
 |--|--|
 | **Purpose** | Brandion tokens, voice, visual system **references** |
-| **Owner** | Future **BRANDION** |
-| **Consume** | Audion copy tone, Checkion creative QA (later) |
-| **Publish rules** | Facet exists in taxonomy with `status: reserved`. GET returns `{ status: 'reserved', guidelineRef: null, … }` until Brandion onboarding. **No stub fake colors/fonts.** When Brandion Phase A guidelines are active, `guidelineRef` points at brandion-v3 (`/guidelines/:id`); DTCG/CSS exports stay product-local (`GET /api/guidelines/:id/export/dtcg|css`) — pack stores **refs only**. |
-| **UI bridge (pre–Phase 4)** | Collection magazine **Brand** tile may teaser the capability-local guideline catalog from dashboard `brandion.guidelines[]` and deep-link to the **BRANDION** TOC pane. That is not KP publish — full dossier stays in Brandion. |
+| **Owner** | **BRANDION** |
+| **Consume** | Audion copy tone, Assistant Collection context, Collection magazine |
+| **Publish rules** | Brandion publishes after guideline activate / active-pack change. Pack stores **refs + voice distillate only** — DTCG/CSS exports stay product-local (`GET /api/guidelines/:id/export/dtcg|css`). |
+| **Status** | Active when `data.status === 'active'` and `guidelineRef` (or voice/tokenRefs) present; otherwise `reserved` for readiness. |
 
-**Reserved field sketch (for future schema_version):**
+**Fields:**
 
 | Field | Type | Notes |
 |-------|------|-------|

@@ -32,6 +32,7 @@ describe('collection knowledge pack merge', () => {
     expect(productMayPublishFacet('market_intelligence', 'echon')).toBe(true);
     expect(productMayPublishFacet('media_insights', 'videon')).toBe(true);
     expect(productMayPublishFacet('media_insights', 'audion')).toBe(false);
-    expect(productMayPublishFacet('brand', 'brandion')).toBe(false);
+    expect(productMayPublishFacet('brand', 'brandion')).toBe(true);
+    expect(productMayPublishFacet('brand', 'audion')).toBe(false);
   });
 });

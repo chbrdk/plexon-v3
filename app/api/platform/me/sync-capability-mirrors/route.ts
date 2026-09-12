@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const user = await getRequestUser(request);
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED);
 
-  let body: { productIds?: unknown } = {};
+  let body: { productIds?: unknown; limit?: unknown; cursor?: unknown } = {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -23,6 +23,8 @@ export async function POST(request: Request) {
   try {
     const result = await syncAccessibleCapabilityMirrors(user.id, {
       productIds: body.productIds,
+      limit: body.limit,
+      cursor: body.cursor,
       source: 'plexon-me-sync-capability-mirrors',
     });
     return Response.json(result);

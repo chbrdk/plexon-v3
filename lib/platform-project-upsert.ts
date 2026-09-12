@@ -174,3 +174,75 @@ export async function pushPlatformProjectUpsert(
     };
   }
 }
+
+export type PlatformProjectTombstonePayload = {
+  externalProjectId?: string | null;
+  source: string;
+  requestedAt: string;
+  reason?: 'hard_delete';
+};
+
+/**
+ * Best-effort product DELETE for Collection hard-delete (Wave D tombstone).
+ * Products that lack DELETE return supported:false or HTTP 404/405/501 → treated as ok skip.
+ */
+export async function pushPlatformProjectTombstone(
+  productId: PlatformProductId,
+  platformProjectId: string,
+  payload: PlatformProjectTombstonePayload
+): Promise<{
+  supported: boolean;
+  ok: boolean;
+  status: number;
+  error?: string;
+}> {
+  const url = projectUpsertUrl(productId, platformProjectId);
+  if (!url) {
+    return { supported: false, ok: true, status: 501, error: `No base URL for ${productId}` };
+  }
+  const serviceSecret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!serviceSecret) {
+    return {
+      supported: false,
+      ok: true,
+      status: 503,
+      error: 'PLEXON_SERVICE_SECRET not configured',
+    };
+  }
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      redirect: 'manual',
+      headers: {
+        'Content-Type': 'application/json',
+        [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+        [PLEXON_SERVICE_SECRET_HEADER]: serviceSecret,
+      },
+      body: JSON.stringify({
+        ...payload,
+        contractVersion: PLEXON_FEDERATION_CONTRACT_VERSION,
+        reason: payload.reason ?? 'hard_delete',
+      }),
+    });
+    if (response.status === 404 || response.status === 405 || response.status === 501) {
+      return { supported: false, ok: true, status: response.status };
+    }
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      return {
+        supported: true,
+        ok: false,
+        status: response.status,
+        error: text.slice(0, 200) || `HTTP ${response.status}`,
+      };
+    }
+    return { supported: true, ok: true, status: response.status };
+  } catch (error) {
+    return {
+      supported: true,
+      ok: false,
+      status: 502,
+      error: error instanceof Error ? error.message : 'tombstone failed',
+    };
+  }
+}

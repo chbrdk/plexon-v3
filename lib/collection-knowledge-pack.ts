@@ -35,13 +35,36 @@ export type FacetProvenance = {
   note?: string | null;
 };
 
+/** Wave A — visible publish / sync state on each facet. Spec: platform-outbox-delivery.md */
+export const FACET_FRESHNESS_VALUES = [
+  'fresh',
+  'publish_pending',
+  'publish_failed',
+  'stale',
+] as const;
+
+export type FacetFreshness = (typeof FACET_FRESHNESS_VALUES)[number];
+
 export type FacetDocument<T> = {
   facetId: KnowledgeFacetId;
   schemaVersion: typeof KNOWLEDGE_PACK_SCHEMA_VERSION;
   updatedAt: string;
   provenance: FacetProvenance;
+  freshness?: FacetFreshness;
   data: T;
 };
+
+export function normalizeFacetFreshness(value: unknown): FacetFreshness {
+  if (
+    value === 'fresh' ||
+    value === 'publish_pending' ||
+    value === 'publish_failed' ||
+    value === 'stale'
+  ) {
+    return value;
+  }
+  return 'fresh';
+}
 
 export type ProfileData = {
   displayName: string;
@@ -199,6 +222,7 @@ function emptyEnvelope<T>(facetId: KnowledgeFacetId, data: T, at: string): Facet
     schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
     updatedAt: at,
     provenance: { ...SYSTEM_PROVENANCE },
+    freshness: 'fresh',
     data,
   };
 }
@@ -281,7 +305,6 @@ export function productMayPublishFacet(
   productId: KnowledgeProductId | null | undefined
 ): boolean {
   if (!productId) return false;
-  if (facetId === 'brand') return false; // reserved until Brandion activates
   return FACET_PUBLISH_OWNERS[facetId].includes(productId);
 }
 
@@ -485,13 +508,45 @@ export function normalizeMediaInsightsData(input: unknown): MediaInsightsData {
 
 export function normalizeBrandData(input: unknown): BrandReservedData {
   const raw = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
-  // Phase 1: always reserved — ignore attempts to activate
+  const status = raw.status === 'active' ? 'active' : 'reserved';
+  let guidelineRef: BrandReservedData['guidelineRef'] = null;
+  if (raw.guidelineRef && typeof raw.guidelineRef === 'object') {
+    const ref = raw.guidelineRef as Record<string, unknown>;
+    if (typeof ref.guidelineId === 'string' && typeof ref.version === 'string') {
+      guidelineRef = {
+        product: 'brandion',
+        guidelineId: ref.guidelineId.trim(),
+        version: ref.version.trim(),
+        url: typeof ref.url === 'string' ? ref.url.trim() : undefined,
+      };
+    }
+  }
+  const tokenRefsRaw = Array.isArray(raw.tokenRefs) ? raw.tokenRefs : [];
+  const tokenRefs: BrandReservedData['tokenRefs'] = [];
+  for (const item of tokenRefsRaw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    if (typeof row.name !== 'string') continue;
+    const kind =
+      row.kind === 'color' || row.kind === 'font' || row.kind === 'logo' ? row.kind : null;
+    if (!kind) continue;
+    tokenRefs.push({
+      kind,
+      name: row.name.trim().slice(0, 120),
+      externalId: typeof row.externalId === 'string' ? row.externalId : undefined,
+    });
+    if (tokenRefs.length >= 48) break;
+  }
   return {
-    status: 'reserved',
-    guidelineRef: null,
-    voiceSummary: typeof raw.voiceSummary === 'string' ? null : null,
-    tokenRefs: [],
-    activeGuidelineVersion: null,
+    status,
+    guidelineRef: status === 'active' ? guidelineRef : null,
+    voiceSummary:
+      typeof raw.voiceSummary === 'string' ? raw.voiceSummary.trim().slice(0, 2000) || null : null,
+    tokenRefs: status === 'active' ? tokenRefs : [],
+    activeGuidelineVersion:
+      typeof raw.activeGuidelineVersion === 'string'
+        ? raw.activeGuidelineVersion.trim() || null
+        : guidelineRef?.version ?? null,
   };
 }
 
@@ -727,14 +782,12 @@ export function ensureFacetsShape(facets: unknown, at = new Date().toISOString()
       schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
       updatedAt: typeof doc.updatedAt === 'string' ? doc.updatedAt : at,
       provenance: normalizeProvenance(doc.provenance, empty[id].provenance),
+      freshness: normalizeFacetFreshness(
+        (doc as { freshness?: unknown }).freshness ?? empty[id].freshness
+      ),
       data: data as never,
     } as KnowledgePackFacets[typeof id];
   }
-  // Brand always reserved in Phase 1
-  out.brand = {
-    ...out.brand,
-    data: { ...normalizeBrandData(out.brand.data), status: 'reserved' },
-  };
   return out;
 }
 
@@ -796,8 +849,14 @@ export function facetPreview(facetId: KnowledgeFacetId, data: unknown): string {
       if (d.mediaCount != null) return `${d.mediaCount} media`;
       return 'No media insights';
     }
-    case 'brand':
-      return 'Coming with Brandion';
+    case 'brand': {
+      const d = normalizeBrandData(data);
+      if (d.status !== 'active') return 'Coming with Brandion';
+      if (d.voiceSummary) return d.voiceSummary.slice(0, 120);
+      if (d.guidelineRef) return `Guideline ${d.guidelineRef.guidelineId}`;
+      if (d.tokenRefs.length) return `${d.tokenRefs.length} token ref(s)`;
+      return 'Brand active';
+    }
     case 'sources': {
       const d = normalizeSourcesData(data);
       if (d.items.length === 0) return 'No sources';
@@ -861,8 +920,11 @@ export function isFacetContentEmpty(facetId: KnowledgeFacetId, data: unknown): b
         d.lastAnalysisAt
       );
     }
-    case 'brand':
-      return true; // reserved always "empty" for content purposes
+    case 'brand': {
+      const d = normalizeBrandData(data);
+      if (d.status !== 'active') return true;
+      return !(d.guidelineRef || d.voiceSummary || d.tokenRefs.length);
+    }
     case 'sources':
       return normalizeSourcesData(data).items.length === 0;
     default:
@@ -883,7 +945,12 @@ export function buildKnowledgeFacetReadiness(
 ): KnowledgeFacetReadiness[] {
   return KNOWLEDGE_FACET_IDS.map((facetId) => {
     if (facetId === 'brand') {
-      return { facetId, status: 'reserved' as const };
+      const brand = normalizeBrandData(facets.brand.data);
+      if (brand.status !== 'active') {
+        return { facetId, status: 'reserved' as const };
+      }
+      const empty = isFacetContentEmpty('brand', brand);
+      return { facetId, status: empty ? ('empty' as const) : ('filled' as const) };
     }
     const empty = isFacetContentEmpty(facetId, facets[facetId].data);
     return { facetId, status: empty ? ('empty' as const) : ('filled' as const) };

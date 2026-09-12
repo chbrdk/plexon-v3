@@ -29,6 +29,10 @@ Kill-switch: `KNOWLEDGE_PACK_AUTOSYNC=0` (beide Apps).
 
 Publish nutzt optimistic concurrency (`expectedRevision`); Clients retry einmal nach `409` mit frischer Revision.
 
+Facet `freshness` (`fresh` | `publish_pending` | `publish_failed` | `stale`) ist auf Plexon-Seite sichtbar — Soft-Skip im Produkt soll Publish-Retry / Re-sync CTA triggern, nicht stilles „alles ok“. Siehe `knowledge/plexon-data-plane-optimizations.md` · `specs/domain/platform-outbox-delivery.md`.
+
+**Brand (Wave C):** Brandion darf Facet `brand` mit Refs (`guidelineRef`, `voiceSummary`, `tokenRefs`) publishen — keine Token-Bytes.
+
 ## Staging-Env (Coolify)
 
 Beide Produkte müssen denselben Plexon-Host und denselben Service-Secret sehen:

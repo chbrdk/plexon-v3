@@ -7,6 +7,8 @@
 | Collection projects | `specs/domain/collection-projects.md` |
 | Collection Test Flow | `specs/domain/collection-test-flow.md` |
 | Collection Knowledge Pack | `specs/domain/collection-knowledge-pack.md` |
+| Platform outbox delivery (Wave A) | `specs/domain/platform-outbox-delivery.md` |
+| Collection read model (Wave B/D) | `specs/domain/collection-read-model.md` |
 | Collection invite links | `specs/domain/collection-invite-links.md` |
 | Collection Memory (Wave 1) | `specs/domain/collection-memory-wave1.md` |
 | ECHON Collection binding (Wave 2) | `specs/domain/echon-collection-binding.md` |
@@ -48,6 +50,7 @@
 | CREATION product (v3 shell) | `knowledge/creation-v3-onboarding.md` · product id `creation` |
 | Federation contract | `knowledge/platform-federation-contract.md` |
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |
+| Data plane optimizations | `knowledge/plexon-data-plane-optimizations.md` |
 | UI rebuild | `knowledge/ui-rebuild-msqdx-ui.md` |
 
 ## Companions

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return apiError(`${PLEXON_USER_HEADER} required`, API_STATUS.BAD_REQUEST);
   }
 
-  let body: { productIds?: unknown } = {};
+  let body: { productIds?: unknown; limit?: unknown; cursor?: unknown } = {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -37,6 +37,8 @@ export async function POST(request: Request) {
   try {
     const result = await syncAccessibleCapabilityMirrors(plexonUserId, {
       productIds: body.productIds,
+      limit: body.limit,
+      cursor: body.cursor,
       source: 'plexon-provisioning-sync-capability-mirrors',
     });
     return platformJson(result);
