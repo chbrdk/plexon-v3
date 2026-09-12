@@ -71,12 +71,13 @@ describe('plexon data plane program', () => {
   });
 
   it('ships outbox scheduler + facet freshness route', () => {
-    expect(existsSync(path.join(root, 'instrumentation.ts'))).toBe(true);
     expect(existsSync(path.join(root, 'lib/platform-outbox-scheduler.ts'))).toBe(true);
+    const dbIndex = readFileSync(path.join(root, 'lib/db/index.ts'), 'utf8');
+    // Scheduler boots from getDb (server-only), not instrumentation (Edge/runtime trap).
+    expect(dbIndex).toContain('platform-outbox-scheduler');
+    expect(dbIndex).toContain('startPlatformOutboxDrainScheduler');
     const instrumentation = readFileSync(path.join(root, 'instrumentation.ts'), 'utf8');
-    // Edge compile must not follow the pg/drizzle graph (Coolify build regression).
-    expect(instrumentation).toContain("NEXT_RUNTIME !== 'nodejs'");
-    expect(instrumentation).toContain('webpackIgnore: true');
+    expect(instrumentation).not.toContain('platform-outbox-scheduler');
     expect(
       existsSync(
         path.join(
