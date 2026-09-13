@@ -1,0 +1,34 @@
+# Creation craft playbooks (multi-format)
+
+**Spec:** `specs/domain/assistant-creation-agi-lite.md` § Wave B  
+**Code:** `lib/assistant/creation-craft-playbooks.ts` · depth `lib/assistant/creation-scene-depth.ts` · gate `lib/assistant/creation-scene-quality.ts`
+
+## Why
+
+Agents defaulted to **web landing** craft. Real Collection work also needs **newsletter/email** and **print magazine / Mag-PDF report** — different palette, width, tokens, and quality jobs.
+
+## Catalog
+
+| Id | Quality job | Trigger examples |
+|----|-------------|------------------|
+| `creation_landing_v1` | `landing` | Landing, Startseite, Hero, PDP |
+| `creation_newsletter_v1` | `newsletter` | Newsletter, E-Mail, mailer, digest |
+| `creation_print_magazine_v1` | `print` | PrintPage, Magazin, Broschüre, DIN A4 |
+| `creation_print_report_v1` | `print` | EQC Mag, Magazin-PDF, dataSlot, Whitepaper |
+| `creation_page_as_pattern_v1` | `generic` | Seite als Pattern speichern |
+
+## Format cheat sheet
+
+| | Web landing | Newsletter | Print |
+|--|-------------|------------|-------|
+| Nodes | Site* / HTML | Site* / HTML **only** | **Print*** under `PrintPage` |
+| Width | Fluid viewport | ~560–640px column | Paper / folio |
+| Tokens | Free Hex greenfield | Free Hex / digital | Brandion **print** channel |
+| Must | Hero mass + CTA | CTA; no Print* | ≥1 PrintPage |
+| PDF | — | — | Mag-PDF via Creation editor (`composition-magazine-pdf`) |
+
+## Related
+
+- Creation print palette: `creation-v3/knowledge/editor-palette-print.md`
+- Mag-PDF / MagazineTemplate: `specs/domain/creation-magazine-template-consume.md` · `creation-v3/knowledge/editor-palette-print.md`
+- Quality loop baseline: `knowledge/creation-mcp-assistant.md`

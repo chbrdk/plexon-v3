@@ -1,7 +1,7 @@
 /**
  * In-process Creation scene quality critic (deterministic).
  * Spec: specs/domain/assistant-creation-mcp.md § Quality gate
- * Wave A1: specs/domain/assistant-creation-agi-lite.md § Visual must-fix
+ * Wave A1/B: specs/domain/assistant-creation-agi-lite.md
  */
 
 export type CreationQualityToolTrace = {
@@ -9,12 +9,12 @@ export type CreationQualityToolTrace = {
   preview?: string;
 };
 
-export type CreationSceneQualityJob = 'landing' | 'generic';
+export type CreationSceneQualityJob = 'landing' | 'newsletter' | 'print' | 'generic';
 
 export type CreationSceneQualityOptions = {
   /**
-   * `landing` enables hero/CTA must-fixes.
-   * `auto` (default) derives from `userPrompt`.
+   * Format job. `auto` (default) derives from `userPrompt`.
+   * Prefer explicit job from craft playbook when available.
    */
   job?: CreationSceneQualityJob | 'auto';
   userPrompt?: string;
@@ -30,10 +30,20 @@ export type CreationSceneQualityVerdict = {
 const LANDING_JOB_RE =
   /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*page|lp)\b|\b(bau|build|erstelle|create|gestalte)\w*.*\b(seite|page|webseite|website)\b/i;
 
+const NEWSLETTER_JOB_RE =
+  /\b(newsletter|news\s*letter|e-?mail(\s*template)?|mailer|digest|mailing|kampagnen?\s*mail|html\s*mail)\b/i;
+
+const PRINT_JOB_RE =
+  /\b(print\s*page|printpage|printcover|print\s*cover|magazin|magazine|brosch[uü]re|flyer|din\s*a4|print\s*report|magazin[\s_-]?pdf|eqc\s*mag|whitepaper|druck)\b/i;
+
 const SEED_CHROME_RE =
   /\b(get started|option a|option b|lorem ipsum|fixture[\s_-]?orange|noto\s*sans)\b|seed-copy|"code"\s*:\s*"seed-copy"/i;
 
-const CTA_TYPE_RE = /\b(SiteButton|Button|SiteLink|Link)\b/i;
+const WEB_CTA_TYPE_RE = /\b(SiteButton|Button|SiteLink|Link)\b/i;
+
+const PRINT_PAGE_RE = /\bPrintPage\b/;
+
+const PRINT_ANY_RE = /\bPrint[A-Z][A-Za-z0-9]*\b/;
 
 const MISSING_CTA_CODE_RE = /missing-cta|"code"\s*:\s*"missing-cta"/i;
 
@@ -155,15 +165,23 @@ function auditReportsMissingCta(auditPreview: string): boolean {
   return parsed.findings.some((f) => f.code === 'missing-cta');
 }
 
-function outlineHasCta(treePreview: string): boolean {
+function outlineHasWebCta(treePreview: string): boolean {
   if (!treePreview.trim()) return false;
-  return CTA_TYPE_RE.test(treePreview);
+  return WEB_CTA_TYPE_RE.test(treePreview);
 }
 
-function missingHeroMass(craftPreview: string): boolean {
+function outlineHasPrintPage(treePreview: string): boolean {
+  return PRINT_PAGE_RE.test(treePreview);
+}
+
+function outlineHasAnyPrint(treePreview: string): boolean {
+  return PRINT_ANY_RE.test(treePreview);
+}
+
+/** Web landing: display ≥48 or hero media. */
+function missingLandingHeroMass(craftPreview: string): boolean {
   const stats = readSceneStats(craftPreview);
   if (!stats) {
-    // Fallback: craft-small-type / no hero signals in flags text
     return (
       craftFlagsInclude(craftPreview, 'craft-small-type') ||
       (/hasLargeDisplay"\s*:\s*false/i.test(craftPreview) &&
@@ -177,13 +195,54 @@ function missingHeroMass(craftPreview: string): boolean {
   return !hasDisplay && !hasMedia;
 }
 
+/** Newsletter: softer type floor (≥28) or media; still not flat 16px everywhere. */
+function missingNewsletterMass(craftPreview: string): boolean {
+  const stats = readSceneStats(craftPreview);
+  if (!stats) return craftFlagsInclude(craftPreview, 'craft-small-type');
+  const nodes = stats.nodeCount ?? 0;
+  if (nodes > 0 && nodes < 5) return false;
+  const max = stats.maxFontSizePx ?? 0;
+  const hasDisplay = stats.hasLargeDisplay === true || max >= 28;
+  const hasMedia = stats.hasHeroMedia === true;
+  return !hasDisplay && !hasMedia;
+}
+
+function pushWebCtaFindings(
+  findings: string[],
+  opts: { hasAudit: boolean; auditPreview: string; treePreview: string; label: string },
+): void {
+  const ctaMissingFromAudit = opts.hasAudit && auditReportsMissingCta(opts.auditPreview);
+  const ctaMissingFromTree =
+    Boolean(opts.treePreview.trim()) && !outlineHasWebCta(opts.treePreview);
+  if (ctaMissingFromAudit) {
+    findings.push(
+      `CTA fehlt — ${opts.label} braucht einen echten Primary-Button/Link (kein Seed-Label).`,
+    );
+  } else if (ctaMissingFromTree) {
+    findings.push(
+      `CTA fehlt im Tree — kein SiteButton/Button/Link in der Outline; Primary-CTA für ${opts.label} einfügen.`,
+    );
+  }
+}
+
 /** Exported for playbook / planner reuse (Wave B). */
 export function resolveCreationSceneQualityJob(
   options?: CreationSceneQualityOptions,
 ): CreationSceneQualityJob {
-  if (options?.job === 'landing' || options?.job === 'generic') return options.job;
+  if (
+    options?.job === 'landing' ||
+    options?.job === 'newsletter' ||
+    options?.job === 'print' ||
+    options?.job === 'generic'
+  ) {
+    return options.job;
+  }
   const prompt = options?.userPrompt?.trim() ?? '';
-  if (prompt && LANDING_JOB_RE.test(prompt)) return 'landing';
+  if (!prompt) return 'generic';
+  // Same priority as craft playbooks (specific → broad)
+  if (NEWSLETTER_JOB_RE.test(prompt)) return 'newsletter';
+  if (PRINT_JOB_RE.test(prompt)) return 'print';
+  if (LANDING_JOB_RE.test(prompt)) return 'landing';
   return 'generic';
 }
 
@@ -232,7 +291,6 @@ export function evaluateCreationSceneQuality(
     findings.push('creation_scene_preview fehlt — Pixel/Vision-Check nicht gelaufen.');
   }
 
-  // Wave A1 — seed / fixture chrome (any job after writes)
   if (hasSeedChrome([auditPreview, craftPreview, treePreview])) {
     findings.push(
       'Seed-/Fixture-Chrome — „Get started“ / Option A/B / Fixture-Orange/Noto ersetzen (echte Copy + Brand).',
@@ -240,24 +298,46 @@ export function evaluateCreationSceneQuality(
   }
 
   if (job === 'landing') {
-    if (hasCraft && missingHeroMass(craftPreview) && !craftThin(craftPreview)) {
+    if (hasCraft && missingLandingHeroMass(craftPreview) && !craftThin(craftPreview)) {
       findings.push(
         'Hero-Masse fehlt — Display ≥48px und/oder großes Hero-Media setzen (Landing darf nicht flach wirken).',
       );
     }
+    pushWebCtaFindings(findings, {
+      hasAudit,
+      auditPreview,
+      treePreview,
+      label: 'Landing',
+    });
+  }
 
-    const ctaMissingFromAudit = hasAudit && auditReportsMissingCta(auditPreview);
-    const ctaMissingFromTree = Boolean(treePreview.trim()) && !outlineHasCta(treePreview);
-    if (ctaMissingFromAudit) {
-      findings.push('CTA fehlt — Landing braucht einen echten Primary-Button/Link (kein Seed-Label).');
-    } else if (ctaMissingFromTree) {
+  if (job === 'newsletter') {
+    if (treePreview.trim() && outlineHasAnyPrint(treePreview)) {
       findings.push(
-        'CTA fehlt im Tree — kein SiteButton/Button/Link in der Outline; Primary-CTA einfügen.',
+        'Newsletter darf keine Print*-Nodes enthalten — PrintPage/Cover entfernen; Einspalten Site*/HTML nutzen.',
+      );
+    }
+    if (hasCraft && missingNewsletterMass(craftPreview) && !craftThin(craftPreview)) {
+      findings.push(
+        'Newsletter-Hierarchie fehlt — Headline ≥28px und/oder Hero-Media; nicht alles 16px Fließtext.',
+      );
+    }
+    pushWebCtaFindings(findings, {
+      hasAudit,
+      auditPreview,
+      treePreview,
+      label: 'Newsletter',
+    });
+  }
+
+  if (job === 'print') {
+    if (treePreview.trim() && !outlineHasPrintPage(treePreview)) {
+      findings.push(
+        'Print-Job ohne PrintPage — mind. eine PrintPage anlegen (Cover/Chapter darunter); keine reine Site*-Landing als Druck verkaufen.',
       );
     }
   }
 
-  // Deduplicate near-identical findings
   const unique = [...new Set(findings)];
 
   if (unique.length === 0) {
@@ -270,6 +350,7 @@ export function evaluateCreationSceneQuality(
     'Der Turn ist noch nicht abgeschlossen. Bitte die Punkte abarbeiten, dann erst antworten.',
     ...unique.map((f, i) => `${i + 1}. ${f}`),
     'Reihenfolge: fehlende Tools parallel aufrufen (audit + craft_debug + preview), dann apply_ops nur für Fixes.',
+    'Format beachten: Landing=Web-Hero · Newsletter=Einspalte ohne Print* · Print=PrintPage-Stack.',
     'Nicht fertig melden bei Seed-Copy, Fixture-Orange/Noto, fehlendem CTA, oder dünnem Hero.',
   ].join('\n');
 

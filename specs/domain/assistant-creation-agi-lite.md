@@ -70,26 +70,56 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 2. Unit: preview tool `error` remains soft-skip; missing preview call still blocks.
 3. Staging smoke: 3 landings; none finish with only seed copy.
 
-## Wave B — Creation craft playbooks
+## Wave B — Creation craft playbooks (multi-format)
 
-**Goal:** Known jobs run as procedures, not free improvisation.
+**Status B:** Implemented 2026-09-13 (`lib/assistant/creation-craft-playbooks.ts`)  
+**Goal:** Known jobs run as **format-aware procedures**, not free improvisation. Formats are first-class: **web landing**, **newsletter/email**, **print magazine**, **print report / Mag-PDF template** — not web-only.
 
-| Playbook id | Job | Happy path |
-|-------------|-----|------------|
-| `creation_landing_v1` | Greenfield / restyle landing | HTML import → audit+craft+preview → polish ops → optional page_save |
-| `creation_page_as_pattern_v1` | Persist artboard as Pattern | `site_kit_page_save` → verify bind → craft-debug clean |
+### Playbook catalog
+
+| Playbook id | Quality job | Job | Happy path |
+|-------------|-------------|-----|------------|
+| `creation_landing_v1` | `landing` | Greenfield / restyle web landing or PDP | Spirion optional → HTML import (Site* / HTML) → audit+craft+preview → polish ops → optional page_save |
+| `creation_newsletter_v1` | `newsletter` | Email / newsletter / digest | Single-column ~560–640px HTML or SiteStack → real subject/preheader/CTA → audit+craft+preview. **No** `Print*` nodes |
+| `creation_print_magazine_v1` | `print` | Editorial print / Magazin-Seiten | `PrintPage` (+ Cover/Chapter/…) via `apply_ops` or HTML that maps to print · Brandion **print** channel · preview → Mag-PDF-ready tree |
+| `creation_print_report_v1` | `print` | Report / EQC Mag / data-bound print deck | Print stack + `dataSlot` awareness (EQC Mag consume) · tables/ranked/persona · optional MagazineTemplate role |
+| `creation_page_as_pattern_v1` | `generic` | Persist artboard as Site Kit Pattern | `site_kit_page_save` → verify bind → craft-debug clean |
+
+### Format constraints (locked)
+
+| Format | Palette | Width / surface | Tokens | CTA / mass |
+|--------|---------|-----------------|--------|------------|
+| Landing (web) | Site* / HTML import | Fluid viewport; hero mass | Free Hex on greenfield; Brandion digital optional | SiteButton/SiteLink; display ≥48px or hero media |
+| Newsletter | Site* / HTML only | **~560–640px** content column; stacked bands | Free Hex or digital; avoid print channel | Real CTA button/link; preheader; no PrintPage |
+| Print magazine | **Print*** under `PrintPage` | Paper / folio; `--print-*` / Brandion **print** | Prefer `creation_brand_tokens_get` + print channel | Cover/chapter hierarchy; KPI/lede; no web hero flex fetish |
+| Print report | Print* + tables/lists/persona | Multi-`PrintPage` deck | Print channel + optional `dataSlot` for bind | Ranked/table content density; Mag-PDF export path |
 
 ### Behaviour
 
-- Planner MAY select a craft playbook when intent is `creation_scene_edit` **and** user phrasing matches (Landing bauen, Seite als Pattern, …) **or** editor context + explicit confirm.
+- Planner / agent resolves playbook from user phrasing (DE/EN) when intent is `creation_scene_edit` **and** write tools are on.
 - Playbook injects a **phased system block** (ordered must-do tool sequence). It does **not** bypass the quality gate.
-- Implementation may start as prompt+gate recipes (`lib/assistant/creation-craft-playbooks.ts`) before full `run_playbook` step runner parity.
+- Quality gate job follows the playbook (`landing` / `newsletter` / `print` / `generic`).
+- Implementation: `lib/assistant/creation-craft-playbooks.ts` (prompt recipes + resolver). Full `run_playbook` step-runner parity is optional later.
+- Shared depth block (`creation-scene-depth`) stays as fallback when **no** playbook matches; when a playbook matches, format-specific phases take priority and the web-only landing essay is not duplicated.
+
+### Resolver priority (first match wins)
+
+1. page-as-pattern / „Seite als Pattern“ / `site_kit_page_save`
+2. newsletter / email / newsletter / mailer / digest / „E-Mail“
+3. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
+4. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
+5. landing / homepage / Startseite / PDP / Hero (web)
 
 ### Acceptance B
 
-1. Unit: landing phrasing → playbook id `creation_landing_v1`.
-2. Unit: “Seite als Pattern” → `creation_page_as_pattern_v1`.
-3. Gate still blocks finish if craft-thin after playbook steps.
+1. Unit: landing phrasing → `creation_landing_v1`.
+2. Unit: newsletter/email phrasing → `creation_newsletter_v1`.
+3. Unit: Magazin/PrintPage/Broschüre → `creation_print_magazine_v1`; EQC Mag / report deck → `creation_print_report_v1`.
+4. Unit: „Seite als Pattern“ → `creation_page_as_pattern_v1`.
+5. Unit: gate job `newsletter` fails on Print* in tree and missing CTA; `print` fails without `PrintPage` after writes.
+6. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
+7. Knowledge documents format table + paths (no hardcoded FQDNs in code).
+
 
 ## Wave C — Collection craft memory (scoped)
 
@@ -101,8 +131,10 @@ Reuse Collection Knowledge Pack `research_brief.sections[]` (Wave 1 transport).
 
 | Section id | Contents (plainText + bullets) | Write when |
 |------------|--------------------------------|------------|
-| `creation-craft-prefs-latest` | Tone, preferred type scale, color literals used, Kit masters reused, “avoid” list | Successful scene turn that passed quality gate **and** Collection bound |
+| `creation-craft-prefs-latest` | Tone, preferred type scale, color literals used, Kit masters reused, format prefs (web/newsletter/print), “avoid” list | Successful scene turn that passed quality gate **and** Collection bound |
 | `creation-landing-recipe-latest` | Short recipe: HTML-first? masters? breakpoints? | Landing playbook success |
+| `creation-newsletter-recipe-latest` | Width, preheader, CTA pattern | Newsletter playbook success |
+| `creation-print-recipe-latest` | PrintPage count, cover/chapter pattern, Mag-PDF notes | Print magazine/report success |
 
 ### Read
 

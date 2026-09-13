@@ -27,6 +27,10 @@ import {
   buildCreationSceneDepthPromptBlock,
   getCreationSceneMaxToolRounds,
 } from '@/lib/assistant/creation-scene-depth';
+import {
+  resolveCreationCraftPlaybook,
+  type CreationCraftPlaybookId,
+} from '@/lib/assistant/creation-craft-playbooks';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -63,6 +67,8 @@ export type AssistantPlan = {
   skipTools: boolean;
   reasoning: string;
   plannerSource: 'heuristic' | 'llm';
+  /** Wave B — format playbook when creation_scene_edit. */
+  creationCraftPlaybookId?: CreationCraftPlaybookId | null;
 };
 
 export type PlannerInput = {
@@ -210,11 +216,25 @@ const CREATION_SCENE_PATTERNS = [
   /\bscene\b/i,
   /\blayout\b/i,
   /\beditor\b/i,
-  /\blanding\s*page\b/i,
+  /\blanding(\s*page)?\b/i,
+  /\bstartseite\b/i,
+  /\bhomepage\b/i,
   /\bhero\b/i,
+  /\bnewsletter\b/i,
+  /\be-?mail(\s*template)?\b/i,
+  /\bmailer\b/i,
+  /\bdigest\b/i,
+  /\bprint(page|cover|chapter)?\b/i,
+  /\bmagazin(e)?\b/i,
+  /\bbrosch[uü]re\b/i,
+  /\bflyer\b/i,
+  /\bdin\s*a4\b/i,
+  /\bdruck(layout|daten)?\b/i,
   /\bsite\s*kit\b/i,
   /\bmaster\b/i,
   /\binstanz/i,
+  /\bpattern\s+speichern\b/i,
+  /\bseite\s+als\s+pattern\b/i,
   /\bscene_apply_ops\b/i,
   /\bscene_tree_index\b/i,
 ];
@@ -265,6 +285,21 @@ function creationSceneEditFamilies(hasSpirionMcp: boolean): ToolFamily[] {
     : [...CREATION_SCENE_EDIT_FAMILIES, 'plexon_ui'];
 }
 
+function withCreationCraftPlaybook(
+  plan: Omit<AssistantPlan, 'plannerSource'> & { plannerSource?: AssistantPlan['plannerSource'] },
+  promptText: string,
+): AssistantPlan {
+  const playbook = resolveCreationCraftPlaybook(promptText);
+  const reasoning = playbook
+    ? `${plan.reasoning} ${playbook.reasoning}`
+    : plan.reasoning;
+  return buildPlan({
+    ...plan,
+    reasoning,
+    creationCraftPlaybookId: playbook?.id ?? null,
+  });
+}
+
 export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   const text = (input.planningPrompt ?? input.prompt).trim();
   const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
@@ -273,16 +308,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   const hasSpirionMcp = Boolean(input.hasSpirionMcp);
 
   if (hasCreationEditorSceneContext(input.pageContext) && input.hasCreationMcp) {
-    return buildPlan({
-      intent: 'creation_scene_edit',
-      mode: 'hybrid',
-      toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
-      allowWriteTools: writeIntent || sceneWriteIntent,
-      maxToolRounds: getCreationSceneMaxToolRounds(),
-      skipTools: false,
-      reasoning:
-        'CREATION Editor — Scene-Tree Prefetch; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
-    });
+    return withCreationCraftPlaybook(
+      {
+        intent: 'creation_scene_edit',
+        mode: 'hybrid',
+        toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
+        allowWriteTools: writeIntent || sceneWriteIntent,
+        maxToolRounds: getCreationSceneMaxToolRounds(),
+        skipTools: false,
+        reasoning:
+          'CREATION Editor — Scene-Tree Prefetch; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
+      },
+      text,
+    );
   }
 
   if (BRANDION_PATTERNS.some((p) => p.test(text)) && input.hasBrandionMcp) {
@@ -300,16 +338,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
   }
 
   if (CREATION_SCENE_PATTERNS.some((p) => p.test(text)) && input.hasCreationMcp) {
-    return buildPlan({
-      intent: 'creation_scene_edit',
-      mode: 'hybrid',
-      toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
-      allowWriteTools: writeIntent || sceneWriteIntent,
-      maxToolRounds: getCreationSceneMaxToolRounds(),
-      skipTools: false,
-      reasoning:
-        'CREATION Scene-Layout — Prefetch/Outline; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
-    });
+    return withCreationCraftPlaybook(
+      {
+        intent: 'creation_scene_edit',
+        mode: 'hybrid',
+        toolFamilies: creationSceneEditFamilies(hasSpirionMcp),
+        allowWriteTools: writeIntent || sceneWriteIntent,
+        maxToolRounds: getCreationSceneMaxToolRounds(),
+        skipTools: false,
+        reasoning:
+          'CREATION Scene-Layout — Prefetch/Outline; scene_apply_ops bei Schreib-Intent; mehr Runden für Layout-Tiefe.',
+      },
+      text,
+    );
   }
 
   if (CREATION_PATTERNS.some((p) => p.test(text)) && input.hasCreationMcp) {
@@ -690,6 +731,7 @@ function parseLlmPlan(raw: LlmPlanJson, fallback: AssistantPlan): AssistantPlan 
     skipTools: Boolean(raw.skipTools),
     reasoning: typeof raw.reasoning === 'string' ? raw.reasoning : fallback.reasoning,
     plannerSource: 'llm',
+    creationCraftPlaybookId: fallback.creationCraftPlaybookId ?? null,
   };
 }
 
@@ -800,7 +842,13 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
       : '';
   const creationDepth =
     plan.intent === 'creation_scene_edit'
-      ? buildCreationSceneDepthPromptBlock(plan.allowWriteTools)
+      ? buildCreationSceneDepthPromptBlock(plan.allowWriteTools, {
+          playbookId: plan.creationCraftPlaybookId,
+        })
+      : '';
+  const playbookLine =
+    plan.intent === 'creation_scene_edit' && plan.creationCraftPlaybookId
+      ? `\n- Craft-Playbook: ${plan.creationCraftPlaybookId}`
       : '';
   return `
 ## Ausführungsplan (Planner)
@@ -808,7 +856,7 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
 - Modus: ${plan.mode}
 - Tool-Familien: ${plan.toolFamilies.length ? plan.toolFamilies.join(', ') : '(keine)'}
 - Schreib-Tools: ${plan.allowWriteTools ? 'ja' : 'nein'}
-- Max. Tool-Runden: ${plan.maxToolRounds}
+- Max. Tool-Runden: ${plan.maxToolRounds}${playbookLine}
 - Strategie: ${plan.reasoning}${writeToolsNote}
 ${creationDepth}
 Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/hybrid: antworte zuerst aus der Projektkurzinfo oben.`;

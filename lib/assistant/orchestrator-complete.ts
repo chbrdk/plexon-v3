@@ -125,8 +125,8 @@ export type OrchestratorCompleteOptions = {
   creationQualityGate?: boolean;
   /** Prompt used to resolve landing vs generic quality job (Wave A1). */
   creationQualityUserPrompt?: string;
-  /** Explicit quality job; default auto from prompt. */
-  creationQualityJob?: 'landing' | 'generic' | 'auto';
+  /** Explicit quality job; default auto from prompt / playbook. */
+  creationQualityJob?: 'landing' | 'newsletter' | 'print' | 'generic' | 'auto';
 };
 
 export type OrchestratorCompleteResult = {

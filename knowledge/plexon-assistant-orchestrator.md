@@ -235,4 +235,4 @@ Einheitliche Capabilities für Assistent **und** Collection Flow — Spec: **`sp
 
 ## Creation domain autonomy (“AGI-lite”)
 
-Nach dem Quality-Loop (Prefetch, parallele Reads, Gate audit/craft-debug/preview): Wave A–D für visuelle Must-fix, Craft-Playbooks, Collection Craft-Memory und Eval-Harness. Spec: **`specs/domain/assistant-creation-agi-lite.md`** · Knowledge: **`knowledge/assistant-creation-agi-lite.md`**. Ein Scene-Writer bleibt verbindlich.
+Nach dem Quality-Loop (Prefetch, parallele Reads, Gate audit/craft-debug/preview): Wave A–D für visuelle Must-fix, **Multi-Format Craft-Playbooks** (Web Landing · Newsletter · Print Magazin/Report), Collection Craft-Memory und Eval-Harness. Spec: **`specs/domain/assistant-creation-agi-lite.md`** · Knowledge: **`knowledge/assistant-creation-agi-lite.md`** · Playbooks: **`knowledge/creation-craft-playbooks.md`**. Ein Scene-Writer bleibt verbindlich.

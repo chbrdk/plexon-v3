@@ -89,11 +89,15 @@ WENN Intent `creation_scene_edit` **and** write tools ran in the turn, DANN MUSS
 3. `creation_scene_preview` fehlt (soft-skip only when the preview tool itself returned `error`), oder
 4. last audit has `error` findings, oder last craft-debug `craftFlags` contains `craft-thin`, oder
 5. **Wave A1** seed/fixture chrome is still visible (`Get started`, `Option A/B`, fixture orange / Noto), oder
-6. **Wave A1 landing job** (prompt/heuristic `landing`|`startseite`|`hero`|`pdp`|…): missing hero mass (`hasLargeDisplay` / `hasHeroMedia`) or missing CTA (audit `missing-cta` or tree outline without Button/Link)
+6. **Wave A1 landing job** (prompt/heuristic `landing`|`startseite`|`hero`|`pdp`|…): missing hero mass (`hasLargeDisplay` / `hasHeroMedia`) or missing CTA (audit `missing-cta` or tree outline without Button/Link), oder
+7. **Wave B newsletter job:** Print* nodes present, or missing web CTA, or newsletter mass too flat (<28px and no media), oder
+8. **Wave B print job:** tree outline after writes has no `PrintPage`
 
 Dann: remaining tool rounds als **QA-Nudge** (user message, kein paralleler Scene-Writer). Kein zweiter Writer-Subagent — optimistic lock bleibt beim Coordinator.
 
-Job resolution: `resolveCreationSceneQualityJob` · options from `creationQualityUserPrompt` / `creationQualityJob` on `runOrchestratorComplete`.
+Job resolution: `resolveCreationSceneQualityJob` · craft playbook via `resolveCreationCraftPlaybook` → `creationCraftPlaybookId` on plan · options from `creationQualityUserPrompt` / `creationQualityJob` on `runOrchestratorComplete`.
+
+Playbooks (web / newsletter / print): `lib/assistant/creation-craft-playbooks.ts` · `knowledge/creation-craft-playbooks.md`.
 
 Non-goal: Anthropic Managed Agents API / parallel scene writers.
 
@@ -118,3 +122,4 @@ Collection ACL for service writes is **enforced fail-closed** in CREATION (`requ
 5. Unit: `creation_scene_edit` plans ≥14 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.
 6. Unit: all-read tool rounds are parallel-safe; write rounds are not. Quality gate requires audit + craft-debug + preview after writes.
 7. Unit (A1): landing job fails on seed chrome, missing CTA (no button/link in outline), and missing hero mass without `craft-thin`; preview tool `error` soft-skips, missing preview still blocks.
+8. Unit (B): newsletter/print/landing/page-as-pattern playbook resolution; newsletter gate fails on Print* + missing CTA; print gate fails without PrintPage.

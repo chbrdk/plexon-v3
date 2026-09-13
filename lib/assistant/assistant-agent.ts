@@ -23,6 +23,7 @@ import {
 import { buildUiToolsPromptBlock, buildUiPanelHintForPlan } from '@/lib/assistant/ui-tools/catalog-for-prompt';
 
 import { buildPlanningPromptFromConversation } from '@/lib/assistant/audience-write-intent';
+import { qualityJobForCreationCraftPlaybook } from '@/lib/assistant/creation-craft-playbooks';
 import { buildAssistantSystemPrompt } from '@/lib/assistant/system-prompt';
 import type { AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
@@ -237,7 +238,7 @@ export async function runAssistantAgent(
     onUiReset: input.onUiReset,
     creationQualityGate: plan.intent === 'creation_scene_edit' && plan.allowWriteTools,
     creationQualityUserPrompt: input.prompt,
-    creationQualityJob: 'auto',
+    creationQualityJob: qualityJobForCreationCraftPlaybook(plan.creationCraftPlaybookId),
   });
 
   return { ...orchestratorResult, plan, retrieval, uiLayout: orchestratorResult.uiLayout };

@@ -1,9 +1,14 @@
 /**
  * Extra depth for CREATION scene/layout turns only.
  * Spec: specs/domain/assistant-creation-mcp.md § Creative depth
+ * Playbooks: specs/domain/assistant-creation-agi-lite.md § Wave B
  */
 import { getAssistantThinkingBudgetTokens } from '@/lib/constants';
 
+import {
+  buildCreationCraftPlaybookPromptBlock,
+  type CreationCraftPlaybookId,
+} from './creation-craft-playbooks';
 import { buildEditorialLandingFallbackBrief } from './editorial-landing-fallback';
 
 const DEFAULT_MAX_TOOL_ROUNDS = 14;
@@ -43,12 +48,30 @@ export function resolveAssistantThinkingBudgetForIntent(intent: string): number 
   return getAssistantThinkingBudgetTokens();
 }
 
-/** System-prompt craft guidance — only for write-capable scene-edit plans. */
-export function buildCreationSceneDepthPromptBlock(allowWriteTools: boolean): string {
-  if (!allowWriteTools) return '';
+const SHARED_DEPTH_TAIL = `
+### Freies Styling (Hex / Abstände — ohne Token wo Format es erlaubt)
+**Literale in \`props\`**; Props überschreiben Tokens.
+1. Farbe: \`set_prop\` \`background\`|\`color\`|\`borderColor\` = \`#RRGGBB\` (+ \`clear_token_binding\` wenn Binding lag).
+2. Spacing/Typo: \`gap\`|\`padding*\`|\`radius\`|\`fontSize\`|\`fontWeight\`|\`lineHeight\`|\`fontFamily\` als Literale.
+3. \`set_style\` nur \`width\`/\`height\`.
+4. Print-Jobs: Brandion **print**-Channel bevorzugen (\`creation_brand_tokens_get\`).
+
+### VERBOTENE End-Copy
+„Get started“, „Option A/B“, alleiniges „Text“/„Link“/„Button“/„Image“/… — vor Abschluss überschreiben.
+
+### Pflicht vor Abschluss
+1. creation_scene_content_audit — errors fixen; \`craft-thin\` Warnings ernst nehmen.
+2. creation_scene_craft_debug — Flags lesen; \`craft-thin\` ist ein Must-Fix.
+3. creation_scene_preview — max. 2×.
+4. Format-Gate: Landing=Hero+CTA · Newsletter=Einspalte ohne Print* · Print=PrintPage.
+Nicht fertig melden solange Fixture-Look, Seed-Copy oder offensichtlich dünne Craft sichtbar. Der Orchestrator schickt den Turn zurück, wenn Audit/Craft-Debug/Preview fehlen.`;
+
+/** Fallback when no craft playbook matched — web-landing oriented (legacy depth). */
+function buildDefaultLandingOrientedDepth(): string {
   return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
 Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
+Kein Playbook erkannt — default = **Web-Landing-Tiefe**. Bei Newsletter/Print explizit so fragen.
 
 ### Pflicht: Eigenes Design-System erfinden (vor dem HTML)
 Greenfield Landing = **freie Art-Direction**, nicht Site-Kit-/Brandion-/MSQDX-Fixture.
@@ -92,24 +115,30 @@ ${buildEditorialLandingFallbackBrief()}
 
 Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst.
 
-### Freies Styling (Hex / Abstände — ohne Token)
-**Literale in \`props\`**; Props überschreiben Tokens.
-1. Farbe: \`set_prop\` \`background\`|\`color\`|\`borderColor\` = \`#RRGGBB\` (+ \`clear_token_binding\` wenn Binding lag).
-2. Spacing/Typo: \`gap\`|\`padding*\`|\`radius\`|\`fontSize\`|\`fontWeight\`|\`lineHeight\`|\`fontFamily\` als Literale.
-3. \`set_style\` nur \`width\`/\`height\`.
-4. **Kein** Brandion-Token anlegen; **kein** \`set_token_binding\` auf freien Landings.
-
-### VERBOTENE End-Copy
-„Get started“, „Option A/B“, alleiniges „Text“/„Link“/„Button“/„Image“/… — vor Abschluss überschreiben.
-
 ### Content-complete
 Marketing/PDP: **insert_child** mit props. Prop-Cheat: SiteButton/SiteBadge/SiteLink children(+href) · SiteText role+children · SiteSelect options · SiteImage alt · SiteGrid columns/gap.
+${SHARED_DEPTH_TAIL}`;
+}
 
-### Pflicht vor Abschluss
-1. Eigenes System + Pack-Dichte sichtbar — Vision **nicht** ok bei MSQDX-Orange+Noto+Near-black-Default oder wireframe-dünnem Hero.
-2. creation_scene_content_audit — errors fixen; \`craft-thin\` Warnings ernst nehmen.
-3. creation_scene_craft_debug — Flags lesen; \`craft-thin\` ist ein Must-Fix.
-4. creation_scene_preview — max. 2×.
-5. Kein Wireframe / Seed-Copy / fehlende CTAs.
-Nicht fertig melden solange Fixture-Look, Seed-Copy oder offensichtlich dünne Craft sichtbar. Der Orchestrator schickt den Turn zurück, wenn Audit/Craft-Debug/Preview fehlen.`;
+export type CreationSceneDepthOptions = {
+  playbookId?: CreationCraftPlaybookId | null;
+};
+
+/** System-prompt craft guidance — only for write-capable scene-edit plans. */
+export function buildCreationSceneDepthPromptBlock(
+  allowWriteTools: boolean,
+  options?: CreationSceneDepthOptions,
+): string {
+  if (!allowWriteTools) return '';
+  const playbookBlock = buildCreationCraftPlaybookPromptBlock(options?.playbookId ?? null);
+  if (playbookBlock) {
+    return `
+## CREATION Layout-Tiefe (nur dieser Intent)
+Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
+Aktives **Craft-Playbook** steuert das Format (Web / Newsletter / Print) — nicht improvisieren.
+
+${playbookBlock}
+${SHARED_DEPTH_TAIL}`;
+  }
+  return buildDefaultLandingOrientedDepth();
 }
