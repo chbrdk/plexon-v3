@@ -53,6 +53,14 @@ export const CREATION_CRAFT_EVAL_BRIEFS: CreationCraftEvalBrief[] = [
   { id: 'de-print-13', lang: 'de', prompt: 'Broschüre Drucklayout mit PrintCover', category: 'print', expectedPlaybookId: 'creation_print_magazine_v1' },
   { id: 'de-report-14', lang: 'de', prompt: 'EQC Magazin-PDF Report Deck mit dataSlot', category: 'print', expectedPlaybookId: 'creation_print_report_v1' },
   { id: 'en-report-15', lang: 'en', prompt: 'Whitepaper print report magazine template', category: 'print', expectedPlaybookId: 'creation_print_report_v1' },
+  {
+    id: 'de-report-p92-25',
+    lang: 'de',
+    prompt:
+      'EQC Magazin-PDF Report mit accent ChipRow, PrintCallout, PrintTable columnAlign right für EUR und PrintSteps emphasisIndex',
+    category: 'print',
+    expectedPlaybookId: 'creation_print_report_v1',
+  },
   { id: 'de-pattern-16', lang: 'de', prompt: 'Seite als Pattern speichern', category: 'pattern', expectedPlaybookId: 'creation_page_as_pattern_v1' },
   { id: 'en-pattern-17', lang: 'en', prompt: 'Save page as pattern please', category: 'pattern', expectedPlaybookId: 'creation_page_as_pattern_v1' },
   { id: 'de-unbound-18', lang: 'de', prompt: 'Baue eine Landing ohne Collection', category: 'unbound', expectedPlaybookId: 'creation_landing_v1' },

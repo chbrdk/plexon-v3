@@ -108,7 +108,8 @@ Ziel: **Druck-/Magazin-Seiten** mit CREATION Print-Primitives — PDF-fähig (\`
 
 ### Format-Regeln (hart)
 - Jede Print-Fläche unter **\`PrintPage\`** (P38: andere Print\\*-Drops außerhalb werden gewrappt — lieber bewusst \`PrintPage\` anlegen).
-- Palette: \`PrintPage\`, \`PrintCover\`, \`PrintChapter\`, \`PrintPullQuote\`, \`PrintChip\`/\`PrintChipRow\`, \`PrintTwoColumn\`, \`PrintScoreRing\`, \`PrintDonut\`, \`PrintRankedList\`, \`PrintLedger\`, \`PrintTraitBars\`, \`PrintTable\`, \`PrintPersonaCard\`/\`PrintPersonaGrid\`.
+- Palette: \`PrintPage\`, \`PrintCover\`, \`PrintChapter\`, \`PrintPullQuote\`, \`PrintCallout\`, \`PrintSteps\`, \`PrintChip\`/\`PrintChipRow\` (tones \`default|muted|accent|solid\`), \`PrintTwoColumn\`, \`PrintScoreRing\`, \`PrintDonut\`, \`PrintRankedList\`, \`PrintLedger\`, \`PrintTraitBars\`, \`PrintTable\` (\`columnAlign\`), \`PrintPersonaCard\`/\`PrintPersonaGrid\`.
+- **Emphasis (P92):** prefer \`PrintChip tone=accent|solid\` for active dimensions; \`PrintCallout\` for wash bands (not PullQuote for non-quotes); \`PrintSteps\` for linear process — **never** invent SiteStack/SVG diagrams inside \`PrintPage\` for Mag smoke.
 - **Tokens:** \`creation_brand_tokens_get\` nutzen wenn Collection gebunden — **print**-Channel (mm/pt), nicht digital-Web-Flex. Free Hex nur wenn Pack fehlt.
 - Typografie/Spacing denken in **Druck**: Cover-Dominanz, Chapter-Eyebrow/Title/Lede, Folio — nicht Website-Hero mit \`display:flex\` Nav.
 - HTML-Import nur wenn er klar Print-Struktur ergibt; sonst **\`insert_child\`** der Print-Typen.
@@ -135,22 +136,24 @@ function phasesPrintReport(): string {
 Ziel: **datengebundenes** Print-Deck (EQC Mag, Audit-Report, Whitepaper) — bindbar über \`dataSlot\` / MagazineTemplate.
 
 ### Format-Regeln (hart)
-- Wie Print Magazin: **\`PrintPage\`**-Stack, Print\\*-Primitives.
+- Wie Print Magazin: **\`PrintPage\`**-Stack, Print\\*-Primitives (inkl. P92 \`PrintChip.tone\`, \`PrintCallout\`, \`PrintTable.columnAlign\`, \`PrintSteps\`).
 - Plane Slots für späteren Bind (Plexon EQC consume): z. B. Cover (\`eqc.cover\`), Tables (\`eqc.domain.*\`), RankedLists (\`eqc.geo.*\`), PersonaGrid — **layout \`slot\` ≠ \`dataSlot\`**.
 - Inhalt: Tabellen/Ranked/Persona mit **echten Platzhalter-Zeilen** (nicht „Option A“); Labels fachlich (Issues, Competitors, Recommendations).
+- Numeric/EUR columns: \`PrintTable columnAlign\` ending in \`right\` (z. B. \`left,left,right\`).
+- Process: \`PrintSteps\` (+ optional \`emphasisIndex\`) — **forbid** SiteStack/SVG diagrams inside \`PrintPage\` as Mag substitute.
 - Brandion print channel bevorzugen.
 - Mehrere \`PrintPage\`s ok (Cover → Domain → GEO → Personas).
 
 Phasen:
 0. Brief: Report-Art (EQC / Audit / Custom), Seitenfolge, welche Datenblöcke.
 1. Palette Print + \`creation_brand_tokens_get\`.
-2. Build Cover + 1–n content pages with PrintTable / PrintRankedList / PrintPersona\\*.
+2. Build Cover + 1–n content pages with PrintTable / PrintRankedList / PrintPersona\\* / PrintCallout / PrintSteps / Chip tones.
 3. Optional: dokumentiere \`dataSlot\`-Keys in der Abschlussantwort (für Template-Publish).
 4. Audit → craft_debug → preview.
 5. Mag-PDF-ready; Template-Publish bleibt Produkt-UI/API — Agent liefert bindfähige Scene.
 
 **Muss:** \`PrintPage\` + inhaltliche Report-Module; kein reines Marketing-Hero.
-**Verwandt:** \`specs/domain/creation-magazine-template-consume.md\` (Plexon) · Creation \`magazine-template\` / Mag-PDF.
+**Verwandt:** \`specs/domain/creation-magazine-template-consume.md\` (Plexon) · Creation \`magazine-template\` / Mag-PDF · \`knowledge/print-report-primitives-agent.md\`.
 ${SHARED_FINISH}
 `.trim();
 }

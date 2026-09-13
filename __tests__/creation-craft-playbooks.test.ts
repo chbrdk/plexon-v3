@@ -53,6 +53,22 @@ describe('creation craft playbooks (Wave B)', () => {
     expect(qualityJobForCreationCraftPlaybook('creation_print_magazine_v1')).toBe('print')
   })
 
+  it('P92 print report brief + playbook mention Steps/Callout/columnAlign', () => {
+    expect(
+      resolveCreationCraftPlaybook(
+        'EQC Magazin-PDF Report mit accent ChipRow, PrintCallout, PrintTable columnAlign right für EUR und PrintSteps emphasisIndex',
+      )?.id,
+    ).toBe('creation_print_report_v1')
+    const report = buildCreationCraftPlaybookPromptBlock('creation_print_report_v1')
+    expect(report).toContain('PrintSteps')
+    expect(report).toContain('PrintCallout')
+    expect(report).toContain('columnAlign')
+    expect(report).toContain('SiteStack')
+    const magazine = buildCreationCraftPlaybookPromptBlock('creation_print_magazine_v1')
+    expect(magazine).toContain('PrintSteps')
+    expect(magazine).toContain('PrintCallout')
+  })
+
   it('resolves page as pattern first', () => {
     expect(resolveCreationCraftPlaybook('Seite als Pattern speichern')?.id).toBe(
       'creation_page_as_pattern_v1',

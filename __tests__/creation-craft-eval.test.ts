@@ -48,6 +48,14 @@ describe('creation craft eval harness (Wave D)', () => {
     expect(seed.seed_chrome).toBe(true)
   })
 
+  it('P92 ships de-report-p92-25 brief → print report playbook', () => {
+    const brief = CREATION_CRAFT_EVAL_BRIEFS.find((b) => b.id === 'de-report-p92-25')
+    expect(brief).toBeTruthy()
+    expect(brief?.expectedPlaybookId).toBe('creation_print_report_v1')
+    expect(brief?.prompt).toMatch(/PrintSteps/)
+    expect(brief?.prompt).toMatch(/columnAlign/)
+  })
+
   it('fixture report meets landing quality floors', () => {
     const report = runCreationCraftEvalFixture()
     expect(report.briefCount).toBeGreaterThanOrEqual(20)
