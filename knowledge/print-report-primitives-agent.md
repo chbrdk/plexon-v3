@@ -19,3 +19,7 @@ Files: `lib/assistant/creation-craft-playbooks.ts` · `knowledge/creation-craft-
 ## Operator quality loop
 
 Creation checklist + golden fixture: `creation-v3/knowledge/print-report-quality-eval.md` · `creation-v3/apps/web/lib/magazine-pdf/p92-s5-fixture.ts`. Send canvas + Mag PNG + scene tree for S5 scoring.
+
+## Write path (ops)
+
+Plexon coerces stringified `ops` → array in `injectCreationSceneToolArgs` (`lib/assistant/creation-scene-tool-args.ts`). Creation MCP `creation.scene_apply_ops` also preprocesses string → array. Agents must still pass a native array when possible; documenting a tree without `apply_ops` is a failed turn.

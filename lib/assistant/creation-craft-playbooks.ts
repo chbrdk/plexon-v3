@@ -45,6 +45,7 @@ const SHARED_FINISH = `
 3. \`creation_scene_preview\` — max. 1–2× (Fehler soft-skip, Aufruf trotzdem Pflicht).
 4. Kein Seed: „Get started“, „Option A/B“, Fixture-Orange, Noto-only als einziges System.
 5. Orchestrator Quality-Gate kann den Turn zurückschicken — dann Fixes, nicht „fertig“ behaupten.
+6. \`creation_scene_apply_ops\`: \`ops\` **muss ein natives Array** sein (kein JSON-String). Nur spezifizieren ohne Write = Fail.
 `.trim();
 
 const SHARED_STYLING = `
@@ -109,7 +110,8 @@ Ziel: **Druck-/Magazin-Seiten** mit CREATION Print-Primitives — PDF-fähig (\`
 ### Format-Regeln (hart)
 - Jede Print-Fläche unter **\`PrintPage\`** (P38: andere Print\\*-Drops außerhalb werden gewrappt — lieber bewusst \`PrintPage\` anlegen).
 - Palette: \`PrintPage\`, \`PrintCover\`, \`PrintChapter\`, \`PrintPullQuote\`, \`PrintCallout\`, \`PrintSteps\`, \`PrintChip\`/\`PrintChipRow\` (tones \`default|muted|accent|solid\`), \`PrintTwoColumn\`, \`PrintScoreRing\`, \`PrintDonut\`, \`PrintRankedList\`, \`PrintLedger\`, \`PrintTraitBars\`, \`PrintTable\` (\`columnAlign\`), \`PrintPersonaCard\`/\`PrintPersonaGrid\`.
-- **Emphasis (P92):** prefer \`PrintChip tone=accent|solid\` for active dimensions; \`PrintCallout\` for wash bands (not PullQuote for non-quotes); \`PrintSteps\` for linear process — **never** invent SiteStack/SVG diagrams inside \`PrintPage\` for Mag smoke.
+- **Emphasis (P92):** prefer \`PrintChip tone=accent|solid\` for active dimensions (**not** \`PrintChipRow.accent\`); \`PrintCallout variant=wash|emphasize|quiet\`; \`PrintTable columnAlign=left,left,right\`; \`PrintSteps\` RankedRow children + \`emphasisIndex\` — **never** invent SiteStack/SVG diagrams inside \`PrintPage\` for Mag smoke.
+- **Write:** \`creation_scene_apply_ops\` with native \`ops\` array — documenting a tree without apply is failure.
 - **Tokens:** \`creation_brand_tokens_get\` nutzen wenn Collection gebunden — **print**-Channel (mm/pt), nicht digital-Web-Flex. Free Hex nur wenn Pack fehlt.
 - Typografie/Spacing denken in **Druck**: Cover-Dominanz, Chapter-Eyebrow/Title/Lede, Folio — nicht Website-Hero mit \`display:flex\` Nav.
 - HTML-Import nur wenn er klar Print-Struktur ergibt; sonst **\`insert_child\`** der Print-Typen.
@@ -139,10 +141,16 @@ Ziel: **datengebundenes** Print-Deck (EQC Mag, Audit-Report, Whitepaper) — bin
 - Wie Print Magazin: **\`PrintPage\`**-Stack, Print\\*-Primitives (inkl. P92 \`PrintChip.tone\`, \`PrintCallout\`, \`PrintTable.columnAlign\`, \`PrintSteps\`).
 - Plane Slots für späteren Bind (Plexon EQC consume): z. B. Cover (\`eqc.cover\`), Tables (\`eqc.domain.*\`), RankedLists (\`eqc.geo.*\`), PersonaGrid — **layout \`slot\` ≠ \`dataSlot\`**.
 - Inhalt: Tabellen/Ranked/Persona mit **echten Platzhalter-Zeilen** (nicht „Option A“); Labels fachlich (Issues, Competitors, Recommendations).
+- **P92 prop shapes (exact):**
+  - \`PrintChip\` shell \`tone\`: \`default|muted|accent|solid\` — **not** \`PrintChipRow.accent\`.
+  - \`PrintCallout\` shell \`variant\`: \`wash|emphasize|quiet\` + slotted label/body Text — **not** \`headline\`.
+  - \`PrintTable\` shell \`columnAlign\`: string like \`left,left,right\` (or array) — **not** \`columns[].align\`.
+  - \`PrintSteps\` children = \`RankedRow\` (label + secondary) · shell \`orientation\` · \`emphasisIndex\` string — **not** bare Stack children.
 - Numeric/EUR columns: \`PrintTable columnAlign\` ending in \`right\` (z. B. \`left,left,right\`).
 - Process: \`PrintSteps\` (+ optional \`emphasisIndex\`) — **forbid** SiteStack/SVG diagrams inside \`PrintPage\` as Mag substitute.
-- Brandion print channel bevorzugen.
+- Brandion print channel bevorzugen — **no hardcoded conference pink/orange hex** (\`#ff6a3b\` etc.).
 - Mehrere \`PrintPage\`s ok (Cover → Domain → GEO → Personas).
+- **MUST call \`creation_scene_apply_ops\`** with a native \`ops\` **array** (never a JSON string). Documenting the tree without apply_ops is a failed turn.
 
 Phasen:
 0. Brief: Report-Art (EQC / Audit / Custom), Seitenfolge, welche Datenblöcke.

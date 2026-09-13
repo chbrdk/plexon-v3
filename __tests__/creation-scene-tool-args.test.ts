@@ -65,6 +65,27 @@ describe('injectCreationSceneToolArgs', () => {
     expect(out.baseUpdatedAt).toBe('2026-08-23T21:00:00.000Z')
   })
 
+  it('coerces stringified ops JSON into a native array for apply_ops', () => {
+    const ops = [{ op: 'insert_child', parentId: 'root', child: { id: 'n1', type: 'PrintPage' } }]
+    const out = injectCreationSceneToolArgs(
+      'creation_scene_apply_ops',
+      { ops: JSON.stringify(ops) },
+      { pageContext: editorContext, actorUserId: 'user-1' },
+    )
+    expect(Array.isArray(out.ops)).toBe(true)
+    expect(out.ops).toEqual(ops)
+  })
+
+  it('leaves already-array ops unchanged', () => {
+    const ops = [{ op: 'add_page' }]
+    const out = injectCreationSceneToolArgs(
+      'creation.scene_apply_ops',
+      { ops },
+      { pageContext: editorContext, actorUserId: 'user-1' },
+    )
+    expect(out.ops).toBe(ops)
+  })
+
   it('leaves unrelated tools unchanged', () => {
     const input = { foo: 'bar' }
     expect(

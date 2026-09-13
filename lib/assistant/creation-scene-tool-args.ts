@@ -15,6 +15,31 @@ function needsOptimisticLock(toolName: string): boolean {
   return /apply_ops|import_html/.test(toolName);
 }
 
+/**
+ * LLMs often pass `ops` (and similar) as a JSON string instead of a native array.
+ * Coerce before MCP Zod validation so apply_ops actually writes the scene.
+ */
+export function coerceJsonArrayArg(value: unknown): unknown {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    return Array.isArray(parsed) ? parsed : value;
+  } catch {
+    return value;
+  }
+}
+
+function coerceCreationWriteArgs(toolName: string, input: Record<string, unknown>): Record<string, unknown> {
+  if (!/apply_ops/.test(toolName)) return input;
+  if (!('ops' in input)) return input;
+  const ops = coerceJsonArrayArg(input.ops);
+  if (ops === input.ops) return input;
+  return { ...input, ops };
+}
+
 /** Extract scene updatedAt from CREATION ops/import tool JSON (success or stale 409). */
 export function extractCreationSceneUpdatedAt(toolResult: unknown): string | null {
   const raw =
@@ -53,7 +78,7 @@ export function injectCreationSceneToolArgs(
 ): Record<string, unknown> {
   if (!isCreationSceneFamilyTool(toolName)) return input;
 
-  const out = { ...input };
+  const out = coerceCreationWriteArgs(toolName, { ...input });
   // Always use the authenticated session user — LLM-supplied display names
   // (e.g. "cb") cause CREATION Collection ACL 403s.
   if (ctx.actorUserId.trim()) {
