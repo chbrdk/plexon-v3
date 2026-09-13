@@ -2,7 +2,7 @@ import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../components/AppShell'
-import { PATH_AGENCY_DEMO, PATH_ASSISTANT, PATH_HOME, PATH_LOGIN, PATH_PRODUCTS, PATH_SETTINGS } from '../lib/constants'
+import { PATH_AGENCY_DEMO, PATH_ASSISTANT, PATH_HOME, PATH_LOGIN, PATH_PRODUCTS, PATH_SETTINGS, PATH_SUITE_LANDING } from '../lib/constants'
 
 const { pathnameRef } = vi.hoisted(() => ({
   pathnameRef: { current: '/' as string },
@@ -154,5 +154,16 @@ describe('app shell', () => {
     )
     expect(document.querySelector('.nav-rail')).toBeNull()
     expect(screen.getByText('Agency landing')).toBeInTheDocument()
+  })
+
+  it('skips shell chrome on the public suite landing', () => {
+    pathnameRef.current = PATH_SUITE_LANDING
+    render(
+      <AppShell>
+        <div>Suite landing</div>
+      </AppShell>,
+    )
+    expect(document.querySelector('.nav-rail')).toBeNull()
+    expect(screen.getByText('Suite landing')).toBeInTheDocument()
   })
 })

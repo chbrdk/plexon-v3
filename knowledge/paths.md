@@ -7,6 +7,7 @@
 - Consumer barrels: `lib/msqdx-ui.ts` · `lib/msqdx-ui-shell.ts`
 - Shell config: `lib/shell-paths.ts` (`shellPaths` / `paths`)
 - Route constants: `lib/constants.ts` · `lib/paths/*`
+- Public suite landing: `/suite` (`PATH_SUITE_LANDING`) · bilingual `?lang=de|en` · spec `specs/domain/plexon-suite-landing.md` · craft `knowledge/plexon-suite-landing.md` · fonts `FONT_URL_SUITE_LANDING` · copy `lib/suite-landing.ts`
 - Default app port: `3334` (local) · Coolify/Docker: `3000`
 - Coolify deploy API (force rebuild): `knowledge/coolify-deploy-api.md` — MCP is read-only; use `POST https://coolify.plygrnd.tech/api/v1/deploy`
 

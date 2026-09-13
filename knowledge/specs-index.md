@@ -30,6 +30,7 @@
 | Creation MagazineTemplate consume (EQC Mag PDF) | `specs/domain/creation-magazine-template-consume.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
+| PLEXON suite landing (public `/suite`) | `specs/domain/plexon-suite-landing.md` |
 
 ## API
 | Spec | Path |
@@ -58,6 +59,7 @@
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |
 | Data plane optimizations | `knowledge/plexon-data-plane-optimizations.md` |
 | UI rebuild | `knowledge/ui-rebuild-msqdx-ui.md` |
+| PLEXON suite landing | `knowledge/plexon-suite-landing.md` |
 
 ## Companions
 | Doc | Path |

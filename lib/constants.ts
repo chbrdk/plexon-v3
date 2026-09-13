@@ -14,6 +14,8 @@ export const PATH_LOGIN = '/login';
 export const PATH_REGISTER = '/register';
 export const PATH_FORGOT_PASSWORD = '/forgot-password';
 export const PATH_RESET_PASSWORD = '/reset-password';
+/** Public MSQ DX / PLEXON suite landing (Collection hub + product sequence). */
+export const PATH_SUITE_LANDING = '/suite';
 /** Public standalone typography-led agency landing prototype. */
 export const PATH_AGENCY_DEMO = '/agency';
 /** Public standalone city-tourism HTML prototype. */
@@ -28,6 +30,24 @@ export const PATH_KERNWERK_NATURAL_DEMO = '/kernwerk-natural.html';
 export const PATH_LOUDER_DEMO = '/louder.html';
 /** Public standalone monochrome CARO tribute HTML prototype. */
 export const PATH_CARO_DEMO = '/caro.html';
+
+/** Unauthenticated standalone pages — skip session redirect and AppShell chrome. */
+export const PUBLIC_STANDALONE_PATHS = [
+  PATH_SUITE_LANDING,
+  PATH_AGENCY_DEMO,
+  PATH_LINDENAU_DEMO,
+  PATH_KERNWERK_DEMO,
+  PATH_KERNWERK_CLASSIC_DEMO,
+  PATH_KERNWERK_NATURAL_DEMO,
+  PATH_LOUDER_DEMO,
+  PATH_CARO_DEMO,
+] as const;
+
+export function isPublicStandalonePath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return (PUBLIC_STANDALONE_PATHS as readonly string[]).includes(pathname);
+}
+
 export const PATH_PRODUCTS = '/products';
 export const PATH_PROJECTS = '/projects';
 export const PATH_SETTINGS = '/settings';
@@ -133,6 +153,10 @@ export const pathPlatformProjectFlow = (platformProjectId: string, flowId: strin
 /** Google Fonts for assistant generative UI (Noto Sans + IBM Plex Mono). */
 export const FONT_URL_ASSISTANT_UI =
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap';
+
+/** Google Fonts for the public suite landing (Fraunces + Syne + IBM Plex Mono). */
+export const FONT_URL_SUITE_LANDING =
+  'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap';
 
 export const API_AUTH_REGISTER = '/api/auth/register';
 export const API_AUTH_REQUEST_PASSWORD_RESET = '/api/auth/request-password-reset';

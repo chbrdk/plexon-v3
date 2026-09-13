@@ -30,8 +30,8 @@ import { AssistantPageContextProvider } from '@/components/assistant/AssistantPa
 import { shellPaths } from '@/lib/shell-paths'
 import {
   PATH_ADMIN,
-  PATH_AGENCY_DEMO,
   PATH_ASSISTANT,
+  isPublicStandalonePath,
   PATH_ASSISTANT_EMBED,
   PATH_BOARD,
   PATH_EVENT_QUICK_CHECK,
@@ -111,7 +111,7 @@ export function AppShell({
   const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
   const isEmbedPage = isAssistantEmbedPath(pathname)
   const isSharePage = isPublicSharePath(pathname)
-  const isAgencyDemoPage = pathname === PATH_AGENCY_DEMO
+  const isStandalonePublicPage = isPublicStandalonePath(pathname)
 
   const frameStyle = useMemo(
     () =>
@@ -143,7 +143,7 @@ export function AppShell({
         ? t(resolvedTitle)
         : resolvedTitle
 
-  if (isAuthPage || isEmbedPage || isSharePage || isAgencyDemoPage) {
+  if (isAuthPage || isEmbedPage || isSharePage || isStandalonePublicPage) {
     return <>{children}</>
   }
 
