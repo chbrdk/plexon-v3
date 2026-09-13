@@ -23,6 +23,7 @@
 - **A1 visual must-fix:** seed/fixture chrome; landing jobs also require hero mass + CTA (outline Button/Link or audit `missing-cta`). Preview tool errors soft-skip; missing preview still blocks.
 - **B craft playbooks:** format-aware (`creation_landing_v1`, `creation_newsletter_v1`, `creation_print_magazine_v1`, `creation_print_report_v1`, `creation_page_as_pattern_v1`) — see `knowledge/creation-craft-playbooks.md`. Gate jobs: landing / newsletter / print / generic.
 - **C craft memory:** after gated success, merge `creation-craft-prefs-latest` (+ format recipe) into Collection Knowledge Pack; hydrate on next `creation_scene_edit`. Env `ASSISTANT_CREATION_CRAFT_MEMORY` (default on). Code: `lib/assistant/knowledge-pack/distill-creation-craft.ts`.
+- **D eval + tiers:** fixture harness `lib/assistant/creation-craft-eval.ts` (CI); budget tiers `lib/assistant/creation-model-tier.ts`. Ops: `knowledge/creation-craft-eval.md`.
 - Page→Pattern: `creation.site_kit_page_save` (persists bound scene). Op `bind_master_composition` is on the curated apply_ops allowlist.
 
 Coordinator remains the only scene writer — no parallel layout subagents.

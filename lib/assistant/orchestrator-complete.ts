@@ -106,6 +106,8 @@ export type OrchestratorCompleteOptions = {
   /** Override extended-thinking budget (e.g. Creation scene depth). Omit → env default. */
   thinkingBudgetTokens?: number;
   modelProfile?: 'board' | 'assistant';
+  /** Optional Anthropic model override (Wave D high tier). */
+  modelOverride?: string;
   skipTools?: boolean;
   toolsFilter?: (toolName: string) => boolean;
   beforeToolCall?: (toolName: string, input: Record<string, unknown>) => Promise<{
@@ -297,6 +299,7 @@ export async function runOrchestratorComplete(
     maxToolRounds = 5,
     thinkingBudgetTokens,
     modelProfile = 'board',
+    modelOverride,
     skipTools = false,
     toolsFilter,
     beforeToolCall,
@@ -393,13 +396,14 @@ export async function runOrchestratorComplete(
       (useVideonMcp && videonMcpUrl)) &&
     tools.length > 0;
   const model =
-    useMcp
+    (modelOverride && modelOverride.trim()) ||
+    (useMcp
       ? modelProfile === 'assistant'
         ? getAssistantCompletionModelWithMcp()
         : getBoardCompletionModelWithMcp()
       : modelProfile === 'assistant'
         ? getAssistantCompletionModel()
-        : getBoardCompletionModel();
+        : getBoardCompletionModel());
 
   const timeline: OrchestratorTimelineItem[] = [];
   const qualityTraces: Array<{ name: string; preview: string }> = [];

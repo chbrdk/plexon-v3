@@ -140,8 +140,13 @@ PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** Gate 
 |----------|---------|--------------|
 | `CREATION_MCP_URL` | Nein | MCP für Assistant (library/compositions/projects). Port **3102**. Spec: `specs/domain/assistant-creation-mcp.md`. |
 | `ASSISTANT_CREATION_CRAFT_MEMORY` | Nein | Default **an**. `0`/`off` deaktiviert Collection Craft-Memory Publish+Hydrate (AGI-lite Wave C). |
+| `ASSISTANT_CREATION_MODEL_TIER` | Nein | Wave D: `low` \| `mid` \| `high` Override; leer/`auto` = Heuristik (Q&A low, Playbook-Writes high). |
+| `ASSISTANT_CREATION_EVAL_MODE` | Nein | Wave D: `off` (Default) \| `fixture` \| `live`. CI nutzt Fixture-Harness ohne Env. |
+| `ASSISTANT_CREATION_HIGH_MODEL` | Nein | Optional stärkeres Anthropic-Modell nur für High-Tier. Ohne Wert bleibt Default-Modell (kein Q&A-Cost-Bump). |
+| `ANTHROPIC_ASSISTANT_MODEL_HIGH` | Nein | Alias für `ASSISTANT_CREATION_HIGH_MODEL`. |
+| `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET_HIGH` | Nein | High-Tier Thinking-Floor (Default ≥12288). `0`/`off` hält Mid-Budget. |
 
-PLEXON aktiviert CREATION-MCP analog Brandion (`resolveUseCreationMcp`). Tools: v1 library/compositions/projects **plus** v2 scene (`creation.scene_*`, `creation.editor_palette`, `creation.brand_tokens_get`, `creation.site_kit_composition_save`, `creation.site_kit_page_save`). Spec: `specs/domain/assistant-creation-mcp.md`.
+PLEXON aktiviert CREATION-MCP analog Brandion (`resolveUseCreationMcp`). Tools: v1 library/compositions/projects **plus** v2 scene (`creation.scene_*`, `creation.editor_palette`, `creation.brand_tokens_get`, `creation.site_kit_composition_save`, `creation.site_kit_page_save`). Spec: `specs/domain/assistant-creation-mcp.md`. Eval/Routing: `knowledge/creation-craft-eval.md`.
 
 ### AUDION MCP
 

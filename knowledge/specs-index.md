@@ -47,6 +47,7 @@
 | CREATION MCP (scene + quality loop) | `knowledge/creation-mcp-assistant.md` |
 | CREATION domain autonomy (“AGI-lite”) | `knowledge/assistant-creation-agi-lite.md` |
 | CREATION craft playbooks (web/newsletter/print) | `knowledge/creation-craft-playbooks.md` |
+| CREATION craft eval + model tiers (Wave D) | `knowledge/creation-craft-eval.md` |
 | Capability Catalog | `knowledge/capability-catalog.md` |
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |

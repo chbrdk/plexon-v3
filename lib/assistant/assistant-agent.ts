@@ -24,6 +24,7 @@ import { buildUiToolsPromptBlock, buildUiPanelHintForPlan } from '@/lib/assistan
 
 import { buildPlanningPromptFromConversation } from '@/lib/assistant/audience-write-intent';
 import { qualityJobForCreationCraftPlaybook } from '@/lib/assistant/creation-craft-playbooks';
+import { resolveCreationSceneBudget } from '@/lib/assistant/creation-model-tier';
 import { buildCreationCraftMemoryHydrateBlock } from '@/lib/assistant/knowledge-pack/distill-creation-craft';
 import { buildAssistantSystemPrompt } from '@/lib/assistant/system-prompt';
 import type { AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
@@ -32,7 +33,6 @@ import type { AssistantPageContext } from '@/lib/assistant/page-context';
 import { buildAssistantPageContextBlock } from '@/lib/assistant/page-context/hydrate-event-quick-check';
 import { resolveMcpFlagsForPlan } from '@/lib/assistant/mcp-flags-for-plan';
 import { prefetchCreationSceneTreeBlock } from '@/lib/assistant/creation-scene-prefetch';
-import { resolveAssistantThinkingBudgetForIntent } from '@/lib/assistant/creation-scene-depth';
 
 export type AgentProgressCallback = (event: {
   type: 'phase';
@@ -211,6 +211,12 @@ export async function runAssistantAgent(
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
   const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
+  const creationBudget = resolveCreationSceneBudget({
+    intent: plan.intent,
+    allowWriteTools: plan.allowWriteTools,
+    playbookId: plan.creationCraftPlaybookId,
+  });
+
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
     prompt: input.prompt,
@@ -228,9 +234,10 @@ export async function runAssistantAgent(
     platformProjectId: input.platformProjectId,
     actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,
-    thinkingBudgetTokens: resolveAssistantThinkingBudgetForIntent(plan.intent),
+    thinkingBudgetTokens: creationBudget.thinkingBudgetTokens,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',
+    modelOverride: creationBudget.tier === 'high' ? creationBudget.model : undefined,
     beforeToolCall: input.beforeToolCall,
     toolsFilter: createToolFilter([], plan),
     onTextDelta: input.onTextDelta,

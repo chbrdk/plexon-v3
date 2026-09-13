@@ -160,6 +160,7 @@ After a Creation scene turn **passes** the quality gate (writes occurred), best-
 
 ## Wave D — Eval harness + model routing
 
+**Status D:** Implemented 2026-09-13 (`lib/assistant/creation-craft-eval.ts` · `lib/assistant/creation-model-tier.ts`)  
 **Goal:** Stop guessing; score autonomy.
 
 ### Harness (`creation-craft-eval`)
@@ -208,6 +209,9 @@ Do not start C/D until A1 has unit coverage. B may land in parallel with A1 if p
 | `ASSISTANT_CREATION_CRAFT_MEMORY` | C | default on when Collection bound; `0` disables publish/hydrate |
 | `ASSISTANT_CREATION_MODEL_TIER` | D | `low` \| `mid` \| `high` override; default auto |
 | `ASSISTANT_CREATION_EVAL_MODE` | D | `off` \| `fixture` \| `live` |
+| `ASSISTANT_CREATION_HIGH_MODEL` | D | Optional stronger model id for high tier only |
+| `ANTHROPIC_ASSISTANT_MODEL_HIGH` | D | Alias for high model (same effect) |
+| `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET_HIGH` | D | High-tier thinking floor (default ≥12288); `0`/`off` keeps mid |
 
 Canonical FQDNs / Coolify UUIDs: `knowledge/paths.md` · `knowledge/coolify-deploy-api.md` — never hardcode in app logic.
 

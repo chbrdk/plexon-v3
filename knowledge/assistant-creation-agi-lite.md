@@ -18,7 +18,7 @@ Stack: **verify → playbook → Collection craft memory → eval + budget routi
 | A2 | Structured Vision checklist in QA nudge | orchestrator Vision path |
 | B | Playbooks `creation_landing_v1` / `creation_newsletter_v1` / `creation_print_*` / page-as-pattern | `lib/assistant/creation-craft-playbooks.ts` (**shipped**) |
 | C | Pack sections `creation-craft-prefs-latest` · format recipes | `lib/assistant/knowledge-pack/distill-creation-craft.ts` (**shipped**) |
-| D | Fixture eval harness + low/mid/high tier | `__tests__` + optional staging runner |
+| D | Fixture eval harness + low/mid/high tier | `lib/assistant/creation-craft-eval.ts` · `creation-model-tier.ts` (**shipped**) · run notes `knowledge/creation-craft-eval.md` |
 
 ## Locked constraints
 
@@ -33,6 +33,12 @@ Stack: **verify → playbook → Collection craft memory → eval + budget routi
 2. Ask for a landing; confirm turn does not finish on seed chrome.
 3. “Seite als Pattern speichern” → MCP `creation.site_kit_page_save` + clean craft-debug.
 4. Plexon health: `GET https://plexon-v3.projects-a.plygrnd.tech/api/health` → `deployment.commitSha`.
+
+## Wave D ops
+
+- CI fixture: `npx vitest run __tests__/creation-craft-eval.test.ts` (no live MCP).
+- Live staging eval procedure + env keys: `knowledge/creation-craft-eval.md`.
+- Tier override: `ASSISTANT_CREATION_MODEL_TIER`; high model only when `ASSISTANT_CREATION_HIGH_MODEL` is set (Q&A stays low cost).
 
 ## Related research posture (2026)
 
