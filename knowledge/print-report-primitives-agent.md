@@ -15,3 +15,7 @@ Files: `lib/assistant/creation-craft-playbooks.ts` · `knowledge/creation-craft-
 ## Eval fixture
 
 `lib/assistant/creation-craft-eval.ts` brief `de-report-p92-25` — print report with accent chips + right EUR column + emphasized step (resolves to `creation_print_report_v1`).
+
+## Operator quality loop
+
+Creation checklist + golden fixture: `creation-v3/knowledge/print-report-quality-eval.md` · `creation-v3/apps/web/lib/magazine-pdf/p92-s5-fixture.ts`. Send canvas + Mag PNG + scene tree for S5 scoring.
