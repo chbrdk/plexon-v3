@@ -241,6 +241,8 @@ export function buildCreationCraftKnowledgeSections(
           ? 'Greenfield: HTML import then polish ops'
           : 'Ops/insert polish path',
         'Must: hero mass + SiteButton/SiteLink CTA',
+        'Default hero: full-bleed backgroundImage (scrim+url, cover, min-height 100vh) + overlay copy — not absolute slides in HTML import',
+        'Desktop breakpoint for web landing — not Print/A4',
         'No Print* for web landing',
       ],
     });

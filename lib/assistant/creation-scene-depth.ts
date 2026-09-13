@@ -86,6 +86,8 @@ Greenfield Landing = **freie Art-Direction**, nicht Site-Kit-/Brandion-/MSQDX-Fi
 **VERBOTEN im Import-HTML:** \`var(--…)\`, Site-Kit-\`--site-*\`, Brandion-Token-Namen, Fixture-Chrome, MSQDX-Orange-Default, Noto-only.
 **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`). **Page-BG + font-family** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
 
+**Default Hero (ohne Extra-Prompt):** Above-fold = Full-Bleed **\`background-image\`** (Scrim + \`url\`, cover, min-height 100vh) + Overlay-Copy/CTAs als Flex-Kinder. **Nicht** absolute \`<img>\` Slides im Import (\`ignored-absolute-position\`). Desktop-Breakpoint, kein Print-Channel.
+
 ### Pflicht: Dichte aus Spirion-Pack (nicht nur Farben)
 Nach \`capture_prompt_pack\` **müssen** diese Felder im HTML sichtbar werden:
 1. \`look_contract.typography\` — starker Type-Scale-Sprung (Display groß, oft ≥48–80px / clamp; Body klein). Kein einheitliches 16–24px überall.

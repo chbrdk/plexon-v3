@@ -30,6 +30,19 @@ describe('creation craft playbooks (Wave B)', () => {
     expect(qualityJobForCreationCraftPlaybook('creation_landing_v1')).toBe('landing')
   })
 
+  it('landing playbook defaults to full-bleed backgroundImage overlay hero', () => {
+    const landing = buildCreationCraftPlaybookPromptBlock('creation_landing_v1')
+    expect(landing).toContain('Default Hero')
+    expect(landing).toContain('background-image')
+    expect(landing).toContain('ignored-absolute-position')
+    expect(landing).toContain('activeBreakpoint=desktop')
+    const depth = buildCreationSceneDepthPromptBlock(true, {
+      playbookId: 'creation_landing_v1',
+    })
+    expect(depth).toContain('Default Hero')
+    expect(depth).toContain('background-image')
+  })
+
   it('resolves newsletter / email phrasing', () => {
     expect(resolveCreationCraftPlaybook('Gestalte einen Newsletter für die Kampagne')?.id).toBe(
       'creation_newsletter_v1',

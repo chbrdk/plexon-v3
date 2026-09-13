@@ -89,7 +89,7 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 
 | Format | Palette | Width / surface | Tokens | CTA / mass |
 |--------|---------|-----------------|--------|------------|
-| Landing (web) | Site* / HTML import | Fluid viewport; hero mass | Free Hex on greenfield; Brandion digital optional | SiteButton/SiteLink; display ≥48px or hero media |
+| Landing (web) | Site* / HTML import | Fluid viewport; **default full-bleed `backgroundImage` overlay hero** (import-safe; no absolute slides in HTML) | Free Hex on greenfield; Brandion digital optional | SiteButton/SiteLink; display ≥48px **and** hero media (`backgroundImage` url or large SiteImage); Desktop breakpoint |
 | Newsletter | Site* / HTML only | **~560–640px** content column; stacked bands | Free Hex or digital; avoid print channel | Real CTA button/link; preheader; no PrintPage |
 | Print magazine | **Print*** under `PrintPage` | Paper / folio; `--print-*` / Brandion **print** | Prefer `creation_brand_tokens_get` + print channel | Cover/chapter hierarchy; KPI/lede; no web hero flex fetish |
 | Print report | Print* + tables/lists/persona | Multi-`PrintPage` deck | Print channel + optional `dataSlot` for bind | Ranked/table content density; Mag-PDF export path |

@@ -58,16 +58,25 @@ function phasesLanding(): string {
 ## Craft-Playbook: Web Landing (\`creation_landing_v1\`)
 Ziel: freistehende Web-Landing/PDP — **Site\\*** / HTML, nicht Print.
 
+### Default Hero (automatisch — Nutzer muss das NICHT detailliert prompten)
+Above-the-fold = **Full-Bleed Media Hero mit Overlay-Copy**, nicht Textspalte + kleines Bild.
+- **Import-sicher:** Foto als \`background-image\` (CSS) am Hero-Stack — Scrim + \`url(…)\` layered, \`background-size: cover\`, \`min-height: 100vh\` (mind. 720px), \`display:flex; flex-direction:column; justify-content:flex-end\`, Padding ~64–72px.
+- Copy (Eyebrow / Display ≥56px / Body / Primary+Secondary CTA) als **normale Kinder** im Flex-Flow — Text liegt **auf** dem Bild.
+- Stock-URL ok (Unsplash w=1920) wenn keine Marken-Assets; \`alt\`/Caption fachlich.
+- Gallery/Slider-Optik: Caption + Dots + Prev/Next als Chrome **im** Hero; **keine** \`position:absolute|fixed\` Slides im HTML-Import (\`ignored-absolute-position\` → flache Bildstreifen). Absolute nur danach via \`apply_ops\` wenn nötig.
+- Breakpoint **Desktop** (\`activeBreakpoint=desktop\`) — nicht Print/A4 für Web-Heroes.
+- \`craft_debug.hasHeroMedia\` zählt Stack-\`backgroundImage\` mit \`url(\` — dünne \`SiteImage\`-Streifen ohne Masse reichen nicht.
+
 Phasen:
 0. Eigenes Design-System (Hex/Typo/Spacing) — **kein** Brandion-Pfad auf Greenfield.
 1. Optional Spirion \`captures_list\` → \`capture_prompt_pack\` (Rhythm/Look; eigene Literale).
-2. \`creation_scene_import_html\` — ein HTML-Dokument; Nav/Hero/CTA/Grid; body font + page BG.
+2. \`creation_scene_import_html\` — ein HTML-Dokument; **Default-Hero wie oben** + Nav/CTA/Grid; body font + page BG.
 3. Polish nur bei Lücken: \`insert_child\` mit echten props / \`set_prop\`.
 4. Audit → craft_debug → preview.
 5. Pattern nur auf expliziten Wunsch: \`creation_site_kit_page_save\`.
 
-**Muss:** Hero-Masse (Display ≥48px und/oder großes Media), echte CTA (SiteButton/SiteLink).
-**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy.
+**Muss:** Hero-Masse (Display ≥48px **und** Full-Bleed Media via \`backgroundImage\` oder großes Media), echte CTA (SiteButton/SiteLink).
+**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing.
 ${SHARED_STYLING}
 ${SHARED_FINISH}
 `.trim();

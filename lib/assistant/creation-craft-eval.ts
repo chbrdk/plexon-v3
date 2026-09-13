@@ -70,6 +70,8 @@ export const CREATION_CRAFT_EVAL_BRIEFS: CreationCraftEvalBrief[] = [
   { id: 'en-newsletter-22', lang: 'en', prompt: 'Build a newsletter digest mailer', category: 'newsletter', expectedPlaybookId: 'creation_newsletter_v1' },
   { id: 'de-landing-23', lang: 'de', prompt: 'Neue Landing mit Hero-Media und Primary CTA', category: 'landing', expectedPlaybookId: 'creation_landing_v1' },
   { id: 'en-landing-24', lang: 'en', prompt: 'Ship a conversion landing with hero and CTA', category: 'landing', expectedPlaybookId: 'creation_landing_v1' },
+  { id: 'de-landing-25', lang: 'de', prompt: 'Galerie Hero Slider', category: 'landing', expectedPlaybookId: 'creation_landing_v1' },
+  { id: 'en-landing-26', lang: 'en', prompt: 'Full-bleed photo hero with overlay CTA', category: 'landing', expectedPlaybookId: 'creation_landing_v1' },
 ];
 const denseCraft = JSON.stringify({
   craftFlags: [],
