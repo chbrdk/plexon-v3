@@ -6,7 +6,7 @@ import { getAssistantThinkingBudgetTokens } from '@/lib/constants';
 
 import { buildEditorialLandingFallbackBrief } from './editorial-landing-fallback';
 
-const DEFAULT_MAX_TOOL_ROUNDS = 12;
+const DEFAULT_MAX_TOOL_ROUNDS = 14;
 const DEFAULT_THINKING_BUDGET = 8192;
 const MAX_TOOL_ROUNDS_CAP = 16;
 
@@ -86,8 +86,9 @@ ${buildEditorialLandingFallbackBrief()}
 3. Inhalt nachziehen nur bei Lücken: **insert_child mit echten props**.
 4. **Look & Feel / Dichte** — wenn Import noch Fixture-Nähe oder \`craft-thin\` zeigt: Literale + Type-Scale + Surfaces nachziehen.
 5. Self-Check — **creation_scene_content_audit** (auch \`craft-thin\` Warnings lesen)
-6. Pixel-Check — **creation_scene_preview** (max. 1–2×)
-7. Abschluss — erfundenes System + \`capture_run_id\` + max Hero-px + Grid-Spalten nennen; import \`warnings\` / craftFlags melden.
+6. Craft-Debug — **creation_scene_craft_debug** (Flags/Stats; \`craft-thin\` = nicht fertig)
+7. Pixel-Check — **creation_scene_preview** (max. 1–2×)
+8. Abschluss — erfundenes System + \`capture_run_id\` + max Hero-px + Grid-Spalten nennen; import \`warnings\` / craftFlags melden. Seite als Pattern nur wenn der Nutzer das verlangt: \`creation_site_kit_page_save\`.
 
 Neue Seite/PDP: \`pageName\` am Import **oder** add_page zuerst.
 
@@ -107,7 +108,8 @@ Marketing/PDP: **insert_child** mit props. Prop-Cheat: SiteButton/SiteBadge/Site
 ### Pflicht vor Abschluss
 1. Eigenes System + Pack-Dichte sichtbar — Vision **nicht** ok bei MSQDX-Orange+Noto+Near-black-Default oder wireframe-dünnem Hero.
 2. creation_scene_content_audit — errors fixen; \`craft-thin\` Warnings ernst nehmen.
-3. creation_scene_preview — max. 2×.
-4. Kein Wireframe / Seed-Copy / fehlende CTAs.
-Nicht fertig melden solange Fixture-Look, Seed-Copy oder offensichtlich dünne Craft sichtbar.`;
+3. creation_scene_craft_debug — Flags lesen; \`craft-thin\` ist ein Must-Fix.
+4. creation_scene_preview — max. 2×.
+5. Kein Wireframe / Seed-Copy / fehlende CTAs.
+Nicht fertig melden solange Fixture-Look, Seed-Copy oder offensichtlich dünne Craft sichtbar. Der Orchestrator schickt den Turn zurück, wenn Audit/Craft-Debug/Preview fehlen.`;
 }

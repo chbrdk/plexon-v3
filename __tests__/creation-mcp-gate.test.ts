@@ -47,6 +47,8 @@ describe('creation tool catalog + planner', () => {
     expect(classifyToolFamily('creation_scene_tree_index')).toBe('creation_scene')
     expect(classifyToolFamily('creation_scene_apply_ops')).toBe('creation_scene_write')
     expect(classifyToolFamily('creation_scene_import_html')).toBe('creation_scene_write')
+    expect(classifyToolFamily('creation_scene_craft_debug')).toBe('creation_scene')
+    expect(classifyToolFamily('creation_site_kit_page_save')).toBe('creation_scene_write')
   })
 
   it('mentions valid insert ops in connectivity block', () => {
@@ -61,6 +63,8 @@ describe('creation tool catalog + planner', () => {
       expect(block).toContain('SiteButton')
       expect(block).toContain('options')
       expect(block).toMatch(/Get started|nackte Instances|Seed/)
+      expect(block).toContain('creation_scene_craft_debug')
+      expect(block).toContain('creation_site_kit_page_save')
     } finally {
       if (prev === undefined) delete process.env.CREATION_MCP_URL
       else process.env.CREATION_MCP_URL = prev

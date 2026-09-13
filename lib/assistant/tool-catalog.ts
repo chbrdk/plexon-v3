@@ -120,13 +120,13 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   creation_compositions: [/^creation_compositions_/],
   creation_projects: [/^creation_projects_/, /^creation_project_/],
   creation_scene: [
-    /^creation_scene_(get|list|tree_index|content_audit|preview)$/,
+    /^creation_scene_(get|list|tree_index|content_audit|preview|craft_debug)$/,
     /^creation_editor_palette$/,
     /^creation_brand_tokens_get$/,
   ],
   creation_scene_write: [
     /^creation_scene_(apply_ops|import_html)$/,
-    /^creation_site_kit_composition_save$/,
+    /^creation_site_kit_(composition_save|page_save)$/,
   ],
   spirion_references: [
     /^spirion_references_search$/,

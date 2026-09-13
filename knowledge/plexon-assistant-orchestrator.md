@@ -155,7 +155,7 @@ Free-Chat-Anfragen laufen über `runAssistantAgent` (`lib/assistant/assistant-ag
 **User document attachments:** Composer (picker / paste / drag-drop) → `POST /api/assistant/documents/upload` (DOCX/PDF/PPTX/MD/TXT) → Complete `documentIds`. User-scoped store + quotas. Extracted text merges into the current user prompt (`### Attached document: …`) before Vision parts. Scanned PDFs: thin embedded text → page screenshots + tesseract OCR. Spec: `specs/domain/assistant-document-attachments.md`.
 
 **Env:** `ANTHROPIC_ASSISTANT_THINKING_BUDGET` (Default `4096`, `0`/`off`/`false` deaktiviert Extended Thinking).  
-**CREATION Scene-Edit only:** `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (Default `12`), `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` (Default `8192`, floored against base) — see `specs/domain/assistant-creation-mcp.md` § Creative depth.
+**CREATION Scene-Edit only:** `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (Default `14`), `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` (Default `8192`, floored against base) — see `specs/domain/assistant-creation-mcp.md` § Creative depth + Quality gate. Parallel read-only MCP rounds; writes stay serial.
 
 Plan-Metadaten: `assistant_messages.metadata.planner`.
 

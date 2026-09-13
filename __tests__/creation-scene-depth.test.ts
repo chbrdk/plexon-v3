@@ -31,9 +31,9 @@ describe('creation scene depth', () => {
     else process.env.ANTHROPIC_ASSISTANT_THINKING_BUDGET = originalBaseThinking
   })
 
-  it('defaults to 12 tool rounds for creation_scene_edit only', () => {
+  it('defaults to 14 tool rounds for creation_scene_edit only', () => {
     delete process.env.ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS
-    expect(getCreationSceneMaxToolRounds()).toBe(12)
+    expect(getCreationSceneMaxToolRounds()).toBe(14)
 
     const scene = planAssistantTurnHeuristic({
       prompt: 'Baue eine PDP Produktdetailseite im CREATION Editor Scene layout',
@@ -46,7 +46,7 @@ describe('creation scene depth', () => {
       compactContextLoaded: false,
     })
     expect(scene.intent).toBe('creation_scene_edit')
-    expect(scene.maxToolRounds).toBe(12)
+    expect(scene.maxToolRounds).toBe(14)
 
     const checkion = planAssistantTurnHeuristic({
       prompt: 'Fasse den letzten CHECKION Scan zusammen',
@@ -59,7 +59,7 @@ describe('creation scene depth', () => {
       compactContextLoaded: false,
     })
     expect(checkion.intent).not.toBe('creation_scene_edit')
-    expect(checkion.maxToolRounds).toBeLessThan(12)
+    expect(checkion.maxToolRounds).toBeLessThan(14)
   })
 
   it('raises thinking budget for scene edit when base thinking is on', () => {
@@ -89,6 +89,7 @@ describe('creation scene depth', () => {
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('clear_token_binding')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/#RRGGBB|background/)
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/Wireframe|wireframe|Fixture/)
+    expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_craft_debug')
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('creation_scene_preview')
     expect(buildCreationSceneDepthPromptBlock(true)).toMatch(/var\(--|Hex\/rem\/px/)
     expect(buildCreationSceneDepthPromptBlock(true)).toContain('freistehende HTML')
@@ -117,6 +118,6 @@ describe('creation scene depth', () => {
     })
     const block = buildPlanSystemPromptBlock(plan)
     expect(block).toContain('Layout-Tiefe')
-    expect(block).toContain('Max. Tool-Runden: 12')
+    expect(block).toContain('Max. Tool-Runden: 14')
   })
 })

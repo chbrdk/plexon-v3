@@ -25,6 +25,8 @@ import {
 } from '@/lib/assistant/context-budget';
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
 import { injectAssistantMcpToolArgs, extractCreationSceneUpdatedAt } from '@/lib/assistant/creation-scene-tool-args';
+import { shouldRunAssistantToolsInParallel } from '@/lib/assistant/mcp-tool-parallel';
+import { evaluateCreationSceneQuality } from '@/lib/assistant/creation-scene-quality';
 import {
   formatToolResultForAnthropic,
   isCreationScenePreviewToolName,
@@ -119,6 +121,8 @@ export type OrchestratorCompleteOptions = {
   onUiBlockUpdate?: (block: UiBlock, index: number) => void;
   onUiPanel?: (panel: UiPanelState) => void;
   onUiReset?: () => void;
+  /** Creation scene-edit: do not finish until audit + craft-debug + preview (after writes). */
+  creationQualityGate?: boolean;
 };
 
 export type OrchestratorCompleteResult = {
@@ -187,14 +191,17 @@ export function normalizeMessageHistory(rawMessages: unknown[], maxHistory = 50)
   return trimMessageHistory(normalized);
 }
 
+export type OrchestratorTimelineItem = {
+  assistantContent: ContentBlock[];
+  toolResults?: { id: string; content: AnthropicToolResultContent }[];
+  userText?: string;
+};
+
 /** Exported for unit tests — current turn multimodal; history text-only. */
 export function buildMessages(
   history: OrchestratorMessage[],
   currentPrompt: string,
-  toolRounds: Array<{
-    assistantContent: ContentBlock[];
-    toolResults: { id: string; content: AnthropicToolResultContent }[];
-  }>,
+  timeline: OrchestratorTimelineItem[],
   images: AssistantResolvedImage[] = [],
 ): AnthropicMessage[] {
   const out: AnthropicMessage[] = [];
@@ -204,16 +211,20 @@ export function buildMessages(
     }
   }
   out.push({ role: 'user', content: buildUserTurnContent(currentPrompt, images) });
-  for (const round of toolRounds) {
-    out.push({ role: 'assistant', content: round.assistantContent });
-    out.push({
-      role: 'user',
-      content: round.toolResults.map((r) => ({
-        type: 'tool_result' as const,
-        tool_use_id: r.id,
-        content: r.content,
-      })),
-    });
+  for (const item of timeline) {
+    out.push({ role: 'assistant', content: item.assistantContent });
+    if (item.toolResults?.length) {
+      out.push({
+        role: 'user',
+        content: item.toolResults.map((r) => ({
+          type: 'tool_result' as const,
+          tool_use_id: r.id,
+          content: r.content,
+        })),
+      });
+    } else if (item.userText) {
+      out.push({ role: 'user', content: item.userText });
+    }
   }
   return out;
 }
@@ -225,30 +236,25 @@ function stripImagesFromToolContent(content: AnthropicToolResultContent): Anthro
     .map((p) => (p.type === 'text' ? p : { type: 'text' as const, text: '[image omitted]' }));
 }
 
-function shrinkToolRoundsForBudget(
-  toolRounds: Array<{
-    assistantContent: ContentBlock[];
-    toolResults: { id: string; content: AnthropicToolResultContent }[];
-  }>,
-): void {
-  for (let i = 0; i < toolRounds.length - 1; i++) {
-    const round = toolRounds[i];
-    if (!round) continue;
+function shrinkToolRoundsForBudget(timeline: OrchestratorTimelineItem[]): void {
+  for (let i = 0; i < timeline.length - 1; i++) {
+    const round = timeline[i];
+    if (!round?.toolResults) continue;
     round.toolResults = round.toolResults.map((r) => ({
       ...r,
       content: stripImagesFromToolContent(r.content),
     }));
   }
-  while (toolRounds.length > 1) {
-    const messages = JSON.stringify(toolRounds);
+  while (timeline.length > 1) {
+    const messages = JSON.stringify(timeline);
     if (messages.length <= ASSISTANT_MAX_PROMPT_CHARS) break;
-    toolRounds.shift();
+    timeline.shift();
   }
-  if (toolRounds.length === 0) return;
-  const messages = JSON.stringify(toolRounds);
+  if (timeline.length === 0) return;
+  const messages = JSON.stringify(timeline);
   if (messages.length <= ASSISTANT_MAX_PROMPT_CHARS) return;
-  const last = toolRounds[toolRounds.length - 1];
-  if (!last) return;
+  const last = timeline[timeline.length - 1];
+  if (!last?.toolResults) return;
   last.toolResults = last.toolResults.map((r) => ({
     id: r.id,
     content:
@@ -256,7 +262,7 @@ function shrinkToolRoundsForBudget(
         ? truncateAssistantText(
             r.content,
             Math.floor(ASSISTANT_MAX_TOOL_RESULT_CHARS / 2),
-            'Tool-Ergebnis',
+            'Tool',
           )
         : stripImagesFromToolContent(r.content),
   }));
@@ -296,6 +302,7 @@ export async function runOrchestratorComplete(
     onUiBlockUpdate,
     onUiPanel,
     onUiReset,
+    creationQualityGate = false,
   } = options;
 
   const uiAccumulator = new UiBlockAccumulator();
@@ -379,10 +386,8 @@ export async function runOrchestratorComplete(
         ? getAssistantCompletionModel()
         : getBoardCompletionModel();
 
-  const toolRounds: Array<{
-    assistantContent: ContentBlock[];
-    toolResults: { id: string; content: AnthropicToolResultContent }[];
-  }> = [];
+  const timeline: OrchestratorTimelineItem[] = [];
+  const qualityTraces: Array<{ name: string; preview: string }> = [];
   let lastText = '';
 
   const thinkingBudget =
@@ -397,8 +402,8 @@ export async function runOrchestratorComplete(
   let turnSceneUpdatedAt = pageContext?.entityUpdatedAt?.trim() || null;
 
   for (let round = 0; round <= maxToolRounds; round++) {
-    shrinkToolRoundsForBudget(toolRounds);
-    const messages = buildMessages(history, prompt, toolRounds, images);
+    shrinkToolRoundsForBudget(timeline);
+    const messages = buildMessages(history, prompt, timeline, images);
     const maxTokens = thinkingBudget > 0 ? thinkingBudget + 8192 : 4096;
     const bodyPayload: Record<string, unknown> = {
       model,
@@ -470,20 +475,6 @@ export async function runOrchestratorComplete(
     const textBlock = content.find((c) => c.type === 'text');
     lastText = textBlock && 'text' in textBlock ? String(textBlock.text) : '';
 
-    if (stopReason !== 'tool_use' || tools.length === 0) {
-      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
-    }
-
-    const toolUseBlocks = content.filter(
-      (c): c is { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> } =>
-        c.type === 'tool_use' && typeof c.id === 'string' && typeof c.name === 'string'
-    );
-    if (toolUseBlocks.length === 0) {
-      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
-    }
-
-    onToolRound?.();
-
     const assistantContent: ContentBlock[] = content
       .map((c) => {
         if (c.type === 'thinking' && c.thinking != null) {
@@ -500,7 +491,38 @@ export async function runOrchestratorComplete(
       })
       .filter((b) => (b.type === 'text' ? b.text !== '' : true));
 
-    const toolResults: { id: string; content: AnthropicToolResultContent }[] = [];
+    if (stopReason !== 'tool_use' || tools.length === 0) {
+      if (creationQualityGate && tools.length > 0 && round < maxToolRounds) {
+        const verdict = evaluateCreationSceneQuality(qualityTraces);
+        if (!verdict.pass) {
+          timeline.push({ assistantContent, userText: verdict.nudge });
+          continue;
+        }
+      }
+      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
+    }
+
+    const toolUseBlocks = content.filter(
+      (c): c is { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> } =>
+        c.type === 'tool_use' && typeof c.id === 'string' && typeof c.name === 'string'
+    );
+    if (toolUseBlocks.length === 0) {
+      if (creationQualityGate && round < maxToolRounds) {
+        const verdict = evaluateCreationSceneQuality(qualityTraces);
+        if (!verdict.pass) {
+          timeline.push({ assistantContent, userText: verdict.nudge });
+          continue;
+        }
+      }
+      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
+    }
+
+    onToolRound?.();
+
+    type ToolUseBlock = (typeof toolUseBlocks)[number];
+    const resultById = new Map<string, AnthropicToolResultContent>();
+    const toRun: ToolUseBlock[] = [];
+
     for (const block of toolUseBlocks) {
       if (beforeToolCall) {
         const gate = await beforeToolCall(block.name, block.input ?? {});
@@ -517,10 +539,10 @@ export async function runOrchestratorComplete(
               },
             };
           }
-          toolResults.push({
-            id: block.id,
-            content: JSON.stringify({ error: gate.reason ?? 'Tool call blocked' }),
-          });
+          resultById.set(
+            block.id,
+            JSON.stringify({ error: gate.reason ?? 'Tool call blocked' }),
+          );
           continue;
         }
       } else if (isConfirmationRequiredToolName(block.name)) {
@@ -535,7 +557,15 @@ export async function runOrchestratorComplete(
           },
         };
       }
+      toRun.push(block);
+    }
 
+    const runBlock = async (block: ToolUseBlock): Promise<{
+      id: string;
+      name: string;
+      content: AnthropicToolResultContent;
+      preview: string;
+    }> => {
       const mcpName = mcpNameByAnthropicName[block.name] ?? block.name;
       const baseUrl = toolSourceByAnthropicName[block.name];
 
@@ -564,8 +594,9 @@ export async function runOrchestratorComplete(
             : `block:${uiResult.blockId}`
           : uiResult.error ?? 'error';
         onToolEnd?.(block.name, preview);
-        toolResults.push({
+        return {
           id: block.id,
+          name: block.name,
           content: JSON.stringify({
             ok: uiResult.ok,
             blockId: uiResult.blockId,
@@ -573,16 +604,18 @@ export async function runOrchestratorComplete(
             cleared: uiResult.cleared,
             error: uiResult.error,
           }),
-        });
-        continue;
+          preview,
+        };
       }
 
       if (!baseUrl) {
-        toolResults.push({
+        const preview = `Unknown tool source for ${block.name}`;
+        return {
           id: block.id,
-          content: JSON.stringify({ error: `Unknown tool source for ${block.name}` }),
-        });
-        continue;
+          name: block.name,
+          content: JSON.stringify({ error: preview }),
+          preview,
+        };
       }
       onToolStart?.(block.name, block.input ?? {});
       const toolInput = injectAssistantMcpToolArgs(block.name, block.input ?? {}, {
@@ -685,13 +718,42 @@ export async function runOrchestratorComplete(
         }
       }
 
-      toolResults.push({
+      return {
         id: block.id,
+        name: block.name,
         content: multimodal,
-      });
+        preview: previewLog,
+      };
+    };
+
+    const executed = shouldRunAssistantToolsInParallel(toRun.map((b) => b.name))
+      ? await Promise.all(toRun.map((block) => runBlock(block)))
+      : await (async () => {
+          const out: Array<{
+            id: string;
+            name: string;
+            content: AnthropicToolResultContent;
+            preview: string;
+          }> = [];
+          for (const block of toRun) {
+            out.push(await runBlock(block));
+          }
+          return out;
+        })();
+
+    for (const item of executed) {
+      resultById.set(item.id, item.content);
+      qualityTraces.push({ name: item.name, preview: item.preview });
     }
 
-    toolRounds.push({ assistantContent, toolResults });
+    const toolResults = toolUseBlocks.map((block) => ({
+      id: block.id,
+      content:
+        resultById.get(block.id) ??
+        JSON.stringify({ error: 'missing-tool-result' }),
+    }));
+
+    timeline.push({ assistantContent, toolResults });
   }
 
   return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };

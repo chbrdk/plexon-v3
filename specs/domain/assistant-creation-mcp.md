@@ -1,8 +1,8 @@
 # Assistant ↔ CREATION MCP
 
-**Status:** Accepted — 2026-08-12 · **P90 scene write** 2026-08-23  
-**Depends:** `creation-v3/specs/domain/mcp-server.md` · `creation-v3/specs/domain/scene-agent-editing.md`  
-**Knowledge:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/creation-v3-onboarding.md` · `knowledge/paths.md` · `creation-v3/knowledge/scene-agent-site-kit-recipe.md`
+**Status:** Accepted — 2026-08-12 · **P90 scene write** 2026-08-23 · **Quality loop** 2026-09-13  
+**Depends:** `creation-v3/specs/domain/mcp-server.md` · `creation-v3/specs/domain/scene-agent-editing.md` · `creation-v3/specs/domain/craft-debug.md` · `creation-v3/specs/domain/page-as-pattern.md`  
+**Knowledge:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/creation-mcp-assistant.md` · `knowledge/creation-v3-onboarding.md` · `knowledge/paths.md` · `creation-v3/knowledge/scene-agent-site-kit-recipe.md`
 
 ## Purpose
 
@@ -33,8 +33,8 @@ Connectivity: `buildCreationIntegrationContextBlock`.
 | `creation_library` | `^creation_health$`, `^creation_library_` |
 | `creation_compositions` | `^creation_compositions_` |
 | `creation_projects` | `^creation_projects_`, `^creation_project_` |
-| `creation_scene` | `^creation_scene_(get|list|tree_index)$`, `^creation_editor_palette$`, `^creation_brand_tokens_get$` |
-| `creation_scene_write` | `^creation_scene_(apply_ops|import_html)$`, `^creation_site_kit_composition_save$` |
+| `creation_scene` | `^creation_scene_(get|list|tree_index|content_audit|preview|craft_debug)$`, `^creation_editor_palette$`, `^creation_brand_tokens_get$` |
+| `creation_scene_write` | `^creation_scene_(apply_ops|import_html)$`, `^creation_site_kit_(composition_save|page_save)$` |
 
 - v1 read families (`creation_library`, `creation_compositions`, `creation_projects`) remain read-only in Q&A.
 - `creation_scene` is read-only; include in `READ_ONLY_QA_FAMILIES` and `KNOWLEDGE_QA_FAMILIES`.
@@ -54,10 +54,11 @@ Heuristic: `creation_scene_edit` when prompt matches scene|layout|editor|hero|la
 ### Latency
 
 - `resolveMcpFlagsForPlan`: for `creation_scene_edit` / `creation_design` contact CREATION MCP (skip Checkion/Audion/Echon). Also contact **Brandion** when `useBrandionMcp` (active-pack / `brandion_tokens_*` for Collection identity). When `useSpirionMcp`, also contact Spirion for reference/screen inspiration (see `assistant-spirion-mcp.md`).
-- Prefetch: editor turns load a compact scene-tree **outline** into the system prompt before the first LLM round.
+- Prefetch: editor turns load a compact scene-tree **outline**, palette types, and compact `craft-debug` into the system prompt before the first LLM round. When Spirion MCP is on, also prefetch `spirion_captures_list` (no Collection filter).
 - Orchestrator compacts `creation_scene_tree_index` results to the same outline format.
 - MCP `tools/list` is cached ~60s per base URL; product MCP fetches run in parallel when multiple are enabled.
-- Before finishing PDP/landing builds: call `creation_scene_content_audit` and fix error findings (Welle 1 self-check).
+- **Parallel reads:** WENN eine Tool-Runde nur read-safe Tools enthält (audit, preview, craft-debug, palette, Spirion list, …), DANN MUSS der Orchestrator sie per `Promise.all` ausführen. WENN die Runde eine Write-Tool enthält (`apply_ops`, `import_html`, `site_kit_*`), DANN MUSS die Runde in Aufrufreihenfolge seriell bleiben (optimistic lock).
+- Before finishing PDP/landing builds: call `creation_scene_content_audit` **and** `creation_scene_craft_debug` and fix error / `craft-thin` findings (Welle 1 self-check).
 
 ### Creative depth (`creation_scene_edit` only)
 
@@ -65,7 +66,7 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 
 | Lever | Default | Env override | Other intents |
 |-------|---------|--------------|---------------|
-| `maxToolRounds` | **12** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
+| `maxToolRounds` | **14** | `ASSISTANT_CREATION_SCENE_MAX_TOOL_ROUNDS` (1–16) | unchanged (typ. 4–6, LLM refine cap 8) |
 | Extended thinking budget | **max(base, 8192)** | `ANTHROPIC_CREATION_SCENE_THINKING_BUDGET` | base only (`ANTHROPIC_ASSISTANT_THINKING_BUDGET`, default 4096) |
 | System prompt | phased craft + **forbid seed copy**; prefer `insert_child`+props; **free literals via `set_prop`** (Hex/gap/radius) + optional `set_token_binding`; anti-wireframe Vision | — | no craft block |
 
@@ -76,6 +77,20 @@ Layout/build turns need more room than Checkion/Audion Q&A. **Only** when planne
 - **Freies Styling (first-class):** Farben/Abstände/Radii wie im Inspector — `set_prop` mit Literal (`background`/`color`/`borderColor`/`gap`/`radius`/`fontSize`/… → Hex, rem, px). Bestehendes Token auf dem Key → `clear_token_binding`. Paint: Props überschreiben Token-Resolve (`resolveNodePaintStyle`). **Kein** neues Brandion-Token nötig. `set_token_binding` optional wenn Pack passt. `set_style` nur `width`/`height`. Optional `creation_brand_tokens_get` — nicht blockierend. Spirion = Inspiration only (see `assistant-spirion-mcp.md`).
 - After audit: `creation_scene_preview` for Vision (Welle 2; max 2 rounds). Vision MUST fail gray wireframe / tiny placeholder images / untouched Site Kit fixture chrome.
 - **HTML first-draft (Shipped P1):** Greenfield landings SHOULD use one HTML document → `creation_scene_import_html` → audit/preview, not dozens of `insert_child` rounds. Ops remain for polish. React/JSX import is out of scope for v1. See `creation-v3/specs/domain/html-scene-import.md`.
+- **Page as Pattern:** `creation_site_kit_page_save` for “Seite als Pattern speichern”; follow-up `bind_master_composition` via `apply_ops` if the route did not already bind.
+
+### Quality gate (in-process critic, not a second scene writer)
+
+WENN Intent `creation_scene_edit` **and** write tools ran in the turn, DANN MUSS der Orchestrator den Turn **nicht** als fertig akzeptieren solange:
+
+1. `creation_scene_content_audit` fehlt, oder
+2. `creation_scene_craft_debug` fehlt, oder
+3. `creation_scene_preview` fehlt (soft-skip only when the preview tool itself returned `error`), oder
+4. last audit has `error` findings, oder last craft-debug `craftFlags` contains `craft-thin`
+
+Dann: remaining tool rounds als **QA-Nudge** (user message, kein paralleler Scene-Writer). Kein zweiter Writer-Subagent — optimistic lock bleibt beim Coordinator.
+
+Non-goal: Anthropic Managed Agents API / parallel scene writers.
 
 ## Non-goals
 
@@ -89,8 +104,9 @@ Collection ACL for service writes is **enforced fail-closed** in CREATION (`requ
 
 ## Acceptance
 
-1. Unit: catalog classifies `creation_scene_tree_index` → `creation_scene`, `creation_scene_apply_ops` / `creation_scene_import_html` → `creation_scene_write`.
+1. Unit: catalog classifies `creation_scene_tree_index` / `creation_scene_craft_debug` → `creation_scene`, `creation_scene_apply_ops` / `creation_scene_import_html` / `creation_site_kit_page_save` → `creation_scene_write`.
 2. Gate: `resolveUseCreationMcp` mirrors Brandion rules.
 3. Planner: layout prompts → `creation_scene_edit` with write tools only when user asks to change/build.
 4. Staging: set `CREATION_MCP_URL` after Coolify `creation-mcp` is live.
-5. Unit: `creation_scene_edit` plans ≥12 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.
+5. Unit: `creation_scene_edit` plans ≥14 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.
+6. Unit: all-read tool rounds are parallel-safe; write rounds are not. Quality gate requires audit + craft-debug + preview after writes.

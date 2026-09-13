@@ -180,24 +180,27 @@ export async function runAssistantAgent(
     phase: plan.maxToolRounds > 0 && !plan.skipTools ? 'tools' : 'executing',
   });
 
-  const sceneTreePrefetch =
+  const scenePrefetch =
     plan.intent === 'creation_scene_edit'
       ? await prefetchCreationSceneTreeBlock({
           pageContext: input.pageContext,
           actorUserId: input.user.id,
           useCreationMcp: mcpFlags.useCreationMcp,
+          useSpirionMcp: mcpFlags.useSpirionMcp,
         })
       : null;
-  if (sceneTreePrefetch) {
-    input.onToolStart?.('creation_scene_tree_index', {
-      sceneId: input.pageContext?.entityId,
-      prefetch: true,
-    });
-    input.onToolEnd?.('creation_scene_tree_index', 'prefetch outline');
+  if (scenePrefetch) {
+    for (const hit of scenePrefetch.hits) {
+      input.onToolStart?.(hit.toolName, {
+        sceneId: input.pageContext?.entityId,
+        prefetch: true,
+      });
+      input.onToolEnd?.(hit.toolName, hit.preview);
+    }
   }
 
   const retrievalBlock = retrieval?.block ? `\n${retrieval.block}\n` : '';
-  const prefetchBlock = sceneTreePrefetch ? `\n${sceneTreePrefetch}\n` : '';
+  const prefetchBlock = scenePrefetch?.block ? `\n${scenePrefetch.block}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
   const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n${retrievalBlock}${prefetchBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
@@ -232,6 +235,7 @@ export async function runAssistantAgent(
     onUiBlockUpdate: input.onUiBlockUpdate,
     onUiPanel: input.onUiPanel,
     onUiReset: input.onUiReset,
+    creationQualityGate: plan.intent === 'creation_scene_edit' && plan.allowWriteTools,
   });
 
   return { ...orchestratorResult, plan, retrieval, uiLayout: orchestratorResult.uiLayout };

@@ -11,6 +11,7 @@ describe('summarizeAssistantToolTrace', () => {
       },
       { name: 'creation_scene_import_html', preview: '{"ok":true,"bytes":12000}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
+      { name: 'creation_scene_craft_debug', preview: '{"craftFlags":[]}' },
       { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
     ])
 
@@ -19,6 +20,7 @@ describe('summarizeAssistantToolTrace', () => {
       'spirion_capture_prompt_pack',
       'creation_scene_import_html',
       'creation_scene_content_audit',
+      'creation_scene_craft_debug',
       'creation_scene_preview',
     ])
     expect(summary.spirion.capturesListCalled).toBe(true)
@@ -26,6 +28,7 @@ describe('summarizeAssistantToolTrace', () => {
     expect(summary.spirion.captureIds).toContain('cap_abc123')
     expect(summary.creation.importHtmlCalled).toBe(true)
     expect(summary.creation.contentAuditCalled).toBe(true)
+    expect(summary.creation.craftDebugCalled).toBe(true)
     expect(summary.creation.previewCalled).toBe(true)
   })
 

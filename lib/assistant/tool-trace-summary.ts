@@ -15,11 +15,12 @@ export type AssistantToolTraceSummary = {
     capturePromptPackCalled: boolean;
     captureIds: string[];
   };
-  creation: {
-    importHtmlCalled: boolean;
-    contentAuditCalled: boolean;
-    previewCalled: boolean;
-  };
+    creation: {
+      importHtmlCalled: boolean;
+      contentAuditCalled: boolean;
+      previewCalled: boolean;
+      craftDebugCalled: boolean;
+    };
 };
 
 const CAPTURE_ID_RE = /cap_[a-z0-9]+/gi;
@@ -35,6 +36,7 @@ export function summarizeAssistantToolTrace(
   let importHtmlCalled = false;
   let contentAuditCalled = false;
   let previewCalled = false;
+  let craftDebugCalled = false;
 
   for (const e of entries) {
     const name = e.name.trim();
@@ -54,6 +56,7 @@ export function summarizeAssistantToolTrace(
     }
     if (n.includes('import_html')) importHtmlCalled = true;
     if (n.includes('content_audit')) contentAuditCalled = true;
+    if (n.includes('craft_debug')) craftDebugCalled = true;
     if (n.includes('scene_preview') && !n.includes('preview_html')) previewCalled = true;
   }
 
@@ -68,6 +71,7 @@ export function summarizeAssistantToolTrace(
       importHtmlCalled,
       contentAuditCalled,
       previewCalled,
+      craftDebugCalled,
     },
   };
 }
