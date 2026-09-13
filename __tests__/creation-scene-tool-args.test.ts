@@ -76,14 +76,17 @@ describe('injectCreationSceneToolArgs', () => {
     expect(out.ops).toEqual(ops)
   })
 
-  it('leaves already-array ops unchanged', () => {
-    const ops = [{ op: 'add_page' }]
+  it('coerces set_prop prop alias to key before MCP', () => {
     const out = injectCreationSceneToolArgs(
-      'creation.scene_apply_ops',
-      { ops },
+      'creation_scene_apply_ops',
+      {
+        ops: [{ op: 'set_prop', nodeId: 'chip-1', prop: 'tone', value: 'accent' }],
+      },
       { pageContext: editorContext, actorUserId: 'user-1' },
     )
-    expect(out.ops).toBe(ops)
+    expect(out.ops).toEqual([
+      { op: 'set_prop', nodeId: 'chip-1', prop: 'tone', key: 'tone', value: 'accent' },
+    ])
   })
 
   it('leaves unrelated tools unchanged', () => {

@@ -22,4 +22,4 @@ Creation checklist + golden fixture: `creation-v3/knowledge/print-report-quality
 
 ## Write path (ops)
 
-Plexon coerces stringified `ops` → array in `injectCreationSceneToolArgs` (`lib/assistant/creation-scene-tool-args.ts`). Creation MCP `creation.scene_apply_ops` also preprocesses string → array. Agents must still pass a native array when possible; documenting a tree without `apply_ops` is a failed turn.
+Plexon coerces stringified `ops` → array in `injectCreationSceneToolArgs` (`lib/assistant/creation-scene-tool-args.ts`) and maps `set_prop.prop|property` → `key`. Creation MCP `creation.scene_apply_ops` also preprocesses string → array. Creation BFF normalizes the same aliases (`lib/scene/normalize-scene-op.ts`) so missing `key` returns **400** instead of **500**. Agents must still pass a native array when possible; documenting a tree without `apply_ops` is a failed turn.

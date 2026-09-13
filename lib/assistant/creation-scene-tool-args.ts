@@ -34,10 +34,33 @@ export function coerceJsonArrayArg(value: unknown): unknown {
 
 function coerceCreationWriteArgs(toolName: string, input: Record<string, unknown>): Record<string, unknown> {
   if (!/apply_ops/.test(toolName)) return input;
-  if (!('ops' in input)) return input;
-  const ops = coerceJsonArrayArg(input.ops);
-  if (ops === input.ops) return input;
-  return { ...input, ops };
+  let out = input;
+  if ('ops' in input) {
+    const ops = coerceJsonArrayArg(input.ops);
+    if (ops !== input.ops) out = { ...out, ops };
+  }
+  const list = out.ops;
+  if (!Array.isArray(list)) return out;
+  const normalized = list.map((raw) => {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+    const op = { ...(raw as Record<string, unknown>) };
+    const kind = typeof op.op === 'string' ? op.op : '';
+    if (
+      kind === 'set_prop' ||
+      kind === 'set_style' ||
+      kind === 'set_token_binding' ||
+      kind === 'clear_token_binding'
+    ) {
+      const key =
+        (typeof op.key === 'string' && op.key.trim()) ||
+        (typeof op.prop === 'string' && op.prop.trim()) ||
+        (typeof op.property === 'string' && op.property.trim()) ||
+        '';
+      if (key) op.key = key;
+    }
+    return op;
+  });
+  return { ...out, ops: normalized };
 }
 
 /** Extract scene updatedAt from CREATION ops/import tool JSON (success or stale 409). */
