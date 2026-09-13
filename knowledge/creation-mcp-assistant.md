@@ -20,6 +20,11 @@
 - Prefetch (editor scene context): tree outline + palette types + compact craft-debug; optional Spirion `captures_list`.
 - Parallel MCP reads when a round has no writes.
 - After writes: orchestrator quality gate requires audit + craft-debug + preview before the turn may finish. `craft-thin` is a must-fix.
+- **A1 visual must-fix:** seed/fixture chrome; landing jobs also require hero mass + CTA (outline Button/Link or audit `missing-cta`). Preview tool errors soft-skip; missing preview still blocks.
 - Page→Pattern: `creation.site_kit_page_save` (persists bound scene). Op `bind_master_composition` is on the curated apply_ops allowlist.
 
 Coordinator remains the only scene writer — no parallel layout subagents.
+
+## Domain autonomy (“AGI-lite”)
+
+Next wave after the quality loop: visual must-fix → craft playbooks → Collection craft memory → eval harness. Spec: `specs/domain/assistant-creation-agi-lite.md` · craft notes: `knowledge/assistant-creation-agi-lite.md`.

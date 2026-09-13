@@ -1,6 +1,7 @@
 # Assistant ↔ CREATION MCP
 
 **Status:** Accepted — 2026-08-12 · **P90 scene write** 2026-08-23 · **Quality loop** 2026-09-13  
+**Next:** Domain autonomy wave (“AGI-lite”) — `specs/domain/assistant-creation-agi-lite.md` · `knowledge/assistant-creation-agi-lite.md`  
 **Depends:** `creation-v3/specs/domain/mcp-server.md` · `creation-v3/specs/domain/scene-agent-editing.md` · `creation-v3/specs/domain/craft-debug.md` · `creation-v3/specs/domain/page-as-pattern.md`  
 **Knowledge:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/creation-mcp-assistant.md` · `knowledge/creation-v3-onboarding.md` · `knowledge/paths.md` · `creation-v3/knowledge/scene-agent-site-kit-recipe.md`
 
@@ -86,11 +87,17 @@ WENN Intent `creation_scene_edit` **and** write tools ran in the turn, DANN MUSS
 1. `creation_scene_content_audit` fehlt, oder
 2. `creation_scene_craft_debug` fehlt, oder
 3. `creation_scene_preview` fehlt (soft-skip only when the preview tool itself returned `error`), oder
-4. last audit has `error` findings, oder last craft-debug `craftFlags` contains `craft-thin`
+4. last audit has `error` findings, oder last craft-debug `craftFlags` contains `craft-thin`, oder
+5. **Wave A1** seed/fixture chrome is still visible (`Get started`, `Option A/B`, fixture orange / Noto), oder
+6. **Wave A1 landing job** (prompt/heuristic `landing`|`startseite`|`hero`|`pdp`|…): missing hero mass (`hasLargeDisplay` / `hasHeroMedia`) or missing CTA (audit `missing-cta` or tree outline without Button/Link)
 
 Dann: remaining tool rounds als **QA-Nudge** (user message, kein paralleler Scene-Writer). Kein zweiter Writer-Subagent — optimistic lock bleibt beim Coordinator.
 
+Job resolution: `resolveCreationSceneQualityJob` · options from `creationQualityUserPrompt` / `creationQualityJob` on `runOrchestratorComplete`.
+
 Non-goal: Anthropic Managed Agents API / parallel scene writers.
+
+Domain autonomy roadmap: `specs/domain/assistant-creation-agi-lite.md`.
 
 ## Non-goals
 
@@ -110,3 +117,4 @@ Collection ACL for service writes is **enforced fail-closed** in CREATION (`requ
 4. Staging: set `CREATION_MCP_URL` after Coolify `creation-mcp` is live.
 5. Unit: `creation_scene_edit` plans ≥14 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.
 6. Unit: all-read tool rounds are parallel-safe; write rounds are not. Quality gate requires audit + craft-debug + preview after writes.
+7. Unit (A1): landing job fails on seed chrome, missing CTA (no button/link in outline), and missing hero mass without `craft-thin`; preview tool `error` soft-skips, missing preview still blocks.

@@ -236,6 +236,8 @@ export async function runAssistantAgent(
     onUiPanel: input.onUiPanel,
     onUiReset: input.onUiReset,
     creationQualityGate: plan.intent === 'creation_scene_edit' && plan.allowWriteTools,
+    creationQualityUserPrompt: input.prompt,
+    creationQualityJob: 'auto',
   });
 
   return { ...orchestratorResult, plan, retrieval, uiLayout: orchestratorResult.uiLayout };

@@ -232,3 +232,7 @@ Einheitliche Capabilities für Assistent **und** Collection Flow — Spec: **`sp
 | C5 | EQC Persona-CTA → Audion `/chat` Deep-Link; optional `audion.persona_chat` Agent-only | CTA Done · chip/catalog optional |
 
 **Nicht:** Jeder Flow-Node als Agent-Tool; Free-JS-Nodes; Explore-Tools (`plexon_ui_*`, Token-Q&A) als Canvas-Nodes; Audion-Persona-Chat in den Platform-Assistant mergen.
+
+## Creation domain autonomy (“AGI-lite”)
+
+Nach dem Quality-Loop (Prefetch, parallele Reads, Gate audit/craft-debug/preview): Wave A–D für visuelle Must-fix, Craft-Playbooks, Collection Craft-Memory und Eval-Harness. Spec: **`specs/domain/assistant-creation-agi-lite.md`** · Knowledge: **`knowledge/assistant-creation-agi-lite.md`**. Ein Scene-Writer bleibt verbindlich.

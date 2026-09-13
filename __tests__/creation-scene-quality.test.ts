@@ -3,7 +3,7 @@ import {
   isParallelSafeAssistantTool,
   shouldRunAssistantToolsInParallel,
 } from '@/lib/assistant/mcp-tool-parallel'
-import { evaluateCreationSceneQuality } from '@/lib/assistant/creation-scene-quality'
+import { evaluateCreationSceneQuality, resolveCreationSceneQualityJob } from '@/lib/assistant/creation-scene-quality'
 import { classifyToolFamily, isDestructiveOrWriteTool } from '@/lib/assistant/tool-catalog'
 import { buildMessages } from '@/lib/assistant/orchestrator-complete'
 
@@ -71,13 +71,138 @@ describe('creation scene quality gate', () => {
   })
 
   it('passes after audit + craft-debug + preview without errors', () => {
-    const verdict = evaluateCreationSceneQuality([
-      { name: 'creation_scene_import_html' },
-      { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
-      { name: 'creation_scene_craft_debug', preview: '{"craftFlags":[]}' },
-      { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
-    ])
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":64}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'landing', userPrompt: 'Baue eine Landing' },
+    )
     expect(verdict.pass).toBe(true)
+    expect(verdict.job).toBe('landing')
+  })
+
+  it('fails on fixture seed chrome for landing jobs', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        {
+          name: 'creation_scene_content_audit',
+          preview:
+            '{"ok":true,"findings":[{"severity":"warning","code":"generic-alt","message":"Get started still visible"}]}',
+        },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":20,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":56}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- CTA [b1] SiteButton Get started',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Seed|Fixture/i)
+  })
+
+  it('fails on missing CTA when landing outline has no button/link', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_apply_ops' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":18,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":52}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - Title [t1] SiteText',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/CTA fehlt/)
+  })
+
+  it('fails on missing hero mass for landing without craft-thin flag', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":20,"hasLargeDisplay":false,"hasHeroMedia":false,"maxFontSizePx":18}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Hero-Masse/)
+  })
+
+  it('soft-skips preview tool errors but still blocks when preview was never called', () => {
+    const withError = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":64}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"error":"playwright timeout"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'generic' },
+    )
+    expect(withError.pass).toBe(true)
+
+    const missing = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":64}}',
+        },
+      ],
+      { job: 'generic' },
+    )
+    expect(missing.pass).toBe(false)
+    expect(missing.findings.join(' ')).toMatch(/preview fehlt/)
+  })
+
+  it('resolves landing job from user prompt when job=auto', () => {
+    expect(resolveCreationSceneQualityJob({ userPrompt: 'Baue eine Landing mit Hero' })).toBe(
+      'landing',
+    )
+    expect(resolveCreationSceneQualityJob({ userPrompt: 'Rename den Layer' })).toBe('generic')
   })
 })
 

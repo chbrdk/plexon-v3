@@ -20,6 +20,7 @@
 | UI migrate — assistant | `specs/domain/ui-migrate-assistant.md` |
 | Central Assistant Flyout | `specs/domain/central-assistant-flyout.md` |
 | Assistant ↔ CREATION MCP (scene quality loop) | `specs/domain/assistant-creation-mcp.md` |
+| Assistant ↔ CREATION domain autonomy (“AGI-lite”) | `specs/domain/assistant-creation-agi-lite.md` |
 | Assistant page context | `specs/domain/assistant-page-context.md` |
 | Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |
 | Assistant journey outline | `specs/domain/assistant-journey-outline.md` |
@@ -44,6 +45,7 @@
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
 | Central Assistant Flyout | `knowledge/central-assistant-flyout.md` |
 | CREATION MCP (scene + quality loop) | `knowledge/creation-mcp-assistant.md` |
+| CREATION domain autonomy (“AGI-lite”) | `knowledge/assistant-creation-agi-lite.md` |
 | Capability Catalog | `knowledge/capability-catalog.md` |
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |

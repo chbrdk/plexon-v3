@@ -123,6 +123,10 @@ export type OrchestratorCompleteOptions = {
   onUiReset?: () => void;
   /** Creation scene-edit: do not finish until audit + craft-debug + preview (after writes). */
   creationQualityGate?: boolean;
+  /** Prompt used to resolve landing vs generic quality job (Wave A1). */
+  creationQualityUserPrompt?: string;
+  /** Explicit quality job; default auto from prompt. */
+  creationQualityJob?: 'landing' | 'generic' | 'auto';
 };
 
 export type OrchestratorCompleteResult = {
@@ -303,7 +307,14 @@ export async function runOrchestratorComplete(
     onUiPanel,
     onUiReset,
     creationQualityGate = false,
+    creationQualityUserPrompt,
+    creationQualityJob = 'auto',
   } = options;
+
+  const creationQualityOptions = {
+    job: creationQualityJob,
+    userPrompt: creationQualityUserPrompt ?? prompt,
+  };
 
   const uiAccumulator = new UiBlockAccumulator();
 
@@ -493,7 +504,7 @@ export async function runOrchestratorComplete(
 
     if (stopReason !== 'tool_use' || tools.length === 0) {
       if (creationQualityGate && tools.length > 0 && round < maxToolRounds) {
-        const verdict = evaluateCreationSceneQuality(qualityTraces);
+        const verdict = evaluateCreationSceneQuality(qualityTraces, creationQualityOptions);
         if (!verdict.pass) {
           timeline.push({ assistantContent, userText: verdict.nudge });
           continue;
@@ -508,7 +519,7 @@ export async function runOrchestratorComplete(
     );
     if (toolUseBlocks.length === 0) {
       if (creationQualityGate && round < maxToolRounds) {
-        const verdict = evaluateCreationSceneQuality(qualityTraces);
+        const verdict = evaluateCreationSceneQuality(qualityTraces, creationQualityOptions);
         if (!verdict.pass) {
           timeline.push({ assistantContent, userText: verdict.nudge });
           continue;
