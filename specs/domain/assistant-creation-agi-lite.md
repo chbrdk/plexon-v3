@@ -123,6 +123,7 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 
 ## Wave C — Collection craft memory (scoped)
 
+**Status C:** Implemented 2026-09-13 (`lib/assistant/knowledge-pack/distill-creation-craft.ts`)  
 **Goal:** Next turn on the same Collection starts warmer — without chat dumps.
 
 ### Store
@@ -138,7 +139,11 @@ Reuse Collection Knowledge Pack `research_brief.sections[]` (Wave 1 transport).
 
 ### Read
 
-On `creation_scene_edit` with `platformProjectId`, hydrate these sections into the system prompt (compact, budget-capped) **after** entitlement/scope checks.
+On `creation_scene_edit` with `platformProjectId`, hydrate these sections into the system prompt via `buildCreationCraftMemoryHydrateBlock` (compact, budget-capped) **after** entitlement/scope checks — dedicated block, not only the generic Knowledge Pack teaser (first N sections).
+
+### Write
+
+After a Creation scene turn **passes** the quality gate (writes occurred), best-effort `distillCreationCraftToKnowledgePack` merges section(s). Unbound Collection → skip (no invent). Env `ASSISTANT_CREATION_CRAFT_MEMORY=0` disables publish+hydrate (default on).
 
 ### Non-goals C
 
@@ -149,8 +154,9 @@ On `creation_scene_edit` with `platformProjectId`, hydrate these sections into t
 ### Acceptance C
 
 1. Unit: distill builder emits stable section ids; merge replaces previous.
-2. Unit: unbound scene → no craft-prefs publish.
-3. Staging: second landing on same Collection references prior prefs in tool choices (manual rubric).
+2. Unit: unbound scene → no craft-prefs publish (`missing-platform-project-id` skip).
+3. Unit: no scene writes → skip publish.
+4. Staging: second landing on same Collection references prior prefs in tool choices (manual rubric).
 
 ## Wave D — Eval harness + model routing
 

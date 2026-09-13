@@ -22,6 +22,7 @@
 - After writes: orchestrator quality gate requires audit + craft-debug + preview before the turn may finish. `craft-thin` is a must-fix.
 - **A1 visual must-fix:** seed/fixture chrome; landing jobs also require hero mass + CTA (outline Button/Link or audit `missing-cta`). Preview tool errors soft-skip; missing preview still blocks.
 - **B craft playbooks:** format-aware (`creation_landing_v1`, `creation_newsletter_v1`, `creation_print_magazine_v1`, `creation_print_report_v1`, `creation_page_as_pattern_v1`) — see `knowledge/creation-craft-playbooks.md`. Gate jobs: landing / newsletter / print / generic.
+- **C craft memory:** after gated success, merge `creation-craft-prefs-latest` (+ format recipe) into Collection Knowledge Pack; hydrate on next `creation_scene_edit`. Env `ASSISTANT_CREATION_CRAFT_MEMORY` (default on). Code: `lib/assistant/knowledge-pack/distill-creation-craft.ts`.
 - Page→Pattern: `creation.site_kit_page_save` (persists bound scene). Op `bind_master_composition` is on the curated apply_ops allowlist.
 
 Coordinator remains the only scene writer — no parallel layout subagents.

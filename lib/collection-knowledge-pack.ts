@@ -208,7 +208,7 @@ export const FACET_SIZE_BUDGETS: Record<KnowledgeFacetId, number> = {
 export const COMPETITIVE_HOST_CAP = 25;
 export const GEO_SEED_QUERY_CAP = 24;
 export const SOURCES_ITEM_CAP = 100;
-export const RESEARCH_SECTION_CAP = 8;
+export const RESEARCH_SECTION_CAP = 16;
 
 const SYSTEM_PROVENANCE: FacetProvenance = {
   actorType: 'system',

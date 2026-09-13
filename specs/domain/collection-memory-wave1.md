@@ -33,6 +33,10 @@ Make **research and chat outcomes** reusable across Plexon Assistant and product
 | `vaillant-uc2-flow-latest` | Vaillant UC2 template run | Each UC2 complete |
 | `assistant-report-latest` | Plexon Assistant curated report | Each report generate (when Collection bound) |
 | `flow-report-latest` | Collection Flow curated report (pinned outputs) | Each flow report generate |
+| `creation-craft-prefs-latest` | Creation scene craft prefs (Wave C) | Successful gated Creation scene turn |
+| `creation-landing-recipe-latest` | Landing recipe | Landing playbook success |
+| `creation-newsletter-recipe-latest` | Newsletter recipe | Newsletter playbook success |
+| `creation-print-recipe-latest` | Print recipe | Print magazine/report success |
 
 Section shape = existing `ResearchSection` (`id`, `title`, `plainText`, `bullets?`).
 

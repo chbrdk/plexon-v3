@@ -32,3 +32,4 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 - Creation print palette: `creation-v3/knowledge/editor-palette-print.md`
 - Mag-PDF / MagazineTemplate: `specs/domain/creation-magazine-template-consume.md` · `creation-v3/knowledge/editor-palette-print.md`
 - Quality loop baseline: `knowledge/creation-mcp-assistant.md`
+- Craft memory (Wave C): `lib/assistant/knowledge-pack/distill-creation-craft.ts` · sections `creation-craft-prefs-latest` + format recipes

@@ -161,6 +161,7 @@ Facets are **stable ids** (snake_case). New products register a facet in this sp
 | `collection-test-flow-latest` | Plexon flow execute |
 | `vaillant-uc1-flow-latest` / `vaillant-uc2-flow-latest` | Vaillant MaFo templates |
 | `assistant-report-latest` | Plexon Assistant report generate |
+| `creation-craft-prefs-latest` / `creation-*-recipe-latest` | Creation craft memory (AGI-lite Wave C) |
 
 Future Wave 2 may split `assistant_insights` / `market_intelligence` into dedicated facets.
 

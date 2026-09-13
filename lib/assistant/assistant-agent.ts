@@ -24,6 +24,7 @@ import { buildUiToolsPromptBlock, buildUiPanelHintForPlan } from '@/lib/assistan
 
 import { buildPlanningPromptFromConversation } from '@/lib/assistant/audience-write-intent';
 import { qualityJobForCreationCraftPlaybook } from '@/lib/assistant/creation-craft-playbooks';
+import { buildCreationCraftMemoryHydrateBlock } from '@/lib/assistant/knowledge-pack/distill-creation-craft';
 import { buildAssistantSystemPrompt } from '@/lib/assistant/system-prompt';
 import type { AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import type { UiBlock, UiLayout, UiPanelState } from '@/lib/assistant/ui-blocks/types';
@@ -202,8 +203,13 @@ export async function runAssistantAgent(
 
   const retrievalBlock = retrieval?.block ? `\n${retrieval.block}\n` : '';
   const prefetchBlock = scenePrefetch?.block ? `\n${scenePrefetch.block}\n` : '';
+  const craftMemoryBlock =
+    plan.intent === 'creation_scene_edit' && input.platformProjectId
+      ? await buildCreationCraftMemoryHydrateBlock(input.platformProjectId)
+      : null;
+  const craftMemoryPrompt = craftMemoryBlock ? `\n${craftMemoryBlock}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n${retrievalBlock}${prefetchBlock}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const orchestratorResult = await runOrchestratorComplete({
     apiKey: input.apiKey,
@@ -239,6 +245,7 @@ export async function runAssistantAgent(
     creationQualityGate: plan.intent === 'creation_scene_edit' && plan.allowWriteTools,
     creationQualityUserPrompt: input.prompt,
     creationQualityJob: qualityJobForCreationCraftPlaybook(plan.creationCraftPlaybookId),
+    creationCraftPlaybookId: plan.creationCraftPlaybookId ?? null,
   });
 
   return { ...orchestratorResult, plan, retrieval, uiLayout: orchestratorResult.uiLayout };

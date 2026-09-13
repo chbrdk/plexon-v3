@@ -17,7 +17,7 @@ Stack: **verify → playbook → Collection craft memory → eval + budget routi
 | A1 | Deterministic visual must-fix beyond `craft-thin` | `lib/assistant/creation-scene-quality.ts` (**shipped**) |
 | A2 | Structured Vision checklist in QA nudge | orchestrator Vision path |
 | B | Playbooks `creation_landing_v1` / `creation_newsletter_v1` / `creation_print_*` / page-as-pattern | `lib/assistant/creation-craft-playbooks.ts` (**shipped**) |
-| C | Pack sections `creation-craft-prefs-latest` · `creation-landing-recipe-latest` | knowledge-pack distill + hydrate |
+| C | Pack sections `creation-craft-prefs-latest` · format recipes | `lib/assistant/knowledge-pack/distill-creation-craft.ts` (**shipped**) |
 | D | Fixture eval harness + low/mid/high tier | `__tests__` + optional staging runner |
 
 ## Locked constraints

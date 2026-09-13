@@ -139,6 +139,7 @@ PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** Gate 
 | Variable | Pflicht | Beschreibung |
 |----------|---------|--------------|
 | `CREATION_MCP_URL` | Nein | MCP für Assistant (library/compositions/projects). Port **3102**. Spec: `specs/domain/assistant-creation-mcp.md`. |
+| `ASSISTANT_CREATION_CRAFT_MEMORY` | Nein | Default **an**. `0`/`off` deaktiviert Collection Craft-Memory Publish+Hydrate (AGI-lite Wave C). |
 
 PLEXON aktiviert CREATION-MCP analog Brandion (`resolveUseCreationMcp`). Tools: v1 library/compositions/projects **plus** v2 scene (`creation.scene_*`, `creation.editor_palette`, `creation.brand_tokens_get`, `creation.site_kit_composition_save`, `creation.site_kit_page_save`). Spec: `specs/domain/assistant-creation-mcp.md`.
 

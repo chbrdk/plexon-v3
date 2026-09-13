@@ -26,7 +26,8 @@ import {
 import { maybeCompactSceneTreeToolResult } from '@/lib/assistant/creation-scene-tree-outline';
 import { injectAssistantMcpToolArgs, extractCreationSceneUpdatedAt } from '@/lib/assistant/creation-scene-tool-args';
 import { shouldRunAssistantToolsInParallel } from '@/lib/assistant/mcp-tool-parallel';
-import { evaluateCreationSceneQuality } from '@/lib/assistant/creation-scene-quality';
+import { evaluateCreationSceneQuality, resolveCreationSceneQualityJob } from '@/lib/assistant/creation-scene-quality';
+import { distillCreationCraftToKnowledgePack } from '@/lib/assistant/knowledge-pack/distill-creation-craft';
 import {
   formatToolResultForAnthropic,
   isCreationScenePreviewToolName,
@@ -127,6 +128,8 @@ export type OrchestratorCompleteOptions = {
   creationQualityUserPrompt?: string;
   /** Explicit quality job; default auto from prompt / playbook. */
   creationQualityJob?: 'landing' | 'newsletter' | 'print' | 'generic' | 'auto';
+  /** Wave B playbook id — used for craft memory distill. */
+  creationCraftPlaybookId?: import('@/lib/assistant/creation-craft-playbooks').CreationCraftPlaybookId | null;
 };
 
 export type OrchestratorCompleteResult = {
@@ -309,6 +312,7 @@ export async function runOrchestratorComplete(
     creationQualityGate = false,
     creationQualityUserPrompt,
     creationQualityJob = 'auto',
+    creationCraftPlaybookId = null,
   } = options;
 
   const creationQualityOptions = {
@@ -401,6 +405,23 @@ export async function runOrchestratorComplete(
   const qualityTraces: Array<{ name: string; preview: string }> = [];
   let lastText = '';
 
+  const publishCraftMemoryIfReady = () => {
+    if (!creationQualityGate || !platformProjectId) return;
+    const verdict = evaluateCreationSceneQuality(qualityTraces, creationQualityOptions);
+    if (!verdict.pass) return;
+    const job = resolveCreationSceneQualityJob(creationQualityOptions);
+    void distillCreationCraftToKnowledgePack({
+      platformProjectId,
+      actorUserId,
+      qualityJob: job,
+      playbookId: creationCraftPlaybookId,
+      userPrompt: creationQualityUserPrompt ?? prompt,
+      sceneId: typeof pageContext?.entityId === 'string' ? pageContext.entityId : null,
+      traces: qualityTraces,
+    }).catch((e) => {
+      console.warn('[orchestrator] creation craft memory distill failed', e);
+    });
+  };
   const thinkingBudget =
     modelProfile === 'assistant' && (onTextDelta || onThinkingDelta)
       ? typeof thinkingBudgetTokens === 'number'
@@ -510,6 +531,7 @@ export async function runOrchestratorComplete(
           continue;
         }
       }
+      publishCraftMemoryIfReady();
       return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
     }
 
@@ -525,6 +547,7 @@ export async function runOrchestratorComplete(
           continue;
         }
       }
+      publishCraftMemoryIfReady();
       return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
     }
 
@@ -767,5 +790,6 @@ export async function runOrchestratorComplete(
     timeline.push({ assistantContent, toolResults });
   }
 
+  publishCraftMemoryIfReady();
   return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
 }
