@@ -19,6 +19,8 @@ export type CreationCraftModuleId =
   | 'stats_metrics_v1'
   | 'pdp_detail_v1'
   | 'social_proof_row_v1'
+  | 'faq_accordion_v1'
+  | 'feature_bento_v1'
   | 'pricing_compare_v1'
   | 'contact_strip_v1';
 
@@ -49,6 +51,12 @@ const NAV_CHROME_RE =
 
 const STATS_METRICS_RE =
   /\b(stats?(\s*(grid|row|strip|band|bar))?|metrics?(\s*(strip|row|band|bar))?|kpi[s]?|zahlen(band|reihe|zeile)?|kennzahlen|key[\s_-]?figures?|impact[\s_-]?numbers?|metric[\s_-]?strip|zahlen[\s_-]?grid)\b/i;
+
+const FAQ_ACCORDION_RE =
+  /\b(faq|f\.?a\.?q\.?|häufige\s*fragen|fragen\s*(&|und)\s*antworten|q\s*&\s*a|q\s*and\s*a|accordion|hilfe[\s_-]?fragen)\b/i;
+
+const FEATURE_BENTO_RE =
+  /\b(bento|feature[\s_-]?bento|feature[\s_-]?(grid|cards?|row|section)|vorteile|capabilities?\s*(grid|section)|asymmetric\s*grid|2\+1\s*(grid|layout)|uneven\s*(grid|bento)|feature[\s_-]?cards?)\b/i;
 
 /** Explicit Spirion / design-ref phrasing (module also auto-attaches on landing/newsletter). */
 const SPIRION_REF_RE =
@@ -89,6 +97,16 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     id: 'social_proof_row_v1',
     label: 'Social Proof / Logo Row',
     playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
+  faq_accordion_v1: {
+    id: 'faq_accordion_v1',
+    label: 'FAQ / Accordion',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
+  feature_bento_v1: {
+    id: 'feature_bento_v1',
+    label: 'Feature Bento / Vorteile',
+    playbookIds: ['creation_landing_v1'],
   },
   pricing_compare_v1: {
     id: 'pricing_compare_v1',
@@ -146,6 +164,18 @@ export function promptLooksLikeStatsMetrics(userPrompt: string | null | undefine
   return STATS_METRICS_RE.test(text);
 }
 
+export function promptLooksLikeFaqAccordion(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return FAQ_ACCORDION_RE.test(text);
+}
+
+export function promptLooksLikeFeatureBento(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return FEATURE_BENTO_RE.test(text);
+}
+
 export function promptLooksLikeSpirionRef(userPrompt: string | null | undefined): boolean {
   const text = userPrompt?.trim() ?? '';
   if (!text) return false;
@@ -176,7 +206,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → Spirion (landing/newsletter always) → wireframe → nav → stats → PDP → social → pricing → contact.
+ * Restyle → Spirion → wireframe → nav → stats → PDP → social → faq → bento → pricing → contact.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -200,6 +230,8 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeStatsMetrics(userPrompt)) push('stats_metrics_v1');
   if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
   if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
+  if (promptLooksLikeFaqAccordion(userPrompt)) push('faq_accordion_v1');
+  if (promptLooksLikeFeatureBento(userPrompt)) push('feature_bento_v1');
   if (promptLooksLikePricing(userPrompt)) push('pricing_compare_v1');
   if (promptLooksLikeContactStrip(userPrompt)) push('contact_strip_v1');
 
@@ -370,6 +402,43 @@ Ziel: Kennzahlen-Band — **3–4 Metrics in einer Reihe**, jede Zahl+Label als 
 `.trim();
 }
 
+function bodyFaqAccordion(): string {
+  return `
+## Craft-Modul: FAQ / Accordion (\`faq_accordion_v1\`)
+Ziel: Fragen-Block als **vertikaler Stack** — nicht als equal three-up Cards.
+
+### Pattern
+1. Catchy Section-Title („Fragen?“ / Outcome) + optional Sub ≤~135 Zeichen.
+2. **4–8 Rows** untereinander: Frage (Title-Gewicht) + kurze Antwort (Body, Fallgefühl-frei).
+3. Visuell: Hairline/Surface je Row; enge Gaps; optional „+“/Chevron als Text/Icon — kein echtes DOM-Accordion nötig.
+4. Copy konkret zur Marke/Produkt — keine „Lorem“ / „Question 1“.
+5. Optional CTA unter dem Stack („Noch Fragen? Contact us“).
+
+### Hart
+- Kein 3-Spalten-Feature-Grid als FAQ-Ersatz.
+- Mit Restyle: bestehende FAQ-Nodes per \`apply_ops\` verdichten.
+`.trim();
+}
+
+function bodyFeatureBento(): string {
+  return `
+## Craft-Modul: Feature Bento / Vorteile (\`feature_bento_v1\`)
+Ziel: Feature/Vorteile-Section mit **ungleichem** Raster (Bento / 2+1) — **kein** equal three-up als ganze Page.
+
+### Pattern
+1. Section-Title + optional Sub.
+2. Layout-Familien mischen: z. B. große Zelle (Media oder Lead-Benefit) + 2 kleinere; oder 2×2 mit einer spanning Zelle.
+3. Je Zelle: kurzer Benefit-Titel + 1 Satz; optional Icon/\`SiteImage\` — echte Surfaces.
+4. Mind. eine Zelle mit mehr Masse (Media oder Display) als die anderen.
+5. Danach Rhythm wechseln (Quote / Stats / CTA) — nicht nochmal dasselbe Grid.
+
+### Hart
+- \`look_contract.avoid\` equal three-up ernst nehmen.
+- Keine „Feature A/B/C“ Seed-Labels.
+- Bei Restyle: Section per \`apply_ops\` nachziehen.
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -390,6 +459,10 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyPdpDetail();
       case 'social_proof_row_v1':
         return bodySocialProofRow();
+      case 'faq_accordion_v1':
+        return bodyFaqAccordion();
+      case 'feature_bento_v1':
+        return bodyFeatureBento();
       case 'pricing_compare_v1':
         return bodyPricingCompare();
       case 'contact_strip_v1':

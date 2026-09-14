@@ -8,17 +8,15 @@
 
 Page modules (PDP, pricing, contact) define **section maps**. Spirion modules supply **visual contracts** from real captures before writing.
 
-## Already shipped (page-level + Spirion meta + above-fold)
+## Already shipped (page-level + Spirion meta + above-fold + mid-page)
 
-Restyle · Wireframe · **Nav** · **Stats** · PDP · Social · Pricing · Contact · **`spirion_section_ref_v1`** (always on landing/newsletter)
+Restyle · Wireframe · Nav · Stats · PDP · Social · **FAQ** · **Bento** · Pricing · Contact · **`spirion_section_ref_v1`**
 
 ## Next modules (Spirion-first section recipes)
 
 | Module | Trigger | Spirion cue | Craft outcome |
 |--------|---------|-------------|----------------|
-| `faq_accordion_v1` | FAQ, Fragen | Support/FAQ captures | Stack of Q/A; tight type; no equal three-up |
 | `testimonial_quote_v1` | Zitat, Testimonial | Quote/press captures | Quote + name/role; not logo-row |
-| `feature_bento_v1` | Features, Vorteile, Bento | Feature grids | Uneven bento / 2+1 — avoid equal three-up |
 | `blog_list_v1` | Blog, News, Artikel | Editorial lists | Title + meta + teaser list |
 | `brandion_bind_pass_v1` | Tokens binden, Brand pack | — (Brandion) | After Hex craft: optional `set_token_binding` |
 | `print_chapter_rhythm_v1` | Magazin Chapter | — (print) | Cover → chapter → folio under print playbook |
@@ -45,6 +43,5 @@ Restyle · Wireframe · **Nav** · **Stats** · PDP · Social · Pricing · Cont
 
 ## Suggested build order (remaining)
 
-1. `faq_accordion_v1` + `feature_bento_v1`  
-2. `testimonial_quote_v1` · `blog_list_v1`  
-3. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`
+1. `testimonial_quote_v1` · `blog_list_v1`  
+2. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`

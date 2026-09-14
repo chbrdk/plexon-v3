@@ -127,10 +127,12 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 | `stats_metrics_v1` | Stats / KPI / Zahlenband | 3–4 metrics row; number+label one shape each |
 | `pdp_detail_v1` | PDP / Produktdetail / product page | Section map: gallery + buy CTA + specs grid (not generic landing) |
 | `social_proof_row_v1` | Happy Customers / logo row / trust bar | 4-up SiteGrid + optional More CTA |
+| `faq_accordion_v1` | FAQ / häufige Fragen / Accordion | Vertical Q/A stack; no three-up cards |
+| `feature_bento_v1` | Bento / Feature grid / Vorteile | Uneven 2+1 / bento — avoid equal three-up |
 | `pricing_compare_v1` | Preise / pricing table / Tarife | 2–4 tier SiteGrid + CTA per cell |
 | `contact_strip_v1` | Contact us / Demo anfragen / Kontaktleiste | Title + input|button row |
 
-Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order restyle → spirion → wireframe → nav → stats → …; max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Knowledge: `creation-craft-module-spirion-section-ref.md` · `creation-craft-module-nav-stats.md` · roadmap `creation-craft-playbook-scenarios-next.md`.
+Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order restyle → spirion → wireframe → nav → stats → PDP → social → faq → bento → …; max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Knowledge: `creation-craft-module-spirion-section-ref.md` · `creation-craft-module-nav-stats.md` · `creation-craft-module-faq-bento.md` · roadmap `creation-craft-playbook-scenarios-next.md`.
 
 ### Acceptance B
 

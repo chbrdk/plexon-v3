@@ -27,6 +27,8 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 | `stats_metrics_v1` | same |
 | `pdp_detail_v1` | same |
 | `social_proof_row_v1` | same |
+| `faq_accordion_v1` | same |
+| `feature_bento_v1` | same |
 | `pricing_compare_v1` | same |
 | `contact_strip_v1` | same |
 
@@ -43,16 +45,18 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Stats / metrics strip** | Stats, KPI, Zahlenband | **Shipped** — `stats_metrics_v1` |
 | **PDP / product detail** | PDP, Produktdetail | **Shipped** — `pdp_detail_v1` |
 | **Social proof / logo row** | Happy Customers, logos, trust | **Shipped** — `social_proof_row_v1` |
+| **FAQ / accordion** | FAQ, Fragen | **Shipped** — `faq_accordion_v1` |
+| **Feature bento** | Bento, Vorteile, Feature grid | **Shipped** — `feature_bento_v1` |
 | **Pricing / comparison** | Preise, Pricing table | **Shipped** — `pricing_compare_v1` |
 | **Form / contact strip** | Contact us, Demo anfragen | **Shipped** — `contact_strip_v1` |
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
 
-## Spirion-backed section modules (next after nav/stats)
+## Spirion-backed section modules (next)
 
 See **`knowledge/creation-craft-spirion-section-modules.md`**.
 
-Priority: FAQ / bento → Brandion bind / print chapter.
+Priority: testimonial / blog → Brandion bind / print chapter.
 
 ## Maybe later (full playbook only if gate differs)
 

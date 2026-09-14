@@ -3,6 +3,8 @@ import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
   promptLooksLikeContactStrip,
+  promptLooksLikeFaqAccordion,
+  promptLooksLikeFeatureBento,
   promptLooksLikeNavChrome,
   promptLooksLikePdp,
   promptLooksLikePricing,
@@ -20,7 +22,7 @@ import {
 } from '@/lib/assistant/page-context'
 
 describe('creation craft modules', () => {
-  it('lists restyle, wireframe, spirion, nav, and stats modules', () => {
+  it('lists restyle, wireframe, spirion, nav, stats, faq, and bento modules', () => {
     const ids = listCreationCraftModules().map((m) => m.id)
     expect(ids).toEqual(
       expect.arrayContaining([
@@ -31,6 +33,8 @@ describe('creation craft modules', () => {
         'stats_metrics_v1',
         'pdp_detail_v1',
         'social_proof_row_v1',
+        'faq_accordion_v1',
+        'feature_bento_v1',
         'pricing_compare_v1',
         'contact_strip_v1',
       ]),
@@ -164,6 +168,32 @@ describe('creation craft modules', () => {
     const stats = buildCreationCraftModulesPromptBlock(['stats_metrics_v1'])
     expect(stats).toContain('stats_metrics_v1')
     expect(stats).toMatch(/SiteGrid|Kennzahlen|eine.*Text-Shape/i)
+  })
+
+  it('resolves FAQ and feature-bento modules', () => {
+    expect(promptLooksLikeFaqAccordion('FAQ Accordion mit häufigen Fragen')).toBe(true)
+    expect(promptLooksLikeFeatureBento('Vorteile Feature-Bento ungleich 2+1')).toBe(true)
+    expect(
+      resolveCreationCraftModules('Add an FAQ accordion with Q and A', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'faq_accordion_v1'])
+    expect(
+      resolveCreationCraftModules('Asymmetric feature bento grid section', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'feature_bento_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Landing FAQ und Feature-Bento Vorteile',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['spirion_section_ref_v1', 'faq_accordion_v1', 'feature_bento_v1'])
+  })
+
+  it('builds FAQ and bento prompt bodies', () => {
+    const faq = buildCreationCraftModulesPromptBlock(['faq_accordion_v1'])
+    expect(faq).toContain('faq_accordion_v1')
+    expect(faq).toMatch(/Stack|Frage|three-up/i)
+    const bento = buildCreationCraftModulesPromptBlock(['feature_bento_v1'])
+    expect(bento).toContain('feature_bento_v1')
+    expect(bento).toMatch(/Bento|2\+1|three-up/i)
   })
 
   it('injects modules into depth when userPrompt matches', () => {
