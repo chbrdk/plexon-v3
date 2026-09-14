@@ -208,6 +208,39 @@ NEXT_PUBLIC_CREATION_URL={{environment.V3_CREATION_PUBLIC_URL}}
 
 ---
 
+## 4f. Wave F — METRON v3 Registry deep-link
+
+Sobald **metron-v3** Staging-Smoke grün ist (`https://metron-v3.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
+
+```bash
+NEXT_PUBLIC_METRON_URL=https://metron-v3.projects-a.plygrnd.tech
+METRON_API_URL=https://metron-v3.projects-a.plygrnd.tech
+```
+
+Dann Redeploy plexon-v3. Wirkung:
+
+- `getMetronUrl()` / `getMetronServiceApiUrl()` → Staging-FQDN
+- Products Registry: METRON `lifecycle: active` (sonst `planned`)
+- Collection binding / upsert + origin `metron-project-origin`
+
+Auf **metron-v3** für Auth + Federation:
+
+```bash
+METRON_FEDERATION_MODE=live
+NEXT_PUBLIC_METRON_URL=https://metron-v3.projects-a.plygrnd.tech
+NEXT_PUBLIC_PLEXON_URL=https://plexon-v3.projects-a.plygrnd.tech
+NEXT_PLEXON_BASE_URL=https://plexon-v3.projects-a.plygrnd.tech
+PLEXON_AUTH_URL=https://plexon-v3.projects-a.plygrnd.tech
+PLEXON_SERVICE_SECRET=<shared with plexon-v3 / siblings>
+AUTH_SECRET=<≥32>
+NEXTAUTH_URL=https://metron-v3.projects-a.plygrnd.tech
+PORT=3011
+```
+
+Coolify: app `8qkrk850d37er6subakpnx0r` · project `sfx1f6qic7zswtt4v7blmevp`.
+
+---
+
 ## 4e. Wave E — SPIRION Registry deep-link
 
 Sobald **SPIRION** Staging-Smoke grün ist (`https://dig.projects-a.plygrnd.tech/api/health` — FQDN still `dig.*` until infra rename), auf **plexon-v3** setzen:

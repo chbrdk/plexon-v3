@@ -44,7 +44,7 @@
 | `METRON_API_URL` | Optional service base for upsert (defaults to public URL) |
 | `METRON_MCP_URL` | MCP Streamable HTTP base for assistant tools (Wave 8) |
 
-Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · app `8qkrk850d37er6subakpnx0r` · project `sfx1f6qic7zswtt4v7blmevp`. Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 when wiring registry.
+Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · app `8qkrk850d37er6subakpnx0r` · project `sfx1f6qic7zswtt4v7blmevp`. `NEXT_PUBLIC_METRON_URL` + `METRON_API_URL` set on plexon-v3; metron `METRON_FEDERATION_MODE=live`.
 
 ## Plexon code touchpoints (Wave 2 checklist)
 
@@ -54,13 +54,12 @@ Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · ap
 - [x] Origin route `POST /api/platform/provisioning/metron-project-origin`
 - [ ] Collection home capability catalog tile + dashboard BFF summary (Wave 3 polish)
 - [x] Usage `service` enum accepts `metron`
-- [ ] Product switcher staging URL when siblings pick up FQDN (live: `https://metron-v3.projects-a.plygrnd.tech`)
-- [ ] Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 Coolify for registry lifecycle
+- [x] Product switcher staging URL when siblings pick up FQDN (live: `https://metron-v3.projects-a.plygrnd.tech`)
+- [x] Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 Coolify for registry lifecycle
+- [x] Spec: `specs/domain/collection-projects.md` Phase 8 → **done (Wave 2)**
 
-## Smoke (after Wave 2)
-
-- Staging: `https://metron-v3.projects-a.plygrnd.tech` · `GET /api/health` → `productId: metron`
-- Federation: `GET /api/federation/health` → `mode: dummy` until live env
-- Upsert skipped while `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` unset on Plexon (binding stays `pending`)
+- Staging: `https://metron-v3.projects-a.plygrnd.tech` · `GET /api/health` → `productId: metron` · `federationMode: live`
+- Federation: `GET /api/federation/health` → `mode: live` · `configured: true`
+- Plexon registry: `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` set on Coolify plexon-v3
 - Staging FQDN recorded in `knowledge/paths.md`
 - GitHub: `https://github.com/chbrdk/metron-v3`
