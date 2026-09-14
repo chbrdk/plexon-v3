@@ -22,6 +22,8 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 |----|------|
 | `restyle_densify_v1` | `lib/assistant/creation-craft-modules.ts` |
 | `wireframe_layout_v1` | same |
+| `pdp_detail_v1` | same |
+| `social_proof_row_v1` | same |
 
 Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({ userPrompt, playbookId })`.
 
@@ -29,11 +31,11 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 
 | Module | Trigger | Why |
 |--------|---------|-----|
-| **Restyle / densify existing** | Restyle, dichter, polish | **Shipped 2026-09-14** — module `restyle_densify_v1` |
-| **Wireframe → layout contract** | Skizze / Bioframe / attachment | **Shipped** — module `wireframe_layout_v1` + landing § |
-| **PDP / product detail** | PDP, Produktdetail | Same gate as landing, different section map (gallery, specs, buy) |
+| **Restyle / densify existing** | Restyle, dichter, polish | **Shipped** — `restyle_densify_v1` |
+| **Wireframe → layout contract** | Skizze / Bioframe | **Shipped** — `wireframe_layout_v1` |
+| **PDP / product detail** | PDP, Produktdetail | **Shipped** — `pdp_detail_v1` |
+| **Social proof / logo row** | Happy Customers, logos, trust | **Shipped** — `social_proof_row_v1` |
 | **Pricing / comparison** | Preise, Pricing table | Grid + CTAs; char discipline |
-| **Social proof / logo row** | Happy Customers, logos, trust | 4-up icon/logo pattern from wireframe |
 | **Form / contact strip** | Contact us, Demo anfragen | Input+button row; catchy title |
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |

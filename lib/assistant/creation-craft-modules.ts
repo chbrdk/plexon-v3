@@ -12,7 +12,9 @@ import { promptLooksLikeWireframeBrief } from '@/lib/assistant/creation-craft-pl
 
 export type CreationCraftModuleId =
   | 'restyle_densify_v1'
-  | 'wireframe_layout_v1';
+  | 'wireframe_layout_v1'
+  | 'pdp_detail_v1'
+  | 'social_proof_row_v1';
 
 export type CreationCraftModule = {
   id: CreationCraftModuleId;
@@ -23,6 +25,12 @@ export type CreationCraftModule = {
 
 const RESTYLE_RE =
   /\b(restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|polier\w*|polish|dichter|tighten|improve\s+(the\s+)?(existing|current)|bestehend\w*\s+(landing|seite|page|hero)|existierend\w*\s+(landing|seite|page))\b/i;
+
+const PDP_RE =
+  /\b(pdp|product\s*detail|produktdetail|product\s*page|produktseite|buy\s*box|add[\s_-]?to[\s_-]?cart|warenkorb|sku|produkt\s*detail)\b/i;
+
+const SOCIAL_PROOF_RE =
+  /\b(happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|referenzen[\s_-]?logos?|testimonial|kundenstimmen|4[\s_-]?up\s*(icons?|logos?)|icon[\s_-]?reihe)\b/i;
 
 const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
   restyle_densify_v1: {
@@ -35,6 +43,16 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     label: 'Wireframe Layout Contract',
     playbookIds: ['creation_landing_v1'],
   },
+  pdp_detail_v1: {
+    id: 'pdp_detail_v1',
+    label: 'PDP / Product Detail',
+    playbookIds: ['creation_landing_v1'],
+  },
+  social_proof_row_v1: {
+    id: 'social_proof_row_v1',
+    label: 'Social Proof / Logo Row',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
 };
 
 const MAX_MODULES_PER_TURN = 3;
@@ -43,6 +61,18 @@ export function promptLooksLikeRestyle(userPrompt: string | null | undefined): b
   const text = userPrompt?.trim() ?? '';
   if (!text) return false;
   return RESTYLE_RE.test(text);
+}
+
+export function promptLooksLikePdp(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return PDP_RE.test(text);
+}
+
+export function promptLooksLikeSocialProof(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return SOCIAL_PROOF_RE.test(text);
 }
 
 function moduleAllowedOnPlaybook(
@@ -56,7 +86,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle before wireframe when both match (ops-first densify + then structure).
+ * Restyle → wireframe → PDP → social proof.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -75,6 +105,8 @@ export function resolveCreationCraftModules(
 
   if (promptLooksLikeRestyle(userPrompt)) push('restyle_densify_v1');
   if (promptLooksLikeWireframeBrief(userPrompt)) push('wireframe_layout_v1');
+  if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
+  if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
 
   return out;
 }
@@ -114,6 +146,42 @@ Nutzer-Skizze = **Layout-Vertrag** (überschreibt Default-Overlay-Hero).
 `.trim();
 }
 
+function bodyPdpDetail(): string {
+  return `
+## Craft-Modul: PDP / Product Detail (\`pdp_detail_v1\`)
+Ziel: Produktdetail — **nicht** generische Marketing-Landing. Gate bleibt \`landing\` (Hero-Masse + CTA).
+
+### Section-Map (Desktop, top→bottom)
+1. **Nav** schlank (Marke + wenige Links) — keine Mega-IA.
+2. **Product hero:** große Media (Gallery oder Full-Bleed Stack-\`backgroundImage\`) + Display-Name (Fallgefühl) + Kurz-Benefit + **Primary Buy/CTA** (\`SiteButton\`).
+3. **Specs / Benefits:** \`SiteGrid\` 2–3 Spalten mit echten Labels (nicht „Feature A/B“).
+4. Optional **Social proof** (Logo-Row / Quote) — wenn Prompt es verlangt, Modul \`social_proof_row_v1\` beachten.
+5. Optional **Related / Bundle** Strip.
+6. **Sticky oder Footer-CTA** wiederholen (gleicher Label-Ton).
+
+### Hart
+- Mind. ein großes Produkt-Media + Display ≥48px + echte CTA (Buy / Demo / Anfragen — kein „Get started“).
+- Keine Print*-Nodes. Desktop-Breakpoint.
+- Copy konkret (Produktname, Nutzen) — keine Seed-Optionen.
+`.trim();
+}
+
+function bodySocialProofRow(): string {
+  return `
+## Craft-Modul: Social Proof / Logo Row (\`social_proof_row_v1\`)
+Ziel: Trust-Band wie „Happy Customers“ — **4 Zellen in einer Reihe**, nicht drei gleiche Feature-Cards als ganze Page.
+
+### Pattern
+1. Section-Title (kurz) + optional Sub ≤~135 Zeichen.
+2. **\`SiteGrid\` columns=4** (oder row-Stack gap eng) mit 4 Zellen: Logo/\`SiteImage\` **oder** Icon+Label — gleiche Zellenhöhe, echte Surfaces.
+3. Darunter optional Secondary CTA („More“ / „Referenzen“).
+4. Keine leeren X-Kästen; keine 200px-Thumb-Streifen als einzige Media der Page.
+
+### Wenn nur dieses Modul (Restyle)
+- Bestehende Section suchen und per \`apply_ops\` nachziehen — nicht die ganze Landing neu importieren.
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -124,6 +192,10 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyRestyleDensify();
       case 'wireframe_layout_v1':
         return bodyWireframeLayout();
+      case 'pdp_detail_v1':
+        return bodyPdpDetail();
+      case 'social_proof_row_v1':
+        return bodySocialProofRow();
       default:
         return '';
     }

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
+  promptLooksLikePdp,
   promptLooksLikeRestyle,
+  promptLooksLikeSocialProof,
   resolveCreationCraftModules,
 } from '@/lib/assistant/creation-craft-modules'
 import { buildCreationSceneDepthPromptBlock } from '@/lib/assistant/creation-scene-depth'
@@ -15,7 +17,14 @@ import {
 describe('creation craft modules', () => {
   it('lists restyle and wireframe modules', () => {
     const ids = listCreationCraftModules().map((m) => m.id)
-    expect(ids).toEqual(expect.arrayContaining(['restyle_densify_v1', 'wireframe_layout_v1']))
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        'restyle_densify_v1',
+        'wireframe_layout_v1',
+        'pdp_detail_v1',
+        'social_proof_row_v1',
+      ]),
+    )
   })
 
   it('detects restyle phrasing', () => {
@@ -36,6 +45,26 @@ describe('creation craft modules', () => {
     ).toEqual(['restyle_densify_v1', 'wireframe_layout_v1'])
   })
 
+  it('resolves PDP and social-proof modules', () => {
+    expect(promptLooksLikePdp('Neue Produktdetailseite / PDP im Editor')).toBe(true)
+    expect(promptLooksLikeSocialProof('Happy Customers Logo-Row mit 4 Icons')).toBe(true)
+    expect(
+      resolveCreationCraftModules('Create a PDP product page layout', 'creation_landing_v1'),
+    ).toEqual(['pdp_detail_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Happy Customers social proof logo row mit 4 Icons',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['social_proof_row_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'PDP mit Happy Customers Trust-Bar',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['pdp_detail_v1', 'social_proof_row_v1'])
+  })
+
   it('caps modules and skips when playbook mismatches', () => {
     expect(resolveCreationCraftModules('Restyle denser', 'creation_print_magazine_v1')).toEqual([])
     expect(
@@ -47,6 +76,15 @@ describe('creation craft modules', () => {
     const block = buildCreationCraftModulesPromptBlock(['restyle_densify_v1'])
     expect(block).toContain('restyle_densify_v1')
     expect(block).toMatch(/Kein.*creation_scene_import_html|Prefer.*apply_ops/i)
+  })
+
+  it('builds PDP and social-proof prompt bodies', () => {
+    const pdp = buildCreationCraftModulesPromptBlock(['pdp_detail_v1'])
+    expect(pdp).toContain('pdp_detail_v1')
+    expect(pdp).toMatch(/Product hero|Buy\/CTA|SiteGrid/)
+    const social = buildCreationCraftModulesPromptBlock(['social_proof_row_v1'])
+    expect(social).toContain('social_proof_row_v1')
+    expect(social).toMatch(/columns=4|4 Zellen/)
   })
 
   it('injects modules into depth when userPrompt matches', () => {

@@ -122,6 +122,8 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 |--------|---------|--------|
 | `restyle_densify_v1` | Restyle / dichter / polish / bestehende Seite | Prefer `apply_ops`; forbid full HTML re-import unless empty/seed |
 | `wireframe_layout_v1` | Wireframe / Skizze / Bioframe | Section-order + char limits (progressive; also summarized in landing playbook) |
+| `pdp_detail_v1` | PDP / Produktdetail / product page | Section map: gallery + buy CTA + specs grid (not generic landing) |
+| `social_proof_row_v1` | Happy Customers / logo row / trust bar | 4-up SiteGrid + optional More CTA |
 
 Resolve via `resolveCreationCraftModules(prompt, playbookId)` — max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Roadmap: `knowledge/creation-craft-playbook-scenarios-next.md`.
 
