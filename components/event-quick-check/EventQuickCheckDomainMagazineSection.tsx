@@ -1,6 +1,4 @@
-'use client'
-
-import { Button, RankedList, RankedRow, Text } from '@msqdx/ui'
+import { Button, LabTile, LabTileStrip, RankedList, RankedRow, Text } from '@msqdx/ui'
 import type { EventQuickCheckReportDomainSection } from '@/lib/assistant/reports/event-quick-check-report-types'
 import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-report-copy'
 
@@ -25,14 +23,14 @@ export function EventQuickCheckDomainMagazineSection({ domain }: Props) {
       unit: '/100',
       label: 'Score',
       meta: domain.domain || 'Domain-Scan',
-      tone: tileTone(domain.score),
+      tone: tileTone(domain.score) as 'pos' | 'low' | 'neg',
     },
     {
       key: 'pages',
       value: String(domain.totalPages),
       label: 'Seiten',
       meta: 'gescannt',
-      tone: undefined as 'pos' | 'low' | 'neg' | undefined,
+      tone: 'neutral' as const,
     },
     {
       key: 'errors',
@@ -57,27 +55,18 @@ export function EventQuickCheckDomainMagazineSection({ domain }: Props) {
           <Text role="meta" as="p" className="plexon-eqc-geo-eyebrow">
             Field notes
           </Text>
-          <div
-            className="plexon-eqc-lab plexon-eqc-lab--notes"
-            style={{ ['--notes-cols' as string]: '2' }}
-          >
+          <LabTileStrip columns={2} className="plexon-eqc-lab plexon-eqc-lab--notes">
             {tiles.map((tile) => (
-              <div
+              <LabTile
                 key={tile.key}
-                className="plexon-eqc-lab-tile"
-                data-tone={tile.tone}
-              >
-                <strong className="plexon-eqc-lab-tile__v">
-                  {tile.value}
-                  {tile.unit ? (
-                    <span className="plexon-eqc-lab-tile__unit">{tile.unit}</span>
-                  ) : null}
-                </strong>
-                <span className="plexon-eqc-lab-tile__k">{tile.label}</span>
-                <span className="plexon-eqc-lab-tile__m">{tile.meta}</span>
-              </div>
+                label={tile.label}
+                value={tile.value}
+                unit={tile.unit}
+                meta={tile.meta}
+                tone={tile.tone}
+              />
             ))}
-          </div>
+          </LabTileStrip>
         </section>
 
         <section className="plexon-eqc-domain-spread__issues" aria-label={EQC_REPORT_COPY.sectionTopIssues}>

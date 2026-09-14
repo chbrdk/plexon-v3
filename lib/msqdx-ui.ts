@@ -79,6 +79,8 @@ export type { AccentSwatchGroupProps } from '../../msqdx-ui/packages/ui/src/comp
 export { WizardSteps } from '../../msqdx-ui/packages/ui/src/components/WizardSteps'
 export type { WizardStep, WizardStepsProps } from '../../msqdx-ui/packages/ui/src/components/WizardSteps'
 export { Lede, LedeStrip } from '../../msqdx-ui/packages/ui/src/components/Lede'
+export { LabTile, LabTileStrip } from '../../msqdx-ui/packages/ui/src/components/LabTile'
+export type { LabTileProps, LabTileStripProps, LabTileTone } from '../../msqdx-ui/packages/ui/src/components/LabTile'
 export type { LedeProps, LedeStripProps, LedeTone, LedeStep } from '../../msqdx-ui/packages/ui/src/components/Lede'
 export { MarkdownProse } from '../../msqdx-ui/packages/ui/src/components/MarkdownProse'
 export type { MarkdownProseProps } from '../../msqdx-ui/packages/ui/src/components/MarkdownProse'
