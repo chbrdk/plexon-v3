@@ -5,6 +5,7 @@
 |------|------|
 | App shell | `specs/domain/app-shell.md` |
 | Collection projects | `specs/domain/collection-projects.md` |
+| METRON capability (Wave 0) | `specs/domain/metron-capability.md` |
 | Collection Test Flow | `specs/domain/collection-test-flow.md` |
 | Collection Knowledge Pack | `specs/domain/collection-knowledge-pack.md` |
 | Platform outbox delivery (Wave A) | `specs/domain/platform-outbox-delivery.md` |

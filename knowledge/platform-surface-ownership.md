@@ -49,6 +49,13 @@ Stand: Mai 2026
 - **Zaoly** (Vite editor + WC library) remains the design runtime — deep-link/embed in later waves; do not invent a second project model
 - Attach: `knowledge/creation-v3-onboarding.md` · `creation-v3/knowledge/staging-coolify.md`
 
+### METRON (v3 planned)
+
+- **v3** (`metron-v3`): Analysis/dashboard capability — datasets, server KPIs, constrained dashboards; Excel/CSV first
+- Product id: `metron` (Display **METRON**)
+- Wave 0 specs done 2026-09-14; registry/bindings = Collection Phase 8 (planned)
+- Attach: `knowledge/metron-v3-onboarding.md` · `knowledge/metron-ecosystem-fit.md` · `specs/domain/metron-capability.md`
+
 ## Selektive Surface-Konsolidierung
 
 Folgende Surfaces sind gute Kandidaten fuer spaetere PLEXON-Integration:
@@ -67,7 +74,7 @@ Folgende Surfaces sind **keine** guten fruehen Kandidaten:
 
 ## Onboarding-Regeln fuer neue Produkte
 
-Jedes neue Produkt, z. B. `VIDEON`, `BRANDION` oder `CREATION`, braucht vor Aufnahme in die Registry:
+Jedes neue Produkt, z. B. `VIDEON`, `BRANDION`, `CREATION` oder `METRON`, braucht vor Aufnahme in die Registry:
 
 1. Produkt-ID
 2. oeffentliche oder interne Produkt-URL

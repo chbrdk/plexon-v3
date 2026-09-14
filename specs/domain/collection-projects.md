@@ -16,7 +16,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
 | Term | Meaning |
 |------|---------|
 | **Collection / Projekt** | User-facing name for a `platform_projects` row (company-scoped). |
-| **Capability** | Product work inside the Collection (scans in CHECKION, personas in AUDION, brand analysis/guidelines in BRANDION, compositions in CREATION, design references in SPIRION, …). |
+| **Capability** | Product work inside the Collection (scans in CHECKION, personas in AUDION, brand analysis/guidelines in BRANDION, compositions in CREATION, design references in SPIRION, dashboards/KPIs in METRON, …). |
 | **Binding** | `platform_project_product_bindings` row linking Collection → product-local `projects.id`. |
 
 ## Invariants
@@ -68,6 +68,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
 | 5 Lifecycle (archive / restore / admin hard-delete) | done — 2026-08-11 |
 | 6 CREATION capability mirror | **done (Wave 3)** — product id `creation` / repo `creation-v3`; `ensureBindingPlaceholders` + upsert via `CREATION_API_URL` / `NEXT_PUBLIC_CREATION_URL`; origin `POST …/creation-project-origin`. See `knowledge/creation-v3-onboarding.md`. |
 | 7 SPIRION capability mirror | **done** — product id `spirion` / repo `design-intelligence-graph` (formerly DIG); placeholders + upsert via `SPIRION_API_URL` / `NEXT_PUBLIC_SPIRION_URL` (legacy `DIG_*` env still accepted); origin `POST …/spirion-project-origin` (legacy `dig-project-origin` forwards); catalog stubs `spirion.*`. See `knowledge/coolify-plexon-v3-env-cheatsheet.md` §4e. |
+| 8 METRON capability mirror | **planned (Wave 0 specs done 2026-09-14)** — product id `metron` / repo `metron-v3`; placeholders + upsert via `METRON_API_URL` / `NEXT_PUBLIC_METRON_URL`; origin `POST …/metron-project-origin` (not landed). Do **not** add to `ensureBindingPlaceholders` until Wave 2 registry+URL. Spec `specs/domain/metron-capability.md` · onboarding `knowledge/metron-v3-onboarding.md` · fit `knowledge/metron-ecosystem-fit.md`. |
 
 ## Phase 5 — Lifecycle
 
