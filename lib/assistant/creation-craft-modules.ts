@@ -19,8 +19,10 @@ export type CreationCraftModuleId =
   | 'stats_metrics_v1'
   | 'pdp_detail_v1'
   | 'social_proof_row_v1'
+  | 'testimonial_quote_v1'
   | 'faq_accordion_v1'
   | 'feature_bento_v1'
+  | 'blog_list_v1'
   | 'pricing_compare_v1'
   | 'contact_strip_v1';
 
@@ -38,7 +40,13 @@ const PDP_RE =
   /\b(pdp|product\s*detail|produktdetail|product\s*page|produktseite|buy\s*box|add[\s_-]?to[\s_-]?cart|warenkorb|sku|produkt\s*detail)\b/i;
 
 const SOCIAL_PROOF_RE =
-  /\b(happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|referenzen[\s_-]?logos?|testimonial|kundenstimmen|4[\s_-]?up\s*(icons?|logos?)|icon[\s_-]?reihe)\b/i;
+  /\b(happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|referenzen[\s_-]?logos?|4[\s_-]?up\s*(icons?|logos?)|icon[\s_-]?reihe)\b/i;
+
+const TESTIMONIAL_QUOTE_RE =
+  /\b(testimonial|kundenstimme(n)?|zitat|quote(\s*(block|section))?|customer\s*quote|press[\s_-]?quote|stimmen|review\s*quote)\b/i;
+
+const BLOG_LIST_RE =
+  /\b(blog(\s*(list|feed|index|teaser|grid))?|news(\s*(list|feed|section|teaser))?|artikel[\s_-]?(liste|teaser|grid|übersicht)?|editorial\s*list|press[\s_-]?(list|teaser)|beiträge|posts?\s*(list|grid|teaser)|artikelübersicht)\b/i;
 
 const PRICING_RE =
   /\b(pricing|preise|preis\s*tabelle|price\s*(table|grid|tier|card)|tarif|pl[aä]ne|plans?\s*(table|grid|tier)|vergleich\s*preise|pricing\s*comparison|kosten\s*pl[aä]ne)\b/i;
@@ -98,6 +106,11 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     label: 'Social Proof / Logo Row',
     playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
   },
+  testimonial_quote_v1: {
+    id: 'testimonial_quote_v1',
+    label: 'Testimonial / Quote',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
   faq_accordion_v1: {
     id: 'faq_accordion_v1',
     label: 'FAQ / Accordion',
@@ -107,6 +120,11 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     id: 'feature_bento_v1',
     label: 'Feature Bento / Vorteile',
     playbookIds: ['creation_landing_v1'],
+  },
+  blog_list_v1: {
+    id: 'blog_list_v1',
+    label: 'Blog / News List',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
   },
   pricing_compare_v1: {
     id: 'pricing_compare_v1',
@@ -138,6 +156,18 @@ export function promptLooksLikeSocialProof(userPrompt: string | null | undefined
   const text = userPrompt?.trim() ?? '';
   if (!text) return false;
   return SOCIAL_PROOF_RE.test(text);
+}
+
+export function promptLooksLikeTestimonialQuote(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return TESTIMONIAL_QUOTE_RE.test(text);
+}
+
+export function promptLooksLikeBlogList(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return BLOG_LIST_RE.test(text);
 }
 
 export function promptLooksLikePricing(userPrompt: string | null | undefined): boolean {
@@ -206,7 +236,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → Spirion → wireframe → nav → stats → PDP → social → faq → bento → pricing → contact.
+ * Restyle → Spirion → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog → pricing → contact.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -230,8 +260,10 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeStatsMetrics(userPrompt)) push('stats_metrics_v1');
   if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
   if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
+  if (promptLooksLikeTestimonialQuote(userPrompt)) push('testimonial_quote_v1');
   if (promptLooksLikeFaqAccordion(userPrompt)) push('faq_accordion_v1');
   if (promptLooksLikeFeatureBento(userPrompt)) push('feature_bento_v1');
+  if (promptLooksLikeBlogList(userPrompt)) push('blog_list_v1');
   if (promptLooksLikePricing(userPrompt)) push('pricing_compare_v1');
   if (promptLooksLikeContactStrip(userPrompt)) push('contact_strip_v1');
 
@@ -439,6 +471,43 @@ Ziel: Feature/Vorteile-Section mit **ungleichem** Raster (Bento / 2+1) — **kei
 `.trim();
 }
 
+function bodyTestimonialQuote(): string {
+  return `
+## Craft-Modul: Testimonial / Quote (\`testimonial_quote_v1\`)
+Ziel: **Zitat-Section** — Quote + Name/Rolle — **nicht** Logo-Row.
+
+### Pattern
+1. Optional Eyebrow („Kundenstimme“ / „Press“).
+2. Großes Quote (Display/Title-Gewicht, Fallgefühl) — 1–3 Sätze, echte Stimme.
+3. Darunter Attribution: Name · Rolle/Firma (Body); optional kleines Portrait/\`SiteImage\`.
+4. Eine starke Quote pro Band (oder max. 2 stacked) — kein 3er-Karten-Grid aus Zitaten.
+5. Optional Secondary CTA („Mehr Referenzen“).
+
+### Hart
+- Kein Ersatz durch \`social_proof_row_v1\` Logo-Strip.
+- Keine Seed-Namen („Jane Doe“) wenn Prompt/Marke konkrete Namen hergibt — sonst glaubwürdige Platzhalter + Rolle.
+- Mit Restyle: Quote-Nodes per \`apply_ops\` verdichten.
+`.trim();
+}
+
+function bodyBlogList(): string {
+  return `
+## Craft-Modul: Blog / News List (\`blog_list_v1\`)
+Ziel: Editorial-Liste — Titel + Meta + Teaser, nicht Feature-Bento.
+
+### Pattern
+1. Section-Title („Insights“ / „News“ / „Aus dem Blog“) + optional „Alle ansehen“-Link/CTA.
+2. **3–6 Rows** (oder 2–3 Card-Teaser in einer Reihe): Datum/Tag · Headline · 1-Satz-Teaser; optional Thumb \`SiteImage\`.
+3. Klare Typo-Hierarchie (Headline Title, Meta klein, Teaser Body).
+4. Rhythm: Liste/Teaser-Grid **eine** Layout-Familie — danach andere Section (nicht nochmal gleiche Cards).
+
+### Hart
+- Keine leeren „Post 1/2/3“ Seed-Titel.
+- Nicht als equal three-up Feature-Benefits verkaufen (\`feature_bento_v1\` ist anders).
+- Mit Restyle: Liste per \`apply_ops\` nachziehen.
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -459,10 +528,14 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyPdpDetail();
       case 'social_proof_row_v1':
         return bodySocialProofRow();
+      case 'testimonial_quote_v1':
+        return bodyTestimonialQuote();
       case 'faq_accordion_v1':
         return bodyFaqAccordion();
       case 'feature_bento_v1':
         return bodyFeatureBento();
+      case 'blog_list_v1':
+        return bodyBlogList();
       case 'pricing_compare_v1':
         return bodyPricingCompare();
       case 'contact_strip_v1':

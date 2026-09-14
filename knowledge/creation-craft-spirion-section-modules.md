@@ -8,16 +8,14 @@
 
 Page modules (PDP, pricing, contact) define **section maps**. Spirion modules supply **visual contracts** from real captures before writing.
 
-## Already shipped (page-level + Spirion meta + above-fold + mid-page)
+## Already shipped (page-level + Spirion meta + section recipes)
 
-Restyle · Wireframe · Nav · Stats · PDP · Social · **FAQ** · **Bento** · Pricing · Contact · **`spirion_section_ref_v1`**
+Restyle · Wireframe · Nav · Stats · PDP · Social · **Testimonial** · FAQ · Bento · **Blog** · Pricing · Contact · **`spirion_section_ref_v1`**
 
-## Next modules (Spirion-first section recipes)
+## Next modules
 
 | Module | Trigger | Spirion cue | Craft outcome |
 |--------|---------|-------------|----------------|
-| `testimonial_quote_v1` | Zitat, Testimonial | Quote/press captures | Quote + name/role; not logo-row |
-| `blog_list_v1` | Blog, News, Artikel | Editorial lists | Title + meta + teaser list |
 | `brandion_bind_pass_v1` | Tokens binden, Brand pack | — (Brandion) | After Hex craft: optional `set_token_binding` |
 | `print_chapter_rhythm_v1` | Magazin Chapter | — (print) | Cover → chapter → folio under print playbook |
 
@@ -43,5 +41,5 @@ Restyle · Wireframe · Nav · Stats · PDP · Social · **FAQ** · **Bento** ·
 
 ## Suggested build order (remaining)
 
-1. `testimonial_quote_v1` · `blog_list_v1`  
-2. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`
+1. `brandion_bind_pass_v1`  
+2. `print_chapter_rhythm_v1`

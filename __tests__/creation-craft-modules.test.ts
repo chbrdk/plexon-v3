@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
+  promptLooksLikeBlogList,
   promptLooksLikeContactStrip,
   promptLooksLikeFaqAccordion,
   promptLooksLikeFeatureBento,
@@ -12,6 +13,7 @@ import {
   promptLooksLikeSocialProof,
   promptLooksLikeSpirionRef,
   promptLooksLikeStatsMetrics,
+  promptLooksLikeTestimonialQuote,
   resolveCreationCraftModules,
 } from '@/lib/assistant/creation-craft-modules'
 import { buildCreationSceneDepthPromptBlock } from '@/lib/assistant/creation-scene-depth'
@@ -22,7 +24,7 @@ import {
 } from '@/lib/assistant/page-context'
 
 describe('creation craft modules', () => {
-  it('lists restyle, wireframe, spirion, nav, stats, faq, and bento modules', () => {
+  it('lists restyle, wireframe, spirion, nav, stats, faq, bento, quote, and blog modules', () => {
     const ids = listCreationCraftModules().map((m) => m.id)
     expect(ids).toEqual(
       expect.arrayContaining([
@@ -33,8 +35,10 @@ describe('creation craft modules', () => {
         'stats_metrics_v1',
         'pdp_detail_v1',
         'social_proof_row_v1',
+        'testimonial_quote_v1',
         'faq_accordion_v1',
         'feature_bento_v1',
+        'blog_list_v1',
         'pricing_compare_v1',
         'contact_strip_v1',
       ]),
@@ -194,6 +198,33 @@ describe('creation craft modules', () => {
     const bento = buildCreationCraftModulesPromptBlock(['feature_bento_v1'])
     expect(bento).toContain('feature_bento_v1')
     expect(bento).toMatch(/Bento|2\+1|three-up/i)
+  })
+
+  it('resolves testimonial quote and blog list modules', () => {
+    expect(promptLooksLikeTestimonialQuote('Kundenstimme Zitat mit Name und Rolle')).toBe(true)
+    expect(promptLooksLikeBlogList('Blog Artikelübersicht mit Teaser-Liste')).toBe(true)
+    expect(promptLooksLikeSocialProof('customer testimonial quote')).toBe(false)
+    expect(
+      resolveCreationCraftModules('Add a customer testimonial quote', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'testimonial_quote_v1'])
+    expect(
+      resolveCreationCraftModules('News blog list with title meta teaser', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'blog_list_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Landing Testimonial Quote und Blog Artikelübersicht',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['spirion_section_ref_v1', 'testimonial_quote_v1', 'blog_list_v1'])
+  })
+
+  it('builds quote and blog prompt bodies', () => {
+    const quote = buildCreationCraftModulesPromptBlock(['testimonial_quote_v1'])
+    expect(quote).toContain('testimonial_quote_v1')
+    expect(quote).toMatch(/Zitat|Attribution|Logo-Row/i)
+    const blog = buildCreationCraftModulesPromptBlock(['blog_list_v1'])
+    expect(blog).toContain('blog_list_v1')
+    expect(blog).toMatch(/Teaser|Titel|Meta/i)
   })
 
   it('injects modules into depth when userPrompt matches', () => {
