@@ -54,7 +54,7 @@ Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · ap
 - [x] `lib/platform-products.ts` registry entry (`lifecycle: planned` until URL set)
 - [x] `ensureBindingPlaceholders` includes `metron`
 - [x] Origin route `POST /api/platform/provisioning/metron-project-origin`
-- [ ] Collection home capability catalog tile + dashboard BFF summary (Wave 3 polish)
+- [x] Collection home capability catalog tile + dashboard BFF summary (Wave 3 polish)
 - [x] Usage `service` enum accepts `metron`
 - [x] Product switcher staging URL when siblings pick up FQDN (live: `https://metron-v3.projects-a.plygrnd.tech`)
 - [x] Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 Coolify for registry lifecycle

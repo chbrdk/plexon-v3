@@ -3,6 +3,7 @@ import {
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
   getCreationServiceApiUrl,
+  getMetronServiceApiUrl,
 } from '@/lib/constants';
 import {
   PLEXON_CONTRACT_VERSION_HEADER,
@@ -271,4 +272,45 @@ export async function fetchCreationPlatformProjectSummary(
   if (!response.ok) return null;
   const data = await readJson<CreationProjectSummary>(response);
   return data ? normalizeCreationSummary(data) : null;
+}
+
+export type MetronProjectSummary = {
+  externalProjectId: string;
+  platformProjectId?: string;
+  datasetCount: number;
+  kpiCount: number;
+  dashboardCount: number;
+};
+
+function normalizeMetronSummary(data: MetronProjectSummary): MetronProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  return {
+    externalProjectId: data.externalProjectId,
+    platformProjectId: data.platformProjectId,
+    datasetCount: Number(data.datasetCount) || 0,
+    kpiCount: Number(data.kpiCount) || 0,
+    dashboardCount: Number(data.dashboardCount) || 0,
+  };
+}
+
+export async function fetchMetronPlatformProjectSummary(
+  platformProjectId: string,
+  plexonUserId: string
+): Promise<MetronProjectSummary | null> {
+  const base = getMetronServiceApiUrl();
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!base?.trim() || !secret) return null;
+  const url = `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      [PLEXON_SERVICE_SECRET_HEADER]: secret,
+      [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+      'X-Plexon-User-Id': plexonUserId,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return null;
+  const data = await readJson<MetronProjectSummary>(response);
+  return data ? normalizeMetronSummary(data) : null;
 }

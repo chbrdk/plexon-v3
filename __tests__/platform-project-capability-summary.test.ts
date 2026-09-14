@@ -3,6 +3,7 @@ import {
   resolveAudionCapability,
   resolveBrandionCapability,
   resolveCheckionCapability,
+  resolveMetronCapability,
 } from '@/lib/platform-project-capability-summary';
 
 describe('platform-project-capability-summary', () => {
@@ -105,5 +106,35 @@ describe('platform-project-capability-summary', () => {
     expect(brandion?.externalProjectId).toBe('live-br');
     expect(brandion?.guidelineCount).toBe(2);
     expect(brandion?.guidelines).toHaveLength(1);
+  });
+
+  it('prefers live Metron summary over binding', () => {
+    const metron = resolveMetronCapability(
+      {
+        externalProjectId: 'live-mt',
+        datasetCount: 2,
+        kpiCount: 5,
+        dashboardCount: 1,
+      },
+      [{ productId: 'metron', externalProjectId: 'bind-mt', syncStatus: 'in_sync' }]
+    );
+    expect(metron).toEqual({
+      externalProjectId: 'live-mt',
+      datasetCount: 2,
+      kpiCount: 5,
+      dashboardCount: 1,
+    });
+  });
+
+  it('falls back to Metron binding when live summary is missing', () => {
+    const metron = resolveMetronCapability(null, [
+      { productId: 'metron', externalProjectId: 'mt-1', syncStatus: 'in_sync' },
+    ]);
+    expect(metron).toEqual({
+      externalProjectId: 'mt-1',
+      datasetCount: 0,
+      kpiCount: 0,
+      dashboardCount: 0,
+    });
   });
 });

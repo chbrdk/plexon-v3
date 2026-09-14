@@ -14,6 +14,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
 export type DashboardFlowsSummary = {
@@ -37,6 +38,7 @@ type Props = {
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
   brandion: BrandionProjectSummary | null
+  metron: MetronProjectSummary | null
   bindings: CollectionBinding[]
   knowledge: DashboardKnowledgeSummary | null
   flows: DashboardFlowsSummary | null
@@ -83,6 +85,7 @@ function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
   if (productId === 'brandion') return 'BRANDION'
+  if (productId === 'metron') return 'METRON'
   return productId
 }
 
@@ -109,6 +112,7 @@ export function CollectionOverviewBand({
   checkion,
   audion,
   brandion,
+  metron,
   bindings,
   knowledge,
   flows,
@@ -271,6 +275,50 @@ export function CollectionOverviewBand({
               <Text role="meta" as="p" className="plexon-collection-overview-aside">
                 {brandion.guidelineCount} {t('projects.detail.guidelines')} ·{' '}
                 {brandion.analysisCount} {t('projects.detail.analyses')}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="plexon-collection-overview-chapter-block" data-chapter="metron">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                METRON
+              </Text>
+              <Button variant="link" size="sm" onClick={() => onOpenWork('metron')}>
+                {t('projects.detail.overviewOpenCatalog')}
+              </Button>
+            </header>
+            {!metron ? (
+              <Text role="meta">{t('projects.detail.overviewMetronEmpty')}</Text>
+            ) : metron.dashboardCount === 0 && metron.kpiCount === 0 ? (
+              <Text role="meta">{t('projects.detail.overviewMetronNoDashboards')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                <li>
+                  <span className="plexon-collection-overview-ledger-label">
+                    {t('projects.detail.dashboards')}
+                  </span>
+                  <span className="plexon-collection-overview-ledger-mark">{metron.dashboardCount}</span>
+                </li>
+                <li>
+                  <span className="plexon-collection-overview-ledger-label">
+                    {t('projects.detail.kpis')}
+                  </span>
+                  <span className="plexon-collection-overview-ledger-mark">{metron.kpiCount}</span>
+                </li>
+                <li>
+                  <span className="plexon-collection-overview-ledger-label">
+                    {t('projects.detail.datasets')}
+                  </span>
+                  <span className="plexon-collection-overview-ledger-mark">{metron.datasetCount}</span>
+                </li>
+              </ul>
+            )}
+            {metron ? (
+              <Text role="meta" as="p" className="plexon-collection-overview-aside">
+                {metron.dashboardCount} {t('projects.detail.dashboards')} ·{' '}
+                {metron.kpiCount} {t('projects.detail.kpis')} ·{' '}
+                {metron.datasetCount} {t('projects.detail.datasets')}
               </Text>
             ) : null}
           </div>

@@ -18,19 +18,22 @@ import {
   fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
   fetchCreationPlatformProjectSummary,
+  fetchMetronPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import {
   resolveAudionCapability,
   resolveBrandionCapability,
   resolveCheckionCapability,
   resolveCreationCapability,
+  resolveMetronCapability,
 } from '@/lib/platform-project-capability-summary';
 import { getCollectionProjection } from '@/lib/collection-projection';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
 import { buildCreationProjectLaunchUrl } from '@/lib/creation-launch-url';
-import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl } from '@/lib/constants';
+import { buildMetronProjectLaunchUrl } from '@/lib/metron-launch-url';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl, getMetronUrl } from '@/lib/constants';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 
 const FLOW_TEASER_LIMIT = 3;
@@ -61,12 +64,13 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, brandionLive, creationLive, packRow, flowRows, projection] =
+  const [checkionLive, audionLive, brandionLive, creationLive, metronLive, packRow, flowRows, projection] =
     await Promise.all([
       fetchCheckionPlatformProjectSummary(ppid, user.id),
       fetchAudionPlatformProjectSummary(ppid, user.id),
       fetchBrandionPlatformProjectSummary(ppid, user.id),
       fetchCreationPlatformProjectSummary(ppid, user.id),
+      fetchMetronPlatformProjectSummary(ppid, user.id),
       getOrCreateKnowledgePack(ppid),
       listCollectionTestFlows(ppid),
       getCollectionProjection(ppid, { rebuildIfMissing: true }),
@@ -75,6 +79,7 @@ export async function GET(
   const audion = resolveAudionCapability(audionLive, bindings);
   const brandion = resolveBrandionCapability(brandionLive, bindings);
   const creation = resolveCreationCapability(creationLive, bindings);
+  const metron = resolveMetronCapability(metronLive, bindings);
 
   const facets = ensureFacetsShape(packRow.facets, packRow.updatedAt.toISOString());
   const readinessFromPack = buildKnowledgeFacetReadiness(facets);
@@ -110,6 +115,7 @@ export async function GET(
   const audionBase = getAudionAdminUrl().replace(/\/+$/, '');
   const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
   const creationBase = (getCreationUrl() ?? '').replace(/\/+$/, '');
+  const metronBase = (getMetronUrl() ?? '').replace(/\/+$/, '');
   const companyId = project.companyId;
 
   return Response.json({
@@ -119,6 +125,7 @@ export async function GET(
     audion,
     brandion,
     creation,
+    metron,
     knowledge,
     /** Rebuildable Collection read model (Wave B) — magazine/Assistant prefer this. */
     projection: projection
@@ -146,6 +153,11 @@ export async function GET(
         ? buildCreationProjectLaunchUrl(creationBase, { platformProjectId: ppid })
         : creationBase
           ? `${creationBase}/projects`
+          : '',
+      metronProject: metron
+        ? buildMetronProjectLaunchUrl(metronBase, { platformProjectId: ppid })
+        : metronBase
+          ? `${metronBase}/projects`
           : '',
     },
   });

@@ -16,6 +16,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
 function openExternal(href: string) {
@@ -35,6 +36,7 @@ function productLabel(productId: string): string {
   if (productId === 'checkion') return 'CHECKION'
   if (productId === 'audion') return 'AUDION'
   if (productId === 'brandion') return 'BRANDION'
+  if (productId === 'metron') return 'METRON'
   return productId
 }
 
@@ -493,6 +495,64 @@ export function BrandionCapabilityView({
       <div className="plexon-knowledge-facet-tile-actions">
         <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
           {t('projects.detail.openBrandion')}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export function MetronCapabilityView({
+  metron,
+  href,
+}: {
+  metron: MetronProjectSummary | null
+  href: string
+}) {
+  const { t } = useI18n()
+  const empty =
+    Boolean(metron) &&
+    metron!.datasetCount === 0 &&
+    metron!.kpiCount === 0 &&
+    metron!.dashboardCount === 0
+
+  return (
+    <div className="plexon-capability-pane" data-testid="metron-capability-view">
+      <header className="plexon-knowledge-facet-tile-head">
+        <div>
+          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+            {t('projects.detail.capabilityLocalBadge')}
+          </Text>
+          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+            METRON
+          </Text>
+          <Text role="meta" as="p">
+            {t('projects.detail.metronCatalogSubtitle')}
+          </Text>
+        </div>
+        <Chip static size="sm">
+          {metron ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+        </Chip>
+      </header>
+
+      {!metron ? (
+        <Text role="meta">{t('projects.detail.metronEmpty')}</Text>
+      ) : (
+        <>
+          <Text role="meta">
+            {metron.dashboardCount} {t('projects.detail.dashboards')} ·{' '}
+            {metron.kpiCount} {t('projects.detail.kpis')} ·{' '}
+            {metron.datasetCount} {t('projects.detail.datasets')}
+            {metron.externalProjectId
+              ? ` · ${t('projects.detail.localId')}: ${metron.externalProjectId}`
+              : ''}
+          </Text>
+          {empty ? <Text role="meta">{t('projects.detail.metronCatalogEmpty')}</Text> : null}
+        </>
+      )}
+
+      <div className="plexon-knowledge-facet-tile-actions">
+        <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
+          {t('projects.detail.openMetron')}
         </Button>
       </div>
     </div>

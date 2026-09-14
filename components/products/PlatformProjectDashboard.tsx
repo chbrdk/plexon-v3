@@ -19,6 +19,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
 type DashboardPayload = {
@@ -38,9 +39,15 @@ type DashboardPayload = {
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
   brandion: BrandionProjectSummary | null
+  metron: MetronProjectSummary | null
   knowledge?: DashboardKnowledgeSummary | null
   flows?: DashboardFlowsSummary | null
-  links: { checkionProject: string; audionProject: string; brandionProject: string }
+  links: {
+    checkionProject: string
+    audionProject: string
+    brandionProject: string
+    metronProject: string
+  }
 }
 
 export function PlatformProjectDashboard({ platformProjectId }: { platformProjectId: string }) {
@@ -142,6 +149,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             checkion={data.checkion}
             audion={data.audion}
             brandion={data.brandion}
+            metron={data.metron ?? null}
             bindings={data.bindings}
             knowledge={data.knowledge ?? null}
             flows={data.flows ?? null}
@@ -152,9 +160,11 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             audionHref={data.links.audionProject}
             checkionHref={data.links.checkionProject}
             brandionHref={data.links.brandionProject}
+            metronHref={data.links.metronProject ?? ''}
             checkion={data.checkion}
             audion={data.audion}
             brandion={data.brandion}
+            metron={data.metron ?? null}
             bindings={data.bindings}
             openNav={workNav}
             onOpenNav={setWorkNav}

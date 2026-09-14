@@ -91,8 +91,8 @@ Lifecycle lives on `platform_projects.status` (`active` | `archived`). **No** `d
 
 - Nav **Projekte** → `/projects`: create form + full Collection list (same card look as dashboard insights).
 - Home keeps a short preview (limit 6) with CTAs to the hub.
-- Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs for CHECKION / AUDION / **BRANDION** / **CREATION** / **SPIRION** + bindings). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
-- Dashboard BFF fetches Brandion/Creation via `GET {PRODUCT}/api/platform/provisioning/projects/{id}` → `brandion` / `creation` + launch links (`lib/platform-project-dashboard-fetch.ts`).
+- Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs for CHECKION / AUDION / **BRANDION** / **METRON** / **CREATION** / **SPIRION** + bindings). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
+- Dashboard BFF fetches Brandion/Creation/Metron via `GET {PRODUCT}/api/platform/provisioning/projects/{id}` → `brandion` / `creation` / `metron` + launch links (`lib/platform-project-dashboard-fetch.ts`).
 - Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync checkion/audion/brandion/creation/spirion).
 - Product-first origins: `…/audion-project-origin`, `…/checkion-project-origin`, `…/brandion-project-origin`, `…/creation-project-origin`, `…/spirion-project-origin` (legacy `…/dig-project-origin`), `…/metron-project-origin`.
 

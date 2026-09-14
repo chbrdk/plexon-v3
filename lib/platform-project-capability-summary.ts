@@ -3,6 +3,7 @@ import type {
   BrandionProjectSummary,
   CheckionProjectSummary,
   CreationProjectSummary,
+  MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 
 type BindingLike = {
@@ -79,5 +80,21 @@ export function resolveCreationCapability(
   return {
     externalProjectId: id,
     compositionCount: 0,
+  };
+}
+
+export function resolveMetronCapability(
+  live: MetronProjectSummary | null,
+  bindings: BindingLike[]
+): MetronProjectSummary | null {
+  if (live?.externalProjectId) return live;
+  const binding = bindings.find((b) => b.productId === 'metron');
+  const id = binding?.externalProjectId?.trim();
+  if (!id) return null;
+  return {
+    externalProjectId: id,
+    datasetCount: 0,
+    kpiCount: 0,
+    dashboardCount: 0,
   };
 }

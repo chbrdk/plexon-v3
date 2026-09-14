@@ -101,7 +101,7 @@ Mirror Brandion/Checkion shell + magazine vs report:
 - [x] `PLATFORM_PRODUCT_IDS` + `lib/platform-products.ts` entry (`lifecycle: planned` until URL set)
 - [x] `ensureBindingPlaceholders` includes `metron`
 - [x] Origin route `…/metron-project-origin`
-- [ ] Collection home capability catalog tile + dashboard BFF summary fetch (Wave 3 polish)
+- [x] Collection home capability catalog tile + dashboard BFF summary fetch (Wave 3 polish)
 - [x] Env stubs in `knowledge/paths.md` (Coolify staging FQDN TBD)
 - [x] Usage `service` enum accepts `metron`
 - [ ] Product switcher static URLs in sibling apps when staging exists

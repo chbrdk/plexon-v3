@@ -9,8 +9,11 @@ import {
   fetchAudionPlatformProjectSummary,
   fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
+  fetchCreationPlatformProjectSummary,
+  fetchMetronPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
+import { getCollectionProjection } from '@/lib/collection-projection';
 
 vi.mock('@/lib/auth-request-user', () => ({
   getRequestUser: vi.fn(),
@@ -40,6 +43,12 @@ vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
   fetchCheckionPlatformProjectSummary: vi.fn(),
   fetchAudionPlatformProjectSummary: vi.fn(),
   fetchBrandionPlatformProjectSummary: vi.fn(),
+  fetchCreationPlatformProjectSummary: vi.fn(),
+  fetchMetronPlatformProjectSummary: vi.fn(),
+}));
+
+vi.mock('@/lib/collection-projection', () => ({
+  getCollectionProjection: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock('@/lib/platform-project-access', () => ({
@@ -63,11 +72,15 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.stubEnv('NEXT_PUBLIC_BRANDION_URL', 'https://brandion-v3.test');
+    vi.stubEnv('NEXT_PUBLIC_METRON_URL', 'https://metron-v3.test');
     vi.mocked(getOrCreateKnowledgePack).mockResolvedValue(
       emptyPackRow('p1') as Awaited<ReturnType<typeof getOrCreateKnowledgePack>>,
     );
     vi.mocked(listCollectionTestFlows).mockResolvedValue([]);
     vi.mocked(fetchBrandionPlatformProjectSummary).mockResolvedValue(null);
+    vi.mocked(fetchCreationPlatformProjectSummary).mockResolvedValue(null);
+    vi.mocked(fetchMetronPlatformProjectSummary).mockResolvedValue(null);
+    vi.mocked(getCollectionProjection).mockResolvedValue(null);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -173,6 +186,13 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
         },
       ],
     });
+    vi.mocked(fetchMetronPlatformProjectSummary).mockResolvedValue({
+      externalProjectId: 'mt-1',
+      platformProjectId: 'p1',
+      datasetCount: 3,
+      kpiCount: 8,
+      dashboardCount: 2,
+    });
     vi.mocked(listCollectionTestFlows).mockResolvedValue([
       {
         id: 'flow-1',
@@ -226,6 +246,12 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     expect(body.links.brandionProject).toContain('platformProjectId=p1');
     expect(body.links.brandionProject).toContain('/projects');
     expect(body.links.brandionProject).not.toContain('platformProjectHint');
+    expect(body.metron?.dashboardCount).toBe(2);
+    expect(body.metron?.kpiCount).toBe(8);
+    expect(body.metron?.datasetCount).toBe(3);
+    expect(body.links.metronProject).toContain('platformProjectId=p1');
+    expect(body.links.metronProject).toContain('/projects');
+    expect(body.links.metronProject).not.toContain('platformProjectHint');
     expect(body.knowledge?.revision).toBe(1);
     expect(body.knowledge?.facets).toEqual(
       expect.arrayContaining([
@@ -304,6 +330,7 @@ describe('GET /api/platform/projects/[platformProjectId]/dashboard', () => {
     });
     expect(body.brandion).toBeNull();
     expect(body.checkion).toBeNull();
+    expect(body.metron).toBeNull();
     expect(body.links.audionProject).toContain('platformProjectHint=p1');
     expect(body.knowledge?.facets).toBeDefined();
     expect(body.flows).toEqual({ count: 0, recent: [] });
