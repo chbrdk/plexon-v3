@@ -111,6 +111,11 @@ const seedAudit = JSON.stringify({
   findings: [{ severity: 'warning', code: 'generic-alt', message: 'Get started still visible' }],
 });
 
+const spirionTools: CreationQualityToolTrace[] = [
+  { name: 'spirion_captures_list', preview: '{"captures":[{"id":"cap_eval1"}]}' },
+  { name: 'spirion_capture_prompt_pack', preview: '{"captureIds":["cap_eval1"]}' },
+];
+
 export type CreationCraftEvalRecordedTrace = {
   id: string;
   briefId: string;
@@ -134,6 +139,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 42000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -229,6 +235,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 39000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -248,6 +255,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 44000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -267,6 +275,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 36000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_apply_ops', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -286,6 +295,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 35000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_apply_ops', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -305,6 +315,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 41000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -324,6 +335,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 40000,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },
@@ -343,6 +355,7 @@ export const CREATION_CRAFT_EVAL_TRACES: CreationCraftEvalRecordedTrace[] = [
     latencyMs: 40500,
     expectFinished: true,
     traces: [
+      ...spirionTools,
       { name: 'creation_scene_import_html', preview: '{"ok":true}' },
       { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
       { name: 'creation_scene_craft_debug', preview: denseCraft },

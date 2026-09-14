@@ -2,6 +2,7 @@
  * Creation craft modules — composable procedures under a format playbook.
  * Spec: specs/domain/assistant-creation-agi-lite.md § Wave B (modules)
  * Knowledge: knowledge/creation-craft-playbook-scenarios-next.md
+ * Spirion meta: knowledge/creation-craft-spirion-section-modules.md
  *
  * Format playbooks stay top-level (quality job). Modules inject only when triggered
  * (progressive disclosure — max 3 per turn).
@@ -11,6 +12,7 @@ import type { CreationCraftPlaybookId } from '@/lib/assistant/creation-craft-pla
 import { promptLooksLikeWireframeBrief } from '@/lib/assistant/creation-craft-playbooks';
 
 export type CreationCraftModuleId =
+  | 'spirion_section_ref_v1'
   | 'restyle_densify_v1'
   | 'wireframe_layout_v1'
   | 'pdp_detail_v1'
@@ -40,7 +42,16 @@ const PRICING_RE =
 const CONTACT_STRIP_RE =
   /\b(contact\s*(us|strip|bar|form)|kontakt(\s*(formular|leiste|bar|strip))?|demo\s*anfragen|newsletter\s*signup|email\s*capture|input\s*\+\s*(button|cta)|anfrage[\s_-]?formular)\b/i;
 
+/** Explicit Spirion / design-ref phrasing (module also auto-attaches on landing/newsletter). */
+const SPIRION_REF_RE =
+  /\b(spirion|capture[_]?prompt[_]?pack|captures?[_]?list|look[_]?contract|page[_]?rhythm|design[\s_-]?referenz|best[\s_-]?practice|wie\s+spirion|visual\s+ref|craft\s+ref)\b/i;
+
 const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
+  spirion_section_ref_v1: {
+    id: 'spirion_section_ref_v1',
+    label: 'Spirion Section Reference',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
   restyle_densify_v1: {
     id: 'restyle_densify_v1',
     label: 'Restyle / Densify',
@@ -105,6 +116,25 @@ export function promptLooksLikeContactStrip(userPrompt: string | null | undefine
   return CONTACT_STRIP_RE.test(text);
 }
 
+export function promptLooksLikeSpirionRef(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return SPIRION_REF_RE.test(text);
+}
+
+/** Landing/newsletter always get Spirion meta (best-practice refs before craft). */
+export function shouldAttachSpirionSectionRef(
+  playbookId: CreationCraftPlaybookId | null | undefined,
+  userPrompt?: string | null,
+): boolean {
+  if (playbookId !== 'creation_landing_v1' && playbookId !== 'creation_newsletter_v1') {
+    return false;
+  }
+  // Always on for these formats; explicit phrasing is documentation/eval only.
+  void userPrompt;
+  return true;
+}
+
 function moduleAllowedOnPlaybook(
   mod: CreationCraftModule,
   playbookId: CreationCraftPlaybookId | null,
@@ -116,7 +146,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → wireframe → PDP → social → pricing → contact.
+ * Restyle → Spirion (landing/newsletter always) → wireframe → PDP → social → pricing → contact.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -134,6 +164,7 @@ export function resolveCreationCraftModules(
   };
 
   if (promptLooksLikeRestyle(userPrompt)) push('restyle_densify_v1');
+  if (shouldAttachSpirionSectionRef(pb, userPrompt)) push('spirion_section_ref_v1');
   if (promptLooksLikeWireframeBrief(userPrompt)) push('wireframe_layout_v1');
   if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
   if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
@@ -141,6 +172,27 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeContactStrip(userPrompt)) push('contact_strip_v1');
 
   return out;
+}
+
+function bodySpirionSectionRef(): string {
+  return `
+## Craft-Modul: Spirion Section Reference (\`spirion_section_ref_v1\`)
+Ziel: **Best-Practice-Look aus Spirion** bevor gebaut/restyled wird — nicht aus dem Bauch.
+
+### Pflicht (vor HTML-Import / großen apply_ops)
+1. \`spirion_captures_list\` (limit ~12; **kein** \`platformProjectId\` / \`digProjectId\`).
+2. 1–2 Captures wählen, die zur **aktuellen Section/Job** passen (Hero / Pricing / Nav / Trust — nicht random).
+3. \`spirion_capture_prompt_pack\` mit \`output_contract: both\` → \`look_contract\` + \`page_rhythm\` lesen.
+4. Ableiten in **eigene** Hex/Type/Spacing-Literale (kein 1:1 Fremdmarken-Clone).
+5. \`look_contract.avoid\` ernst nehmen (z. B. kein equal three-up als ganze Page).
+6. Bei Import: \`craftMeta.spirion\` mit \`captureIds\` + Kurz-Avoid setzen.
+
+### Editorial-Fallback
+Nur wenn \`captures_list\` wirklich \`captures: []\` — dann trotzdem eigenes Design-System erfinden; **nicht** nach Search-0 abbrechen.
+
+### Mit Restyle
+Erst Pack lesen, dann gezielte \`apply_ops\` — kein Full-Reimport nur wegen Spirion.
+`.trim();
 }
 
 function bodyRestyleDensify(): string {
@@ -257,6 +309,8 @@ export function buildCreationCraftModulesPromptBlock(
   if (!moduleIds?.length) return '';
   const parts = moduleIds.map((id) => {
     switch (id) {
+      case 'spirion_section_ref_v1':
+        return bodySpirionSectionRef();
       case 'restyle_densify_v1':
         return bodyRestyleDensify();
       case 'wireframe_layout_v1':

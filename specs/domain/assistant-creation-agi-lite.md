@@ -120,6 +120,7 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 
 | Module | Trigger | Effect |
 |--------|---------|--------|
+| `spirion_section_ref_v1` | **Always** on landing/newsletter (meta) | Pflicht `captures_list` → `capture_prompt_pack` (`both`); Look/Rhythm → eigene Literale; gate finding wenn fehlt |
 | `restyle_densify_v1` | Restyle / dichter / polish / bestehende Seite | Prefer `apply_ops`; forbid full HTML re-import unless empty/seed |
 | `wireframe_layout_v1` | Wireframe / Skizze / Bioframe | Section-order + char limits (progressive; also summarized in landing playbook) |
 | `pdp_detail_v1` | PDP / Produktdetail / product page | Section map: gallery + buy CTA + specs grid (not generic landing) |
@@ -127,7 +128,7 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 | `pricing_compare_v1` | Preise / pricing table / Tarife | 2–4 tier SiteGrid + CTA per cell |
 | `contact_strip_v1` | Contact us / Demo anfragen / Kontaktleiste | Title + input|button row |
 
-Resolve via `resolveCreationCraftModules(prompt, playbookId)` — max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Roadmap: `knowledge/creation-craft-playbook-scenarios-next.md`.
+Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order restyle → spirion → wireframe → …; max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Knowledge: `creation-craft-module-spirion-section-ref.md` · roadmap `creation-craft-playbook-scenarios-next.md`.
 
 ### Acceptance B
 
@@ -138,6 +139,7 @@ Resolve via `resolveCreationCraftModules(prompt, playbookId)` — max 3 per turn
 5. Unit: gate job `newsletter` fails on Print* in tree and missing CTA; `print` fails without `PrintPage` after writes.
 6. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
 7. Knowledge documents format table + paths (no hardcoded FQDNs in code).
+8. Unit: landing/newsletter always resolve `spirion_section_ref_v1`; gate fails landing/newsletter writes without `spirion_captures_list` or `spirion_capture_prompt_pack`.
 
 
 ## Wave C — Collection craft memory (scoped)

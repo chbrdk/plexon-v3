@@ -36,7 +36,7 @@ const PRINT_MAGAZINE_RE =
   /\b(print\s*page|printpage|printcover|print\s*cover|print\s*chapter|magazin(?!\s*pdf)|magazine(?!\s*template)|brosch[uü]re|flyer|din\s*a4|a4\s*print|print\s*channel|druck(daten|layout| magazin)?|print\s*layout)\b/i;
 
 const LANDING_RE =
-  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*detail|product\s*page|produktdetail|produktseite|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief|restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|dichter|polish|polier\w*|bestehend\w*|existing\s+page|happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|pricing|preise|preis\s*tabelle|price\s*(table|grid|tier)|tarif|pl[aä]ne|contact\s*(us|strip|bar|form)|kontakt|demo\s*anfragen)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
+  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*detail|product\s*page|produktdetail|produktseite|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief|restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|dichter|polish|polier\w*|bestehend\w*|existing\s+page|happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|pricing|preise|preis\s*tabelle|price\s*(table|grid|tier)|tarif|pl[aä]ne|contact\s*(us|strip|bar|form)|kontakt|demo\s*anfragen|spirion|capture[_]?prompt|look[_]?contract|best[\s_-]?practice)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
 
 /** User attached / described a layout sketch (not the thin gray anti-pattern). */
 export function promptLooksLikeWireframeBrief(userPrompt: string | null | undefined): boolean {
@@ -89,7 +89,7 @@ Nutzer-Wireframe ≠ verbotenes Grau-Wireframe-Look. Skizze = **Section-Order + 
 
 Phasen:
 0. Eigenes Design-System (Hex/Typo/Spacing) — **kein** Brandion-Pfad auf Greenfield. Bei Wireframe: zuerst Section-Map aus der Skizze.
-1. Optional Spirion \`captures_list\` → \`capture_prompt_pack\` (Rhythm/Look; eigene Literale).
+1. Optional Spirion — **wenn Modul \`spirion_section_ref_v1\` aktiv (Landing default):** Pflicht \`captures_list\` → \`capture_prompt_pack\` (Rhythm/Look; eigene Literale).
 2. \`creation_scene_import_html\` — ein HTML-Dokument; Hero laut Default **oder** Wireframe-Vertrag; body font + page BG.
 3. Polish nur bei Lücken: \`insert_child\` mit echten props / \`set_prop\`.
 4. Audit → craft_debug → preview.

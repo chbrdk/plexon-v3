@@ -314,6 +314,13 @@ export function evaluateCreationSceneQuality(
         'Display-Fallgefühl — lineHeight ~1.05–1.12 + leicht negatives letterSpacing auf ≥48px Type; Body-1.6 nicht erben (Umbrüche wirken sonst auseinandergezogen).',
       );
     }
+    const hasSpirionList = called(traces, 'captures_list');
+    const hasSpirionPack = called(traces, 'capture_prompt_pack');
+    if (!hasSpirionList && !hasSpirionPack) {
+      findings.push(
+        'Spirion-Referenz fehlt — spirion_captures_list + spirion_capture_prompt_pack (output_contract both) vor Abschluss; Look/Rhythm aus Captures ableiten (Modul spirion_section_ref_v1).',
+      );
+    }
     pushWebCtaFindings(findings, {
       hasAudit,
       auditPreview,
@@ -323,6 +330,13 @@ export function evaluateCreationSceneQuality(
   }
 
   if (job === 'newsletter') {
+    const hasSpirionList = called(traces, 'captures_list');
+    const hasSpirionPack = called(traces, 'capture_prompt_pack');
+    if (!hasSpirionList && !hasSpirionPack) {
+      findings.push(
+        'Spirion-Referenz fehlt — spirion_captures_list + spirion_capture_prompt_pack (output_contract both) vor Abschluss; Look/Rhythm aus Captures ableiten (Modul spirion_section_ref_v1).',
+      );
+    }
     if (treePreview.trim() && outlineHasAnyPrint(treePreview)) {
       findings.push(
         'Newsletter darf keine Print*-Nodes enthalten — PrintPage/Cover entfernen; Einspalten Site*/HTML nutzen.',

@@ -20,7 +20,8 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 
 | Id | File |
 |----|------|
-| `restyle_densify_v1` | `lib/assistant/creation-craft-modules.ts` |
+| `spirion_section_ref_v1` | `lib/assistant/creation-craft-modules.ts` (always landing/newsletter) |
+| `restyle_densify_v1` | same |
 | `wireframe_layout_v1` | same |
 | `pdp_detail_v1` | same |
 | `social_proof_row_v1` | same |
@@ -33,6 +34,7 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 
 | Module | Trigger | Why |
 |--------|---------|-----|
+| **Spirion section ref (meta)** | Always landing/newsletter | **Shipped** — `spirion_section_ref_v1` |
 | **Restyle / densify existing** | Restyle, dichter, polish | **Shipped** — `restyle_densify_v1` |
 | **Wireframe → layout contract** | Skizze / Bioframe | **Shipped** — `wireframe_layout_v1` |
 | **PDP / product detail** | PDP, Produktdetail | **Shipped** — `pdp_detail_v1` |
@@ -42,11 +44,11 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
 
-## Spirion-backed section modules (recommended next)
+## Spirion-backed section modules (next after meta)
 
 See **`knowledge/creation-craft-spirion-section-modules.md`**.
 
-Priority: `spirion_section_ref_v1` (meta) → nav / stats → FAQ / bento → Brandion bind / print chapter.
+Priority: nav / stats → FAQ / bento → Brandion bind / print chapter.
 
 ## Maybe later (full playbook only if gate differs)
 

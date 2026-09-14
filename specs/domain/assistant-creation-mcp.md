@@ -91,7 +91,8 @@ WENN Intent `creation_scene_edit` **and** write tools ran in the turn, DANN MUSS
 5. **Wave A1** seed/fixture chrome is still visible (`Get started`, `Option A/B`, fixture orange / Noto), oder
 6. **Wave A1 landing job** (prompt/heuristic `landing`|`startseite`|`hero`|`pdp`|…): missing hero mass (`hasLargeDisplay` / `hasHeroMedia`) or missing CTA (audit `missing-cta` or tree outline without Button/Link), oder
 7. **Wave B newsletter job:** Print* nodes present, or missing web CTA, or newsletter mass too flat (<28px and no media), oder
-8. **Wave B print job:** tree outline after writes has no `PrintPage`
+8. **Wave B print job:** tree outline after writes has no `PrintPage`, oder
+9. **Spirion section ref (landing + newsletter):** neither `spirion_captures_list` nor `spirion_capture_prompt_pack` was called after writes (module `spirion_section_ref_v1`; empty list still counts if list was called)
 
 Dann: remaining tool rounds als **QA-Nudge** (user message, kein paralleler Scene-Writer). Kein zweiter Writer-Subagent — optimistic lock bleibt beim Coordinator.
 

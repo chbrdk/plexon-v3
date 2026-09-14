@@ -73,6 +73,8 @@ describe('creation scene quality gate', () => {
   it('passes after audit + craft-debug + preview without errors', () => {
     const verdict = evaluateCreationSceneQuality(
       [
+        { name: 'spirion_captures_list', preview: '{"captures":[{"id":"cap_abc"}]}' },
+        { name: 'spirion_capture_prompt_pack', preview: '{"captureIds":["cap_abc"]}' },
         { name: 'creation_scene_import_html' },
         { name: 'creation_scene_content_audit', preview: '{"ok":true}' },
         {
@@ -90,6 +92,50 @@ describe('creation scene quality gate', () => {
     )
     expect(verdict.pass).toBe(true)
     expect(verdict.job).toBe('landing')
+  })
+
+  it('fails landing when Spirion capture pack was never called', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":true,"maxFontSizePx":64}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Spirion-Referenz/)
+  })
+
+  it('fails newsletter when Spirion was never called', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":18,"hasLargeDisplay":true,"hasHeroMedia":false,"maxFontSizePx":32}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Root [r1] SiteStack\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'newsletter' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Spirion-Referenz/)
   })
 
   it('fails on fixture seed chrome for landing jobs', () => {

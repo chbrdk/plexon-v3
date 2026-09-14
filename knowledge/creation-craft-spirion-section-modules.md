@@ -1,45 +1,42 @@
-# Creation craft — Spirion-backed section modules (next)
+# Creation craft — Spirion-backed section modules
 
 **Date:** 2026-09-14  
-**Depends:** `creation-craft-playbook-scenarios-next.md` · Spirion tools in landing depth (`captures_list` → `capture_prompt_pack`)  
-**Code today:** optional Spirion in playbook phase 1; prefetch may list captures
+**Depends:** `creation-craft-playbook-scenarios-next.md` · Spirion tools (`captures_list` → `capture_prompt_pack`)  
+**Shipped meta:** `spirion_section_ref_v1` — see `knowledge/creation-craft-module-spirion-section-ref.md`
 
 ## Idea
 
-Module catalog is strong on **page jobs** (PDP, pricing, contact). Next leap = **section recipes** that pull **Spirion best-practice refs** before writing — so density/look come from real captures, not invented wireframe chrome.
+Page modules (PDP, pricing, contact) define **section maps**. Spirion modules supply **visual contracts** from real captures before writing.
 
-## Already shipped (page-level)
+## Already shipped (page-level + Spirion meta)
 
-Restyle · Wireframe · PDP · Social · Pricing · Contact
+Restyle · Wireframe · PDP · Social · Pricing · Contact · **`spirion_section_ref_v1`** (always on landing/newsletter)
 
-## Proposed next modules (Spirion-first)
+## Next modules (Spirion-first section recipes)
 
 | Module | Trigger | Spirion cue | Craft outcome |
 |--------|---------|-------------|----------------|
-| `spirion_section_ref_v1` | „wie Spirion“, „Referenz“, „best practice“, densify | Always: 1–2 captures → `capture_prompt_pack` (`both`) | Look/rhythm → own Hex/type; cite `captureIds` in craftMeta |
-| `nav_chrome_v1` | Nav, Header, Menü | Captures tagged homepage header | Slim row, not mega-IA unless sketch says so |
-| `faq_accordion_v1` | FAQ, Fragen | Support/FAQ page captures | Stack of Q/A; tight type; no equal three-up |
-| `stats_metrics_v1` | Stats, KPIs, Zahlenband | Landing hero/metrics bands | Row of 3–4 metrics as **one** text shape each (no „3“+„+“) |
+| `nav_chrome_v1` | Nav, Header, Menü | Homepage header captures | Slim row, not mega-IA unless sketch says so |
+| `faq_accordion_v1` | FAQ, Fragen | Support/FAQ captures | Stack of Q/A; tight type; no equal three-up |
+| `stats_metrics_v1` | Stats, KPIs, Zahlenband | Metrics bands | 3–4 metrics as **one** text shape each |
 | `testimonial_quote_v1` | Zitat, Testimonial | Quote/press captures | Quote + name/role; not logo-row |
-| `feature_bento_v1` | Features, Vorteile, Bento | Product feature grids | Uneven bento / 2+1 — avoid equal three-up whole page |
-| `blog_list_v1` | Blog, News, Artikel | Editorial list captures | Title + meta + teaser list |
+| `feature_bento_v1` | Features, Vorteile, Bento | Feature grids | Uneven bento / 2+1 — avoid equal three-up |
+| `blog_list_v1` | Blog, News, Artikel | Editorial lists | Title + meta + teaser list |
 | `brandion_bind_pass_v1` | Tokens binden, Brand pack | — (Brandion) | After Hex craft: optional `set_token_binding` |
 | `print_chapter_rhythm_v1` | Magazin Chapter | — (print) | Cover → chapter → folio under print playbook |
 
-## How Spirion should plug in (procedure)
-
-For any Spirion-backed module:
+## How Spirion plugs in (every Spirion-backed module)
 
 1. `spirion_captures_list` (limit ~12; **no** platformProjectId).  
-2. Pick 1–2 captures matching the **section** (not random homepage).  
-3. `spirion_capture_prompt_pack` (`output_contract: both`) → apply `look_contract` + `page_rhythm` as **literals**.  
-4. Prefer `apply_ops` on existing section when restyle is also active.  
+2. Pick 1–2 captures matching the **section**.  
+3. `spirion_capture_prompt_pack` (`output_contract: both`) → apply as **literals**.  
+4. Prefer `apply_ops` when restyle is also active.  
 5. Stamp `craftMeta.spirion.captureIds` + short avoid list.
 
 ## Granularity rule
 
-- **Page module** = section map (PDP, pricing).  
-- **Spirion module** = visual contract for *how* a section looks.  
+- **Page module** = section map.  
+- **Spirion module** = how a section looks.  
 - Compose: e.g. `pricing_compare_v1` + `spirion_section_ref_v1` (max 3).
 
 ## Do not
@@ -48,9 +45,8 @@ For any Spirion-backed module:
 - Skip pack and invent equal padding stacks.  
 - Add a full playbook per section type.
 
-## Suggested build order
+## Suggested build order (remaining)
 
-1. **`spirion_section_ref_v1`** (meta — unlocks all others)  
-2. `nav_chrome_v1` + `stats_metrics_v1` (above-fold polish)  
-3. `faq_accordion_v1` + `feature_bento_v1`  
-4. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`
+1. `nav_chrome_v1` + `stats_metrics_v1`  
+2. `faq_accordion_v1` + `feature_bento_v1`  
+3. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`

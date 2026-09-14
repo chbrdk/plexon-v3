@@ -7,6 +7,7 @@ import {
   promptLooksLikePricing,
   promptLooksLikeRestyle,
   promptLooksLikeSocialProof,
+  promptLooksLikeSpirionRef,
   resolveCreationCraftModules,
 } from '@/lib/assistant/creation-craft-modules'
 import { buildCreationSceneDepthPromptBlock } from '@/lib/assistant/creation-scene-depth'
@@ -17,10 +18,11 @@ import {
 } from '@/lib/assistant/page-context'
 
 describe('creation craft modules', () => {
-  it('lists restyle and wireframe modules', () => {
+  it('lists restyle, wireframe, and spirion modules', () => {
     const ids = listCreationCraftModules().map((m) => m.id)
     expect(ids).toEqual(
       expect.arrayContaining([
+        'spirion_section_ref_v1',
         'restyle_densify_v1',
         'wireframe_layout_v1',
         'pdp_detail_v1',
@@ -37,16 +39,26 @@ describe('creation craft modules', () => {
     expect(promptLooksLikeRestyle('Baue eine neue Landing von null')).toBe(false)
   })
 
-  it('resolves restyle module under landing playbook', () => {
+  it('always attaches spirion_section_ref_v1 on landing/newsletter', () => {
+    expect(promptLooksLikeSpirionRef('wie Spirion best practice')).toBe(true)
     expect(
-      resolveCreationCraftModules('Restyle die bestehende Landing — dichter', 'creation_landing_v1'),
-    ).toEqual(['restyle_densify_v1'])
+      resolveCreationCraftModules('Baue eine neue Landing von null', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1'])
+    expect(
+      resolveCreationCraftModules('Schreib einen Newsletter Digest', 'creation_newsletter_v1'),
+    ).toEqual(['spirion_section_ref_v1'])
   })
 
-  it('resolves wireframe module and can compose with restyle', () => {
+  it('resolves restyle module under landing playbook with spirion', () => {
+    expect(
+      resolveCreationCraftModules('Restyle die bestehende Landing — dichter', 'creation_landing_v1'),
+    ).toEqual(['restyle_densify_v1', 'spirion_section_ref_v1'])
+  })
+
+  it('resolves wireframe module and can compose with restyle + spirion', () => {
     expect(
       resolveCreationCraftModules('Wireframe 1:1 nachziehen und dichter restylen', 'creation_landing_v1'),
-    ).toEqual(['restyle_densify_v1', 'wireframe_layout_v1'])
+    ).toEqual(['restyle_densify_v1', 'spirion_section_ref_v1', 'wireframe_layout_v1'])
   })
 
   it('resolves PDP and social-proof modules', () => {
@@ -54,32 +66,38 @@ describe('creation craft modules', () => {
     expect(promptLooksLikeSocialProof('Happy Customers Logo-Row mit 4 Icons')).toBe(true)
     expect(
       resolveCreationCraftModules('Create a PDP product page layout', 'creation_landing_v1'),
-    ).toEqual(['pdp_detail_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'pdp_detail_v1'])
     expect(
       resolveCreationCraftModules(
         'Happy Customers social proof logo row mit 4 Icons',
         'creation_landing_v1',
       ),
-    ).toEqual(['social_proof_row_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'social_proof_row_v1'])
     expect(
       resolveCreationCraftModules(
         'PDP mit Happy Customers Trust-Bar',
         'creation_landing_v1',
       ),
-    ).toEqual(['pdp_detail_v1', 'social_proof_row_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'pdp_detail_v1', 'social_proof_row_v1'])
   })
 
   it('caps modules and skips when playbook mismatches', () => {
     expect(resolveCreationCraftModules('Restyle denser', 'creation_print_magazine_v1')).toEqual([])
     expect(
       resolveCreationCraftModules('Restyle this newsletter digest', 'creation_newsletter_v1'),
-    ).toEqual(['restyle_densify_v1'])
+    ).toEqual(['restyle_densify_v1', 'spirion_section_ref_v1'])
   })
 
   it('builds restyle override prompt that forbids full re-import', () => {
     const block = buildCreationCraftModulesPromptBlock(['restyle_densify_v1'])
     expect(block).toContain('restyle_densify_v1')
     expect(block).toMatch(/Kein.*creation_scene_import_html|Prefer.*apply_ops/i)
+  })
+
+  it('builds spirion section-ref prompt body', () => {
+    const block = buildCreationCraftModulesPromptBlock(['spirion_section_ref_v1'])
+    expect(block).toContain('spirion_section_ref_v1')
+    expect(block).toMatch(/spirion_captures_list|capture_prompt_pack/)
   })
 
   it('builds PDP and social-proof prompt bodies', () => {
@@ -96,16 +114,16 @@ describe('creation craft modules', () => {
     expect(promptLooksLikeContactStrip('Contact us Strip mit Email und Demo anfragen')).toBe(true)
     expect(
       resolveCreationCraftModules('Preise Vergleich Grid mit drei Tarifen', 'creation_landing_v1'),
-    ).toEqual(['pricing_compare_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'pricing_compare_v1'])
     expect(
       resolveCreationCraftModules('Kontaktleiste Contact us Input und Button', 'creation_landing_v1'),
-    ).toEqual(['contact_strip_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'contact_strip_v1'])
     expect(
       resolveCreationCraftModules(
         'Landing Preise und Contact us Strip',
         'creation_landing_v1',
       ),
-    ).toEqual(['pricing_compare_v1', 'contact_strip_v1'])
+    ).toEqual(['spirion_section_ref_v1', 'pricing_compare_v1', 'contact_strip_v1'])
   })
 
   it('builds pricing and contact prompt bodies', () => {
@@ -123,6 +141,7 @@ describe('creation craft modules', () => {
       userPrompt: 'Restyle die bestehende Landing — dichter, kein Wireframe',
     })
     expect(depth).toContain('restyle_densify_v1')
+    expect(depth).toContain('spirion_section_ref_v1')
     expect(depth).toContain('Prefer')
   })
 
@@ -145,9 +164,10 @@ describe('creation craft modules', () => {
       },
     })
     expect(plan.creationCraftPlaybookId).toBe('creation_landing_v1')
-    expect(plan.creationCraftModuleIds).toEqual(['restyle_densify_v1'])
+    expect(plan.creationCraftModuleIds).toEqual(['restyle_densify_v1', 'spirion_section_ref_v1'])
     const block = buildPlanSystemPromptBlock(plan)
-    expect(block).toContain('Craft-Module: restyle_densify_v1')
+    expect(block).toContain('Craft-Module: restyle_densify_v1, spirion_section_ref_v1')
     expect(block).toContain('restyle_densify_v1')
+    expect(block).toContain('spirion_section_ref_v1')
   })
 })
