@@ -1,8 +1,9 @@
 # METRON v3 — Plexon onboarding
 
-**Status:** Wave 5 KPI engine (Wave 0–4 complete) · **Date:** 2026-09-14  
+**Status:** Wave 5 + staging Coolify · **Date:** 2026-09-14  
 **Product id:** `metron` · **Repo:** `metron-v3` · **Display:** METRON  
-**GitHub:** `https://github.com/chbrdk/metron-v3`
+**GitHub:** `https://github.com/chbrdk/metron-v3`  
+**Staging:** `https://metron-v3.projects-a.plygrnd.tech` · Coolify `8qkrk850d37er6subakpnx0r`
 
 > Companion fit analysis: `knowledge/metron-ecosystem-fit.md`  
 > Product specs SoT: `metron-v3/specs/domain/*`
@@ -43,7 +44,7 @@
 | `METRON_API_URL` | Optional service base for upsert (defaults to public URL) |
 | `METRON_MCP_URL` | MCP Streamable HTTP base for assistant tools (Wave 8) |
 
-Coolify: add §4f to `coolify-plexon-v3-env-cheatsheet.md` when staging exists.
+Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · app `8qkrk850d37er6subakpnx0r` · project `sfx1f6qic7zswtt4v7blmevp`. Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 when wiring registry.
 
 ## Plexon code touchpoints (Wave 2 checklist)
 
@@ -53,13 +54,13 @@ Coolify: add §4f to `coolify-plexon-v3-env-cheatsheet.md` when staging exists.
 - [x] Origin route `POST /api/platform/provisioning/metron-project-origin`
 - [ ] Collection home capability catalog tile + dashboard BFF summary (Wave 3 polish)
 - [x] Usage `service` enum accepts `metron`
-- [ ] Product switcher staging URL when FQDN exists
-- [x] Spec: `specs/domain/collection-projects.md` Phase 8 → **done (Wave 2)**
+- [ ] Product switcher staging URL when siblings pick up FQDN (live: `https://metron-v3.projects-a.plygrnd.tech`)
+- [ ] Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 Coolify for registry lifecycle
 
 ## Smoke (after Wave 2)
 
-- Local: `http://localhost:3011` · `GET /api/health` → `productId: metron`
+- Staging: `https://metron-v3.projects-a.plygrnd.tech` · `GET /api/health` → `productId: metron`
 - Federation: `GET /api/federation/health` → `mode: dummy` until live env
-- Upsert skipped while `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` unset (binding stays `pending`)
-- Staging FQDN: TBD → record in `knowledge/paths.md`
+- Upsert skipped while `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` unset on Plexon (binding stays `pending`)
+- Staging FQDN recorded in `knowledge/paths.md`
 - GitHub: `https://github.com/chbrdk/metron-v3`
