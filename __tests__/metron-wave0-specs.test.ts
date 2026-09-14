@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 const root = path.resolve(__dirname, '..')
 
 describe('METRON Wave 0 plexon companions', () => {
-  it('locks product id and Phase 8 planned row', () => {
+  it('locks product id and Phase 8 done row', () => {
     const capability = readFileSync(path.join(root, 'specs/domain/metron-capability.md'), 'utf8')
     expect(capability).toContain('`metron`')
     expect(capability).toContain('METRON')
@@ -19,7 +19,7 @@ describe('METRON Wave 0 plexon companions', () => {
     expect(collections).toContain('8 METRON capability mirror')
     expect(collections).toContain('product id `metron`')
     expect(collections).toContain('metron-v3')
-    expect(collections).toContain('Do **not** add to `ensureBindingPlaceholders` until Wave 2')
+    expect(collections).toContain('**done (Wave 2)**')
 
     const onboarding = readFileSync(path.join(root, 'knowledge/metron-v3-onboarding.md'), 'utf8')
     expect(onboarding).toContain('Product id | `metron`')
@@ -39,8 +39,8 @@ describe('METRON Wave 0 plexon companions', () => {
     expect(existsSync(path.join(root, 'specs/domain/metron-capability.md'))).toBe(true)
   })
 
-  it('does not yet register metron in PLATFORM_PRODUCT_IDS (Wave 2)', () => {
+  it('registers metron in PLATFORM_PRODUCT_IDS (Wave 2)', () => {
     const entitlements = readFileSync(path.join(root, 'lib/platform-entitlements.ts'), 'utf8')
-    expect(entitlements).not.toMatch(/['"]metron['"]/)
+    expect(entitlements).toMatch(/['"]metron['"]/)
   })
 })

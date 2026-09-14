@@ -117,7 +117,7 @@ describe('collection projects domain (phase 0)', () => {
     )
     expect(spec).toContain('SPIRION capability mirror')
     expect(spec).toContain('spirion-project-origin')
-    expect(spec).toContain('ensureBindingPlaceholders(checkion, audion, brandion, creation, spirion)')
+    expect(spec).toContain('ensureBindingPlaceholders(checkion, audion, brandion, creation, spirion, metron)')
     expect(paths).toContain('NEXT_PUBLIC_SPIRION_URL')
     expect(paths).toContain('spirion-project-origin')
     expect(cheatsheet).toContain('4e. Wave E — SPIRION')

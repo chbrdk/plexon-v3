@@ -287,6 +287,17 @@ export const getCreationServiceApiUrl = (): string | null => {
   return process.env.CREATION_API_URL?.trim() || getCreationUrl();
 };
 
+export const getMetronUrl = (): string | null => {
+  if (typeof process === 'undefined') return null;
+  return process.env.NEXT_PUBLIC_METRON_URL?.trim() || null;
+};
+
+/** Service base for METRON project upsert (defaults to public web origin). */
+export const getMetronServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getMetronUrl();
+  return process.env.METRON_API_URL?.trim() || getMetronUrl();
+};
+
 /** Public SPIRION web origin. Prefer `NEXT_PUBLIC_SPIRION_URL`, fall back to legacy `NEXT_PUBLIC_DIG_URL`. */
 export const getSpirionUrl = (): string | null => {
   if (typeof process === 'undefined') return null;
@@ -457,6 +468,10 @@ export const API_PLATFORM_PROVISIONING_BRANDION_PROJECT_ORIGIN =
 /** Service-authenticated: CREATION created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
   '/api/platform/provisioning/creation-project-origin';
+
+/** Service-authenticated: METRON created a project first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_METRON_PROJECT_ORIGIN =
+  '/api/platform/provisioning/metron-project-origin';
 
 /** Service-authenticated: SPIRION created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_SPIRION_PROJECT_ORIGIN =

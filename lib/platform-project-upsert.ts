@@ -7,8 +7,9 @@ import {
 import {
   getAudionPlatformApiBase,
   getBrandionServiceApiUrl,
-  getCheckionServiceApiUrl,
   getCreationServiceApiUrl,
+  getCheckionServiceApiUrl,
+  getMetronServiceApiUrl,
   getSpirionServiceApiUrl,
 } from '@/lib/constants';
 
@@ -56,6 +57,11 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
   }
   if (productId === 'spirion') {
     const base = getSpirionServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
+  }
+  if (productId === 'metron') {
+    const base = getMetronServiceApiUrl();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }

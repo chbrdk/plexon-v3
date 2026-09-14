@@ -4,6 +4,7 @@ import {
   getCheckionUrl,
   getCreationUrl,
   getEchonUrl,
+  getMetronUrl,
   getSpirionUrl,
   getVideonUrl,
   PATH_ASSISTANT,
@@ -125,6 +126,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const brandionUrl = getBrandionUrl();
   const creationUrl = getCreationUrl();
   const spirionUrl = getSpirionUrl();
+  const metronUrl = getMetronUrl();
   const echonUrl = getEchonUrl();
 
   return [
@@ -337,6 +339,33 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
           id: 'spirion-capture',
           labelKey: 'dashboard.entry.projects',
           href: joinUrl(spirionUrl, '/capture') ?? spirionUrl ?? '#',
+          openInNewTab: true,
+        },
+      ],
+      defaultAccess: 'hidden',
+    },
+    {
+      id: 'metron',
+      name: 'METRON',
+      descriptionKey: 'dashboard.productMetronDescription',
+      lifecycle: metronUrl ? 'active' : 'planned',
+      surface: 'federated',
+      promoted: true,
+      primaryActionKey: 'dashboard.openMetron',
+      homeUrl: metronUrl,
+      loginUrl: joinUrl(metronUrl, '/login'),
+      healthUrl: joinUrl(metronUrl, '/api/health'),
+      capabilities: [
+        'dashboard.capabilityCentralIdentity',
+        'dashboard.capabilityUsage',
+        'dashboard.capabilityFutureRegistry',
+      ],
+      entryPoints: [
+        { id: 'metron-home', labelKey: 'dashboard.entry.home', href: metronUrl ?? '#', openInNewTab: true },
+        {
+          id: 'metron-projects',
+          labelKey: 'dashboard.entry.projects',
+          href: joinUrl(metronUrl, '/projects') ?? metronUrl ?? '#',
           openInNewTab: true,
         },
       ],

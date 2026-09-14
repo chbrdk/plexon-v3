@@ -89,6 +89,7 @@ export async function ensureBindingPlaceholders(platformProjectId: string) {
     'brandion',
     'creation',
     'spirion',
+    'metron',
     'echon',
   ];
   const db = getDb();

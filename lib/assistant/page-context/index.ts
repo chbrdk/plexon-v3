@@ -47,6 +47,7 @@ export function isAssistantPageContextProduct(
     value === 'creation' ||
     value === 'echon' ||
     value === 'spirion' ||
+    value === 'metron' ||
     value === 'videon'
   )
 }

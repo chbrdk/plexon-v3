@@ -9,7 +9,7 @@ import {
 } from '@/lib/list-accessible-collections';
 
 /** Products that receive Collection capability mirrors (not plexon/videon). */
-const MIRROR_PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion'];
+const MIRROR_PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion', 'metron'];
 
 export const SYNC_ACCESSIBLE_MIRRORS_CAP = 50;
 

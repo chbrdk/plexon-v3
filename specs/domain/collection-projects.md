@@ -43,7 +43,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
 
 ## Create rule (1A)
 
-- Canonical path: create Collection → `ensureBindingPlaceholders(checkion, audion, brandion, creation, spirion)` → sync products (brandion/creation/spirion when API base configured).
+- Canonical path: create Collection → `ensureBindingPlaceholders(checkion, audion, brandion, creation, spirion, metron)` → sync products (brandion/creation/spirion/metron when API base configured).
 - **AUDION-first / CHECKION-first / BRANDION-first / CREATION-first / SPIRION-first origin** may start in a product UI, but the PLEXON result must still be a Collection with the origin product bound **and** the other capability mirrors synced (best-effort where product URLs allow).
 - Assistant “nur Audion/Checkion/Brandion/Creation/SPIRION” intents map to Collection + all mirrors (Phase 1).
 
@@ -68,7 +68,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
 | 5 Lifecycle (archive / restore / admin hard-delete) | done — 2026-08-11 |
 | 6 CREATION capability mirror | **done (Wave 3)** — product id `creation` / repo `creation-v3`; `ensureBindingPlaceholders` + upsert via `CREATION_API_URL` / `NEXT_PUBLIC_CREATION_URL`; origin `POST …/creation-project-origin`. See `knowledge/creation-v3-onboarding.md`. |
 | 7 SPIRION capability mirror | **done** — product id `spirion` / repo `design-intelligence-graph` (formerly DIG); placeholders + upsert via `SPIRION_API_URL` / `NEXT_PUBLIC_SPIRION_URL` (legacy `DIG_*` env still accepted); origin `POST …/spirion-project-origin` (legacy `dig-project-origin` forwards); catalog stubs `spirion.*`. See `knowledge/coolify-plexon-v3-env-cheatsheet.md` §4e. |
-| 8 METRON capability mirror | **planned (Wave 0 specs done 2026-09-14)** — product id `metron` / repo `metron-v3`; placeholders + upsert via `METRON_API_URL` / `NEXT_PUBLIC_METRON_URL`; origin `POST …/metron-project-origin` (not landed). Do **not** add to `ensureBindingPlaceholders` until Wave 2 registry+URL. Spec `specs/domain/metron-capability.md` · onboarding `knowledge/metron-v3-onboarding.md` · fit `knowledge/metron-ecosystem-fit.md`. |
+| 8 METRON capability mirror | **done (Wave 2)** — product id `metron` / repo `metron-v3`; `ensureBindingPlaceholders` + upsert via `METRON_API_URL` / `NEXT_PUBLIC_METRON_URL`; origin `POST …/metron-project-origin`. Spec `specs/domain/metron-capability.md` · onboarding `knowledge/metron-v3-onboarding.md` · fit `knowledge/metron-ecosystem-fit.md`. |
 
 ## Phase 5 — Lifecycle
 
@@ -94,7 +94,7 @@ Lifecycle lives on `platform_projects.status` (`active` | `archived`). **No** `d
 - Detail stays `/projects/[id]` (`PlatformProjectDashboard`): **Overview magazine** (nutshell teasers) then **work band** (knowledge TOC + capability catalogs for CHECKION / AUDION / **BRANDION** / **CREATION** / **SPIRION** + bindings). No separate `/overview` route — see `collection-knowledge-pack.md` § Magazine vs report.
 - Dashboard BFF fetches Brandion/Creation via `GET {PRODUCT}/api/platform/provisioning/projects/{id}` → `brandion` / `creation` + launch links (`lib/platform-project-dashboard-fetch.ts`).
 - Create POST: `POST /api/platform/companies/:id/platform-projects` (bindings + sync checkion/audion/brandion/creation/spirion).
-- Product-first origins: `…/audion-project-origin`, `…/checkion-project-origin`, `…/brandion-project-origin`, `…/creation-project-origin`, `…/spirion-project-origin` (legacy `…/dig-project-origin`).
+- Product-first origins: `…/audion-project-origin`, `…/checkion-project-origin`, `…/brandion-project-origin`, `…/creation-project-origin`, `…/spirion-project-origin` (legacy `…/dig-project-origin`), `…/metron-project-origin`.
 
 ## Collection Knowledge Pack
 

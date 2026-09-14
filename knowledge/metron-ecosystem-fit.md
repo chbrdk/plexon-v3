@@ -87,7 +87,7 @@ Mirror Brandion/Checkion shell + magazine vs report:
 |------|-------|--------|
 | 0 | Specs: product id, federation, Collection binding, keep/drop vs Power BI | **done** — `metron-v3` |
 | 1 | Repo `metron-v3`: AppShell, paths, health | **done** — 2026-09-14 |
-| 2 | Plexon registry + placeholders + origin + upsert summary fields | planned |
+| 2 | Plexon registry + placeholders + origin + upsert summary fields | **done** — 2026-09-14 |
 | 3 | Stub hubs (datasets / KPIs / dashboards) + Collection deep links | planned |
 | 4 | Excel/CSV import assistant (tolerant, transparent errors) | planned |
 | 5 | Semantic model + relationships + server KPI formulas | planned |
@@ -97,12 +97,12 @@ Mirror Brandion/Checkion shell + magazine vs report:
 
 ## Plexon touchpoints (checklist) — Wave 2
 
-- [ ] `PLATFORM_PRODUCT_IDS` + `lib/platform-products.ts` entry (`lifecycle: planned` until URL set)
-- [ ] `ensureBindingPlaceholders` includes `metron`
-- [ ] Origin route `…/metron-project-origin`
-- [ ] Collection home capability catalog tile + dashboard BFF summary fetch
-- [ ] Env cheatsheet + `knowledge/paths.md` + Coolify staging
-- [ ] Usage `service` enum + entitlements if gated
+- [x] `PLATFORM_PRODUCT_IDS` + `lib/platform-products.ts` entry (`lifecycle: planned` until URL set)
+- [x] `ensureBindingPlaceholders` includes `metron`
+- [x] Origin route `…/metron-project-origin`
+- [ ] Collection home capability catalog tile + dashboard BFF summary fetch (Wave 3 polish)
+- [x] Env stubs in `knowledge/paths.md` (Coolify staging FQDN TBD)
+- [x] Usage `service` enum accepts `metron`
 - [ ] Product switcher static URLs in sibling apps when staging exists
 
 Wave 0 docs checklist: `specs/domain/metron-capability.md` · `knowledge/metron-v3-onboarding.md` · `collection-projects.md` Phase 8 row.

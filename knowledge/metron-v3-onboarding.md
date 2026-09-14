@@ -1,6 +1,6 @@
 # METRON v3 — Plexon onboarding
 
-**Status:** Wave 1 AppShell (Wave 0 specs complete) · **Date:** 2026-09-14  
+**Status:** Wave 2 auth + registry (Wave 0–1 complete) · **Date:** 2026-09-14  
 **Product id:** `metron` · **Repo:** `metron-v3` · **Display:** METRON  
 **GitHub:** `https://github.com/chbrdk/metron-v3`
 
@@ -27,7 +27,7 @@
 |------|-------|--------|
 | 0 | Specs, product id, paths, keep/drop, inventory tests | **done** |
 | 1 | AppShell + health | **done** |
-| 2 | Auth + registry + placeholders + origin + upsert | planned |
+| 2 | Auth + registry + placeholders + origin + upsert | **done** |
 | 3 | Stub hubs + Collection deep links | planned |
 | 4 | Excel/CSV import | planned |
 | 5 | Semantic model + KPI engine | planned |
@@ -47,18 +47,19 @@ Coolify: add §4f to `coolify-plexon-v3-env-cheatsheet.md` when staging exists.
 
 ## Plexon code touchpoints (Wave 2 checklist)
 
-- [ ] `PLATFORM_PRODUCT_IDS` includes `metron`
-- [ ] `lib/platform-products.ts` registry entry (`lifecycle: planned` until URL set)
-- [ ] `ensureBindingPlaceholders` includes `metron`
-- [ ] Origin route `POST /api/platform/provisioning/metron-project-origin`
-- [ ] Collection home capability catalog tile + dashboard BFF summary
-- [ ] Usage `service` enum accepts `metron`
+- [x] `PLATFORM_PRODUCT_IDS` includes `metron`
+- [x] `lib/platform-products.ts` registry entry (`lifecycle: planned` until URL set)
+- [x] `ensureBindingPlaceholders` includes `metron`
+- [x] Origin route `POST /api/platform/provisioning/metron-project-origin`
+- [ ] Collection home capability catalog tile + dashboard BFF summary (Wave 3 polish)
+- [x] Usage `service` enum accepts `metron`
 - [ ] Product switcher staging URL when FQDN exists
-- [ ] Spec: `specs/domain/collection-projects.md` Phase 8 → done when landed
+- [x] Spec: `specs/domain/collection-projects.md` Phase 8 → **done (Wave 2)**
 
-## Smoke (after Wave 1+)
+## Smoke (after Wave 2)
 
 - Local: `http://localhost:3011` · `GET /api/health` → `productId: metron`
-- Federation: `GET /api/federation/health` → `mode: dummy` until Wave 2
+- Federation: `GET /api/federation/health` → `mode: dummy` until live env
+- Upsert skipped while `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` unset (binding stays `pending`)
 - Staging FQDN: TBD → record in `knowledge/paths.md`
 - GitHub: `https://github.com/chbrdk/metron-v3`
