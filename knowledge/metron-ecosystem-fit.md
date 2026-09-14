@@ -1,6 +1,6 @@
 # METRON — Ecosystem fit evaluation (v0.1 concept)
 
-**Status:** Wave 6 dashboard builder landed — 2026-09-14  
+**Status:** Wave 7 suite connectors landed — 2026-09-14  
 **Input:** METRON Grobkonzept v0.1 (Excel-first BI capability for PLEXON Suite)  
 **Naming:** **Locked** — product id `metron`, display **METRON** (spoken “Metrion” ok; code/registry always `metron`).
 
@@ -92,7 +92,7 @@ Mirror Brandion/Checkion shell + magazine vs report:
 | 4 | Excel/CSV import assistant (tolerant, transparent errors) | **done** — 2026-09-14 |
 | 5 | Semantic model + relationships + server KPI formulas | **done** — 2026-09-14 |
 | 6 | Constrained dashboard builder (widget set fixed; layout grid) | **done** — 2026-09-14 |
-| 7 | Suite connectors + provenance UI | planned |
+| 7 | Suite connectors + provenance UI | **done** — 2026-09-14 |
 | 8 | MCP + Capability Catalog ids for Assistant | planned |
 
 ## Plexon touchpoints (checklist) — Wave 2

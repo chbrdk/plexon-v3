@@ -1,6 +1,6 @@
 # METRON v3 — Plexon onboarding
 
-**Status:** Wave 6 + staging Coolify · **Date:** 2026-09-14  
+**Status:** Wave 7 + staging Coolify · **Date:** 2026-09-14  
 **Product id:** `metron` · **Repo:** `metron-v3` · **Display:** METRON  
 **GitHub:** `https://github.com/chbrdk/metron-v3`  
 **Staging:** `https://metron-v3.projects-a.plygrnd.tech` · Coolify `8qkrk850d37er6subakpnx0r`
