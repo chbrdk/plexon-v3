@@ -114,6 +114,17 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 
 User-attached sketches are a **layout contract** (section order, char limits, image-under-headline vs overlay). They override the Default Overlay Hero. Forbidden “wireframe” still means thin gray end-state — see `knowledge/creation-wireframe-layout-contract.md`.
 
+### Craft modules (2026-09-14)
+
+Composable procedures under a format playbook (`lib/assistant/creation-craft-modules.ts`):
+
+| Module | Trigger | Effect |
+|--------|---------|--------|
+| `restyle_densify_v1` | Restyle / dichter / polish / bestehende Seite | Prefer `apply_ops`; forbid full HTML re-import unless empty/seed |
+| `wireframe_layout_v1` | Wireframe / Skizze / Bioframe | Section-order + char limits (progressive; also summarized in landing playbook) |
+
+Resolve via `resolveCreationCraftModules(prompt, playbookId)` — max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Roadmap: `knowledge/creation-craft-playbook-scenarios-next.md`.
+
 ### Acceptance B
 
 1. Unit: landing phrasing → `creation_landing_v1`.

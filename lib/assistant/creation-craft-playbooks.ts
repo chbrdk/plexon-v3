@@ -36,7 +36,7 @@ const PRINT_MAGAZINE_RE =
   /\b(print\s*page|printpage|printcover|print\s*cover|print\s*chapter|magazin(?!\s*pdf)|magazine(?!\s*template)|brosch[uü]re|flyer|din\s*a4|a4\s*print|print\s*channel|druck(daten|layout| magazin)?|print\s*layout)\b/i;
 
 const LANDING_RE =
-  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*page|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
+  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*page|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief|restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|dichter|polish|polier\w*|bestehend\w*|existing\s+page)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
 
 /** User attached / described a layout sketch (not the thin gray anti-pattern). */
 export function promptLooksLikeWireframeBrief(userPrompt: string | null | undefined): boolean {

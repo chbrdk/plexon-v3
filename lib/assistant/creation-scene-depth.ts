@@ -9,6 +9,11 @@ import {
   buildCreationCraftPlaybookPromptBlock,
   type CreationCraftPlaybookId,
 } from './creation-craft-playbooks';
+import {
+  buildCreationCraftModulesPromptBlock,
+  resolveCreationCraftModules,
+  type CreationCraftModuleId,
+} from './creation-craft-modules';
 import { buildEditorialLandingFallbackBrief } from './editorial-landing-fallback';
 
 const DEFAULT_MAX_TOOL_ROUNDS = 14;
@@ -126,6 +131,10 @@ ${SHARED_DEPTH_TAIL}`;
 
 export type CreationSceneDepthOptions = {
   playbookId?: CreationCraftPlaybookId | null;
+  /** User prompt — resolves composable craft modules (restyle, wireframe, …). */
+  userPrompt?: string | null;
+  /** Pre-resolved modules (optional; otherwise derived from userPrompt + playbookId). */
+  moduleIds?: CreationCraftModuleId[] | null;
 };
 
 /** System-prompt craft guidance — only for write-capable scene-edit plans. */
@@ -135,6 +144,10 @@ export function buildCreationSceneDepthPromptBlock(
 ): string {
   if (!allowWriteTools) return '';
   const playbookBlock = buildCreationCraftPlaybookPromptBlock(options?.playbookId ?? null);
+  const moduleIds =
+    options?.moduleIds ??
+    resolveCreationCraftModules(options?.userPrompt ?? null, options?.playbookId ?? null);
+  const modulesBlock = buildCreationCraftModulesPromptBlock(moduleIds);
   if (playbookBlock) {
     return `
 ## CREATION Layout-Tiefe (nur dieser Intent)
@@ -142,7 +155,9 @@ Nutze die Tool-Runden für Qualität — nicht nur den ersten gültigen Insert.
 Aktives **Craft-Playbook** steuert das Format (Web / Newsletter / Print) — nicht improvisieren.
 
 ${playbookBlock}
+${modulesBlock ? `\n${modulesBlock}\n` : ''}
 ${SHARED_DEPTH_TAIL}`;
   }
-  return buildDefaultLandingOrientedDepth();
+  const landingFallback = buildDefaultLandingOrientedDepth();
+  return modulesBlock ? `${landingFallback}\n\n${modulesBlock}` : landingFallback;
 }

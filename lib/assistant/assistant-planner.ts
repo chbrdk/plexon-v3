@@ -31,6 +31,10 @@ import {
   resolveCreationCraftPlaybook,
   type CreationCraftPlaybookId,
 } from '@/lib/assistant/creation-craft-playbooks';
+import {
+  resolveCreationCraftModules,
+  type CreationCraftModuleId,
+} from '@/lib/assistant/creation-craft-modules';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -69,6 +73,10 @@ export type AssistantPlan = {
   plannerSource: 'heuristic' | 'llm';
   /** Wave B — format playbook when creation_scene_edit. */
   creationCraftPlaybookId?: CreationCraftPlaybookId | null;
+  /** Wave B modules — composable procedures under the format playbook. */
+  creationCraftModuleIds?: CreationCraftModuleId[] | null;
+  /** Prompt text used to resolve playbook/modules (for depth compose). */
+  creationCraftUserPrompt?: string | null;
 };
 
 export type PlannerInput = {
@@ -290,13 +298,18 @@ function withCreationCraftPlaybook(
   promptText: string,
 ): AssistantPlan {
   const playbook = resolveCreationCraftPlaybook(promptText);
+  const moduleIds = resolveCreationCraftModules(promptText, playbook?.id ?? null);
+  const moduleNote =
+    moduleIds.length > 0 ? ` Module: ${moduleIds.join(', ')}.` : '';
   const reasoning = playbook
-    ? `${plan.reasoning} ${playbook.reasoning}`
+    ? `${plan.reasoning} ${playbook.reasoning}${moduleNote}`
     : plan.reasoning;
   return buildPlan({
     ...plan,
     reasoning,
     creationCraftPlaybookId: playbook?.id ?? null,
+    creationCraftModuleIds: moduleIds.length ? moduleIds : null,
+    creationCraftUserPrompt: promptText,
   });
 }
 
@@ -732,6 +745,8 @@ function parseLlmPlan(raw: LlmPlanJson, fallback: AssistantPlan): AssistantPlan 
     reasoning: typeof raw.reasoning === 'string' ? raw.reasoning : fallback.reasoning,
     plannerSource: 'llm',
     creationCraftPlaybookId: fallback.creationCraftPlaybookId ?? null,
+    creationCraftModuleIds: fallback.creationCraftModuleIds ?? null,
+    creationCraftUserPrompt: fallback.creationCraftUserPrompt ?? null,
   };
 }
 
@@ -844,11 +859,17 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
     plan.intent === 'creation_scene_edit'
       ? buildCreationSceneDepthPromptBlock(plan.allowWriteTools, {
           playbookId: plan.creationCraftPlaybookId,
+          userPrompt: plan.creationCraftUserPrompt,
+          moduleIds: plan.creationCraftModuleIds,
         })
       : '';
   const playbookLine =
     plan.intent === 'creation_scene_edit' && plan.creationCraftPlaybookId
       ? `\n- Craft-Playbook: ${plan.creationCraftPlaybookId}`
+      : '';
+  const modulesLine =
+    plan.intent === 'creation_scene_edit' && plan.creationCraftModuleIds?.length
+      ? `\n- Craft-Module: ${plan.creationCraftModuleIds.join(', ')}`
       : '';
   return `
 ## Ausführungsplan (Planner)
@@ -856,7 +877,7 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
 - Modus: ${plan.mode}
 - Tool-Familien: ${plan.toolFamilies.length ? plan.toolFamilies.join(', ') : '(keine)'}
 - Schreib-Tools: ${plan.allowWriteTools ? 'ja' : 'nein'}
-- Max. Tool-Runden: ${plan.maxToolRounds}${playbookLine}
+- Max. Tool-Runden: ${plan.maxToolRounds}${playbookLine}${modulesLine}
 - Strategie: ${plan.reasoning}${writeToolsNote}
 ${creationDepth}
 Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/hybrid: antworte zuerst aus der Projektkurzinfo oben.`;
