@@ -1,0 +1,803 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/jbcd2l",
+    "id": "jbcd2l",
+    "slide": 8,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "IBM Plex Mono",
+      "Noto Sans JP",
+      "Noto Sans JP Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u1cfa903",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        28.8,
+        768,
+        24
+      ],
+      "geometry": "rect",
+      "text": "WARUM DAS SO IST",
+      "textPreview": "WARUM DAS SO IST",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "WARUM DAS SO IST"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "WARUM DAS SO IST",
+          "runs": [
+            {
+              "index": 1,
+              "text": "WARUM DAS SO IST",
+              "fontSize": 16,
+              "typeface": "IBM Plex Mono",
+              "color": "#F256B6"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/v2lw3uh8",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        52.8,
+        816,
+        81.6
+      ],
+      "geometry": "rect",
+      "text": "check24.de dominiert, E-E-A-T-Lücken bremsen",
+      "textPreview": "check24.de dominiert, E-E-A-T-Lücken bremsen",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "check24.de dominiert, E-E-A-T-Lücken"
+          },
+          {
+            "index": 2,
+            "text": "bremsen"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "check24.de dominiert, E-E-A-T-Lücken bremsen",
+          "runs": [
+            {
+              "index": 1,
+              "text": "check24.de dominiert, E-E-A-T-Lücken bremsen",
+              "fontSize": 42.67,
+              "typeface": "Noto Sans JP",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/i1oj6xs7",
+      "id": "14",
+      "name": "Image 0",
+      "bbox": [
+        816,
+        19.2,
+        105.6,
+        42.24
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image1.png",
+        "contentType": "image/png",
+        "byteLength": 2818
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image1.png",
+        "contentType": "image/png",
+        "byteLength": 2818
+      }
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/58ne9ozq",
+      "id": "5",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        187.2,
+        403.2,
+        288
+      ],
+      "geometry": "roundRect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "fillColor": "#000000"
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i5wfe90z",
+      "id": "6",
+      "name": "Text 3",
+      "bbox": [
+        67.2,
+        206.4,
+        345.6,
+        24
+      ],
+      "geometry": "rect",
+      "text": "PLATZHIRSCH",
+      "textPreview": "PLATZHIRSCH",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "PLATZHIRSCH"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "PLATZHIRSCH",
+          "runs": [
+            {
+              "index": 1,
+              "text": "PLATZHIRSCH",
+              "fontSize": 14.67,
+              "typeface": "IBM Plex Mono",
+              "color": "#F256B6"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j65w7ehk",
+      "id": "7",
+      "name": "Text 4",
+      "bbox": [
+        67.2,
+        235.2,
+        364.8,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "check24.de dominiert bei beiden Partnern",
+      "textPreview": "check24.de dominiert bei beiden Partnern",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "check24.de dominiert bei beiden"
+          },
+          {
+            "index": 2,
+            "text": "Partnern"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "check24.de dominiert bei beiden Partnern",
+          "runs": [
+            {
+              "index": 1,
+              "text": "check24.de dominiert bei beiden Partnern",
+              "fontSize": 21.33,
+              "typeface": "Noto Sans JP",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kbad4fil",
+      "id": "8",
+      "name": "Text 5",
+      "bbox": [
+        67.2,
+        307.2,
+        364.8,
+        158.4
+      ],
+      "geometry": "rect",
+      "text": "Kretschmer & Schweiger: check24.de auf Platz 1 bei 4 von 8 Fragen\n\nVBG: check24.de auf Platz 1 bei 3 von 8 Fragen\n\nGenau dort, wo der Partner selbst nicht vorkommt.",
+      "textPreview": "Kretschmer & Schweiger: check24.de auf Platz 1 bei 4 von 8 Fragen |  | VBG: check24.de auf Platz 1 bei 3 von 8 Fragen |  | Genau dort, wo...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Kretschmer & Schweiger: check24.de auf Platz 1"
+          },
+          {
+            "index": 2,
+            "text": "bei 4 von 8 Fragen"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "VBG: check24.de auf Platz 1 bei 3 von 8 Fragen"
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": "Genau dort, wo der Partner selbst nicht vorkommt."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Kretschmer & Schweiger: check24.de auf Platz 1 bei 4 von 8 Fragen\n\nVBG: check24.de auf Platz 1 bei 3 von 8 Fragen\n\nGenau dort, wo der Partner selbst nicht vorkommt.",
+          "lineSpacingPercent": 115000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Kretschmer & Schweiger: ",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#FFFFFF",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "check24.de auf Platz 1 bei 4 von 8 Fragen\n\n",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            },
+            {
+              "index": 3,
+              "text": "VBG: ",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#FFFFFF",
+              "bold": true
+            },
+            {
+              "index": 4,
+              "text": "check24.de auf Platz 1 bei 3 von 8 Fragen\n\n",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            },
+            {
+              "index": 5,
+              "text": "Genau dort, wo der Partner selbst nicht vorkommt.",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B",
+              "italic": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lcjexkz6",
+      "id": "9",
+      "name": "Shape 6",
+      "bbox": [
+        508.8,
+        187.2,
+        403.2,
+        288
+      ],
+      "geometry": "roundRect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "fillColor": "#F6F4EF"
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xoju98fu",
+      "id": "10",
+      "name": "Text 7",
+      "bbox": [
+        528,
+        206.4,
+        345.6,
+        24
+      ],
+      "geometry": "rect",
+      "text": "E-E-A-T-LÜCKE",
+      "textPreview": "E-E-A-T-LÜCKE",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "E-E-A-T-LÜCKE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "E-E-A-T-LÜCKE",
+          "runs": [
+            {
+              "index": 1,
+              "text": "E-E-A-T-LÜCKE",
+              "fontSize": 14.67,
+              "typeface": "IBM Plex Mono",
+              "color": "#F256B6"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cnad03e9",
+      "id": "11",
+      "name": "Text 8",
+      "bbox": [
+        528,
+        235.2,
+        364.8,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "Unterschiedliche Ursache, gleiches Symptom",
+      "textPreview": "Unterschiedliche Ursache, gleiches Symptom",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Unterschiedliche Ursache, gleiches"
+          },
+          {
+            "index": 2,
+            "text": "Symptom"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Unterschiedliche Ursache, gleiches Symptom",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unterschiedliche Ursache, gleiches Symptom",
+              "fontSize": 21.33,
+              "typeface": "Noto Sans JP",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bm1c7yxo",
+      "id": "12",
+      "name": "Text 9",
+      "bbox": [
+        528,
+        307.2,
+        364.8,
+        158.4
+      ],
+      "geometry": "rect",
+      "text": "Kretschmer & Schweiger — Erfahrung (40/100): keine Fallbeispiele, keine nachprüfbaren Prozesse\n\nVBG — Vertrauen (40/100): fehlende Impressum-, Datenschutz- und Über-uns-Signale",
+      "textPreview": "Kretschmer & Schweiger — Erfahrung (40/100): keine Fallbeispiele, keine nachprüfbaren Prozesse |  | VBG — Vertrauen (40/100): fehlende Im...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Kretschmer & Schweiger — Erfahrung (40/100):"
+          },
+          {
+            "index": 2,
+            "text": "keine Fallbeispiele, keine nachprüfbaren Prozesse"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "VBG — Vertrauen (40/100): fehlende Impressum-,"
+          },
+          {
+            "index": 5,
+            "text": "Datenschutz- und Über-uns-Signale"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Kretschmer & Schweiger — Erfahrung (40/100): keine Fallbeispiele, keine nachprüfbaren Prozesse\n\nVBG — Vertrauen (40/100): fehlende Impressum-, Datenschutz- und Über-uns-Signale",
+          "lineSpacingPercent": 115000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Kretschmer & Schweiger — Erfahrung (40/100): ",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": "keine Fallbeispiele, keine nachprüfbaren Prozesse\n\n",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            },
+            {
+              "index": 3,
+              "text": "VBG — Vertrauen (40/100): ",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 4,
+              "text": "fehlende Impressum-, Datenschutz- und Über-uns-Signale",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/alsvytw3",
+      "id": "13",
+      "name": "Text 10",
+      "bbox": [
+        864,
+        504,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "8",
+      "textPreview": "8",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "8"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "8",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "8",
+              "fontSize": 13.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

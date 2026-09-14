@@ -1,0 +1,1359 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/zzsgda",
+    "id": "zzsgda",
+    "slide": 6,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "IBM Plex Mono",
+      "Noto Sans JP",
+      "Noto Sans JP Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ulc36h43",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        28.8,
+        768,
+        24
+      ],
+      "geometry": "rect",
+      "text": "KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE",
+      "textPreview": "KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE",
+          "runs": [
+            {
+              "index": 1,
+              "text": "KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE",
+              "fontSize": 16,
+              "typeface": "IBM Plex Mono",
+              "color": "#F256B6"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vml4fm5o",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        52.8,
+        816,
+        81.6
+      ],
+      "geometry": "rect",
+      "text": "Acht Fragen, acht Mal unsichtbar",
+      "textPreview": "Acht Fragen, acht Mal unsichtbar",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Acht Fragen, acht Mal unsichtbar"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Acht Fragen, acht Mal unsichtbar",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Acht Fragen, acht Mal unsichtbar",
+              "fontSize": 42.67,
+              "typeface": "Noto Sans JP",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/j2hwryl0",
+      "id": "24",
+      "name": "Image 0",
+      "bbox": [
+        816,
+        19.2,
+        105.6,
+        42.24
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image1.png",
+        "contentType": "image/png",
+        "byteLength": 2818
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image1.png",
+        "contentType": "image/png",
+        "byteLength": 2818
+      }
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/psnmlgnq",
+      "id": "5",
+      "name": "Text 2",
+      "bbox": [
+        48,
+        168,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Erste eigene Wohnung in Haar",
+      "textPreview": "Erste eigene Wohnung in Haar",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Erste eigene Wohnung in Haar"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Erste eigene Wohnung in Haar",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Erste eigene Wohnung in Haar",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ipw3a14f",
+      "id": "6",
+      "name": "Text 3",
+      "bbox": [
+        336,
+        168,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/3q54j65k",
+      "id": "7",
+      "name": "Text 4",
+      "bbox": [
+        48,
+        227.52,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Langfristiger Berater in Haar/München Ost",
+      "textPreview": "Langfristiger Berater in Haar/München Ost",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Langfristiger Berater in"
+          },
+          {
+            "index": 2,
+            "text": "Haar/München Ost"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Langfristiger Berater in Haar/München Ost",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Langfristiger Berater in Haar/München Ost",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kval07m1",
+      "id": "8",
+      "name": "Text 5",
+      "bbox": [
+        336,
+        227.52,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lw329cnm",
+      "id": "9",
+      "name": "Text 6",
+      "bbox": [
+        48,
+        287.04,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Persönliche Beratung in Vaterstetten",
+      "textPreview": "Persönliche Beratung in Vaterstetten",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Persönliche Beratung in Vaterstetten"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Persönliche Beratung in Vaterstetten",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Persönliche Beratung in Vaterstetten",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xcvud4j6",
+      "id": "10",
+      "name": "Text 7",
+      "bbox": [
+        336,
+        287.04,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wbmt4z21",
+      "id": "11",
+      "name": "Text 8",
+      "bbox": [
+        48,
+        346.56,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Familie & Haus in Grasbrunn absichern",
+      "textPreview": "Familie & Haus in Grasbrunn absichern",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Familie & Haus in Grasbrunn"
+          },
+          {
+            "index": 2,
+            "text": "absichern"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Familie & Haus in Grasbrunn absichern",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Familie & Haus in Grasbrunn absichern",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/badcbu1g",
+      "id": "12",
+      "name": "Text 9",
+      "bbox": [
+        336,
+        346.56,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a94b2pkv",
+      "id": "13",
+      "name": "Text 10",
+      "bbox": [
+        508.8,
+        168,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Versicherungen für junge Leute Trudering-Riem",
+      "textPreview": "Versicherungen für junge Leute Trudering-Riem",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Versicherungen für junge Leute"
+          },
+          {
+            "index": 2,
+            "text": "Trudering-Riem"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Versicherungen für junge Leute Trudering-Riem",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Versicherungen für junge Leute Trudering-Riem",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lgfuhoji",
+      "id": "14",
+      "name": "Text 11",
+      "bbox": [
+        796.8,
+        168,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kf6t8j2x",
+      "id": "15",
+      "name": "Text 12",
+      "bbox": [
+        508.8,
+        227.52,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Familienplanung & Reihenfolge in Haar",
+      "textPreview": "Familienplanung & Reihenfolge in Haar",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Familienplanung & Reihenfolge in"
+          },
+          {
+            "index": 2,
+            "text": "Haar"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Familienplanung & Reihenfolge in Haar",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Familienplanung & Reihenfolge in Haar",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jexcfe1c",
+      "id": "16",
+      "name": "Text 13",
+      "bbox": [
+        796.8,
+        227.52,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yd4b69kr",
+      "id": "17",
+      "name": "Text 14",
+      "bbox": [
+        508.8,
+        287.04,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Altersvorsorge Erwachsenen-Haushalt Putzbrunn",
+      "textPreview": "Altersvorsorge Erwachsenen-Haushalt Putzbrunn",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Altersvorsorge"
+          },
+          {
+            "index": 2,
+            "text": "Erwachsenen-Haushalt Putzbrunn"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Altersvorsorge Erwachsenen-Haushalt Putzbrunn",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Altersvorsorge Erwachsenen-Haushalt Putzbrunn",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/tkfuloje",
+      "id": "18",
+      "name": "Text 15",
+      "bbox": [
+        796.8,
+        287.04,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8j6tcj29",
+      "id": "19",
+      "name": "Text 16",
+      "bbox": [
+        508.8,
+        346.56,
+        288,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "Unabhängige Vermittler für junge Familie München",
+      "textPreview": "Unabhängige Vermittler für junge Familie München",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Unabhängige Vermittler für junge"
+          },
+          {
+            "index": 2,
+            "text": "Familie München"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Unabhängige Vermittler für junge Familie München",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unabhängige Vermittler für junge Familie München",
+              "fontSize": 17.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sned8na5",
+      "id": "20",
+      "name": "Text 17",
+      "bbox": [
+        796.8,
+        346.56,
+        115.2,
+        40.32
+      ],
+      "geometry": "rect",
+      "text": "nicht zitiert",
+      "textPreview": "nicht zitiert",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "nicht zitiert"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "nicht zitiert",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "nicht zitiert",
+              "fontSize": 16,
+              "typeface": "Noto Sans JP",
+              "color": "#716E6B",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/donehsrq",
+      "id": "21",
+      "name": "Shape 18",
+      "bbox": [
+        484.8,
+        168,
+        0.96,
+        244.8
+      ],
+      "geometry": "rect",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": ""
+          }
+        ]
+      },
+      "fillColor": "#EAE8E8",
+      "lineColor": "#EAE8E8",
+      "lineWidth": 0.67
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qlwv6xsz",
+      "id": "22",
+      "name": "Text 19",
+      "bbox": [
+        48,
+        436.8,
+        864,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × 10 Modelle) wird Kretschmer & Schweiger zitiert.",
+      "textPreview": "Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × ...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8"
+          },
+          {
+            "index": 2,
+            "text": "Fragen × 10 Modelle) wird Kretschmer & Schweiger zitiert."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × 10 Modelle) wird Kretschmer & Schweiger zitiert.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × 10 Modelle) wird Kretschmer & Schweiger zitiert.",
+              "fontSize": 14.67,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rm5wf29k",
+      "id": "23",
+      "name": "Text 20",
+      "bbox": [
+        864,
+        504,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "6",
+      "textPreview": "6",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "6"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "6",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "6",
+              "fontSize": 13.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

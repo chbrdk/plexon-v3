@@ -1,0 +1,7 @@
+DEVIATION LOG
+
+- Keine visuellen Abweichungen vom Referenzsystem geplant.
+- Alle 11 Quellfolien werden in gleicher Reihenfolge dupliziert; nur vorhandene Textfelder werden inhaltlich neu belegt.
+- Auf Folie 3 werden die sechs Persona-Slots als vier Personas plus zwei verdichtete gemeinsame Suchmodi genutzt.
+- Auf Folien 6 und 7 werden die vorhandenen Listenflächen mit den acht Provinzial-Prompts bzw. deren Gruppierung belegt.
+- Speaker Notes erhalten je Folie einen [Sources]-Block mit Verweis auf die Quell-PDF-Seiten.

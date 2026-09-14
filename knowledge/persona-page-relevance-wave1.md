@@ -39,8 +39,7 @@
 3. Assistant: *„Welche Seiten auf vaillant.de sind für Sandra (Altbau-Eigenheimbesitzerin) besonders relevant — mit den wichtigsten CHECKION-Metriken?“*
 4. Expect: ranked table, links to `/results/{scanId}/overview`, persona cited from AUDION
 
-## Wave 2 (later)
+## Wave 2
 
-- Port AUDION `site-topics` to audion-v3 (tag overlap signal)
-- Implement CHECKION `classifyPageWithLlm` for richer tags
-- Optional pre-score: tag overlap × persona keyword set before LLM rank
+Full backlog: `knowledge/persona-page-relevance-wave2-roadmap.md` (Epics A–J, ~40 tasks).  
+Build order recommendation: **Vaillant B2C bootstrap → site-topics → page classification → ranking v2 → Flow node → Playbook**.

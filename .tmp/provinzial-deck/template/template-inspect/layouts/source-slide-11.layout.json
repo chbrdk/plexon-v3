@@ -1,0 +1,423 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/jetc3ut0",
+    "id": "jetc3ut0",
+    "slide": 11,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#000000",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "IBM Plex Mono",
+      "Noto Sans JP",
+      "Noto Sans JP Light"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/2lcz2l0n",
+      "id": "8",
+      "name": "Image 0",
+      "bbox": [
+        816,
+        19.2,
+        105.6,
+        42.24
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image2.png",
+        "contentType": "image/png",
+        "byteLength": 2891
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image2.png",
+        "contentType": "image/png",
+        "byteLength": 2891
+      }
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wbih4b6d",
+      "id": "3",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        28.8,
+        480,
+        24
+      ],
+      "geometry": "rect",
+      "text": "FAZIT",
+      "textPreview": "FAZIT",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "FAZIT"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "FAZIT",
+          "runs": [
+            {
+              "index": 1,
+              "text": "FAZIT",
+              "fontSize": 16,
+              "typeface": "IBM Plex Mono",
+              "color": "#F256B6"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n69grmpw",
+      "id": "4",
+      "name": "Text 1",
+      "bbox": [
+        67.2,
+        163.2,
+        825.6,
+        182.4
+      ],
+      "geometry": "rect",
+      "text": "Der eigentliche Wettbewerber ist nicht Allianz oder Check24 —\nes ist die Masse an „sonstigen“ Quellen.",
+      "textPreview": "Der eigentliche Wettbewerber ist nicht Allianz oder Check24 — | es ist die Masse an „sonstigen“ Quellen.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Der eigentliche Wettbewerber ist nicht Allianz"
+          },
+          {
+            "index": 2,
+            "text": "oder Check24 —"
+          },
+          {
+            "index": 3,
+            "text": "es ist die Masse an „sonstigen“ Quellen."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Der eigentliche Wettbewerber ist nicht Allianz oder Check24 —",
+          "lineSpacingPercent": 115000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Der eigentliche Wettbewerber ist nicht Allianz oder Check24 —",
+              "fontSize": 34.67,
+              "typeface": "Noto Sans JP",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "es ist die Masse an „sonstigen“ Quellen.",
+          "lineSpacingPercent": 115000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "es ist die Masse an „sonstigen“ Quellen.",
+              "fontSize": 34.67,
+              "typeface": "Noto Sans JP",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/250zy18b",
+      "id": "5",
+      "name": "Text 2",
+      "bbox": [
+        67.2,
+        369.6,
+        825.6,
+        115.2
+      ],
+      "geometry": "rect",
+      "text": "Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sichtbarkeitsanteil). Der Hebel: aus der Masse als konkret zitierbare, benannte Quelle heraustreten.",
+      "textPreview": "Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sich...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter"
+          },
+          {
+            "index": 2,
+            "text": "der Sammelkategorie „other“ (73–74 % Sichtbarkeitsanteil). Der Hebel: aus der Masse als konkret"
+          },
+          {
+            "index": 3,
+            "text": "zitierbare, benannte Quelle heraustreten."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sichtbarkeitsanteil). Der Hebel: aus der Masse als konkret zitierbare, benannte Quelle heraustreten.",
+          "lineSpacingPercent": 120000,
+          "runs": [
+            {
+              "index": 1,
+              "text": "Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sichtbarkeitsanteil). Der Hebel: aus der Masse als konkret zitierbare, benannte Quelle heraustreten.",
+              "fontSize": 18.67,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/98rytw72",
+      "id": "6",
+      "name": "Text 3",
+      "bbox": [
+        67.2,
+        480,
+        825.6,
+        28.8
+      ],
+      "geometry": "rect",
+      "text": "Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.",
+      "textPreview": "Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.",
+              "fontSize": 13.33,
+              "typeface": "IBM Plex Mono",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o7ih0r6h",
+      "id": "7",
+      "name": "Text 4",
+      "bbox": [
+        864,
+        504,
+        48,
+        24
+      ],
+      "geometry": "rect",
+      "text": "11",
+      "textPreview": "11",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 2,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "middle",
+        "wrap": "square",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "11"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "11",
+          "resolvedTextStyle": {
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "11",
+              "fontSize": 13.33,
+              "typeface": "Noto Sans JP Light",
+              "color": "#716E6B"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

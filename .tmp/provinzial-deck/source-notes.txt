@@ -1,0 +1,22 @@
+SOURCE NOTES
+
+Fachliche Quelle:
+/Users/christoph.bordeck/Downloads/plexon-assistant-report-Quick-Check-Provinzial.pdf
+
+Designreferenz:
+/Users/christoph.bordeck/Desktop/VKB_GEO_Sichtbarkeitsaudit.pptx
+
+Verwendung nach Folie:
+1: PDF S. 1, 6–9 — Titelthese aus Domain-, GEO- und Sichtbarkeitswerten.
+2: PDF S. 1, 6 — Umfang, Personas, Prompts und Modelle.
+3: PDF S. 4–5 — vier AUDION-Personas.
+4: PDF S. 1, 6, 9 — Domain-Score 73, GEO-Score 46, Sichtbarkeitsanteil 3 %, Ø Position 4,4.
+5: PDF S. 6, 9 — other 77 %, Provinzial 3 %, zwei unzitierte Prompts.
+6: PDF S. 6 — alle acht Prompts und beste Positionen.
+7: PDF S. 6 — Gruppierung lokaler/spezifischer und generischer Vergleichsfragen.
+8: PDF S. 6–7 — Wettbewerbsanteile und E-E-A-T-Signale.
+9: PDF S. 2–3, 7 — technische Basis, Lesbarkeit und fehlende zitierfähige Struktur.
+10: PDF S. 8–9 — priorisierte GEO-Empfehlungen.
+11: PDF S. 1, 6–9 — Synthese und Handlungsrichtung.
+
+Keine externe Webrecherche und keine externen Bildquellen verwendet.

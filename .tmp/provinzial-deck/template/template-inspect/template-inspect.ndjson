@@ -1,0 +1,166 @@
+{"kind":"slide","id":"sl/y90nupkv","slide":1,"title":"GEO-SICHTBARKEITS-AUDIT · VKB","textShapes":3}
+{"kind":"textbox","id":"sh/k3yl0zql","slide":1,"name":"Text 0","text":"GEO-SICHTBARKEITS-AUDIT · VKB","textPreview":"GEO-SICHTBARKEITS-AUDIT · VKB","textChars":29,"textLines":1,"bbox":[48,163.2,768,28.8]}
+{"kind":"textbox","id":"sh/7qp4be9c","slide":1,"name":"Text 1","text":"Score schlägt nicht Realität","textPreview":"Score schlägt nicht Realität","textChars":28,"textLines":1,"bbox":[48,192,864,153.6]}
+{"kind":"textbox","id":"sh/65g3298r","slide":1,"name":"Text 2","text":"GEO-Sichtbarkeit zweier VKB-Vertriebspartner in LLM-Suchanfragen","textPreview":"GEO-Sichtbarkeit zweier VKB-Vertriebspartner in LLM-Suchanfragen","textChars":64,"textLines":1,"bbox":[48,340.8,816,48]}
+{"kind":"image","id":"im/cj21o7ed","slide":1,"name":"Image 0","bbox":[48,28.8,105.6,42.24]}
+{"kind":"slide","id":"sl/hwbqtkby","slide":2,"title":"KONTEXT","textShapes":12}
+{"kind":"textbox","id":"sh/9072xkry","slide":2,"name":"Text 0","text":"KONTEXT","textPreview":"KONTEXT","textChars":7,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/ozy1ofad","slide":2,"name":"Text 1","text":"Zwei Partner, ein einheitlicher Test-Aufbau","textPreview":"Zwei Partner, ein einheitlicher Test-Aufbau","textChars":43,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/a10jqpsj","slide":2,"name":"Text 2","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[48,206.4,67.2,48]}
+{"kind":"textbox","id":"sh/x4r21kru","slide":2,"name":"Text 3","text":"Geprüfte Partner","textPreview":"Geprüfte Partner","textChars":16,"textLines":1,"bbox":[124.8,203.52,288,48]}
+{"kind":"textbox","id":"sh/w3i1sfa9","slide":2,"name":"Text 4","text":"Kretschmer & Schweiger oHG  ·  Versicherungsbüro VBG Daniela Mütze (vkb.de/vbg)","textPreview":"Kretschmer & Schweiger oHG  ·  Versicherungsbüro VBG Daniela Mütze (vkb.de/vbg)","textChars":79,"textLines":1,"bbox":[422.4,203.52,480,67.2]}
+{"kind":"textbox","id":"sh/r65knqtk","slide":2,"name":"Text 5","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[48,297.6,67.2,48]}
+{"kind":"textbox","id":"sh/q5wjelsz","slide":2,"name":"Text 6","text":"Datenbasis","textPreview":"Datenbasis","textChars":10,"textLines":1,"bbox":[124.8,294.72,288,48]}
+{"kind":"textbox","id":"sh/ove9o7yd","slide":2,"name":"Text 7","text":"Checkion GEO-Audit je Partner: 3 Personas, 8 Prompts, je 10 LLM-Modelle","textPreview":"Checkion GEO-Audit je Partner: 3 Personas, 8 Prompts, je 10 LLM-Modelle","textChars":71,"textLines":1,"bbox":[422.4,294.72,480,67.2]}
+{"kind":"textbox","id":"sh/9wnqhczy","slide":2,"name":"Text 8","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[48,388.8,67.2,48]}
+{"kind":"textbox","id":"sh/mtwrmxg7","slide":2,"name":"Text 9","text":"Fragestellung","textPreview":"Fragestellung","textChars":13,"textLines":1,"bbox":[124.8,385.92,288,48]}
+{"kind":"textbox","id":"sh/nu58f2hs","slide":2,"name":"Text 10","text":"Wird der Partner in KI-generierten Antworten zitiert bzw. empfohlen — und wenn ja, wo?","textPreview":"Wird der Partner in KI-generierten Antworten zitiert bzw. empfohlen — und wenn ja, wo?","textChars":86,"textLines":1,"bbox":[422.4,385.92,480,67.2]}
+{"kind":"textbox","id":"sh/wjy9sry9","slide":2,"name":"Text 11","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/atwv650n","slide":2,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/ofy9wn61","slide":3,"title":"PERSONA-PORTFOLIO","textShapes":17}
+{"kind":"textbox","id":"sh/cza94vmx","slide":3,"name":"Text 0","text":"PERSONA-PORTFOLIO","textPreview":"PERSONA-PORTFOLIO","textChars":17,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/d0jax03i","slide":3,"name":"Text 1","text":"Wer hinter den Testfragen steht","textPreview":"Wer hinter den Testfragen steht","textChars":31,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/3ah8rqlg","slide":3,"name":"Text 2","text":"KRETSCHMER & SCHWEIGER","textPreview":"KRETSCHMER & SCHWEIGER","textChars":22,"textLines":1,"bbox":[48,148.8,403.2,28.8]}
+{"kind":"textbox","id":"sh/obq90bml","slide":3,"name":"Text 3","text":"Sabine Koller","textPreview":"Sabine Koller","textChars":13,"textLines":1,"bbox":[48,187.2,384,28.8]}
+{"kind":"textbox","id":"sh/pcjqtg36","slide":3,"name":"Text 4","text":"Risikoavers, will festen Ansprechpartner, der alles von Haftpflicht bis Altersvorsorge im Blick hat.","textPreview":"Risikoavers, will festen Ansprechpartner, der alles von Haftpflicht bis Altersvorsorge im Blick hat.","textChars":100,"textLines":1,"bbox":[48,214.08,384,62.4]}
+{"kind":"textbox","id":"sh/m5cra54z","slide":3,"name":"Text 5","text":"Markus Huber","textPreview":"Markus Huber","textChars":12,"textLines":1,"bbox":[48,297.6,384,28.8]}
+{"kind":"textbox","id":"sh/n6ls3alk","slide":3,"name":"Text 6","text":"Zeitknapp, will schnellen, klaren Überblick zu Einkommensschutz/BU ohne Massenberatung.","textPreview":"Zeitknapp, will schnellen, klaren Überblick zu Einkommensschutz/BU ohne Massenberatung.","textChars":87,"textLines":1,"bbox":[48,324.48,384,62.4]}
+{"kind":"textbox","id":"sh/n2l4fq98","slide":3,"name":"Text 7","text":"Aylin Demir","textPreview":"Aylin Demir","textChars":11,"textLines":1,"bbox":[48,408,384,28.8]}
+{"kind":"textbox","id":"sh/m1c3mlsn","slide":3,"name":"Text 8","text":"Gerade nach Haar gezogen, im Aufbau von Haushalt/Familie, offen für Beratung, sucht langfristige Begleitung.","textPreview":"Gerade nach Haar gezogen, im Aufbau von Haushalt/Familie, offen für Beratung, sucht langfristige Begleitung.","textChars":108,"textLines":1,"bbox":[48,434.88,384,62.4]}
+{"kind":"textbox","id":"sh/943mhgre","slide":3,"name":"Text 9","text":"VBG DANIELA MÜTZE","textPreview":"VBG DANIELA MÜTZE","textChars":17,"textLines":1,"bbox":[508.8,148.8,403.2,28.8]}
+{"kind":"textbox","id":"sh/83ulovat","slide":3,"name":"Text 10","text":"Sabine Moser","textPreview":"Sabine Moser","textChars":12,"textLines":1,"bbox":[508.8,187.2,384,28.8]}
+{"kind":"textbox","id":"sh/v6l4jq94","slide":3,"name":"Text 11","text":"Risiko-sichernde Vertrauenskäuferin aus Feldkirchen, will persönliche Termine und nachvollziehbare Erklärungen statt Fachbegriffe.","textPreview":"Risiko-sichernde Vertrauenskäuferin aus Feldkirchen, will persönliche Termine und nachvollziehbare Erklärungen statt Fachbegriffe.","textChars":130,"textLines":1,"bbox":[508.8,214.08,384,62.4]}
+{"kind":"textbox","id":"sh/a5c3ql8z","slide":3,"name":"Text 12","text":"Markus Leitner","textPreview":"Markus Leitner","textChars":14,"textLines":1,"bbox":[508.8,297.6,384,28.8]}
+{"kind":"textbox","id":"sh/x8nml0ra","slide":3,"name":"Text 13","text":"Effizienter Pragmatiker, will kurze klare Schritte und verlässliche Ansprechperson bei Lebensereignissen (Jobwechsel, Umzug, Nachwuchs).","textPreview":"Effizienter Pragmatiker, will kurze klare Schritte und verlässliche Ansprechperson bei Lebensereignissen (Jobwechsel, Umzug, Nachwuchs).","textChars":136,"textLines":1,"bbox":[508.8,324.48,384,62.4]}
+{"kind":"textbox","id":"sh/w7ulsvqp","slide":3,"name":"Text 14","text":"Elisabeth Graf","textPreview":"Elisabeth Graf","textChars":14,"textLines":1,"bbox":[508.8,408,384,28.8]}
+{"kind":"textbox","id":"sh/ja54na9g","slide":3,"name":"Text 15","text":"Detailgetriebene Gestalterin, denkt in Szenarien, erwartet konsistente Gesamtstrategie statt Einzelprodukte.","textPreview":"Detailgetriebene Gestalterin, denkt in Szenarien, erwartet konsistente Gesamtstrategie statt Einzelprodukte.","textChars":108,"textLines":1,"bbox":[508.8,434.88,384,62.4]}
+{"kind":"shape","id":"sh/i9w3u58v","slide":3,"name":"Shape 16","bbox":[484.8,148.8,0.96,340.8]}
+{"kind":"textbox","id":"sh/e10f2twf","slide":3,"name":"Text 17","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/o32dw321","slide":3,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/jyx0ra1s","slide":4,"title":"KERNZAHLEN IM VERGLEICH","textShapes":24}
+{"kind":"textbox","id":"sh/1cj2d8b6","slide":4,"name":"Text 0","text":"KERNZAHLEN IM VERGLEICH","textPreview":"KERNZAHLEN IM VERGLEICH","textChars":23,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/0ba143al","slide":4,"name":"Text 1","text":"Höherer Score, keine Zitierung","textPreview":"Höherer Score, keine Zitierung","textChars":30,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/ql8jytsj","slide":4,"name":"Shape 2","bbox":[48,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/doj29oba","slide":4,"name":"Text 3","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[67.2,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/sna103ap","slide":4,"name":"Text 4","text":"Domainscore","textPreview":"Domainscore","textChars":11,"textLines":1,"bbox":[67.2,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/3ihk3et8","slide":4,"name":"Text 5","text":"Kretschmer & Schweiger","textPreview":"Kretschmer & Schweiger","textChars":22,"textLines":1,"bbox":[67.2,264,235.2,24]}
+{"kind":"textbox","id":"sh/ih8ju9sn","slide":4,"name":"Text 6","text":"80 / 100","textPreview":"80 / 100","textChars":8,"textLines":1,"bbox":[67.2,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/kbm987y5","slide":4,"name":"Text 7","text":"VBG Daniela Mütze","textPreview":"VBG Daniela Mütze","textChars":17,"textLines":1,"bbox":[67.2,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/5cva1cfq","slide":4,"name":"Text 8","text":"74 / 100","textPreview":"74 / 100","textChars":8,"textLines":1,"bbox":[67.2,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/i94r6xgz","slide":4,"name":"Text 9","text":"Kretschmer & Schweiger liegt vorn — auf dem Papier.","textPreview":"Kretschmer & Schweiger liegt vorn — auf dem Papier.","textChars":51,"textLines":1,"bbox":[67.2,417.6,235.2,52.8]}
+{"kind":"shape","id":"sh/jadsz2xk","slide":4,"name":"Shape 10","bbox":[343.2,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/w72947yt","slide":4,"name":"Text 11","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[362.4,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/x8vaxsfe","slide":4,"name":"Text 12","text":"Zitierungen von 8 Prompts","textPreview":"Zitierungen von 8 Prompts","textChars":25,"textLines":1,"bbox":[362.4,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/a5kr2xg3","slide":4,"name":"Text 13","text":"Kretschmer & Schweiger","textPreview":"Kretschmer & Schweiger","textChars":22,"textLines":1,"bbox":[362.4,264,235.2,24]}
+{"kind":"textbox","id":"sh/v6tsv2xo","slide":4,"name":"Text 14","text":"0 von 8","textPreview":"0 von 8","textChars":7,"textLines":1,"bbox":[362.4,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/g36tgryd","slide":4,"name":"Text 15","text":"VBG Daniela Mütze","textPreview":"VBG Daniela Mütze","textChars":17,"textLines":1,"bbox":[362.4,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/h4fa9wfy","slide":4,"name":"Text 16","text":"5 von 8","textPreview":"5 von 8","textChars":7,"textLines":1,"bbox":[362.4,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/p0batw72","slide":4,"name":"Text 17","text":"Sichtbarkeit dreht die Reihenfolge komplett um.","textPreview":"Sichtbarkeit dreht die Reihenfolge komplett um.","textChars":47,"textLines":1,"bbox":[362.4,417.6,235.2,52.8]}
+{"kind":"shape","id":"sh/oz29krqh","slide":4,"name":"Shape 18","bbox":[638.4,153.6,273.6,321.6]}
+{"kind":"textbox","id":"sh/3ytsrmpw","slide":4,"name":"Text 19","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[657.6,168,115.2,38.4]}
+{"kind":"textbox","id":"sh/2xkrih8b","slide":4,"name":"Text 20","text":"Beste erreichte Position","textPreview":"Beste erreichte Position","textChars":24,"textLines":1,"bbox":[657.6,209.28,235.2,38.4]}
+{"kind":"textbox","id":"sh/1wbapc7q","slide":4,"name":"Text 21","text":"Kretschmer & Schweiger","textPreview":"Kretschmer & Schweiger","textChars":22,"textLines":1,"bbox":[657.6,264,235.2,24]}
+{"kind":"textbox","id":"sh/gv29g7q5","slide":4,"name":"Text 22","text":"— (keine)","textPreview":"— (keine)","textChars":9,"textLines":1,"bbox":[657.6,288,235.2,38.4]}
+{"kind":"textbox","id":"sh/fu9sn2p0","slide":4,"name":"Text 23","text":"VBG Daniela Mütze","textPreview":"VBG Daniela Mütze","textChars":17,"textLines":1,"bbox":[657.6,340.8,235.2,24]}
+{"kind":"textbox","id":"sh/et0reh8f","slide":4,"name":"Text 24","text":"Platz 1 (Nische)","textPreview":"Platz 1 (Nische)","textChars":16,"textLines":1,"bbox":[657.6,364.8,235.2,38.4]}
+{"kind":"textbox","id":"sh/tsrqlc7u","slide":4,"name":"Text 25","text":"VBG holt Top-Platzierungen bei Nischenfragen.","textPreview":"VBG holt Top-Platzierungen bei Nischenfragen.","textChars":45,"textLines":1,"bbox":[657.6,417.6,235.2,52.8]}
+{"kind":"textbox","id":"sh/sri9s7q9","slide":4,"name":"Text 26","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/tona5s3y","slide":4,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/i107q5of","slide":5,"title":"KERNERKENNTNIS","textShapes":3}
+{"kind":"textbox","id":"sh/cf2tcr61","slide":5,"name":"Text 0","text":"KERNERKENNTNIS","textPreview":"KERNERKENNTNIS","textChars":14,"textLines":1,"bbox":[48,28.8,480,24]}
+{"kind":"textbox","id":"sh/z2tcnm5s","slide":5,"name":"Text 1","text":"Der höhere Domaincore hilft nichts, wenn kein Modell den Partner zitiert.\n\nKretschmer & Schweiger (58 Punkte) ist bei allen 8 Fragen unsichtbar. VBG Daniela Mütze (48 Punkte) wird bei 5 von 8 Fragen zitiert — zweimal auf Platz 1 bzw. 2.","textPreview":"Der höhere Domaincore hilft nichts, wenn kein Modell den Partner zitiert. |  | Kretschmer & Schweiger (58 Punkte) ist bei allen 8 Fragen ...","textChars":236,"textLines":3,"bbox":[67.2,153.6,825.6,307.2]}
+{"kind":"textbox","id":"sh/yhkbe1o7","slide":5,"name":"Text 2","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/g7atobq5","slide":5,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/x8f69ofe","slide":6,"title":"KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE","textShapes":20}
+{"kind":"textbox","id":"sh/yhg7epsj","slide":6,"name":"Text 0","text":"KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE","textPreview":"KRETSCHMER & SCHWEIGER OHG · ERGEBNIS JE FRAGE","textChars":46,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/zi98nu94","slide":6,"name":"Text 1","text":"Acht Fragen, acht Mal unsichtbar","textPreview":"Acht Fragen, acht Mal unsichtbar","textChars":32,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/98rqt4r6","slide":6,"name":"Text 2","text":"Erste eigene Wohnung in Haar","textPreview":"Erste eigene Wohnung in Haar","textChars":28,"textLines":1,"bbox":[48,168,288,40.32]}
+{"kind":"textbox","id":"sh/ml07i9sv","slide":6,"name":"Text 3","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,168,115.2,40.32]}
+{"kind":"textbox","id":"sh/7m98ru9g","slide":6,"name":"Text 4","text":"Langfristiger Berater in Haar/München Ost","textPreview":"Langfristiger Berater in Haar/München Ost","textChars":41,"textLines":1,"bbox":[48,227.52,288,40.32]}
+{"kind":"textbox","id":"sh/oryp8fah","slide":6,"name":"Text 5","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,227.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/pc76hkr2","slide":6,"name":"Text 6","text":"Persönliche Beratung in Vaterstetten","textPreview":"Persönliche Beratung in Vaterstetten","textChars":36,"textLines":1,"bbox":[48,287.04,288,40.32]}
+{"kind":"textbox","id":"sh/h4bupgn6","slide":6,"name":"Text 7","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,287.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/w32twb6l","slide":6,"name":"Text 8","text":"Familie & Haus in Grasbrunn absichern","textPreview":"Familie & Haus in Grasbrunn absichern","textChars":37,"textLines":1,"bbox":[48,346.56,288,40.32]}
+{"kind":"textbox","id":"sh/v2tcn650","slide":6,"name":"Text 9","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,346.56,115.2,40.32]}
+{"kind":"textbox","id":"sh/u1kbu1ov","slide":6,"name":"Text 10","text":"Versicherungen für junge Leute Trudering-Riem","textPreview":"Versicherungen für junge Leute Trudering-Riem","textChars":45,"textLines":1,"bbox":[508.8,168,288,40.32]}
+{"kind":"textbox","id":"sh/5svutgni","slide":6,"name":"Text 11","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[796.8,168,115.2,40.32]}
+{"kind":"textbox","id":"sh/47mt0b6x","slide":6,"name":"Text 12","text":"Familienplanung & Reihenfolge in Haar","textPreview":"Familienplanung & Reihenfolge in Haar","textChars":37,"textLines":1,"bbox":[508.8,227.52,288,40.32]}
+{"kind":"textbox","id":"sh/j6dcr65c","slide":6,"name":"Text 13","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[796.8,227.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/i54bylor","slide":6,"name":"Text 14","text":"Altersvorsorge Erwachsenen-Haushalt Putzbrunn","textPreview":"Altersvorsorge Erwachsenen-Haushalt Putzbrunn","textChars":45,"textLines":1,"bbox":[508.8,287.04,288,40.32]}
+{"kind":"textbox","id":"sh/twfux0ne","slide":6,"name":"Text 15","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[796.8,287.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/svmt4v6t","slide":6,"name":"Text 16","text":"Unabhängige Vermittler für junge Familie München","textPreview":"Unabhängige Vermittler für junge Familie München","textChars":48,"textLines":1,"bbox":[508.8,346.56,288,40.32]}
+{"kind":"textbox","id":"sh/cbe5g3ih","slide":6,"name":"Text 17","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[796.8,346.56,115.2,40.32]}
+{"kind":"shape","id":"sh/dcnm98zm","slide":6,"name":"Shape 18","bbox":[484.8,168,0.96,244.8]}
+{"kind":"textbox","id":"sh/qpwnet0b","slide":6,"name":"Text 19","text":"Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × 10 Modelle) wird Kretschmer & Schweiger zitiert.","textPreview":"Acht unterschiedliche Alltagsfragen, acht unterschiedliche Standorte im Münchner Umland — bei keiner der 80 Modell-Antworten (8 Fragen × ...","textChars":185,"textLines":1,"bbox":[48,436.8,864,48]}
+{"kind":"textbox","id":"sh/bq547yhw","slide":6,"name":"Text 20","text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/neh8na9g","slide":6,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/gnmp4jqx","slide":7,"title":"VBG DANIELA MÜTZE · ERGEBNIS JE FRAGE","textShapes":22}
+{"kind":"textbox","id":"sh/cb2tkvap","slide":7,"name":"Text 0","text":"VBG DANIELA MÜTZE · ERGEBNIS JE FRAGE","textPreview":"VBG DANIELA MÜTZE · ERGEBNIS JE FRAGE","textChars":37,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/dcbud0ra","slide":7,"name":"Text 1","text":"Nische gewinnt, Mainstream verliert","textPreview":"Nische gewinnt, Mainstream verliert","textChars":35,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"textbox","id":"sh/zedcfa9g","slide":7,"name":"Text 2","text":"MAINSTREAM-FRAGEN","textPreview":"MAINSTREAM-FRAGEN","textChars":17,"textLines":1,"bbox":[48,182.4,403.2,28.8]}
+{"kind":"textbox","id":"sh/kzmdova1","slide":7,"name":"Text 3","text":"Versicherungsberater in Feldkirchen","textPreview":"Versicherungsberater in Feldkirchen","textChars":35,"textLines":1,"bbox":[48,220.8,288,40.32]}
+{"kind":"textbox","id":"sh/l0vuh0rm","slide":7,"name":"Text 4","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,220.8,115.2,40.32]}
+{"kind":"textbox","id":"sh/eh0ba1sr","slide":7,"name":"Text 5","text":"Familie & Eigenheim Feldkirchen","textPreview":"Familie & Eigenheim Feldkirchen","textChars":31,"textLines":1,"bbox":[48,263.04,288,40.32]}
+{"kind":"textbox","id":"sh/fi9c369c","slide":7,"name":"Text 6","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,263.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/baxkjqlk","slide":7,"name":"Text 7","text":"Neue Wohnung Feldkirchen/Kirchheim","textPreview":"Neue Wohnung Feldkirchen/Kirchheim","textChars":34,"textLines":1,"bbox":[48,305.28,288,40.32]}
+{"kind":"textbox","id":"sh/a9ojq5kz","slide":7,"name":"Text 8","text":"Platz 4","textPreview":"Platz 4","textChars":7,"textLines":1,"bbox":[336,305.28,115.2,40.32]}
+{"kind":"textbox","id":"sh/xcz2l03q","slide":7,"name":"Text 9","text":"Mieter-Haftpflicht Feldkirchen","textPreview":"Mieter-Haftpflicht Feldkirchen","textChars":30,"textLines":1,"bbox":[48,347.52,288,40.32]}
+{"kind":"textbox","id":"sh/cbq1sv25","slide":7,"name":"Text 10","text":"nicht zitiert","textPreview":"nicht zitiert","textChars":13,"textLines":1,"bbox":[336,347.52,115.2,40.32]}
+{"kind":"textbox","id":"sh/n6x0fqlo","slide":7,"name":"Text 11","text":"Familie & Eigenheim Kirchheim","textPreview":"Familie & Eigenheim Kirchheim","textChars":29,"textLines":1,"bbox":[48,389.76,288,40.32]}
+{"kind":"textbox","id":"sh/25ojml43","slide":7,"name":"Text 12","text":"Platz 6","textPreview":"Platz 6","textChars":7,"textLines":1,"bbox":[336,389.76,115.2,40.32]}
+{"kind":"textbox","id":"sh/p8fih03e","slide":7,"name":"Text 13","text":"NISCHEN-FRAGEN","textPreview":"NISCHEN-FRAGEN","textChars":14,"textLines":1,"bbox":[508.8,182.4,403.2,28.8]}
+{"kind":"textbox","id":"sh/o761ov2t","slide":7,"name":"Text 14","text":"Persönliche Beratung Aschheim/Feldkirchen","textPreview":"Persönliche Beratung Aschheim/Feldkirchen","textChars":41,"textLines":1,"bbox":[508.8,220.8,288,40.32]}
+{"kind":"textbox","id":"sh/f2d0b6lc","slide":7,"name":"Text 15","text":"Platz 2","textPreview":"Platz 2","textChars":7,"textLines":1,"bbox":[796.8,220.8,115.2,40.32]}
+{"kind":"textbox","id":"sh/eh4jil4r","slide":7,"name":"Text 16","text":"Landwirtschaftliche Betriebe Münchner Osten","textPreview":"Landwirtschaftliche Betriebe Münchner Osten","textChars":43,"textLines":1,"bbox":[508.8,263.04,288,40.32]}
+{"kind":"textbox","id":"sh/id4ju1oz","slide":7,"name":"Text 17","text":"Platz 1","textPreview":"Platz 1","textChars":7,"textLines":1,"bbox":[796.8,263.04,115.2,40.32]}
+{"kind":"textbox","id":"sh/jedkn654","slide":7,"name":"Text 18","text":"Selbstständige/kleine Unternehmen Aschheim","textPreview":"Selbstständige/kleine Unternehmen Aschheim","textChars":42,"textLines":1,"bbox":[508.8,305.28,288,40.32]}
+{"kind":"textbox","id":"sh/4fm1wb6p","slide":7,"name":"Text 19","text":"Platz 13","textPreview":"Platz 13","textChars":8,"textLines":1,"bbox":[796.8,305.28,115.2,40.32]}
+{"kind":"shape","id":"sh/50v2pgna","slide":7,"name":"Shape 20","bbox":[484.8,182.4,0.96,283.2]}
+{"kind":"textbox","id":"sh/q143ylov","slide":7,"name":"Text 21","text":"Bei den vier alltäglichen Standardfragen verliert VBG durchgehend gegen check24.de — die Top-Platzierungen betreffen ausschließlich spezifische, wenig umkämpfte Nischenfragen.","textPreview":"Bei den vier alltäglichen Standardfragen verliert VBG durchgehend gegen check24.de — die Top-Platzierungen betreffen ausschließlich spezi...","textChars":175,"textLines":1,"bbox":[48,475.2,864,43.2]}
+{"kind":"textbox","id":"sh/r2dkrq5g","slide":7,"name":"Text 22","text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/3ydory5k","slide":7,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/fu1gfa1s","slide":8,"title":"WARUM DAS SO IST","textShapes":9}
+{"kind":"textbox","id":"sh/18byd4zy","slide":8,"name":"Text 0","text":"WARUM DAS SO IST","textPreview":"WARUM DAS SO IST","textChars":16,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/g72x4zyd","slide":8,"name":"Text 1","text":"check24.de dominiert, E-E-A-T-Lücken bremsen","textPreview":"check24.de dominiert, E-E-A-T-Lücken bremsen","textChars":44,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/6h0fypgb","slide":8,"name":"Shape 2","bbox":[48,187.2,403.2,288]}
+{"kind":"textbox","id":"sh/tkby9kzm","slide":8,"name":"Text 3","text":"PLATZHIRSCH","textPreview":"PLATZHIRSCH","textChars":11,"textLines":1,"bbox":[67.2,206.4,345.6,24]}
+{"kind":"textbox","id":"sh/sjix0zy1","slide":8,"name":"Text 4","text":"check24.de dominiert bei beiden Partnern","textPreview":"check24.de dominiert bei beiden Partnern","textChars":40,"textLines":1,"bbox":[67.2,235.2,364.8,57.6]}
+{"kind":"textbox","id":"sh/je9g3ahk","slide":8,"name":"Text 5","text":"Kretschmer & Schweiger: check24.de auf Platz 1 bei 4 von 8 Fragen\n\nVBG: check24.de auf Platz 1 bei 3 von 8 Fragen\n\nGenau dort, wo der Partner selbst nicht vorkommt.","textPreview":"Kretschmer & Schweiger: check24.de auf Platz 1 bei 4 von 8 Fragen |  | VBG: check24.de auf Platz 1 bei 3 von 8 Fragen |  | Genau dort, wo...","textChars":164,"textLines":5,"bbox":[67.2,307.2,364.8,158.4]}
+{"kind":"shape","id":"sh/id0fu50z","slide":8,"name":"Shape 6","bbox":[508.8,187.2,403.2,288]}
+{"kind":"textbox","id":"sh/o7ydoret","slide":8,"name":"Text 7","text":"E-E-A-T-LÜCKE","textPreview":"E-E-A-T-LÜCKE","textChars":13,"textLines":1,"bbox":[528,206.4,345.6,24]}
+{"kind":"textbox","id":"sh/98rehwve","slide":8,"name":"Text 8","text":"Unterschiedliche Ursache, gleiches Symptom","textPreview":"Unterschiedliche Ursache, gleiches Symptom","textChars":42,"textLines":1,"bbox":[528,235.2,364.8,57.6]}
+{"kind":"textbox","id":"sh/m5gvmhwn","slide":8,"name":"Text 9","text":"Kretschmer & Schweiger — Erfahrung (40/100): keine Fallbeispiele, keine nachprüfbaren Prozesse\n\nVBG — Vertrauen (40/100): fehlende Impressum-, Datenschutz- und Über-uns-Signale","textPreview":"Kretschmer & Schweiger — Erfahrung (40/100): keine Fallbeispiele, keine nachprüfbaren Prozesse |  | VBG — Vertrauen (40/100): fehlende Im...","textChars":176,"textLines":3,"bbox":[528,307.2,364.8,158.4]}
+{"kind":"textbox","id":"sh/n6pwfmd8","slide":8,"name":"Text 10","text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/zqd8fe18","slide":8,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/udsvah03","slide":9,"title":"EINORDNUNG","textShapes":4}
+{"kind":"shape","id":"sh/0b65obm9","slide":9,"name":"Shape 0","bbox":[86.4,105.6,787.2,345.6]}
+{"kind":"textbox","id":"sh/nex4jq5k","slide":9,"name":"Text 1","text":"EINORDNUNG","textPreview":"EINORDNUNG","textChars":10,"textLines":1,"bbox":[115.2,134.4,480,24]}
+{"kind":"textbox","id":"sh/mdonql4z","slide":9,"name":"Text 2","text":"Die Technik ist bei beiden solide — die Schwäche liegt im Content","textPreview":"Die Technik ist bei beiden solide — die Schwäche liegt im Content","textChars":65,"textLines":1,"bbox":[115.2,168,729.6,105.6]}
+{"kind":"textbox","id":"sh/9gzml0nq","slide":9,"name":"Text 3","text":"Domain-Scores von 80 (Kretschmer & Schweiger) und 74 (VBG) liegen klar über dem Referenzwert. Es fehlt strukturierter, zitierfähiger Content: FAQ-Schema, HowTo-Schema, Breadcrumbs sowie Autoren- und Expertise-Angaben — bei beiden Partnern identisch.","textPreview":"Domain-Scores von 80 (Kretschmer & Schweiger) und 74 (VBG) liegen klar über dem Referenzwert. Es fehlt strukturierter, zitierfähiger Cont...","textChars":249,"textLines":1,"bbox":[115.2,292.8,729.6,144]}
+{"kind":"textbox","id":"sh/ofq5svm5","slide":9,"name":"Text 4","text":"9","textPreview":"9","textChars":1,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/ytkjutwz","slide":9,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/m90b6t0r","slide":10,"title":"HANDLUNGSEMPFEHLUNGEN","textShapes":13}
+{"kind":"textbox","id":"sh/xc3mho32","slide":10,"name":"Text 0","text":"HANDLUNGSEMPFEHLUNGEN","textPreview":"HANDLUNGSEMPFEHLUNGEN","textChars":21,"textLines":1,"bbox":[48,28.8,768,24]}
+{"kind":"textbox","id":"sh/cbu58j2h","slide":10,"name":"Text 1","text":"Drei Prioritäten, klarer Hebel","textPreview":"Drei Prioritäten, klarer Hebel","textChars":30,"textLines":1,"bbox":[48,52.8,816,81.6]}
+{"kind":"shape","id":"sh/ydcnatkn","slide":10,"name":"Shape 2","bbox":[48,158.4,67.2,67.2]}
+{"kind":"textbox","id":"sh/l036l83y","slide":10,"name":"Text 3","text":"P1","textPreview":"P1","textChars":2,"textLines":1,"bbox":[48,164.16,67.2,55.68]}
+{"kind":"textbox","id":"sh/kzu5c32t","slide":10,"name":"Text 4","text":"Beide Partner","textPreview":"Beide Partner","textChars":13,"textLines":1,"bbox":[134.4,156.48,220.8,67.2]}
+{"kind":"textbox","id":"sh/725onyl4","slide":10,"name":"Text 5","text":"Kurze, klar zitierfähige Antwortblöcke (Definition + Fakten + Ansprechpartner) für Fragen ergänzen, bei denen check24.de aktuell Platz 1 belegt.","textPreview":"Kurze, klar zitierfähige Antwortblöcke (Definition + Fakten + Ansprechpartner) für Fragen ergänzen, bei denen check24.de aktuell Platz 1 ...","textChars":144,"textLines":1,"bbox":[364.8,156.48,537.6,81.6]}
+{"kind":"shape","id":"sh/m1cnetkj","slide":10,"name":"Shape 6","bbox":[48,257.28,67.2,67.2]}
+{"kind":"textbox","id":"sh/s7yt4b21","slide":10,"name":"Text 7","text":"P2","textPreview":"P2","textChars":2,"textLines":1,"bbox":[48,263.04,67.2,55.68]}
+{"kind":"textbox","id":"sh/d87uxg3m","slide":10,"name":"Text 8","text":"VBG — höchster Hebel","textPreview":"VBG — höchster Hebel","textChars":20,"textLines":1,"bbox":[134.4,255.36,220.8,67.2]}
+{"kind":"textbox","id":"sh/q5gb21kb","slide":10,"name":"Text 9","text":"Vertrauenssignale sichtbar machen: Impressum, Datenschutz, Über-uns/Bio mit Qualifikationen. VBG wird bereits bei 5 von 8 Fragen zitiert — größte kurzfristige Wirkung.","textPreview":"Vertrauenssignale sichtbar machen: Impressum, Datenschutz, Über-uns/Bio mit Qualifikationen. VBG wird bereits bei 5 von 8 Fragen zitiert ...","textChars":167,"textLines":1,"bbox":[364.8,255.36,537.6,81.6]}
+{"kind":"shape","id":"sh/r6pcv6lw","slide":10,"name":"Shape 10","bbox":[48,356.16,67.2,67.2]}
+{"kind":"textbox","id":"sh/0bit8b2d","slide":10,"name":"Text 11","text":"P3","textPreview":"P3","textChars":2,"textLines":1,"bbox":[48,361.92,67.2,55.68]}
+{"kind":"textbox","id":"sh/1cru1g3y","slide":10,"name":"Text 12","text":"Kretschmer & Schweiger","textPreview":"Kretschmer & Schweiger","textChars":22,"textLines":1,"bbox":[134.4,354.24,220.8,67.2]}
+{"kind":"textbox","id":"sh/e9gb61k7","slide":10,"name":"Text 13","text":"Erfahrungs-Dimension ausbauen: Fallbeispiele, Kennzahlen, nachprüfbare Beratungsprozesse. Ziel: von 0 auf erste Zitierungen bei den 8 Kernfragen.","textPreview":"Erfahrungs-Dimension ausbauen: Fallbeispiele, Kennzahlen, nachprüfbare Beratungsprozesse. Ziel: von 0 auf erste Zitierungen bei den 8 Ker...","textChars":145,"textLines":1,"bbox":[364.8,354.24,537.6,81.6]}
+{"kind":"textbox","id":"sh/fapcz6ls","slide":10,"name":"Text 14","text":"Für beide: FAQ- und HowTo-Schema sowie Breadcrumb-Struktur ergänzen — identische strukturelle Lücke, direkter Hebel für generative Suche.","textPreview":"Für beide: FAQ- und HowTo-Schema sowie Breadcrumb-Struktur ergänzen — identische strukturelle Lücke, direkter Hebel für generative Suche.","textChars":137,"textLines":1,"bbox":[48,465.6,864,38.4]}
+{"kind":"textbox","id":"sh/ozitcv29","slide":10,"name":"Text 15","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/q90jedkz","slide":10,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
+{"kind":"slide","id":"sl/jetc3ut0","slide":11,"title":"FAZIT","textShapes":5}
+{"kind":"textbox","id":"sh/wbih4b6d","slide":11,"name":"Text 0","text":"FAZIT","textPreview":"FAZIT","textChars":5,"textLines":1,"bbox":[48,28.8,480,24]}
+{"kind":"textbox","id":"sh/n69grmpw","slide":11,"name":"Text 1","text":"Der eigentliche Wettbewerber ist nicht Allianz oder Check24 —\nes ist die Masse an „sonstigen“ Quellen.","textPreview":"Der eigentliche Wettbewerber ist nicht Allianz oder Check24 — | es ist die Masse an „sonstigen“ Quellen.","textChars":102,"textLines":2,"bbox":[67.2,163.2,825.6,182.4]}
+{"kind":"textbox","id":"sh/250zy18b","slide":11,"name":"Text 2","text":"Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sichtbarkeitsanteil). Der Hebel: aus der Masse als konkret zitierbare, benannte Quelle heraustreten.","textPreview":"Beide Partner liegen weit über dem Wettbewerbs-Schnitt (+41 / +32 Punkte), aber deutlich hinter der Sammelkategorie „other“ (73–74 % Sich...","textChars":233,"textLines":1,"bbox":[67.2,369.6,825.6,115.2]}
+{"kind":"textbox","id":"sh/98rytw72","slide":11,"name":"Text 3","text":"Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.","textPreview":"Vollständiger Fragenkatalog im Wortlaut (16 Prompts) siehe Anhang des Checkion-Audit-Reports.","textChars":93,"textLines":1,"bbox":[67.2,480,825.6,28.8]}
+{"kind":"textbox","id":"sh/o7ih0r6h","slide":11,"name":"Text 4","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[864,504,48,24]}
+{"kind":"image","id":"im/2lcz2l0n","slide":11,"name":"Image 0","bbox":[816,19.2,105.6,42.24]}
