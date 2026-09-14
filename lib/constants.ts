@@ -110,6 +110,15 @@ export const apiPublicQuickCheckPdf = (token: string) =>
 export const apiPublicQuickCheckPptx = (token: string) =>
   `${apiPublicQuickCheck(token)}/pptx`;
 
+/** Public shared METRON dashboard snapshot (read-only, no login). */
+export const PATH_SHARE_METRON = '/share/metron';
+export const pathShareMetron = (token: string) =>
+  `${PATH_SHARE_METRON}/${encodeURIComponent(token)}`;
+export const apiPublicMetron = (token: string) =>
+  `/api/public/metron/${encodeURIComponent(token)}`;
+export const API_ASSISTANT_METRON_DASHBOARD_SHARE = '/api/assistant/metron/dashboards/share';
+export const apiAssistantMetronDashboardShare = () => API_ASSISTANT_METRON_DASHBOARD_SHARE;
+
 /**
  * Authenticated Collection invite accept page (session required).
  * Spec: collection-invite-links.md

@@ -486,6 +486,26 @@ export const eventQuickCheckShares = pgTable(
   })
 );
 
+/** Public read-only share links for METRON dashboard assistant snapshots. */
+export const metronDashboardShares = pgTable(
+  'metron_dashboard_shares',
+  {
+    id: text('id').primaryKey(),
+    createdByUserId: text('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    platformProjectId: text('platform_project_id'),
+    dashboardId: text('dashboard_id').notNull(),
+    shareTokenHash: text('share_token_hash').notNull(),
+    reportSnapshot: jsonb('report_snapshot').$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    dashboardIdx: index('metron_dashboard_shares_dashboard_id_idx').on(t.dashboardId),
+    tokenHashIdx: uniqueIndex('metron_dashboard_shares_token_hash_uidx').on(t.shareTokenHash),
+  })
+);
+
 /**
  * Authenticated Collection invite links (Access Model B).
  * Spec: collection-invite-links.md — store token hash only.

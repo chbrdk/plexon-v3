@@ -67,3 +67,7 @@ MCP fetch branch beside Videon using `fetchCheckionMcpTools` against `getMetronM
 | `metron_dashboard_summarize` | `metric_grid` from KPI/gauge lines + `link_list` deep link |
 
 Builders: `lib/assistant/ui-blocks/build-metron-dashboard-ui.ts`. Same chat organisms as GEO/Scan (`UiMetricGrid` / `UiChartBlock` / `UiLinkList`).
+
+### Public share
+
+One-click share after get/summarize Auto-UI → `POST /api/assistant/metron/dashboards/share` → `/share/metron/{token}`. Spec: `assistant-metron-share.md`.

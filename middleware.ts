@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isPublicStandalonePath, PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK } from '@/lib/constants';
+import { isPublicStandalonePath, PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK, PATH_SHARE_METRON } from '@/lib/constants';
 
 const authPaths = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD];
 
@@ -15,7 +15,9 @@ function isPublicSharePath(pathname: string): boolean {
     pathname === PATH_SHARE_REPORTS ||
     pathname.startsWith(`${PATH_SHARE_REPORTS}/`) ||
     pathname === PATH_SHARE_QUICK_CHECK ||
-    pathname.startsWith(`${PATH_SHARE_QUICK_CHECK}/`)
+    pathname.startsWith(`${PATH_SHARE_QUICK_CHECK}/`) ||
+    pathname === PATH_SHARE_METRON ||
+    pathname.startsWith(`${PATH_SHARE_METRON}/`)
   );
 }
 

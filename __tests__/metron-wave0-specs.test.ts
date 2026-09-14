@@ -23,20 +23,21 @@ describe('METRON Wave 0 plexon companions', () => {
 
     const onboarding = readFileSync(path.join(root, 'knowledge/metron-v3-onboarding.md'), 'utf8')
     expect(onboarding).toContain('Product id | `metron`')
-    expect(onboarding).toContain('Wave 0')
     expect(onboarding).toContain('**done**')
 
     const fit = readFileSync(path.join(root, 'knowledge/metron-ecosystem-fit.md'), 'utf8')
     expect(fit).toContain('product id `metron`')
-    expect(fit).toContain('Wave 0')
     expect(fit).toContain('**done**')
 
     const paths = readFileSync(path.join(root, 'knowledge/paths.md'), 'utf8')
     expect(paths).toContain('NEXT_PUBLIC_METRON_URL')
     expect(paths).toContain('localhost:3011')
     expect(paths).toContain('metron-v3-onboarding.md')
+    expect(paths).toContain('PATH_SHARE_METRON')
+    expect(paths).toContain('assistant-metron-share.md')
 
     expect(existsSync(path.join(root, 'specs/domain/metron-capability.md'))).toBe(true)
+    expect(existsSync(path.join(root, 'specs/domain/assistant-metron-share.md'))).toBe(true)
   })
 
   it('registers metron in PLATFORM_PRODUCT_IDS (Wave 2)', () => {

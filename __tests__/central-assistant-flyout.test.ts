@@ -24,6 +24,7 @@ describe('central assistant flyout specs + mounts', () => {
     expect(shell).toContain('isEmbedPage')
     expect(shell).toContain('isPublicSharePath')
     expect(shell).toContain('PATH_SHARE_QUICK_CHECK')
+    expect(shell).toContain('PATH_SHARE_METRON')
   })
 
   it('host uses native AssistantChat same-origin and iframe cross-origin', () => {

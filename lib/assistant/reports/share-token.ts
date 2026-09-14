@@ -8,6 +8,10 @@ export function generateEqcShareToken(): string {
   return `eqc_${randomBytes(32).toString('hex')}`;
 }
 
+export function generateMetronShareToken(): string {
+  return `mtn_${randomBytes(32).toString('hex')}`;
+}
+
 export function hashReportShareToken(plain: string): string {
   return createHash('sha256').update(plain.trim(), 'utf8').digest('hex');
 }

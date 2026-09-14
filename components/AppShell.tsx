@@ -43,6 +43,7 @@ import {
   PATH_REGISTER,
   PATH_RESET_PASSWORD,
   PATH_SETTINGS,
+  PATH_SHARE_METRON,
   PATH_SHARE_QUICK_CHECK,
   PATH_SHARE_REPORTS,
 } from '@/lib/constants'
@@ -62,7 +63,9 @@ function isPublicSharePath(pathname: string | null): boolean {
     pathname === PATH_SHARE_QUICK_CHECK ||
     pathname.startsWith(`${PATH_SHARE_QUICK_CHECK}/`) ||
     pathname === PATH_SHARE_REPORTS ||
-    pathname.startsWith(`${PATH_SHARE_REPORTS}/`)
+    pathname.startsWith(`${PATH_SHARE_REPORTS}/`) ||
+    pathname === PATH_SHARE_METRON ||
+    pathname.startsWith(`${PATH_SHARE_METRON}/`)
   )
 }
 

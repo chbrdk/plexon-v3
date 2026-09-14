@@ -68,7 +68,20 @@ export type UiBlock = {
     source?: 'plexon_ui';
     toolCallId?: string;
     createdAt?: string;
+    /** Snapshot for one-click METRON public share (assistant-metron-share.md). */
+    metronShareSnapshot?: MetronDashboardShareSnapshot;
   };
+};
+
+/** Public share payload for METRON dashboard Auto-UI. */
+export type MetronDashboardShareSnapshot = {
+  version: 1;
+  dashboardId: string;
+  name: string;
+  platformProjectId?: string | null;
+  metrics: Array<{ label: string; value: number | string }>;
+  chart: { title: string; labels: string[]; values: number[] } | null;
+  href: string | null;
 };
 
 export type UiPanelState = {

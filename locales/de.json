@@ -731,6 +731,12 @@
       "selectAllPins": "Alle auswählen",
       "selectedCount": "{selected} von {total} ausgewählt"
     },
+    "metron": {
+      "shareLink": "Öffentlichen Link teilen",
+      "shareLinkBusy": "Link wird erstellt…",
+      "shareLinkCopied": "Link kopiert",
+      "shareLinkError": "Share-Link konnte nicht erstellt werden"
+    },
     "ui": {
       "panelDefaultTitle": "Detailansicht",
       "panelClose": "Panel schließen",

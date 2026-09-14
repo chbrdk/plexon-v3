@@ -19,6 +19,7 @@
 ## Smoke
 
 Ask in assistant (from Metron or Plexon shell): “Welche Dashboards habe ich?” → `metron_dashboards_list` → `link_list`.  
-“Summarize dashboard X” / get → `metric_grid` + optional `chart` + deep link (`UiMetricGrid` / `UiChartBlock`).
+“Summarize dashboard X” / get → `metric_grid` + optional `chart` + deep link (`UiMetricGrid` / `UiChartBlock`).  
+**Share** on that turn → clipboard `/share/metron/mtn_…` (public read-only). Spec: `specs/domain/assistant-metron-share.md`.
 
 Staging (2026-09-14): MCP `tools/call` for `metron.projects_list`, `metron.dashboards_list`, and `metron.dashboard_summarize` returned live Collection data with actor injection. Empty `actorUserId` → MCP client error before Product.

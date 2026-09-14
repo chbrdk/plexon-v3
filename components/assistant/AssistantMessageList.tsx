@@ -12,6 +12,8 @@ import type { ConversationRecommendation } from '@/lib/assistant/insights/follow
 import { applyConversationTargetToRecommendations } from '@/lib/assistant/project-target-url'
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url'
 import { messageUiBlocksForSurface } from '@/lib/assistant/ui-blocks/parse-metadata'
+import { findMetronShareSnapshotInBlocks } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui'
+import { MetronDashboardShareBar } from '@/components/assistant/MetronDashboardShareBar'
 import {
   ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
   ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER,
@@ -73,6 +75,8 @@ export function AssistantMessageList({
           })
         )
         const uiBlocks = messageUiBlocksForSurface(msg.metadata, surface)
+        const metronShareSnapshot =
+          !isUser && !isStreaming ? findMetronShareSnapshotInBlocks(uiBlocks) : null
         const messageImages = Array.isArray(
           (msg.metadata as { images?: unknown } | undefined)?.images,
         )
@@ -157,6 +161,9 @@ export function AssistantMessageList({
                       pinnedKeys={pinnedKeys}
                       onPinToggle={!isUser ? onPinToggle : undefined}
                     />
+                  ) : null}
+                  {metronShareSnapshot ? (
+                    <MetronDashboardShareBar snapshot={metronShareSnapshot} />
                   ) : null}
                   {planner?.intent ? <PlannerStepCard planner={planner} /> : null}
                   {followUpPrompts.length > 0 && onFollowUp ? (

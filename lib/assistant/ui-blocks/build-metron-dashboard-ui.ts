@@ -5,8 +5,12 @@
 
 import { randomUUID } from 'crypto';
 import { getMetronUrl } from '@/lib/constants';
-import type { UiBlock } from '@/lib/assistant/ui-blocks/types';
-import { UI_BLOCK_LIMITS } from '@/lib/assistant/ui-blocks/types';
+import type {
+  MetronDashboardShareSnapshot,
+  UiBlock,
+  UiLayout,
+} from '@/lib/assistant/ui-blocks/types';
+import { UI_BLOCK_LIMITS, UI_LAYOUT_VERSION } from '@/lib/assistant/ui-blocks/types';
 import { createUiBlock } from '@/lib/assistant/ui-blocks/validate';
 
 export type MetronDashboardListItem = {
@@ -26,6 +30,7 @@ export type MetronDashboardGetPayload = {
     labels: string[];
     values: number[];
   } | null;
+  platformProjectId?: string | null;
 };
 
 export type MetronDashboardSummarizePayload = {
@@ -35,7 +40,11 @@ export type MetronDashboardSummarizePayload = {
   metrics: Array<{ label: string; value: number | string }>;
 };
 
-type ToolMeta = { source: string; toolCallId: string };
+type ToolMeta = {
+  source: string;
+  toolCallId: string;
+  metronShareSnapshot?: MetronDashboardShareSnapshot;
+};
 
 function metronBase(): string {
   return getMetronUrl()?.replace(/\/+$/, '') ?? '';
@@ -243,15 +252,78 @@ export function buildMetronDashboardListBlocks(
   return block.ok ? [block.block] : [];
 }
 
+export function buildMetronShareSnapshot(input: {
+  dashboardId: string;
+  name: string;
+  metrics: Array<{ label: string; value: number | string }>;
+  chart: MetronDashboardGetPayload['chart'];
+  platformProjectId?: string | null;
+}): MetronDashboardShareSnapshot {
+  const href = buildMetronDashboardHref(input.dashboardId);
+  return {
+    version: 1,
+    dashboardId: input.dashboardId,
+    name: input.name,
+    platformProjectId: input.platformProjectId ?? null,
+    metrics: input.metrics.slice(0, UI_BLOCK_LIMITS.maxMetrics),
+    chart: input.chart,
+    href,
+  };
+}
+
+/** Rebuild Auto-UI blocks from a stored public share snapshot. */
+export function buildMetronShareUiLayout(snapshot: MetronDashboardShareSnapshot): UiLayout {
+  const meta = { source: 'plexon_ui', toolCallId: 'share' };
+  const blocks: UiBlock[] = [];
+  appendMetricGrid(blocks, snapshot.name, snapshot.metrics, meta);
+  if (snapshot.chart) {
+    const chart = createUiBlock(
+      'chart',
+      {
+        title: snapshot.chart.title,
+        chartType: 'bar' as const,
+        labels: snapshot.chart.labels,
+        datasets: [
+          { label: snapshot.chart.title.slice(0, 256), values: snapshot.chart.values },
+        ],
+      },
+      randomUUID(),
+      meta,
+    );
+    if (chart.ok) blocks.push(chart.block);
+  }
+  if (snapshot.href) {
+    appendLinkBlock(blocks, snapshot.name, 'Open in METRON', snapshot.href, meta);
+  }
+  return { version: UI_LAYOUT_VERSION, blocks };
+}
+
+export function findMetronShareSnapshotInBlocks(
+  blocks: UiBlock[],
+): MetronDashboardShareSnapshot | null {
+  for (const b of blocks) {
+    const snap = b.meta?.metronShareSnapshot;
+    if (snap?.version === 1 && snap.dashboardId) return snap;
+  }
+  return null;
+}
+
 export function buildMetronDashboardSummarizeBlocks(
   summary: MetronDashboardSummarizePayload,
   meta: ToolMeta,
 ): UiBlock[] {
   const href = buildMetronDashboardHref(summary.id);
   if (!href) return [];
+  const snapshot = buildMetronShareSnapshot({
+    dashboardId: summary.id,
+    name: summary.name,
+    metrics: summary.metrics,
+    chart: null,
+  });
+  const blockMeta = { ...meta, metronShareSnapshot: snapshot };
   const blocks: UiBlock[] = [];
-  appendMetricGrid(blocks, summary.name, summary.metrics, meta);
-  appendLinkBlock(blocks, summary.name, summary.teaser || 'Open in METRON', href, meta);
+  appendMetricGrid(blocks, summary.name, summary.metrics, blockMeta);
+  appendLinkBlock(blocks, summary.name, summary.teaser || 'Open in METRON', href, blockMeta);
   return blocks;
 }
 
@@ -260,9 +332,17 @@ export function buildMetronDashboardGetBlocks(
   meta: ToolMeta,
 ): UiBlock[] {
   const href = buildMetronDashboardHref(payload.id);
-  if (!href) return [];
+  if (!href && !payload.metrics.length && !payload.chart) return [];
+  const snapshot = buildMetronShareSnapshot({
+    dashboardId: payload.id,
+    name: payload.name,
+    metrics: payload.metrics,
+    chart: payload.chart,
+    platformProjectId: payload.platformProjectId,
+  });
+  const blockMeta = { ...meta, metronShareSnapshot: snapshot };
   const blocks: UiBlock[] = [];
-  appendMetricGrid(blocks, payload.name, payload.metrics, meta);
+  appendMetricGrid(blocks, payload.name, payload.metrics, blockMeta);
 
   if (payload.chart) {
     const chart = createUiBlock(
@@ -274,12 +354,14 @@ export function buildMetronDashboardGetBlocks(
         datasets: [{ label: payload.chart.title.slice(0, 256), values: payload.chart.values }],
       },
       randomUUID(),
-      meta,
+      blockMeta,
     );
     if (chart.ok) blocks.push(chart.block);
   }
 
-  appendLinkBlock(blocks, payload.name, 'Open in METRON', href, meta);
+  if (href) {
+    appendLinkBlock(blocks, payload.name, 'Open in METRON', href, blockMeta);
+  }
   return blocks;
 }
 
