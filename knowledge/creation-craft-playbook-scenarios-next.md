@@ -42,6 +42,12 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
 
+## Spirion-backed section modules (recommended next)
+
+See **`knowledge/creation-craft-spirion-section-modules.md`**.
+
+Priority: `spirion_section_ref_v1` (meta) → nav / stats → FAQ / bento → Brandion bind / print chapter.
+
 ## Maybe later (full playbook only if gate differs)
 
 - **App shell / dashboard UI** in Creation (not marketing landing) — different density rules  
