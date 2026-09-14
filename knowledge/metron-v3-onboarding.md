@@ -1,6 +1,6 @@
 # METRON v3 — Plexon onboarding
 
-**Status:** Wave 2 auth + registry (Wave 0–1 complete) · **Date:** 2026-09-14  
+**Status:** Wave 3 projects hub (Wave 0–2 complete) · **Date:** 2026-09-14  
 **Product id:** `metron` · **Repo:** `metron-v3` · **Display:** METRON  
 **GitHub:** `https://github.com/chbrdk/metron-v3`
 
@@ -28,7 +28,7 @@
 | 0 | Specs, product id, paths, keep/drop, inventory tests | **done** |
 | 1 | AppShell + health | **done** |
 | 2 | Auth + registry + placeholders + origin + upsert | **done** |
-| 3 | Stub hubs + Collection deep links | planned |
+| 3 | Stub hubs + Collection deep links | **done** |
 | 4 | Excel/CSV import | planned |
 | 5 | Semantic model + KPI engine | planned |
 | 6 | Dashboard builder (after DS Chart/Gauge/WidgetGrid) | planned |

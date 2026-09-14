@@ -88,7 +88,7 @@ Mirror Brandion/Checkion shell + magazine vs report:
 | 0 | Specs: product id, federation, Collection binding, keep/drop vs Power BI | **done** — `metron-v3` |
 | 1 | Repo `metron-v3`: AppShell, paths, health | **done** — 2026-09-14 |
 | 2 | Plexon registry + placeholders + origin + upsert summary fields | **done** — 2026-09-14 |
-| 3 | Stub hubs (datasets / KPIs / dashboards) + Collection deep links | planned |
+| 3 | Stub hubs (datasets / KPIs / dashboards) + Collection deep links | **done** — 2026-09-14 |
 | 4 | Excel/CSV import assistant (tolerant, transparent errors) | planned |
 | 5 | Semantic model + relationships + server KPI formulas | planned |
 | 6 | Constrained dashboard builder (widget set fixed; layout grid) | planned |
