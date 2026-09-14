@@ -305,6 +305,15 @@ export function evaluateCreationSceneQuality(
         'Hero-Masse fehlt — Display ≥48px UND Full-Bleed Media (Stack backgroundImage url/cover oder großes SiteImage). Text-only Hero ist nicht fertig.',
       );
     }
+    if (
+      hasCraft &&
+      (craftFlagsInclude(craftPreview, 'craft-loose-display-leading') ||
+        /hasLooseDisplayLeading"\s*:\s*true/i.test(craftPreview))
+    ) {
+      findings.push(
+        'Display-Fallgefühl — lineHeight ~1.05–1.12 + leicht negatives letterSpacing auf ≥48px Type; Body-1.6 nicht erben (Umbrüche wirken sonst auseinandergezogen).',
+      );
+    }
     pushWebCtaFindings(findings, {
       hasAudit,
       auditPreview,

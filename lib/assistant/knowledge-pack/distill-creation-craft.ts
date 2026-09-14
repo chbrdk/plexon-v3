@@ -242,6 +242,7 @@ export function buildCreationCraftKnowledgeSections(
           : 'Ops/insert polish path',
         'Must: hero mass + SiteButton/SiteLink CTA',
         'Default hero: full-bleed backgroundImage (scrim+url, cover, min-height 100vh) + overlay copy — not absolute slides in HTML import',
+        'Display Fallgefühl: line-height 1.05–1.12 + slight negative tracking on ≥48px — never inherit body 1.6',
         'Desktop breakpoint for web landing — not Print/A4',
         'No Print* for web landing',
       ],

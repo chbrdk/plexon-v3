@@ -184,6 +184,28 @@ describe('creation scene quality gate', () => {
     expect(verdict.findings.join(' ')).toMatch(/Hero-Masse|Full-Bleed Media|Text-only/)
   })
 
+  it('fails landing on loose display leading even when hero mass is present', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[{"code":"craft-loose-display-leading","message":"loose"}],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":true,"hasLooseDisplayLeading":true,"maxFontSizePx":64}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Fallgefühl|lineHeight/)
+  })
+
   it('soft-skips preview tool errors but still blocks when preview was never called', () => {
     const withError = evaluateCreationSceneQuality(
       [

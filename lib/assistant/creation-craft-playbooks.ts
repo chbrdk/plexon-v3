@@ -62,6 +62,7 @@ Ziel: freistehende Web-Landing/PDP — **Site\\*** / HTML, nicht Print.
 Above-the-fold = **Full-Bleed Media Hero mit Overlay-Copy**, nicht Textspalte + kleines Bild.
 - **Import-sicher:** Foto als \`background-image\` (CSS) am Hero-Stack — Scrim + \`url(…)\` layered, \`background-size: cover\`, \`min-height: 100vh\` (mind. 720px), \`display:flex; flex-direction:column; justify-content:flex-end\`, Padding ~64–72px.
 - Copy (Eyebrow / Display ≥56px / Body / Primary+Secondary CTA) als **normale Kinder** im Flex-Flow — Text liegt **auf** dem Bild.
+- **Typo Fallgefühl (Display):** Body darf \`line-height: 1.5–1.6\` haben — Display **nicht**. Auf ≥48px Type **explizit** \`line-height: 1.05–1.12\` + leicht negatives \`letter-spacing\` (−0.01…−0.03em). Umbrüche in einer Headline müssen als **eine Form** wirken, nicht als gelockerte Zeilen. Stack-Gap Eyebrow→Display→Lede eng (8–16px), Section-Gaps größer.
 - Stock-URL ok (Unsplash w=1920) wenn keine Marken-Assets; \`alt\`/Caption fachlich.
 - Gallery/Slider-Optik: Caption + Dots + Prev/Next als Chrome **im** Hero; **keine** \`position:absolute|fixed\` Slides im HTML-Import (\`ignored-absolute-position\` → flache Bildstreifen). Absolute nur danach via \`apply_ops\` wenn nötig.
 - Breakpoint **Desktop** (\`activeBreakpoint=desktop\`) — nicht Print/A4 für Web-Heroes.
@@ -75,8 +76,8 @@ Phasen:
 4. Audit → craft_debug → preview.
 5. Pattern nur auf expliziten Wunsch: \`creation_site_kit_page_save\`.
 
-**Muss:** Hero-Masse = Display ≥48px **UND** Full-Bleed Media (\`backgroundImage\` url am Hero-Stack oder großes SiteImage). Text-only Heroes = Fail.
-**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing; lange Text-Scrolls ohne Foto-Hero.
+**Muss:** Hero-Masse = Display ≥48px **UND** Full-Bleed Media (\`backgroundImage\` url am Hero-Stack oder großes SiteImage). Text-only Heroes = Fail. Display-Leading eng (nicht Body-1.6).
+**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing; lange Text-Scrolls ohne Foto-Hero; Display mit geerbtem Body-\`line-height\`.
 ${SHARED_STYLING}
 ${SHARED_FINISH}
 `.trim();
