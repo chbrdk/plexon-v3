@@ -63,4 +63,7 @@ MCP fetch branch beside Videon using `fetchCheckionMcpTools` against `getMetronM
 | Tool | Block |
 |------|-------|
 | `metron_dashboards_list` | `link_list` — dashboard titles + absolute METRON deep links |
-| `metron_dashboard_summarize` | `link_list` — summary teaser + deep link |
+| `metron_dashboard_get` | `metric_grid` (kpi_tile/gauge) + `chart` (first widget with `chartPoints`) + `link_list` |
+| `metron_dashboard_summarize` | `metric_grid` from KPI/gauge lines + `link_list` deep link |
+
+Builders: `lib/assistant/ui-blocks/build-metron-dashboard-ui.ts`. Same chat organisms as GEO/Scan (`UiMetricGrid` / `UiChartBlock` / `UiLinkList`).

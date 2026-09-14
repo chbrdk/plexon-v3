@@ -28,8 +28,11 @@ Chunk clue: stack frames in `4bd1b696-….js` are React itself on **plexon-v3** 
 | `phase_strip` | `UiPhaseStrip` | `ChatPhaseStrip` |
 | `moment_list` | `UiMomentList` | `ChatMomentList` |
 | `quote_list` | `UiQuoteList` | `ChatQuoteList` |
+| `chart` | `UiChartBlock` | recharts (bar/line) inside `UiBlockSurface` |
 
 Builders: `build-journey-outline-ui.ts` (`buildJourneyOutlineBlocks` · `buildJourneyDetailLayout`)
+
+**METRON:** `build-metron-dashboard-ui.ts` — `metron_dashboard_get` → `metric_grid` + `chart` + `link_list`; summarize → `metric_grid` + `link_list`; list → `link_list`. No new DS ChatChart; reuses existing generative blocks.
 
 **Intent:** `journey_outline` / `journey_generate` — specs + `knowledge/assistant-journey-outline.md` · `knowledge/assistant-journey-interactive.md` · handlers `journey-outline.ts` / `journey-generate.ts`  
 Interactive: embedded `phase_strip.moments` + `UiPhaseStrip` phase click.

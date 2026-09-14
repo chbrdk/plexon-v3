@@ -10,8 +10,11 @@ import {
   executeMetronReadCapability,
 } from '@/lib/capabilities'
 import {
+  buildMetronDashboardGetBlocks,
   buildMetronDashboardHref,
   buildMetronDashboardListBlocks,
+  buildMetronDashboardSummarizeBlocks,
+  parseMetronDashboardGetPayload,
   parseMetronDashboardSummarizePayload,
   parseMetronDashboardsListPayload,
 } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui'
@@ -93,14 +96,66 @@ describe('METRON dashboard generative UI', () => {
     expect(blocks[0]?.type).toBe('link_list')
   })
 
-  it('parses summarize text for deep link', () => {
+  it('parses summarize text into metrics + link_list', () => {
+    process.env.NEXT_PUBLIC_METRON_URL = 'https://metron.test'
     const s = parseMetronDashboardSummarizePayload(
-      'Dashboard: Recruiting overview\nStatus: published\nTiles: 8\nDeep link: /dashboards/db-1\n- KPI A (gauge): 1',
+      'Dashboard: Recruiting overview\nStatus: published\nTiles: 8\nDeep link: /dashboards/db-1\n- Hired (kpi_tile): 12\n- Fill rate (gauge): 0.4\n- By status (chart): —',
     )
-    expect(s).toEqual({
-      id: 'db-1',
-      name: 'Recruiting overview',
-      teaser: 'KPI A (gauge): 1',
+    expect(s?.id).toBe('db-1')
+    expect(s?.name).toBe('Recruiting overview')
+    expect(s?.metrics).toEqual([
+      { label: 'Hired', value: 12 },
+      { label: 'Fill rate', value: 0.4 },
+    ])
+    const blocks = buildMetronDashboardSummarizeBlocks(s!, {
+      source: 'plexon_ui',
+      toolCallId: 't2',
     })
+    expect(blocks.map((b) => b.type)).toEqual(['metric_grid', 'link_list'])
+  })
+
+  it('builds metric_grid + chart + link from dashboard_get JSON', () => {
+    process.env.NEXT_PUBLIC_METRON_URL = 'https://metron.test'
+    const payload = parseMetronDashboardGetPayload(
+      JSON.stringify({
+        dashboard: {
+          id: 'db-1',
+          name: 'Recruiting overview',
+          widgets: [
+            { id: 'w1', title: 'Hired', kind: 'kpi_tile' },
+            { id: 'w2', title: 'Fill', kind: 'gauge' },
+            {
+              id: 'w3',
+              title: 'By segment',
+              kind: 'chart',
+              chartPoints: [
+                { label: 'Retail', value: 3 },
+                { label: 'Corporate', value: 5 },
+              ],
+            },
+          ],
+        },
+        evaluations: {
+          w1: { value: 12, status: 'ok' },
+          w2: { value: 0.4, status: 'ok' },
+          w3: { value: null, status: 'ok' },
+        },
+      }),
+    )
+    expect(payload?.metrics).toEqual([
+      { label: 'Hired', value: 12 },
+      { label: 'Fill', value: 0.4 },
+    ])
+    expect(payload?.chart?.labels).toEqual(['Retail', 'Corporate'])
+    const blocks = buildMetronDashboardGetBlocks(payload!, {
+      source: 'plexon_ui',
+      toolCallId: 't3',
+    })
+    expect(blocks.map((b) => b.type)).toEqual(['metric_grid', 'chart', 'link_list'])
+  })
+
+  it('returns empty blocks for bad get payload', () => {
+    expect(parseMetronDashboardGetPayload('{')).toBeNull()
+    expect(parseMetronDashboardGetPayload(JSON.stringify({ error: 'nope' }))).toBeNull()
   })
 })

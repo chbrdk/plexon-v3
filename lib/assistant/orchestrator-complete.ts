@@ -69,10 +69,13 @@ import {
   parseVideonMediaGetPayload,
 } from '@/lib/assistant/ui-blocks/build-videon-status-ui';
 import {
+  buildMetronDashboardGetBlocks,
   buildMetronDashboardListBlocks,
   buildMetronDashboardSummarizeBlocks,
+  isMetronDashboardGetToolName,
   isMetronDashboardSummarizeToolName,
   isMetronDashboardsListToolName,
+  parseMetronDashboardGetPayload,
   parseMetronDashboardSummarizePayload,
   parseMetronDashboardsListPayload,
 } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui';
@@ -800,6 +803,24 @@ export async function runOrchestratorComplete(
         );
         if (summary) {
           const autoBlocks = buildMetronDashboardSummarizeBlocks(summary, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronDashboardGetToolName(mcpName) || isMetronDashboardGetToolName(block.name)) {
+        const payload = parseMetronDashboardGetPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildMetronDashboardGetBlocks(payload, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });
