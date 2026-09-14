@@ -88,6 +88,7 @@ Greenfield Landing = **freie Art-Direction**, nicht Site-Kit-/Brandion-/MSQDX-Fi
 **Layout:** Nav/Header/Stats/CTA-Zeilen mit \`display:flex; flex-direction:row; gap:…\`. Benefits/Metrics/Cards: \`display:grid; grid-template-columns:repeat(N,minmax(0,1fr)); gap:…\` mit **expliziten** Zell-Hintergründen (\`#…\`). **Page-BG + font-family** auf \`body\` setzen. **Überschriften als ein Textknoten** mit echten Leerzeichen. **Metriken/Logos als ein Textknoten** (\`3+\`, \`MSQ DX\`). Danach nur kleine \`apply_ops\`-Fixes.
 
 **Default Hero (ohne Extra-Prompt):** Above-fold = Full-Bleed **\`background-image\`** (Scrim + \`url\`, cover, min-height 100vh) + Overlay-Copy/CTAs als Flex-Kinder. **Nicht** absolute \`<img>\` Slides im Import (\`ignored-absolute-position\`). Desktop-Breakpoint, kein Print-Channel.
+**Wireframe/Skizze überschreibt Default:** Section-Order + Bild **unter** Headline + Char-Limits aus Annotationen — siehe Playbook § Wireframe-Vertrag. Kein Default-Overlay drüberbügeln.
 
 ### Pflicht: Dichte aus Spirion-Pack (nicht nur Farben)
 Nach \`capture_prompt_pack\` **müssen** diese Felder im HTML sichtbar werden:

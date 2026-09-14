@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCreationCraftPlaybookPromptBlock,
   listCreationCraftPlaybooks,
+  promptLooksLikeWireframeBrief,
   qualityJobForCreationCraftPlaybook,
   resolveCreationCraftPlaybook,
 } from '@/lib/assistant/creation-craft-playbooks'
@@ -36,11 +37,25 @@ describe('creation craft playbooks (Wave B)', () => {
     expect(landing).toContain('background-image')
     expect(landing).toContain('ignored-absolute-position')
     expect(landing).toContain('activeBreakpoint=desktop')
+    expect(landing).toContain('Wireframe / Skizze = Layout-Vertrag')
+    expect(landing).toContain('Zeichenlimits')
     const depth = buildCreationSceneDepthPromptBlock(true, {
       playbookId: 'creation_landing_v1',
     })
     expect(depth).toContain('Default Hero')
     expect(depth).toContain('background-image')
+    expect(depth).toContain('Wireframe / Skizze = Layout-Vertrag')
+  })
+
+  it('resolves wireframe / skizze phrasing to landing playbook', () => {
+    expect(resolveCreationCraftPlaybook('Setze dieses Wireframe als Landing um')?.id).toBe(
+      'creation_landing_v1',
+    )
+    expect(resolveCreationCraftPlaybook('Bioframe Skizze umsetzen')?.id).toBe(
+      'creation_landing_v1',
+    )
+    expect(promptLooksLikeWireframeBrief('Hier ein Wireframe — bitte so bauen')).toBe(true)
+    expect(promptLooksLikeWireframeBrief('Restyle dichter')).toBe(false)
   })
 
   it('resolves newsletter / email phrasing', () => {

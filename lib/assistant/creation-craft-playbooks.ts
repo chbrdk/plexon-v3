@@ -36,7 +36,16 @@ const PRINT_MAGAZINE_RE =
   /\b(print\s*page|printpage|printcover|print\s*cover|print\s*chapter|magazin(?!\s*pdf)|magazine(?!\s*template)|brosch[uü]re|flyer|din\s*a4|a4\s*print|print\s*channel|druck(daten|layout| magazin)?|print\s*layout)\b/i;
 
 const LANDING_RE =
-  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*page|\blp\b)\b|\b(bau|build|erstelle|create|gestalte)\w*.*\b(seite|page|webseite|website)\b/i;
+  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*page|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
+
+/** User attached / described a layout sketch (not the thin gray anti-pattern). */
+export function promptLooksLikeWireframeBrief(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return /\b(wireframe|skizze|sketch|bioframe|hand[\s_-]?drawn|layout[\s_-]?brief|papier[\s_-]?skizze|rahmen[\s_-]?skizze)\b/i.test(
+    text,
+  );
+}
 
 const SHARED_FINISH = `
 ### Pflicht vor Abschluss (alle Formate)
@@ -59,7 +68,7 @@ function phasesLanding(): string {
 Ziel: freistehende Web-Landing/PDP — **Site\\*** / HTML, nicht Print.
 
 ### Default Hero (automatisch — Nutzer muss das NICHT detailliert prompten)
-Above-the-fold = **Full-Bleed Media Hero mit Overlay-Copy**, nicht Textspalte + kleines Bild.
+Above-the-fold = **Full-Bleed Media Hero mit Overlay-Copy**, nicht Textspalte + kleines Bild — **außer** Nutzer liefert Wireframe/Skizze (dann gilt § Wireframe-Vertrag unten und überschreibt Overlay-Default).
 - **Import-sicher:** Foto als \`background-image\` (CSS) am Hero-Stack — Scrim + \`url(…)\` layered, \`background-size: cover\`, \`min-height: 100vh\` (mind. 720px), \`display:flex; flex-direction:column; justify-content:flex-end\`, Padding ~64–72px.
 - Copy (Eyebrow / Display ≥56px / Body / Primary+Secondary CTA) als **normale Kinder** im Flex-Flow — Text liegt **auf** dem Bild.
 - **Typo Fallgefühl (Display):** Body darf \`line-height: 1.5–1.6\` haben — Display **nicht**. Auf ≥48px Type **explizit** \`line-height: 1.05–1.12\` + leicht negatives \`letter-spacing\` (−0.01…−0.03em). Umbrüche in einer Headline müssen als **eine Form** wirken, nicht als gelockerte Zeilen. Stack-Gap Eyebrow→Display→Lede eng (8–16px), Section-Gaps größer.
@@ -68,16 +77,26 @@ Above-the-fold = **Full-Bleed Media Hero mit Overlay-Copy**, nicht Textspalte + 
 - Breakpoint **Desktop** (\`activeBreakpoint=desktop\`) — nicht Print/A4 für Web-Heroes.
 - \`craft_debug.hasHeroMedia\` zählt Stack-\`backgroundImage\` mit \`url(\` — dünne \`SiteImage\`-Streifen ohne Masse reichen nicht.
 
+### Wireframe / Skizze = Layout-Vertrag (wenn angehängt oder beschrieben)
+Nutzer-Wireframe ≠ verbotenes Grau-Wireframe-Look. Skizze = **Section-Order + Constraints**; Umsetzung = fertiges Craft (Hex, Type, echte Media), nicht Kästen mit X.
+1. **Zuerst lesen:** Section-Reihenfolge top→bottom 1:1 (Header → Hero → Social/Happy → Mid-Media → Contact/Footer). Keine Extra-Mega-Nav / Produkt-IA erfinden, die nicht in der Skizze steht.
+2. **Platzierung:** Steht Headline+CTA **über** dem Hero-Bild (nicht Overlay) → so bauen (gestapelter Hero). Overlay-Default nur ohne Skizze.
+3. **Zeichenlimits:** Annotationen wie „max 40 chars headline“ / „subheader max 135“ hart einhalten (Spaces zählen). Zu lange Display-Zeilen kürzen.
+4. **Bild-Slots:** große Rechtecke = große \`SiteImage\` oder Stack-\`backgroundImage\` mit Dashboard-/Produkt-Foto (Unsplash/Brand ok) — keine leeren X-Kästen, keine Tiny-Thumbnails.
+5. **Icon-Reihen:** 4 Smileys / Logos = \`SiteGrid\` oder row-Stack mit 4 Zellen + darunter CTA („More“).
+6. **Contact-Bar:** Input + Primary-Button in einer Zeile; catchy Section-Title wenn annotiert.
+7. Abschluss: kurz Section-Map nennen (1…n) und bestätigen dass Limits + Order getroffen wurden.
+
 Phasen:
-0. Eigenes Design-System (Hex/Typo/Spacing) — **kein** Brandion-Pfad auf Greenfield.
+0. Eigenes Design-System (Hex/Typo/Spacing) — **kein** Brandion-Pfad auf Greenfield. Bei Wireframe: zuerst Section-Map aus der Skizze.
 1. Optional Spirion \`captures_list\` → \`capture_prompt_pack\` (Rhythm/Look; eigene Literale).
-2. \`creation_scene_import_html\` — ein HTML-Dokument; **Default-Hero wie oben** + Nav/CTA/Grid; body font + page BG.
+2. \`creation_scene_import_html\` — ein HTML-Dokument; Hero laut Default **oder** Wireframe-Vertrag; body font + page BG.
 3. Polish nur bei Lücken: \`insert_child\` mit echten props / \`set_prop\`.
 4. Audit → craft_debug → preview.
 5. Pattern nur auf expliziten Wunsch: \`creation_site_kit_page_save\`.
 
-**Muss:** Hero-Masse = Display ≥48px **UND** Full-Bleed Media (\`backgroundImage\` url am Hero-Stack oder großes SiteImage). Text-only Heroes = Fail. Display-Leading eng (nicht Body-1.6).
-**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing; lange Text-Scrolls ohne Foto-Hero; Display mit geerbtem Body-\`line-height\`.
+**Muss:** Hero-Masse = Display ≥48px **UND** Full-Bleed Media (\`backgroundImage\` url am Hero-Stack oder großes SiteImage). Text-only Heroes = Fail. Display-Leading eng (nicht Body-1.6). Bei Wireframe: Section-Order + Char-Limits.
+**Verboten:** PrintPage/PrintCover als Landing-Ersatz; **dünnes Grau-Wireframe-Look** (leere Kästen/X als Endzustand); Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing; lange Text-Scrolls ohne Foto-Hero; Display mit geerbtem Body-\`line-height\`; Skizzen-Order ignorieren und Default-Overlay-Landing drüberbügeln.
 ${SHARED_STYLING}
 ${SHARED_FINISH}
 `.trim();

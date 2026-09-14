@@ -108,7 +108,11 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 2. newsletter / email / newsletter / mailer / digest / „E-Mail“
 3. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
 4. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
-5. landing / homepage / Startseite / PDP / Hero (web)
+5. landing / homepage / Startseite / PDP / Hero / wireframe / Skizze / Bioframe (web)
+
+### Wireframe / Skizze (2026-09-14)
+
+User-attached sketches are a **layout contract** (section order, char limits, image-under-headline vs overlay). They override the Default Overlay Hero. Forbidden “wireframe” still means thin gray end-state — see `knowledge/creation-wireframe-layout-contract.md`.
 
 ### Acceptance B
 

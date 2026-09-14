@@ -243,6 +243,7 @@ export function buildCreationCraftKnowledgeSections(
         'Must: hero mass + SiteButton/SiteLink CTA',
         'Default hero: full-bleed backgroundImage (scrim+url, cover, min-height 100vh) + overlay copy — not absolute slides in HTML import',
         'Display Fallgefühl: line-height 1.05–1.12 + slight negative tracking on ≥48px — never inherit body 1.6',
+        'User wireframe/sketch = layout contract (section order + char limits); overrides overlay default',
         'Desktop breakpoint for web landing — not Print/A4',
         'No Print* for web landing',
       ],

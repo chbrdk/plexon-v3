@@ -38,3 +38,4 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 - **Landing default hero** (BG fill overlay, no absolute import): `creation-v3/knowledge/gallery-hero-slider-prompt.md` · playbook `creation_landing_v1` § Default Hero
 - **Landing quality gate** (display **and** media required): `knowledge/creation-landing-hero-gate.md`
 - **Display Fallgefühl** (tight leading): `creation-v3/knowledge/landing-display-fallgefuehl.md`
+- **Wireframe/Skizze = layout contract** (overrides overlay default): `knowledge/creation-wireframe-layout-contract.md` · ref `knowledge/refs/landing-wireframe-company-profile.jpg`
