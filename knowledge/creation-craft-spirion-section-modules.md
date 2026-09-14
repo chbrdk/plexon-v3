@@ -8,17 +8,15 @@
 
 Page modules (PDP, pricing, contact) define **section maps**. Spirion modules supply **visual contracts** from real captures before writing.
 
-## Already shipped (page-level + Spirion meta)
+## Already shipped (page-level + Spirion meta + above-fold)
 
-Restyle · Wireframe · PDP · Social · Pricing · Contact · **`spirion_section_ref_v1`** (always on landing/newsletter)
+Restyle · Wireframe · **Nav** · **Stats** · PDP · Social · Pricing · Contact · **`spirion_section_ref_v1`** (always on landing/newsletter)
 
 ## Next modules (Spirion-first section recipes)
 
 | Module | Trigger | Spirion cue | Craft outcome |
 |--------|---------|-------------|----------------|
-| `nav_chrome_v1` | Nav, Header, Menü | Homepage header captures | Slim row, not mega-IA unless sketch says so |
 | `faq_accordion_v1` | FAQ, Fragen | Support/FAQ captures | Stack of Q/A; tight type; no equal three-up |
-| `stats_metrics_v1` | Stats, KPIs, Zahlenband | Metrics bands | 3–4 metrics as **one** text shape each |
 | `testimonial_quote_v1` | Zitat, Testimonial | Quote/press captures | Quote + name/role; not logo-row |
 | `feature_bento_v1` | Features, Vorteile, Bento | Feature grids | Uneven bento / 2+1 — avoid equal three-up |
 | `blog_list_v1` | Blog, News, Artikel | Editorial lists | Title + meta + teaser list |
@@ -47,6 +45,6 @@ Restyle · Wireframe · PDP · Social · Pricing · Contact · **`spirion_sectio
 
 ## Suggested build order (remaining)
 
-1. `nav_chrome_v1` + `stats_metrics_v1`  
-2. `faq_accordion_v1` + `feature_bento_v1`  
+1. `faq_accordion_v1` + `feature_bento_v1`  
+2. `testimonial_quote_v1` · `blog_list_v1`  
 3. `brandion_bind_pass_v1` · `print_chapter_rhythm_v1`

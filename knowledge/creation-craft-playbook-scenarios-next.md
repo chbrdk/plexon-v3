@@ -23,6 +23,8 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 | `spirion_section_ref_v1` | `lib/assistant/creation-craft-modules.ts` (always landing/newsletter) |
 | `restyle_densify_v1` | same |
 | `wireframe_layout_v1` | same |
+| `nav_chrome_v1` | same |
+| `stats_metrics_v1` | same |
 | `pdp_detail_v1` | same |
 | `social_proof_row_v1` | same |
 | `pricing_compare_v1` | same |
@@ -37,6 +39,8 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Spirion section ref (meta)** | Always landing/newsletter | **Shipped** — `spirion_section_ref_v1` |
 | **Restyle / densify existing** | Restyle, dichter, polish | **Shipped** — `restyle_densify_v1` |
 | **Wireframe → layout contract** | Skizze / Bioframe | **Shipped** — `wireframe_layout_v1` |
+| **Nav / header chrome** | Nav, Header, Menü | **Shipped** — `nav_chrome_v1` |
+| **Stats / metrics strip** | Stats, KPI, Zahlenband | **Shipped** — `stats_metrics_v1` |
 | **PDP / product detail** | PDP, Produktdetail | **Shipped** — `pdp_detail_v1` |
 | **Social proof / logo row** | Happy Customers, logos, trust | **Shipped** — `social_proof_row_v1` |
 | **Pricing / comparison** | Preise, Pricing table | **Shipped** — `pricing_compare_v1` |
@@ -44,11 +48,11 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
 
-## Spirion-backed section modules (next after meta)
+## Spirion-backed section modules (next after nav/stats)
 
 See **`knowledge/creation-craft-spirion-section-modules.md`**.
 
-Priority: nav / stats → FAQ / bento → Brandion bind / print chapter.
+Priority: FAQ / bento → Brandion bind / print chapter.
 
 ## Maybe later (full playbook only if gate differs)
 

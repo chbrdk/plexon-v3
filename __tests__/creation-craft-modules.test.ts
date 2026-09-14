@@ -3,11 +3,13 @@ import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
   promptLooksLikeContactStrip,
+  promptLooksLikeNavChrome,
   promptLooksLikePdp,
   promptLooksLikePricing,
   promptLooksLikeRestyle,
   promptLooksLikeSocialProof,
   promptLooksLikeSpirionRef,
+  promptLooksLikeStatsMetrics,
   resolveCreationCraftModules,
 } from '@/lib/assistant/creation-craft-modules'
 import { buildCreationSceneDepthPromptBlock } from '@/lib/assistant/creation-scene-depth'
@@ -18,13 +20,15 @@ import {
 } from '@/lib/assistant/page-context'
 
 describe('creation craft modules', () => {
-  it('lists restyle, wireframe, and spirion modules', () => {
+  it('lists restyle, wireframe, spirion, nav, and stats modules', () => {
     const ids = listCreationCraftModules().map((m) => m.id)
     expect(ids).toEqual(
       expect.arrayContaining([
         'spirion_section_ref_v1',
         'restyle_densify_v1',
         'wireframe_layout_v1',
+        'nav_chrome_v1',
+        'stats_metrics_v1',
         'pdp_detail_v1',
         'social_proof_row_v1',
         'pricing_compare_v1',
@@ -133,6 +137,33 @@ describe('creation craft modules', () => {
     const contact = buildCreationCraftModulesPromptBlock(['contact_strip_v1'])
     expect(contact).toContain('contact_strip_v1')
     expect(contact).toMatch(/SiteInput|SiteButton|eine Zeile/)
+  })
+
+  it('resolves nav chrome and stats metrics modules', () => {
+    expect(promptLooksLikeNavChrome('Landing mit schlanker Top-Nav Header')).toBe(true)
+    expect(promptLooksLikeStatsMetrics('Kennzahlen Zahlenband mit vier Metrics')).toBe(true)
+    expect(promptLooksLikeStatsMetrics('Landingpage Hero + Stats Grid bauen')).toBe(true)
+    expect(
+      resolveCreationCraftModules('Slim site header navigation bar', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'nav_chrome_v1'])
+    expect(
+      resolveCreationCraftModules('KPI metrics strip under the hero', 'creation_landing_v1'),
+    ).toEqual(['spirion_section_ref_v1', 'stats_metrics_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Landing Top-Nav und Stats Grid Kennzahlen',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['spirion_section_ref_v1', 'nav_chrome_v1', 'stats_metrics_v1'])
+  })
+
+  it('builds nav and stats prompt bodies', () => {
+    const nav = buildCreationCraftModulesPromptBlock(['nav_chrome_v1'])
+    expect(nav).toContain('nav_chrome_v1')
+    expect(nav).toMatch(/schlank|Mega-IA|In-Page/i)
+    const stats = buildCreationCraftModulesPromptBlock(['stats_metrics_v1'])
+    expect(stats).toContain('stats_metrics_v1')
+    expect(stats).toMatch(/SiteGrid|Kennzahlen|eine.*Text-Shape/i)
   })
 
   it('injects modules into depth when userPrompt matches', () => {

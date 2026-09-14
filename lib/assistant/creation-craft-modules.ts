@@ -15,6 +15,8 @@ export type CreationCraftModuleId =
   | 'spirion_section_ref_v1'
   | 'restyle_densify_v1'
   | 'wireframe_layout_v1'
+  | 'nav_chrome_v1'
+  | 'stats_metrics_v1'
   | 'pdp_detail_v1'
   | 'social_proof_row_v1'
   | 'pricing_compare_v1'
@@ -42,6 +44,12 @@ const PRICING_RE =
 const CONTACT_STRIP_RE =
   /\b(contact\s*(us|strip|bar|form)|kontakt(\s*(formular|leiste|bar|strip))?|demo\s*anfragen|newsletter\s*signup|email\s*capture|input\s*\+\s*(button|cta)|anfrage[\s_-]?formular)\b/i;
 
+const NAV_CHROME_RE =
+  /\b(nav(igation)?(\s*(bar|chrome|header))?|top[\s_-]?nav|site[\s_-]?header|header[\s_-]?(bar|nav|chrome)|men[uü](\s*(bar|leiste))?|navbar|hauptmen[uü]|men[uü]leiste)\b/i;
+
+const STATS_METRICS_RE =
+  /\b(stats?(\s*(grid|row|strip|band|bar))?|metrics?(\s*(strip|row|band|bar))?|kpi[s]?|zahlen(band|reihe|zeile)?|kennzahlen|key[\s_-]?figures?|impact[\s_-]?numbers?|metric[\s_-]?strip|zahlen[\s_-]?grid)\b/i;
+
 /** Explicit Spirion / design-ref phrasing (module also auto-attaches on landing/newsletter). */
 const SPIRION_REF_RE =
   /\b(spirion|capture[_]?prompt[_]?pack|captures?[_]?list|look[_]?contract|page[_]?rhythm|design[\s_-]?referenz|best[\s_-]?practice|wie\s+spirion|visual\s+ref|craft\s+ref)\b/i;
@@ -61,6 +69,16 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     id: 'wireframe_layout_v1',
     label: 'Wireframe Layout Contract',
     playbookIds: ['creation_landing_v1'],
+  },
+  nav_chrome_v1: {
+    id: 'nav_chrome_v1',
+    label: 'Nav / Header Chrome',
+    playbookIds: ['creation_landing_v1'],
+  },
+  stats_metrics_v1: {
+    id: 'stats_metrics_v1',
+    label: 'Stats / Metrics Strip',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
   },
   pdp_detail_v1: {
     id: 'pdp_detail_v1',
@@ -116,6 +134,18 @@ export function promptLooksLikeContactStrip(userPrompt: string | null | undefine
   return CONTACT_STRIP_RE.test(text);
 }
 
+export function promptLooksLikeNavChrome(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return NAV_CHROME_RE.test(text);
+}
+
+export function promptLooksLikeStatsMetrics(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return STATS_METRICS_RE.test(text);
+}
+
 export function promptLooksLikeSpirionRef(userPrompt: string | null | undefined): boolean {
   const text = userPrompt?.trim() ?? '';
   if (!text) return false;
@@ -146,7 +176,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → Spirion (landing/newsletter always) → wireframe → PDP → social → pricing → contact.
+ * Restyle → Spirion (landing/newsletter always) → wireframe → nav → stats → PDP → social → pricing → contact.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -166,6 +196,8 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeRestyle(userPrompt)) push('restyle_densify_v1');
   if (shouldAttachSpirionSectionRef(pb, userPrompt)) push('spirion_section_ref_v1');
   if (promptLooksLikeWireframeBrief(userPrompt)) push('wireframe_layout_v1');
+  if (promptLooksLikeNavChrome(userPrompt)) push('nav_chrome_v1');
+  if (promptLooksLikeStatsMetrics(userPrompt)) push('stats_metrics_v1');
   if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
   if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
   if (promptLooksLikePricing(userPrompt)) push('pricing_compare_v1');
@@ -303,6 +335,41 @@ Ziel: Abschluss-Band wie Wireframe „contact us“ — **eine Zeile** Input + P
 `.trim();
 }
 
+function bodyNavChrome(): string {
+  return `
+## Craft-Modul: Nav / Header Chrome (\`nav_chrome_v1\`)
+Ziel: **schlanke** Top-Chrome — Marke + wenige Links + optional Primary CTA. Keine Mega-IA.
+
+### Pattern
+1. Eine horizontale Reihe: Logo/Wortmarke links · 2–5 Links Mitte/rechts · optional \`SiteButton\` (Primary).
+2. Conversion-Landing: Links eher **In-Page-Anker** (Features / Preise / Kontakt) — keine Exit-Ramps zu Fremdseiten/Social.
+3. Homepage/Wireframe mit Menü: trotzdem **nicht** Dropdown-Mega-Menü erfinden, außer Skizze zeigt es.
+4. Höhe kompakt (≈56–72px); klare Surface vom Hero; Sticky nur wenn Prompt/Skizze es verlangt.
+
+### Hart
+- Kein 8+-Link-Footer als „Nav“. Kein Seed „Get started“ als einziger Label.
+- Bei Restyle: bestehende Header-Nodes per \`apply_ops\` verdichten.
+`.trim();
+}
+
+function bodyStatsMetrics(): string {
+  return `
+## Craft-Modul: Stats / Metrics Strip (\`stats_metrics_v1\`)
+Ziel: Kennzahlen-Band — **3–4 Metrics in einer Reihe**, jede Zahl+Label als **eine** Text-Shape (nicht „3“ und „+“ getrennt).
+
+### Pattern
+1. Optional kurzer Section-Eyebrow/Title darüber.
+2. **\`SiteGrid\` columns=3 oder 4** (oder row-Stack): je Zelle große Zahl (Display/Title-Gewicht) + kurzes Label darunter.
+3. Konkrete Zahlen („98%“, „40k+“, „12 Länder“) — keine „XX%“ / „N Customers“.
+4. Enge Gaps in der Reihe; Section-Abstand zum Hero/Proof darunter größer.
+5. Nicht die ganze Page als equal three-up Features verkaufen — das ist nur das Metrics-Band.
+
+### Hart
+- Keine Icon-Feature-Cards als Ersatz für Stats.
+- Mit Restyle: Band per \`apply_ops\` nachziehen; Spirion-Pack für Rhythm nutzen wenn aktiv.
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -315,6 +382,10 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyRestyleDensify();
       case 'wireframe_layout_v1':
         return bodyWireframeLayout();
+      case 'nav_chrome_v1':
+        return bodyNavChrome();
+      case 'stats_metrics_v1':
+        return bodyStatsMetrics();
       case 'pdp_detail_v1':
         return bodyPdpDetail();
       case 'social_proof_row_v1':
