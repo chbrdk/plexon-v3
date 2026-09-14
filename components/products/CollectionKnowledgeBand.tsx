@@ -997,7 +997,11 @@ export function CollectionKnowledgeBand({
               data-empty={!metron ? 'true' : 'false'}
               hidden={openNav !== 'metron'}
             >
-              <MetronCapabilityView metron={metron} href={metronHref ?? ''} />
+              <MetronCapabilityView
+                metron={metron}
+                href={metronHref ?? ''}
+                platformProjectId={platformProjectId}
+              />
             </article>
 
             <article

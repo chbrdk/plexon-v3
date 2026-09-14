@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { Alert, Spinner, Text } from '@msqdx/ui'
-import { PublicReportView } from '@/components/assistant/PublicReportView'
+import { MetronShareMagazine } from '@/components/assistant/MetronShareMagazine'
 import { buildMetronShareUiLayout } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui'
 import type { MetronDashboardShareSnapshot } from '@/lib/assistant/ui-blocks/types'
-import { apiPublicMetron } from '@/lib/constants'
+import { apiPublicMetron, pathShareMetron } from '@/lib/constants'
 
 export default function ShareMetronPage({
   params,
@@ -16,6 +16,7 @@ export default function ShareMetronPage({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<MetronDashboardShareSnapshot | null>(null)
+  const [createdAt, setCreatedAt] = useState<string | null>(null)
 
   useEffect(() => {
     void params.then((p) => setToken(p.token))
@@ -29,9 +30,13 @@ export default function ShareMetronPage({
       try {
         const res = await fetch(apiPublicMetron(token))
         if (!res.ok) throw new Error('not found')
-        const data = (await res.json()) as { report?: MetronDashboardShareSnapshot }
+        const data = (await res.json()) as {
+          report?: MetronDashboardShareSnapshot
+          createdAt?: string
+        }
         if (!data.report?.dashboardId) throw new Error('not found')
         setSnapshot(data.report)
+        setCreatedAt(typeof data.createdAt === 'string' ? data.createdAt : null)
       } catch {
         setError('Dieser METRON-Report ist nicht verfügbar.')
       } finally {
@@ -58,10 +63,17 @@ export default function ShareMetronPage({
   }
 
   const layout = buildMetronShareUiLayout(snapshot)
+  const shareUrl =
+    typeof window !== 'undefined'
+      ? new URL(pathShareMetron(token), window.location.origin).toString()
+      : pathShareMetron(token)
 
   return (
-    <main className="plexon-metron-share-page">
-      <PublicReportView title={snapshot.name} uiLayout={layout} />
-    </main>
+    <MetronShareMagazine
+      snapshot={snapshot}
+      layout={layout}
+      createdAt={createdAt}
+      shareUrl={shareUrl}
+    />
   )
 }

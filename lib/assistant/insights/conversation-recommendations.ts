@@ -9,6 +9,10 @@ import {
   mergeRecommendations,
   type ConversationRecommendation,
 } from '@/lib/assistant/insights/follow-up-suggestions';
+import {
+  buildMetronFollowUps,
+  resolveMetronFollowUpMode,
+} from '@/lib/assistant/insights/metron-follow-ups';
 import { resolveAssistantTargetUrl } from '@/lib/assistant/project-target-url';
 
 export type { ConversationRecommendation };
@@ -55,6 +59,15 @@ export function attachRecommendationsToMetadata(
   }
 
   const planner = base.planner as { intent?: string } | undefined;
+  const metronMode = resolveMetronFollowUpMode(base);
+  if (metronMode) {
+    recs = mergeRecommendations(
+      recs,
+      buildMetronFollowUps({ mode: metronMode, uiLayout: base.uiLayout }),
+      seen
+    );
+  }
+
   recs = mergeRecommendations(
     recs,
     buildContextualRecommendations({

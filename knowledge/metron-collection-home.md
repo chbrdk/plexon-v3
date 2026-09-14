@@ -10,6 +10,7 @@ Wave 3 polish: Collection `/projects/[id]` shows METRON beside CHECKION/AUDION/B
 - Plexon BFF `GET /api/platform/projects/{id}/dashboard` → `metron` + `links.metronProject`
 - Launch: `{METRON}/projects?platformProjectId=` (`lib/metron-launch-url.ts`)
 - UI: Overview chapter + work-band `MetronCapabilityView`
+- **Ask in Assistant:** `pathAssistantWithProjectAndDraft(projectId, askMetronDraft)` → `/assistant?project=…&draft=…` (composer seed, one-shot)
 
 ## Paths
-Staging METRON / launch query documented in `knowledge/paths.md`.
+Staging METRON / launch query / draft param documented in `knowledge/paths.md`.

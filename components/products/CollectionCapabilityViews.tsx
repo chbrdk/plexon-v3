@@ -9,7 +9,7 @@ import {
   buildAudionStudyUrl,
   buildAudionTargetGroupUrl,
 } from '@/lib/audion-admin-launch-url'
-import { getAudionWebOrigin } from '@/lib/constants'
+import { getAudionWebOrigin, pathAssistantWithProjectAndDraft } from '@/lib/constants'
 import { pathCheckionDomainResult, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import { pathBrandionGuideline } from '@/lib/paths/brandion-api'
 import type {
@@ -504,9 +504,11 @@ export function BrandionCapabilityView({
 export function MetronCapabilityView({
   metron,
   href,
+  platformProjectId,
 }: {
   metron: MetronProjectSummary | null
   href: string
+  platformProjectId: string
 }) {
   const { t } = useI18n()
   const empty =
@@ -514,6 +516,10 @@ export function MetronCapabilityView({
     metron!.datasetCount === 0 &&
     metron!.kpiCount === 0 &&
     metron!.dashboardCount === 0
+  const askHref = pathAssistantWithProjectAndDraft(
+    platformProjectId,
+    t('projects.detail.askMetronDraft'),
+  )
 
   return (
     <div className="plexon-capability-pane" data-testid="metron-capability-view">
@@ -554,6 +560,13 @@ export function MetronCapabilityView({
         <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
           {t('projects.detail.openMetron')}
         </Button>
+        {platformProjectId ? (
+          <a href={askHref} data-testid="metron-ask-assistant">
+            <Button variant="ghost" size="md">
+              {t('projects.detail.askMetron')}
+            </Button>
+          </a>
+        ) : null}
       </div>
     </div>
   )

@@ -11,4 +11,4 @@ See `knowledge/paths.md` (PATH_SHARE_METRON · apiAssistantMetronDashboardShare 
 ## Flow
 1. Assistant emits METRON Auto-UI with `meta.metronShareSnapshot`
 2. Share bar → POST snapshot → clipboard `/share/metron/mtn_…`
-3. Public page loads GET `/api/public/metron/:token` → UiBlocks read-only
+3. Public page loads GET `/api/public/metron/:token` → magazine masthead (read-only chip, copy again, print/PDF) + UiBlocks

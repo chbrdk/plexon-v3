@@ -8,6 +8,7 @@ import {
   API_ASSISTANT_CONVERSATIONS,
   API_PLATFORM_ME_PROJECT_INSIGHTS,
   ASSISTANT_CONVERSATION_QUERY_PARAM,
+  ASSISTANT_DRAFT_PROMPT_QUERY_PARAM,
   ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM,
   PATH_ASSISTANT,
   apiAssistantConversation,
@@ -221,6 +222,21 @@ export function AssistantChat({
     const fromUrl = searchParams.get(ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM)?.trim();
     if (fromUrl) setPlatformProjectId(fromUrl);
   }, [searchParams]);
+
+  /** One-shot composer seed from Collection / capability deep links (`?draft=`). */
+  const draftSeededRef = useRef(false);
+  useEffect(() => {
+    if (draftSeededRef.current) return;
+    const draft = searchParams.get(ASSISTANT_DRAFT_PROMPT_QUERY_PARAM)?.trim();
+    if (!draft) return;
+    draftSeededRef.current = true;
+    setInput(draft);
+    if (presentation === 'overlay') return;
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete(ASSISTANT_DRAFT_PROMPT_QUERY_PARAM);
+    const qs = next.toString();
+    router.replace(qs ? `${PATH_ASSISTANT}?${qs}` : PATH_ASSISTANT, { scroll: false });
+  }, [presentation, router, searchParams]);
 
   useEffect(() => {
     void refreshConversations();

@@ -95,6 +95,23 @@ export const pathAssistantWithProject = (platformProjectId: string): string => {
   return `${PATH_ASSISTANT}?${ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM}=${encodeURIComponent(id)}`;
 };
 
+/** Prefill the composer draft (`?draft=`) once on `/assistant`. */
+export const ASSISTANT_DRAFT_PROMPT_QUERY_PARAM = 'draft';
+
+/** Collection context + optional draft prompt for one-click METRON / capability asks. */
+export const pathAssistantWithProjectAndDraft = (
+  platformProjectId: string,
+  draftPrompt?: string | null,
+): string => {
+  const id = platformProjectId.trim();
+  if (!id) return PATH_ASSISTANT;
+  const params = new URLSearchParams();
+  params.set(ASSISTANT_PLATFORM_PROJECT_QUERY_PARAM, id);
+  const draft = draftPrompt?.trim();
+  if (draft) params.set(ASSISTANT_DRAFT_PROMPT_QUERY_PARAM, draft);
+  return `${PATH_ASSISTANT}?${params.toString()}`;
+};
+
 /** Public shared assistant report (no login required). */
 export const PATH_SHARE_REPORTS = '/share/reports';
 export const pathShareReport = (token: string) =>

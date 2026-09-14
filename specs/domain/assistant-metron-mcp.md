@@ -71,3 +71,7 @@ Builders: `lib/assistant/ui-blocks/build-metron-dashboard-ui.ts`. Same chat orga
 ### Public share
 
 One-click share after get/summarize Auto-UI → `POST /api/assistant/metron/dashboards/share` → `/share/metron/{token}`. Spec: `assistant-metron-share.md`.
+
+### Follow-up prompts
+
+After METRON list/get/summarize turns, `attachRecommendationsToMetadata` merges METRON-specific `followUpPrompts` (show/summarize board, share via UI tip, confirm-write discoverability for starter pack / dashboard create). Builder: `lib/assistant/insights/metron-follow-ups.ts`.

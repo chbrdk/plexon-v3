@@ -6190,6 +6190,48 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   text-align: center;
 }
 
+/* METRON public share magazine (EQC-lite) */
+.plexon-metron-share-masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.plexon-metron-share-masthead__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.plexon-metron-share-kicker {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plexon-metron-share-masthead__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plexon-metron-share-masthead__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+@media print {
+  .plexon-metron-share-no-print {
+    display: none !important;
+  }
+}
+
 .plexon-spinner {
   width: 1.25rem;
   height: 1.25rem;

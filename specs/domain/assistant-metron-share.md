@@ -37,8 +37,18 @@ No anonymous writes. Revoke / expiry = later (out of scope).
 
 ## UI
 
-After METRON Auto-UI blocks on an assistant message: **Share** copies absolute `/share/metron/{token}` (EQC clipboard pattern). Public page renders `metric_grid` + `chart` + `link_list` via existing generative UI (`PublicReportView` / `AssistantMessageBlocks`).
+After METRON Auto-UI blocks on an assistant message: **Share** copies absolute `/share/metron/{token}` (EQC clipboard pattern).
+
+Public page (`/share/metron/:token`) is a **read-only magazine**:
+
+| Element | Notes |
+|---------|--------|
+| Masthead | Title + “Read-only snapshot” chip + optional `createdAt` |
+| Actions | Copy link again · Print / Save as PDF (`window.print`) |
+| Body | `metric_grid` + `chart` + `link_list` via generative UI |
+
+No login. No live filters / builder edit.
 
 ## Non-goals
 
-Live filters, builder edit, PDF/PPTX for METRON shares (v1), full EQC magazine chrome.
+Server-rendered PDF/PPTX pipelines (use browser print for v1), full EQC persona/GEO chrome, revoke/expiry.

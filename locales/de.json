@@ -405,6 +405,8 @@
       "brandionCatalogEmpty": "Noch keine Guidelines in diesem BRANDION-Projekt.",
       "metronCatalogSubtitle": "Datasets, KPIs und Dashboards dieser Collection in METRON öffnen.",
       "metronCatalogEmpty": "Noch keine Datasets, KPIs oder Dashboards in diesem METRON-Projekt.",
+      "askMetron": "Im Assistant fragen",
+      "askMetronDraft": "Zeig mir die METRON Dashboards für diese Collection und fasse das wichtigste Dashboard zusammen",
       "dashboards": "Dashboards",
       "kpis": "KPIs",
       "datasets": "Datasets",
@@ -735,7 +737,10 @@
       "shareLink": "Öffentlichen Link teilen",
       "shareLinkBusy": "Link wird erstellt…",
       "shareLinkCopied": "Link kopiert",
-      "shareLinkError": "Share-Link konnte nicht erstellt werden"
+      "shareLinkError": "Share-Link konnte nicht erstellt werden",
+      "shareReadOnly": "Nur-Lesen-Snapshot",
+      "shareCopyAgain": "Link kopieren",
+      "sharePrintPdf": "Drucken / PDF speichern"
     },
     "ui": {
       "panelDefaultTitle": "Detailansicht",
