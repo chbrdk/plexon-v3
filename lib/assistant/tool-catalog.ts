@@ -40,6 +40,11 @@ export type ToolFamily =
   | 'videon_cuts'
   | 'videon_export'
   | 'videon_reframe'
+  | 'metron_ops'
+  | 'metron_projects'
+  | 'metron_datasets'
+  | 'metron_kpis'
+  | 'metron_dashboards'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -158,6 +163,11 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   videon_cuts: [/^videon_cuts?_/, /^videon_cut_/],
   videon_export: [/^videon_export_/],
   videon_reframe: [/^videon_reframe_/],
+  metron_ops: [/^metron_health$/],
+  metron_projects: [/^metron_projects_/],
+  metron_datasets: [/^metron_datasets_/],
+  metron_kpis: [/^metron_kpis_/],
+  metron_dashboards: [/^metron_dashboard/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -233,6 +243,11 @@ export const PLATFORM_ASSISTANT_FAMILIES: ToolFamily[] = [
   'videon_cuts',
   'videon_export',
   'videon_reframe',
+  'metron_ops',
+  'metron_projects',
+  'metron_datasets',
+  'metron_kpis',
+  'metron_dashboards',
 ];
 
 /** Safe read-only families for generic project Q&A. */
@@ -262,6 +277,11 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'videon_media',
   'videon_analysis',
   'videon_cuts',
+  'metron_ops',
+  'metron_projects',
+  'metron_datasets',
+  'metron_kpis',
+  'metron_dashboards',
 ];
 
 export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
@@ -289,6 +309,15 @@ export const VIDEON_MEDIA_FAMILIES: ToolFamily[] = [
   'videon_media',
   'videon_analysis',
   'videon_cuts',
+];
+
+/** METRON Phase 1 read tools. */
+export const METRON_ANALYTICS_FAMILIES: ToolFamily[] = [
+  'metron_ops',
+  'metron_projects',
+  'metron_datasets',
+  'metron_kpis',
+  'metron_dashboards',
 ];
 
 /** Write/job families — still gated by allowWriteTools on the plan. */

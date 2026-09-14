@@ -752,3 +752,10 @@ export const getVideonMcpUrl = (): string | undefined => {
   const url = process.env.VIDEON_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for METRON KPI/dashboard tools. Reads METRON_MCP_URL (e.g. http://metron-mcp:3104). */
+export const getMetronMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url = process.env.METRON_MCP_URL?.trim();
+  return url || undefined;
+};

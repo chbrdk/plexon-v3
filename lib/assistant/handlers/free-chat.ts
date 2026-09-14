@@ -17,6 +17,7 @@ import {
   resolveUseEchonMcp,
   resolveUseSpirionMcp,
   resolveUseVideonMcp,
+  resolveUseMetronMcp,
 } from '@/lib/assistant/product-mcp-gate';
 import {
   emitPhase,
@@ -79,6 +80,11 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     pageContext,
     hasAnyActiveEntitlement,
   });
+  const useMetronMcp = resolveUseMetronMcp({
+    // Phase 1: gate via URL + shell/sibling (entitlements.metron optional later).
+    pageContext,
+    hasAnyActiveEntitlement,
+  });
   const companies = await listUserCompanies(ctx.user.id);
 
   const effectivePrompt = ctx.body.confirmToolCall
@@ -108,6 +114,7 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
       useCreationMcp,
       useSpirionMcp,
       useVideonMcp,
+      useMetronMcp,
       pageContext: ctx.body.pageContext ?? null,
       onProgress: (ev) => {
         ctx.emit?.(ev);

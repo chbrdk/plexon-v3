@@ -14,6 +14,7 @@ const baseFlags = {
   useCreationMcp: true,
   useSpirionMcp: true,
   useVideonMcp: true,
+  useMetronMcp: true,
 }
 
 function plan(intent: AssistantPlan['intent']): AssistantPlan {
@@ -39,6 +40,7 @@ describe('resolveMcpFlagsForPlan', () => {
       useCreationMcp: true,
       useSpirionMcp: true,
       useVideonMcp: false,
+      useMetronMcp: false,
     })
   })
 
@@ -51,6 +53,7 @@ describe('resolveMcpFlagsForPlan', () => {
       useCreationMcp: false,
       useSpirionMcp: true,
       useVideonMcp: false,
+      useMetronMcp: false,
     })
   })
 
@@ -63,6 +66,20 @@ describe('resolveMcpFlagsForPlan', () => {
       useCreationMcp: false,
       useSpirionMcp: false,
       useVideonMcp: true,
+      useMetronMcp: false,
+    })
+  })
+
+  it('keeps only Metron for metron_analytics', () => {
+    expect(resolveMcpFlagsForPlan(plan('metron_analytics'), baseFlags)).toEqual({
+      useCheckionMcp: false,
+      useAudionMcp: false,
+      useEchonMcp: false,
+      useBrandionMcp: false,
+      useCreationMcp: false,
+      useSpirionMcp: false,
+      useVideonMcp: false,
+      useMetronMcp: true,
     })
   })
 

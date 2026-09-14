@@ -4,6 +4,7 @@ import {
   getCheckionMcpUrl,
   getCreationMcpUrl,
   getEchonMcpUrl,
+  getMetronMcpUrl,
   getSpirionMcpUrl,
   getVideonMcpUrl,
 } from '@/lib/constants';
@@ -21,7 +22,8 @@ export type AssistantProductMcpId =
   | 'creation'
   | 'echon'
   | 'spirion'
-  | 'videon';
+  | 'videon'
+  | 'metron';
 
 const PLATFORM_SHELL_HOSTS = new Set([
   'plexon',
@@ -32,6 +34,7 @@ const PLATFORM_SHELL_HOSTS = new Set([
   'echon',
   'spirion',
   'videon',
+  'metron',
 ]);
 
 /**
@@ -157,6 +160,21 @@ export function resolveUseVideonMcp(input: {
     product: 'videon',
     mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getVideonMcpUrl(),
     productEntitlement: input.videonEntitlement,
+    pageContext: input.pageContext,
+    hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
+  });
+}
+
+export function resolveUseMetronMcp(input: {
+  metronEntitlement?: ProductMcpEntitlementRow;
+  pageContext?: Pick<AssistantPageContext, 'product'> | null;
+  hasAnyActiveEntitlement?: boolean;
+  mcpUrl?: string | undefined;
+}): boolean {
+  return resolveUseProductMcp({
+    product: 'metron',
+    mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getMetronMcpUrl(),
+    productEntitlement: input.metronEntitlement,
     pageContext: input.pageContext,
     hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
   });

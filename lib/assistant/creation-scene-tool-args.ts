@@ -3,6 +3,7 @@ import {
 } from '@/lib/assistant/scene-write-intent';
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 import { injectSpirionToolArgs } from '@/lib/assistant/spirion-tool-args';
+import { injectMetronToolArgs } from '@/lib/assistant/metron-tool-args';
 
 function isCreationSceneFamilyTool(toolName: string): boolean {
   return (
@@ -127,7 +128,7 @@ export function injectCreationSceneToolArgs(
   return out;
 }
 
-/** Creation scene args + Spirion search platformProjectId + VIDEON actor injection. */
+/** Creation scene args + Spirion search platformProjectId + VIDEON + METRON actor injection. */
 export function injectAssistantMcpToolArgs(
   toolName: string,
   input: Record<string, unknown>,
@@ -140,7 +141,8 @@ export function injectAssistantMcpToolArgs(
 ): Record<string, unknown> {
   const withCreation = injectCreationSceneToolArgs(toolName, input, ctx);
   const withSpirion = injectSpirionToolArgs(toolName, withCreation, ctx);
-  return injectVideonToolArgs(toolName, withSpirion, ctx);
+  const withVideon = injectVideonToolArgs(toolName, withSpirion, ctx);
+  return injectMetronToolArgs(toolName, withVideon, ctx);
 }
 
 function isVideonMediaSearchTool(toolName: string): boolean {

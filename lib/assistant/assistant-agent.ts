@@ -15,6 +15,7 @@ import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creatio
 import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
+import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
 import {
   runOrchestratorComplete,
   type OrchestratorCompleteOptions,
@@ -59,6 +60,7 @@ export type RunAssistantAgentInput = {
   useCreationMcp: boolean;
   useSpirionMcp: boolean;
   useVideonMcp: boolean;
+  useMetronMcp: boolean;
   beforeToolCall?: OrchestratorCompleteOptions['beforeToolCall'];
   onProgress?: AgentProgressCallback;
   onPlan?: (plan: AssistantPlan) => void;
@@ -128,6 +130,10 @@ export async function runAssistantAgent(
     useVideonMcp: input.useVideonMcp,
   });
 
+  const metronIntegrationBlock = buildMetronIntegrationContextBlock({
+    useMetronMcp: input.useMetronMcp,
+  });
+
   const compactContextLoaded = baseSystemPrompt.includes('## Projektkontext (Kurzfassung)');
 
   const planningPrompt = buildPlanningPromptFromConversation(
@@ -146,6 +152,7 @@ export async function runAssistantAgent(
     hasCreationMcp: input.useCreationMcp,
     hasSpirionMcp: input.useSpirionMcp,
     hasVideonMcp: input.useVideonMcp,
+    hasMetronMcp: input.useMetronMcp,
     compactContextLoaded,
     pageContext: input.pageContext,
   });
@@ -159,6 +166,7 @@ export async function runAssistantAgent(
     useCreationMcp: input.useCreationMcp,
     useSpirionMcp: input.useSpirionMcp,
     useVideonMcp: input.useVideonMcp,
+    useMetronMcp: input.useMetronMcp,
   });
 
   let retrieval: RetrievalResult | null = null;
@@ -209,7 +217,7 @@ export async function runAssistantAgent(
       : null;
   const craftMemoryPrompt = craftMemoryBlock ? `\n${craftMemoryBlock}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n\n${metronIntegrationBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const creationBudget = resolveCreationSceneBudget({
     intent: plan.intent,
@@ -230,6 +238,7 @@ export async function runAssistantAgent(
     useCreationMcp: mcpFlags.useCreationMcp,
     useSpirionMcp: mcpFlags.useSpirionMcp,
     useVideonMcp: mcpFlags.useVideonMcp,
+    useMetronMcp: mcpFlags.useMetronMcp,
     pageContext: input.pageContext,
     platformProjectId: input.platformProjectId,
     actorUserId: input.user.id,
