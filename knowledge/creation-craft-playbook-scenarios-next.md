@@ -24,6 +24,8 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 | `wireframe_layout_v1` | same |
 | `pdp_detail_v1` | same |
 | `social_proof_row_v1` | same |
+| `pricing_compare_v1` | same |
+| `contact_strip_v1` | same |
 
 Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({ userPrompt, playbookId })`.
 
@@ -35,8 +37,8 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Wireframe → layout contract** | Skizze / Bioframe | **Shipped** — `wireframe_layout_v1` |
 | **PDP / product detail** | PDP, Produktdetail | **Shipped** — `pdp_detail_v1` |
 | **Social proof / logo row** | Happy Customers, logos, trust | **Shipped** — `social_proof_row_v1` |
-| **Pricing / comparison** | Preise, Pricing table | Grid + CTAs; char discipline |
-| **Form / contact strip** | Contact us, Demo anfragen | Input+button row; catchy title |
+| **Pricing / comparison** | Preise, Pricing table | **Shipped** — `pricing_compare_v1` |
+| **Form / contact strip** | Contact us, Demo anfragen | **Shipped** — `contact_strip_v1` |
 | **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
 | **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
 

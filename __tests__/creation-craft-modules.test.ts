@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
+  promptLooksLikeContactStrip,
   promptLooksLikePdp,
+  promptLooksLikePricing,
   promptLooksLikeRestyle,
   promptLooksLikeSocialProof,
   resolveCreationCraftModules,
@@ -23,6 +25,8 @@ describe('creation craft modules', () => {
         'wireframe_layout_v1',
         'pdp_detail_v1',
         'social_proof_row_v1',
+        'pricing_compare_v1',
+        'contact_strip_v1',
       ]),
     )
   })
@@ -85,6 +89,32 @@ describe('creation craft modules', () => {
     const social = buildCreationCraftModulesPromptBlock(['social_proof_row_v1'])
     expect(social).toContain('social_proof_row_v1')
     expect(social).toMatch(/columns=4|4 Zellen/)
+  })
+
+  it('resolves pricing and contact-strip modules', () => {
+    expect(promptLooksLikePricing('Pricing table mit 3 Plänen')).toBe(true)
+    expect(promptLooksLikeContactStrip('Contact us Strip mit Email und Demo anfragen')).toBe(true)
+    expect(
+      resolveCreationCraftModules('Preise Vergleich Grid mit drei Tarifen', 'creation_landing_v1'),
+    ).toEqual(['pricing_compare_v1'])
+    expect(
+      resolveCreationCraftModules('Kontaktleiste Contact us Input und Button', 'creation_landing_v1'),
+    ).toEqual(['contact_strip_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Landing Preise und Contact us Strip',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['pricing_compare_v1', 'contact_strip_v1'])
+  })
+
+  it('builds pricing and contact prompt bodies', () => {
+    const pricing = buildCreationCraftModulesPromptBlock(['pricing_compare_v1'])
+    expect(pricing).toContain('pricing_compare_v1')
+    expect(pricing).toMatch(/SiteGrid|Tier|emphasized/)
+    const contact = buildCreationCraftModulesPromptBlock(['contact_strip_v1'])
+    expect(contact).toContain('contact_strip_v1')
+    expect(contact).toMatch(/SiteInput|SiteButton|eine Zeile/)
   })
 
   it('injects modules into depth when userPrompt matches', () => {

@@ -14,7 +14,9 @@ export type CreationCraftModuleId =
   | 'restyle_densify_v1'
   | 'wireframe_layout_v1'
   | 'pdp_detail_v1'
-  | 'social_proof_row_v1';
+  | 'social_proof_row_v1'
+  | 'pricing_compare_v1'
+  | 'contact_strip_v1';
 
 export type CreationCraftModule = {
   id: CreationCraftModuleId;
@@ -31,6 +33,12 @@ const PDP_RE =
 
 const SOCIAL_PROOF_RE =
   /\b(happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|referenzen[\s_-]?logos?|testimonial|kundenstimmen|4[\s_-]?up\s*(icons?|logos?)|icon[\s_-]?reihe)\b/i;
+
+const PRICING_RE =
+  /\b(pricing|preise|preis\s*tabelle|price\s*(table|grid|tier|card)|tarif|pl[aä]ne|plans?\s*(table|grid|tier)|vergleich\s*preise|pricing\s*comparison|kosten\s*pl[aä]ne)\b/i;
+
+const CONTACT_STRIP_RE =
+  /\b(contact\s*(us|strip|bar|form)|kontakt(\s*(formular|leiste|bar|strip))?|demo\s*anfragen|newsletter\s*signup|email\s*capture|input\s*\+\s*(button|cta)|anfrage[\s_-]?formular)\b/i;
 
 const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
   restyle_densify_v1: {
@@ -51,6 +59,16 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
   social_proof_row_v1: {
     id: 'social_proof_row_v1',
     label: 'Social Proof / Logo Row',
+    playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
+  pricing_compare_v1: {
+    id: 'pricing_compare_v1',
+    label: 'Pricing / Comparison',
+    playbookIds: ['creation_landing_v1'],
+  },
+  contact_strip_v1: {
+    id: 'contact_strip_v1',
+    label: 'Contact Strip / Form',
     playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
   },
 };
@@ -75,6 +93,18 @@ export function promptLooksLikeSocialProof(userPrompt: string | null | undefined
   return SOCIAL_PROOF_RE.test(text);
 }
 
+export function promptLooksLikePricing(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return PRICING_RE.test(text);
+}
+
+export function promptLooksLikeContactStrip(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return CONTACT_STRIP_RE.test(text);
+}
+
 function moduleAllowedOnPlaybook(
   mod: CreationCraftModule,
   playbookId: CreationCraftPlaybookId | null,
@@ -86,7 +116,7 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → wireframe → PDP → social proof.
+ * Restyle → wireframe → PDP → social → pricing → contact.
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -107,6 +137,8 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeWireframeBrief(userPrompt)) push('wireframe_layout_v1');
   if (promptLooksLikePdp(userPrompt)) push('pdp_detail_v1');
   if (promptLooksLikeSocialProof(userPrompt)) push('social_proof_row_v1');
+  if (promptLooksLikePricing(userPrompt)) push('pricing_compare_v1');
+  if (promptLooksLikeContactStrip(userPrompt)) push('contact_strip_v1');
 
   return out;
 }
@@ -182,6 +214,43 @@ Ziel: Trust-Band wie „Happy Customers“ — **4 Zellen in einer Reihe**, nich
 `.trim();
 }
 
+function bodyPricingCompare(): string {
+  return `
+## Craft-Modul: Pricing / Comparison (\`pricing_compare_v1\`)
+Ziel: Preis-/Plan-Vergleich als **dichte Grid-Section**, nicht Fließtext-Liste.
+
+### Pattern
+1. Catchy Section-Title (kurz) + optional Sub ≤~135 Zeichen.
+2. **\`SiteGrid\` 2–4 Spalten** (typisch 3 Tiers): je Zelle Name · Preis · 3–5 Bullet-Benefits · **Primary CTA** (\`SiteButton\`, z. B. „Starten“ / „Demo“ — kein „Get started“).
+3. Eine Zelle darf **emphasized** sein (Accent-Border/BG) — Recommended/Popular.
+4. Zahlen rechtsbündig wirkend (klare Preis-Hierarchie); Display nur für Section-Title, Tier-Namen eher Title/Body-Gewicht.
+5. Optional Footnote / „jährlich sparen“ Microcopy unter dem Grid.
+
+### Hart
+- Echte Plan-Namen + Preise (Literale), keine „Option A/B“.
+- Jede Tier-Zelle hat CTA. Char-Disziplin auf Labels.
+- Bei Restyle: Section per \`apply_ops\` nachziehen.
+`.trim();
+}
+
+function bodyContactStrip(): string {
+  return `
+## Craft-Modul: Contact Strip / Form (\`contact_strip_v1\`)
+Ziel: Abschluss-Band wie Wireframe „contact us“ — **eine Zeile** Input + Primary-Button, catchy Title darüber.
+
+### Pattern
+1. Catchy Section-Title (nicht „Contact“ allein — Nutzen/Outcome).
+2. **Row-Stack:** \`SiteInput\`/\`SiteText\`-Feld (Email/Name) + \`SiteButton\` („Contact us“ / „Demo anfragen“ / „Senden“).
+3. Optional 3 kleine Footer-Icons/Links rechts darunter (Social/Legal) — nicht die Hauptstory.
+4. Surfaces klar vom Page-BG absetzen; enge Gaps in der Bar.
+
+### Hart
+- Echte CTA-Labels. Kein Seed „Get started“.
+- Nicht als volle Multi-Field-Form aufblasen, außer Nutzer fordert Formular explizit.
+- Mit Restyle: bestehende Bar per \`apply_ops\` verdichten — kein Full-Reimport.
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -196,6 +265,10 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyPdpDetail();
       case 'social_proof_row_v1':
         return bodySocialProofRow();
+      case 'pricing_compare_v1':
+        return bodyPricingCompare();
+      case 'contact_strip_v1':
+        return bodyContactStrip();
       default:
         return '';
     }

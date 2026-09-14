@@ -124,6 +124,8 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 | `wireframe_layout_v1` | Wireframe / Skizze / Bioframe | Section-order + char limits (progressive; also summarized in landing playbook) |
 | `pdp_detail_v1` | PDP / Produktdetail / product page | Section map: gallery + buy CTA + specs grid (not generic landing) |
 | `social_proof_row_v1` | Happy Customers / logo row / trust bar | 4-up SiteGrid + optional More CTA |
+| `pricing_compare_v1` | Preise / pricing table / Tarife | 2–4 tier SiteGrid + CTA per cell |
+| `contact_strip_v1` | Contact us / Demo anfragen / Kontaktleiste | Title + input|button row |
 
 Resolve via `resolveCreationCraftModules(prompt, playbookId)` — max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Roadmap: `knowledge/creation-craft-playbook-scenarios-next.md`.
 

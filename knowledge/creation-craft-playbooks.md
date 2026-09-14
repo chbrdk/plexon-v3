@@ -40,4 +40,4 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 - **Display Fallgefühl** (tight leading): `creation-v3/knowledge/landing-display-fallgefuehl.md`
 - **Wireframe/Skizze = layout contract** (overrides overlay default): `knowledge/creation-wireframe-layout-contract.md` · ref `knowledge/refs/landing-wireframe-company-profile.jpg`
 - **Next scenarios / granularity:** `knowledge/creation-craft-playbook-scenarios-next.md`
-- **Craft modules (restyle / wireframe / PDP / social):** `lib/assistant/creation-craft-modules.ts` · restyle `knowledge/creation-craft-module-restyle.md` · PDP+social `knowledge/creation-craft-module-pdp-social.md`
+- **Craft modules (restyle / wireframe / PDP / social / pricing / contact):** `lib/assistant/creation-craft-modules.ts` · restyle `knowledge/creation-craft-module-restyle.md` · PDP+social `knowledge/creation-craft-module-pdp-social.md` · pricing+contact `knowledge/creation-craft-module-pricing-contact.md`
