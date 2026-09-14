@@ -58,6 +58,8 @@ Coolify: §4f staging live — `https://metron-v3.projects-a.plygrnd.tech` · ap
 - [x] Set `NEXT_PUBLIC_METRON_URL` on plexon-v3 Coolify for registry lifecycle
 - [x] Spec: `specs/domain/collection-projects.md` Phase 8 → **done (Wave 2)**
 
+## Smoke (after Wave 2)
+
 - Staging: `https://metron-v3.projects-a.plygrnd.tech` · `GET /api/health` → `productId: metron` · `federationMode: live`
 - Federation: `GET /api/federation/health` → `mode: live` · `configured: true`
 - Plexon registry: `NEXT_PUBLIC_METRON_URL` / `METRON_API_URL` set on Coolify plexon-v3
