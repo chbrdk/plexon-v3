@@ -1,6 +1,6 @@
 # METRON — Ecosystem fit evaluation (v0.1 concept)
 
-**Status:** Wave 0 landed — 2026-09-14  
+**Status:** Wave 5 KPI engine landed — 2026-09-14  
 **Input:** METRON Grobkonzept v0.1 (Excel-first BI capability for PLEXON Suite)  
 **Naming:** **Locked** — product id `metron`, display **METRON** (spoken “Metrion” ok; code/registry always `metron`).
 
