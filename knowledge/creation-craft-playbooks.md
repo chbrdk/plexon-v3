@@ -24,7 +24,7 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 | Nodes | Site* / HTML | Site* / HTML **only** | **Print*** under `PrintPage` |
 | Width | Fluid viewport | ~560–640px column | Paper / folio |
 | Tokens | Free Hex greenfield | Free Hex / digital | Brandion **print** channel |
-| Must | Hero mass + CTA · **default full-bleed `backgroundImage` overlay hero** (not absolute slides in HTML import) | CTA; no Print* | ≥1 PrintPage |
+| Must | Hero mass = Display ≥48 **AND** full-bleed media (`backgroundImage` or large SiteImage) + CTA · text-only heroes fail gate | CTA; no Print* | ≥1 PrintPage |
 | PDF | — | — | Mag-PDF via Creation editor (`composition-magazine-pdf`) |
 | P92 report atoms | — | — | Chip `tone` · `PrintCallout` · Table `columnAlign` · `PrintSteps` (no SiteStack/SVG diagrams for Mag) |
 
@@ -36,3 +36,4 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 - Quality loop baseline: `knowledge/creation-mcp-assistant.md`
 - Craft memory (Wave C): `lib/assistant/knowledge-pack/distill-creation-craft.ts` · sections `creation-craft-prefs-latest` + format recipes
 - **Landing default hero** (BG fill overlay, no absolute import): `creation-v3/knowledge/gallery-hero-slider-prompt.md` · playbook `creation_landing_v1` § Default Hero
+- **Landing quality gate** (display **and** media required): `knowledge/creation-landing-hero-gate.md`

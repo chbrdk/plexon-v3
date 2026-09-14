@@ -75,8 +75,8 @@ Phasen:
 4. Audit → craft_debug → preview.
 5. Pattern nur auf expliziten Wunsch: \`creation_site_kit_page_save\`.
 
-**Muss:** Hero-Masse (Display ≥48px **und** Full-Bleed Media via \`backgroundImage\` oder großes Media), echte CTA (SiteButton/SiteLink).
-**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing.
+**Muss:** Hero-Masse = Display ≥48px **UND** Full-Bleed Media (\`backgroundImage\` url am Hero-Stack oder großes SiteImage). Text-only Heroes = Fail.
+**Verboten:** PrintPage/PrintCover als Landing-Ersatz; Wireframe; Seed-Copy; Absolute-Overlay-Hero nur im HTML-Import; Print-Channel für Web-Landing; lange Text-Scrolls ohne Foto-Hero.
 ${SHARED_STYLING}
 ${SHARED_FINISH}
 `.trim();

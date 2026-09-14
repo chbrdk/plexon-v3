@@ -178,13 +178,14 @@ function outlineHasAnyPrint(treePreview: string): boolean {
   return PRINT_ANY_RE.test(treePreview);
 }
 
-/** Web landing: display ≥48 or hero media. */
+/** Web landing: require large display AND hero media (full-bleed fill or large SiteImage). */
 function missingLandingHeroMass(craftPreview: string): boolean {
   const stats = readSceneStats(craftPreview);
   if (!stats) {
     return (
       craftFlagsInclude(craftPreview, 'craft-small-type') ||
-      (/hasLargeDisplay"\s*:\s*false/i.test(craftPreview) &&
+      craftFlagsInclude(craftPreview, 'craft-no-hero-media') ||
+      (/hasLargeDisplay"\s*:\s*false/i.test(craftPreview) ||
         /hasHeroMedia"\s*:\s*false/i.test(craftPreview))
     );
   }
@@ -192,7 +193,8 @@ function missingLandingHeroMass(craftPreview: string): boolean {
   if (nodes > 0 && nodes < 6) return false;
   const hasDisplay = stats.hasLargeDisplay === true || (stats.maxFontSizePx ?? 0) >= 48;
   const hasMedia = stats.hasHeroMedia === true;
-  return !hasDisplay && !hasMedia;
+  // Text-only landings (big type, no photo/fill) are not done — agents must ship media mass.
+  return !hasDisplay || !hasMedia;
 }
 
 /** Newsletter: softer type floor (≥28) or media; still not flat 16px everywhere. */
@@ -300,7 +302,7 @@ export function evaluateCreationSceneQuality(
   if (job === 'landing') {
     if (hasCraft && missingLandingHeroMass(craftPreview) && !craftThin(craftPreview)) {
       findings.push(
-        'Hero-Masse fehlt — Display ≥48px und/oder großes Hero-Media setzen (Landing darf nicht flach wirken).',
+        'Hero-Masse fehlt — Display ≥48px UND Full-Bleed Media (Stack backgroundImage url/cover oder großes SiteImage). Text-only Hero ist nicht fertig.',
       );
     }
     pushWebCtaFindings(findings, {
@@ -351,7 +353,8 @@ export function evaluateCreationSceneQuality(
     ...unique.map((f, i) => `${i + 1}. ${f}`),
     'Reihenfolge: fehlende Tools parallel aufrufen (audit + craft_debug + preview), dann apply_ops nur für Fixes.',
     'Format beachten: Landing=Web-Hero · Newsletter=Einspalte ohne Print* · Print=PrintPage-Stack.',
-    'Nicht fertig melden bei Seed-Copy, Fixture-Orange/Noto, fehlendem CTA, oder dünnem Hero.',
+    'Nicht fertig melden bei Seed-Copy, Fixture-Orange/Noto, fehlendem CTA, oder dünnem Hero (ohne Foto-Fill).',
+    'Landing-Default: background-image Scrim+url am Hero-Stack, Overlay-Copy — kein absolute HTML-Import.',
   ].join('\n');
 
   return { pass: false, findings: unique, nudge, job };

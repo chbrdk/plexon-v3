@@ -162,6 +162,28 @@ describe('creation scene quality gate', () => {
     expect(verdict.findings.join(' ')).toMatch(/Hero-Masse/)
   })
 
+  it('fails landing when large display exists but hero media is missing', () => {
+    const verdict = evaluateCreationSceneQuality(
+      [
+        { name: 'creation_scene_import_html' },
+        { name: 'creation_scene_content_audit', preview: '{"ok":true,"findings":[]}' },
+        {
+          name: 'creation_scene_craft_debug',
+          preview:
+            '{"craftFlags":[],"sceneStats":{"nodeCount":24,"hasLargeDisplay":true,"hasHeroMedia":false,"maxFontSizePx":64}}',
+        },
+        { name: 'creation_scene_preview', preview: '{"status":"ready"}' },
+        {
+          name: 'creation_scene_tree_index',
+          preview: '- Hero [h1] SiteStack\n  - Title [t1] SiteText\n  - CTA [b1] SiteButton',
+        },
+      ],
+      { job: 'landing' },
+    )
+    expect(verdict.pass).toBe(false)
+    expect(verdict.findings.join(' ')).toMatch(/Hero-Masse|Full-Bleed Media|Text-only/)
+  })
+
   it('soft-skips preview tool errors but still blocks when preview was never called', () => {
     const withError = evaluateCreationSceneQuality(
       [
