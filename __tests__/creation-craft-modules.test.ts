@@ -3,12 +3,14 @@ import {
   buildCreationCraftModulesPromptBlock,
   listCreationCraftModules,
   promptLooksLikeBlogList,
+  promptLooksLikeBrandionBind,
   promptLooksLikeContactStrip,
   promptLooksLikeFaqAccordion,
   promptLooksLikeFeatureBento,
   promptLooksLikeNavChrome,
   promptLooksLikePdp,
   promptLooksLikePricing,
+  promptLooksLikePrintChapter,
   promptLooksLikeRestyle,
   promptLooksLikeSocialProof,
   promptLooksLikeSpirionRef,
@@ -41,6 +43,8 @@ describe('creation craft modules', () => {
         'blog_list_v1',
         'pricing_compare_v1',
         'contact_strip_v1',
+        'brandion_bind_pass_v1',
+        'print_chapter_rhythm_v1',
       ]),
     )
   })
@@ -94,7 +98,9 @@ describe('creation craft modules', () => {
   })
 
   it('caps modules and skips when playbook mismatches', () => {
-    expect(resolveCreationCraftModules('Restyle denser', 'creation_print_magazine_v1')).toEqual([])
+    expect(resolveCreationCraftModules('Restyle denser', 'creation_print_magazine_v1')).toEqual([
+      'print_chapter_rhythm_v1',
+    ])
     expect(
       resolveCreationCraftModules('Restyle this newsletter digest', 'creation_newsletter_v1'),
     ).toEqual(['restyle_densify_v1', 'spirion_section_ref_v1'])
@@ -225,6 +231,35 @@ describe('creation craft modules', () => {
     const blog = buildCreationCraftModulesPromptBlock(['blog_list_v1'])
     expect(blog).toContain('blog_list_v1')
     expect(blog).toMatch(/Teaser|Titel|Meta/i)
+  })
+
+  it('resolves brandion bind and print chapter modules', () => {
+    expect(promptLooksLikeBrandionBind('Brandion Tokens binden active pack')).toBe(true)
+    expect(promptLooksLikePrintChapter('Magazin Cover Chapter Folio Seitenfolge')).toBe(true)
+    expect(
+      resolveCreationCraftModules(
+        'Bind Brandion active pack tokens via set_token_binding',
+        'creation_landing_v1',
+      ),
+    ).toEqual(['spirion_section_ref_v1', 'brandion_bind_pass_v1'])
+    expect(
+      resolveCreationCraftModules('Print magazine layout', 'creation_print_magazine_v1'),
+    ).toEqual(['print_chapter_rhythm_v1'])
+    expect(
+      resolveCreationCraftModules(
+        'Print magazine Brandion print pack tokens binden',
+        'creation_print_magazine_v1',
+      ),
+    ).toEqual(['brandion_bind_pass_v1', 'print_chapter_rhythm_v1'])
+  })
+
+  it('builds brandion bind and print chapter prompt bodies', () => {
+    const brand = buildCreationCraftModulesPromptBlock(['brandion_bind_pass_v1'])
+    expect(brand).toContain('brandion_bind_pass_v1')
+    expect(brand).toMatch(/creation_brand_tokens_get|set_token_binding/)
+    const chapter = buildCreationCraftModulesPromptBlock(['print_chapter_rhythm_v1'])
+    expect(chapter).toContain('print_chapter_rhythm_v1')
+    expect(chapter).toMatch(/Cover|Chapter|Folio|PrintPage/)
   })
 
   it('injects modules into depth when userPrompt matches', () => {

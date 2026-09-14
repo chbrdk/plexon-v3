@@ -24,7 +24,9 @@ export type CreationCraftModuleId =
   | 'feature_bento_v1'
   | 'blog_list_v1'
   | 'pricing_compare_v1'
-  | 'contact_strip_v1';
+  | 'contact_strip_v1'
+  | 'brandion_bind_pass_v1'
+  | 'print_chapter_rhythm_v1';
 
 export type CreationCraftModule = {
   id: CreationCraftModuleId;
@@ -69,6 +71,12 @@ const FEATURE_BENTO_RE =
 /** Explicit Spirion / design-ref phrasing (module also auto-attaches on landing/newsletter). */
 const SPIRION_REF_RE =
   /\b(spirion|capture[_]?prompt[_]?pack|captures?[_]?list|look[_]?contract|page[_]?rhythm|design[\s_-]?referenz|best[\s_-]?practice|wie\s+spirion|visual\s+ref|craft\s+ref)\b/i;
+
+const BRANDION_BIND_RE =
+  /\b(brandion|active[\s_-]?pack|token[\s_-]?bind(ing|en)?|tokens?\s*binden|set[_]?token[_]?binding|brand[\s_-]?tokens?|pack[\s_-]?bind|guideline[\s_-]?pack|brand[\s_-]?pack)\b/i;
+
+const PRINT_CHAPTER_RE =
+  /\b(print[\s_-]?chapter|kapitel|folio|cover[\s_-]?chapter|seitenfolge|multi[\s_-]?page\s*(magazin|print|magazine)|chapter[\s_-]?rhythm|druck[\s_-]?kapitel|magazin[\s_-]?kapitel)\b/i;
 
 const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
   spirion_section_ref_v1: {
@@ -135,6 +143,21 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     id: 'contact_strip_v1',
     label: 'Contact Strip / Form',
     playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
+  brandion_bind_pass_v1: {
+    id: 'brandion_bind_pass_v1',
+    label: 'Brandion Token Bind Pass',
+    playbookIds: [
+      'creation_landing_v1',
+      'creation_newsletter_v1',
+      'creation_print_magazine_v1',
+      'creation_print_report_v1',
+    ],
+  },
+  print_chapter_rhythm_v1: {
+    id: 'print_chapter_rhythm_v1',
+    label: 'Print Chapter Rhythm',
+    playbookIds: ['creation_print_magazine_v1', 'creation_print_report_v1'],
   },
 };
 
@@ -212,6 +235,18 @@ export function promptLooksLikeSpirionRef(userPrompt: string | null | undefined)
   return SPIRION_REF_RE.test(text);
 }
 
+export function promptLooksLikeBrandionBind(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return BRANDION_BIND_RE.test(text);
+}
+
+export function promptLooksLikePrintChapter(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return PRINT_CHAPTER_RE.test(text);
+}
+
 /** Landing/newsletter always get Spirion meta (best-practice refs before craft). */
 export function shouldAttachSpirionSectionRef(
   playbookId: CreationCraftPlaybookId | null | undefined,
@@ -221,6 +256,18 @@ export function shouldAttachSpirionSectionRef(
     return false;
   }
   // Always on for these formats; explicit phrasing is documentation/eval only.
+  void userPrompt;
+  return true;
+}
+
+/** Print magazine/report always get Cover→Chapter→Folio rhythm. */
+export function shouldAttachPrintChapterRhythm(
+  playbookId: CreationCraftPlaybookId | null | undefined,
+  userPrompt?: string | null,
+): boolean {
+  if (playbookId !== 'creation_print_magazine_v1' && playbookId !== 'creation_print_report_v1') {
+    return false;
+  }
   void userPrompt;
   return true;
 }
@@ -236,7 +283,8 @@ function moduleAllowedOnPlaybook(
 
 /**
  * Resolve modules for this turn. Order = priority. Cap at MAX_MODULES_PER_TURN.
- * Restyle → Spirion → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog → pricing → contact.
+ * Restyle → Spirion → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog →
+ * pricing → contact → brandion bind → print chapter (print always).
  */
 export function resolveCreationCraftModules(
   userPrompt: string | null | undefined,
@@ -266,6 +314,8 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeBlogList(userPrompt)) push('blog_list_v1');
   if (promptLooksLikePricing(userPrompt)) push('pricing_compare_v1');
   if (promptLooksLikeContactStrip(userPrompt)) push('contact_strip_v1');
+  if (promptLooksLikeBrandionBind(userPrompt)) push('brandion_bind_pass_v1');
+  if (shouldAttachPrintChapterRhythm(pb, userPrompt)) push('print_chapter_rhythm_v1');
 
   return out;
 }
@@ -508,6 +558,46 @@ Ziel: Editorial-Liste — Titel + Meta + Teaser, nicht Feature-Bento.
 `.trim();
 }
 
+function bodyBrandionBindPass(): string {
+  return `
+## Craft-Modul: Brandion Token Bind Pass (\`brandion_bind_pass_v1\`)
+Ziel: **Nach** Hex/Literal-Craft passende Scene-Props an Collection **active pack** binden — kein Greenfield-Token-Erfinden.
+
+### Wann
+Nur wenn Nutzer Bind/Pack verlangt **oder** Collection klar gebunden ist und dieses Modul aktiv ist. Freie Agency-Landings ohne Pack: Modul überspringen / Pack fehlt → Literale behalten.
+
+### Procedure
+1. \`creation_brand_tokens_get\` (Collection) — digital für Web/Newsletter, **print**-Channel für Magazin/Report.
+2. Map vorhandene Hex/Gap/Radius-Literale auf Pack-Pfade (Farbe/Typo/Space) — nur Treffer binden.
+3. \`creation_scene_apply_ops\` mit \`set_token_binding\` (Key + Token-Pfad). Bei Konflikt zuerst \`clear_token_binding\` dann neu binden.
+4. **Kein** neues Brandion-Token anlegen; kein Push zurück nach Brandion.
+5. Abschluss: kurz listen welche Keys gebunden wurden; unbound Literale bleiben ok.
+
+### Hart
+- Nicht die ganze Page neu importieren nur für Bind.
+- Nicht blockieren wenn Pack leer — dann sagen „kein Pack / Literale bleiben“.
+`.trim();
+}
+
+function bodyPrintChapterRhythm(): string {
+  return `
+## Craft-Modul: Print Chapter Rhythm (\`print_chapter_rhythm_v1\`)
+Ziel: Magazin-/Report-**Seitenfolge** Cover → Chapter → Folio — kein Web-Hero-Flex.
+
+### Rhythm (top→bottom / page→page)
+1. **Cover \`PrintPage\`:** \`PrintCover\` dominant (Titel + optional Lede/KPI) — keine SiteNav/SiteButton.
+2. **Chapter \`PrintPage\`(s):** Eyebrow → Title → Lede → Body-Blöcke (\`PrintTwoColumn\` / Callout / PullQuote / Steps / Table je nach Brief).
+3. **Folio / Abschluss:** kurze Closing-Page oder Chapter-Ende mit ChipRow / Callout — Seitenzahl-Feeling, nicht Landing-CTA.
+4. Mehrere Pages ok; jede unter bewusstem \`PrintPage\`.
+5. Tokens: print-Channel wenn Pack da; sonst Literale — **kein** Conference-Pink Hex erfinden.
+
+### Hart
+- Gate: mind. eine \`PrintPage\` nach Writes.
+- Keine Site\\*-Landing als Print verkaufen; keine SVG/SiteStack-Diagramme als Mag-Ersatz.
+- Write nur via \`creation_scene_apply_ops\` (natives \`ops\`-Array).
+`.trim();
+}
+
 export function buildCreationCraftModulesPromptBlock(
   moduleIds: CreationCraftModuleId[] | null | undefined,
 ): string {
@@ -540,6 +630,10 @@ export function buildCreationCraftModulesPromptBlock(
         return bodyPricingCompare();
       case 'contact_strip_v1':
         return bodyContactStrip();
+      case 'brandion_bind_pass_v1':
+        return bodyBrandionBindPass();
+      case 'print_chapter_rhythm_v1':
+        return bodyPrintChapterRhythm();
       default:
         return '';
     }

@@ -33,10 +33,14 @@ Industry pattern 2026: progressive disclosure — load only the module that matc
 | `blog_list_v1` | same |
 | `pricing_compare_v1` | same |
 | `contact_strip_v1` | same |
+| `brandion_bind_pass_v1` | same (landing/newsletter/print) |
+| `print_chapter_rhythm_v1` | same (print magazine/report always) |
 
 Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({ userPrompt, playbookId })`.
 
-## Remaining modules (not new quality jobs) — priority
+## Remaining modules (not new quality jobs)
+
+Catalog complete for the Spirion/section + Brandion/print wave. Further granularity only when a new gate finding or format appears.
 
 | Module | Trigger | Why |
 |--------|---------|-----|
@@ -53,14 +57,12 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 | **Blog / news list** | Blog, News, Artikel | **Shipped** — `blog_list_v1` |
 | **Pricing / comparison** | Preise, Pricing table | **Shipped** — `pricing_compare_v1` |
 | **Form / contact strip** | Contact us, Demo anfragen | **Shipped** — `contact_strip_v1` |
-| **Brandion-bound restyle** | Collection has active pack | Literals → token bind optional second pass |
-| **Print chapter rhythm** | Magazin multi-page | Cover → chapter → folio (module under print playbook) |
+| **Brandion bind pass** | active pack / token bind | **Shipped** — `brandion_bind_pass_v1` |
+| **Print chapter rhythm** | Always on print playbooks | **Shipped** — `print_chapter_rhythm_v1` |
 
-## Spirion-backed section modules (next)
+## Spirion-backed section modules
 
-See **`knowledge/creation-craft-spirion-section-modules.md`**.
-
-Priority: Brandion bind / print chapter.
+See **`knowledge/creation-craft-spirion-section-modules.md`** — catalog wave complete.
 
 ## Maybe later (full playbook only if gate differs)
 

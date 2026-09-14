@@ -13,8 +13,8 @@ Meta module for **landing** and **newsletter**: before craft, pull Spirion captu
 ## Attach rules
 
 - Always on `creation_landing_v1` and `creation_newsletter_v1` (not only when the user says “Spirion”).
-- Compose order: restyle → **spirion** → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog → pricing → contact (max 3).
-- Print playbooks: never attaches.
+- Compose order: restyle → **spirion** → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog → pricing → contact → brandion → print chapter (max 3).
+- Print playbooks: never attach Spirion; always attach `print_chapter_rhythm_v1`.
 
 ## Agent procedure
 

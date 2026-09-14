@@ -133,8 +133,10 @@ Composable procedures under a format playbook (`lib/assistant/creation-craft-mod
 | `blog_list_v1` | Blog / News / Artikelübersicht | Title + meta + teaser list |
 | `pricing_compare_v1` | Preise / pricing table / Tarife | 2–4 tier SiteGrid + CTA per cell |
 | `contact_strip_v1` | Contact us / Demo anfragen / Kontaktleiste | Title + input|button row |
+| `brandion_bind_pass_v1` | Brandion / active pack / token bind | After Hex: `creation_brand_tokens_get` → `set_token_binding` |
+| `print_chapter_rhythm_v1` | **Always** on print magazine/report | Cover → Chapter → Folio under PrintPage |
 
-Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order restyle → spirion → wireframe → nav → stats → PDP → social → testimonial → faq → bento → blog → …; max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Knowledge: `creation-craft-module-spirion-section-ref.md` · `creation-craft-module-nav-stats.md` · `creation-craft-module-faq-bento.md` · `creation-craft-module-quote-blog.md` · roadmap `creation-craft-playbook-scenarios-next.md`.
+Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order … contact → brandion → print chapter; max 3 per turn. Injected in `buildCreationSceneDepthPromptBlock`. Knowledge: `creation-craft-module-spirion-section-ref.md` · `creation-craft-module-nav-stats.md` · `creation-craft-module-faq-bento.md` · `creation-craft-module-quote-blog.md` · `creation-craft-module-brandion-print.md` · roadmap `creation-craft-playbook-scenarios-next.md`.
 
 ### Acceptance B
 
@@ -146,7 +148,7 @@ Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order restyle 
 6. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
 7. Knowledge documents format table + paths (no hardcoded FQDNs in code).
 8. Unit: landing/newsletter always resolve `spirion_section_ref_v1`; gate fails landing/newsletter writes without `spirion_captures_list` or `spirion_capture_prompt_pack`.
-
+9. Unit: print magazine/report always resolve `print_chapter_rhythm_v1`; brandion bind resolves on explicit pack/bind phrasing.
 
 ## Wave C — Collection craft memory (scoped)
 

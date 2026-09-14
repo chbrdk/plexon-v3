@@ -36,7 +36,7 @@ const PRINT_MAGAZINE_RE =
   /\b(print\s*page|printpage|printcover|print\s*cover|print\s*chapter|magazin(?!\s*pdf)|magazine(?!\s*template)|brosch[uü]re|flyer|din\s*a4|a4\s*print|print\s*channel|druck(daten|layout| magazin)?|print\s*layout)\b/i;
 
 const LANDING_RE =
-  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*detail|product\s*page|produktdetail|produktseite|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief|restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|dichter|polish|polier\w*|bestehend\w*|existing\s+page|happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|pricing|preise|preis\s*tabelle|price\s*(table|grid|tier)|tarif|pl[aä]ne|contact\s*(us|strip|bar|form)|kontakt|demo\s*anfragen|spirion|capture[_]?prompt|look[_]?contract|best[\s_-]?practice|nav(igation)?|navbar|top[\s_-]?nav|site[\s_-]?header|men[uü](leiste|bar)?|stats?|metrics?|kpi[s]?|zahlenband|kennzahlen|faq|häufige\s*fragen|accordion|bento|feature[\s_-]?(grid|cards?|bento)|vorteile|testimonial|kundenstimme(n)?|zitat|quote|blog|news(\s*list)?|artikel)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
+  /\b(landing|landingpage|startseite|homepage|home\s*page|hero|pdp|product\s*detail|product\s*page|produktdetail|produktseite|\blp\b|wireframe|skizze|sketch|bioframe|layout[\s_-]?brief|restyle|re-?style|densif\w*|verdicht\w*|nachzieh\w*|dichter|polish|polier\w*|bestehend\w*|existing\s+page|happy\s*customers?|social[\s_-]?proof|logo[\s_-]?row|trust\s*(bar|row|strip)|kundenlogos?|pricing|preise|preis\s*tabelle|price\s*(table|grid|tier)|tarif|pl[aä]ne|contact\s*(us|strip|bar|form)|kontakt|demo\s*anfragen|spirion|capture[_]?prompt|look[_]?contract|best[\s_-]?practice|nav(igation)?|navbar|top[\s_-]?nav|site[\s_-]?header|men[uü](leiste|bar)?|stats?|metrics?|kpi[s]?|zahlenband|kennzahlen|faq|häufige\s*fragen|accordion|bento|feature[\s_-]?(grid|cards?|bento)|vorteile|testimonial|kundenstimme(n)?|zitat|quote|blog|news(\s*list)?|artikel|brandion|active[\s_-]?pack|token[\s_-]?bind|brand[\s_-]?tokens?)\b|\b(bau|build|erstelle|create|gestalte|umsetz)\w*.*\b(seite|page|webseite|website|wireframe|skizze)\b/i;
 
 /** User attached / described a layout sketch (not the thin gray anti-pattern). */
 export function promptLooksLikeWireframeBrief(userPrompt: string | null | undefined): boolean {
@@ -149,11 +149,12 @@ Ziel: **Druck-/Magazin-Seiten** mit CREATION Print-Primitives — PDF-fähig (\`
 Phasen:
 0. Brief: Seitenzahl (1–3), Cover ja/nein, Kapitel-Titel, KPI-Idee.
 1. \`creation_editor_palette\` (Gruppe Print) + optional \`creation_brand_tokens_get\`.
-2. Tree: mind. eine \`PrintPage\`; Cover und/oder Chapter mit echter Copy (keine Seed).
+2. Tree nach Modul \`print_chapter_rhythm_v1\`: Cover → Chapter → Folio; mind. eine \`PrintPage\`; echte Copy (keine Seed).
 3. Dichte: KPI-Ledes / Quote / TwoColumn / ChipRow — nicht leere Paper-Fläche.
 4. Audit → craft_debug → preview.
 5. Nutzer kann Mag-PDF im Editor exportieren; Agent muss Tree Mag-ready hinterlassen.
 6. Pattern optional (\`creation_site_kit_page_save\`) nur auf Wunsch.
+7. Optional Modul \`brandion_bind_pass_v1\`: Literale → print-Channel Pack binden.
 
 **Muss:** \`PrintPage\` im Tree nach Writes; echte Cover/Chapter-Copy; kein Seed.
 **Verboten:** reine Site\\*-Landing als „Print“ verkaufen; Newsletter-Spalte als Magazin.

@@ -6,18 +6,18 @@
 
 ## Idea
 
-Page modules (PDP, pricing, contact) define **section maps**. Spirion modules supply **visual contracts** from real captures before writing.
+Page modules define **section maps**. Spirion modules supply **visual contracts** from real captures before writing. Brandion bind + print chapter close the format loop.
 
-## Already shipped (page-level + Spirion meta + section recipes)
+## Shipped catalog
 
-Restyle · Wireframe · Nav · Stats · PDP · Social · **Testimonial** · FAQ · Bento · **Blog** · Pricing · Contact · **`spirion_section_ref_v1`**
+Restyle · Wireframe · Nav · Stats · PDP · Social · Testimonial · FAQ · Bento · Blog · Pricing · Contact · **`spirion_section_ref_v1`** · **`brandion_bind_pass_v1`** · **`print_chapter_rhythm_v1`**
 
-## Next modules
+Module notes:
 
-| Module | Trigger | Spirion cue | Craft outcome |
-|--------|---------|-------------|----------------|
-| `brandion_bind_pass_v1` | Tokens binden, Brand pack | — (Brandion) | After Hex craft: optional `set_token_binding` |
-| `print_chapter_rhythm_v1` | Magazin Chapter | — (print) | Cover → chapter → folio under print playbook |
+- `knowledge/creation-craft-module-nav-stats.md`
+- `knowledge/creation-craft-module-faq-bento.md`
+- `knowledge/creation-craft-module-quote-blog.md`
+- `knowledge/creation-craft-module-brandion-print.md`
 
 ## How Spirion plugs in (every Spirion-backed module)
 
@@ -31,15 +31,17 @@ Restyle · Wireframe · Nav · Stats · PDP · Social · **Testimonial** · FAQ 
 
 - **Page module** = section map.  
 - **Spirion module** = how a section looks.  
-- Compose: e.g. `pricing_compare_v1` + `spirion_section_ref_v1` (max 3).
+- **Brandion bind** = optional second pass after literals.  
+- **Print chapter** = always-on rhythm under print playbooks.  
+- Compose max 3 per turn.
 
 ## Do not
 
 - Clone competitor brand 1:1 from Spirion.  
 - Skip pack and invent equal padding stacks.  
-- Add a full playbook per section type.
+- Add a full playbook per section type.  
+- Invent Brandion tokens or push tokens to Brandion.
 
-## Suggested build order (remaining)
+## Status
 
-1. `brandion_bind_pass_v1`  
-2. `print_chapter_rhythm_v1`
+Catalog wave complete. Add new modules only when a gate finding or format gap appears.
