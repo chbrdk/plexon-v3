@@ -68,6 +68,14 @@ import {
   parseVideonAnalysisGetPayload,
   parseVideonMediaGetPayload,
 } from '@/lib/assistant/ui-blocks/build-videon-status-ui';
+import {
+  buildMetronDashboardListBlocks,
+  buildMetronDashboardSummarizeBlocks,
+  isMetronDashboardSummarizeToolName,
+  isMetronDashboardsListToolName,
+  parseMetronDashboardSummarizePayload,
+  parseMetronDashboardsListPayload,
+} from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -162,6 +170,9 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /signal_ingest$/,
   /waves_detect$/,
   /project_create$/,
+  /metron_dashboard_create$/,
+  /metron_kpi_starter_pack_install$/,
+  /metron_suite_connectors_sync$/,
 ];
 
 export function isDestructiveToolName(toolName: string): boolean {
@@ -750,6 +761,45 @@ export async function runOrchestratorComplete(
         );
         if (payload) {
           const autoBlocks = buildVideonAnalysisGetBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronDashboardsListToolName(mcpName) || isMetronDashboardsListToolName(block.name)) {
+        const items = parseMetronDashboardsListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (items?.length) {
+          const autoBlocks = buildMetronDashboardListBlocks(items, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMetronDashboardSummarizeToolName(mcpName) ||
+        isMetronDashboardSummarizeToolName(block.name)
+      ) {
+        const summary = parseMetronDashboardSummarizePayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (summary) {
+          const autoBlocks = buildMetronDashboardSummarizeBlocks(summary, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });

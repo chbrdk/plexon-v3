@@ -1,12 +1,12 @@
 # Assistant ↔ METRON MCP
 
-**Status:** Accepted — 2026-09-14 (Phase 1 read)  
-**Depends:** `metron-v3/specs/domain/mcp-server.md` · `specs/domain/metron-capability.md`  
+**Status:** Accepted — 2026-09-14 (Phase 1 read + Phase 2 writes + Catalog)  
+**Depends:** `metron-v3/specs/domain/mcp-server.md` · `specs/domain/metron-capability.md` · `capability-catalog.md` METRON set  
 **Knowledge:** `knowledge/metron-mcp-assistant.md` · `knowledge/paths.md` · `metron-v3/knowledge/mcp-server.md`
 
 ## Purpose
 
-Wire METRON KPI/dashboard MCP tools into the Plexon free-chat orchestrator so operators can list projects, datasets, KPIs, and dashboards — and summarize boards — without inventing analytics facts.
+Wire METRON KPI/dashboard MCP tools into the Plexon free-chat orchestrator so operators can list projects, datasets, KPIs, and dashboards — summarize boards — and (with confirm) create dashboards / install starter packs / suite-sync — without inventing analytics facts.
 
 ## Env
 
@@ -14,7 +14,7 @@ Wire METRON KPI/dashboard MCP tools into the Plexon free-chat orchestrator so op
 |-----|--------|--------|
 | `METRON_MCP_URL` | plexon-v3 Coolify | Public FQDN of `metron-mcp` (prefer over internal hostname across projects) |
 
-Helper: `getMetronMcpUrl()` in `lib/constants.ts`.
+Helper: `getMetronMcpUrl()` in `lib/constants.ts`. Staging: `https://hh0pad7nwoupxnydpd7shb9r.projects-a.plygrnd.tech`.
 
 ## Auth
 
@@ -40,10 +40,27 @@ Connectivity block: `buildMetronIntegrationContextBlock`.
 | `metron_projects` | `^metron_projects_` |
 | `metron_datasets` | `^metron_datasets_` |
 | `metron_kpis` | `^metron_kpis_` |
-| `metron_dashboards` | `^metron_dashboard` |
+| `metron_dashboards` | `^metron_dashboard_(get|summarize)$` / list |
+| `metron_write` | `dashboard_create` / `kpi_starter_pack_install` / `suite_connectors_sync` |
 
-Planner intent `metron_analytics` when prompt matches KPI/dashboard/metron patterns and `hasMetronMcp`.
+Planner intent `metron_analytics` when prompt matches KPI/dashboard/metron patterns and `hasMetronMcp`. Write verbs set `allowWriteTools` + confirm patterns.
+
+## Capability Catalog mapping
+
+| Cap id | MCP (Anthropic) |
+|--------|-----------------|
+| `metron.dashboards.list` | `metron_dashboards_list` |
+| `metron.dashboard.summarize` | `metron_dashboard_summarize` |
+| `metron.dashboard.create` | `metron_dashboard_create` |
+| … | see `capability-catalog.md` METRON set |
 
 ## Orchestrator
 
 MCP fetch branch beside Videon using `fetchCheckionMcpTools` against `getMetronMcpUrl()`.
+
+### Auto UI
+
+| Tool | Block |
+|------|-------|
+| `metron_dashboards_list` | `link_list` — dashboard titles + absolute METRON deep links |
+| `metron_dashboard_summarize` | `link_list` — summary teaser + deep link |

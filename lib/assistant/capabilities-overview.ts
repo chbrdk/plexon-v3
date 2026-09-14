@@ -107,6 +107,17 @@ export const ASSISTANT_CAPABILITIES_SECTIONS: CapabilitySection[] = [
       'Status & Zusammenfassungen laufender oder abgeschlossener Analysen',
     ],
   },
+  {
+    id: 'metron',
+    title: 'METRON – KPIs & Dashboards',
+    rows: [
+      { name: 'Dashboards listen', description: 'Collection-Dashboards auflisten und zusammenfassen' },
+      { name: 'KPIs & Datasets', description: 'KPI-Definitionen und Datasets live aus METRON lesen' },
+      { name: 'Dashboard erstellen', description: 'Neues Dashboard anlegen (mit Bestätigung)' },
+      { name: 'Starter-Pack', description: 'HDI-Recruiting-KPI-Pack installieren (mit Bestätigung)' },
+      { name: 'Suite-Sync', description: 'CHECKION/AUDION/Knowledge-Pack Snapshots ziehen' },
+    ],
+  },
 ];
 
 export const ASSISTANT_CAPABILITIES_EXAMPLES = [

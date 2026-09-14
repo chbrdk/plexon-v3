@@ -28,6 +28,8 @@ METRON is the analysis/dashboard **capability** of a Collection: ingest (Excel/C
 
 ## Related
 - `collection-projects.md` Phase 8
+- `capability-catalog.md` — METRON set (Wave 9 agent-only)
+- `assistant-metron-mcp.md`
 - `knowledge/metron-v3-onboarding.md`
 - `knowledge/metron-ecosystem-fit.md`
 - Product SoT: `metron-v3/specs/domain/product-overview.md`

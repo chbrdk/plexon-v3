@@ -45,6 +45,7 @@ export type ToolFamily =
   | 'metron_datasets'
   | 'metron_kpis'
   | 'metron_dashboards'
+  | 'metron_write'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -167,7 +168,12 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   metron_projects: [/^metron_projects_/],
   metron_datasets: [/^metron_datasets_/],
   metron_kpis: [/^metron_kpis_/],
-  metron_dashboards: [/^metron_dashboard/],
+  metron_dashboards: [/^metron_dashboard(?!_create)/],
+  metron_write: [
+    /^metron_dashboard_create$/,
+    /^metron_kpi_starter_pack_install$/,
+    /^metron_suite_connectors_sync$/,
+  ],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -248,6 +254,7 @@ export const PLATFORM_ASSISTANT_FAMILIES: ToolFamily[] = [
   'metron_datasets',
   'metron_kpis',
   'metron_dashboards',
+  'metron_write',
 ];
 
 /** Safe read-only families for generic project Q&A. */
@@ -319,6 +326,9 @@ export const METRON_ANALYTICS_FAMILIES: ToolFamily[] = [
   'metron_kpis',
   'metron_dashboards',
 ];
+
+/** METRON Phase 2 writes — gated by allowWriteTools + confirm. */
+export const METRON_WRITE_FAMILIES: ToolFamily[] = ['metron_write'];
 
 /** Write/job families — still gated by allowWriteTools on the plan. */
 export const VIDEON_WRITE_FAMILIES: ToolFamily[] = [

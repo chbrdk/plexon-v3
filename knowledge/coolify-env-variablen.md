@@ -139,6 +139,7 @@ PLEXON aktiviert BRANDION-MCP, wenn `BRANDION_MCP_URL` gesetzt ist **und** Gate 
 | Variable | Pflicht | Beschreibung |
 |----------|---------|--------------|
 | `CREATION_MCP_URL` | Nein | MCP für Assistant (library/compositions/projects). Port **3102**. Spec: `specs/domain/assistant-creation-mcp.md`. |
+| `METRON_MCP_URL` | Nein | MCP für Assistant (KPIs/Dashboards). Port **3104**. Staging `https://hh0pad7nwoupxnydpd7shb9r.projects-a.plygrnd.tech`. Spec: `specs/domain/assistant-metron-mcp.md`. |
 | `ASSISTANT_CREATION_CRAFT_MEMORY` | Nein | Default **an**. `0`/`off` deaktiviert Collection Craft-Memory Publish+Hydrate (AGI-lite Wave C). |
 | `ASSISTANT_CREATION_MODEL_TIER` | Nein | Wave D: `low` \| `mid` \| `high` Override; leer/`auto` = Heuristik (Q&A low, Playbook-Writes high). |
 | `ASSISTANT_CREATION_EVAL_MODE` | Nein | Wave D: `off` (Default) \| `fixture` \| `live`. CI nutzt Fixture-Harness ohne Env. |

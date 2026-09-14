@@ -210,6 +210,25 @@ Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP r
 
 Companions: `videon-integration.md` · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `videon-v3/specs/domain/media-reframe.md` · `videon-v3/specs/domain/cut-multi-source-compose.md` · `knowledge/collection-flow-videon.md`.
 
+### METRON set (Wave 9 — KPIs / dashboards)
+
+Owner `metron`. Agent-only (no Collection Flow nodes in Wave 9). Free-chat uses MCP (`METRON_MCP_URL`); Catalog is SSOT for overview/promote.
+
+| Capability id | Owner | Flow | Agent / MCP | Side effect | Catalog root | Notes |
+|---------------|-------|------|-------------|-------------|--------------|-------|
+| `metron.health` | metron | — | `metron_health` | read | — | Liveness |
+| `metron.projects.list` | metron | — | `metron_projects_list` | read | `metron.projects` | |
+| `metron.datasets.list` | metron | — | `metron_datasets_list` | read | `metron.datasets` | optional `platformProjectId` |
+| `metron.kpis.list` | metron | — | `metron_kpis_list` | read | `metron.kpis` | |
+| `metron.dashboards.list` | metron | — | `metron_dashboards_list` | read | `metron.dashboards` | Auto `link_list` UI |
+| `metron.dashboard.get` | metron | — | `metron_dashboard_get` | read | `metron.dashboards` | |
+| `metron.dashboard.summarize` | metron | — | `metron_dashboard_summarize` | read | `metron.dashboards` | Auto `link_list` UI |
+| `metron.dashboard.create` | metron | — | `metron_dashboard_create` | write | `metron.dashboards` | `human_gate` |
+| `metron.kpi.starter_pack_install` | metron | — | `metron_kpi_starter_pack_install` | write | `metron.kpis` | `human_gate` |
+| `metron.suite_connectors.sync` | metron | — | `metron_suite_connectors_sync` | job | `metron.suite` | `human_gate` |
+
+Companions: `metron-capability.md` · `assistant-metron-mcp.md` · `metron-v3/specs/domain/mcp-server.md` · `knowledge/metron-mcp-assistant.md`.
+
 **Planned Agent-only (not Flow):** `audion.persona_chat` — maps to Audion chat-api / MCP `audion_chat_*`; SoT UI remains Audion `/chat`. See Wave C5.
 
 Explicitly **out of pilot** as Agent tools: `compare`, `set`, `human_confirm`, Family-A micro-kinds, `research_brief`, Echon waves.

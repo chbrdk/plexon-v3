@@ -67,6 +67,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | Brandion Farben/Fonts | MCP \`brandion_tokens_list\` → Auto \`color_swatch_grid\` / \`font_specimen_list\` |
 | VIDEON Szenen-Suche | MCP \`videon_media_search\` → Auto \`video_hit_strip\` (actions / filmstrip / preview) |
 | VIDEON Status | MCP \`videon_media_get\` / \`videon_analysis_get\` → Auto \`video_status_card\` |
+| METRON Dashboards | MCP \`metron_dashboards_list\` / \`metron_dashboard_summarize\` → Auto \`link_list\` |
 | Persona × Markenfarben | \`persona_card\` + \`finding_list\` (pro Fit \`hex\`/\`swatches\` + \`severity\`) — **kein** \`data_table\` |`;
 }
 

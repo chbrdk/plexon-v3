@@ -103,6 +103,14 @@ export {
   ENV_CAPABILITY_CATALOG_RUNTIME,
   isCapabilityCatalogRuntimeEnabled,
 } from '@/lib/capabilities/runtime-flag';
+export {
+  executeMetronRead,
+  executeMetronReadCapability,
+} from '@/lib/capabilities/executors/metron-read';
+export {
+  executeMetronWrite,
+  executeMetronWriteCapability,
+} from '@/lib/capabilities/executors/metron-write';
 export type {
   CapabilityExecuteContext,
   CapabilityExecutor,

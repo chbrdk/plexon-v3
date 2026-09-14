@@ -1,9 +1,10 @@
 # METRON v3 — Plexon onboarding
 
-**Status:** Wave 8 Dashboard Builder Excellence + staging Coolify · **Date:** 2026-09-14  
+**Status:** Wave 9 MCP + Capability Catalog · **Date:** 2026-09-14  
 **Product id:** `metron` · **Repo:** `metron-v3` · **Display:** METRON  
 **GitHub:** `https://github.com/chbrdk/metron-v3`  
-**Staging:** `https://metron-v3.projects-a.plygrnd.tech` · Coolify `8qkrk850d37er6subakpnx0r`
+**Staging:** `https://metron-v3.projects-a.plygrnd.tech` · Coolify `8qkrk850d37er6subakpnx0r`  
+**MCP:** `https://hh0pad7nwoupxnydpd7shb9r.projects-a.plygrnd.tech` · Coolify `hh0pad7nwoupxnydpd7shb9r` · Plexon `METRON_MCP_URL`
 
 > Companion fit analysis: `knowledge/metron-ecosystem-fit.md`  
 > Product specs SoT: `metron-v3/specs/domain/*`
@@ -35,7 +36,7 @@
 | 6 | Constrained dashboard viewer (DS Chart/Gauge/WidgetGrid) | **done** |
 | 7 | Suite connectors + provenance UI | **done** |
 | 8 | Dashboard Builder Excellence (templates + Flow chrome + PATCH) | **done** |
-| 9 | MCP + Capability Catalog | later |
+| 9 | MCP + Capability Catalog (+ Phase 2 writes + assistant UI) | **done** |
 
 ## Env (Plexon) — Wave 2
 

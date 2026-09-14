@@ -10,7 +10,8 @@ export type CapabilityOwner =
   | 'echon'
   | 'plexon'
   | 'spirion'
-  | 'videon';
+  | 'videon'
+  | 'metron';
 
 export type CapabilitySideEffect = 'read' | 'write' | 'job';
 
@@ -35,7 +36,17 @@ export type CapabilityId =
   | 'videon.cut.create'
   | 'videon.cut.scenes.add'
   | 'videon.export.run'
-  | 'videon.reframe.run';
+  | 'videon.reframe.run'
+  | 'metron.health'
+  | 'metron.projects.list'
+  | 'metron.datasets.list'
+  | 'metron.kpis.list'
+  | 'metron.dashboards.list'
+  | 'metron.dashboard.get'
+  | 'metron.dashboard.summarize'
+  | 'metron.dashboard.create'
+  | 'metron.kpi.starter_pack_install'
+  | 'metron.suite_connectors.sync';
 
 export type CapabilitySurfaces = {
   agent: boolean;

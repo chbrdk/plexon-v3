@@ -33,6 +33,10 @@
 
 Flag off → legacy clients unchanged.
 
+### METRON Wave 9
+
+Agent-only catalog caps (`metron.*`) map to MCP tools; free-chat uses `METRON_MCP_URL`. No Flow nodes yet. See `specs/domain/capability-catalog.md` § METRON set · `knowledge/metron-mcp-assistant.md`.
+
 ### Next — Wave C5 (Persona talk)
 
 EQC magazine + public share → Audion `/chat/embed` in `ChatOverlay` iframe (guest budgets); deep-link fallback full `/chat`; Assistant stays orchestrator. Details: `knowledge/eqc-persona-chat.md`.
