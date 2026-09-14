@@ -14,7 +14,7 @@
 
 | Key | Notes |
 |-----|--------|
-| `METRON_MCP_URL` | Set after Coolify `metron-mcp` is live |
+| `METRON_MCP_URL` | Set after Coolify `metron-mcp` is live — staging `https://hh0pad7nwoupxnydpd7shb9r.projects-a.plygrnd.tech` |
 
 ## Smoke
 

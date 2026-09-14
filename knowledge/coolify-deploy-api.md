@@ -24,7 +24,7 @@ Force-deploy is fallback when a GitHub webhook missed. Default for Storybook (`r
 | brandion-v3 | `hta84est51lwzkqol3hd6wig` | https://brandion-v3.projects-a.plygrnd.tech |
 | creation-v3 | `uk1t9tnsqo65vlpzo2vwq0u2` | https://creation-v3.projects-a.plygrnd.tech |
 | metron-v3 | `8qkrk850d37er6subakpnx0r` | https://metron-v3.projects-a.plygrnd.tech |
-| metron-mcp | *(attach)* | port **3104** · set plexon `METRON_MCP_URL` |
+| metron-mcp | `hh0pad7nwoupxnydpd7shb9r` | https://hh0pad7nwoupxnydpd7shb9r.projects-a.plygrnd.tech |
 | brandion-mcp | `g79ues4e48rh8wq6g3jrabpv` | https://g79ues4e48rh8wq6g3jrabpv.projects-a.plygrnd.tech |
 | audion-mcp | `oswkso8os4wc0o4soosgwwcc` | https://mcp-audion.projects-a.plygrnd.tech |
 | creation-mcp | `j1pmt4en25da2yp40f4827d7` | https://j1pmt4en25da2yp40f4827d7.projects-a.plygrnd.tech |
