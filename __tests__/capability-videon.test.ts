@@ -44,12 +44,16 @@ describe('VIDEON V6 capability catalog', () => {
         'videon.cut.scenes.add',
         'videon.export.run',
         'videon.reframe.run',
+        'videon.generate.edit',
+        'videon.generate.create',
       ])
     );
     expect(getCapability('videon.analysis.run')?.owner).toBe('videon');
     expect(getCapability('videon.export.run')?.surfaces).toEqual({ agent: false, flow: true });
     expect(getCapability('videon.reframe.run')?.surfaces).toEqual({ agent: true, flow: false });
     expect(getCapability('videon.reframe.run')?.agent?.toolNames).toContain('videon_reframe_run');
+    expect(getCapability('videon.generate.edit')?.agent?.toolNames).toContain('videon_generate_edit_run');
+    expect(getCapability('videon.generate.create')?.agent?.toolNames).toContain('videon_generate_create_run');
     expect(getCapability('videon.cut.scenes.add')?.surfaces).toEqual({ agent: true, flow: false });
     expect(getCapability('videon.cut.scenes.add')?.agent?.toolNames).toContain('videon_cut_scenes_add');
   });

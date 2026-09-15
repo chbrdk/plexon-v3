@@ -451,6 +451,8 @@ Capabilities are registered progressively after their execution endpoints exist:
 | `videon.cut.scenes.add` | write | Agent (+ Catalog); **no** Flow node | Append scene ranges to existing Cut |
 | `videon.export.run` | job | Flow first | export job and signed result reference |
 | `videon.reframe.run` | job | Agent (+ Catalog); **no** Flow node yet | reframe job and derivative deep link |
+| `videon.generate.edit` | job | Agent (+ Catalog); **no** Flow node | AI V2V edit job + promoted asset deep link |
+| `videon.generate.create` | job | Agent (+ Catalog); **no** Flow node | AI T2V/I2V create job + promoted asset deep link |
 
 **Agent surface:** Product MCP (`videon-v3/specs/domain/mcp-server.md`) + Plexon wire-up (`specs/domain/assistant-videon-mcp.md`). Catalog inputs must include `platformProjectId`; execution verifies access again. Agent results are bounded summaries and links, not video binaries or full transcripts. Write/job capabilities use idempotency keys and confirmation policy consistent with the central catalog.
 

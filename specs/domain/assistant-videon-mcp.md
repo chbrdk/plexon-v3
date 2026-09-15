@@ -95,6 +95,7 @@ MCP payloads MUST NOT include thumbnails, video bytes, or signed playback URLs.
 4. MCP tools remain unchanged; the UI triggers existing write tools after confirm (or same-origin `/api/assistant/videon-action` with `confirmed: true`).  
 5. WHEN action would be export THEN it MUST NOT appear on Hit-Cards — export is Flow-first (`videon.export.run` / node `videon_export_run`).  
 6. WHEN action would be reframe THEN it MUST NOT appear on Hit-Cards — reframe is Agent/Catalog confirm (`videon.reframe.run`); no Flow node yet.
+7. WHEN action would be AI generate edit/create THEN it MUST NOT appear on Hit-Cards — use Agent/Catalog confirm (`videon.generate.edit` / `videon.generate.create`).
 
 Capability Catalog entries (V6) share the same ids; when `CAPABILITY_CATALOG_RUNTIME` is on, Agent/Flow adapters MAY call shared executors — free-chat MCP path stays available either way.
 
@@ -115,6 +116,8 @@ Register progressive catalog entries (same ids as `videon-integration.md`) with 
 | `videon.cut.scenes.add` | `videon.cut_scenes_add` |
 | `videon.export.run` | `videon.export_run` (optional `format`: `mp4` \| `premiere_xml` ZIP) |
 | `videon.reframe.run` | `videon.reframe_run` |
+| `videon.generate.edit` | `videon.generate_edit_run` |
+| `videon.generate.create` | `videon.generate_create_run` |
 
 ## Embed product
 

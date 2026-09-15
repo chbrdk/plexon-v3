@@ -37,6 +37,8 @@ export type CapabilityId =
   | 'videon.cut.scenes.add'
   | 'videon.export.run'
   | 'videon.reframe.run'
+  | 'videon.generate.edit'
+  | 'videon.generate.create'
   | 'metron.health'
   | 'metron.projects.list'
   | 'metron.datasets.list'

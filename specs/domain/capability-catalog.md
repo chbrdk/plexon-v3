@@ -207,8 +207,10 @@ Owner `videon`. Runtime behind `CAPABILITY_CATALOG_RUNTIME` (default off). MCP r
 | `videon.cut.scenes.add` | videon | — (no Flow node) | `videon_cut_scenes_add` | write | `media.cut` | Agent/Catalog append batch; **no** Hit-Card |
 | `videon.export.run` | videon | `videon_export_run` | `videon_export_run` | job | `media.export` | **Flow first** — optional `format` `mp4`\|`premiere_xml` (ZIP + media); no Hit-Card export button |
 | `videon.reframe.run` | videon | — (no Flow node yet) | `videon_reframe_run` | job | `media.reframe` | Agent/Catalog confirm; **no** Hit-Card; Robust CPU default |
+| `videon.generate.edit` | videon | — (no Flow node) | `videon_generate_edit_run` | job | `media.generate` | Agent/Catalog confirm; V2V edit; **no** Hit-Card |
+| `videon.generate.create` | videon | — (no Flow node) | `videon_generate_create_run` | job | `media.generate` | Agent/Catalog confirm; T2V/I2V; **no** Hit-Card |
 
-Companions: `videon-integration.md` · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `videon-v3/specs/domain/media-reframe.md` · `videon-v3/specs/domain/cut-multi-source-compose.md` · `knowledge/collection-flow-videon.md`.
+Companions: `videon-integration.md` · `assistant-videon-mcp.md` · `collection-test-flow.md` Family Media · `videon-v3/specs/domain/media-reframe.md` · `videon-v3/specs/domain/media-generative-edit.md` · `videon-v3/specs/domain/cut-multi-source-compose.md` · `knowledge/collection-flow-videon.md`.
 
 ### METRON set (Wave 9 — KPIs / dashboards)
 

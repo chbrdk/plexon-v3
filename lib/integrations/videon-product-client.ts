@@ -265,3 +265,72 @@ export async function reframeRun(input: {
     },
   });
 }
+
+export async function generateEditRun(input: {
+  platformProjectId: string;
+  mediaAssetId: string;
+  actorUserId?: string | null;
+  startMs: number;
+  endMs: number;
+  prompt: string;
+  modelId?: string;
+  skipDraft?: boolean;
+  keepSourceAudio?: boolean;
+  referenceImageUrls?: string[];
+  seed?: number;
+  idempotencyKey?: string;
+}): Promise<VideonProductResult> {
+  const pid = input.platformProjectId.trim();
+  const mid = input.mediaAssetId.trim();
+  if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
+  if (!mid) return { ok: false, status: 400, error: 'mediaAssetId required' };
+  if (!input.prompt.trim()) return { ok: false, status: 400, error: 'prompt required' };
+  return videonFetch({
+    method: 'POST',
+    path: `/api/media/${encodeURIComponent(mid)}/generate?${platformQuery(pid)}`,
+    actorUserId: input.actorUserId,
+    body: {
+      intent: 'edit',
+      startMs: input.startMs,
+      endMs: input.endMs,
+      prompt: input.prompt,
+      modelId: input.modelId ?? 'seedance_2_5_edit',
+      skipDraft: input.skipDraft === true,
+      keepSourceAudio: input.keepSourceAudio !== false,
+      ...(input.referenceImageUrls?.length ? { referenceImageUrls: input.referenceImageUrls } : {}),
+      ...(typeof input.seed === 'number' ? { seed: input.seed } : {}),
+      ...(input.idempotencyKey?.trim() ? { idempotencyKey: input.idempotencyKey.trim() } : {}),
+    },
+  });
+}
+
+export async function generateCreateRun(input: {
+  platformProjectId: string;
+  actorUserId?: string | null;
+  prompt: string;
+  modelId?: string;
+  durationSeconds?: number;
+  aspectRatio?: string;
+  referenceImageUrls?: string[];
+  seed?: number;
+  idempotencyKey?: string;
+}): Promise<VideonProductResult> {
+  const pid = input.platformProjectId.trim();
+  if (!pid) return { ok: false, status: 400, error: 'platformProjectId required' };
+  if (!input.prompt.trim()) return { ok: false, status: 400, error: 'prompt required' };
+  return videonFetch({
+    method: 'POST',
+    path: `/api/media/ai-create?${platformQuery(pid)}`,
+    actorUserId: input.actorUserId,
+    body: {
+      intent: 'create',
+      prompt: input.prompt,
+      modelId: input.modelId ?? 'seedance_2_5_t2v',
+      durationSeconds: input.durationSeconds ?? 5,
+      aspectRatio: input.aspectRatio ?? '16:9',
+      ...(input.referenceImageUrls?.length ? { referenceImageUrls: input.referenceImageUrls } : {}),
+      ...(typeof input.seed === 'number' ? { seed: input.seed } : {}),
+      ...(input.idempotencyKey?.trim() ? { idempotencyKey: input.idempotencyKey.trim() } : {}),
+    },
+  });
+}

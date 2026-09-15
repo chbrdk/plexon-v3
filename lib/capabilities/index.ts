@@ -88,6 +88,14 @@ export {
   executeVideonReframeRunCapability,
 } from '@/lib/capabilities/executors/videon-reframe-run';
 export {
+  executeVideonGenerateEditRun,
+  executeVideonGenerateEditRunCapability,
+} from '@/lib/capabilities/executors/videon-generate-edit-run';
+export {
+  executeVideonGenerateCreateRun,
+  executeVideonGenerateCreateRunCapability,
+} from '@/lib/capabilities/executors/videon-generate-create-run';
+export {
   classifyPromoteTrace,
   buildPlaybookRecipe,
   buildPromotedFlowDocument,
