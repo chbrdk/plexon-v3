@@ -170,6 +170,24 @@ export function apiPlatformProvisioningCollectionMember(
   return `${apiPlatformProvisioningCollectionMembers(platformProjectId)}/${encodeURIComponent(userId)}`;
 }
 
+/** Creation Client Page Share policy + inventory. Spec: creation-client-share.md */
+export function apiPlatformProvisioningCollectionClientSharePolicy(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-share-policy`;
+}
+export function apiPlatformProvisioningCollectionClientShares(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-shares`;
+}
+export function apiPlatformProvisioningCollectionClientShare(
+  platformProjectId: string,
+  shareId: string
+): string {
+  return `${apiPlatformProvisioningCollectionClientShares(platformProjectId)}/${encodeURIComponent(shareId)}`;
+}
+
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;

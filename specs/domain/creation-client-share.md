@@ -1,9 +1,9 @@
 # Creation Client Page Share (PLEXON)
 
-**Status:** Accepted · 2026-09-19 · **Phase:** P0 (policy + ownership)  
+**Status:** Accepted · 2026-09-19 · **Phase:** P2 (policy API + inventory projection)  
 **Product:** CREATION capability under Collection  
 **Companion domain:** `creation-v3/specs/domain/client-page-share.md`  
-**Eval:** `creation-v3/knowledge/client-page-share-eval.md`  
+**Eval:** `creation-v3/knowledge/client-page-share-eval.md` · `creation-v3/knowledge/client-page-share-p2.md`  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Sibling (do not conflate):** `collection-invite-links.md` — member grant, same company only
 
@@ -48,18 +48,20 @@ Defaults for enterprise-leaning staging:
 - `allowPublicLink: false`
 - `requirePassword: true`
 - `maxTtlDays: 30`
-- `allowLiveHead: false`
-- `allowEmailAllowlist: false` until P2
+- `allowLiveHead: true` (P2)
+- `allowEmailAllowlist: true` (P2)
 
-## API (Phase 2+)
+## API (Phase 2)
 
 | Route | Notes |
 |-------|-------|
 | `GET /api/platform/provisioning/collections/:id/client-share-policy` | Service + user; Creation BFF |
-| `PATCH …/client-share-policy` | Company admin / Collection admin per RBAC |
-| `GET …/client-shares` | Optional registry projection fed by Creation webhook/outbox |
+| `PATCH …/client-share-policy` | Collection lifecycle manage |
+| `GET …/client-shares` | Registry projection (metadata only; no tokens) |
+| `POST …/client-shares` | Creation service upsert projection |
+| `DELETE …/client-shares/:shareId` | Creation service mark revoked |
 
-Phase 1 MAY ship Creation-local feature flag only; document migration to live policy before GA.
+Phase 1 shipped Creation-local feature flags; P2 adds live policy + inventory.
 
 ## Audit
 

@@ -597,3 +597,47 @@ export const collectionProjections = pgTable('collection_projections', {
   snapshot: jsonb('snapshot').$type<Record<string, unknown>>().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Per-Collection Client Page Share policy (CREATION).
+ * Spec: creation-client-share.md
+ */
+export const collectionClientSharePolicies = pgTable('collection_client_share_policies', {
+  platformProjectId: text('platform_project_id')
+    .primaryKey()
+    .references(() => platformProjects.id, { onDelete: 'cascade' }),
+  enabled: boolean('enabled').notNull().default(true),
+  allowPublicLink: boolean('allow_public_link').notNull().default(false),
+  requirePassword: boolean('require_password').notNull().default(true),
+  maxTtlDays: integer('max_ttl_days'),
+  allowLiveHead: boolean('allow_live_head').notNull().default(true),
+  allowEmailAllowlist: boolean('allow_email_allowlist').notNull().default(true),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedByUserId: text('updated_by_user_id'),
+});
+
+/**
+ * Metadata-only projection of CREATION client shares (no tokens).
+ * Spec: creation-client-share.md
+ */
+export const creationClientShareProjections = pgTable(
+  'creation_client_share_projections',
+  {
+    shareId: text('share_id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    sceneId: text('scene_id').notNull(),
+    pageIds: jsonb('page_ids').$type<string[]>().notNull().default([]),
+    accessMode: text('access_mode').notNull(),
+    contentMode: text('content_mode').notNull(),
+    label: text('label'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('creation_client_share_projections_project_idx').on(t.platformProjectId),
+  })
+);
