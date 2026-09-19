@@ -3,12 +3,18 @@
  * Spec: specs/domain/creation-client-share.md
  */
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { getCreationServiceApiUrl } from '@/lib/constants';
 import { getDb } from '@/lib/db';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import {
   collectionClientSharePolicies,
   creationClientShareProjections,
 } from '@/lib/db/schema';
+import {
+  PLEXON_CONTRACT_VERSION_HEADER,
+  PLEXON_FEDERATION_CONTRACT_VERSION,
+  PLEXON_SERVICE_SECRET_HEADER,
+} from '@/lib/platform-contract';
 import { userCanManageCollectionLifecycle, userCanViewPlatformProject } from '@/lib/platform-project-access';
 import type { RequestUser } from '@/lib/auth-request-user';
 
@@ -225,16 +231,62 @@ export async function upsertClientShareProjection(
   return { ok: true };
 }
 
+/** Fan-out revoke to Creation token store (P4). Spec: creation-client-share.md */
+async function pushCreationClientShareRevoke(
+  platformProjectId: string,
+  shareId: string,
+  actorUserId: string
+): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  const base = getCreationServiceApiUrl()?.replace(/\/+$/, '');
+  if (!base) return { ok: true }; // no Creation URL → projection-only (local/dev)
+  const serviceSecret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!serviceSecret) {
+    return { ok: false, status: 503, error: 'PLEXON_SERVICE_SECRET not configured' };
+  }
+  const url = `${base}/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-shares/${encodeURIComponent(shareId)}`;
+  try {
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+        [PLEXON_SERVICE_SECRET_HEADER]: serviceSecret,
+        'X-Plexon-User-Id': actorUserId,
+      },
+      cache: 'no-store',
+    });
+    if (res.ok || res.status === 404) return { ok: true };
+    const text = await res.text().catch(() => '');
+    return {
+      ok: false,
+      status: res.status >= 400 && res.status < 600 ? res.status : 502,
+      error: text.slice(0, 200) || `Creation revoke failed (${res.status})`,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      status: 502,
+      error: e instanceof Error ? e.message : 'Creation revoke failed',
+    };
+  }
+}
+
 export async function revokeClientShareProjection(
   platformProjectId: string,
   shareId: string,
   actor: RequestUser
-): Promise<{ ok: true } | { ok: false; status: 403 | 404 }> {
+): Promise<
+  { ok: true } | { ok: false; status: 403 | 404 | 502 | 503; error?: string }
+> {
   await ensureClientShareSchema();
   const project = await getPlatformProjectById(platformProjectId);
   if (!project) return { ok: false, status: 404 };
   const allowed = await userCanManageCollectionLifecycle(actor, platformProjectId);
   if (!allowed) return { ok: false, status: 403 };
+
+  const fanout = await pushCreationClientShareRevoke(platformProjectId, shareId, actor.id);
+  if (!fanout.ok) {
+    return { ok: false, status: fanout.status === 503 ? 503 : 502, error: fanout.error };
+  }
 
   const db = getDb();
   const now = new Date();

@@ -2,6 +2,16 @@
 
 **Date:** 2026-09-19  
 **Spec:** `specs/domain/creation-client-share.md`  
-**Creation:** `../creation-v3/knowledge/client-page-share-eval.md`
+**Creation:** `../creation-v3/knowledge/client-page-share-eval.md` · P4 `../creation-v3/knowledge/client-page-share-p4.md`
 
-Plexon owns **policy + Collection ownership** for CREATION client preview links. Creation owns token storage and the `/share/p/:token` viewer in Phase 1. Do not overload `collection_invites` for external clients.
+Plexon owns **policy + Collection ownership** for CREATION client preview links. Creation owns token storage and the `/share/p/:token` viewer.
+
+## P4 Collection UI
+
+- Component: `components/projects/CollectionClientSharesPanel.tsx`
+- Mount: Collection detail `PlatformProjectDashboard` (`/projects/:id`)
+- Locale keys: `projects.detail.clientShares.*`
+- Revoke: `DELETE …/client-shares/:shareId` marks projection **and** fans out to Creation `DELETE /api/platform/provisioning/collections/:id/client-shares/:shareId`
+
+Do not overload `collection_invites` for external clients.
+

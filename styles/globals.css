@@ -1231,6 +1231,55 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: 0.5rem;
 }
 
+.plexon-collection-client-shares {
+  margin-block: 1.25rem 0.5rem;
+}
+
+.plexon-collection-client-shares-policy {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 36rem;
+}
+
+.plexon-collection-client-shares-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.plexon-collection-client-shares-ttl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 20rem;
+}
+
+.plexon-collection-client-shares-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.plexon-collection-client-shares-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.plexon-collection-client-shares-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
+}
+
 .plexon-collection-create {
   max-width: 28rem;
   gap: 0.75rem;

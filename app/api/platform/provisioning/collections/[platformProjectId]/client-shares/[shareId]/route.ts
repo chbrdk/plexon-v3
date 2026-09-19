@@ -22,6 +22,10 @@ export async function DELETE(
   }
 
   const result = await revokeClientShareProjection(platformProjectId, shareId, actor);
-  if (!result.ok) return apiError(result.status === 404 ? 'Not found' : 'Forbidden', result.status);
+  if (!result.ok) {
+    if (result.status === 404) return apiError('Not found', 404);
+    if (result.status === 403) return apiError('Forbidden', 403);
+    return apiError(result.error || 'Creation revoke failed', result.status);
+  }
   return platformJson({ ok: true });
 }

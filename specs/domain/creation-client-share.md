@@ -1,6 +1,6 @@
 # Creation Client Page Share (PLEXON)
 
-**Status:** Accepted · 2026-09-19 · **Phase:** P2 (policy API + inventory projection)  
+**Status:** Accepted · 2026-09-19 · **Phase:** P4 (Collection Shares panel + revoke fan-out)  
 **Product:** CREATION capability under Collection  
 **Companion domain:** `creation-v3/specs/domain/client-page-share.md`  
 **Eval:** `creation-v3/knowledge/client-page-share-eval.md` · `creation-v3/knowledge/client-page-share-p2.md`  
@@ -51,7 +51,7 @@ Defaults for enterprise-leaning staging:
 - `allowLiveHead: true` (P2)
 - `allowEmailAllowlist: true` (P2)
 
-## API (Phase 2)
+## API (Phase 2+)
 
 | Route | Notes |
 |-------|-------|
@@ -59,9 +59,19 @@ Defaults for enterprise-leaning staging:
 | `PATCH …/client-share-policy` | Collection lifecycle manage |
 | `GET …/client-shares` | Registry projection (metadata only; no tokens) |
 | `POST …/client-shares` | Creation service upsert projection |
-| `DELETE …/client-shares/:shareId` | Creation service mark revoked |
+| `DELETE …/client-shares/:shareId` | Lifecycle manage: mark projection revoked **and** fan-out `DELETE` to Creation token store |
 
-Phase 1 shipped Creation-local feature flags; P2 adds live policy + inventory.
+Phase 1 shipped Creation-local feature flags; P2 adds live policy + inventory; **P4** ships Collection UI + Creation revoke fan-out.
+
+## Collection UI (Phase 4)
+
+On Collection detail (`/projects/:id`), managers see **Client page shares**:
+
+- Edit `clientShare` policy (enabled, public link, require password, max TTL, live head, email allowlist)
+- List inventory projections (label, access/content mode, expiry, revoked)
+- Revoke an active share (Plexon projection + Creation token)
+
+Viewers may list; only lifecycle managers may PATCH policy or DELETE.
 
 ## Audit
 
@@ -81,7 +91,7 @@ Minimum events (Creation emits; Plexon may ingest later):
 
 ## Non-goals
 
-- Hosting the interactive page renderer in Plexon (iframe inventory only later)
+- Hosting the interactive page renderer in Plexon (inventory links to Creation `/share/p/:token` only when plain token is known — Plexon never stores plain tokens)
 - Replacing METRON/EQC share tokens (keep product-prefixed tokens)
 - Public write into scenes
 

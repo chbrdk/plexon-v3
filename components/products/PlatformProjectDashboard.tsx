@@ -15,6 +15,7 @@ import {
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
 import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
+import { CollectionClientSharesPanel } from '@/components/projects/CollectionClientSharesPanel'
 import type {
   AudionProjectSummary,
   BrandionProjectSummary,
@@ -155,6 +156,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             flows={data.flows ?? null}
             onOpenWork={openWork}
           />
+          <CollectionClientSharesPanel platformProjectId={platformProjectId} />
           <CollectionKnowledgeBand
             platformProjectId={platformProjectId}
             audionHref={data.links.audionProject}
