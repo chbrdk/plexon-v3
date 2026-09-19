@@ -8,7 +8,7 @@ vi.mock('@/lib/db/assistant-conversations', () => ({
 }));
 
 vi.mock('@/lib/platform-project-access', () => ({
-  userCanViewPlatformProject: (...args: unknown[]) => canViewProject(...args),
+  userCanViewPlatformProjectMembership: (...args: unknown[]) => canViewProject(...args),
 }));
 
 vi.mock('@/lib/db/assistant-workflow-runs', () => ({
@@ -73,7 +73,7 @@ describe('authorize-event-quick-check-run', () => {
     ).resolves.toBe(true);
   });
 
-  it('allows company/project viewer via userCanViewPlatformProject', async () => {
+  it('allows company/project viewer via membership (strict Model B)', async () => {
     getConversation.mockResolvedValueOnce({ platformProjectId: 'pp-1' });
     canViewProject.mockResolvedValueOnce(true);
     await expect(
@@ -82,7 +82,18 @@ describe('authorize-event-quick-check-run', () => {
         run({ id: 'r1', result: { platformProjectId: 'pp-1' } })
       )
     ).resolves.toBe(true);
-    expect(canViewProject).toHaveBeenCalledWith('teammate', 'user', 'pp-1');
+    expect(canViewProject).toHaveBeenCalledWith('teammate', 'pp-1');
+  });
+
+  it('denies admin without membership (no role bypass)', async () => {
+    canViewProject.mockResolvedValueOnce(false);
+    await expect(
+      userCanAccessEventQuickCheckRun(
+        { id: 'admin-1', role: 'admin' },
+        run({ id: 'r1', result: { platformProjectId: 'pp-1' } })
+      )
+    ).resolves.toBe(false);
+    expect(canViewProject).toHaveBeenCalledWith('admin-1', 'pp-1');
   });
 
   it('denies stranger when project view is false', async () => {

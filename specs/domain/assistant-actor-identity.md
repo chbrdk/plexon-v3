@@ -29,8 +29,18 @@ THEN viewer MAY remain the token owner (Cursor / CLI without actor).
 
 RAG / project-context REST already send `X-Plexon-User-Id` with the machine Bearer — Products MUST honor it under the machine-token rule above.
 
+## Assistant Collection ACL (strict Model B)
+
+WHEN the Assistant binds or reads a Collection (`platformProjectId` on complete, summarize, EQC, …)  
+THEN access MUST use **membership** only (creator / assignment / legacy product binding) — **not** the global `USER_ROLE.ADMIN` shortcut in `userCanViewPlatformProject`.
+
+Admin UI / directory / knowledge-pack editors MAY keep the admin bypass. Chat and Assistant workflows MUST NOT.
+
+Canonical helper: `userCanViewPlatformProjectMembership` in `lib/platform-project-access.ts`.
+
 ## Non-goals
 
 - Minting per-user API tokens for chat  
 - Rotating Coolify secrets per user  
 - Opening company-wide Collection visibility
+- Removing admin bypass from non-Assistant product surfaces

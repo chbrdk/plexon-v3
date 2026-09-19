@@ -10,7 +10,8 @@ import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning';
 
 /**
  * Access model B: creator, direct assignment, or legacy product assignment.
- * Company membership alone does not grant view. Global admins see all.
+ * Company membership alone does not grant view. Global admins see all
+ * (UI / admin tooling). Assistant MUST use `userCanViewPlatformProjectMembership`.
  */
 export async function userCanViewPlatformProject(
   userId: string,
@@ -18,6 +19,18 @@ export async function userCanViewPlatformProject(
   platformProjectId: string
 ): Promise<boolean> {
   if (userRole === USER_ROLE.ADMIN) return true;
+  return userCanViewPlatformProjectMembership(userId, platformProjectId);
+}
+
+/**
+ * Strict Access Model B for Assistant: creator / assignment / legacy binding only.
+ * Ignores global admin role so chat cannot dump Collections the admin does not own/share.
+ * Spec: `specs/domain/assistant-actor-identity.md` § Assistant Collection ACL.
+ */
+export async function userCanViewPlatformProjectMembership(
+  userId: string,
+  platformProjectId: string
+): Promise<boolean> {
   const project = await getPlatformProjectById(platformProjectId);
   if (!project) return false;
   if (project.createdByUserId === userId) return true;

@@ -25,9 +25,13 @@ Plexon chat session = signed-in user. CHECKION/AUDION MCP + RAG called Products 
 | 1 | Audion Next TG/RAG Model B | Done (`audion-v3` `eee3e18`) |
 | 2 | Staging two-user smoke checklist | Done (`knowledge/assistant-access-model-b-smoke.md`) |
 | 3 | Machine token without actor fail-closed + no Brandion ACL bypass | Done (this wave) |
-| 4 | Plexon Admin bypass (Assistant-only strict Model B) | Open (product decision) |
+| 4 | Plexon Admin bypass (Assistant-only strict Model B) | Done (`userCanViewPlatformProjectMembership`) |
 | 5 | Audion MCP (AUDION-v2) forward actor | Done (actor store + header) |
 | 6 | Knowledge pack / internal stores gate | Done (`authorizeKnowledgeRead`) |
+
+## Assistant Collection ACL
+
+Chat / EQC / summarize use `userCanViewPlatformProjectMembership` — **no** global admin shortcut. Admin UI keeps `userCanViewPlatformProject` bypass.
 
 ## Related
 

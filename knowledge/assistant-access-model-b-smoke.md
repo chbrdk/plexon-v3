@@ -15,7 +15,8 @@
 2. **Assistant Collection chat** — As A, ask about `C` data (Checkion scans / Audion personas). Answers OK.  
 3. **Assistant as B** — Open chat without `C` in context; ask for A’s project by name. Must not dump A’s RAG/roster.  
 4. **Share then see** — A adds B via Collection Team (email or invite). B then sees `C` and can ask about it.  
-5. **Revoke** — Remove B’s assignment; B loses list + assistant retrieval again.
+5. **Revoke** — Remove B’s assignment; B loses list + assistant retrieval again.  
+6. **Admin strict** — Global Plexon admin without membership on `C` must get Forbidden when binding `C` in Assistant (UI admin directory may still list all).
 
 ## Automated coverage (CI)
 

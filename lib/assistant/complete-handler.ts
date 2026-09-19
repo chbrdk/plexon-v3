@@ -25,7 +25,7 @@ import {
 import { getDb } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
-import { userCanViewPlatformProject } from '@/lib/platform-project-access';
+import { userCanViewPlatformProjectMembership } from '@/lib/platform-project-access';
 import type { AssistantCompleteBody, AssistantCompleteResult } from '@/lib/assistant/complete-types';
 import type { AssistantHandlerContext } from '@/lib/assistant/handlers/context';
 import { dispatchAssistantIntent } from '@/lib/assistant/workflow-registry';
@@ -147,7 +147,7 @@ export async function handleAssistantComplete(
     undefined;
 
   if (platformProjectId) {
-    const allowed = await userCanViewPlatformProject(user.id, user.role, platformProjectId);
+    const allowed = await userCanViewPlatformProjectMembership(user.id, platformProjectId);
     if (!allowed) {
       const err = new Error('Forbidden project context') as Error & { status?: number };
       err.status = API_STATUS.FORBIDDEN;

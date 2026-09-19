@@ -3,7 +3,6 @@ import { getDb } from '@/lib/db';
 import {
   assistantConversations,
   assistantWorkflowRuns,
-  USER_ROLE,
   users,
 } from '@/lib/db/schema';
 import type { StoredAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
@@ -39,34 +38,31 @@ export async function listVisiblePlatformProjectIdsForUser(userId: string): Prom
 
 /**
  * Own EQC runs plus Collection-visible runs (conversation.platformProjectId).
- * Admins see all EQC runs (capped by limit).
+ * Strict Model B — no global admin shortcut (assistant-actor-identity.md).
  */
 export async function listEventQuickCheckRunsForViewer(input: {
   userId: string;
-  userRole: string;
+  /** Kept for call-site compat; ignored for visibility (no admin bypass). */
+  userRole?: string;
   limit?: number;
 }): Promise<EventQuickCheckRunListRow[]> {
   const db = getDb();
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 100);
-  const isAdmin = input.userRole === USER_ROLE.ADMIN;
 
-  const visibility = isAdmin
-    ? eq(assistantWorkflowRuns.type, EVENT_QUICK_CHECK_PLAYBOOK_ID)
-    : await (async () => {
-        const projectIds = await listVisiblePlatformProjectIdsForUser(input.userId);
-        const own = and(
+  const projectIds = await listVisiblePlatformProjectIdsForUser(input.userId);
+  const own = and(
+    eq(assistantWorkflowRuns.userId, input.userId),
+    eq(assistantWorkflowRuns.type, EVENT_QUICK_CHECK_PLAYBOOK_ID)
+  );
+  const visibility = !projectIds.length
+    ? own
+    : and(
+        eq(assistantWorkflowRuns.type, EVENT_QUICK_CHECK_PLAYBOOK_ID),
+        or(
           eq(assistantWorkflowRuns.userId, input.userId),
-          eq(assistantWorkflowRuns.type, EVENT_QUICK_CHECK_PLAYBOOK_ID)
-        );
-        if (!projectIds.length) return own;
-        return and(
-          eq(assistantWorkflowRuns.type, EVENT_QUICK_CHECK_PLAYBOOK_ID),
-          or(
-            eq(assistantWorkflowRuns.userId, input.userId),
-            inArray(assistantConversations.platformProjectId, projectIds)
-          )
-        );
-      })();
+          inArray(assistantConversations.platformProjectId, projectIds)
+        )
+      );
 
   const rows = await db
     .select({

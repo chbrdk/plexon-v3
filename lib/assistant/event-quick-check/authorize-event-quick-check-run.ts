@@ -2,7 +2,7 @@ import type { RequestUser } from '@/lib/auth-request-user';
 import type { StoredAssistantWorkflowRun } from '@/lib/db/assistant-workflow-runs';
 import { getAssistantWorkflowRunById } from '@/lib/db/assistant-workflow-runs';
 import { getAssistantConversationById } from '@/lib/db/assistant-conversations';
-import { userCanViewPlatformProject } from '@/lib/platform-project-access';
+import { userCanViewPlatformProjectMembership } from '@/lib/platform-project-access';
 import { EVENT_QUICK_CHECK_RUN_RESULT_REPORT_KEY } from '@/lib/paths/event-quick-check-page';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
 
@@ -28,7 +28,7 @@ export async function resolveEqcPlatformProjectId(
 }
 
 /**
- * Owner always; otherwise Collection viewers via userCanViewPlatformProject.
+ * Owner always; otherwise Collection viewers via membership (strict Model B — no admin bypass).
  * Runs without a platform project stay owner-only.
  */
 export async function userCanAccessEventQuickCheckRun(
@@ -41,7 +41,7 @@ export async function userCanAccessEventQuickCheckRun(
   if (run.userId === user.id) return true;
   const platformProjectId = await resolveEqcPlatformProjectId(run);
   if (!platformProjectId) return false;
-  return userCanViewPlatformProject(user.id, user.role, platformProjectId);
+  return userCanViewPlatformProjectMembership(user.id, platformProjectId);
 }
 
 /** Load run and enforce access; throws NOT_FOUND when missing or denied. */

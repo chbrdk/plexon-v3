@@ -1,5 +1,5 @@
 import type { RequestUser } from '@/lib/auth-request-user';
-import { userCanViewPlatformProject } from '@/lib/platform-project-access';
+import { userCanViewPlatformProjectMembership } from '@/lib/platform-project-access';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { getBindingsForPlatformProject } from '@/lib/db/platform-project-bindings';
 import {
@@ -20,7 +20,7 @@ export async function summarizeProjectWorkflow(
   user: RequestUser,
   platformProjectId: string
 ): Promise<ProjectSummaryResult> {
-  const allowed = await userCanViewPlatformProject(user.id, user.role, platformProjectId);
+  const allowed = await userCanViewPlatformProjectMembership(user.id, platformProjectId);
   if (!allowed) {
     return { ok: false, error: 'Kein Zugriff auf dieses Projekt' };
   }
