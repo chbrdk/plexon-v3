@@ -12,6 +12,7 @@ describe('mapDomainScanV3ToPreview', () => {
         status: 'completed',
         overallScore: 91,
         pageCount: 7,
+        scoresByKind: { accessibility: 80, generative: 50 },
       },
       issues: [
         { title: 'Alt missing', severity: 'serious', affectedCount: 4 },
@@ -24,6 +25,7 @@ describe('mapDomainScanV3ToPreview', () => {
     expect(preview.status).toBe('complete')
     expect(preview.topIssues[0]?.title).toBe('Alt missing')
     expect(preview.stats.errors).toBeGreaterThan(0)
+    expect(preview.scoresByKind).toEqual({ accessibility: 80, generative: 50 })
   })
 })
 

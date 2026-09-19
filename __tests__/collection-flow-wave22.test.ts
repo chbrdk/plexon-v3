@@ -76,9 +76,11 @@ describe('Wave 22 — domain issues.items', () => {
       issueItems: [
         { id: 'i1', severity: 'critical', ruleId: 'color-contrast', title: 'Contrast' },
       ],
+      scoresByKind: { accessibility: 72, generative: 61 },
     });
     const items = (bundle.issues as { items: Array<{ ruleId: string }> }).items;
     expect(items[0]?.ruleId).toBe('color-contrast');
+    expect(bundle.scores).toEqual({ accessibility: 72, generative: 61 });
   });
 });
 

@@ -31,6 +31,8 @@ export type CheckionDomainScanSummary = {
   completedAt?: string | null;
   error?: string;
   issueStats?: { errors: number; warnings: number; notices: number; total: number } | null;
+  /** Corpus mean kind scores (0–100), when CHECKION DomainScanLight exposes them. */
+  scoresByKind?: Record<string, number> | null;
 };
 
 const TERMINAL = new Set(['completed', 'complete', 'failed', 'error', 'cancelled']);
@@ -68,6 +70,7 @@ function parseDomain(body: unknown): CheckionDomainScanSummary | null {
         total: Number(statsRaw.total ?? 0),
       }
     : null;
+  const scoresByKind = parseScoresByKind(scanRaw.scoresByKind);
   return {
     id,
     projectId: typeof scanRaw.projectId === 'string' ? scanRaw.projectId : '',
@@ -91,7 +94,77 @@ function parseDomain(body: unknown): CheckionDomainScanSummary | null {
           : undefined,
     error: typeof scanRaw.error === 'string' ? scanRaw.error : undefined,
     issueStats,
+    ...(scoresByKind ? { scoresByKind } : {}),
   };
+}
+
+function parseScoresByKind(raw: unknown): Record<string, number> | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    const kind = k.trim().toLowerCase();
+    if (!kind) continue;
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      out[kind] = v;
+      continue;
+    }
+    if (v && typeof v === 'object' && typeof (v as { value?: unknown }).value === 'number') {
+      const n = (v as { value: number }).value;
+      if (Number.isFinite(n)) out[kind] = n;
+    }
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+function scoresByKindFromOverviewScores(overview: unknown): Record<string, number> | null {
+  if (!overview || typeof overview !== 'object') return null;
+  const scores = (overview as { scores?: unknown }).scores;
+  if (!Array.isArray(scores)) return null;
+  const byKind: Record<string, number> = {};
+  for (const row of scores) {
+    if (!row || typeof row !== 'object') continue;
+    const o = row as Record<string, unknown>;
+    const kind = typeof o.kind === 'string' ? o.kind.trim().toLowerCase() : '';
+    const value =
+      typeof o.value === 'number'
+        ? o.value
+        : typeof o.score === 'number'
+          ? o.score
+          : null;
+    if (!kind || value == null || !Number.isFinite(value)) continue;
+    byKind[kind] = value;
+  }
+  return Object.keys(byKind).length ? byKind : null;
+}
+
+/**
+ * Kind means for a domain scan: prefer DomainScanLight.scoresByKind on detail,
+ * else DomainOverview.scores (same aggregation CHECKION magazine uses).
+ */
+export async function fetchCheckionDomainScanScores(
+  domainScanId: string
+): Promise<
+  | { ok: true; byKind: Record<string, number> }
+  | { ok: false; error: string }
+> {
+  const detail = await fetchCheckionDomainScanV3Detail(domainScanId);
+  if (detail.ok && detail.scan.scoresByKind && Object.keys(detail.scan.scoresByKind).length) {
+    return { ok: true, byKind: detail.scan.scoresByKind };
+  }
+  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId);
+  if (!overviewRes.ok) {
+    return {
+      ok: false,
+      error: detail.ok
+        ? overviewRes.error
+        : detail.error || overviewRes.error,
+    };
+  }
+  const byKind = scoresByKindFromOverviewScores(overviewRes.overview);
+  if (!byKind) {
+    return { ok: false, error: 'CHECKION domain scores: keine Kind-Scores' };
+  }
+  return { ok: true, byKind };
 }
 
 export async function listCheckionDomainScansV3(projectId?: string): Promise<

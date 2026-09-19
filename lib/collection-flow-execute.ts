@@ -59,6 +59,7 @@ import { executeCheckionDomainScanCapability } from '@/lib/capabilities/executor
 import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job';
 import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import {
+  fetchCheckionDomainScanScores,
   fetchCheckionDomainScanV3Issues,
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
@@ -787,6 +788,9 @@ export async function executeCollectionFlowRun(input: {
           issueSignals = issuesRes.signals;
           issueItems = catalogItemsFromRaw(issuesRes.items);
         }
+        const scoresRes = await fetchCheckionDomainScanScores(quality.id);
+        if (scoresRes.ok) scoresByKind = scoresRes.byKind;
+        else if (hasCompare) blockers.push(scoresRes.error);
       } else {
         const issuesRes = await fetchCheckionScanIssues(quality.id);
         if (!issuesRes.ok) {
@@ -819,6 +823,7 @@ export async function executeCollectionFlowRun(input: {
             url: quality.url,
             issues: issueSignals,
             issueItems,
+            scoresByKind,
           }),
           qualityNode?.id
         );

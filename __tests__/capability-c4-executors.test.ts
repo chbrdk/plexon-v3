@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { executeCheckionDomainScanCapability } from '@/lib/capabilities/executors/checkion-domain-scan';
 import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/checkion-geo-job';
 import { executeAudionPersonaBootstrapCapability } from '@/lib/capabilities/executors/audion-persona-bootstrap';
@@ -13,6 +13,7 @@ import { resolveCatalogPath, setContextBundle, emptyRunContext } from '@/lib/col
 import { runDomainScanWorkflow } from '@/lib/assistant/workflows/domain-scan';
 import { runGeoAnalysisWorkflow } from '@/lib/assistant/workflows/geo-analysis';
 import {
+  fetchCheckionDomainScanScores,
   fetchCheckionDomainScanV3Preview,
   pollCheckionDomainScanV3,
   runCheckionDomainScanV3,
@@ -24,6 +25,7 @@ import { runPersonaBootstrap } from '@/lib/integrations/audion-persona-bootstrap
 vi.mock('@/lib/integrations/checkion-domain-scans-v3-client', () => ({
   runCheckionDomainScanV3: vi.fn(),
   fetchCheckionDomainScanV3Preview: vi.fn(),
+  fetchCheckionDomainScanScores: vi.fn(),
   startCheckionDomainScanV3: vi.fn(),
   pollCheckionDomainScanV3: vi.fn(),
 }));
@@ -46,6 +48,13 @@ describe('capability C4 executors + adapters', () => {
   afterEach(() => {
     vi.clearAllMocks();
     delete process.env[ENV_CAPABILITY_CATALOG_RUNTIME];
+  });
+
+  beforeEach(() => {
+    vi.mocked(fetchCheckionDomainScanScores).mockResolvedValue({
+      ok: false,
+      error: 'no scores',
+    });
   });
 
   it('maps domain_scan / geo_job / persona_bootstrap / journey intents', () => {
@@ -72,6 +81,7 @@ describe('capability C4 executors + adapters', () => {
         status: 'completed',
         overallScore: 71,
         pageCount: 12,
+        scoresByKind: { accessibility: 68, generative: 55 },
       },
     });
 
@@ -85,11 +95,42 @@ describe('capability C4 executors + adapters', () => {
     const ctx = setContextBundle(emptyRunContext(), 'domain', result.catalogBundle!);
     expect(resolveCatalogPath(ctx, 'domain.overallScore')).toBe(71);
     expect(resolveCatalogPath(ctx, 'domain.url')).toBe('https://domain.test');
+    expect(resolveCatalogPath(ctx, 'domain.scores.accessibility')).toBe(68);
+    expect(resolveCatalogPath(ctx, 'domain.scores.generative')).toBe(55);
+    expect(fetchCheckionDomainScanScores).not.toHaveBeenCalled();
     expect(runCheckionDomainScanV3).toHaveBeenCalledWith(
       expect.objectContaining({
         reuseExistingCompleted: true,
       }),
     );
+  });
+
+  it('domain_scan capability fetches scoresByKind when detail omits them', async () => {
+    vi.mocked(runCheckionDomainScanV3).mockResolvedValue({
+      ok: true,
+      scan: {
+        id: 'ds-2',
+        projectId: 'ck-1',
+        url: 'https://domain.test',
+        status: 'completed',
+        overallScore: 60,
+        pageCount: 4,
+      },
+    });
+    vi.mocked(fetchCheckionDomainScanScores).mockResolvedValue({
+      ok: true,
+      byKind: { seo: 77, ux: 41 },
+    });
+
+    const result = await executeCheckionDomainScanCapability(
+      { url: 'https://domain.test' },
+      { source: 'flow', checkionProjectId: 'ck-1', platformProjectId: 'pp-1' }
+    );
+
+    expect(result.ok).toBe(true);
+    const ctx = setContextBundle(emptyRunContext(), 'domain', result.catalogBundle!);
+    expect(resolveCatalogPath(ctx, 'domain.scores.seo')).toBe(77);
+    expect(fetchCheckionDomainScanScores).toHaveBeenCalledWith('ds-2');
   });
 
   it('domain_scan capability does not reuse completed scans for agent source', async () => {

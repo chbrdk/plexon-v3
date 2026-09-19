@@ -20,6 +20,8 @@ export type DomainScanPreview = {
   seoPagesAnalyzed?: number;
   /** Corpus composition from Checkion domain-scan overview (optional). */
   distributions?: DomainScanDistributions;
+  /** Corpus mean kind scores when CHECKION exposes them. */
+  scoresByKind?: Record<string, number> | null;
 };
 
 export type DomainScanStartResult =

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   actionKindForCatalogRoot,
+  buildDomainCatalogBundle,
   buildQueriesCatalogBundle,
   buildScanCatalogBundle,
   catalogPathFromOutHandle,
@@ -34,6 +35,19 @@ describe('collection-flow-run-context', () => {
     expect(resolveCatalogPath(ctx, 'scan.overallScore')).toBe(88);
     expect(resolveCatalogPath(ctx, 'scan.scores.accessibility')).toBe(72);
     expect(resolveCatalogPath(ctx, 'scan.issues.criticalCount')).toBe(1);
+  });
+
+  it('buildDomainCatalogBundle includes scoresByKind as domain.scores', () => {
+    const bundle = buildDomainCatalogBundle({
+      status: 'completed',
+      overallScore: 55,
+      pageCount: 10,
+      url: 'https://d.test',
+      scoresByKind: { accessibility: 40, seo: 90 },
+    });
+    const ctx = setContextBundle(emptyRunContext(), 'domain', bundle);
+    expect(resolveCatalogPath(ctx, 'domain.scores.accessibility')).toBe(40);
+    expect(resolveCatalogPath(ctx, 'domain.scores.seo')).toBe(90);
   });
 
   it('evaluateCompareOp covers closed ops', () => {

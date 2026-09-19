@@ -74,5 +74,8 @@ export function mapDomainScanV3ToPreview(input: {
     score: scan.overallScore ?? 0,
     stats,
     topIssues,
+    ...(scan.scoresByKind && Object.keys(scan.scoresByKind).length
+      ? { scoresByKind: scan.scoresByKind }
+      : {}),
   }
 }

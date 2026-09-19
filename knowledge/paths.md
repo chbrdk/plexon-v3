@@ -109,6 +109,7 @@
   - Canvas helpers: `lib/collection-flow-canvas.ts`
   - Live journey: `POST …/flows/:flowId/run/journey` · `GET …/journey-jobs/:jobId` · quality via existing `…/run`
   - Wave 8A quality catalog: `scan.scanMode` single|deep · `domain_scan` · `scoreKind` · expanded issue_gate conditions — `specs/domain/collection-test-flow.md`
+  - Domain catalog `scores.*` (corpus kind means): `buildDomainCatalogBundle` + `fetchCheckionDomainScanScores` (`checkionApiDomainScanDetail` / `checkionApiDomainScanOverview`) — parity with CHECKION `DomainScanLight.scoresByKind` (`checkion-v3/knowledge/deep-scan-score-parity.md`)
   - Wave 8B GEO: `geo_job` / `geo_gate` · `checkionApiGeoJobs` · `pathCheckionGeoOverview` → `/geo/{id}/overview`
   - Wave 9 Run Context: catalog outputs + `compare` node — `specs/domain/collection-test-flow.md`
   - Wave 10 Catalog Port UX: labeled I/O ports + `bind` edges — `specs/domain/collection-test-flow.md`

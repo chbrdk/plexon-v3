@@ -54,6 +54,7 @@ import { executeCheckionGeoJobCapability } from '@/lib/capabilities/executors/ch
 import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import {
+  fetchCheckionDomainScanScores,
   fetchCheckionDomainScanV3Issues,
   runCheckionDomainScanV3,
 } from '@/lib/integrations/checkion-domain-scans-v3-client';
@@ -421,6 +422,11 @@ export async function executeEqcCollectionFlowRun(input: {
       domainScanId = domainScan.id;
       overallScore = domainScan.overallScore;
       const issuesRes = await fetchCheckionDomainScanV3Issues(domainScan.id);
+      let scoresByKind = domainScan.scoresByKind ?? null;
+      if (!scoresByKind || !Object.keys(scoresByKind).length) {
+        const scoresRes = await fetchCheckionDomainScanScores(domainScan.id);
+        if (scoresRes.ok) scoresByKind = scoresRes.byKind;
+      }
       runContext = setContextBundle(
         runContext,
         'domain',
@@ -439,6 +445,7 @@ export async function executeEqcCollectionFlowRun(input: {
                 title: typeof o.title === 'string' ? o.title : undefined,
               }))
             : [],
+          scoresByKind,
         }),
         node.id
       );

@@ -11,6 +11,7 @@ import type {
 } from '@/lib/capabilities/types';
 import type { DomainScanPreview } from '@/lib/integrations/checkion-domain-scan-client';
 import {
+  fetchCheckionDomainScanScores,
   fetchCheckionDomainScanV3Preview,
   runCheckionDomainScanV3,
   type CheckionDomainScanSummary,
@@ -73,6 +74,7 @@ export async function executeCheckionDomainScanCapability(
             pageCount: result.scan.pageCount ?? null,
             scanId: result.scan.id,
             url: result.scan.url || url,
+            scoresByKind: result.scan.scoresByKind ?? null,
           })
         : undefined,
       agentPayload: result.scan ? { variant: 'flow', scan: result.scan } : undefined,
@@ -80,12 +82,18 @@ export async function executeCheckionDomainScanCapability(
   }
 
   const scan = result.scan;
+  let scoresByKind = scan.scoresByKind ?? null;
+  if (!scoresByKind || !Object.keys(scoresByKind).length) {
+    const scoresRes = await fetchCheckionDomainScanScores(scan.id);
+    if (scoresRes.ok) scoresByKind = scoresRes.byKind;
+  }
   const catalogBundle = buildDomainCatalogBundle({
     status: scan.status,
     overallScore: scan.overallScore,
     pageCount: scan.pageCount ?? null,
     scanId: scan.id,
     url: scan.url || url,
+    scoresByKind,
   });
 
   if (ctx.source === 'agent') {

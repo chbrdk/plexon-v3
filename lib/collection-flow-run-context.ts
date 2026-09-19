@@ -551,7 +551,14 @@ export function buildDomainCatalogBundle(input: {
   issueItems?: CatalogIssueItem[] | null;
   scanId?: string | null;
   url?: string | null;
+  scoresByKind?: Record<string, number> | null;
 }): Record<string, unknown> {
+  const scores: Record<string, number> = {};
+  if (input.scoresByKind) {
+    for (const [k, v] of Object.entries(input.scoresByKind)) {
+      if (typeof v === 'number' && Number.isFinite(v)) scores[k] = v;
+    }
+  }
   const issues = input.issues ?? {
     criticalCount: 0,
     seriousCount: 0,
@@ -570,6 +577,7 @@ export function buildDomainCatalogBundle(input: {
     scanId: input.scanId ?? null,
     url: input.url ?? null,
     issueCount: issues.issueCount,
+    scores,
     issues: {
       criticalCount: issues.criticalCount,
       seriousCount: issues.seriousCount,
