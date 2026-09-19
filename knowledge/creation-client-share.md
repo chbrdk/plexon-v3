@@ -19,5 +19,11 @@ Plexon owns **policy + Collection ownership** for CREATION client preview links.
 - Ingest: `POST …/client-share-events`
 - Export: `GET …/client-share-events/export` · panel button “Export audit CSV”
 
+## P6 Company defaults
+
+- Table: `company_client_share_policies` (migration `0019`)
+- Admin UI: `CompanyClientSharePolicyPanel` on `/admin/companies/:id`
+- Collection GET returns company→Collection restrictive merge; Collection PATCH may not loosen past company
+
 Do not overload `collection_invites` for external clients.
 

@@ -72,6 +72,22 @@
     "archivingProject": "Archiviere…",
     "editCompany": "Organisation bearbeiten",
     "saveCompany": "Speichern",
+    "clientShare": {
+      "title": "Client-Seitenfreigabe Defaults",
+      "subtitle": "Org-Obergrenze für CREATION Client-Links. Collections dürfen nur verschärfen.",
+      "loadError": "Client-Share-Defaults konnten nicht geladen werden.",
+      "saveError": "Client-Share-Defaults konnten nicht gespeichert werden.",
+      "saved": "Defaults gespeichert.",
+      "enabled": "Client-Seitenfreigaben erlauben",
+      "allowPublicLink": "Offene Links erlauben (ohne Passwort)",
+      "requirePassword": "Passwort verlangen, wenn offene Links aus sind",
+      "allowLiveHead": "Live-Entwurf (live_head) erlauben",
+      "allowEmailAllowlist": "E-Mail-Allowlist-Shares erlauben",
+      "maxTtlDays": "Max. Link-Laufzeit (Tage)",
+      "maxTtlUnlimited": "Kein Maximum",
+      "saveTtl": "TTL speichern",
+      "ttlInvalid": "Positive Tageszahl eingeben oder leer lassen für kein Maximum."
+    },
     "usersTitle": "Nutzer",
     "usersSubtitle": "Übersicht aller zentralen Konten (anzeigen, bearbeiten, löschen).",
     "usersOrganizations": "Organisationen",
@@ -452,7 +468,8 @@
         "revokeError": "Freigabe konnte nicht widerrufen werden.",
         "revokedCount": "{count} widerrufen (für Audit behalten).",
         "exportAudit": "Audit-CSV exportieren",
-        "exportError": "Audit-CSV konnte nicht exportiert werden."
+        "exportError": "Audit-CSV konnte nicht exportiert werden.",
+        "companyCeilingHint": "Werte sind durch Organisations-Defaults begrenzt. Lockern über die Company-Policy wird abgelehnt."
       },
       "knowledgeTitle": "Collection-Wissen",
       "knowledgeSubtitle": "Plattform-Quelle der Wahrheit — gemeinsamer Brief für CHECKION und AUDION.",

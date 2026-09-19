@@ -233,6 +233,7 @@ export function CollectionClientSharesPanel({
 
       {!loading && policy ? (
         <>
+          <Text role="meta">{t('projects.detail.clientShares.companyCeilingHint')}</Text>
           <div className="plexon-collection-client-shares-policy">
             <label className="plexon-collection-client-shares-check">
               <input

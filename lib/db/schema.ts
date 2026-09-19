@@ -617,6 +617,24 @@ export const collectionClientSharePolicies = pgTable('collection_client_share_po
 });
 
 /**
+ * Company-level Client Page Share defaults (P6). Collection may only tighten.
+ * Spec: creation-client-share.md
+ */
+export const companyClientSharePolicies = pgTable('company_client_share_policies', {
+  companyId: text('company_id')
+    .primaryKey()
+    .references(() => companies.id, { onDelete: 'cascade' }),
+  enabled: boolean('enabled').notNull().default(true),
+  allowPublicLink: boolean('allow_public_link').notNull().default(false),
+  requirePassword: boolean('require_password').notNull().default(true),
+  maxTtlDays: integer('max_ttl_days'),
+  allowLiveHead: boolean('allow_live_head').notNull().default(true),
+  allowEmailAllowlist: boolean('allow_email_allowlist').notNull().default(true),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedByUserId: text('updated_by_user_id'),
+});
+
+/**
  * Metadata-only projection of CREATION client shares (no tokens).
  * Spec: creation-client-share.md
  */

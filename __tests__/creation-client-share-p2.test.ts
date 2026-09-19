@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..')
 
 describe('creation client share P2', () => {
   it('defaults deny public link and allow live/email', () => {
-    const src = readFileSync(path.join(root, 'lib/creation-client-share.ts'), 'utf8')
+    const src = readFileSync(path.join(root, 'lib/client-share-policy-merge.ts'), 'utf8')
     expect(src).toContain('allowPublicLink: false')
     expect(src).toContain('requirePassword: true')
     expect(src).toContain('allowLiveHead: true')

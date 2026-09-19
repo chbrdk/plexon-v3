@@ -430,6 +430,8 @@ export const apiAdminCompany = (id: string) =>
 export const apiAdminCompanyMembers = (id: string) => `${apiAdminCompany(id)}/members`;
 export const apiAdminCompanyPlatformProjects = (id: string) =>
   `${apiAdminCompany(id)}/platform-projects`;
+export const apiAdminCompanyClientSharePolicy = (id: string) =>
+  `${apiAdminCompany(id)}/client-share-policy`;
 export const apiAdminPlatformProject = (id: string) =>
   `/api/admin/platform-projects/${encodeURIComponent(id)}`;
 export const apiAdminPlatformProjectSync = (id: string) =>

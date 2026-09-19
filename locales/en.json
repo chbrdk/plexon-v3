@@ -72,6 +72,22 @@
     "archivingProject": "Archiving…",
     "editCompany": "Edit organization",
     "saveCompany": "Save",
+    "clientShare": {
+      "title": "Client page share defaults",
+      "subtitle": "Org ceiling for CREATION client links. Collections may only tighten these rules.",
+      "loadError": "Could not load client share defaults.",
+      "saveError": "Could not save client share defaults.",
+      "saved": "Defaults saved.",
+      "enabled": "Allow client page shares",
+      "allowPublicLink": "Allow open links (no password)",
+      "requirePassword": "Require password when public links are off",
+      "allowLiveHead": "Allow live draft (live_head) shares",
+      "allowEmailAllowlist": "Allow email allowlist shares",
+      "maxTtlDays": "Max link lifetime (days)",
+      "maxTtlUnlimited": "No max",
+      "saveTtl": "Save TTL",
+      "ttlInvalid": "Enter a positive number of days, or leave empty for no max."
+    },
     "usersTitle": "Users",
     "usersSubtitle": "All central accounts (view, edit, delete).",
     "usersOrganizations": "Organizations",
@@ -452,7 +468,8 @@
         "revokeError": "Could not revoke share.",
         "revokedCount": "{count} revoked (kept for audit).",
         "exportAudit": "Export audit CSV",
-        "exportError": "Could not export audit CSV."
+        "exportError": "Could not export audit CSV.",
+        "companyCeilingHint": "Values are capped by organization defaults. Loosening past the company policy is rejected."
       },
       "knowledgeTitle": "Collection knowledge",
       "knowledgeSubtitle": "Platform source of truth — shared brief across CHECKION and AUDION.",

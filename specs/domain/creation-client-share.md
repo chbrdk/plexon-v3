@@ -1,6 +1,6 @@
 # Creation Client Page Share (PLEXON)
 
-**Status:** Accepted · 2026-09-19 · **Phase:** P5 (audit events + CSV export)  
+**Status:** Accepted · 2026-09-19 · **Phase:** P6 (company defaults + Collection override merge)  
 **Product:** CREATION capability under Collection  
 **Companion domain:** `creation-v3/specs/domain/client-page-share.md`  
 **Eval:** `creation-v3/knowledge/client-page-share-eval.md` · `creation-v3/knowledge/client-page-share-p2.md`  
@@ -29,7 +29,7 @@ Define **enterprise ownership and policy** for CREATION client page shares so ex
 
 ## Policy shape (indicative)
 
-Stored on company defaults with optional Collection override under key **`clientShare`**:
+Stored on **company defaults** (`company_client_share_policies`) with optional **Collection override** (`collection_client_share_policies`) under logical key **`clientShare`**:
 
 ```ts
 type ClientSharePolicy = {
@@ -42,7 +42,9 @@ type ClientSharePolicy = {
 }
 ```
 
-Defaults for enterprise-leaning staging:
+**P6 merge (restrictive):** company is the org ceiling; Collection may only tighten (`AND` for allows, `OR` for `requirePassword`, `min` for TTL). Collection `GET …/client-share-policy` returns the **effective** merged policy (Creation consumes it unchanged). Collection PATCH that loosens past company → **400**.
+
+Defaults for enterprise-leaning staging (code + company row when unset):
 
 - `enabled: true`
 - `allowPublicLink: false`
@@ -62,6 +64,7 @@ Defaults for enterprise-leaning staging:
 | `DELETE …/client-shares/:shareId` | Lifecycle manage: mark projection revoked **and** fan-out `DELETE` to Creation token store |
 | `POST …/client-share-events` | Creation service ingest (P5) |
 | `GET …/client-share-events/export` | CSV audit export (P5) |
+| `GET/PATCH /api/admin/companies/:id/client-share-policy` | Company defaults (P6, admin) |
 
 Phase 1 shipped Creation-local feature flags; P2 adds live policy + inventory; **P4** ships Collection UI + Creation revoke fan-out.
 
@@ -88,7 +91,7 @@ Minimum events (Creation emits via service ingest; Plexon also records revoke on
 
 **P5 export:** `GET …/collections/:id/client-share-events/export` → `text/csv` (view access; capped window).
 
-Company-default policy merge remains deferred (Collection row or code defaults today).
+**P6:** Company defaults table + restrictive merge into Collection GET.
 
 ## Invariants
 
@@ -106,4 +109,5 @@ Company-default policy merge remains deferred (Collection row or code defaults t
 ## Testing
 
 - Spec file present; policy defaults documented  
-- When implemented: unit tests for policy merge (company → Collection) and deny-by-default public link when `requirePassword`
+- Unit tests for policy merge (company → Collection) and deny-by-default public link when `requirePassword`
+- Company admin GET/PATCH path helpers; Collection GET returns effective merge
