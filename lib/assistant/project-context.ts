@@ -128,7 +128,7 @@ async function fetchAudionProjectContext(
     if (listRes.status >= 300 && listRes.status < 400) {
       const location = listRes.headers.get('location') ?? '';
       return [
-        `AUDION: Login-Redirect (${listRes.status} → ${location || '?'}) – AUDION_API_URL in Coolify auf FastAPI setzen (z.B. http://audion-api:8000), nicht Web-URL`,
+        `AUDION: Login-Redirect (${listRes.status} → ${location || '?'}) – AUDION_API_URL in Coolify auf https://audion-v3…/api setzen (nicht Web-Origin ohne /api)`,
       ];
     }
     return [formatAudionHttpFailure(listRes.status, listRes.headers.get('content-type'), body, 'AUDION Zielgruppen')];
@@ -138,7 +138,7 @@ async function fetchAudionProjectContext(
   try {
     listJson = (await listRes.json()) as { items?: AudionTargetGroup[] };
   } catch {
-    return ['AUDION: Ungültige JSON-Antwort – vermutlich Web-App statt FastAPI (AUDION_API_URL prüfen)'];
+    return ['AUDION: Ungültige JSON-Antwort – AUDION_API_URL prüfen (erwartet audion-v3 …/api)'];
   }
   const groups = (listJson.items ?? []).slice(0, 8);
   if (groups.length === 0) return ['AUDION: Keine Zielgruppen'];

@@ -20,3 +20,5 @@ Plexon chat session = signed-in user. CHECKION/AUDION MCP + RAG called Products 
 
 - Collection Team consumers: `knowledge/collection-team-ecosystem.md`
 - Paths: machine tokens stay in Coolify env; no per-user redeploy
+- Staging two-user smoke: `knowledge/assistant-access-model-b-smoke.md`
+- Canonical AUDION assistant API: `AUDION_API_URL=https://audion-v3.projects-a.plygrnd.tech/api` (not FastAPI)
