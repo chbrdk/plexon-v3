@@ -128,7 +128,7 @@ export function injectCreationSceneToolArgs(
   return out;
 }
 
-/** Creation scene args + Spirion search platformProjectId + VIDEON + METRON actor injection. */
+/** Creation scene args + Spirion + VIDEON + METRON + CHECKION/AUDION/BRANDION actor injection. */
 export function injectAssistantMcpToolArgs(
   toolName: string,
   input: Record<string, unknown>,
@@ -142,7 +142,62 @@ export function injectAssistantMcpToolArgs(
   const withCreation = injectCreationSceneToolArgs(toolName, input, ctx);
   const withSpirion = injectSpirionToolArgs(toolName, withCreation, ctx);
   const withVideon = injectVideonToolArgs(toolName, withSpirion, ctx);
-  return injectMetronToolArgs(toolName, withVideon, ctx);
+  const withMetron = injectMetronToolArgs(toolName, withVideon, ctx);
+  const withCheckion = injectCheckionToolArgs(toolName, withMetron, ctx);
+  const withAudion = injectAudionToolArgs(toolName, withCheckion, ctx);
+  return injectBrandionToolArgs(toolName, withAudion, ctx);
+}
+
+/**
+ * Inject authenticated session user into CHECKION MCP tools (Access Model B).
+ * Spec: specs/domain/assistant-actor-identity.md
+ */
+export function injectCheckionToolArgs(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: { actorUserId: string },
+): Record<string, unknown> {
+  if (!/^checkion([._]|$)/i.test(toolName)) return input;
+  if (/health$/i.test(toolName)) return input;
+  const out = { ...input };
+  if (ctx.actorUserId.trim()) {
+    out.actorUserId = ctx.actorUserId.trim();
+  }
+  return out;
+}
+
+/**
+ * Inject authenticated session user into AUDION MCP tools (Access Model B).
+ */
+export function injectAudionToolArgs(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: { actorUserId: string },
+): Record<string, unknown> {
+  if (!/^audion([._]|$)/i.test(toolName)) return input;
+  if (/health$/i.test(toolName)) return input;
+  const out = { ...input };
+  if (ctx.actorUserId.trim()) {
+    out.actorUserId = ctx.actorUserId.trim();
+  }
+  return out;
+}
+
+/**
+ * Inject authenticated session user into BRANDION MCP tools (Access Model B).
+ */
+export function injectBrandionToolArgs(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: { actorUserId: string },
+): Record<string, unknown> {
+  if (!/^brandion([._]|$)/i.test(toolName)) return input;
+  if (/health$/i.test(toolName)) return input;
+  const out = { ...input };
+  if (ctx.actorUserId.trim()) {
+    out.actorUserId = ctx.actorUserId.trim();
+  }
+  return out;
 }
 
 function isVideonMediaSearchTool(toolName: string): boolean {

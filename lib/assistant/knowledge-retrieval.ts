@@ -7,6 +7,11 @@ import {
   audionApiTargetGroupKnowledge,
   audionApiTargetGroups,
 } from '@/lib/paths/audion-api';
+import {
+  PLEXON_CONTRACT_VERSION_HEADER,
+  PLEXON_FEDERATION_CONTRACT_VERSION,
+  PLEXON_SERVICE_SECRET_HEADER,
+} from '@/lib/platform-contract';
 
 export const ASSISTANT_MAX_RETRIEVAL_CHARS = 12_000;
 
@@ -110,11 +115,17 @@ export function rankKnowledgeHits(hits: KnowledgeHit[], terms: string[], limit =
 }
 
 function serviceHeaders(plexonUserId: string, token: string): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
     'X-Plexon-User-Id': plexonUserId,
   };
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (secret) {
+    headers[PLEXON_SERVICE_SECRET_HEADER] = secret;
+    headers[PLEXON_CONTRACT_VERSION_HEADER] = PLEXON_FEDERATION_CONTRACT_VERSION;
+  }
+  return headers;
 }
 
 async function collectAudionHits(

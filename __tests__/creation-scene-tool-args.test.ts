@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   extractCreationSceneUpdatedAt,
+  injectAudionToolArgs,
+  injectAssistantMcpToolArgs,
+  injectBrandionToolArgs,
+  injectCheckionToolArgs,
   injectCreationSceneToolArgs,
   injectVideonToolArgs,
 } from '@/lib/assistant/creation-scene-tool-args'
@@ -201,5 +205,39 @@ describe('injectVideonToolArgs', () => {
     expect(
       injectVideonToolArgs('videon_health', input, { actorUserId: 'session-user' }),
     ).toEqual(input)
+  })
+})
+
+describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs', () => {
+  it('forces session actor on checkion/audion/brandion tools', () => {
+    expect(
+      injectCheckionToolArgs(
+        'checkion_v3.projects_list',
+        { actorUserId: 'llm-spoof' },
+        { actorUserId: 'session-user' },
+      ).actorUserId,
+    ).toBe('session-user')
+
+    expect(
+      injectAudionToolArgs('audion_projects_list', {}, { actorUserId: 'session-user' })
+        .actorUserId,
+    ).toBe('session-user')
+
+    expect(
+      injectBrandionToolArgs('brandion.projects_list', {}, { actorUserId: 'session-user' })
+        .actorUserId,
+    ).toBe('session-user')
+
+    expect(
+      injectAssistantMcpToolArgs(
+        'checkion_v3.scans_list',
+        { limit: 5 },
+        { actorUserId: 'session-user' },
+      ).actorUserId,
+    ).toBe('session-user')
+
+    expect(
+      injectCheckionToolArgs('checkion_v3.health', {}, { actorUserId: 'session-user' }),
+    ).toEqual({})
   })
 })

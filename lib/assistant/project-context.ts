@@ -17,18 +17,30 @@ import {
   normalizeResearchBriefData,
 } from '@/lib/collection-knowledge-pack';
 import { getOrCreateKnowledgePack } from '@/lib/db/collection-knowledge-packs';
+import {
+  PLEXON_CONTRACT_VERSION_HEADER,
+  PLEXON_FEDERATION_CONTRACT_VERSION,
+  PLEXON_SERVICE_SECRET_HEADER,
+} from '@/lib/platform-contract';
 
 type BindingIds = {
   checkionProjectId?: string | null;
   audionProjectId?: string | null;
 };
 
+/** Machine Bearer + actor (+ service secret when configured). Spec: assistant-actor-identity.md */
 function serviceHeaders(plexonUserId: string, token: string): Record<string, string> {
-  return {
+  const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
     'X-Plexon-User-Id': plexonUserId,
   };
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (secret) {
+    headers[PLEXON_SERVICE_SECRET_HEADER] = secret;
+    headers[PLEXON_CONTRACT_VERSION_HEADER] = PLEXON_FEDERATION_CONTRACT_VERSION;
+  }
+  return headers;
 }
 
 function compactStringList(value: unknown, max = 12): string[] {

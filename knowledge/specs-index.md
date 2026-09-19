@@ -22,6 +22,7 @@
 | UI migrate — assistant | `specs/domain/ui-migrate-assistant.md` |
 | Central Assistant Flyout | `specs/domain/central-assistant-flyout.md` |
 | Assistant ↔ CREATION MCP (scene quality loop) | `specs/domain/assistant-creation-mcp.md` |
+| Assistant actor identity (Access Model B) | `specs/domain/assistant-actor-identity.md` |
 | Assistant ↔ CREATION domain autonomy (“AGI-lite”) | `specs/domain/assistant-creation-agi-lite.md` |
 | Assistant page context | `specs/domain/assistant-page-context.md` |
 | Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |

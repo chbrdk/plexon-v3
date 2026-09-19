@@ -14,6 +14,10 @@
 | Metron | Project detail panel | `/api/projects/:id/members` · invites | Gate via `collection-access` |
 | Videon | Collections hub Team panel | `/api/collections/:platformProjectId/members` · invites | Local `videon_workspace_members` = projection only; do not rewrite replay |
 
+## Assistant
+
+Chat must use the **session user** as actor when calling product MCP/RAG — not the Coolify API-token owner. See `knowledge/assistant-actor-identity.md` · `specs/domain/assistant-actor-identity.md`.
+
 ## Non-goals
 
 - Company-wide visibility
