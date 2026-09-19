@@ -11,6 +11,7 @@
 | Platform outbox delivery (Wave A) | `specs/domain/platform-outbox-delivery.md` |
 | Collection read model (Wave B/D) | `specs/domain/collection-read-model.md` |
 | Collection invite links | `specs/domain/collection-invite-links.md` |
+| Collection members | `specs/api/collection-members.md` |
 | Collection Memory (Wave 1) | `specs/domain/collection-memory-wave1.md` |
 | ECHON Collection binding (Wave 2) | `specs/domain/echon-collection-binding.md` |
 | UI migrate (index) | `specs/domain/ui-migrate.md` |
@@ -38,6 +39,7 @@
 |------|------|
 | Collection Knowledge Pack | `specs/api/collection-knowledge-pack.md` |
 | Collection invites | `specs/api/collection-invites.md` |
+| Collection members | `specs/api/collection-members.md` |
 | Assistant embed protocol | `specs/api/assistant-embed.md` |
 
 ## Knowledge (related)

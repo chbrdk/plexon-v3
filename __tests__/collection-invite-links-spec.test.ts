@@ -31,6 +31,18 @@ describe('collection invite links specs', () => {
     expect(constants).toContain('apiPlatformProvisioningCollectionInvites');
   });
 
+  it('members API spec + constants exist', () => {
+    const api = path.join(root, 'specs/api/collection-members.md');
+    expect(existsSync(api)).toBe(true);
+    const apiText = readFileSync(api, 'utf8');
+    expect(apiText).toContain('already_member');
+    expect(apiText).toContain('creator_immutable');
+    const constants = readFileSync(path.join(root, 'lib/constants.ts'), 'utf8');
+    expect(constants).toContain('apiPlatformProvisioningCollectionMembers');
+    const paths = readFileSync(path.join(root, 'knowledge/paths.md'), 'utf8');
+    expect(paths).toContain('collection-members');
+  });
+
   it('migration 0015 creates collection_invites', () => {
     const sql = readFileSync(
       path.join(root, 'lib/db/migrations/0015_collection_invites.sql'),

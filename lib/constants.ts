@@ -157,6 +157,19 @@ export function apiPlatformProvisioningCollectionInvite(
   return `${apiPlatformProvisioningCollectionInvites(platformProjectId)}/${encodeURIComponent(inviteId)}`;
 }
 
+/** Collection members (Access Model B roster). Spec: collection-members.md */
+export const API_PLATFORM_PROVISIONING_COLLECTION_MEMBERS =
+  '/api/platform/provisioning/collections/:platformProjectId/members';
+export function apiPlatformProvisioningCollectionMembers(platformProjectId: string): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/members`;
+}
+export function apiPlatformProvisioningCollectionMember(
+  platformProjectId: string,
+  userId: string
+): string {
+  return `${apiPlatformProvisioningCollectionMembers(platformProjectId)}/${encodeURIComponent(userId)}`;
+}
+
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;

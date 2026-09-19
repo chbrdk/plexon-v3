@@ -37,3 +37,7 @@ Authenticated Plexon users in the **same company** can be invited to a Collectio
 - Scene-scoped ACL tables  
 - Cross-company invites  
 - CRDT/OT editing (Presence remains as today)
+
+## Direct email assignment
+
+Products may also add a same-company user by email via `POST …/collections/:id/members` (additive upsert into `user_platform_project_assignments`). Spec: `specs/api/collection-members.md`. Existing assignments are never overwritten or deleted by that POST.

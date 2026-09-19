@@ -7,6 +7,7 @@
  *
  * Product UIs filter via `accessible-collections` (live) and/or local owner id.
  * Spec: `specs/domain/collection-projects.md` invariant 5.
+ * Team roster SSOT: `GET/POST …/collections/:id/members` (`specs/api/collection-members.md`).
  */
 
 export {}

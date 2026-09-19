@@ -55,6 +55,36 @@ export async function getUserPlatformProjectAssignment(
   return row ? mapRow(row) : null;
 }
 
+/** All explicit assignments for one Collection (Access Model B roster). */
+export async function listAssignmentsForPlatformProject(
+  platformProjectId: string
+): Promise<StoredUserPlatformProjectAssignment[]> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(userPlatformProjectAssignments)
+    .where(eq(userPlatformProjectAssignments.platformProjectId, platformProjectId));
+  return rows.map(mapRow);
+}
+
+/** Remove a non-creator assignment. Caller must enforce creator immutability. */
+export async function deleteUserPlatformProjectAssignment(
+  userId: string,
+  platformProjectId: string
+): Promise<boolean> {
+  const db = getDb();
+  const deleted = await db
+    .delete(userPlatformProjectAssignments)
+    .where(
+      and(
+        eq(userPlatformProjectAssignments.userId, userId),
+        eq(userPlatformProjectAssignments.platformProjectId, platformProjectId)
+      )
+    )
+    .returning({ userId: userPlatformProjectAssignments.userId });
+  return deleted.length > 0;
+}
+
 export async function upsertUserPlatformProjectAssignment(
   userId: string,
   platformProjectId: string,
