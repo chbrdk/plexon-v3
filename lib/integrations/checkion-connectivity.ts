@@ -98,21 +98,45 @@ export function formatCheckionScanHttpFailure(status: number, body: string): str
   return snippet ? `CHECKION Scan: HTTP ${status} – ${snippet}` : `CHECKION Scan: HTTP ${status}`;
 }
 
-export function resolveCheckionServiceAuth():
+export function resolveCheckionServiceAuth(actorUserId?: string | null):
   | { ok: true; token: string; headers: Record<string, string> }
   | { ok: false; error: string } {
   const token = getCheckionServiceToken();
   if (!token) {
     return { ok: false, error: checkionMissingTokenError() };
   }
+  const actor = actorUserId?.trim() || '';
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+  if (actor) {
+    headers['X-Plexon-User-Id'] = actor;
+  }
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (secret) {
+    headers['X-Service-Secret'] = secret;
+    headers['X-Plexon-Contract-Version'] =
+      process.env.PLEXON_FEDERATION_CONTRACT_VERSION?.trim() ||
+      '2026-05-plexon-federation-v3';
+    if (actor) headers['X-Plexon-User-Id'] = actor;
+  }
   return {
     ok: true,
     token,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
   };
+}
+
+/** Assistant / product calls: machine auth without actor fails closed. */
+export function resolveCheckionServiceAuthForActor(actorUserId: string | null | undefined):
+  | { ok: true; token: string; headers: Record<string, string> }
+  | { ok: false; error: string } {
+  const actor = actorUserId?.trim();
+  if (!actor) {
+    return { ok: false, error: 'X-Plexon-User-Id (actor) erforderlich für CHECKION Machine-Auth' };
+  }
+  return resolveCheckionServiceAuth(actor);
 }
 
 export async function probeCheckionApiHealth(): Promise<CheckionProbeResult> {

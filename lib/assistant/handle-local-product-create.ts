@@ -79,7 +79,7 @@ export async function handleLocalProductCreate(
   const result =
     input.product === 'audion'
       ? await createAudionProject(input.name)
-      : await createCheckionProject(input.name, input.domain);
+      : await createCheckionProject(input.name, input.domain, input.userId);
 
   if (!result.ok) {
     steps = await advanceSteps(workflowRun.id, steps, 'create', {

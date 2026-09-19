@@ -5,6 +5,7 @@ import {
 } from '@/lib/auth-request-user';
 import { canManageCompany } from '@/lib/auth-company-access';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
+import { USER_ROLE } from '@/lib/db/schema';
 import { getUserPlatformProjectAssignment } from '@/lib/db/user-platform-project-assignments';
 import { userCanViewPlatformProject } from '@/lib/platform-project-access';
 import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning';
@@ -25,18 +26,24 @@ export function hasValidContractHeader(request: Request): boolean {
   return contract === PLEXON_FEDERATION_CONTRACT_VERSION;
 }
 
+const PLEXON_USER_ID_HEADER = 'X-Plexon-User-Id';
+
 export type KnowledgeAuth =
-  | { kind: 'service' }
+  | { kind: 'service'; userId: string }
   | { kind: 'session'; user: RequestUser };
 
-/** Session viewer OR valid service secret (+ contract for service). */
+/** Session viewer OR service secret + actor with Access Model B on the Collection. */
 export async function authorizeKnowledgeRead(
   request: Request,
   platformProjectId: string
 ): Promise<KnowledgeAuth | { error: 'unauthorized' | 'forbidden' | 'contract' }> {
   if (isServiceSecretAuthorized(request)) {
     if (!hasValidContractHeader(request)) return { error: 'contract' };
-    return { kind: 'service' };
+    const actor = request.headers.get(PLEXON_USER_ID_HEADER)?.trim();
+    if (!actor) return { error: 'unauthorized' };
+    const allowed = await userCanViewPlatformProject(actor, USER_ROLE.USER, platformProjectId);
+    if (!allowed) return { error: 'forbidden' };
+    return { kind: 'service', userId: actor };
   }
   const user = await getRequestUser(request);
   if (!user) return { error: 'unauthorized' };

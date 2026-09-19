@@ -4,6 +4,7 @@ import {
   getCheckionUrlDiagnostics,
   isCheckionUserApiTokenFormat,
   resolveCheckionServiceAuth,
+  resolveCheckionServiceAuthForActor,
 } from '@/lib/integrations/checkion-connectivity';
 
 describe('checkion-connectivity', () => {
@@ -57,6 +58,22 @@ describe('checkion-connectivity', () => {
     if (!auth.ok) {
       expect(auth.error).toContain('CHECKION_API_TOKEN fehlt');
       expect(auth.error).toContain('CHECKION_ADMIN_API_KEY');
+    }
+  });
+
+  it('resolveCheckionServiceAuthForActor fails closed without actor', () => {
+    process.env.CHECKION_API_TOKEN = 'checkion_' + 'c'.repeat(64);
+    const auth = resolveCheckionServiceAuthForActor(null);
+    expect(auth.ok).toBe(false);
+    if (!auth.ok) expect(auth.error).toContain('actor');
+  });
+
+  it('resolveCheckionServiceAuth attaches actor header when provided', () => {
+    process.env.CHECKION_API_TOKEN = 'checkion_' + 'c'.repeat(64);
+    const auth = resolveCheckionServiceAuth('user-42');
+    expect(auth.ok).toBe(true);
+    if (auth.ok) {
+      expect(auth.headers['X-Plexon-User-Id']).toBe('user-42');
     }
   });
 });

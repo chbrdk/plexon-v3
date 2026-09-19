@@ -115,6 +115,7 @@ export async function executeCheckionScanCapability(
   const quick = await runCheckionQuickScan({
     url,
     checkionProjectId: ctx.checkionProjectId,
+    actorUserId: ctx.actorUserId,
   });
   if (!quick.ok) {
     return { ok: false, error: quick.error, catalogRoot: 'scan' };

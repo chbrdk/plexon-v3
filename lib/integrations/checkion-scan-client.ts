@@ -1,4 +1,4 @@
-import { formatCheckionScanHttpFailure, resolveCheckionServiceAuth } from '@/lib/integrations/checkion-connectivity';
+import { formatCheckionScanHttpFailure, resolveCheckionServiceAuthForActor } from '@/lib/integrations/checkion-connectivity';
 import { checkionApiScan } from '@/lib/paths/checkion-api';
 import type { ScanResultPreview } from '@/lib/assistant/ui-blocks/build-scan-result-ui';
 
@@ -33,13 +33,14 @@ function mapScanData(data: Record<string, unknown>): ScanResultPreview {
 export async function runCheckionQuickScan(input: {
   url: string;
   checkionProjectId?: string | null;
+  actorUserId?: string | null;
 }): Promise<QuickScanResult> {
   const url = input.url.trim();
   if (!url) {
     return { ok: false, error: 'URL fehlt', missing: ['url'] };
   }
 
-  const auth = resolveCheckionServiceAuth();
+  const auth = resolveCheckionServiceAuthForActor(input.actorUserId);
   if (!auth.ok) {
     return { ok: false, error: auth.error };
   }

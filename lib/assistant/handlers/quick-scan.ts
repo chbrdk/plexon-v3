@@ -42,7 +42,11 @@ export const handleQuickScanIntent: IntentHandler<'quick_scan'> = async (ctx, in
   emitWorkflowStepsToStream(ctx.emit, initialSteps, 'quick_scan', stepListTitle);
 
   const { ok, scan, error, steps: scanSteps } = await runQuickScanWorkflow(
-    { url: intent.url, checkionProjectId: ctx.bindingIds?.checkionProjectId },
+    {
+      url: intent.url,
+      checkionProjectId: ctx.bindingIds?.checkionProjectId,
+      actorUserId: ctx.user.id,
+    },
     {
       workflowRunId,
       initialSteps: workflowRun.steps,

@@ -19,7 +19,7 @@ export type QuickScanWorkflowOptions = {
 };
 
 export async function runQuickScanWorkflow(
-  input: { url: string; checkionProjectId?: string | null },
+  input: { url: string; checkionProjectId?: string | null; actorUserId?: string | null },
   options: QuickScanWorkflowOptions = {}
 ): Promise<{
   ok: boolean;
@@ -74,6 +74,7 @@ export async function runQuickScanWorkflow(
       {
         source: 'agent',
         checkionProjectId: input.checkionProjectId,
+        actorUserId: input.actorUserId,
       }
     );
     if (
@@ -89,6 +90,7 @@ export async function runQuickScanWorkflow(
     const result = await runCheckionQuickScan({
       url: input.url,
       checkionProjectId: input.checkionProjectId,
+      actorUserId: input.actorUserId,
     });
     if (result.ok) scan = result.scan;
     else scanError = result.error;

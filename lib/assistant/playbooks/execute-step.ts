@@ -49,7 +49,11 @@ export async function executePlaybookStep(
       return { ok: true, payload: { kind: 'pagespeed_check', data: result.data } };
     }
     case 'quick_scan': {
-      const result = await runCheckionQuickScan({ url, checkionProjectId });
+      const result = await runCheckionQuickScan({
+        url,
+        checkionProjectId,
+        actorUserId: ctx.userId,
+      });
       if (!result.ok) return { ok: false, error: result.error };
       return { ok: true, payload: { kind: 'quick_scan', data: result.scan } };
     }

@@ -1,4 +1,4 @@
-import { resolveCheckionServiceAuth } from '@/lib/integrations/checkion-connectivity';
+import { resolveCheckionServiceAuthForActor } from '@/lib/integrations/checkion-connectivity';
 import { checkionApiProjectsCreate } from '@/lib/paths/checkion-api';
 
 export type CreateCheckionProjectResult =
@@ -12,14 +12,15 @@ function formatCheckionHttpFailure(status: number, body: string, context: string
 
 export async function createCheckionProject(
   name: string,
-  domain?: string | null
+  domain?: string | null,
+  actorUserId?: string | null
 ): Promise<CreateCheckionProjectResult> {
   const trimmed = name.trim();
   if (!trimmed) {
     return { ok: false, error: 'Projektname fehlt', missing: ['name'] };
   }
 
-  const auth = resolveCheckionServiceAuth();
+  const auth = resolveCheckionServiceAuthForActor(actorUserId);
   if (!auth.ok) {
     return { ok: false, error: auth.error };
   }

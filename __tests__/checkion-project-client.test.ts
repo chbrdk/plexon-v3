@@ -25,11 +25,22 @@ describe('createCheckionProject', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await createCheckionProject('Acme', 'acme.com');
+    const result = await createCheckionProject('Acme', 'acme.com', 'user-actor-1');
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.id).toBe('proj-1');
       expect(result.domain).toBe('acme.com');
     }
+    expect(fetchMock).toHaveBeenCalled();
+    const init = fetchMock.mock.calls[0]?.[1] as { headers?: Record<string, string> };
+    expect(init.headers?.['X-Plexon-User-Id']).toBe('user-actor-1');
+  });
+
+  it('fails closed without actor', async () => {
+    vi.stubEnv('CHECKION_API_URL', 'https://checkion.example');
+    vi.stubEnv('CHECKION_API_TOKEN', 'chk_token');
+    const result = await createCheckionProject('Acme', 'acme.com');
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain('actor');
   });
 });
