@@ -2,12 +2,13 @@
  * Creation Client Page Share policy + inventory projection.
  * Spec: specs/domain/creation-client-share.md
  */
-import { and, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, sql } from 'drizzle-orm';
 import { getCreationServiceApiUrl } from '@/lib/constants';
 import { getDb } from '@/lib/db';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import {
   collectionClientSharePolicies,
+  creationClientShareEvents,
   creationClientShareProjections,
 } from '@/lib/db/schema';
 import {
@@ -70,6 +71,19 @@ CREATE TABLE IF NOT EXISTS creation_client_share_projections (
 );
 CREATE INDEX IF NOT EXISTS creation_client_share_projections_project_idx
   ON creation_client_share_projections (platform_project_id);
+CREATE TABLE IF NOT EXISTS creation_client_share_events (
+  id text PRIMARY KEY,
+  platform_project_id text NOT NULL REFERENCES platform_projects(id) ON DELETE CASCADE,
+  share_id text NOT NULL,
+  event_type text NOT NULL,
+  actor_user_id text,
+  meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS creation_client_share_events_project_created_idx
+  ON creation_client_share_events (platform_project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS creation_client_share_events_share_created_idx
+  ON creation_client_share_events (share_id, created_at DESC);
 `));
     })();
   }
@@ -300,7 +314,147 @@ export async function revokeClientShareProjection(
         isNull(creationClientShareProjections.revokedAt)
       )
     );
+  void appendClientShareEvent({
+    platformProjectId,
+    shareId,
+    eventType: 'client_share.revoked',
+    actorUserId: actor.id,
+    meta: { source: 'plexon_collection' },
+  }).catch(() => undefined);
   return { ok: true };
+}
+
+export const CLIENT_SHARE_EVENT_TYPES = [
+  'client_share.created',
+  'client_share.revoked',
+  'client_share.viewed',
+  'client_share.unlock_failed',
+] as const;
+
+export type ClientShareEventType = (typeof CLIENT_SHARE_EVENT_TYPES)[number];
+
+export type ClientShareEventInput = {
+  platformProjectId: string;
+  shareId: string;
+  eventType: ClientShareEventType | string;
+  actorUserId?: string | null;
+  meta?: Record<string, unknown>;
+  createdAt?: string | null;
+  id?: string | null;
+};
+
+function isAllowedEventType(t: string): t is ClientShareEventType {
+  return (CLIENT_SHARE_EVENT_TYPES as readonly string[]).includes(t);
+}
+
+/** Best-effort append; never throws to callers that void it. */
+export async function appendClientShareEvent(
+  input: ClientShareEventInput
+): Promise<{ ok: true; id: string } | { ok: false; status: 400 | 403 | 404 }> {
+  await ensureClientShareSchema();
+  const platformProjectId = input.platformProjectId?.trim();
+  const shareId = input.shareId?.trim();
+  const eventType = input.eventType?.trim();
+  if (!platformProjectId || !shareId || !eventType || !isAllowedEventType(eventType)) {
+    return { ok: false, status: 400 };
+  }
+  const project = await getPlatformProjectById(platformProjectId);
+  if (!project) return { ok: false, status: 404 };
+
+  const id =
+    typeof input.id === 'string' && input.id.trim()
+      ? input.id.trim()
+      : `cse_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+  const createdAt = input.createdAt ? new Date(input.createdAt) : new Date();
+  const meta =
+    input.meta && typeof input.meta === 'object' && !Array.isArray(input.meta)
+      ? sanitizeEventMeta(input.meta)
+      : {};
+
+  const db = getDb();
+  await db
+    .insert(creationClientShareEvents)
+    .values({
+      id,
+      platformProjectId,
+      shareId,
+      eventType,
+      actorUserId: input.actorUserId?.trim() || null,
+      meta,
+      createdAt: Number.isNaN(createdAt.getTime()) ? new Date() : createdAt,
+    })
+    .onConflictDoNothing();
+  return { ok: true, id };
+}
+
+function sanitizeEventMeta(meta: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    const key = k.toLowerCase();
+    if (key.includes('token') || key.includes('password') || key.includes('secret')) continue;
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' || v === null) {
+      out[k] = v;
+    } else if (Array.isArray(v) && v.every((x) => typeof x === 'string')) {
+      out[k] = v.slice(0, 40);
+    }
+  }
+  return out;
+}
+
+export const CLIENT_SHARE_AUDIT_EXPORT_MAX_ROWS = 10_000;
+export const CLIENT_SHARE_AUDIT_EXPORT_MAX_DAYS = 90;
+
+export async function exportClientShareEventsCsv(
+  platformProjectId: string,
+  actor: RequestUser
+): Promise<{ ok: true; csv: string; filename: string } | { ok: false; status: 403 | 404 }> {
+  await ensureClientShareSchema();
+  const project = await getPlatformProjectById(platformProjectId);
+  if (!project) return { ok: false, status: 404 };
+  const canView = await userCanViewPlatformProject(actor.id, actor.role, platformProjectId);
+  if (!canView) return { ok: false, status: 403 };
+
+  const since = new Date();
+  since.setUTCDate(since.getUTCDate() - CLIENT_SHARE_AUDIT_EXPORT_MAX_DAYS);
+
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(creationClientShareEvents)
+    .where(
+      and(
+        eq(creationClientShareEvents.platformProjectId, platformProjectId),
+        gte(creationClientShareEvents.createdAt, since)
+      )
+    )
+    .orderBy(desc(creationClientShareEvents.createdAt))
+    .limit(CLIENT_SHARE_AUDIT_EXPORT_MAX_ROWS);
+
+  const header = ['id', 'created_at', 'event_type', 'share_id', 'actor_user_id', 'meta_json'];
+  const lines = [header.join(',')];
+  for (const r of rows) {
+    lines.push(
+      [
+        csvEscape(r.id),
+        csvEscape(r.createdAt.toISOString()),
+        csvEscape(r.eventType),
+        csvEscape(r.shareId),
+        csvEscape(r.actorUserId ?? ''),
+        csvEscape(JSON.stringify(r.meta ?? {})),
+      ].join(',')
+    );
+  }
+  const stamp = new Date().toISOString().slice(0, 10);
+  return {
+    ok: true,
+    csv: `${lines.join('\n')}\n`,
+    filename: `client-share-audit-${platformProjectId.slice(0, 8)}-${stamp}.csv`,
+  };
+}
+
+function csvEscape(value: string): string {
+  if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
+  return value;
 }
 
 export async function listClientShareProjections(

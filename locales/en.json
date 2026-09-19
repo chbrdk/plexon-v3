@@ -450,7 +450,9 @@
         "revoke": "Revoke",
         "revokeConfirm": "Revoke this client share? The public link will stop working.",
         "revokeError": "Could not revoke share.",
-        "revokedCount": "{count} revoked (kept for audit)."
+        "revokedCount": "{count} revoked (kept for audit).",
+        "exportAudit": "Export audit CSV",
+        "exportError": "Could not export audit CSV."
       },
       "knowledgeTitle": "Collection knowledge",
       "knowledgeSubtitle": "Platform source of truth — shared brief across CHECKION and AUDION.",

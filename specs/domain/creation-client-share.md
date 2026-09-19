@@ -1,6 +1,6 @@
 # Creation Client Page Share (PLEXON)
 
-**Status:** Accepted · 2026-09-19 · **Phase:** P4 (Collection Shares panel + revoke fan-out)  
+**Status:** Accepted · 2026-09-19 · **Phase:** P5 (audit events + CSV export)  
 **Product:** CREATION capability under Collection  
 **Companion domain:** `creation-v3/specs/domain/client-page-share.md`  
 **Eval:** `creation-v3/knowledge/client-page-share-eval.md` · `creation-v3/knowledge/client-page-share-p2.md`  
@@ -60,6 +60,8 @@ Defaults for enterprise-leaning staging:
 | `GET …/client-shares` | Registry projection (metadata only; no tokens) |
 | `POST …/client-shares` | Creation service upsert projection |
 | `DELETE …/client-shares/:shareId` | Lifecycle manage: mark projection revoked **and** fan-out `DELETE` to Creation token store |
+| `POST …/client-share-events` | Creation service ingest (P5) |
+| `GET …/client-share-events/export` | CSV audit export (P5) |
 
 Phase 1 shipped Creation-local feature flags; P2 adds live policy + inventory; **P4** ships Collection UI + Creation revoke fan-out.
 
@@ -75,12 +77,18 @@ Viewers may list; only lifecycle managers may PATCH policy or DELETE.
 
 ## Audit
 
-Minimum events (Creation emits; Plexon may ingest later):
+Minimum events (Creation emits via service ingest; Plexon also records revoke on Collection DELETE):
 
 - `client_share.created`
 - `client_share.revoked`
 - `client_share.viewed` (sampled / rate-limited)
 - `client_share.unlock_failed` (rate-limited)
+
+**P5 store:** `creation_client_share_events` (Collection-scoped, append-only, no tokens/passwords in `meta`).
+
+**P5 export:** `GET …/collections/:id/client-share-events/export` → `text/csv` (view access; capped window).
+
+Company-default policy merge remains deferred (Collection row or code defaults today).
 
 ## Invariants
 

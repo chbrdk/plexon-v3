@@ -641,3 +641,32 @@ export const creationClientShareProjections = pgTable(
     projectIdx: index('creation_client_share_projections_project_idx').on(t.platformProjectId),
   })
 );
+
+/**
+ * Append-only Client Page Share audit events (P5). No tokens/passwords in meta.
+ * Spec: creation-client-share.md
+ */
+export const creationClientShareEvents = pgTable(
+  'creation_client_share_events',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    shareId: text('share_id').notNull(),
+    eventType: text('event_type').notNull(),
+    actorUserId: text('actor_user_id'),
+    meta: jsonb('meta').$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectCreatedIdx: index('creation_client_share_events_project_created_idx').on(
+      t.platformProjectId,
+      t.createdAt
+    ),
+    shareCreatedIdx: index('creation_client_share_events_share_created_idx').on(
+      t.shareId,
+      t.createdAt
+    ),
+  })
+);

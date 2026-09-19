@@ -187,6 +187,16 @@ export function apiPlatformProvisioningCollectionClientShare(
 ): string {
   return `${apiPlatformProvisioningCollectionClientShares(platformProjectId)}/${encodeURIComponent(shareId)}`;
 }
+export function apiPlatformProvisioningCollectionClientShareEvents(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-share-events`;
+}
+export function apiPlatformProvisioningCollectionClientShareEventsExport(
+  platformProjectId: string
+): string {
+  return `${apiPlatformProvisioningCollectionClientShareEvents(platformProjectId)}/export`;
+}
 
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';

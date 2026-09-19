@@ -13,5 +13,11 @@ Plexon owns **policy + Collection ownership** for CREATION client preview links.
 - Locale keys: `projects.detail.clientShares.*`
 - Revoke: `DELETE …/client-shares/:shareId` marks projection **and** fans out to Creation `DELETE /api/platform/provisioning/collections/:id/client-shares/:shareId`
 
+## P5 Audit
+
+- Table: `creation_client_share_events` (migration `0018`)
+- Ingest: `POST …/client-share-events`
+- Export: `GET …/client-share-events/export` · panel button “Export audit CSV”
+
 Do not overload `collection_invites` for external clients.
 

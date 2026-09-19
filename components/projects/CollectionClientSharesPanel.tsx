@@ -5,6 +5,7 @@ import { Alert, Button, Field, Input, SectionChrome, Spinner, Text } from '@msqd
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   apiPlatformProvisioningCollectionClientShare,
+  apiPlatformProvisioningCollectionClientShareEventsExport,
   apiPlatformProvisioningCollectionClientSharePolicy,
   apiPlatformProvisioningCollectionClientShares,
 } from '@/lib/constants'
@@ -50,6 +51,8 @@ export function CollectionClientSharesPanel({
   const [error, setError] = useState<string | null>(null)
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [ttlDraft, setTtlDraft] = useState('')
+
+  const [exportBusy, setExportBusy] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -140,6 +143,35 @@ export function CollectionClientSharesPanel({
     await patchPolicy({ maxTtlDays: n })
   }
 
+  const exportAudit = async () => {
+    setExportBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(
+        apiPlatformProvisioningCollectionClientShareEventsExport(platformProjectId),
+        { credentials: 'same-origin' }
+      )
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string }
+        throw new Error(body.error || t('projects.detail.clientShares.exportError'))
+      }
+      const blob = await res.blob()
+      const disposition = res.headers.get('content-disposition') ?? ''
+      const match = /filename="([^"]+)"/.exec(disposition)
+      const filename = match?.[1] ?? `client-share-audit-${platformProjectId.slice(0, 8)}.csv`
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('projects.detail.clientShares.exportError'))
+    } finally {
+      setExportBusy(false)
+    }
+  }
+
   const revoke = async (shareId: string) => {
     if (!canManage) return
     if (!window.confirm(t('projects.detail.clientShares.revokeConfirm'))) return
@@ -175,6 +207,19 @@ export function CollectionClientSharesPanel({
       <SectionChrome
         title={t('projects.detail.clientShares.title')}
         meta={<Text role="meta">{t('projects.detail.clientShares.subtitle')}</Text>}
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={loading || exportBusy}
+            onClick={() => void exportAudit()}
+            data-testid="client-share-export-audit"
+          >
+            {exportBusy
+              ? t('common.loading')
+              : t('projects.detail.clientShares.exportAudit')}
+          </Button>
+        }
       />
 
       {loading ? (

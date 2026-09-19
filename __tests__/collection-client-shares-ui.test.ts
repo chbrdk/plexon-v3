@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import {
   apiPlatformProvisioningCollectionClientShare,
+  apiPlatformProvisioningCollectionClientShareEventsExport,
   apiPlatformProvisioningCollectionClientSharePolicy,
   apiPlatformProvisioningCollectionClientShares,
 } from '../lib/constants'
@@ -61,5 +62,27 @@ describe('collection client shares UI (P4)', () => {
     expect(src).toContain('pushCreationClientShareRevoke')
     expect(src).toContain('getCreationServiceApiUrl')
     expect(src).toContain('/api/platform/provisioning/collections/')
+  })
+
+  it('panel exposes audit CSV export', () => {
+    const src = readFileSync(
+      path.join(root, 'components/projects/CollectionClientSharesPanel.tsx'),
+      'utf8'
+    )
+    expect(src).toContain('apiPlatformProvisioningCollectionClientShareEventsExport')
+    expect(src).toContain('data-testid="client-share-export-audit"')
+  })
+
+  it('P5 audit helpers and migration exist', () => {
+    const lib = readFileSync(path.join(root, 'lib/creation-client-share.ts'), 'utf8')
+    expect(lib).toContain('appendClientShareEvent')
+    expect(lib).toContain('exportClientShareEventsCsv')
+    expect(lib).toContain('client_share.viewed')
+    expect(
+      existsSync(path.join(root, 'lib/db/migrations/0018_creation_client_share_events.sql'))
+    ).toBe(true)
+    expect(apiPlatformProvisioningCollectionClientShareEventsExport('col-1')).toBe(
+      '/api/platform/provisioning/collections/col-1/client-share-events/export'
+    )
   })
 })

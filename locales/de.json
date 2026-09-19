@@ -450,7 +450,9 @@
         "revoke": "Widerrufen",
         "revokeConfirm": "Diese Client-Freigabe widerrufen? Der öffentliche Link funktioniert danach nicht mehr.",
         "revokeError": "Freigabe konnte nicht widerrufen werden.",
-        "revokedCount": "{count} widerrufen (für Audit behalten)."
+        "revokedCount": "{count} widerrufen (für Audit behalten).",
+        "exportAudit": "Audit-CSV exportieren",
+        "exportError": "Audit-CSV konnte nicht exportiert werden."
       },
       "knowledgeTitle": "Collection-Wissen",
       "knowledgeSubtitle": "Plattform-Quelle der Wahrheit — gemeinsamer Brief für CHECKION und AUDION.",
