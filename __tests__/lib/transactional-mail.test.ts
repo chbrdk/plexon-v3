@@ -20,6 +20,49 @@ describe('resolveMailTransport / transactional mail', () => {
     expect(resolveMailTransport()).toBe('smtp');
   });
 
+  it('prefers smtp_http over SMTP_HOST when bridge URL+token are set', async () => {
+    vi.stubEnv('SMTP_HOST', 'mail.example.com');
+    vi.stubEnv('PLEXON_SMTP_HTTP_URL', 'https://smtp-bridge.example/send');
+    vi.stubEnv('PLEXON_SMTP_HTTP_TOKEN', 'bridge-secret');
+    const { resolveMailTransport, getTransactionalMailDiagnostics } = await import('@/lib/mail');
+    expect(resolveMailTransport()).toBe('smtp_http');
+    expect(getTransactionalMailDiagnostics()).toMatchObject({
+      transport: 'smtp_http',
+      smtpHttpUrlSet: true,
+      smtpHostSet: true,
+    });
+  });
+
+  it('sendTransactionalEmail posts to smtp_http bridge', async () => {
+    vi.stubEnv('PLEXON_SMTP_HTTP_URL', 'https://smtp-bridge.example');
+    vi.stubEnv('PLEXON_SMTP_HTTP_TOKEN', 'bridge-secret');
+    vi.stubEnv('PLEXON_SMTP_FROM', 'PLEXON <noreply@example.com>');
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => '{"ok":true}',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const { sendTransactionalEmail } = await import('@/lib/mail');
+    await sendTransactionalEmail({
+      kind: 'password_reset',
+      to: 'user@example.com',
+      payload: { resetLink: 'https://plexon.test/reset-password?token=abc' },
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://smtp-bridge.example/send');
+    expect(init.method).toBe('POST');
+    expect(init.headers).toMatchObject({
+      Authorization: 'Bearer bridge-secret',
+      'Content-Type': 'application/json',
+    });
+    const body = JSON.parse(String(init.body));
+    expect(body.to).toBe('user@example.com');
+    expect(body.subject).toContain('Passwort');
+    expect(body.html).toContain('reset-password?token=abc');
+    expect(body.from).toContain('noreply@example.com');
+  });
+
   it('returns mailgun when MAILGUN_API_KEY and MAILGUN_DOMAIN are set', async () => {
     vi.stubEnv('MAILGUN_API_KEY', 'key-xxx');
     vi.stubEnv('MAILGUN_DOMAIN', 'mg.example.com');

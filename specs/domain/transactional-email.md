@@ -28,7 +28,7 @@ Capability Team UI ──► Plexon members/invites APIs ──► mailer ──
 Product login forgot ──► Plexon /forgot-password     ──► mailer ──► SMTP
 ```
 
-1. **Single mailer** — SMTP first (`PLEXON_SMTP_*` / `SMTP_*`), else Mailgun HTTP, else log (dev/staging).
+1. **Single mailer** — SMTP-HTTP bridge first (`PLEXON_SMTP_HTTP_URL` + token), else direct SMTP (`PLEXON_SMTP_*` / `SMTP_*`), else Mailgun HTTP, else log (dev/staging).
 2. **Hooks on Plexon mutations only** — apps do not send team mail themselves.
 3. **Best-effort send** — membership / invite / reset token commit succeeds even if SMTP fails; log + health diagnostics.
 4. **No secrets in products** — no `SMTP_*` in capability Coolify apps for this program.

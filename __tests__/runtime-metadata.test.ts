@@ -15,6 +15,7 @@ describe('PLEXON runtime metadata', () => {
       federationContractVersion: '2026-05-plexon-federation-v3',
       passwordResetMail: {
         transport: 'log',
+        smtpHttpUrlSet: false,
         smtpHostSet: false,
         mailgunApiKeySet: false,
         mailgunDomainSet: false,
@@ -23,6 +24,7 @@ describe('PLEXON runtime metadata', () => {
       },
       transactionalMail: {
         transport: 'log',
+        smtpHttpUrlSet: false,
         smtpHostSet: false,
         mailgunApiKeySet: false,
         mailgunDomainSet: false,
@@ -53,6 +55,7 @@ describe('PLEXON runtime metadata', () => {
     const { getRuntimeMetadata } = await import('@/lib/runtime-metadata');
     expect(getRuntimeMetadata().passwordResetMail).toEqual({
       transport: 'mailgun',
+      smtpHttpUrlSet: false,
       smtpHostSet: false,
       mailgunApiKeySet: true,
       mailgunDomainSet: true,

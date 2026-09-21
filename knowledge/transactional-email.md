@@ -28,16 +28,21 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 **Plexon logs:** `[PLEXON] transactional mail failed kind=password_reset: Error: Connection timeout` (`ETIMEDOUT`, `command: CONN`). Same for `collection_member_added`.  
 **Health:** `transactionalMail.transport=smtp`, `smtpHostSet=true` — env is fine; **TCP never reaches the MTA**.
 
-**Root cause:** `docker-mailserver` runs on the **Coolify host** (`mail.plygrnd.tech` → `89.58.35.209`). Roundcube HTTPS (80/443) works via Traefik. **SMTP/IMAP ports 25/465/587/993 are not reachable** from outside (firewall and/or compose not publishing). Plexon on **projects-01** therefore cannot submit.
+**Root cause:** `docker-mailserver` runs on the **Coolify host** (`mail.plygrnd.tech` → `89.58.35.209`). Roundcube HTTPS (80/443) works via Traefik. **SMTP/IMAP ports 25/465/587/993 are not reachable** from outside (host firewall). Plexon on **projects-01** therefore cannot submit on TCP 587.
 
-**Fix (ops — Coolify host / docker-mailserver compose):**
+**Fix shipped (2026-09-21) — HTTPS SMTP bridge (no firewall change):**
 
-1. Publish submission ports on the mail container, e.g. `587:587` and preferably `465:465` (and 25 only if needed for inbound MX).
-2. Open host firewall for **TCP 587** (and 465) at least from projects-01 (`159.195.39.207`) — or world if clients must submit remotely.
-3. Redeploy `docker-mailserver`, then from any host: `nc -vz mail.plygrnd.tech 587` must succeed.
-4. Retry forgot-password; Plexon logs should show no `ETIMEDOUT`.
+| Item | Value |
+|------|--------|
+| Coolify service | `plexon-smtp-http-bridge` (`90fzj0soeu4ruawzq4l3xanx`) on **coolify** host |
+| Public URL | `https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech` (`/health`, `POST /send`) |
+| Local hop | Bridge → `host.docker.internal:587` (STARTTLS, cert verify skipped for host-local) |
+| Plexon env | `PLEXON_SMTP_HTTP_URL` = bridge base (or `…/send`) · `PLEXON_SMTP_HTTP_TOKEN` = `BRIDGE_TOKEN` |
+| Transport | Health `transactionalMail.transport=smtp_http` when URL+token set (preferred over direct SMTP) |
 
-Do **not** change Plexon `SMTP_*` until 587 answers — the app already points at the right host.
+Ops alternative still valid: open host firewall TCP **587** from projects-01 (`159.195.39.207`) and keep direct `SMTP_HOST=mail.plygrnd.tech`.
+
+Do **not** put bridge token or SMTP password in git.
 
 ## Code today (P1)
 

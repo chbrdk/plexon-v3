@@ -295,13 +295,16 @@ SMTP_USER=info@plygrnd.tech
 SMTP_PASSWORD=<secret — Coolify only>
 PLEXON_PASSWORD_RESET_FROM_EMAIL=PLEXON <noreply@plygrnd.tech>
 PLEXON_SMTP_FROM=PLEXON <noreply@plygrnd.tech>
+# Preferred when projects-01 cannot reach TCP 587 (2026-09-21):
+PLEXON_SMTP_HTTP_URL=https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech
+PLEXON_SMTP_HTTP_TOKEN=<same as bridge BRIDGE_TOKEN — Coolify only>
 ```
 
 - STARTTLS: Port **587** (Default in Staging). SMTPS: Port **465** + `SMTP_SECURE=true`.
 - Absender-Domain muss beim Mail-Server erlaubt sein (`noreply@plygrnd.tech`).
-- Nach Env-Änderung: **Redeploy** Plexon. Check: `GET /api/health` → `transactionalMail.transport` = `smtp`, `smtpHostSet` = true.
-- Optional Mailgun weglassen, solange SMTP gesetzt ist (SMTP hat Vorrang).
-- **Connectivity:** `mail.plygrnd.tech:587` must accept TCP from **projects-01** (Plexon). Roundcube HTTPS alone is not enough — see `knowledge/transactional-email.md` § Incident 2026-09-21.
+- Nach Env-Änderung: **Redeploy** Plexon. Check: `GET /api/health` → `transactionalMail.transport` = `smtp_http` (bridge) or `smtp`, `smtpHttpUrlSet` / `smtpHostSet` as configured.
+- Optional Mailgun weglassen, solange SMTP/bridge gesetzt ist (`smtp_http` > SMTP > Mailgun).
+- **Connectivity:** Direct `mail.plygrnd.tech:587` is blocked from **projects-01**; use the HTTPS bridge (above) or open firewall — see `knowledge/transactional-email.md` § Incident 2026-09-21.
 
 Ops detail: `knowledge/coolify-env-variablen.md` · `knowledge/transactional-email.md`.
 

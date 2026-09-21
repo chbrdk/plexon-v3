@@ -10,11 +10,12 @@ Outbound transactional mail is an **internal Plexon concern**. There is no publi
 
 ## Transport resolution (implementation)
 
-Priority (unchanged from password-reset mailer):
+Priority (password-reset mailer + HTTPS bridge for blocked TCP 587):
 
-1. SMTP when `PLEXON_SMTP_HOST` or `SMTP_HOST` is set  
-2. Else Mailgun HTTP when `MAILGUN_API_KEY` + `MAILGUN_DOMAIN`  
-3. Else **log** (link/body in container logs)
+1. **SMTP-HTTP bridge** when `PLEXON_SMTP_HTTP_URL` (or `SMTP_HTTP_URL`) **and** `PLEXON_SMTP_HTTP_TOKEN` (or `SMTP_HTTP_TOKEN`) are set — Coolify Traefik → host-local SMTP  
+2. Else SMTP when `PLEXON_SMTP_HOST` or `SMTP_HOST` is set  
+3. Else Mailgun HTTP when `MAILGUN_API_KEY` + `MAILGUN_DOMAIN`  
+4. Else **log** (link/body in container logs)
 
 Env inventory: `knowledge/transactional-email.md` · `knowledge/coolify-env-variablen.md`.
 

@@ -1,5 +1,5 @@
 /**
- * Transactional mail transport: SMTP → Mailgun → log.
+ * Transactional mail transport: SMTP-HTTP bridge → SMTP → Mailgun → log.
  * Spec: specs/domain/transactional-email.md
  */
 
@@ -16,6 +16,19 @@ import { runtimeEnv } from '@/lib/runtime-env';
 
 function trimEnv(key: string): string {
   return runtimeEnv(key);
+}
+
+/** HTTPS→SMTP bridge on the Coolify mail host (bypasses blocked TCP 587 from projects-01). */
+function smtpHttpUrl(): string {
+  return (
+    trimEnv('PLEXON_SMTP_HTTP_URL') ||
+    trimEnv('SMTP_HTTP_URL') ||
+    trimEnv('PLEXON_SMTP_HTTP_BRIDGE_URL')
+  ).replace(/\/$/, '');
+}
+
+function smtpHttpToken(): string {
+  return trimEnv('PLEXON_SMTP_HTTP_TOKEN') || trimEnv('SMTP_HTTP_TOKEN') || trimEnv('SMTP_BRIDGE_TOKEN');
 }
 
 function smtpHost(): string {
@@ -66,7 +79,7 @@ function mailgunBasicUser(): string {
   return trimEnv('MAILGUN_BASIC_USERNAME') || 'api';
 }
 
-export type MailTransport = 'smtp' | 'mailgun' | 'log';
+export type MailTransport = 'smtp_http' | 'smtp' | 'mailgun' | 'log';
 
 export function getMailgunApiKeyFormatHint(): string {
   const key = mailgunApiKey();
@@ -80,6 +93,7 @@ export function getMailgunApiKeyFormatHint(): string {
 
 export type TransactionalMailDiagnostics = {
   transport: MailTransport;
+  smtpHttpUrlSet: boolean;
   smtpHostSet: boolean;
   mailgunApiKeySet: boolean;
   mailgunDomainSet: boolean;
@@ -92,6 +106,7 @@ export function getTransactionalMailDiagnostics(): TransactionalMailDiagnostics 
   const domain = mailgunDomain();
   return {
     transport: resolveMailTransport(),
+    smtpHttpUrlSet: Boolean(smtpHttpUrl() && smtpHttpToken()),
     smtpHostSet: Boolean(smtpHost()),
     mailgunApiKeySet: Boolean(apiKey),
     mailgunDomainSet: Boolean(domain),
@@ -101,6 +116,8 @@ export function getTransactionalMailDiagnostics(): TransactionalMailDiagnostics 
 }
 
 export function resolveMailTransport(): MailTransport {
+  // Prefer HTTPS bridge when configured — projects-01 cannot reach mail host TCP 587.
+  if (smtpHttpUrl() && smtpHttpToken()) return 'smtp_http';
   if (smtpHost()) return 'smtp';
   if (mailgunApiKey() && mailgunDomain()) return 'mailgun';
   return 'log';
@@ -136,6 +153,38 @@ export type OutboundMailMessage = {
   /** Log-friendly hint when transport is log (e.g. reset link). */
   logDetail?: string;
 };
+
+function smtpHttpSendUrl(): string {
+  const base = smtpHttpUrl();
+  if (!base) return '';
+  if (base.endsWith('/send')) return base;
+  return `${base}/send`;
+}
+
+async function sendViaSmtpHttp(message: OutboundMailMessage): Promise<void> {
+  const url = smtpHttpSendUrl();
+  const token = smtpHttpToken();
+  if (!url || !token) return;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: message.to,
+      subject: message.subject,
+      html: message.html,
+      from: fromAddress('smtp_http'),
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`smtp_http ${res.status} url=${url} body=${txt.slice(0, 200)}`);
+  }
+}
 
 async function sendViaSmtp(message: OutboundMailMessage): Promise<void> {
   const host = smtpHost();
@@ -229,6 +278,10 @@ export async function deliverMail(
 ): Promise<{ transport: MailTransport }> {
   const mode = resolveMailTransport();
   try {
+    if (mode === 'smtp_http') {
+      await sendViaSmtpHttp(message);
+      return { transport: 'smtp_http' };
+    }
     if (mode === 'smtp') {
       await sendViaSmtp(message);
       return { transport: 'smtp' };
@@ -243,7 +296,7 @@ export async function deliverMail(
   }
 
   console.warn(
-    `[PLEXON] No SMTP (PLEXON_SMTP_HOST / SMTP_HOST) and no Mailgun (MAILGUN_API_KEY + MAILGUN_DOMAIN); kind=${kind} to=${message.to}`,
+    `[PLEXON] No SMTP-HTTP (PLEXON_SMTP_HTTP_URL + TOKEN), SMTP (PLEXON_SMTP_HOST / SMTP_HOST), or Mailgun; kind=${kind} to=${message.to}`,
     message.logDetail ?? message.subject
   );
   return { transport: 'log' };
