@@ -97,6 +97,8 @@ async function createTargetGroup(
   const tgRes = await audionFetch(audionApiTargetGroupsCreate(), {
     method: 'POST',
     body: JSON.stringify({
+      // AUDION Next contracts use camelCase; keep snake_case for FastAPI-era proxies.
+      projectId: projectId,
       project_id: projectId,
       name: segment.name.slice(0, 120),
       segment: segment.segment.slice(0, 120),

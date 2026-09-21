@@ -964,9 +964,9 @@ export async function runEventQuickCheck(
       geoCompetitors,
       platformProjectId,
       bindAudion: async (ppId, apId) => {
-        if (!ensured?.audionProjectId) {
-          await bindAudionToPlatform(ppId, apId);
-        }
+        // Always upsert — personas may land on a newly created AUDION project even when a
+        // prior binding existed (stale / wrong external id). Skipping left Collection → wrong project.
+        await bindAudionToPlatform(ppId, apId);
       },
     });
 
