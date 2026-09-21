@@ -22,6 +22,23 @@
 
 Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From as above. Cheatsheet §5.
 
+### Incident 2026-09-21 — forgot-password no inbox
+
+**Symptom:** UI returns ok (anti-enumeration); no mail arrives.  
+**Plexon logs:** `[PLEXON] transactional mail failed kind=password_reset: Error: Connection timeout` (`ETIMEDOUT`, `command: CONN`). Same for `collection_member_added`.  
+**Health:** `transactionalMail.transport=smtp`, `smtpHostSet=true` — env is fine; **TCP never reaches the MTA**.
+
+**Root cause:** `docker-mailserver` runs on the **Coolify host** (`mail.plygrnd.tech` → `89.58.35.209`). Roundcube HTTPS (80/443) works via Traefik. **SMTP/IMAP ports 25/465/587/993 are not reachable** from outside (firewall and/or compose not publishing). Plexon on **projects-01** therefore cannot submit.
+
+**Fix (ops — Coolify host / docker-mailserver compose):**
+
+1. Publish submission ports on the mail container, e.g. `587:587` and preferably `465:465` (and 25 only if needed for inbound MX).
+2. Open host firewall for **TCP 587** (and 465) at least from projects-01 (`159.195.39.207`) — or world if clients must submit remotely.
+3. Redeploy `docker-mailserver`, then from any host: `nc -vz mail.plygrnd.tech 587` must succeed.
+4. Retry forgot-password; Plexon logs should show no `ETIMEDOUT`.
+
+Do **not** change Plexon `SMTP_*` until 587 answers — the app already points at the right host.
+
 ## Code today (P1)
 
 | Path | Role |

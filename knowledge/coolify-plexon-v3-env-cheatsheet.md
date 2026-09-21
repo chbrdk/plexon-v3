@@ -301,6 +301,7 @@ PLEXON_SMTP_FROM=PLEXON <noreply@plygrnd.tech>
 - Absender-Domain muss beim Mail-Server erlaubt sein (`noreply@plygrnd.tech`).
 - Nach Env-Änderung: **Redeploy** Plexon. Check: `GET /api/health` → `transactionalMail.transport` = `smtp`, `smtpHostSet` = true.
 - Optional Mailgun weglassen, solange SMTP gesetzt ist (SMTP hat Vorrang).
+- **Connectivity:** `mail.plygrnd.tech:587` must accept TCP from **projects-01** (Plexon). Roundcube HTTPS alone is not enough — see `knowledge/transactional-email.md` § Incident 2026-09-21.
 
 Ops detail: `knowledge/coolify-env-variablen.md` · `knowledge/transactional-email.md`.
 

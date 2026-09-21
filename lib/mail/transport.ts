@@ -138,10 +138,16 @@ export type OutboundMailMessage = {
 };
 
 async function sendViaSmtp(message: OutboundMailMessage): Promise<void> {
+  const host = smtpHost();
+  const port = smtpPort();
+  const secure = smtpSecure();
   const transporter = nodemailer.createTransport({
-    host: smtpHost(),
-    port: smtpPort(),
-    secure: smtpSecure(),
+    host,
+    port,
+    secure,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
     auth: (() => {
       const user = smtpUser();
       const pass = smtpPassword();
@@ -149,12 +155,20 @@ async function sendViaSmtp(message: OutboundMailMessage): Promise<void> {
       return { user, pass };
     })(),
   });
-  await transporter.sendMail({
-    from: fromAddress('smtp'),
-    to: message.to,
-    subject: message.subject,
-    html: message.html,
-  });
+  try {
+    await transporter.sendMail({
+      from: fromAddress('smtp'),
+      to: message.to,
+      subject: message.subject,
+      html: message.html,
+    });
+  } catch (e) {
+    const hint = `host=${host} port=${port} secure=${secure}`;
+    if (e instanceof Error) {
+      e.message = `${e.message} (${hint})`;
+    }
+    throw e;
+  }
 }
 
 async function sendViaMailgun(message: OutboundMailMessage): Promise<void> {
