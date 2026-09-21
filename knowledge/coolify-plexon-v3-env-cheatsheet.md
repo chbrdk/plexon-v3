@@ -283,19 +283,26 @@ NEXT_PUBLIC_SPIRION_URL={{environment.V3_SPIRION_PUBLIC_URL}}
 
 ---
 
-## 5. Passwort-Reset (Staging, optional)
+## 5. Transactional mail (SMTP — plygrnd)
 
-**Einfach:** nichts setzen → Reset-Link nur in Container-Logs.
-
-**Mailpit** (empfohlen Staging): eigene App im gleichen Env, dann:
+**Provider:** `mail.plygrnd.tech` (nicht Mailpit). Secrets nur in Coolify Runtime, nie committen.
 
 ```bash
-SMTP_HOST=<coolify-internal-hostname-mailpit>
-SMTP_PORT=1025
-PLEXON_PASSWORD_RESET_FROM_EMAIL=PLEXON <noreply@projects-a.plygrnd.tech>
+SMTP_HOST=mail.plygrnd.tech
+SMTP_PORT=587
+# Alternative: SMTP_PORT=465 + SMTP_SECURE=true (SMTPS)
+SMTP_USER=info@plygrnd.tech
+SMTP_PASSWORD=<secret — Coolify only>
+PLEXON_PASSWORD_RESET_FROM_EMAIL=PLEXON <noreply@plygrnd.tech>
+PLEXON_SMTP_FROM=PLEXON <noreply@plygrnd.tech>
 ```
 
-**Mailgun:** nur mit **eigenen** Staging-Keys — siehe `knowledge/coolify-env-variablen.md`.
+- STARTTLS: Port **587** (Default in Staging). SMTPS: Port **465** + `SMTP_SECURE=true`.
+- Absender-Domain muss beim Mail-Server erlaubt sein (`noreply@plygrnd.tech`).
+- Nach Env-Änderung: **Redeploy** Plexon. Check: `GET /api/health` → `transactionalMail.transport` = `smtp`, `smtpHostSet` = true.
+- Optional Mailgun weglassen, solange SMTP gesetzt ist (SMTP hat Vorrang).
+
+Ops detail: `knowledge/coolify-env-variablen.md` · `knowledge/transactional-email.md`.
 
 ---
 

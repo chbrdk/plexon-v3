@@ -1,10 +1,11 @@
 /**
  * Collection members roster (Access Model B).
- * Spec: specs/api/collection-members.md
+ * Spec: specs/api/collection-members.md · transactional-email.md
  */
 
 import { eq, sql } from 'drizzle-orm';
 import { isAdmin, type RequestUser } from '@/lib/auth-request-user';
+import { pathPlatformProjectDashboard } from '@/lib/constants';
 import { getCompanyIdsForUser } from '@/lib/db/companies';
 import { getDb } from '@/lib/db';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
@@ -15,6 +16,7 @@ import {
   listAssignmentsForPlatformProject,
   upsertUserPlatformProjectAssignment,
 } from '@/lib/db/user-platform-project-assignments';
+import { getPublicAppBaseUrl, sendTransactionalEmail } from '@/lib/mail';
 import {
   userCanManageCollectionLifecycle,
   userCanViewPlatformProject,
@@ -67,6 +69,12 @@ async function findUserByEmail(
     .where(sql`lower(${users.email}) = ${normalized}`)
     .limit(1);
   return row ?? null;
+}
+
+function collectionLaunchUrl(platformProjectId: string): string {
+  const base = getPublicAppBaseUrl();
+  const path = pathPlatformProjectDashboard(platformProjectId);
+  return base ? `${base}${path}` : path;
 }
 
 export async function listCollectionMembers(
@@ -166,9 +174,20 @@ export async function addCollectionMemberByEmail(input: {
     };
   }
 
-  // Creator is already granted via createdByUserId; still allow explicit assignment row
-  // only when missing — never overwrite creator semantics.
   await upsertUserPlatformProjectAssignment(user.id, platformProjectId, requestedRole);
+
+  const actorPublic = await loadUserPublic(input.actor.id);
+  void sendTransactionalEmail({
+    kind: 'collection_member_added',
+    to: user.email,
+    payload: {
+      collectionName: project.name || 'Collection',
+      role: requestedRole,
+      launchUrl: collectionLaunchUrl(platformProjectId),
+      actorName: actorPublic?.name || actorPublic?.email || undefined,
+    },
+  });
+
   return {
     ok: true,
     status: 'added',

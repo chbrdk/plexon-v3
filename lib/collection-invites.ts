@@ -8,7 +8,7 @@ import { and, desc, eq, isNull } from 'drizzle-orm';
 import { getCompanyIdsForUser } from '@/lib/db/companies';
 import { getDb } from '@/lib/db';
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
-import { collectionInvites } from '@/lib/db/schema';
+import { collectionInvites, users } from '@/lib/db/schema';
 import { upsertUserPlatformProjectAssignment } from '@/lib/db/user-platform-project-assignments';
 import {
   generateCollectionInviteToken,
@@ -18,10 +18,8 @@ import {
   buildCreationInviteRedirectUrl,
   resolvePublicAppBaseUrl,
 } from '@/lib/collection-invite-redirect';
-import {
-  pathCollectionInvite,
-} from '@/lib/constants';
-import { getCreationUrl } from '@/lib/constants';
+import { getCreationUrl, pathCollectionInvite } from '@/lib/constants';
+import { sendTransactionalEmail } from '@/lib/mail';
 import {
   PLATFORM_PROJECT_ASSIGNMENT_ROLE,
   type PlatformProjectAssignmentRole,
@@ -67,6 +65,14 @@ function parseRole(value: unknown): PlatformProjectAssignmentRole {
   return PLATFORM_PROJECT_ASSIGNMENT_ROLE.MEMBER;
 }
 
+function normalizeInviteEmail(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const email = raw.trim().toLowerCase();
+  if (!email || !email.includes('@') || email.includes(' ')) return null;
+  if (email.length > 254) return null;
+  return email;
+}
+
 export type CreateCollectionInviteInput = {
   platformProjectId: string;
   createdBy: RequestUser;
@@ -74,6 +80,8 @@ export type CreateCollectionInviteInput = {
   sceneId?: unknown;
   expiresInDays?: unknown;
   maxUses?: unknown;
+  /** Optional — when set, best-effort send collection_invite mail. */
+  toEmail?: unknown;
 };
 
 export type CreateCollectionInviteResult =
@@ -85,6 +93,7 @@ export type CreateCollectionInviteResult =
       sceneId: string | null;
       expiresAt: string;
       maxUses: number | null;
+      emailedTo?: string;
     }
   | { ok: false; status: 403 | 404 | 400; error: string };
 
@@ -99,6 +108,12 @@ export async function createCollectionInvite(
 
   const allowed = await userCanManageCollectionLifecycle(input.createdBy, platformProjectId);
   if (!allowed) return { ok: false, status: 403, error: 'Forbidden' };
+
+  let toEmail: string | null = null;
+  if (input.toEmail !== undefined && input.toEmail !== null && input.toEmail !== '') {
+    toEmail = normalizeInviteEmail(input.toEmail);
+    if (!toEmail) return { ok: false, status: 400, error: 'Invalid toEmail' };
+  }
 
   let expiresInDays = DEFAULT_EXPIRES_DAYS;
   if (typeof input.expiresInDays === 'number' && Number.isFinite(input.expiresInDays)) {
@@ -143,6 +158,30 @@ export async function createCollectionInvite(
     ? `${appBase}${pathCollectionInvite(plain)}`
     : pathCollectionInvite(plain);
 
+  let emailedTo: string | undefined;
+  if (toEmail) {
+    emailedTo = toEmail;
+    let actorName: string | undefined;
+    const [actorRow] = await db
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(eq(users.id, input.createdBy.id))
+      .limit(1);
+    actorName = actorRow?.name || actorRow?.email || undefined;
+
+    void sendTransactionalEmail({
+      kind: 'collection_invite',
+      to: toEmail,
+      payload: {
+        inviteUrl,
+        collectionName: project.name || 'Collection',
+        role,
+        expiresAt: expiresAt.toISOString(),
+        actorName,
+      },
+    });
+  }
+
   return {
     ok: true,
     inviteId: id,
@@ -151,6 +190,7 @@ export async function createCollectionInvite(
     sceneId,
     expiresAt: expiresAt.toISOString(),
     maxUses,
+    ...(emailedTo ? { emailedTo } : {}),
   };
 }
 

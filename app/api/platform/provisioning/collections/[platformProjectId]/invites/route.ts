@@ -65,6 +65,7 @@ export async function POST(
     sceneId: body.sceneId,
     expiresInDays: body.expiresInDays,
     maxUses: body.maxUses,
+    toEmail: body.toEmail,
   });
 
   if (!result.ok) return apiError(result.error, result.status);

@@ -11,6 +11,7 @@
 | Platform outbox delivery (Wave A) | `specs/domain/platform-outbox-delivery.md` |
 | Collection read model (Wave B/D) | `specs/domain/collection-read-model.md` |
 | Collection invite links | `specs/domain/collection-invite-links.md` |
+| Transactional email (SMTP) | `specs/domain/transactional-email.md` |
 | Collection members | `specs/api/collection-members.md` |
 | Collection Memory (Wave 1) | `specs/domain/collection-memory-wave1.md` |
 | ECHON Collection binding (Wave 2) | `specs/domain/echon-collection-binding.md` |
@@ -41,12 +42,14 @@
 | Collection Knowledge Pack | `specs/api/collection-knowledge-pack.md` |
 | Collection invites | `specs/api/collection-invites.md` |
 | Collection members | `specs/api/collection-members.md` |
+| Transactional email | `specs/api/transactional-email.md` |
 | Assistant embed protocol | `specs/api/assistant-embed.md` |
 
 ## Knowledge (related)
 | Doc | Path |
 |-----|------|
 | Paths | `knowledge/paths.md` |
+| Transactional email (SMTP inventory) | `knowledge/transactional-email.md` |
 | Surface ownership | `knowledge/platform-surface-ownership.md` |
 | Central Assistant Flyout | `knowledge/central-assistant-flyout.md` |
 | CREATION MCP (scene + quality loop) | `knowledge/creation-mcp-assistant.md` |

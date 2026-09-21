@@ -1,7 +1,8 @@
 # Collection invites API
 
-**Status:** Accepted · 2026-09-10  
-**Parent:** `specs/domain/collection-invite-links.md`
+**Status:** Accepted · 2026-09-10 (optional `toEmail` · 2026-09-21)  
+**Parent:** `specs/domain/collection-invite-links.md`  
+**Mail:** `specs/api/transactional-email.md`
 
 ## Endpoints
 
@@ -20,13 +21,15 @@
   "role": "member",
   "sceneId": "optional-scene-uuid",
   "expiresInDays": 7,
-  "maxUses": null
+  "maxUses": null,
+  "toEmail": "peer@example.com"
 }
 ```
 
 - `role`: `member` \| `admin` (default `member`)
 - `expiresInDays`: 1–30 (default 7)
 - `maxUses`: positive int or null (unlimited)
+- `toEmail` optional — when set, Plexon best-effort sends `collection_invite` with the absolute `inviteUrl` (see transactional-email API). Invalid address → `400` before mint.
 
 ## Create response
 
@@ -37,9 +40,12 @@
   "role": "member",
   "sceneId": "…",
   "expiresAt": "ISO-8601",
-  "maxUses": null
+  "maxUses": null,
+  "emailedTo": "peer@example.com"
 }
 ```
+
+- `emailedTo` only when `toEmail` was provided and a send was attempted.
 
 ## Accept response
 

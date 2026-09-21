@@ -24,3 +24,4 @@ Chat must use the **session user** as actor when calling product MCP/RAG — not
 - Cross-company invites
 - Changing Videon members replay / provisioning upsert
 - Prod control plane `chbrdk/PLEXON`
+- **App-local SMTP** for team or auth — outbound mail is Plexon-only (`specs/domain/transactional-email.md` · `knowledge/transactional-email.md`). Team add/invite trigger Plexon mail on grant / optional `toEmail`.

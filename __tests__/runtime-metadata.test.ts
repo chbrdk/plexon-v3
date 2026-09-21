@@ -21,6 +21,14 @@ describe('PLEXON runtime metadata', () => {
         mailgunApiBase: 'https://api.mailgun.net',
         mailgunKeyFormatHint: 'missing',
       },
+      transactionalMail: {
+        transport: 'log',
+        smtpHostSet: false,
+        mailgunApiKeySet: false,
+        mailgunDomainSet: false,
+        mailgunApiBase: 'https://api.mailgun.net',
+        mailgunKeyFormatHint: 'missing',
+      },
     });
   });
 

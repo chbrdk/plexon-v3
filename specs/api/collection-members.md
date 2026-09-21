@@ -1,8 +1,8 @@
 # Collection members API
 
-**Status:** Accepted · 2026-09-19  
+**Status:** Accepted · 2026-09-19 (member notify · 2026-09-21)  
 **Parent:** `specs/domain/collection-invite-links.md` · Access Model B  
-**Companion:** `specs/api/collection-invites.md`
+**Companion:** `specs/api/collection-invites.md` · `specs/api/transactional-email.md`
 
 ## Endpoints
 
@@ -53,6 +53,7 @@
 - Invitee MUST be in the Collection’s company (`company_users`) unless global admin.
 - **Additive only:** if assignment already exists → keep existing role (no downgrade), return `status: "already_member"`.
 - If missing → insert assignment, return `status: "added"`.
+- **Mail:** on `status: "added"` Plexon MUST best-effort send `collection_member_added`. On `already_member` MUST NOT send. Transport failure does not change this HTTP response.
 - Never DELETE other members on POST. Never mutate the creator row via this endpoint.
 
 ## POST response
@@ -71,6 +72,7 @@
 - Removes `user_platform_project_assignments` for that user + Collection.
 - Creator cannot be revoked (`400` / `creator_immutable`).
 - Requires manage-lifecycle.
+- **Mail (P2):** best-effort `collection_member_removed` to the removed user.
 
 ## Errors
 

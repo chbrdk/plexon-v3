@@ -29,6 +29,11 @@ vi.mock('@/lib/platform-project-access', () => ({
   userCanManageCollectionLifecycle: vi.fn(),
 }));
 
+vi.mock('@/lib/mail', () => ({
+  sendTransactionalEmail: vi.fn(async () => undefined),
+  getPublicAppBaseUrl: () => 'https://plexon.test',
+}));
+
 vi.mock('@/lib/db', () => ({
   getDb: vi.fn(() => ({
     select: vi.fn(() => ({
@@ -58,6 +63,7 @@ import {
   listCollectionMembers,
   revokeCollectionMember,
 } from '@/lib/collection-members';
+import { sendTransactionalEmail } from '@/lib/mail';
 
 describe('collection members', () => {
   beforeEach(() => {
@@ -140,6 +146,43 @@ describe('collection members', () => {
       expect(result.role).toBe('admin');
     }
     expect(upsertUserPlatformProjectAssignment).not.toHaveBeenCalled();
+    expect(sendTransactionalEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends collection_member_added mail only when status is added', async () => {
+    const { getDb } = await import('@/lib/db');
+    vi.mocked(getDb).mockReturnValue({
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: async () => [{ id: 'u-new', email: 'new@example.com', name: 'New' }],
+          }),
+        }),
+      }),
+    } as never);
+    vi.mocked(getUserPlatformProjectAssignment).mockResolvedValue(null);
+    vi.mocked(upsertUserPlatformProjectAssignment).mockResolvedValue(undefined as never);
+
+    const result = await addCollectionMemberByEmail({
+      platformProjectId: 'pp-1',
+      actor: { id: 'creator-1', role: 'user' },
+      email: 'new@example.com',
+      role: 'member',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.status).toBe('added');
+    expect(sendTransactionalEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'collection_member_added',
+        to: 'new@example.com',
+        payload: expect.objectContaining({
+          collectionName: 'Demo',
+          role: 'member',
+          launchUrl: 'https://plexon.test/projects/pp-1',
+        }),
+      })
+    );
   });
 
   it('rejects wrong company', async () => {

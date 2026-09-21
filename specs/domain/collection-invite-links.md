@@ -1,9 +1,10 @@
 # Collection invite links
 
-**Status:** Accepted · 2026-09-10  
+**Status:** Accepted · 2026-09-10 (mail notify · 2026-09-21)  
 **Layer:** Domain (PLEXON control plane)  
 **Parent:** `specs/domain/collection-projects.md` · Access Model B  
-**API:** `specs/api/collection-invites.md`
+**API:** `specs/api/collection-invites.md`  
+**Mail:** `specs/domain/transactional-email.md`
 
 ## Goal
 
@@ -27,17 +28,19 @@ Authenticated Plexon users in the **same company** can be invited to a Collectio
 
 ## Flows
 
-1. Owner/admin creates invite (`platformProjectId`, optional `sceneId`, `role`, TTL, `maxUses`).
-2. System returns absolute Plexon URL `/invite/{token}`.
-3. Invitee (signed in) opens URL → accept → upsert assignment → redirect to CREATION `/editor?sceneId=&platformProjectId=` when configured, else Collection launch URL.
+1. Owner/admin creates invite (`platformProjectId`, optional `sceneId`, `role`, TTL, `maxUses`, optional `toEmail`).
+2. System returns absolute Plexon URL `/invite/{token}` (clipboard / product UI).
+3. When `toEmail` is set, Plexon MUST best-effort send `collection_invite` mail with that URL (`specs/domain/transactional-email.md`). Create still succeeds if SMTP fails.
+4. Invitee (signed in) opens URL → accept → upsert assignment → redirect to CREATION `/editor?sceneId=&platformProjectId=` when configured, else Collection launch URL.
 
 ## Non-goals
 
 - Anonymous / public-edit tokens  
 - Scene-scoped ACL tables  
 - Cross-company invites  
-- CRDT/OT editing (Presence remains as today)
+- CRDT/OT editing (Presence remains as today)  
+- Capability-app SMTP for invite delivery (Plexon mailer only)
 
 ## Direct email assignment
 
-Products may also add a same-company user by email via `POST …/collections/:id/members` (additive upsert into `user_platform_project_assignments`). Spec: `specs/api/collection-members.md`. Existing assignments are never overwritten or deleted by that POST.
+Products may also add a same-company user by email via `POST …/collections/:id/members` (additive upsert into `user_platform_project_assignments`). Spec: `specs/api/collection-members.md`. Existing assignments are never overwritten or deleted by that POST. On `status: added`, Plexon MUST best-effort send `collection_member_added` (not on `already_member`).

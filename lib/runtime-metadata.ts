@@ -1,5 +1,5 @@
 import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
-import { getPasswordResetMailDiagnostics } from '@/lib/send-password-reset-email';
+import { getTransactionalMailDiagnostics } from '@/lib/mail';
 
 const APP_VERSION_FALLBACK = '0.1.0';
 const COMMIT_SHA_KEYS = ['SOURCE_COMMIT', 'COMMIT_SHA', 'GIT_COMMIT_SHA', 'VERCEL_GIT_COMMIT_SHA'] as const;
@@ -28,14 +28,17 @@ function normalizeBuiltAt(value: string | null): string | null {
 }
 
 export function getRuntimeMetadata() {
+  const mail = getTransactionalMailDiagnostics();
   return {
     app: 'plexon',
     runtime: 'nextjs',
     version: process.env.npm_package_version?.trim() || APP_VERSION_FALLBACK,
     nodeEnv: process.env.NODE_ENV?.trim() || null,
     federationContractVersion: PLEXON_FEDERATION_CONTRACT_VERSION,
-    /** Password-reset mail: which transport is active (Coolify must inject env at **runtime**, not build-only). */
-    passwordResetMail: getPasswordResetMailDiagnostics(),
+    /** @deprecated Prefer transactionalMail — kept for Coolify health dashboards. */
+    passwordResetMail: mail,
+    /** Shared SMTP/Mailgun/log transport for all transactional kinds. */
+    transactionalMail: mail,
     deployment: {
       commitSha: readFirstEnv(COMMIT_SHA_KEYS),
       branch: readFirstEnv(BRANCH_KEYS),
