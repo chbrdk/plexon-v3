@@ -35,6 +35,8 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 
 ## Product inventory
 
+Team UI may forward draft email as invite `toEmail` — see `knowledge/invite-toemail-team-ui.md`.
+
 | App | Team BFF | Forgot → Plexon | Own SMTP? |
 |-----|----------|-----------------|-----------|
 | Audion | `/api/projects/:id/members\|invites` | Yes (`plexon-links`) | No |
