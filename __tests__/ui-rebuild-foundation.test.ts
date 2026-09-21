@@ -27,6 +27,7 @@ describe('ui rebuild foundation inventory', () => {
       'emailCodePanel',
       'emailButton',
       'msqdxEmailPalette',
+      'MSQDX_EMAIL_LOGO_MARK_URL',
       "from '../../msqdx-ui/packages/ui/src/email'",
     ]) {
       expect(barrel, token).toContain(token)

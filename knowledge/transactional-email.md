@@ -50,7 +50,7 @@ Ops alternative still valid: open host firewall TCP **587** from projects-01 and
 
 ## HTML presentation (2026-09-21)
 
-Transactional HTML uses the shared **MSQDX email shell** (`@msqdx/ui` → `renderMsqdxEmailDocument`, brand orange / neutral canvas). Spec: `msqdx-ui/specs/domain/msqdx-ui-email.md`. Plain-text multipart remains required. Password-reset stays **code-only** (no `*.plygrnd.tech` links — Mimecast).
+Transactional HTML uses the shared **MSQDX email shell** (`@msqdx/ui` → `renderMsqdxEmailDocument`, brand orange / neutral canvas, **logo mark always on** via `MSQDX_EMAIL_LOGO_MARK_URL` / jsDelivr — not plygrnd). Spec: `msqdx-ui/specs/domain/msqdx-ui-email.md`. Plain-text multipart remains required. Password-reset stays **code-only** (no `*.plygrnd.tech` links — Mimecast).
 
 | Path | Role |
 |------|------|

@@ -88,6 +88,8 @@ describe('resolveMailTransport / transactional mail', () => {
     expect(reset.text).toContain('tok_abc123');
     expect(reset.html).toContain('role="presentation"');
     expect(reset.html).toContain('#ff6a3b');
+    expect(reset.html).toContain('msqdx-mark.png');
+    expect(reset.html).toContain('MSQ DX');
     expect(reset.html).not.toMatch(/https?:\/\/[^\s"']*plygrnd/);
     expect(reset.text).not.toMatch(/https?:\/\//);
 

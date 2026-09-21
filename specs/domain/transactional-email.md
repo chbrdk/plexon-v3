@@ -32,7 +32,7 @@ Product login forgot ──► Plexon /forgot-password     ──► mailer ─�
 2. **Hooks on Plexon mutations only** — apps do not send team mail themselves.
 3. **Best-effort send** — membership / invite / reset token commit succeeds even if SMTP fails; log + health diagnostics.
 4. **No secrets in products** — no `SMTP_*` in capability Coolify apps for this program.
-5. **Deep links** — invite / member-added CTAs use absolute URLs when deliverability allows. Password-reset (and Mimecast-sensitive kinds) use pasteable codes / in-app instructions without `*.plygrnd.tech` URLs. HTML presentation uses the shared MSQDX email shell (`@msqdx/ui` `renderMsqdxEmailDocument`).
+5. **Deep links** — invite / member-added CTAs use absolute URLs when deliverability allows. Password-reset (and Mimecast-sensitive kinds) use pasteable codes / in-app instructions without `*.plygrnd.tech` URLs. HTML presentation uses the shared MSQDX email shell (`@msqdx/ui` `renderMsqdxEmailDocument`, logo mark always on via `MSQDX_EMAIL_LOGO_MARK_URL`).
 
 ## Mail kinds
 
