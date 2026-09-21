@@ -6,9 +6,16 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { apiError, handleApiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, resetPasswordBodySchema } from '@/lib/api-schemas';
+import { PATH_LOGIN } from '@/lib/constants';
+import { getPublicAppBaseUrl, sendTransactionalEmail } from '@/lib/mail';
 import { consumePasswordResetToken } from '@/lib/password-reset';
 
 const SALT_ROUNDS = 10;
+
+function loginUrl(): string {
+  const base = getPublicAppBaseUrl();
+  return base ? `${base}${PATH_LOGIN}` : PATH_LOGIN;
+}
 
 export async function POST(request: Request) {
   if (!process.env.DATABASE_URL) {
@@ -28,6 +35,13 @@ export async function POST(request: Request) {
             ? 'This reset link was already used.'
             : 'Invalid or unknown reset link.';
       return apiError(msg, API_STATUS.BAD_REQUEST);
+    }
+    if (result.email) {
+      void sendTransactionalEmail({
+        kind: 'password_changed',
+        to: result.email,
+        payload: { loginUrl: loginUrl() },
+      });
     }
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -35,17 +35,18 @@ sendTransactionalEmail({
 | `password_reset` | `resetLink` | Existing `sendPasswordResetEmail` |
 | `collection_member_added` | `collectionName`, `role`, `launchUrl`, `actorName?` | Only when members POST returns `added` |
 | `collection_invite` | `inviteUrl`, `collectionName`, `role`, `expiresAt?`, `actorName?` | When create body includes `toEmail` |
-| `password_changed` | `loginUrl` | P2 |
-| `account_welcome` | `loginUrl` or `setPasswordLink` | P2 |
-| `collection_member_removed` | `collectionName` | P2 |
+| `password_changed` | `loginUrl` | After reset consume / change-password |
+| `account_welcome` | `loginUrl` or `setPasswordLink` | After self-register (admin invite-to-register later) |
+| `collection_member_removed` | `collectionName` | After DELETE members |
 
 ## Auth routes (existing)
 
 | Method | Path | Mail |
 |--------|------|------|
 | `POST` | `/api/auth/request-password-reset` | `password_reset` (best-effort) |
-| `POST` | `/api/auth/reset-password` | `password_changed` (P2) |
-| `POST` | `/api/auth/change-password` | `password_changed` (P2) |
+| `POST` | `/api/auth/reset-password` | `password_changed` (best-effort) |
+| `POST` | `/api/auth/change-password` | `password_changed` (best-effort) |
+| `POST` | `/api/auth/register` | `account_welcome` (best-effort) |
 
 ## Collection members — notify
 
@@ -59,7 +60,7 @@ sendTransactionalEmail({
 
 Optional future body flag `notify: false` MAY suppress send (default `true`). Not required for P1.
 
-DELETE member: `collection_member_removed` in P2 (best-effort).
+DELETE member: MUST best-effort send `collection_member_removed`.
 
 ## Collection invites — optional email
 

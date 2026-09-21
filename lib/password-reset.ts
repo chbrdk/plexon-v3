@@ -41,7 +41,10 @@ export async function createPasswordResetTokenForEmail(email: string): Promise<{
 export async function consumePasswordResetToken(
   plainToken: string,
   newPasswordHash: string
-): Promise<{ ok: true } | { ok: false; reason: 'invalid' | 'expired' | 'used' }> {
+): Promise<
+  | { ok: true; userId: string; email: string }
+  | { ok: false; reason: 'invalid' | 'expired' | 'used' }
+> {
   const tokenHash = hashPasswordResetToken(plainToken.trim());
   const db = getDb();
   const now = new Date();
@@ -50,10 +53,16 @@ export async function consumePasswordResetToken(
   if (tok.consumedAt) return { ok: false, reason: 'used' };
   if (tok.expiresAt <= now) return { ok: false, reason: 'expired' };
 
+  const [user] = await db
+    .select({ email: users.email })
+    .from(users)
+    .where(eq(users.id, tok.userId))
+    .limit(1);
+
   await db.transaction(async (tx) => {
     await tx.update(users).set({ passwordHash: newPasswordHash }).where(eq(users.id, tok.userId));
     await tx.update(passwordResetTokens).set({ consumedAt: now }).where(eq(passwordResetTokens.id, tok.id));
   });
 
-  return { ok: true };
+  return { ok: true, userId: tok.userId, email: user?.email ?? '' };
 }

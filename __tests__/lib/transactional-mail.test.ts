@@ -55,6 +55,21 @@ describe('resolveMailTransport / transactional mail', () => {
       role: 'admin',
     });
     expect(invite.html).toContain('/invite/inv_x');
+
+    const changed = renderTransactionalMail('password_changed', {
+      loginUrl: 'https://plexon.test/login',
+    });
+    expect(changed.subject).toContain('Passwort geändert');
+
+    const welcome = renderTransactionalMail('account_welcome', {
+      loginUrl: 'https://plexon.test/login',
+    });
+    expect(welcome.subject).toContain('Willkommen');
+
+    const removed = renderTransactionalMail('collection_member_removed', {
+      collectionName: 'Demo',
+    });
+    expect(removed.html).toContain('entfernt');
   });
 
   it('sendTransactionalEmail delivers via log transport without throwing', async () => {

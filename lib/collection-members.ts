@@ -222,7 +222,17 @@ export async function revokeCollectionMember(input: {
     return { ok: false, status: 400, error: 'creator_immutable' };
   }
 
+  const removedUser = await loadUserPublic(userId);
   const removed = await deleteUserPlatformProjectAssignment(userId, platformProjectId);
   if (!removed) return { ok: false, status: 404, error: 'Not found' };
+
+  if (removedUser?.email) {
+    void sendTransactionalEmail({
+      kind: 'collection_member_removed',
+      to: removedUser.email,
+      payload: { collectionName: project.name || 'Collection' },
+    });
+  }
+
   return { ok: true };
 }

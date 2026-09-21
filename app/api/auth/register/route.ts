@@ -5,9 +5,11 @@
 import { NextResponse } from 'next/server';
 import { apiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, registerBodySchema } from '@/lib/api-schemas';
+import { PATH_LOGIN } from '@/lib/constants';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/db';
 import { USER_ROLE, users } from '@/lib/db/schema';
+import { getPublicAppBaseUrl, sendTransactionalEmail } from '@/lib/mail';
 import { attachPlatformHeaders } from '@/lib/platform-contract';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
@@ -50,6 +52,14 @@ export async function POST(request: Request) {
       passwordHash,
       name: name || null,
       role,
+    });
+
+    const base = getPublicAppBaseUrl();
+    const loginUrl = base ? `${base}${PATH_LOGIN}` : PATH_LOGIN;
+    void sendTransactionalEmail({
+      kind: 'account_welcome',
+      to: email,
+      payload: { loginUrl },
     });
 
     return attachPlatformHeaders(NextResponse.json({ success: true, userId: id }));

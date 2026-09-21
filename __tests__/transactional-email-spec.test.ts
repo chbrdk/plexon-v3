@@ -19,6 +19,9 @@ describe('transactional email specs', () => {
     expect(domainText).toContain('password_reset');
     expect(domainText).toContain('collection_member_added');
     expect(domainText).toContain('collection_invite');
+    expect(domainText).toContain('password_changed');
+    expect(domainText).toContain('account_welcome');
+    expect(domainText).toContain('collection_member_removed');
     expect(domainText).toContain('Capability apps');
     expect(apiText).toContain('toEmail');
     expect(apiText).toContain('already_member');
@@ -28,12 +31,16 @@ describe('transactional email specs', () => {
   it('members + invites specs document notify / toEmail', () => {
     const members = readFileSync(path.join(root, 'specs/api/collection-members.md'), 'utf8');
     const invites = readFileSync(path.join(root, 'specs/api/collection-invites.md'), 'utf8');
+    const mailApi = readFileSync(path.join(root, 'specs/api/transactional-email.md'), 'utf8');
     const inviteDomain = readFileSync(
       path.join(root, 'specs/domain/collection-invite-links.md'),
       'utf8'
     );
     expect(members).toContain('collection_member_added');
     expect(members).toContain('already_member');
+    expect(mailApi).toContain('password_changed');
+    expect(mailApi).toContain('account_welcome');
+    expect(mailApi).toContain('collection_member_removed');
     expect(invites).toContain('toEmail');
     expect(invites).toContain('emailedTo');
     expect(inviteDomain).toContain('transactional-email');

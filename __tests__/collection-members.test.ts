@@ -215,5 +215,34 @@ describe('collection members', () => {
     });
     expect(result).toEqual({ ok: false, status: 400, error: 'creator_immutable' });
     expect(deleteUserPlatformProjectAssignment).not.toHaveBeenCalled();
+    expect(sendTransactionalEmail).not.toHaveBeenCalled();
+  });
+
+  it('sends collection_member_removed when assignment deleted', async () => {
+    const { getDb } = await import('@/lib/db');
+    vi.mocked(getDb).mockReturnValue({
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: async () => [{ id: 'u-2', email: 'peer@example.com', name: 'Peer' }],
+          }),
+        }),
+      }),
+    } as never);
+    vi.mocked(deleteUserPlatformProjectAssignment).mockResolvedValue(true);
+
+    const result = await revokeCollectionMember({
+      platformProjectId: 'pp-1',
+      userId: 'u-2',
+      actor: { id: 'creator-1', role: 'user' },
+    });
+    expect(result).toEqual({ ok: true });
+    expect(sendTransactionalEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: 'collection_member_removed',
+        to: 'peer@example.com',
+        payload: { collectionName: 'Demo' },
+      })
+    );
   });
 });

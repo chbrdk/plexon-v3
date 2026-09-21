@@ -6,8 +6,10 @@ import { NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { apiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, changePasswordBodySchema } from '@/lib/api-schemas';
+import { PATH_LOGIN } from '@/lib/constants';
 import { getDb } from '@/lib/db';
 import { users } from '@/lib/db/schema';
+import { getPublicAppBaseUrl, sendTransactionalEmail } from '@/lib/mail';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
 
   const db = getDb();
   const [user] = await db
-    .select({ passwordHash: users.passwordHash })
+    .select({ passwordHash: users.passwordHash, email: users.email })
     .from(users)
     .where(eq(users.id, requestUser.id))
     .limit(1);
@@ -33,5 +35,14 @@ export async function POST(request: Request) {
   if (!valid) return apiError('Current password is incorrect', API_STATUS.BAD_REQUEST);
   const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
   await db.update(users).set({ passwordHash }).where(eq(users.id, requestUser.id));
+
+  const base = getPublicAppBaseUrl();
+  const loginUrl = base ? `${base}${PATH_LOGIN}` : PATH_LOGIN;
+  void sendTransactionalEmail({
+    kind: 'password_changed',
+    to: user.email,
+    payload: { loginUrl },
+  });
+
   return NextResponse.json({ success: true });
 }

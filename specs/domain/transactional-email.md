@@ -80,7 +80,7 @@ Product login forgot ──► Plexon /forgot-password     ──► mailer ─�
 |-------|--------|------|
 | **P0** | This domain + API specs, knowledge, invite/members patches, inventory test | Specs accepted |
 | **P1** | Generalize mailer (`lib/mail/`); wire `collection_member_added` + `collection_invite` (`toEmail`); extend health diagnostics beyond password-reset-only naming; mock-transport tests; Videon/Metron forgot-password deep-link parity | Staging SMTP delivers team + reset mail |
-| **P2** | `password_changed`, `account_welcome`, `collection_member_removed` | Security/onboarding coverage |
+| **P2** | `password_changed`, `account_welcome` (register), `collection_member_removed` | Security/onboarding coverage |
 | **P3+** | Product share/digest/alert kinds with preferences; CREATION magic-link via Plexon helper or shared send | Product async notify |
 
 ## Related
