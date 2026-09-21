@@ -1,8 +1,9 @@
 /**
  * Shared `checkion.scan` capability executor (Wave C1.1).
- * Agent → legacy quick-scan HTTP; Flow → platform `/api/scans` poll.
+ * Agent → quick-scan via contracts `/api/scans`; Flow → platform `/api/scans` poll.
  * Both write the same `scan.*` catalog root via shared normalizers.
  * @see specs/domain/capability-catalog.md
+ * @see knowledge/checkion-quick-scan-v3.md
  */
 
 import type { ScanResultPreview } from '@/lib/assistant/ui-blocks/build-scan-result-ui';

@@ -1,33 +1,78 @@
-import { formatCheckionScanHttpFailure, resolveCheckionServiceAuthForActor } from '@/lib/integrations/checkion-connectivity';
-import { checkionApiScan } from '@/lib/paths/checkion-api';
+/**
+ * CHECKION accessibility quick scan for Assistant / agent surfaces.
+ * Uses contracts `POST /api/scans` (mode=single) — legacy `/api/scan` does not exist on checkion-v3.
+ * @see knowledge/checkion-quick-scan-v3.md
+ */
+
 import type { ScanResultPreview } from '@/lib/assistant/ui-blocks/build-scan-result-ui';
+import { createCheckionProject } from '@/lib/integrations/checkion-project-client';
+import {
+  fetchCheckionScanIssues,
+  runCheckionSingleScan,
+  type CheckionIssueItem,
+} from '@/lib/integrations/checkion-scans-client';
 
 export type QuickScanResult =
   | { ok: true; scan: ScanResultPreview }
-  | { ok: false; error: string; missing?: Array<'url'> };
+  | { ok: false; error: string; missing?: Array<'url' | 'projectId'> };
 
-function mapScanData(data: Record<string, unknown>): ScanResultPreview {
-  const stats = (data.stats as Record<string, number>) ?? {};
-  const issues = Array.isArray(data.issues)
-    ? (data.issues as Array<Record<string, unknown>>).map((i) => ({
-        code: String(i.code ?? ''),
-        type: String(i.type ?? 'unknown'),
-        message: String(i.message ?? ''),
-        selector: String(i.selector ?? ''),
-      }))
-    : [];
-  return {
-    id: String(data.id ?? ''),
-    url: String(data.url ?? ''),
-    score: Number(data.score ?? 0),
-    stats: {
-      errors: Number(stats.errors ?? 0),
-      warnings: Number(stats.warnings ?? 0),
-      notices: Number(stats.notices ?? 0),
-      total: Number(stats.total ?? 0),
-    },
-    issues,
-  };
+function hostnameFromUrl(url: string): string {
+  try {
+    return new URL(url).hostname || 'scan';
+  } catch {
+    return 'scan';
+  }
+}
+
+function severityToPreviewType(severity: string): string {
+  const s = severity.toLowerCase();
+  if (s === 'critical' || s === 'serious' || s === 'error') return 'error';
+  if (s === 'moderate' || s === 'warning') return 'warning';
+  return 'notice';
+}
+
+function buildStats(items: CheckionIssueItem[]): ScanResultPreview['stats'] {
+  let errors = 0;
+  let warnings = 0;
+  let notices = 0;
+  for (const it of items) {
+    const t = severityToPreviewType(it.severity);
+    if (t === 'error') errors += 1;
+    else if (t === 'warning') warnings += 1;
+    else notices += 1;
+  }
+  return { errors, warnings, notices, total: items.length };
+}
+
+function mapIssues(items: CheckionIssueItem[]): ScanResultPreview['issues'] {
+  return items.slice(0, 50).map((it) => ({
+    code: it.ruleId || it.id,
+    type: severityToPreviewType(it.severity),
+    message: it.title ?? it.ruleId ?? it.id,
+    selector: '',
+  }));
+}
+
+async function resolveCheckionProjectId(input: {
+  url: string;
+  checkionProjectId?: string | null;
+  actorUserId?: string | null;
+}): Promise<{ ok: true; projectId: string } | { ok: false; error: string }> {
+  const existing = input.checkionProjectId?.trim();
+  if (existing) return { ok: true, projectId: existing };
+
+  const created = await createCheckionProject(
+    `Quick Scan · ${hostnameFromUrl(input.url)}`,
+    hostnameFromUrl(input.url),
+    input.actorUserId
+  );
+  if (!created.ok) {
+    return {
+      ok: false,
+      error: `CHECKION Projekt für Quick Scan fehlt und konnte nicht angelegt werden: ${created.error}`,
+    };
+  }
+  return { ok: true, projectId: created.id };
 }
 
 export async function runCheckionQuickScan(input: {
@@ -40,38 +85,45 @@ export async function runCheckionQuickScan(input: {
     return { ok: false, error: 'URL fehlt', missing: ['url'] };
   }
 
-  const auth = resolveCheckionServiceAuthForActor(input.actorUserId);
-  if (!auth.ok) {
-    return { ok: false, error: auth.error };
+  const project = await resolveCheckionProjectId(input);
+  if (!project.ok) {
+    return { ok: false, error: project.error, missing: ['projectId'] };
   }
 
-  try {
-    const res = await fetch(checkionApiScan(), {
-      method: 'POST',
-      headers: {
-        ...auth.headers,
-        'x-checkion-scan-stream': '0',
-      },
-      body: JSON.stringify({
-        url,
-        standard: 'WCAG2AA',
-        runners: ['axe', 'htmlcs'],
-        ...(input.checkionProjectId ? { projectId: input.checkionProjectId } : {}),
-      }),
-      cache: 'no-store',
-    });
-    const body = await res.text();
-    if (!res.ok) {
-      return { ok: false, error: formatCheckionScanHttpFailure(res.status, body) };
-    }
-    const json = JSON.parse(body) as { success?: boolean; data?: Record<string, unknown> };
-    const data = json.data ?? (json as Record<string, unknown>);
-    const scan = mapScanData(data);
-    if (!scan.id) {
-      return { ok: false, error: 'CHECKION Scan ohne ID' };
-    }
-    return { ok: true, scan };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  const started = await runCheckionSingleScan({
+    projectId: project.projectId,
+    url,
+    mode: 'single',
+  });
+  if (!started.ok) {
+    return { ok: false, error: started.error };
   }
+
+  const summary = started.scan;
+  const status = summary.status.toLowerCase();
+  if (status === 'failed' || status === 'cancelled') {
+    return {
+      ok: false,
+      error: summary.error?.trim() || `CHECKION Scan ${status}`,
+    };
+  }
+
+  const issuesRes = await fetchCheckionScanIssues(summary.id);
+  const items = issuesRes.ok ? issuesRes.items : [];
+  const stats = buildStats(items);
+  const score =
+    typeof summary.overallScore === 'number' && Number.isFinite(summary.overallScore)
+      ? summary.overallScore
+      : Math.max(0, 100 - stats.errors * 8 - stats.warnings * 3);
+
+  return {
+    ok: true,
+    scan: {
+      id: summary.id,
+      url: summary.url || url,
+      score,
+      stats,
+      issues: mapIssues(items),
+    },
+  };
 }

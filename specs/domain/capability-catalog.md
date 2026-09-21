@@ -318,11 +318,12 @@ MUSS: Promote never creates a node for `brandion.tokens_list` until that capabil
 
 **C1.1 (landed):**
 
-- [x] `executors/checkion-scan.ts` — Agent→`runCheckionQuickScan`, Flow→`runCheckionSingleScan`, shared catalog root
+- [x] `executors/checkion-scan.ts` — Agent→`runCheckionQuickScan` (v3 `POST /api/scans` via `runCheckionSingleScan`), Flow→`runCheckionSingleScan`, shared catalog root
 - [x] Flow page-`scan` path uses executor when `CAPABILITY_CATALOG_RUNTIME` on
 - [x] `runQuickScanWorkflow` uses executor when flag on
-- [x] Tests: `__tests__/capability-checkion-scan-executor.test.ts`, `__tests__/capability-quick-scan-flag.test.ts`
+- [x] Tests: `__tests__/capability-checkion-scan-executor.test.ts`, `__tests__/capability-quick-scan-flag.test.ts`, `__tests__/checkion-quick-scan-v3.test.ts`
 - [x] Env in Coolify docs
+- [x] Agent quick scan no longer calls legacy `/api/scan` (absent on checkion-v3) — see `knowledge/checkion-quick-scan-v3.md`
 
 **Exit:** `checkion.scan` identical `catalogBundle` contract + both surfaces call the same executor module when flag on. **Done.**
 

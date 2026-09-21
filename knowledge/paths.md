@@ -92,6 +92,7 @@
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`
   - Table: `collection_test_flows` (Drizzle `lib/db/schema.ts` · migration `0005_collection_test_flows.sql` · `pnpm db:push`)
   - CHECKION client: `lib/integrations/checkion-scans-client.ts` → `POST {CHECKION_API}/api/scans` `mode=single` + poll detail (`checkionApiScans` / `checkionApiScanDetail`)
+  - Assistant quick scan: `lib/integrations/checkion-scan-client.ts` → same `/api/scans` path (`knowledge/checkion-quick-scan-v3.md`) — **not** legacy `/api/scan`
   - Smoke: `knowledge/collection-test-flow-smoke.md`
 - Collection Test Flow Wave 2 (journey embed):
   - Template `journey-quality` + embedded `journeyFlow`; client `lib/integrations/audion-journey-client.ts`

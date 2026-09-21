@@ -50,6 +50,7 @@ export function pathCheckionDomainScan(input: {
 
 export function checkionApiScan(): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');
+  /** @deprecated Legacy CHECKION v2 route — missing on checkion-v3. Prefer `checkionApiScans()`. */
   return `${base}/api/scan`;
 }
 
