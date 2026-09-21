@@ -58,8 +58,9 @@ describe('resolveMailTransport / transactional mail', () => {
     });
     const body = JSON.parse(String(init.body));
     expect(body.to).toBe('user@example.com');
-    expect(body.subject).toContain('Passwort');
+    expect(body.subject).toContain('PLEXON');
     expect(body.html).toContain('reset-password?token=abc');
+    expect(body.text).toContain('reset-password?token=abc');
     expect(body.from).toContain('noreply@example.com');
   });
 
@@ -80,8 +81,9 @@ describe('resolveMailTransport / transactional mail', () => {
     const reset = renderTransactionalMail('password_reset', {
       resetLink: 'https://plexon.test/reset-password?token=abc',
     });
-    expect(reset.subject).toContain('Passwort');
+    expect(reset.subject).toContain('PLEXON');
     expect(reset.html).toContain('https://plexon.test/reset-password?token=abc');
+    expect(reset.text).toContain('https://plexon.test/reset-password?token=abc');
 
     const added = renderTransactionalMail('collection_member_added', {
       collectionName: 'Acme <Brand>',
@@ -102,7 +104,8 @@ describe('resolveMailTransport / transactional mail', () => {
     const changed = renderTransactionalMail('password_changed', {
       loginUrl: 'https://plexon.test/login',
     });
-    expect(changed.subject).toContain('Passwort geändert');
+    expect(changed.subject).toContain('Konto-Hinweis');
+    expect(changed.text).toContain('Passwort');
 
     const welcome = renderTransactionalMail('account_welcome', {
       loginUrl: 'https://plexon.test/login',

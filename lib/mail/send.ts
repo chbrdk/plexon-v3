@@ -25,6 +25,7 @@ export async function sendTransactionalEmail<K extends TransactionalMailKind>(in
     to,
     subject: rendered.subject,
     html: rendered.html,
+    text: rendered.text,
     logDetail: rendered.logDetail,
   });
 }

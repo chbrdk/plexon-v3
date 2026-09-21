@@ -35,14 +35,18 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 | Item | Value |
 |------|--------|
 | Coolify service | `plexon-smtp-http-bridge` (`90fzj0soeu4ruawzq4l3xanx`) on **coolify** host |
-| Public URL | `https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech` (`/health`, `POST /send`) — Coolify service `plexon-smtp-http-bridge` |
-| Local hop | Bridge → `host.docker.internal:587` (STARTTLS, cert verify skipped for host-local) |
-| Plexon env | `PLEXON_SMTP_HTTP_URL` · `PLEXON_SMTP_HTTP_TOKEN` · `PLEXON_SMTP_HTTP_INSECURE_TLS=1` (Traefik default/self-signed until LE) |
-| Transport | Health `transactionalMail.transport=smtp_http` when URL+token set (preferred over direct SMTP) |
+| Public URL | `https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech` (`/health`, `POST /send`) |
+| Delivery mode (updated evening) | **Direct MX** — bridge resolves recipient MX (DoH) and submits on TCP **25** from `89.58.35.209` (`HELO mail.plygrnd.tech`). Local Postfix submission accepted mail but did **not** reliably deliver outbound. |
+| Plexon env | `PLEXON_SMTP_HTTP_URL` · `PLEXON_SMTP_HTTP_TOKEN` · `PLEXON_SMTP_HTTP_INSECURE_TLS=1` |
+| Transport | Health `transactionalMail.transport=smtp_http` |
 
-Ops alternative still valid: open host firewall TCP **587** from projects-01 (`159.195.39.207`) and keep direct `SMTP_HOST=mail.plygrnd.tech`.
+**Delivery notes (2026-09-21 evening):**
 
-Do **not** put bridge token or SMTP password in git.
+- `bordeck.christoph@gmail.com`: Gmail MX accepts from `89.58.35.209` (probe + direct DATA ok). Prefer spam folder if not in inbox.
+- `christoph.bordeck@msqdx.com`: Mimecast MX — plain/test bodies deliver; short **password-reset** bodies were rejected with **554 security policies** (`DOC-1369#554`) and intermittent **451**. Softened multipart templates (`PLEXON: Link für dein Konto`) + text/plain. Still allowlist sending IP `89.58.35.209` / `plygrnd.tech` in Mimecast if resets stay flaky.
+- SPF for `plygrnd.tech` is `v=spf1 mx ~all` (softfail). Hardening (DKIM/DMARC + `ip4:89.58.35.209` in SPF) still recommended.
+
+Ops alternative still valid: open host firewall TCP **587** from projects-01 and repair Postfix outbound; or use Mailgun as transport 3.
 
 ## Code today (P1)
 

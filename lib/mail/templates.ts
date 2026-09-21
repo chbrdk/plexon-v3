@@ -1,6 +1,9 @@
 /**
- * Transactional mail templates (plain HTML).
+ * Transactional mail templates (plain HTML + text).
  * Spec: specs/api/transactional-email.md
+ *
+ * Mimecast (msqdx.com) rejects short “password reset + raw URL” bodies with 554
+ * security policy — keep reset/changed copy conversational + multipart text.
  */
 
 import { escapeHtml } from '@/lib/mail/escape-html';
@@ -53,6 +56,8 @@ export type TransactionalPayloadByKind = {
 export type RenderedMail = {
   subject: string;
   html: string;
+  text: string;
+  /** Log-friendly hint when transport is log (e.g. reset link). */
   logDetail?: string;
 };
 
@@ -64,8 +69,19 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
     const p = payload as PasswordResetPayload;
     const link = escapeHtml(p.resetLink);
     return {
-      subject: 'PLEXON – Passwort zurücksetzen',
-      html: `<p>Setze dein Passwort unter:</p><p><a href="${link}">${link}</a></p><p>Der Link ist 1 Stunde gültig.</p>`,
+      subject: 'PLEXON: Link für dein Konto',
+      html: `<p>Hallo,</p><p>für dein PLEXON-Konto wurde ein Link angefordert, mit dem du dein Passwort neu setzen kannst.</p><p><a href="${link}">Passwort in PLEXON neu setzen</a></p><p>Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, kannst du diese Nachricht ignorieren.</p><p>— PLEXON · plygrnd.tech</p>`,
+      text: [
+        'Hallo,',
+        '',
+        'für dein PLEXON-Konto wurde ein Link angefordert, mit dem du dein Passwort neu setzen kannst.',
+        '',
+        `Link: ${p.resetLink}`,
+        '',
+        'Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese Nachricht.',
+        '',
+        '— PLEXON · plygrnd.tech',
+      ].join('\n'),
       logDetail: p.resetLink,
     };
   }
@@ -78,6 +94,7 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
     return {
       subject: `PLEXON – Zugang zu „${p.collectionName}"`,
       html: `<p>Du wurdest${who ? ` von ${who}` : ''} zur Collection <strong>${name}</strong> hinzugefügt (Rolle: ${role}).</p><p><a href="${launch}">Collection öffnen</a></p>`,
+      text: `Du wurdest${p.actorName ? ` von ${p.actorName}` : ''} zur Collection „${p.collectionName}" hinzugefügt (Rolle: ${p.role}).\n\nÖffnen: ${p.launchUrl}`,
       logDetail: p.launchUrl,
     };
   }
@@ -91,6 +108,7 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
     return {
       subject: `PLEXON – Einladung zu „${p.collectionName}"`,
       html: `<p>${who ? `${who} hat dich` : 'Du wurdest'} zur Collection <strong>${name}</strong> eingeladen (Rolle: ${role}).</p><p><a href="${invite}">Einladung annehmen</a></p>${expires}<p>Du musst mit einem PLEXON-Konto derselben Organisation angemeldet sein.</p>`,
+      text: `${p.actorName ? `${p.actorName} hat dich` : 'Du wurdest'} zur Collection „${p.collectionName}" eingeladen (Rolle: ${p.role}).\n\nAnnehmen: ${p.inviteUrl}${p.expiresAt ? `\nGültig bis: ${p.expiresAt}` : ''}`,
       logDetail: p.inviteUrl,
     };
   }
@@ -98,8 +116,18 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
     const p = payload as PasswordChangedPayload;
     const login = escapeHtml(p.loginUrl);
     return {
-      subject: 'PLEXON – Passwort geändert',
-      html: `<p>Dein PLEXON-Passwort wurde soeben geändert.</p><p>Wenn du das nicht warst, setze es umgehend zurück und melde dich beim Admin.</p><p><a href="${login}">Zur Anmeldung</a></p>`,
+      subject: 'PLEXON: Konto-Hinweis',
+      html: `<p>Hallo,</p><p>dein PLEXON-Passwort wurde soeben geändert.</p><p>Wenn du das nicht warst, setze es umgehend zurück und melde dich beim Admin.</p><p><a href="${login}">Zur Anmeldung</a></p><p>— PLEXON · plygrnd.tech</p>`,
+      text: [
+        'Hallo,',
+        '',
+        'dein PLEXON-Passwort wurde soeben geändert.',
+        'Wenn du das nicht warst, setze es umgehend zurück und melde dich beim Admin.',
+        '',
+        `Anmeldung: ${p.loginUrl}`,
+        '',
+        '— PLEXON · plygrnd.tech',
+      ].join('\n'),
       logDetail: p.loginUrl,
     };
   }
@@ -109,9 +137,11 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
     const setPw = p.setPasswordLink
       ? `<p><a href="${escapeHtml(p.setPasswordLink)}">Passwort setzen</a></p>`
       : '';
+    const setPwText = p.setPasswordLink ? `\nPasswort setzen: ${p.setPasswordLink}\n` : '';
     return {
       subject: 'PLEXON – Willkommen',
       html: `<p>Willkommen bei PLEXON.</p>${setPw}<p><a href="${login}">Anmelden</a></p>`,
+      text: `Willkommen bei PLEXON.${setPwText}\nAnmelden: ${p.loginUrl}`,
       logDetail: p.setPasswordLink || p.loginUrl,
     };
   }
@@ -120,6 +150,7 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
   return {
     subject: `PLEXON – Zugang entfernt („${p.collectionName}")`,
     html: `<p>Dein Zugang zur Collection <strong>${name}</strong> wurde entfernt.</p>`,
+    text: `Dein Zugang zur Collection „${p.collectionName}" wurde entfernt.`,
     logDetail: p.collectionName,
   };
 }

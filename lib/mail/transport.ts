@@ -159,6 +159,7 @@ export type OutboundMailMessage = {
   to: string;
   subject: string;
   html: string;
+  text?: string;
   /** Log-friendly hint when transport is log (e.g. reset link). */
   logDetail?: string;
 };
@@ -179,6 +180,7 @@ async function sendViaSmtpHttp(message: OutboundMailMessage): Promise<void> {
     to: message.to,
     subject: message.subject,
     html: message.html,
+    text: message.text || undefined,
     from: fromAddress('smtp_http'),
   });
 
@@ -234,7 +236,7 @@ async function sendViaSmtpHttp(message: OutboundMailMessage): Promise<void> {
 
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
-    throw new Error(`smtp_http ${res.status} url=${url} body=${txt.slice(0, 200)}`);
+    throw new Error(`smtp_http ${res.status} url=${url} body=${txt.slice(0, 300)}`);
   }
 }
 
@@ -262,6 +264,7 @@ async function sendViaSmtp(message: OutboundMailMessage): Promise<void> {
       to: message.to,
       subject: message.subject,
       html: message.html,
+      text: message.text || undefined,
     });
   } catch (e) {
     const hint = `host=${host} port=${port} secure=${secure}`;
@@ -286,6 +289,7 @@ async function sendViaMailgun(message: OutboundMailMessage): Promise<void> {
     to: message.to,
     subject: message.subject,
     html: message.html,
+    ...(message.text ? { text: message.text } : {}),
   });
 
   const res = await fetch(url, {
