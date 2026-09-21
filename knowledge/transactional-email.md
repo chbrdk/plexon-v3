@@ -43,7 +43,7 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 **Delivery notes (2026-09-21 evening):**
 
 - `bordeck.christoph@gmail.com`: Gmail MX accepts from `89.58.35.209` (probe + direct DATA ok). Prefer spam folder if not in inbox.
-- `christoph.bordeck@msqdx.com`: Mimecast MX — plain/test bodies deliver; short **password-reset** bodies were rejected with **554 security policies** (`DOC-1369#554`) and intermittent **451**. Softened multipart templates (`PLEXON: Link für dein Konto`) + text/plain. Still allowlist sending IP `89.58.35.209` / `plygrnd.tech` in Mimecast if resets stay flaky.
+- `christoph.bordeck@msqdx.com`: Mimecast MX — **blocks any `*.plygrnd.tech` URL** in the body (`554` DOC-1369#554). Plain text without links delivers. **Password reset therefore sends a pasteable code** (no deep link); `/reset-password` has a code field. Long-term: Mimecast allowlist for `plygrnd.tech` or a separate mail-link domain.
 - SPF for `plygrnd.tech` is `v=spf1 mx ~all` (softfail). Hardening (DKIM/DMARC + `ip4:89.58.35.209` in SPF) still recommended.
 
 Ops alternative still valid: open host firewall TCP **587** from projects-01 and repair Postfix outbound; or use Mailgun as transport 3.

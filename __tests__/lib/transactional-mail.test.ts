@@ -46,7 +46,7 @@ describe('resolveMailTransport / transactional mail', () => {
     await sendTransactionalEmail({
       kind: 'password_reset',
       to: 'user@example.com',
-      payload: { resetLink: 'https://plexon.test/reset-password?token=abc' },
+      payload: { plainToken: 'tok_abc123' },
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
@@ -59,8 +59,9 @@ describe('resolveMailTransport / transactional mail', () => {
     const body = JSON.parse(String(init.body));
     expect(body.to).toBe('user@example.com');
     expect(body.subject).toContain('PLEXON');
-    expect(body.html).toContain('reset-password?token=abc');
-    expect(body.text).toContain('reset-password?token=abc');
+    expect(body.html).toContain('tok_abc123');
+    expect(body.text).toContain('tok_abc123');
+    expect(body.html).not.toContain('http');
     expect(body.from).toContain('noreply@example.com');
   });
 
@@ -79,11 +80,13 @@ describe('resolveMailTransport / transactional mail', () => {
   it('renders password_reset and collection templates', async () => {
     const { renderTransactionalMail } = await import('@/lib/mail');
     const reset = renderTransactionalMail('password_reset', {
-      resetLink: 'https://plexon.test/reset-password?token=abc',
+      plainToken: 'tok_abc123',
     });
     expect(reset.subject).toContain('PLEXON');
-    expect(reset.html).toContain('https://plexon.test/reset-password?token=abc');
-    expect(reset.text).toContain('https://plexon.test/reset-password?token=abc');
+    expect(reset.html).toContain('tok_abc123');
+    expect(reset.text).toContain('tok_abc123');
+    expect(reset.html).not.toMatch(/https?:\/\//);
+    expect(reset.text).not.toMatch(/https?:\/\//);
 
     const added = renderTransactionalMail('collection_member_added', {
       collectionName: 'Acme <Brand>',

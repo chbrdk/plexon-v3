@@ -33,7 +33,7 @@ sendTransactionalEmail({
 
 | Kind | Required payload fields | Notes |
 |------|-------------------------|-------|
-| `password_reset` | `resetLink` | Existing `sendPasswordResetEmail` |
+| `password_reset` | `plainToken` | Mimecast blocks `*.plygrnd.tech` links — mail carries pasteable code only; UI `/reset-password` accepts code field |
 | `collection_member_added` | `collectionName`, `role`, `launchUrl`, `actorName?` | Only when members POST returns `added` |
 | `collection_invite` | `inviteUrl`, `collectionName`, `role`, `expiresAt?`, `actorName?` | When create body includes `toEmail` |
 | `password_changed` | `loginUrl` | After reset consume / change-password |

@@ -6,8 +6,7 @@ import { NextResponse } from 'next/server';
 import { apiError, handleApiError, API_STATUS } from '@/lib/api-error-handler';
 import { parseApiBody, requestPasswordResetBodySchema } from '@/lib/api-schemas';
 import { createPasswordResetTokenForEmail } from '@/lib/password-reset';
-import { getPasswordResetPublicBaseUrl, sendPasswordResetEmail } from '@/lib/send-password-reset-email';
-import { PATH_RESET_PASSWORD } from '@/lib/constants';
+import { sendPasswordResetEmail } from '@/lib/send-password-reset-email';
 
 export async function POST(request: Request) {
   if (!process.env.DATABASE_URL) {
@@ -23,11 +22,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const base = getPasswordResetPublicBaseUrl();
-    const resetPath = `${PATH_RESET_PASSWORD}?token=${encodeURIComponent(created.plainToken)}`;
-    const resetLink = base ? `${base}${resetPath}` : resetPath;
-
-    await sendPasswordResetEmail(email, resetLink);
+    await sendPasswordResetEmail(email, created.plainToken);
 
     return NextResponse.json({ ok: true });
   } catch (e) {

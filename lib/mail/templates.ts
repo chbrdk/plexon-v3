@@ -16,7 +16,10 @@ export type TransactionalMailKind =
   | 'account_welcome'
   | 'collection_member_removed';
 
-export type PasswordResetPayload = { resetLink: string };
+export type PasswordResetPayload = {
+  /** Opaque token to paste on /reset-password (no app URL — Mimecast blocks *.plygrnd.tech links). */
+  plainToken: string;
+};
 
 export type CollectionMemberAddedPayload = {
   collectionName: string;
@@ -67,22 +70,23 @@ export function renderTransactionalMail<K extends TransactionalMailKind>(
 ): RenderedMail {
   if (kind === 'password_reset') {
     const p = payload as PasswordResetPayload;
-    const link = escapeHtml(p.resetLink);
+    const token = escapeHtml(p.plainToken);
     return {
-      subject: 'PLEXON: Link für dein Konto',
-      html: `<p>Hallo,</p><p>für dein PLEXON-Konto wurde ein Link angefordert, mit dem du dein Passwort neu setzen kannst.</p><p><a href="${link}">Passwort in PLEXON neu setzen</a></p><p>Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, kannst du diese Nachricht ignorieren.</p><p>— PLEXON · plygrnd.tech</p>`,
+      subject: 'PLEXON: Code für dein Konto',
+      html: `<p>Hallo,</p><p>dein PLEXON-Code zum Setzen eines neuen Passworts lautet:</p><p><strong style="font-size:1.15em;letter-spacing:0.02em">${token}</strong></p><p>Öffne in PLEXON die Seite „Passwort zurücksetzen“, füge den Code ein und wähle ein neues Passwort. Der Code ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese Nachricht.</p><p>— PLEXON</p>`,
       text: [
         'Hallo,',
         '',
-        'für dein PLEXON-Konto wurde ein Link angefordert, mit dem du dein Passwort neu setzen kannst.',
+        'dein PLEXON-Code zum Setzen eines neuen Passworts lautet:',
         '',
-        `Link: ${p.resetLink}`,
+        p.plainToken,
         '',
-        'Der Link ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese Nachricht.',
+        'Öffne in PLEXON die Seite „Passwort zurücksetzen“, füge den Code ein und wähle ein neues Passwort.',
+        'Der Code ist eine Stunde gültig. Wenn du das nicht angefordert hast, ignoriere diese Nachricht.',
         '',
-        '— PLEXON · plygrnd.tech',
+        '— PLEXON',
       ].join('\n'),
-      logDetail: p.resetLink,
+      logDetail: 'password_reset_token_issued',
     };
   }
   if (kind === 'collection_member_added') {

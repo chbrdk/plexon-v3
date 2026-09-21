@@ -1,6 +1,9 @@
 /**
  * Password-reset mail — thin facade over shared transactional mailer.
  * Spec: specs/domain/transactional-email.md
+ *
+ * Mimecast (msqdx.com) rejects bodies containing *.plygrnd.tech URLs (554).
+ * Reset mail therefore carries a pasteable token, not a deep link.
  */
 import {
   getMailgunApiKeyFormatHint,
@@ -25,11 +28,11 @@ export function resolvePasswordResetMailTransport(): MailTransport {
   return resolveMailTransport();
 }
 
-export async function sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
+export async function sendPasswordResetEmail(to: string, plainToken: string): Promise<void> {
   await sendTransactionalEmail({
     kind: 'password_reset',
     to,
-    payload: { resetLink },
+    payload: { plainToken },
   });
 }
 

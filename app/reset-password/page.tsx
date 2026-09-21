@@ -11,7 +11,8 @@ function ResetForm() {
   const { t } = useI18n()
   const router = useRouter()
   const params = useSearchParams()
-  const token = params.get('token')?.trim() ?? ''
+  const tokenFromUrl = params.get('token')?.trim() ?? ''
+  const [token, setToken] = useState(tokenFromUrl)
   const [password, setPassword] = useState('')
   const [password2, setPassword2] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,7 +24,8 @@ function ResetForm() {
       setError(t('auth.resetPassword.mismatch'))
       return
     }
-    if (!token) {
+    const trimmed = token.trim()
+    if (!trimmed) {
       setError(t('auth.resetPassword.noToken'))
       return
     }
@@ -33,7 +35,7 @@ function ResetForm() {
       const res = await fetch(API_AUTH_RESET_PASSWORD, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, new_password: password }),
+        body: JSON.stringify({ token: trimmed, new_password: password }),
       })
       const data = (await res.json().catch(() => ({}))) as { error?: string }
       if (!res.ok) throw new Error(data.error ?? t('auth.resetPassword.error'))
@@ -51,11 +53,24 @@ function ResetForm() {
       <Text role="headline" as="h1">
         {t('auth.resetPassword.title')}
       </Text>
+      <p className="plexon-auth-lede">{t('auth.resetPassword.hint')}</p>
       {error ? (
         <p className="plexon-auth-error" role="alert">
           {error}
         </p>
       ) : null}
+      <Field label={t('auth.resetPassword.token')} size="md">
+        <Input
+          type="text"
+          autoComplete="one-time-code"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          required
+          block
+          spellCheck={false}
+          aria-label={t('auth.resetPassword.token')}
+        />
+      </Field>
       <Field label={t('auth.register.password')} size="md">
         <Input
           type="password"

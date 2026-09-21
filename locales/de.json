@@ -153,17 +153,19 @@
       "cta": "Link senden",
       "ctaLoading": "Senden…",
       "error": "Reset-E-Mail konnte nicht gesendet werden",
-      "success": "Wenn ein Konto mit dieser E-Mail existiert, erhältst du in Kürze einen Link.",
+      "success": "Wenn ein Konto mit dieser E-Mail existiert, erhältst du in Kürze einen Code.",
       "back": "Zurück zur Anmeldung"
     },
     "resetPassword": {
       "title": "Neues Passwort wählen",
+      "hint": "Code aus der E-Mail einfügen (ohne Link — der Code reicht).",
+      "token": "Code aus der E-Mail",
       "confirm": "Passwort bestätigen",
       "cta": "Passwort speichern",
       "ctaLoading": "Speichern…",
       "error": "Zurücksetzen des Passworts fehlgeschlagen",
       "mismatch": "Die Passwörter stimmen nicht überein.",
-      "noToken": "Ungültiger oder fehlender Link. Bitte den Link aus der E-Mail erneut öffnen."
+      "noToken": "Bitte den Code aus der E-Mail einfügen."
     }
   },
   "dashboard": {

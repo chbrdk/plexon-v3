@@ -38,7 +38,7 @@ Product login forgot ──► Plexon /forgot-password     ──► mailer ─�
 
 | Kind | Priority | Trigger | Recipient | Primary CTA |
 |------|----------|---------|-----------|-------------|
-| `password_reset` | **must** | Forgot-password request | Account email | `/reset-password?token=` |
+| `password_reset` | **must** | Forgot-password request | Account email | pasteable code → `/reset-password` (no `*.plygrnd.tech` URL in body — Mimecast) |
 | `collection_member_added` | **must** | `POST …/members` → `status: added` | Added user | Collection launch URL |
 | `collection_invite` | **must** | `POST …/invites` with `toEmail` | `toEmail` | `/invite/{token}` |
 | `password_changed` | should | Successful reset consume (or change-password) | Account email | Login |

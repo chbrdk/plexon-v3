@@ -153,17 +153,19 @@
       "cta": "Send link",
       "ctaLoading": "Sending…",
       "error": "Could not send reset email",
-      "success": "If an account exists for this email, you will receive a reset link shortly.",
+      "success": "If an account exists for this email, you will receive a reset code shortly.",
       "back": "Back to sign in"
     },
     "resetPassword": {
       "title": "Choose a new password",
+      "hint": "Paste the code from your email (no link required).",
+      "token": "Code from email",
       "confirm": "Confirm password",
       "cta": "Save password",
       "ctaLoading": "Saving…",
       "error": "Password reset failed",
       "mismatch": "Passwords do not match.",
-      "noToken": "Invalid or missing reset link. Open the link from your email again."
+      "noToken": "Paste the code from your email."
     }
   },
   "dashboard": {
