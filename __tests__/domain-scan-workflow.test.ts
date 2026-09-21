@@ -70,11 +70,20 @@ describe('runDomainScanWorkflow', () => {
     const result = await runDomainScanWorkflow({
       url: 'https://example.com',
       checkionProjectId: 'chk-1',
+      actorUserId: 'actor-9',
     })
     expect(result.ok).toBe(true)
     expect(result.scan?.totalPages).toBe(12)
     expect(startCheckionDomainScanV3).toHaveBeenCalledWith(
-      expect.objectContaining({ projectId: 'chk-1', url: 'https://example.com' })
+      expect.objectContaining({
+        projectId: 'chk-1',
+        url: 'https://example.com',
+        actorUserId: 'actor-9',
+      })
+    )
+    expect(pollCheckionDomainScanV3).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ actorUserId: 'actor-9' })
     )
   })
 })

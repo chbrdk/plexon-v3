@@ -39,7 +39,12 @@ function parseMaxPages(override?: number): number {
  * Wave C4: when `CAPABILITY_CATALOG_RUNTIME` is on, uses shared catalog executor.
  */
 export async function runDomainScanWorkflow(
-  input: { url: string; checkionProjectId?: string | null; maxPages?: number },
+  input: {
+    url: string
+    checkionProjectId?: string | null
+    maxPages?: number
+    actorUserId?: string | null
+  },
   options: {
     workflowRunId?: string
     initialSteps?: WorkflowStep[]
@@ -75,7 +80,11 @@ export async function runDomainScanWorkflow(
     steps = await setStep(runId, steps, 'poll_scan', { status: 'running', progress: 20 })
     const cap = await executeCheckionDomainScanCapability(
       { url: input.url, maxPages: parseMaxPages(input.maxPages) },
-      { source: 'agent', checkionProjectId: projectId }
+      {
+        source: 'agent',
+        checkionProjectId: projectId,
+        actorUserId: input.actorUserId,
+      }
     )
     if (!cap.ok || cap.agentPayload?.variant !== 'agent') {
       const err = cap.error ?? 'Domain-Scan fehlgeschlagen'
@@ -108,6 +117,7 @@ export async function runDomainScanWorkflow(
     projectId,
     maxPages: parseMaxPages(input.maxPages),
     waitForCompletion: false,
+    actorUserId: input.actorUserId,
   })
   if (!started.ok) {
     steps = await setStep(runId, steps, 'start_scan', { status: 'error', detail: started.error })
@@ -130,6 +140,7 @@ export async function runDomainScanWorkflow(
 
   steps = await setStep(runId, steps, 'poll_scan', { status: 'running', progress: 5 })
   const polled = await pollCheckionDomainScanV3(scanId, {
+    actorUserId: input.actorUserId,
     onProgress: async (status, progress) => {
       await options.onExternalProgress?.(status, progress)
       steps = await setStep(runId, steps, 'poll_scan', {
@@ -147,7 +158,7 @@ export async function runDomainScanWorkflow(
   steps = await setStep(runId, steps, 'poll_scan', { status: 'done', progress: 100 })
 
   steps = await setStep(runId, steps, 'aggregate', { status: 'running' })
-  const summary = await fetchCheckionDomainScanV3Preview(scanId)
+  const summary = await fetchCheckionDomainScanV3Preview(scanId, input.actorUserId)
   if (!summary.ok) {
     steps = await setStep(runId, steps, 'aggregate', { status: 'error', detail: summary.error })
     return { ok: false, error: summary.error, scanId, steps }

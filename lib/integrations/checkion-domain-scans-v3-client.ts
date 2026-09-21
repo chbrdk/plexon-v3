@@ -37,10 +37,10 @@ export type CheckionDomainScanSummary = {
 
 const TERMINAL = new Set(['completed', 'complete', 'failed', 'error', 'cancelled']);
 
-function requireAuthHeaders():
+function requireAuthHeaders(actorUserId?: string | null):
   | { ok: true; headers: Record<string, string> }
   | { ok: false; error: string } {
-  const auth = resolveCheckionServiceAuth();
+  const auth = resolveCheckionServiceAuth(actorUserId);
   if (!auth.ok) return auth;
   return { ok: true, headers: auth.headers };
 }
@@ -142,16 +142,17 @@ function scoresByKindFromOverviewScores(overview: unknown): Record<string, numbe
  * else DomainOverview.scores (same aggregation CHECKION magazine uses).
  */
 export async function fetchCheckionDomainScanScores(
-  domainScanId: string
+  domainScanId: string,
+  actorUserId?: string | null
 ): Promise<
   | { ok: true; byKind: Record<string, number> }
   | { ok: false; error: string }
 > {
-  const detail = await fetchCheckionDomainScanV3Detail(domainScanId);
+  const detail = await fetchCheckionDomainScanV3Detail(domainScanId, actorUserId);
   if (detail.ok && detail.scan.scoresByKind && Object.keys(detail.scan.scoresByKind).length) {
     return { ok: true, byKind: detail.scan.scoresByKind };
   }
-  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId);
+  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId, actorUserId);
   if (!overviewRes.ok) {
     return {
       ok: false,
@@ -167,11 +168,14 @@ export async function fetchCheckionDomainScanScores(
   return { ok: true, byKind };
 }
 
-export async function listCheckionDomainScansV3(projectId?: string): Promise<
+export async function listCheckionDomainScansV3(
+  projectId?: string,
+  actorUserId?: string | null
+): Promise<
   | { ok: true; scans: CheckionDomainScanSummary[] }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(actorUserId);
   if (!auth.ok) return { ok: false, error: auth.error };
   try {
     const url = new URL(checkionApiDomainScans());
@@ -232,10 +236,14 @@ export async function findCheckionDomainScanIdByUrl(input: {
   projectId?: string | null;
   /** Prefer terminal completed scans (for stuck-run reconcile). */
   preferCompleted?: boolean;
+  actorUserId?: string | null;
 }): Promise<string | null> {
   const want = checkionDomainScanHostKey(input.url || input.domain || '');
   if (!want) return null;
-  const listed = await listCheckionDomainScansV3(input.projectId?.trim() || undefined);
+  const listed = await listCheckionDomainScansV3(
+    input.projectId?.trim() || undefined,
+    input.actorUserId
+  );
   if (!listed.ok || !listed.scans.length) return null;
   let sameHost = listed.scans.filter((s) => checkionDomainScanHostKey(s.url) === want);
   if (!sameHost.length) return null;
@@ -259,11 +267,12 @@ export async function startCheckionDomainScanV3(input: {
   url: string;
   maxPages?: number;
   waitForCompletion?: boolean;
+  actorUserId?: string | null;
 }): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.actorUserId);
   if (!auth.ok) return { ok: false, error: auth.error };
   const url = input.url.trim();
   const projectId = input.projectId.trim();
@@ -304,12 +313,13 @@ export async function startCheckionDomainScanV3(input: {
 }
 
 export async function fetchCheckionDomainScanV3Detail(
-  domainScanId: string
+  domainScanId: string,
+  actorUserId?: string | null
 ): Promise<
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(actorUserId);
   if (!auth.ok) return { ok: false, error: auth.error };
   try {
     const res = await fetch(checkionApiDomainScanDetail(domainScanId), {
@@ -334,6 +344,7 @@ export async function pollCheckionDomainScanV3(
     maxMs?: number;
     /** Used to scale default poll budget when maxMs is omitted. */
     maxPages?: number;
+    actorUserId?: string | null;
     onProgress?: (status: string, progress?: number) => void | Promise<void>;
   }
 ): Promise<
@@ -350,7 +361,7 @@ export async function pollCheckionDomainScanV3(
       }
     },
     fetch: async () => {
-      const res = await fetchCheckionDomainScanV3Detail(domainScanId);
+      const res = await fetchCheckionDomainScanV3Detail(domainScanId, options?.actorUserId);
       if (!res.ok) return { done: true, error: res.error, status: 'error' };
       lastScan = res.scan;
       const status = String(res.scan.status ?? '').toLowerCase();
@@ -387,11 +398,12 @@ export async function pollCheckionDomainScanV3(
 
 /** Detail + issues → DomainScanPreview for EQC / assistant report model. */
 export async function fetchCheckionDomainScanV3Preview(
-  domainScanId: string
+  domainScanId: string,
+  actorUserId?: string | null
 ): Promise<{ ok: true; preview: DomainScanPreview } | { ok: false; error: string }> {
-  const detail = await fetchCheckionDomainScanV3Detail(domainScanId);
+  const detail = await fetchCheckionDomainScanV3Detail(domainScanId, actorUserId);
   if (!detail.ok) return detail;
-  const issuesRes = await fetchCheckionDomainScanV3Issues(domainScanId);
+  const issuesRes = await fetchCheckionDomainScanV3Issues(domainScanId, actorUserId);
   const issueRows: DomainScanV3IssueRow[] = issuesRes.ok
     ? issuesRes.items.map((o) => ({
         title: typeof o.title === 'string' ? o.title : undefined,
@@ -406,7 +418,7 @@ export async function fetchCheckionDomainScanV3Preview(
     issues: issueRows,
     issueStats: detail.scan.issueStats,
   });
-  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId);
+  const overviewRes = await fetchCheckionDomainScanV3Overview(domainScanId, actorUserId);
   if (overviewRes.ok) {
     const distributions = mapDomainOverviewToDistributions(overviewRes.overview);
     if (distributions) preview.distributions = distributions;
@@ -416,9 +428,10 @@ export async function fetchCheckionDomainScanV3Preview(
 
 /** Best-effort DomainOverview JSON for corpus distributions. */
 export async function fetchCheckionDomainScanV3Overview(
-  domainScanId: string
+  domainScanId: string,
+  actorUserId?: string | null
 ): Promise<{ ok: true; overview: unknown } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(actorUserId);
   if (!auth.ok) return { ok: false, error: auth.error };
   try {
     const res = await fetch(checkionApiDomainScanOverview(domainScanId), {
@@ -449,6 +462,8 @@ export async function runCheckionDomainScanV3(input: {
   projectId: string;
   url: string;
   maxPages?: number;
+  /** Access Model B viewer — pairs with X-Service-Secret when set. */
+  actorUserId?: string | null;
   /** Adopt an already-started CHECKION scan (skip duplicate POST). */
   existingScanId?: string;
   /** Reuse newest completed scan for the same host when no existingScanId is set. */
@@ -459,6 +474,7 @@ export async function runCheckionDomainScanV3(input: {
   | { ok: true; scan: CheckionDomainScanSummary }
   | { ok: false; error: string; scan?: CheckionDomainScanSummary }
 > {
+  const actorUserId = input.actorUserId;
   let existingId = input.existingScanId?.trim();
   if (!existingId && input.reuseExistingCompleted) {
     existingId =
@@ -466,10 +482,11 @@ export async function runCheckionDomainScanV3(input: {
         url: input.url,
         projectId: input.projectId,
         preferCompleted: true,
+        actorUserId,
       })) ?? undefined;
   }
   if (existingId) {
-    const detail = await fetchCheckionDomainScanV3Detail(existingId);
+    const detail = await fetchCheckionDomainScanV3Detail(existingId, actorUserId);
     if (!detail.ok) return { ok: false, error: detail.error };
     await input.onStarted?.(detail.scan);
     const status = String(detail.scan.status ?? '').toLowerCase();
@@ -485,6 +502,7 @@ export async function runCheckionDomainScanV3(input: {
     }
     const polled = await pollCheckionDomainScanV3(detail.scan.id, {
       maxPages: input.maxPages,
+      actorUserId,
     });
     if (!polled.ok) return { ok: false, error: polled.error, scan: detail.scan };
     return { ok: true, scan: polled.scan };
@@ -495,6 +513,7 @@ export async function runCheckionDomainScanV3(input: {
     url: input.url,
     maxPages: input.maxPages,
     waitForCompletion: false,
+    actorUserId,
   });
   if (!started.ok) return started;
   await input.onStarted?.(started.scan);
@@ -510,18 +529,20 @@ export async function runCheckionDomainScanV3(input: {
   }
   const polled = await pollCheckionDomainScanV3(started.scan.id, {
     maxPages: input.maxPages,
+    actorUserId,
   });
   if (!polled.ok) return { ok: false, error: polled.error, scan: started.scan };
   return { ok: true, scan: polled.scan };
 }
 
 export async function fetchCheckionDomainScanV3Issues(
-  domainScanId: string
+  domainScanId: string,
+  actorUserId?: string | null
 ): Promise<
   | { ok: true; signals: IssueGateSignals; items: Array<Record<string, unknown>> }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(actorUserId);
   if (!auth.ok) return { ok: false, error: auth.error };
   try {
     const res = await fetch(checkionApiDomainScanIssues(domainScanId), {

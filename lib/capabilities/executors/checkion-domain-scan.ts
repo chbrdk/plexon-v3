@@ -58,6 +58,7 @@ export async function executeCheckionDomainScanCapability(
     projectId,
     url,
     maxPages,
+    actorUserId: ctx.actorUserId,
     reuseExistingCompleted: ctx.source === 'flow',
     ...(existingScanId ? { existingScanId } : {}),
     ...(onStarted ? { onStarted } : {}),
@@ -84,7 +85,7 @@ export async function executeCheckionDomainScanCapability(
   const scan = result.scan;
   let scoresByKind = scan.scoresByKind ?? null;
   if (!scoresByKind || !Object.keys(scoresByKind).length) {
-    const scoresRes = await fetchCheckionDomainScanScores(scan.id);
+    const scoresRes = await fetchCheckionDomainScanScores(scan.id, ctx.actorUserId);
     if (scoresRes.ok) scoresByKind = scoresRes.byKind;
   }
   const catalogBundle = buildDomainCatalogBundle({
@@ -97,7 +98,7 @@ export async function executeCheckionDomainScanCapability(
   });
 
   if (ctx.source === 'agent') {
-    const preview = await fetchCheckionDomainScanV3Preview(scan.id);
+    const preview = await fetchCheckionDomainScanV3Preview(scan.id, ctx.actorUserId);
     if (!preview.ok) {
       return {
         ok: false,

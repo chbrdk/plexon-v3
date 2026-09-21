@@ -27,7 +27,11 @@ export const handleDomainScanIntent: IntentHandler<'domain_scan'> = async (ctx, 
   });
   const workflowRunId = workflowRun.id;
   const result = await runDomainScanWorkflow(
-    { url: intent.url, checkionProjectId: ctx.bindingIds?.checkionProjectId },
+    {
+      url: intent.url,
+      checkionProjectId: ctx.bindingIds?.checkionProjectId,
+      actorUserId: ctx.user.id,
+    },
     { workflowRunId, initialSteps: workflowRun.steps }
   );
   const steps = result.steps;

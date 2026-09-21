@@ -113,13 +113,19 @@ export function resolveCheckionServiceAuth(actorUserId?: string | null):
   if (actor) {
     headers['X-Plexon-User-Id'] = actor;
   }
+  /**
+   * Access Model B: service secret ⇒ viewer MUST be X-Plexon-User-Id (fail closed).
+   * Only attach the secret when an actor is present — otherwise Checkion short-circuits
+   * to 401 and never falls through to a personal Settings Bearer (`checkion_…`).
+   * @see specs/domain/assistant-actor-identity.md
+   * @see knowledge/checkion-service-auth-actor.md
+   */
   const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
-  if (secret) {
+  if (secret && actor) {
     headers['X-Service-Secret'] = secret;
     headers['X-Plexon-Contract-Version'] =
       process.env.PLEXON_FEDERATION_CONTRACT_VERSION?.trim() ||
       '2026-05-plexon-federation-v3';
-    if (actor) headers['X-Plexon-User-Id'] = actor;
   }
   return {
     ok: true,

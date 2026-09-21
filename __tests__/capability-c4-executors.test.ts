@@ -105,6 +105,49 @@ describe('capability C4 executors + adapters', () => {
     );
   });
 
+  it('domain_scan capability forwards actorUserId to run + scores/preview', async () => {
+    vi.mocked(runCheckionDomainScanV3).mockResolvedValue({
+      ok: true,
+      scan: {
+        id: 'ds-actor',
+        projectId: 'ck-1',
+        url: 'https://domain.test',
+        status: 'completed',
+        overallScore: 60,
+        pageCount: 4,
+      },
+    });
+    vi.mocked(fetchCheckionDomainScanScores).mockResolvedValue({
+      ok: true,
+      byKind: { seo: 77 },
+    });
+    vi.mocked(fetchCheckionDomainScanV3Preview).mockResolvedValue({
+      ok: true,
+      preview: {
+        url: 'https://domain.test',
+        totalPages: 4,
+        overallScore: 60,
+        issues: [],
+      } as never,
+    });
+
+    await executeCheckionDomainScanCapability(
+      { url: 'https://domain.test' },
+      {
+        source: 'agent',
+        checkionProjectId: 'ck-1',
+        platformProjectId: 'pp-1',
+        actorUserId: 'user-actor',
+      }
+    );
+
+    expect(runCheckionDomainScanV3).toHaveBeenCalledWith(
+      expect.objectContaining({ actorUserId: 'user-actor' })
+    );
+    expect(fetchCheckionDomainScanScores).toHaveBeenCalledWith('ds-actor', 'user-actor');
+    expect(fetchCheckionDomainScanV3Preview).toHaveBeenCalledWith('ds-actor', 'user-actor');
+  });
+
   it('domain_scan capability fetches scoresByKind when detail omits them', async () => {
     vi.mocked(runCheckionDomainScanV3).mockResolvedValue({
       ok: true,
@@ -130,7 +173,7 @@ describe('capability C4 executors + adapters', () => {
     expect(result.ok).toBe(true);
     const ctx = setContextBundle(emptyRunContext(), 'domain', result.catalogBundle!);
     expect(resolveCatalogPath(ctx, 'domain.scores.seo')).toBe(77);
-    expect(fetchCheckionDomainScanScores).toHaveBeenCalledWith('ds-2');
+    expect(fetchCheckionDomainScanScores).toHaveBeenCalledWith('ds-2', undefined);
   });
 
   it('domain_scan capability does not reuse completed scans for agent source', async () => {
