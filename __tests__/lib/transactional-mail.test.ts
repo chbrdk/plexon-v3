@@ -61,7 +61,8 @@ describe('resolveMailTransport / transactional mail', () => {
     expect(body.subject).toContain('PLEXON');
     expect(body.html).toContain('tok_abc123');
     expect(body.text).toContain('tok_abc123');
-    expect(body.html).not.toContain('http');
+    expect(body.html).toContain('role="presentation"');
+    expect(body.html).not.toMatch(/https?:\/\/[^\s"']*plygrnd/);
     expect(body.from).toContain('noreply@example.com');
   });
 
@@ -85,7 +86,9 @@ describe('resolveMailTransport / transactional mail', () => {
     expect(reset.subject).toContain('PLEXON');
     expect(reset.html).toContain('tok_abc123');
     expect(reset.text).toContain('tok_abc123');
-    expect(reset.html).not.toMatch(/https?:\/\//);
+    expect(reset.html).toContain('role="presentation"');
+    expect(reset.html).toContain('#ff6a3b');
+    expect(reset.html).not.toMatch(/https?:\/\/[^\s"']*plygrnd/);
     expect(reset.text).not.toMatch(/https?:\/\//);
 
     const added = renderTransactionalMail('collection_member_added', {

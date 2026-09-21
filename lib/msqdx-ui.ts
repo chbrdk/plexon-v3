@@ -210,3 +210,18 @@ export {
   IconProjects,
   IconText,
 } from '../../msqdx-ui/packages/ui/src/components/icons'
+
+/** Transactional HTML email shell (table + inline CSS). Spec: msqdx-ui/specs/domain/msqdx-ui-email.md */
+export {
+  msqdxEmailPalette,
+  emailParagraph,
+  emailCodePanel,
+  emailButton,
+  emailMetaRow,
+  emailMetaTable,
+  renderMsqdxEmailDocument,
+} from '../../msqdx-ui/packages/ui/src/email'
+export type {
+  MsqdxEmailPalette,
+  MsqdxEmailDocumentInput,
+} from '../../msqdx-ui/packages/ui/src/email'

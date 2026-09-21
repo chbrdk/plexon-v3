@@ -19,6 +19,20 @@ describe('ui rebuild foundation inventory', () => {
     }
   })
 
+  it('curated barrel re-exports MSQDX email shell helpers', () => {
+    const barrel = readFileSync(path.join(root, 'lib/msqdx-ui.ts'), 'utf8')
+    for (const token of [
+      'renderMsqdxEmailDocument',
+      'emailParagraph',
+      'emailCodePanel',
+      'emailButton',
+      'msqdxEmailPalette',
+      "from '../../msqdx-ui/packages/ui/src/email'",
+    ]) {
+      expect(barrel, token).toContain(token)
+    }
+  })
+
   it('depends on @msqdx/ui not @msqdx/react', () => {
     const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8')) as {
       dependencies: Record<string, string>

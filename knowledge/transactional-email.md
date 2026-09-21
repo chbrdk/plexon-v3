@@ -48,7 +48,9 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 
 Ops alternative still valid: open host firewall TCP **587** from projects-01 and repair Postfix outbound; or use Mailgun as transport 3.
 
-## Code today (P1)
+## HTML presentation (2026-09-21)
+
+Transactional HTML uses the shared **MSQDX email shell** (`@msqdx/ui` → `renderMsqdxEmailDocument`, brand orange / neutral canvas). Spec: `msqdx-ui/specs/domain/msqdx-ui-email.md`. Plain-text multipart remains required. Password-reset stays **code-only** (no `*.plygrnd.tech` links — Mimecast).
 
 | Path | Role |
 |------|------|
