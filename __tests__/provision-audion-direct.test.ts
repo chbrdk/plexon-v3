@@ -22,9 +22,11 @@ describe('provisionAudionDirect', () => {
     const result = await provisionAudionDirect({
       projectName: 'Acme',
       platformProjectId: 'pp-1',
+      plexonUserId: 'user-1',
     });
 
     expect(result).toEqual({ ok: true, audionProjectId: 'a1', bound: true });
+    expect(createAudionProject).toHaveBeenCalledWith('Acme', { plexonUserId: 'user-1' });
     expect(upsertPlatformProjectBinding).toHaveBeenCalledWith(
       expect.objectContaining({ platformProjectId: 'pp-1', externalProjectId: 'a1', productId: 'audion' })
     );
@@ -33,7 +35,7 @@ describe('provisionAudionDirect', () => {
   it('returns error when audion create fails', async () => {
     vi.mocked(createAudionProject).mockResolvedValue({ ok: false, error: 'AUDION_API_TOKEN fehlt' });
 
-    const result = await provisionAudionDirect({ projectName: 'Acme' });
+    const result = await provisionAudionDirect({ projectName: 'Acme', plexonUserId: 'user-1' });
 
     expect(result).toEqual({ ok: false, error: 'AUDION_API_TOKEN fehlt' });
   });

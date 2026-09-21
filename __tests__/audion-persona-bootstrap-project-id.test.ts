@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 /**
  * Regression: AUDION TG create must send both camelCase and snake_case project ids
  * so personas attach to the bound Audion project (not an unbound TG).
+ * Machine calls must also send X-Plexon-User-Id (Access Model B).
  */
 describe('audion-persona-bootstrap-client project binding', () => {
   it('POSTs projectId and project_id on target-group create', () => {
@@ -14,5 +15,7 @@ describe('audion-persona-bootstrap-client project binding', () => {
     );
     expect(src).toMatch(/projectId:\s*projectId/);
     expect(src).toMatch(/project_id:\s*projectId/);
+    expect(src).toMatch(/buildAudionMachineHeaders/);
+    expect(src).toMatch(/plexonUserId/);
   });
 });

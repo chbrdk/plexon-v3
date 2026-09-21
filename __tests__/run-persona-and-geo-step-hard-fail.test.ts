@@ -29,6 +29,7 @@ describe('runPersonaAndGeoQuestionsStep hard fail', () => {
       projectName: 'Acme',
       url: 'https://example.com',
       geoCompetitors: [],
+      plexonUserId: 'user-1',
       companyBrief: {
         displayName: 'Acme',
         industry: 'Software',

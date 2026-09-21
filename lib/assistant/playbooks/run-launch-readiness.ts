@@ -349,6 +349,7 @@ export async function runLaunchReadiness(
       const persona = await runPersonaBootstrap({
         projectName,
         existingAudionProjectId: audionProjectId,
+        plexonUserId: input.user.id,
       });
       if (!persona.ok) {
         steps = await setStep(runId, steps, 'persona_bootstrap', { status: 'error', detail: persona.error });

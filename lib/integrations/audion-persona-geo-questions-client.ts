@@ -1,10 +1,11 @@
-import { getAudionServiceToken } from '@/lib/constants';
-import { audionApiPersonaGeoQuestions } from '@/lib/paths/audion-api';
 import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
   formatAudionHttpFailure,
   getAudionUrlDiagnostics,
   isAudionHtmlOrLoginRedirect,
 } from '@/lib/integrations/audion-connectivity';
+import { audionApiPersonaGeoQuestions } from '@/lib/paths/audion-api';
 import {
   normalizeAudionPersonaOutputLocale,
   PLEXON_DEFAULT_AUDION_PERSONA_OUTPUT_LOCALE,
@@ -28,9 +29,12 @@ export async function fetchAudionPersonaGeoQuestions(input: {
   brandUrl?: string;
   count?: number;
   outputLocale?: AudionPersonaOutputLocale;
+  plexonUserId?: string;
 }): Promise<AudionPersonaGeoQuestionsResult> {
-  const token = getAudionServiceToken();
-  if (!token) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
+  const actor = input.plexonUserId?.trim() || '';
+  if (!actor) return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
   const diag = getAudionUrlDiagnostics();
   if (diag.looksLikeWebApp) {
     return { ok: false, error: 'AUDION_API_URL zeigt auf Web-App (ohne /api)' };
@@ -42,10 +46,7 @@ export async function fetchAudionPersonaGeoQuestions(input: {
   const url = audionApiPersonaGeoQuestions(input.personaId);
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       max_items: input.count ?? 3,
       output_locale: outputLocale,
@@ -78,8 +79,5 @@ export async function fetchAudionPersonaGeoQuestions(input: {
     return { ok: false, error: 'AUDION GEO-Fragen: questions fehlt' };
   }
   const questions = raw.map((q) => String(q).trim()).filter(Boolean);
-  if (!questions.length) {
-    return { ok: false, error: 'AUDION GEO-Fragen: leere Liste' };
-  }
   return { ok: true, questions };
 }

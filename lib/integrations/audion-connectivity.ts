@@ -166,6 +166,24 @@ export async function probeAudionApiHealth(): Promise<AudionProbeResult> {
   }
 }
 
+/**
+ * Machine Bearer + session actor — Access Model B fail-closed without actor.
+ * @see specs/domain/assistant-actor-identity.md
+ */
+export function buildAudionMachineHeaders(plexonUserId: string): Record<string, string> | null {
+  const token = getAudionServiceToken();
+  const actor = plexonUserId.trim();
+  if (!token || !actor) return null;
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'X-Plexon-User-Id': actor,
+  };
+}
+
+export const AUDION_MACHINE_ACTOR_REQUIRED =
+  'X-Plexon-User-Id (actor) erforderlich für AUDION Machine-Auth';
+
 export type AudionProjectPreview = { id: string; name: string };
 
 export async function fetchAudionProjectsPreview(): Promise<

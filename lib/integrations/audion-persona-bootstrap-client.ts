@@ -1,4 +1,3 @@
-import { getAudionServiceToken } from '@/lib/constants';
 import {
   audionApiTargetGroupPersonasGenerate,
   audionApiTargetGroupsCreate,
@@ -11,6 +10,8 @@ import {
   type BuyerSegmentDraft,
 } from '@/lib/assistant/event-quick-check/derive-buyer-segments';
 import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
   formatAudionHttpFailure,
   getAudionUrlDiagnostics,
   isAudionHtmlOrLoginRedirect,
@@ -29,10 +30,13 @@ import {
 
 async function audionFetch(
   url: string,
-  init: RequestInit
+  init: RequestInit,
+  plexonUserId: string
 ): Promise<{ ok: true; json: Record<string, unknown> } | { ok: false; error: string }> {
-  const token = getAudionServiceToken();
-  if (!token) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
+  const actor = plexonUserId.trim();
+  if (!actor) return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
   const diag = getAudionUrlDiagnostics();
   if (diag.looksLikeWebApp) {
     return { ok: false, error: 'AUDION_API_URL zeigt auf Web-App (ohne /api)' };
@@ -40,8 +44,7 @@ async function audionFetch(
   const res = await fetch(url, {
     ...init,
     headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      ...headers,
       ...(init.headers ?? {}),
     },
     cache: 'no-store',
@@ -72,10 +75,13 @@ async function ensureAudionProject(input: {
   projectName: string;
   existingAudionProjectId?: string | null;
   companyBrief?: EventQuickCheckCompanyBrief;
+  plexonUserId: string;
 }): Promise<{ ok: true; projectId: string } | { ok: false; error: string; missing?: Array<'name'> }> {
   let projectId = input.existingAudionProjectId?.trim() || '';
   if (!projectId) {
-    const created = await createAudionProject(input.projectName);
+    const created = await createAudionProject(input.projectName, {
+      plexonUserId: input.plexonUserId,
+    });
     if (!created.ok) {
       return { ok: false, error: created.error, missing: created.missing };
     }
@@ -84,7 +90,9 @@ async function ensureAudionProject(input: {
 
   const context = input.companyBrief?.companyContext?.trim();
   if (context) {
-    await updateAudionProjectCompanyContext(projectId, context);
+    await updateAudionProjectCompanyContext(projectId, context, {
+      plexonUserId: input.plexonUserId,
+    });
   }
 
   return { ok: true, projectId };
@@ -92,19 +100,24 @@ async function ensureAudionProject(input: {
 
 async function createTargetGroup(
   projectId: string,
-  segment: BuyerSegmentDraft
+  segment: BuyerSegmentDraft,
+  plexonUserId: string
 ): Promise<{ ok: true; id: string; name: string; segment: string } | { ok: false; error: string }> {
-  const tgRes = await audionFetch(audionApiTargetGroupsCreate(), {
-    method: 'POST',
-    body: JSON.stringify({
-      // AUDION Next contracts use camelCase; keep snake_case for FastAPI-era proxies.
-      projectId: projectId,
-      project_id: projectId,
-      name: segment.name.slice(0, 120),
-      segment: segment.segment.slice(0, 120),
-      description: segment.description.slice(0, 2000),
-    }),
-  });
+  const tgRes = await audionFetch(
+    audionApiTargetGroupsCreate(),
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        // AUDION Next contracts use camelCase; keep snake_case for FastAPI-era proxies.
+        projectId: projectId,
+        project_id: projectId,
+        name: segment.name.slice(0, 120),
+        segment: segment.segment.slice(0, 120),
+        description: segment.description.slice(0, 2000),
+      }),
+    },
+    plexonUserId
+  );
   if (!tgRes.ok) return { ok: false, error: tgRes.error };
 
   const tgId = String(tgRes.json.id ?? '');
@@ -119,19 +132,24 @@ async function generatePersonasForTargetGroup(input: {
   segment: BuyerSegmentDraft;
   outputLocale: AudionPersonaOutputLocale;
   count: number;
+  plexonUserId: string;
 }): Promise<{ personas: PersonaPreviewItem[]; error?: string }> {
   const count = clampEventQuickCheckPersonaCount(input.count);
-  const personaRes = await audionFetch(audionApiTargetGroupPersonasGenerate(input.targetGroupId), {
-    method: 'POST',
-    body: JSON.stringify({
-      ...buildAudionPersonaGenerateRequestBody({
-        segment: input.segment.segment.slice(0, 120),
-        description: input.segment.personaDescription.slice(0, 2000),
-        outputLocale: input.outputLocale,
+  const personaRes = await audionFetch(
+    audionApiTargetGroupPersonasGenerate(input.targetGroupId),
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        ...buildAudionPersonaGenerateRequestBody({
+          segment: input.segment.segment.slice(0, 120),
+          description: input.segment.personaDescription.slice(0, 2000),
+          outputLocale: input.outputLocale,
+        }),
+        count,
       }),
-      count,
-    }),
-  });
+    },
+    input.plexonUserId
+  );
 
   if (!personaRes.ok) {
     return {
@@ -167,6 +185,7 @@ async function generatePersonaForTargetGroup(input: {
   targetGroupName: string;
   segment: BuyerSegmentDraft;
   outputLocale: AudionPersonaOutputLocale;
+  plexonUserId: string;
 }): Promise<{ persona?: PersonaPreviewItem; error?: string }> {
   const result = await generatePersonasForTargetGroup({ ...input, count: 1 });
   return { persona: result.personas[0], error: result.error };
@@ -178,7 +197,13 @@ export async function runPersonaBootstrap(input: {
   existingAudionProjectId?: string | null;
   outputLocale?: AudionPersonaOutputLocale;
   companyBrief?: EventQuickCheckCompanyBrief;
+  /** Session actor — required (Access Model B). */
+  plexonUserId: string;
 }): Promise<PersonaBootstrapResult> {
+  const plexonUserId = input.plexonUserId?.trim() || '';
+  if (!plexonUserId) {
+    return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  }
   const outputLocale = normalizeAudionPersonaOutputLocale(
     input.outputLocale ?? PLEXON_DEFAULT_AUDION_PERSONA_OUTPUT_LOCALE
   );
@@ -207,6 +232,7 @@ export async function runPersonaBootstrap(input: {
     projectName,
     existingAudionProjectId: input.existingAudionProjectId,
     companyBrief: brief,
+    plexonUserId,
   });
   if (!project.ok) {
     return { ok: false, error: project.error, missing: project.missing };
@@ -219,7 +245,7 @@ export async function runPersonaBootstrap(input: {
     personaDescription,
   };
 
-  const tg = await createTargetGroup(project.projectId, segmentDraft);
+  const tg = await createTargetGroup(project.projectId, segmentDraft, plexonUserId);
   if (!tg.ok) {
     return { ok: false, error: tg.error };
   }
@@ -229,6 +255,7 @@ export async function runPersonaBootstrap(input: {
     targetGroupName: tg.name,
     segment: segmentDraft,
     outputLocale,
+    plexonUserId,
   });
 
   const preview: PersonaBootstrapPreview = {
@@ -258,7 +285,13 @@ export async function runMultiPersonaBootstrap(input: {
   /** @deprecated prefer targetGroupCount + personaCount */
   personaCount?: number;
   targetGroupCount?: number;
+  /** Session actor — required (Access Model B). */
+  plexonUserId: string;
 }): Promise<PersonaBootstrapResult> {
+  const plexonUserId = input.plexonUserId?.trim() || '';
+  if (!plexonUserId) {
+    return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  }
   const outputLocale = normalizeAudionPersonaOutputLocale(
     input.outputLocale ?? PLEXON_DEFAULT_AUDION_PERSONA_OUTPUT_LOCALE
   );
@@ -275,6 +308,7 @@ export async function runMultiPersonaBootstrap(input: {
     projectName,
     existingAudionProjectId: input.existingAudionProjectId,
     companyBrief: brief,
+    plexonUserId,
   });
   if (!project.ok) {
     return { ok: false, error: project.error, missing: project.missing };
@@ -287,7 +321,7 @@ export async function runMultiPersonaBootstrap(input: {
 
   for (let i = 0; i < segments.length; i += 1) {
     const segment = segments[i];
-    const tg = await createTargetGroup(project.projectId, segment);
+    const tg = await createTargetGroup(project.projectId, segment, plexonUserId);
     if (!tg.ok) {
       errors.push(tg.error);
       continue;
@@ -303,6 +337,7 @@ export async function runMultiPersonaBootstrap(input: {
       segment,
       outputLocale,
       count: countForTg,
+      plexonUserId,
     });
     if (generated.personas.length) {
       personas.push(...generated.personas);

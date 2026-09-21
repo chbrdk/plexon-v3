@@ -101,6 +101,7 @@ export async function buildMultiPersonaGeoQuestions(input: {
   personas: NonNullable<PersonaBootstrapPreview['persona']>[];
   companyBrief?: EventQuickCheckCompanyBrief;
   questionsPerPersona: number;
+  plexonUserId?: string;
 }): Promise<MultiPersonaGeoQuestionsResult> {
   const groups: PersonaGeoQuestionGroup[] = [];
   let competitors: string[] = [];
@@ -112,6 +113,7 @@ export async function buildMultiPersonaGeoQuestions(input: {
       persona,
       companyBrief: input.companyBrief,
       count: input.questionsPerPersona,
+      plexonUserId: input.plexonUserId,
     });
     if (!competitors.length && built.competitors.length) {
       competitors = built.competitors;
@@ -138,6 +140,7 @@ export async function buildPersonaGeoQuestions(input: {
   persona: NonNullable<PersonaBootstrapPreview['persona']>;
   companyBrief?: EventQuickCheckCompanyBrief;
   count?: number;
+  plexonUserId?: string;
 }): Promise<PersonaGeoQuestionsResult> {
   const count = input.count ?? EVENT_QUICK_CHECK_GEO_QUESTION_COUNT;
   const suggested = await suggestCheckionGeoQueries(input.url);
@@ -149,6 +152,7 @@ export async function buildPersonaGeoQuestions(input: {
     const audion = await fetchAudionPersonaGeoQuestions({
       personaId: input.persona.id,
       count,
+      plexonUserId: input.plexonUserId,
     });
     if (audion.ok) {
       const questions = sanitizePersonaGeoQuestions(audion.questions, count, {

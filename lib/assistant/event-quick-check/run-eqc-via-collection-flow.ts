@@ -472,6 +472,7 @@ export async function runEqcViaCollectionFlow(
     doc,
     body,
     historyRunId,
+    actorUserId: input.user.id,
     onDomainScanStarted: options.onDomainScanStarted,
   });
 

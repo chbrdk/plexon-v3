@@ -78,7 +78,7 @@ export async function handleLocalProductCreate(
 
   const result =
     input.product === 'audion'
-      ? await createAudionProject(input.name)
+      ? await createAudionProject(input.name, { plexonUserId: input.userId })
       : await createCheckionProject(input.name, input.domain, input.userId);
 
   if (!result.ok) {

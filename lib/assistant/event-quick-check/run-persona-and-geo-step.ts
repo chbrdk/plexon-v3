@@ -67,6 +67,8 @@ export async function runPersonaAndGeoQuestionsStep(input: {
   geoCompetitors: string[];
   platformProjectId?: string;
   bindAudion?: (platformProjectId: string, audionProjectId: string) => Promise<void>;
+  /** Session actor for AUDION machine auth (Access Model B). */
+  plexonUserId: string;
 }): Promise<PersonaAndGeoStepResult> {
   let personaPreview: PersonaBootstrapPreview | undefined;
   let audionProjectId = input.audionProjectId;
@@ -85,6 +87,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
       companyBrief: input.companyBrief,
       targetGroupCount: input.profile.targetGroupCount,
       personaCount: input.profile.personaCount,
+      plexonUserId: input.plexonUserId,
     });
     if (!persona.ok) {
       return personaMissingResult({
@@ -119,6 +122,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
       personas,
       companyBrief: input.companyBrief,
       questionsPerPersona: input.profile.geoQuestionsPerPersona,
+      plexonUserId: input.plexonUserId,
     });
     geoQuestions = built.questions;
     geoQuestionsByPersona = built.groups;
@@ -156,6 +160,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
     projectName: input.projectName,
     existingAudionProjectId: audionProjectId,
     companyBrief: input.companyBrief,
+    plexonUserId: input.plexonUserId,
   });
 
   if (!persona.ok || !persona.preview.persona) {
@@ -181,6 +186,7 @@ export async function runPersonaAndGeoQuestionsStep(input: {
     persona: persona.preview.persona,
     companyBrief: input.companyBrief,
     count: input.profile.geoQuestionsPerPersona,
+    plexonUserId: input.plexonUserId,
   });
   geoQuestions = built.questions;
   geoCompetitors = geoCompetitors.length ? geoCompetitors : built.competitors;

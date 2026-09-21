@@ -40,6 +40,7 @@ export async function executeAudionPersonaBootstrapCapability(
     projectName: projectName || undefined,
     targetGroupName: targetGroupName || undefined,
     existingAudionProjectId: ctx.audionProjectId,
+    plexonUserId: ctx.actorUserId?.trim() || '',
   });
 
   if (!result.ok) {

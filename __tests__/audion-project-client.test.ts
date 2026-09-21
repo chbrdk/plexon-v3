@@ -8,14 +8,24 @@ describe('createAudionProject', () => {
   });
 
   it('returns missing name when name is empty', async () => {
-    const result = await createAudionProject('   ');
+    const result = await createAudionProject('   ', { plexonUserId: 'user-1' });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.missing).toContain('name');
     }
   });
 
-  it('creates project via AUDION API', async () => {
+  it('requires plexonUserId actor for machine auth', async () => {
+    vi.stubEnv('AUDION_API_URL', 'http://audion-api:8000');
+    vi.stubEnv('AUDION_API_TOKEN', 'audion_' + 'a'.repeat(64));
+    const result = await createAudionProject('Acme');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/X-Plexon-User-Id|actor/i);
+    }
+  });
+
+  it('creates project via AUDION API with actor header', async () => {
     vi.stubEnv('AUDION_API_URL', 'http://audion-api:8000');
     vi.stubEnv('AUDION_API_TOKEN', 'audion_' + 'a'.repeat(64));
 
@@ -27,7 +37,9 @@ describe('createAudionProject', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await createAudionProject('Rheinland Versicherungen');
+    const result = await createAudionProject('Rheinland Versicherungen', {
+      plexonUserId: 'user-eqc',
+    });
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.id).toBe('proj-1');
@@ -39,6 +51,10 @@ describe('createAudionProject', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ name: 'Rheinland Versicherungen' }),
+        headers: expect.objectContaining({
+          Authorization: expect.stringMatching(/^Bearer audion_/),
+          'X-Plexon-User-Id': 'user-eqc',
+        }),
       })
     );
   });

@@ -105,6 +105,7 @@ export async function bootstrapEqcCollection(input: {
       projectName,
       platformProjectId,
       source: EVENT_QUICK_CHECK_BINDING_SOURCE,
+      plexonUserId: input.user.id,
     });
     if (direct.ok) {
       audionProjectId = direct.audionProjectId;

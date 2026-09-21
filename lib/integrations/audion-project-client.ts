@@ -1,6 +1,7 @@
-import { getAudionServiceToken } from '@/lib/constants';
 import { audionApiProjectsCreate, audionApiProjectById } from '@/lib/paths/audion-api';
 import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
   formatAudionHttpFailure,
   getAudionUrlDiagnostics,
   isAudionHtmlOrLoginRedirect,
@@ -10,14 +11,27 @@ export type CreateAudionProjectResult =
   | { ok: true; id: string; name: string }
   | { ok: false; error: string; missing?: Array<'name'> };
 
-export async function createAudionProject(name: string): Promise<CreateAudionProjectResult> {
+export type AudionMachineAuthOptions = {
+  /** Session user — required for Access Model B (AUDION machine token is not a viewer). */
+  plexonUserId: string;
+};
+
+export async function createAudionProject(
+  name: string,
+  options?: AudionMachineAuthOptions
+): Promise<CreateAudionProjectResult> {
   const trimmed = name.trim();
   if (!trimmed) {
     return { ok: false, error: 'Projektname fehlt', missing: ['name'] };
   }
 
-  const token = getAudionServiceToken();
-  if (!token) {
+  const actor = options?.plexonUserId?.trim() || '';
+  if (!actor) {
+    return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  }
+
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) {
     return { ok: false, error: 'AUDION_API_TOKEN fehlt auf PLEXON' };
   }
 
@@ -29,10 +43,7 @@ export async function createAudionProject(name: string): Promise<CreateAudionPro
   try {
     const res = await fetch(audionApiProjectsCreate(), {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ name: trimmed }),
       cache: 'no-store',
       redirect: 'manual',
@@ -81,10 +92,14 @@ export type UpdateAudionProjectResult = { ok: true } | { ok: false; error: strin
 
 export async function updateAudionProjectCompanyContext(
   projectId: string,
-  companyContext: string
+  companyContext: string,
+  options?: AudionMachineAuthOptions
 ): Promise<UpdateAudionProjectResult> {
-  const token = getAudionServiceToken();
-  if (!token) return { ok: false, error: 'AUDION_API_TOKEN fehlt auf PLEXON' };
+  const actor = options?.plexonUserId?.trim() || '';
+  if (!actor) return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) return { ok: false, error: 'AUDION_API_TOKEN fehlt auf PLEXON' };
 
   const trimmed = companyContext.trim();
   if (!trimmed) return { ok: false, error: 'company_context leer' };
@@ -92,10 +107,7 @@ export async function updateAudionProjectCompanyContext(
   try {
     const res = await fetch(audionApiProjectById(projectId), {
       method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ company_context: trimmed }),
       cache: 'no-store',
       redirect: 'manual',
@@ -104,7 +116,12 @@ export async function updateAudionProjectCompanyContext(
     if (!res.ok) {
       return {
         ok: false,
-        error: body.slice(0, 200) || `HTTP ${res.status}`,
+        error: formatAudionHttpFailure(
+          res.status,
+          res.headers.get('content-type'),
+          body,
+          'AUDION Projekt aktualisieren'
+        ),
       };
     }
     return { ok: true };

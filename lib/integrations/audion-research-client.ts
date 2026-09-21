@@ -4,6 +4,7 @@ import {
   audionApiProjectResearchStart,
   audionApiProjectResearchStatus,
 } from '@/lib/paths/audion-api';
+import { buildAudionMachineHeaders } from '@/lib/integrations/audion-connectivity';
 
 export type AudionResearchStartResult = {
   ok: boolean;
@@ -20,13 +21,7 @@ export type AudionResearchPollResult = {
 };
 
 function audionHeaders(plexonUserId: string): Record<string, string> {
-  const token = getAudionServiceToken();
-  if (!token) return {};
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    'X-Plexon-User-Id': plexonUserId,
-  };
+  return buildAudionMachineHeaders(plexonUserId) ?? {};
 }
 
 export async function startAudionProjectResearch(

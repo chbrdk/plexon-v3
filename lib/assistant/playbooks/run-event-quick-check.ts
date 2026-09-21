@@ -690,6 +690,7 @@ export async function runEventQuickCheck(
         projectName,
         platformProjectId,
         source: EVENT_QUICK_CHECK_BINDING_SOURCE,
+        plexonUserId: input.user.id,
       });
       if (direct.ok) {
         audionProjectId = direct.audionProjectId;
@@ -963,6 +964,7 @@ export async function runEventQuickCheck(
       companyBrief,
       geoCompetitors,
       platformProjectId,
+      plexonUserId: input.user.id,
       bindAudion: async (ppId, apId) => {
         // Always upsert — personas may land on a newly created AUDION project even when a
         // prior binding existed (stale / wrong external id). Skipping left Collection → wrong project.
@@ -1380,6 +1382,7 @@ async function runEventQuickCheckFromCompetitors(
     companyBrief,
     geoCompetitors,
     platformProjectId,
+    plexonUserId: input.user.id,
     bindAudion: bindAudionToPlatform,
   });
 

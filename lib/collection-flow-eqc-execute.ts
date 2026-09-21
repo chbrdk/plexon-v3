@@ -130,6 +130,8 @@ export async function executeEqcCollectionFlowRun(input: {
   doc: CollectionTestFlowDocument;
   body: Record<string, unknown>;
   historyRunId?: string | null;
+  /** Session actor for product machine auth (Access Model B). */
+  actorUserId?: string | null;
   /** Persist CHECKION scan id as soon as known (before long poll). */
   onDomainScanStarted?: (scan: { id: string; status: string; url?: string }) => void | Promise<void>;
 }): Promise<ExecuteCollectionFlowRunSuccess | ExecuteCollectionFlowRunFailure> {
@@ -137,6 +139,10 @@ export async function executeEqcCollectionFlowRun(input: {
   const fid = input.flowId;
   const doc = input.doc;
   const body = input.body;
+  const actorUserId =
+    (typeof input.actorUserId === 'string' && input.actorUserId.trim()) ||
+    (typeof body.actorUserId === 'string' && body.actorUserId.trim()) ||
+    '';
   const startedAt = new Date().toISOString();
 
   if (!documentHasEqcSpine(doc)) {
@@ -463,6 +469,7 @@ export async function executeEqcCollectionFlowRun(input: {
         companyBrief: brief,
         geoCompetitors: competitors,
         platformProjectId: id,
+        plexonUserId: actorUserId,
       });
       if (step.personaOutcome?.status === 'error') {
         return failEqc({
@@ -536,6 +543,7 @@ export async function executeEqcCollectionFlowRun(input: {
           companyBrief: brief,
           geoCompetitors: competitors,
           platformProjectId: id,
+          plexonUserId: actorUserId,
         });
         runContext = setContextBundle(
           runContext,

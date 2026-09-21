@@ -12,8 +12,11 @@ export async function provisionAudionDirect(input: {
   projectName: string;
   platformProjectId?: string | null;
   source?: string;
+  plexonUserId: string;
 }): Promise<ProvisionAudionDirectResult> {
-  const created = await createAudionProject(input.projectName);
+  const created = await createAudionProject(input.projectName, {
+    plexonUserId: input.plexonUserId,
+  });
   if (!created.ok) {
     return { ok: false, error: created.error };
   }

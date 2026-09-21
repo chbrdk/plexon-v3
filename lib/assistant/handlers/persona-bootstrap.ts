@@ -41,6 +41,7 @@ export const handlePersonaBootstrapIntent: IntentHandler<'persona_bootstrap'> = 
       {
         source: 'agent',
         audionProjectId: ctx.bindingIds?.audionProjectId,
+        actorUserId: ctx.user.id,
       }
     );
     if (cap.ok && cap.agentPayload?.preview) {
@@ -53,6 +54,7 @@ export const handlePersonaBootstrapIntent: IntentHandler<'persona_bootstrap'> = 
       projectName: ctx.resolvedName(intent.name),
       targetGroupName: ctx.resolvedName(intent.targetGroupName),
       existingAudionProjectId: ctx.bindingIds?.audionProjectId,
+      plexonUserId: ctx.user.id,
     });
   }
 
