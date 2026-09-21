@@ -250,6 +250,7 @@ export async function runMarketToAudience(
     const created = await createAudionTargetGroupsFromSuggestions({
       audionProjectId,
       suggestions,
+      plexonUserId: input.user.id,
     });
     createdTargetGroups.push(...created.created);
     errors.push(...created.errors);

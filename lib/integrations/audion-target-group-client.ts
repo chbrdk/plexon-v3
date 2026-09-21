@@ -1,6 +1,7 @@
-import { getAudionServiceToken } from '@/lib/constants';
 import { audionApiTargetGroupsCreate } from '@/lib/paths/audion-api';
 import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
   formatAudionHttpFailure,
   getAudionUrlDiagnostics,
   isAudionHtmlOrLoginRedirect,
@@ -13,20 +14,20 @@ export type CreateTargetGroupResult =
 
 async function audionPost(
   url: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  plexonUserId: string
 ): Promise<{ ok: true; json: Record<string, unknown> } | { ok: false; error: string }> {
-  const token = getAudionServiceToken();
-  if (!token) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
+  const actor = plexonUserId.trim();
+  if (!actor) return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) return { ok: false, error: 'AUDION_API_TOKEN fehlt' };
   const diag = getAudionUrlDiagnostics();
   if (diag.looksLikeWebApp) {
     return { ok: false, error: 'AUDION_API_URL zeigt auf Web-App (ohne FastAPI)' };
   }
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify(body),
     cache: 'no-store',
     redirect: 'manual',
@@ -47,13 +48,19 @@ async function audionPost(
 export async function createAudionTargetGroup(input: {
   audionProjectId: string;
   suggestion: TargetGroupSuggestion;
+  plexonUserId: string;
 }): Promise<CreateTargetGroupResult> {
-  const res = await audionPost(audionApiTargetGroupsCreate(), {
-    project_id: input.audionProjectId,
-    name: input.suggestion.name,
-    segment: input.suggestion.segment,
-    description: input.suggestion.description.slice(0, 4000),
-  });
+  const res = await audionPost(
+    audionApiTargetGroupsCreate(),
+    {
+      projectId: input.audionProjectId,
+      project_id: input.audionProjectId,
+      name: input.suggestion.name,
+      segment: input.suggestion.segment,
+      description: input.suggestion.description.slice(0, 4000),
+    },
+    input.plexonUserId
+  );
   if (!res.ok) return { ok: false, error: res.error };
   const id = String(res.json.id ?? '').trim();
   if (!id) return { ok: false, error: 'AUDION Zielgruppe ohne ID' };
@@ -63,6 +70,7 @@ export async function createAudionTargetGroup(input: {
 export async function createAudionTargetGroupsFromSuggestions(input: {
   audionProjectId: string;
   suggestions: TargetGroupSuggestion[];
+  plexonUserId: string;
 }): Promise<{
   created: Array<{ id: string; name: string }>;
   errors: string[];
@@ -73,6 +81,7 @@ export async function createAudionTargetGroupsFromSuggestions(input: {
     const result = await createAudionTargetGroup({
       audionProjectId: input.audionProjectId,
       suggestion,
+      plexonUserId: input.plexonUserId,
     });
     if (result.ok) {
       created.push({ id: result.id, name: result.name });
