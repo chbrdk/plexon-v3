@@ -31,6 +31,15 @@ function smtpHttpToken(): string {
   return trimEnv('PLEXON_SMTP_HTTP_TOKEN') || trimEnv('SMTP_HTTP_TOKEN') || trimEnv('SMTP_BRIDGE_TOKEN');
 }
 
+/** Staging bridge often presents Traefik default/self-signed until LE is ready. */
+function smtpHttpInsecureTls(): boolean {
+  const v = (
+    trimEnv('PLEXON_SMTP_HTTP_INSECURE_TLS') ||
+    trimEnv('SMTP_HTTP_INSECURE_TLS')
+  ).toLowerCase();
+  return v === '1' || v === 'true' || v === 'yes';
+}
+
 function smtpHost(): string {
   return trimEnv('PLEXON_SMTP_HOST') || trimEnv('SMTP_HOST');
 }
@@ -166,19 +175,62 @@ async function sendViaSmtpHttp(message: OutboundMailMessage): Promise<void> {
   const token = smtpHttpToken();
   if (!url || !token) return;
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      to: message.to,
-      subject: message.subject,
-      html: message.html,
-      from: fromAddress('smtp_http'),
-    }),
+  const payload = JSON.stringify({
+    to: message.to,
+    subject: message.subject,
+    html: message.html,
+    from: fromAddress('smtp_http'),
   });
+
+  let res: Response;
+  if (smtpHttpInsecureTls()) {
+    // Bearer-auth bridge hop; Traefik may serve default cert until LE covers the FQDN.
+    const https = await import('node:https');
+    const { URL } = await import('node:url');
+    const parsed = new URL(url);
+    res = await new Promise<Response>((resolve, reject) => {
+      const req = https.request(
+        {
+          protocol: parsed.protocol,
+          hostname: parsed.hostname,
+          port: parsed.port || 443,
+          path: `${parsed.pathname}${parsed.search}`,
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(payload),
+          },
+          rejectUnauthorized: false,
+        },
+        (incoming) => {
+          const chunks: Buffer[] = [];
+          incoming.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+          incoming.on('end', () => {
+            const body = Buffer.concat(chunks).toString('utf8');
+            resolve(
+              new Response(body, {
+                status: incoming.statusCode ?? 500,
+                headers: { 'Content-Type': incoming.headers['content-type'] ?? 'application/json' },
+              })
+            );
+          });
+        }
+      );
+      req.on('error', reject);
+      req.write(payload);
+      req.end();
+    });
+  } else {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: payload,
+    });
+  }
 
   if (!res.ok) {
     const txt = await res.text().catch(() => '');

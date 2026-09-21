@@ -33,7 +33,7 @@ describe('resolveMailTransport / transactional mail', () => {
     });
   });
 
-  it('sendTransactionalEmail posts to smtp_http bridge', async () => {
+  it('sendTransactionalEmail posts to smtp_http bridge with insecure TLS helper', async () => {
     vi.stubEnv('PLEXON_SMTP_HTTP_URL', 'https://smtp-bridge.example');
     vi.stubEnv('PLEXON_SMTP_HTTP_TOKEN', 'bridge-secret');
     vi.stubEnv('PLEXON_SMTP_FROM', 'PLEXON <noreply@example.com>');

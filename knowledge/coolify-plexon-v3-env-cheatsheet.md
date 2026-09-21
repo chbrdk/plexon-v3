@@ -298,6 +298,7 @@ PLEXON_SMTP_FROM=PLEXON <noreply@plygrnd.tech>
 # Preferred when projects-01 cannot reach TCP 587 (2026-09-21):
 PLEXON_SMTP_HTTP_URL=https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech
 PLEXON_SMTP_HTTP_TOKEN=<same as bridge BRIDGE_TOKEN — Coolify only>
+PLEXON_SMTP_HTTP_INSECURE_TLS=1
 ```
 
 - STARTTLS: Port **587** (Default in Staging). SMTPS: Port **465** + `SMTP_SECURE=true`.

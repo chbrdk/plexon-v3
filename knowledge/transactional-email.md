@@ -35,9 +35,9 @@ Env keys: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASSWORD` · From a
 | Item | Value |
 |------|--------|
 | Coolify service | `plexon-smtp-http-bridge` (`90fzj0soeu4ruawzq4l3xanx`) on **coolify** host |
-| Public URL | `https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech` (`/health`, `POST /send`) |
+| Public URL | `https://smtp_http_bridge-90fzj0soeu4ruawzq4l3xanx.plygrnd.tech` (`/health`, `POST /send`) — Coolify service `plexon-smtp-http-bridge` |
 | Local hop | Bridge → `host.docker.internal:587` (STARTTLS, cert verify skipped for host-local) |
-| Plexon env | `PLEXON_SMTP_HTTP_URL` = bridge base (or `…/send`) · `PLEXON_SMTP_HTTP_TOKEN` = `BRIDGE_TOKEN` |
+| Plexon env | `PLEXON_SMTP_HTTP_URL` · `PLEXON_SMTP_HTTP_TOKEN` · `PLEXON_SMTP_HTTP_INSECURE_TLS=1` (Traefik default/self-signed until LE) |
 | Transport | Health `transactionalMail.transport=smtp_http` when URL+token set (preferred over direct SMTP) |
 
 Ops alternative still valid: open host firewall TCP **587** from projects-01 (`159.195.39.207`) and keep direct `SMTP_HOST=mail.plygrnd.tech`.
