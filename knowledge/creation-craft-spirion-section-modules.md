@@ -44,4 +44,6 @@ Module notes:
 
 ## Status
 
-Catalog wave complete. Add new modules only when a gate finding or format gap appears.
+Catalog wave complete for **web section modules**.  
+
+**Next corpus wave (SPIRION product):** campaign / graphic motifs — `specs/domain/spirion-campaign-motif-corpus.md` · then plexon module `campaign_motif_ref_v1`.

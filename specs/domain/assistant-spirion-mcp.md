@@ -99,6 +99,13 @@ Creation persistiert pro Import `page.craftDebug` (stats, craftFlags, optional s
 - Capture/job write tools / confirmation flows
 - Capability executors beyond MCP tool loop
 - Scene pixel preview (Welle 2 — `scene_preview`)
+- Campaign / non-web graphic corpus (see Welle 2 below)
+
+## Welle 2 — Campaign / graphic motif corpus
+
+**Spec:** `specs/domain/spirion-campaign-motif-corpus.md` · **Knowledge:** `knowledge/spirion-campaign-motif-corpus.md`
+
+Extend library assets beyond `web_screen` (`campaign_keyvisual`, `social_post`, `print_ad`, …) with `composition_contract` packs. Ingest: **bulk upload first**, then **official connectors** (Dribbble API preferred; no Behance HTML scrape). Landing craft (`spirion_section_ref_v1`) stays web-kind; a later module `campaign_motif_ref_v1` consumes graphic packs.
 
 ## Acceptance
 
@@ -109,3 +116,4 @@ Creation persistiert pro Import `page.craftDebug` (stats, craftFlags, optional s
 5. Staging: set `SPIRION_MCP_URL` on plexon-v3 Coolify.
 6. Unit: `summarizeAssistantToolTrace` flags captures_list / prompt_pack / import_html; depth prompt requires density + `craftMeta.spirion`.
 7. Staging smoke: after a landing turn, `metadata.toolTrace` present; Creation `craft-debug` fetchable by sceneId — see `knowledge/spirion-creation-landing-staging-smoke.md`.
+8. Welle 2: domain spec accepted for asset kinds + composition packs + upload/connector ingest (implementation tracked in SPIRION product + knowledge runbook).

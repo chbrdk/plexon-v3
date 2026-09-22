@@ -25,3 +25,7 @@ Live search needs `platformProjectId` (orchestrator injects from page/conversati
 Staging smoke: `knowledge/spirion-creation-landing-staging-smoke.md`.
 
 **Tokens vs Literals:** Spirion is not a full Collection token library. Prefer pack bindings when they match; otherwise deliberately choose literals (`set_style` / props) and say so — do not stall for missing tokens. See `assistant-spirion-mcp.md` § Tokens vs Literals.
+
+## Welle 2 — Campaign / graphic motifs
+
+Beyond web screens: asset kinds + `composition_contract`, bulk upload first, then official connectors (Dribbble). Spec `specs/domain/spirion-campaign-motif-corpus.md` · runbook `knowledge/spirion-campaign-motif-corpus.md`.

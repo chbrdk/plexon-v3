@@ -42,6 +42,8 @@ Compose: `resolveCreationCraftModules` → `buildCreationSceneDepthPromptBlock({
 
 Catalog complete for the Spirion/section + Brandion/print wave. Further granularity only when a new gate finding or format appears.
 
+**Deferred (needs SPIRION Welle 2 packs):** `campaign_motif_ref_v1` — graphic/campaign assets via `composition_contract` (`specs/domain/spirion-campaign-motif-corpus.md`).
+
 | Module | Trigger | Why |
 |--------|---------|-----|
 | **Spirion section ref (meta)** | Always landing/newsletter | **Shipped** — `spirion_section_ref_v1` |
