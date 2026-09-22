@@ -31,6 +31,7 @@ describe('creation craft modules', () => {
     expect(ids).toEqual(
       expect.arrayContaining([
         'spirion_section_ref_v1',
+        'campaign_motif_ref_v1',
         'restyle_densify_v1',
         'wireframe_layout_v1',
         'nav_chrome_v1',
@@ -63,6 +64,15 @@ describe('creation craft modules', () => {
     expect(
       resolveCreationCraftModules('Schreib einen Newsletter Digest', 'creation_newsletter_v1'),
     ).toEqual(['spirion_section_ref_v1'])
+  })
+
+  it('attaches campaign_motif_ref_v1 for key visual / campaign prompts (skips web spirion)', () => {
+    expect(
+      resolveCreationCraftModules('Baue ein Key Visual für die Kampagne', 'creation_landing_v1'),
+    ).toEqual(['campaign_motif_ref_v1'])
+    const block = buildCreationCraftModulesPromptBlock(['campaign_motif_ref_v1'])
+    expect(block).toContain('composition_contract')
+    expect(block).toContain('output_contract: graphic')
   })
 
   it('resolves restyle module under landing playbook with spirion', () => {

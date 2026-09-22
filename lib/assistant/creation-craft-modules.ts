@@ -13,6 +13,7 @@ import { promptLooksLikeWireframeBrief } from '@/lib/assistant/creation-craft-pl
 
 export type CreationCraftModuleId =
   | 'spirion_section_ref_v1'
+  | 'campaign_motif_ref_v1'
   | 'restyle_densify_v1'
   | 'wireframe_layout_v1'
   | 'nav_chrome_v1'
@@ -72,6 +73,9 @@ const FEATURE_BENTO_RE =
 const SPIRION_REF_RE =
   /\b(spirion|capture[_]?prompt[_]?pack|captures?[_]?list|look[_]?contract|page[_]?rhythm|design[\s_-]?referenz|best[\s_-]?practice|wie\s+spirion|visual\s+ref|craft\s+ref)\b/i;
 
+const CAMPAIGN_MOTIF_RE =
+  /\b(key[\s_-]?visual|kampagne|campaign|social[\s_-]?post|print[\s_-]?ad|ooh|motif|motiv|composition[_]?contract|artboard|grafik[\s_-]?motiv|flyer|plakat|poster)\b/i;
+
 const BRANDION_BIND_RE =
   /\b(brandion|active[\s_-]?pack|token[\s_-]?bind(ing|en)?|tokens?\s*binden|set[_]?token[_]?binding|brand[\s_-]?tokens?|pack[\s_-]?bind|guideline[\s_-]?pack|brand[\s_-]?pack)\b/i;
 
@@ -83,6 +87,15 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
     id: 'spirion_section_ref_v1',
     label: 'Spirion Section Reference',
     playbookIds: ['creation_landing_v1', 'creation_newsletter_v1'],
+  },
+  campaign_motif_ref_v1: {
+    id: 'campaign_motif_ref_v1',
+    label: 'Campaign / Graphic Motif Reference',
+    playbookIds: [
+      'creation_landing_v1',
+      'creation_print_magazine_v1',
+      'creation_print_report_v1',
+    ],
   },
   restyle_densify_v1: {
     id: 'restyle_densify_v1',
@@ -247,6 +260,12 @@ export function promptLooksLikePrintChapter(userPrompt: string | null | undefine
   return PRINT_CHAPTER_RE.test(text);
 }
 
+export function promptLooksLikeCampaignMotif(userPrompt: string | null | undefined): boolean {
+  const text = userPrompt?.trim() ?? '';
+  if (!text) return false;
+  return CAMPAIGN_MOTIF_RE.test(text);
+}
+
 /** Landing/newsletter always get Spirion meta (best-practice refs before craft). */
 export function shouldAttachSpirionSectionRef(
   playbookId: CreationCraftPlaybookId | null | undefined,
@@ -302,7 +321,9 @@ export function resolveCreationCraftModules(
   };
 
   if (promptLooksLikeRestyle(userPrompt)) push('restyle_densify_v1');
-  if (shouldAttachSpirionSectionRef(pb, userPrompt)) push('spirion_section_ref_v1');
+  const wantsCampaign = promptLooksLikeCampaignMotif(userPrompt);
+  if (wantsCampaign) push('campaign_motif_ref_v1');
+  else if (shouldAttachSpirionSectionRef(pb, userPrompt)) push('spirion_section_ref_v1');
   if (promptLooksLikeWireframeBrief(userPrompt)) push('wireframe_layout_v1');
   if (promptLooksLikeNavChrome(userPrompt)) push('nav_chrome_v1');
   if (promptLooksLikeStatsMetrics(userPrompt)) push('stats_metrics_v1');
@@ -318,6 +339,24 @@ export function resolveCreationCraftModules(
   if (shouldAttachPrintChapterRhythm(pb, userPrompt)) push('print_chapter_rhythm_v1');
 
   return out;
+}
+
+function bodyCampaignMotifRef(): string {
+  return `
+## Craft-Modul: Campaign / Graphic Motif (\`campaign_motif_ref_v1\`)
+Ziel: **Kampagnen-/Grafik-Motiv** aus Spirion — Artboard-Composition, kein Fake-Web-Hero.
+
+### Pflicht (vor Artboard / Print / Export)
+1. \`spirion_assets_list\` oder \`spirion_captures_list\` mit \`assetKind\` in \`campaign_keyvisual|social_post|print_ad|other_graphic\` und ideal \`craftEligible=true\`.
+2. 1–2 Assets wählen (Layout-Familie / Format / Tone — nicht random Moodboard).
+3. \`spirion_capture_prompt_pack\` mit \`output_contract: graphic\` (oder \`auto\`) → \`composition_contract\` lesen.
+4. Ableiten in **eigene** Literale (Margins, Hierarchy, Focal) — kein 1:1 Fremdmarken-Clone.
+5. \`composition_contract.avoid\` ernst nehmen; **kein** \`page_rhythm\`-Scroll für reine Graphics erzwingen.
+6. Bei Import: \`craftMeta.spirion\` mit \`assetIds\` / \`assetKind\` + Kurz-Avoid setzen.
+
+### Mit Brandion
+Optional zweiter Pass \`brandion_bind_pass_v1\` — Tokens nur binden, nicht aus Fremdpalette erfinden.
+`.trim();
 }
 
 function bodySpirionSectionRef(): string {
@@ -606,6 +645,8 @@ export function buildCreationCraftModulesPromptBlock(
     switch (id) {
       case 'spirion_section_ref_v1':
         return bodySpirionSectionRef();
+      case 'campaign_motif_ref_v1':
+        return bodyCampaignMotifRef();
       case 'restyle_densify_v1':
         return bodyRestyleDensify();
       case 'wireframe_layout_v1':

@@ -65,6 +65,13 @@ Full ticket breakdown: **`knowledge/spirion-campaign-motif-tickets.md`** (Epics 
 
 ## Smoke (after P0)
 
-- Upload 20 campaign images → list shows `assetKind=campaign_keyvisual`  
-- Pack with `output_contract=graphic` returns `composition_contract.avoid`  
-- Landing path still pulls `web_screen` only for `spirion_section_ref_v1`
+1. `POST /api/jobs/images` multipart with `files` + optional `assetKind=campaign_keyvisual`
+2. Poll jobs → captures appear with `asset_kind`, `enrichment_status=ready`, `composition_contract`
+3. `GET /api/library/captures?assetKind=campaign_keyvisual` (or MCP `spirion.assets_list`)
+4. MCP `spirion.capture_prompt_pack` with `output_contract=graphic` → pack includes `composition_contract.avoid`
+5. Landing craft without campaign phrasing still attaches `spirion_section_ref_v1` (web_screen path)
+6. Prompt „Key Visual Kampagne“ → plexon module `campaign_motif_ref_v1`
+
+## Dribbble (P1)
+
+See SPIRION `knowledge/dribbble-connector.md` — env on dig-api only; no scrape.
