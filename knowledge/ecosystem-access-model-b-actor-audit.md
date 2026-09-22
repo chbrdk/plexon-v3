@@ -23,11 +23,12 @@ Viewer = session / personal token / **`X-Plexon-User-Id`**. Spec: `specs/domain/
 
 ## Still to fix (Plexon)
 
-1. `lib/integrations/audion-journey-client.ts` — `requireAuthHeaders()` no actor
-2. `lib/integrations/audion-platform-proxy.ts` — Bearer only
-3. `lib/integrations/audion-journey-outline-client.ts` — detail/validate Bearer only (despite `plexonUserId` in input)
-4. `lib/integrations/audion-connectivity.ts` — diagnostics preview fetches (token-only; OK for health, not for gated APIs)
-5. Harden Brandion analysis client: require actor (same as CHECKION/AUDION)
+~~1. `audion-journey-client.ts`~~ **Done 2026-09-22** — `plexonUserId` + `buildAudionMachineHeaders`  
+~~2. `audion-platform-proxy.ts`~~ **Done** — optional `actorUserId` (guest chat may omit)  
+~~3. `audion-journey-outline-client.ts`~~ **Done**  
+~~4. Brandion analysis client require actor~~ **Done**  
+
+Diagnostics preview fetches in `audion-connectivity.ts` remain token-only (health only).
 
 ## Not apps to “redeploy for this bug”
 

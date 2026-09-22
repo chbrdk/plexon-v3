@@ -139,6 +139,7 @@ export async function POST(
       projectId: audionProjectId,
       flow: journeyFlow,
       name: `${row.name} · ${label}`,
+      plexonUserId: user.id,
     });
     if (!started.ok) {
       return failHistory(started.error, API_STATUS.BAD_REQUEST);

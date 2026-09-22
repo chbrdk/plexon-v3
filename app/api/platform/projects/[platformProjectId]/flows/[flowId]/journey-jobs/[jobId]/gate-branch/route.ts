@@ -38,7 +38,12 @@ export async function POST(
       return apiError('gateNodeId and edgeKind (when|otherwise) required', API_STATUS.BAD_REQUEST);
     }
 
-    const result = await postJourneyGateBranch({ jobId: jid, gateNodeId, edgeKind });
+    const result = await postJourneyGateBranch({
+      jobId: jid,
+      gateNodeId,
+      edgeKind,
+      plexonUserId: user.id,
+    });
     if (!result.ok) return apiError(result.error, 502);
     return platformJson({ ok: true, flowCursor: result.flowCursor ?? null });
   } catch (e) {

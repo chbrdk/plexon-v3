@@ -147,6 +147,7 @@ export async function executeCollectionFlowRun(input: {
         doc,
         body,
         historyRunId,
+        actorUserId: input.updatedByUserId ?? null,
       });
     }
 
@@ -343,6 +344,7 @@ export async function executeCollectionFlowRun(input: {
           projectId: audionProjectId,
           flow: journeyFlow,
           name: `${row.name} · ${label}`,
+          plexonUserId: input.updatedByUserId?.trim() || '',
         });
 
         personaRuns.push({
@@ -1144,6 +1146,7 @@ export async function executeCollectionFlowRun(input: {
         scanId: quality?.pageScanId ?? quality?.id ?? geoJobId,
         stepUrl: stepUrl ?? quality?.url ?? geoUrl,
         overallScore: overallForVerdict,
+        plexonUserId: input.updatedByUserId?.trim() || '',
       });
       waveEvaluateOk = rollup.waveEvaluateOk;
       waveRollupOk = rollup.ok && rollup.waveRollupOk;

@@ -3,7 +3,10 @@
  * Spec: collection-test-flow.md Wave 2
  */
 
-import { getAudionServiceToken } from '@/lib/constants';
+import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
+} from '@/lib/integrations/audion-connectivity';
 import { pollUntil } from '@/lib/assistant/poll-until';
 import type { CollectionVerdict, EmbeddedAudionJourneyFlow } from '@/lib/collection-test-flow';
 import {
@@ -64,20 +67,18 @@ export type AudionJourneySegmentResult =
       job?: AudionJourneyJobSnapshot;
     };
 
-function requireAuthHeaders():
+function requireAuthHeaders(plexonUserId: string):
   | { ok: true; headers: Record<string, string> }
   | { ok: false; error: string } {
-  const token = getAudionServiceToken();
-  if (!token) {
+  const actor = plexonUserId.trim();
+  if (!actor) {
+    return { ok: false, error: AUDION_MACHINE_ACTOR_REQUIRED };
+  }
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) {
     return { ok: false, error: 'AUDION_API_TOKEN not configured' };
   }
-  return {
-    ok: true,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  };
+  return { ok: true, headers };
 }
 
 function pickFinalUrl(job: Record<string, unknown>): string | null {
@@ -162,11 +163,12 @@ export async function createStudyFromFlow(input: {
   projectId: string;
   flow: EmbeddedAudionJourneyFlow;
   name?: string;
+  plexonUserId: string;
 }): Promise<
   | { ok: true; studyId: string; waveId: string; flowId: string }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
 
   try {
@@ -207,11 +209,12 @@ export async function createStudyFromFlow(input: {
 export async function startStudyWave(input: {
   studyId: string;
   waveId: string;
+  plexonUserId: string;
 }): Promise<
   | { ok: true; jobId: string }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
 
   try {
@@ -242,9 +245,10 @@ export async function startStudyWave(input: {
 }
 
 export async function fetchJourneyJob(
-  jobId: string
+  jobId: string,
+  plexonUserId: string
 ): Promise<{ ok: true; job: AudionJourneyJobSnapshot } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(plexonUserId);
   if (!auth.ok) return auth;
 
   try {
@@ -265,6 +269,7 @@ export async function fetchJourneyJob(
 
 export async function pollJourneyJob(
   jobId: string,
+  plexonUserId: string,
   options?: { intervalMs?: number; maxMs?: number }
 ): Promise<
   | { ok: true; job: AudionJourneyJobSnapshot }
@@ -275,7 +280,7 @@ export async function pollJourneyJob(
     intervalMs: options?.intervalMs ?? 3000,
     maxMs: options?.maxMs ?? 8 * 60 * 1000,
     fetch: async () => {
-      const res = await fetchJourneyJob(jobId);
+      const res = await fetchJourneyJob(jobId, plexonUserId);
       if (!res.ok) {
         return { done: true, error: res.error, status: 'error' };
       }
@@ -291,8 +296,9 @@ export async function pollJourneyJob(
 export async function syncStudyWave(input: {
   studyId: string;
   waveId: string;
+  plexonUserId: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
   try {
     const res = await fetch(audionPlatformStudyWaveSync(input.studyId, input.waveId), {
@@ -319,11 +325,12 @@ export async function postJourneyGateBranch(input: {
   jobId: string;
   gateNodeId: string;
   edgeKind: 'when' | 'otherwise';
+  plexonUserId: string;
 }): Promise<
   | { ok: true; flowCursor?: Record<string, unknown> | null }
   | { ok: false; error: string }
 > {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
   try {
     const res = await fetch(audionPlatformJourneyJobGateBranch(input.jobId), {
@@ -354,8 +361,10 @@ export async function postHybridSegment(input: {
   projectId: string;
   nodeId: string;
   flow: EmbeddedAudionJourneyFlow;
+
+  plexonUserId: string;
 }): Promise<{ ok: true; jobId?: string } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
   try {
     const res = await fetch(audionPlatformFlowsHybridSegment(), {
@@ -398,8 +407,9 @@ export type AudionWaveSnapshot = {
 export async function evaluateStudyWave(input: {
   studyId: string;
   waveId: string;
+  plexonUserId: string;
 }): Promise<{ ok: true; wave: AudionWaveSnapshot } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
   try {
     const res = await fetch(audionPlatformStudyWaveEvaluate(input.studyId, input.waveId), {
@@ -424,8 +434,9 @@ export async function evaluateStudyWave(input: {
 export async function fetchStudyWave(input: {
   studyId: string;
   waveId: string;
+  plexonUserId: string;
 }): Promise<{ ok: true; wave: AudionWaveSnapshot } | { ok: false; error: string }> {
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) return auth;
   try {
     const res = await fetch(audionPlatformStudyWave(input.studyId, input.waveId), {
@@ -471,6 +482,8 @@ export async function rollupCollectionVerdictToAudionWave(input: {
   scanId?: string | null;
   stepUrl?: string | null;
   overallScore?: number | null;
+
+  plexonUserId: string;
 }): Promise<
   | { ok: true; waveEvaluateOk: true; waveRollupOk: true }
   | { ok: false; waveEvaluateOk: boolean; waveRollupOk: false; error: string }
@@ -478,6 +491,7 @@ export async function rollupCollectionVerdictToAudionWave(input: {
   const evaluated = await evaluateStudyWave({
     studyId: input.studyId,
     waveId: input.waveId,
+    plexonUserId: input.plexonUserId,
   });
   if (!evaluated.ok) {
     return {
@@ -494,6 +508,7 @@ export async function rollupCollectionVerdictToAudionWave(input: {
     const fetched = await fetchStudyWave({
       studyId: input.studyId,
       waveId: input.waveId,
+      plexonUserId: input.plexonUserId,
     });
     if (fetched.ok) wave = fetched.wave;
   }
@@ -515,7 +530,7 @@ export async function rollupCollectionVerdictToAudionWave(input: {
     priorReport: wave.reportMarkdown,
   });
 
-  const auth = requireAuthHeaders();
+  const auth = requireAuthHeaders(input.plexonUserId);
   if (!auth.ok) {
     return {
       ok: false,
@@ -573,6 +588,7 @@ export async function startAudionJourneySegment(input: {
   projectId: string;
   flow: EmbeddedAudionJourneyFlow;
   name?: string;
+  plexonUserId: string;
 }): Promise<AudionJourneyStartOnlyResult> {
   const created = await createStudyFromFlow(input);
   if (!created.ok) return created;
@@ -580,6 +596,7 @@ export async function startAudionJourneySegment(input: {
   const started = await startStudyWave({
     studyId: created.studyId,
     waveId: created.waveId,
+    plexonUserId: input.plexonUserId,
   });
   if (!started.ok) {
     return {
@@ -603,6 +620,7 @@ export async function runAudionJourneySegment(input: {
   projectId: string;
   flow: EmbeddedAudionJourneyFlow;
   name?: string;
+  plexonUserId: string;
 }): Promise<AudionJourneySegmentResult> {
   const created = await createStudyFromFlow(input);
   if (!created.ok) return created;
@@ -610,6 +628,7 @@ export async function runAudionJourneySegment(input: {
   const started = await startStudyWave({
     studyId: created.studyId,
     waveId: created.waveId,
+    plexonUserId: input.plexonUserId,
   });
   if (!started.ok) {
     return {
@@ -620,7 +639,7 @@ export async function runAudionJourneySegment(input: {
     };
   }
 
-  const polled = await pollJourneyJob(started.jobId);
+  const polled = await pollJourneyJob(started.jobId, input.plexonUserId);
   if (!polled.ok) {
     return {
       ok: false,
@@ -632,7 +651,11 @@ export async function runAudionJourneySegment(input: {
   }
 
   // Best-effort sync for Phase 7 wave fields
-  await syncStudyWave({ studyId: created.studyId, waveId: created.waveId });
+  await syncStudyWave({
+    studyId: created.studyId,
+    waveId: created.waveId,
+    plexonUserId: input.plexonUserId,
+  });
 
   if (polled.value.status === 'error') {
     return {

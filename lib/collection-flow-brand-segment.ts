@@ -121,7 +121,7 @@ export async function runBrandMeasureSegment(input: {
   const created = await createBrandionFixtureAnalysisRun({
     guidelineId,
     fixtureId,
-    plexonUserId: input.plexonUserId ?? null,
+    plexonUserId: input.plexonUserId?.trim() || '',
   });
 
   if (!created.ok) {

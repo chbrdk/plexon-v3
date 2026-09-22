@@ -70,7 +70,7 @@ function parseRun(body: unknown): BrandionAnalysisRunDetail | null {
 export async function createBrandionFixtureAnalysisRun(input: {
   guidelineId: string;
   fixtureId: string;
-  plexonUserId?: string | null;
+  plexonUserId: string;
 }): Promise<CreateBrandionFixtureRunResult> {
   const auth = requireAuth();
   if (!auth.ok) return auth;
@@ -79,10 +79,15 @@ export async function createBrandionFixtureAnalysisRun(input: {
   const fixtureId = input.fixtureId.trim() || 'demo-landing-pass';
   if (!guidelineId) return { ok: false, error: 'guidelineId required' };
 
-  const headers = { ...auth.headers };
-  if (input.plexonUserId?.trim()) {
-    headers['X-Plexon-User-Id'] = input.plexonUserId.trim();
+  const actor = input.plexonUserId?.trim() || '';
+  if (!actor) {
+    return { ok: false, error: 'X-Plexon-User-Id (actor) erforderlich für BRANDION Machine-Auth' };
   }
+
+  const headers = {
+    ...auth.headers,
+    'X-Plexon-User-Id': actor,
+  };
 
   try {
     const res = await fetch(apiBrandionGuidelineAnalysisRuns(guidelineId), {

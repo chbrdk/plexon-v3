@@ -4,7 +4,11 @@
  * Spec: specs/domain/assistant-journey-outline.md
  */
 
-import { getAudionServiceToken, getAudionWebOrigin } from '@/lib/constants';
+import { getAudionWebOrigin } from '@/lib/constants';
+import {
+  AUDION_MACHINE_ACTOR_REQUIRED,
+  buildAudionMachineHeaders,
+} from '@/lib/integrations/audion-connectivity';
 import { buildAudionJourneyUrl } from '@/lib/audion-admin-launch-url';
 import {
   fetchAudionPlatformProjectSummary,
@@ -65,6 +69,15 @@ type RawJourneyPhase = {
   summary?: string | null;
   elements?: RawJourneyElement[];
 };
+
+
+function audionActorHeaders(plexonUserId: string): Record<string, string> | { error: string } {
+  const actor = plexonUserId.trim();
+  if (!actor) return { error: AUDION_MACHINE_ACTOR_REQUIRED };
+  const headers = buildAudionMachineHeaders(actor);
+  if (!headers) return { error: 'AUDION_API_TOKEN fehlt' };
+  return headers;
+}
 
 type RawJourneyDetail = {
   id?: string;
@@ -201,11 +214,12 @@ function pickCatalogJourney(
 }
 
 async function fetchJourneyDetailJson(
-  journeyId: string
+  journeyId: string,
+  plexonUserId: string
 ): Promise<{ ok: true; detail: RawJourneyDetail } | { ok: false; error: string }> {
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  const token = getAudionServiceToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const auth = audionActorHeaders(plexonUserId);
+  if ('error' in auth) return { ok: false, error: auth.error };
+  const headers: Record<string, string> = { Accept: 'application/json', ...auth };
 
   try {
     const res = await fetch(audionPlatformJourneyById(journeyId), {
@@ -233,17 +247,18 @@ async function fetchJourneyDetailJson(
 
 async function postJourneyValidate(
   journeyId: string,
-  personaIds: string[]
+  personaIds: string[],
+  plexonUserId: string
 ): Promise<{ ok: true; report: RawValidateResponse } | { ok: false; error: string }> {
   if (!personaIds.length) {
     return { ok: false, error: 'Keine Persona für Validate im Katalog' };
   }
+  const auth = audionActorHeaders(plexonUserId);
+  if ('error' in auth) return { ok: false, error: auth.error };
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
+    ...auth,
   };
-  const token = getAudionServiceToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await fetch(audionPlatformJourneyValidate(journeyId), {
@@ -315,7 +330,7 @@ export async function runJourneyOutline(input: {
     personas = summary?.personas ?? [];
   }
 
-  const fetched = await fetchJourneyDetailJson(journeyId);
+  const fetched = await fetchJourneyDetailJson(journeyId, input.plexonUserId);
   if (!fetched.ok) return fetched;
 
   const phases = mapPhases(fetched.detail.phases);
@@ -332,7 +347,7 @@ export async function runJourneyOutline(input: {
 
   if (input.validate) {
     const personaIds = personas.map((p) => p.id).filter(Boolean).slice(0, 3);
-    const validated = await postJourneyValidate(journeyId, personaIds);
+    const validated = await postJourneyValidate(journeyId, personaIds, input.plexonUserId);
     if (validated.ok) {
       const mapped = mapValidateToOutlineBlocks(validated.report);
       preview.validateRan = true;
@@ -364,17 +379,20 @@ function pickCatalogTargetGroup(
   return groups[0] ?? null;
 }
 
-async function postJourneyGenerate(body: {
-  project_id: string;
-  target_group_id?: string | null;
-  journey_type?: string;
-}): Promise<{ ok: true; journeyId: string; journeyName: string } | { ok: false; error: string }> {
+async function postJourneyGenerate(
+  body: {
+    project_id: string;
+    target_group_id?: string | null;
+    journey_type?: string;
+  },
+  plexonUserId: string
+): Promise<{ ok: true; journeyId: string; journeyName: string } | { ok: false; error: string }> {
+  const auth = audionActorHeaders(plexonUserId);
+  if ('error' in auth) return { ok: false, error: auth.error };
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
+    ...auth,
   };
-  const token = getAudionServiceToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
     const res = await fetch(audionPlatformJourneyGenerate(), {
@@ -455,11 +473,14 @@ export async function runJourneyGenerate(input: {
     return { ok: false, error: 'Kein AUDION-Projekt an dieses Collection gebunden.' };
   }
 
-  const generated = await postJourneyGenerate({
-    project_id: audionProjectId,
-    target_group_id: targetGroupId,
-    journey_type: input.journeyType,
-  });
+  const generated = await postJourneyGenerate(
+    {
+      project_id: audionProjectId,
+      target_group_id: targetGroupId,
+      journey_type: input.journeyType,
+    },
+    input.plexonUserId
+  );
   if (!generated.ok) return generated;
 
   return runJourneyOutline({

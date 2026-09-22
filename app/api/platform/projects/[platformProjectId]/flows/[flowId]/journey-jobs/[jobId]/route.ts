@@ -32,7 +32,7 @@ export async function GET(
       return apiError('Forbidden', API_STATUS.FORBIDDEN);
     }
 
-    const job = await fetchJourneyJob(jid);
+    const job = await fetchJourneyJob(jid, user.id);
     if (!job.ok) return apiError(job.error, 502);
 
     return platformJson(job.job);

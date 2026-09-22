@@ -65,6 +65,7 @@ export async function POST(
       projectId: audionProjectId,
       nodeId,
       flow: journeyFlow,
+      plexonUserId: user.id,
     });
     if (!result.ok) return apiError(result.error, 502);
     return platformJson({ ok: true, jobId: result.jobId ?? null });
