@@ -48,7 +48,7 @@ Write (identity / pack / lifecycle)
 - **Background drain:** first `getDb()` boots `lib/platform-outbox-scheduler.ts` (default every 30s; `PLEXON_OUTBOX_DRAIN_ENABLED=0` to disable). Not started from `instrumentation.ts` (Edge bundle / missing-module trap on Coolify)
 - Mirror sync failures enqueue retry; drain updates binding `sync_status`
 - Facet `freshness`: `fresh` | `publish_pending` | `publish_failed` | `stale`
-- Service mark: `POST …/knowledge/facets/:facetId/freshness` (Audion/Checkion soft-skip)
+- Service mark: `POST …/knowledge/facets/:facetId/freshness` (Audion/Checkion/`media_insights` Videon soft-skip; Creation craft memory marks `research_brief` from Plexon Assistant distill)
 - Append-only `collection_knowledge_pack_events` on facet writes
 - Soft-skip remains product-local, but Plexon surfaces freshness + ops metrics
 

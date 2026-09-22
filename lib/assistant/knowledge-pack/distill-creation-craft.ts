@@ -372,14 +372,61 @@ export async function distillCreationCraftToKnowledgePack(input: {
     });
 
     if (result === 'conflict') {
+      await markCreationCraftFreshnessFailed(
+        ppid,
+        'creation soft-skip:research_brief_revision_conflict',
+      );
       return { ok: false, error: 'Knowledge Pack revision conflict' };
     }
     if (!result) {
+      await markCreationCraftFreshnessFailed(
+        ppid,
+        'creation soft-skip:research_brief_not_found',
+      );
       return { ok: false, error: 'Knowledge Pack not found' };
     }
     return { ok: true, sectionIds: sections.map((s) => s.id) };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    const message = e instanceof Error ? e.message : String(e);
+    if (ppid) {
+      await markCreationCraftFreshnessFailed(
+        ppid,
+        `creation soft-skip:research_brief_error:${message}`,
+      );
+    }
+    return { ok: false, error: message };
+  }
+}
+
+/** Best-effort freshness mark when craft memory distill soft-fails (Wave C). */
+async function markCreationCraftFreshnessFailed(
+  platformProjectId: string,
+  note: string,
+): Promise<void> {
+  try {
+    const current = await getOrCreateKnowledgePack(platformProjectId);
+    const at = new Date().toISOString();
+    const facets = ensureFacetsShape(current.facets, at);
+    const existing = facets.research_brief;
+    await patchKnowledgePackFacet({
+      platformProjectId,
+      facetId: 'research_brief',
+      facetDocument: {
+        ...existing,
+        updatedAt: at,
+        freshness: 'publish_failed',
+        provenance: {
+          ...existing.provenance,
+          actorType: 'service',
+          productId: 'plexon',
+          note: note.slice(0, 500),
+        },
+      },
+      expectedRevision: current.revision,
+      updatedByUserId: null,
+    });
+  } catch {
+    // best-effort — never fail the orchestrator path for freshness
   }
 }
 

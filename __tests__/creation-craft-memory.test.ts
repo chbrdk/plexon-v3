@@ -122,4 +122,16 @@ describe('creation craft memory distill (Wave C)', () => {
       expect(result.error).toBe('no-scene-writes')
     }
   })
+
+  it('documents soft-skip freshness mark helper for distill failures', () => {
+    const { readFileSync } = require('node:fs') as typeof import('node:fs')
+    const { join } = require('node:path') as typeof import('node:path')
+    const src = readFileSync(
+      join(process.cwd(), 'lib/assistant/knowledge-pack/distill-creation-craft.ts'),
+      'utf8',
+    )
+    expect(src).toContain('markCreationCraftFreshnessFailed')
+    expect(src).toContain("freshness: 'publish_failed'")
+    expect(src).toContain('creation soft-skip:research_brief_revision_conflict')
+  })
 })
