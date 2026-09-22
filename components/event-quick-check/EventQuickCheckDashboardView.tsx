@@ -336,7 +336,7 @@ export function EventQuickCheckDashboardView({
               </RankedList>
             ) : null}
             {market.implications ? <Text role="meta">{market.implications}</Text> : null}
-            {market.echonHref ? (
+            {!readOnly && market.echonHref ? (
               <Button variant="link" size="sm" href={market.echonHref} target="_blank" rel="noopener noreferrer">
                 ECHON öffnen
               </Button>
@@ -347,7 +347,7 @@ export function EventQuickCheckDashboardView({
 
       {layout.showDomain && domain ? (
         <Band title={EQC_REPORT_COPY.sectionDomain}>
-          <EventQuickCheckDomainMagazineSection domain={domain} />
+          <EventQuickCheckDomainMagazineSection domain={domain} readOnly={readOnly} />
         </Band>
       ) : null}
 
@@ -370,7 +370,7 @@ export function EventQuickCheckDashboardView({
                 r.stats.errors,
               ])}
             />
-            {report.domainComparison.checkionProjectHref ? (
+            {report.domainComparison.checkionProjectHref && !readOnly ? (
               <Button
                 variant="link"
                 size="sm"
@@ -446,16 +446,18 @@ export function EventQuickCheckDashboardView({
                 >
                   {EQC_REPORT_COPY.personaChatCta}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  href={personaChatHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="eqc-persona-chat-deep-link"
-                >
-                  {EQC_REPORT_COPY.personaChatOpenAudion}
-                </Button>
+                {!readOnly ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    href={personaChatHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="eqc-persona-chat-deep-link"
+                  >
+                    {EQC_REPORT_COPY.personaChatOpenAudion}
+                  </Button>
+                ) : null}
               </div>
             ) : null}
             {persona.goals.length > 0 ||
@@ -544,65 +546,67 @@ export function EventQuickCheckDashboardView({
         </Band>
       ) : null}
 
-      <section className="plexon-dash-band" data-section="eqc-magazine-appendix">
-        <Accordion
-          aria-label={EQC_REPORT_COPY.sectionAppendix}
-          value={appendixOpen}
-          onChange={setAppendixOpen}
-          items={[
-            {
-              id: 'appendix',
-              title: EQC_REPORT_COPY.sectionAppendix,
-              preview: `${report.appendix.stepTable.rows.length} Schritte`,
-              panel: (
-                <div className="plexon-eqc-mag-stack">
-                  {(report.appendix.scanId ||
-                    report.appendix.geoJobId ||
-                    report.appendix.platformProjectId) && (
-                    <div className="plexon-eqc-mag-chips">
-                      {report.appendix.scanId ? (
-                        <Chip static size="sm">
-                          Scan: {report.appendix.scanId}
-                        </Chip>
-                      ) : null}
-                      {report.appendix.geoJobId ? (
-                        <Chip static size="sm">
-                          GEO: {report.appendix.geoJobId}
-                        </Chip>
-                      ) : null}
-                      {report.appendix.platformProjectId ? (
-                        <Chip static size="sm">
-                          Projekt: {report.appendix.platformProjectId}
-                        </Chip>
-                      ) : null}
-                    </div>
-                  )}
-                  <MagTable
-                    columns={report.appendix.stepTable.columns}
-                    rows={report.appendix.stepTable.rows}
-                  />
-                  {report.appendix.links.length > 0 ? (
-                    <div className="plexon-eqc-mag-chips">
-                      {report.appendix.links.map((link) => (
-                        <Button
-                          key={link.href}
-                          variant="link"
-                          size="sm"
-                          href={link.href}
-                          target={link.external ? '_blank' : undefined}
-                          rel={link.external ? 'noopener noreferrer' : undefined}
-                        >
-                          {link.label}
-                        </Button>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ),
-            },
-          ]}
-        />
-      </section>
+      {!readOnly ? (
+        <section className="plexon-dash-band" data-section="eqc-magazine-appendix">
+          <Accordion
+            aria-label={EQC_REPORT_COPY.sectionAppendix}
+            value={appendixOpen}
+            onChange={setAppendixOpen}
+            items={[
+              {
+                id: 'appendix',
+                title: EQC_REPORT_COPY.sectionAppendix,
+                preview: `${report.appendix.stepTable.rows.length} Schritte`,
+                panel: (
+                  <div className="plexon-eqc-mag-stack">
+                    {(report.appendix.scanId ||
+                      report.appendix.geoJobId ||
+                      report.appendix.platformProjectId) && (
+                      <div className="plexon-eqc-mag-chips">
+                        {report.appendix.scanId ? (
+                          <Chip static size="sm">
+                            Scan: {report.appendix.scanId}
+                          </Chip>
+                        ) : null}
+                        {report.appendix.geoJobId ? (
+                          <Chip static size="sm">
+                            GEO: {report.appendix.geoJobId}
+                          </Chip>
+                        ) : null}
+                        {report.appendix.platformProjectId ? (
+                          <Chip static size="sm">
+                            Projekt: {report.appendix.platformProjectId}
+                          </Chip>
+                        ) : null}
+                      </div>
+                    )}
+                    <MagTable
+                      columns={report.appendix.stepTable.columns}
+                      rows={report.appendix.stepTable.rows}
+                    />
+                    {report.appendix.links.length > 0 ? (
+                      <div className="plexon-eqc-mag-chips">
+                        {report.appendix.links.map((link) => (
+                          <Button
+                            key={link.href}
+                            variant="link"
+                            size="sm"
+                            href={link.href}
+                            target={link.external ? '_blank' : undefined}
+                            rel={link.external ? 'noopener noreferrer' : undefined}
+                          >
+                            {link.label}
+                          </Button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </section>
+      ) : null}
 
       {presenting && chapterCount > 0 ? (
         <div className="plexon-eqc-present-hud" role="navigation" aria-label={EQC_PAGE_COPY.presentHudAria}>

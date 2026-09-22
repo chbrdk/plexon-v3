@@ -4,6 +4,8 @@ import { EQC_REPORT_COPY } from '@/lib/assistant/reports/event-quick-check-repor
 
 type Props = {
   domain: EventQuickCheckReportDomainSection
+  /** Public share: hide product deep-links (CHECKION). */
+  readOnly?: boolean
 }
 
 function tileTone(score: number): 'pos' | 'low' | 'neg' {
@@ -15,7 +17,7 @@ function tileTone(score: number): 'pos' | 'low' | 'neg' {
 /**
  * Domain & a11y chapter — Checkion lab-tile metrics left, top issues right.
  */
-export function EventQuickCheckDomainMagazineSection({ domain }: Props) {
+export function EventQuickCheckDomainMagazineSection({ domain, readOnly = false }: Props) {
   const tiles = [
     {
       key: 'score',
@@ -87,7 +89,7 @@ export function EventQuickCheckDomainMagazineSection({ domain }: Props) {
           ) : (
             <Text role="hint">Keine Top-Probleme gemeldet.</Text>
           )}
-          {domain.checkionHref ? (
+          {!readOnly && domain.checkionHref ? (
             <Button
               variant="link"
               size="sm"

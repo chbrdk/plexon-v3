@@ -74,6 +74,10 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
       path.join(root, 'components/event-quick-check/EventQuickCheckResultsMasthead.tsx'),
       'utf8'
     )
+    const domainMag = readFileSync(
+      path.join(root, 'components/event-quick-check/EventQuickCheckDomainMagazineSection.tsx'),
+      'utf8'
+    )
     expect(dash).toContain('plexon-magazine')
     expect(dash).toContain('plexon-eqc-results')
     expect(dash).toContain('EventQuickCheckResultsMasthead')
@@ -174,6 +178,13 @@ describe('event quick check ui rebuild (wave 6 + wave 7 results)', () => {
     expect(dash).toContain('useEqcPresentationMode')
     expect(dash).toContain('EQC_PAGE_COPY.presentButton')
     expect(dash).toContain('readOnly ? undefined')
+    expect(dash).toContain('!readOnly')
+    expect(dash).toContain('eqc-magazine-appendix')
+    expect(dash).toMatch(/!readOnly \? \(\s*<section[^>]*eqc-magazine-appendix/)
+    expect(dash).toContain('eqc-persona-chat-deep-link')
+    expect(dash).toMatch(/!readOnly \? \(\s*<Button[\s\S]*eqc-persona-chat-deep-link/)
+    expect(domainMag).toContain('readOnly')
+    expect(domainMag).toContain('!readOnly && domain.checkionHref')
     expect(masthead).toContain('data-eqc-chapter="short"')
     expect(masthead).toContain('showTopbar')
     expect(masthead).toContain('!readOnly')

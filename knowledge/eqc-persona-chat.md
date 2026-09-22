@@ -30,8 +30,8 @@ Paths: `lib/paths/audion-chat-api.ts` · proxy: `lib/integrations/audion-platfor
 
 ## Surfaces
 
-1. Authenticated EQC magazine (`EventQuickCheckDashboardView`) — `guestEmbed={false}` → Tavus + inspect
-2. Public Quick Check share `/share/quick-check/[token]` — `guestEmbed={true}` → text-only guest budget
+1. Authenticated EQC magazine (`EventQuickCheckDashboardView`) — `guestEmbed={false}` → Tavus + inspect; **In CHECKION/AUDION öffnen** + Anhang/Rohdaten visible
+2. Public Quick Check share `/share/quick-check/[token]` — `readOnly` + `guestEmbed={true}` → text-only guest chat overlay; **no** product deep-links (CHECKION/AUDION/ECHON) and **no** appendix (Rohdaten & Schritte)
 
 ## Implement checklist
 
@@ -39,10 +39,11 @@ Paths: `lib/paths/audion-chat-api.ts` · proxy: `lib/integrations/audion-platfor
 2. [x] Native workspace loads persona via BFF `GET …/share/personas/[id]?projectId=`
 3. [x] Stream via BFF `POST …/chat/stream` (guest session cookie on Plexon origin)
 4. [x] Logged-in EQC: Tavus (`POST …/tavus/session`) + website inspect tool approval
-5. [x] Secondary / header action **„In Audion öffnen“** → `resolveEqcPersonaChatHref`
+5. [x] Secondary / header action **„In Audion öffnen“** → `resolveEqcPersonaChatHref` (**authenticated magazine only**; hidden on public `readOnly` share)
 6. [x] Hide CTA when `persona.id` or Audion `projectId` missing
-7. [ ] Optional: Assistant chip after EQC context
-8. [ ] Optional: register `audion.persona_chat` in `lib/capabilities/catalog.ts`
+7. [x] Public share (`readOnly`): hide CHECKION/AUDION/ECHON product links + appendix Rohdaten
+8. [ ] Optional: Assistant chip after EQC context
+9. [ ] Optional: register `audion.persona_chat` in `lib/capabilities/catalog.ts`
 
 **Implements:** `components/persona-chat/*` · `components/event-quick-check/EqcPersonaChatOverlay.tsx` · `app/api/capabilities/audion/**`
 
