@@ -435,7 +435,7 @@ export function EventQuickCheckDashboardView({
                 {persona.traits.length > 0 ? <TraitBars traits={persona.traits} /> : null}
               </div>
             </div>
-            {personaChatHref ? (
+            {personaChatHref && !readOnly ? (
               <div className="plexon-eqc-mag-persona-actions">
                 <Button
                   variant="primary"
@@ -446,18 +446,16 @@ export function EventQuickCheckDashboardView({
                 >
                   {EQC_REPORT_COPY.personaChatCta}
                 </Button>
-                {!readOnly ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    href={personaChatHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="eqc-persona-chat-deep-link"
-                  >
-                    {EQC_REPORT_COPY.personaChatOpenAudion}
-                  </Button>
-                ) : null}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  href={personaChatHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="eqc-persona-chat-deep-link"
+                >
+                  {EQC_REPORT_COPY.personaChatOpenAudion}
+                </Button>
               </div>
             ) : null}
             {persona.goals.length > 0 ||
@@ -629,14 +627,16 @@ export function EventQuickCheckDashboardView({
         </div>
       ) : null}
 
-      <EqcPersonaChatOverlay
-        open={personaChatOpen}
-        onOpenChange={setPersonaChatOpen}
-        personaId={persona?.id}
-        personaName={persona?.name}
-        audionProjectId={report.meta.audionProjectId ?? report.appendix.audionProjectId}
-        guestEmbed={readOnly}
-      />
+      {!readOnly ? (
+        <EqcPersonaChatOverlay
+          open={personaChatOpen}
+          onOpenChange={setPersonaChatOpen}
+          personaId={persona?.id}
+          personaName={persona?.name}
+          audionProjectId={report.meta.audionProjectId ?? report.appendix.audionProjectId}
+          guestEmbed={false}
+        />
+      ) : null}
     </div>
   )
 }
