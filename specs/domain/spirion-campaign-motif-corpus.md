@@ -159,7 +159,7 @@ Idempotent on `source`+`sourceId` or content hash.
 | Tool / family | Change |
 |---------------|--------|
 | `spirion_captures_list` / screens list | Filter `assetKind`; default may remain web for landing module |
-| `spirion_capture_prompt_pack` | Honor `output_contract: composition \| graphic \| auto` |
+| `spirion_capture_prompt_pack` | Honor `output_contract: composition \| graphic \| auto`; include compact `graphic_craft_brief` when craft metrics exist |
 | `spirion_assets_list` (new alias or rename path) | Preferred name for multi-kind library; captures remain alias |
 | `spirion_references_*` | May index graphic assets for research intent |
 | Connector admin | **Not** in Welle 1 read families — operator/service jobs in SPIRION product |

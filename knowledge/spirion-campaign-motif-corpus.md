@@ -68,7 +68,7 @@ Full ticket breakdown: **`knowledge/spirion-campaign-motif-tickets.md`** (Epics 
 1. `POST /api/jobs/images` multipart with `files` + optional `assetKind=campaign_keyvisual`
 2. Poll jobs → captures appear with `asset_kind`, `enrichment_status=ready`, `composition_contract`
 3. `GET /api/library/captures?assetKind=campaign_keyvisual` (or MCP `spirion.assets_list`)
-4. MCP `spirion.capture_prompt_pack` with `output_contract=graphic` → pack includes `composition_contract.avoid`
+4. MCP `spirion.capture_prompt_pack` with `output_contract=graphic` → pack includes `composition_contract.avoid` **and** compact `graphic_craft_brief` (literals / rebuild_directives) when enrichment wrote craft metrics.
 5. Landing craft without campaign phrasing still attaches `spirion_section_ref_v1` (web_screen path)
 6. Prompt „Key Visual Kampagne“ → plexon module `campaign_motif_ref_v1`
 
