@@ -33,5 +33,7 @@ describe('EqcPersonaChatOverlay (Wave C6 native)', () => {
     expect(panel).toContain('applyPersonaChatStreamEvent');
     expect(panel).toContain('Keep `id` stable');
     expect(panel).not.toMatch(/id:\s*event\.messageId/);
+    expect(panel).toContain('chat-thinking-live');
+    expect(panel).toContain('Writing…');
   });
 });

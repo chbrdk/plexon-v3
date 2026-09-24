@@ -37,6 +37,22 @@ type Props = {
   composerLeading?: React.ReactNode
 }
 
+/** TTFT wait — mirrors Audion `ChatWritingIndicator` (DS chat-thinking-live). */
+function ChatWritingIndicator({ label }: { label: string }) {
+  return (
+    <div className="chat-thinking chat-thinking-live" role="status" aria-live="polite">
+      <span className="chat-thinking-dots" aria-hidden>
+        <span />
+        <span />
+        <span />
+      </span>
+      <div className="chat-thinking-copy">
+        <span className="chat-thinking-label">{label}</span>
+      </div>
+    </div>
+  )
+}
+
 function ChatTurnArticle({ turn }: { turn: ChatMessage }) {
   return (
     <article
@@ -47,7 +63,7 @@ function ChatTurnArticle({ turn }: { turn: ChatMessage }) {
         turn.content ? (
           <PersonaChatAnswer answer={turn.content} />
         ) : (
-          <LoadingText>Thinking…</LoadingText>
+          <ChatWritingIndicator label="Writing…" />
         )
       ) : (
         <p className="chat-text">{turn.content}</p>
@@ -365,7 +381,7 @@ export function PersonaChatPanel({
           </InspectDock>
         ) : null}
 
-        {busy ? <LoadingText>Streaming…</LoadingText> : null}
+        {busy ? <LoadingText>Reply incoming…</LoadingText> : null}
       </div>
 
       {err ? <Alert tone="error">{err}</Alert> : null}
