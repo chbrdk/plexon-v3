@@ -78,6 +78,21 @@ describe('central assistant flyout specs + mounts', () => {
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     expect(chat).toContain('syncConversationToUrl')
     expect(chat).toContain("if (presentation === 'overlay') return")
+    expect(chat).toContain('history.replaceState')
+    expect(chat).not.toMatch(/syncConversationToUrl[\s\S]{0,200}router\.replace/)
+  })
+
+  it('defers expand URL sync until after create so first turn is not remounted', () => {
+    const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(chat).toContain('sendInFlightRef')
+    expect(chat).toMatch(/ensureConversation[\s\S]*?setConversationId\(row\.id\)/)
+    expect(chat).toContain('Keep URL sync for after the turn completes')
+    // ensureConversation must not call syncConversationToUrl (mid-create remount bug).
+    const ensureBody = chat.slice(
+      chat.indexOf('const ensureConversation'),
+      chat.indexOf('const watchWorkflow'),
+    )
+    expect(ensureBody).not.toContain('syncConversationToUrl')
   })
 
   it('overlay folds side panel into message stream (no AssistantPanel column)', () => {

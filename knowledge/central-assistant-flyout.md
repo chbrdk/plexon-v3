@@ -65,6 +65,10 @@ Do **not** force `--color-bg-subtle` / `--color-text-on-light` on `[data-plexon-
 
 Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps users out of the flyout onto the expand page (and hides the FAB). URL sync is expand-only; flyout keeps `conversationId` in React state + `onConversationChange`.
 
+### First-turn remount (2026-09-24)
+
+Expand used to `router.replace(?c=…)` inside `ensureConversation` **before** the stream finished. App Router soft-nav remounted `AssistantChat` / Suspense and the first reply vanished (user had to send again). Fix: `history.replaceState` only for expand URL sync; defer URL write until after create; `sendInFlightRef` blocks history/`openConversation` wipe mid-turn. Spec: `specs/domain/central-assistant-flyout.md` § First-turn continuity.
+
 ### Activity + answer chrome (follow-up)
 
 - `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.

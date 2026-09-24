@@ -65,6 +65,8 @@ Authenticated shells MUST mount `PlatformAssistantHost`:
 
 Same stream client, history Flyout pattern, Collection picker, generative blocks.
 
+**First-turn continuity:** Creating a conversation (or finishing a turn) MUST NOT App-Router-`replace` the expand URL mid-flight. Soft-nav remounts `AssistantChat` and drops the in-flight first reply (user had to send again). Expand URL sync uses `history.replaceState` only; overlay still never writes `?c=` (host callback only).
+
 **Overlay panel rule:** Flyout width (~32rem) cannot host a second column. Client folds open `uiLayout.panel.blocks` into the assistant message (`mergeUiLayoutBlocksWithPanel`) and does not render `AssistantPanel`. Expand workspace keeps the side panel.
 
 ## Collection context
@@ -91,3 +93,4 @@ Same stream client, history Flyout pattern, Collection picker, generative blocks
 4. Expand with `?c=` continues the conversation started in the flyout.
 5. Zero hardcoded Plexon/product URLs in host components.
 6. Contract + shell smoke tests pass (see `knowledge/central-assistant-flyout.md`).
+7. First message on expand/flyout always streams without requiring a second send (no mid-turn App Router remount).

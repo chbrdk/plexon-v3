@@ -99,6 +99,7 @@ export function AssistantChat({
   const [livePanel, setLivePanel] = useState<UiPanelState | null>(null);
   const [reportPins, setReportPins] = useState<ReportPinItem[]>([]);
   const streamingMessageIdRef = useRef<string | null>(null);
+  const sendInFlightRef = useRef(false);
   const workflowStreamRef = useRef<EventSource | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
@@ -260,15 +261,21 @@ export function AssistantChat({
     (id: string | null) => {
       // Flyout must stay on the host route — URL sync is expand-workspace only.
       if (presentation === 'overlay') return
-      if (id) router.replace(pathAssistantChat(id), { scroll: false })
-      else router.replace(PATH_ASSISTANT, { scroll: false })
+      const href = id ? pathAssistantChat(id) : PATH_ASSISTANT
+      // Address-bar only — App Router `router.replace` remounts Suspense/AssistantChat
+      // and drops the in-flight first turn (user had to send again).
+      if (typeof window === 'undefined') return
+      const current = `${window.location.pathname}${window.location.search}`
+      if (current !== href) {
+        window.history.replaceState(window.history.state, '', href)
+      }
     },
-    [presentation, router],
+    [presentation],
   )
 
   const openConversation = useCallback(
     async (id: string, meta?: AssistantConversationSummary) => {
-      if (loading) return;
+      if (loading || sendInFlightRef.current) return;
       workflowStreamRef.current?.close();
       setConversationId(id);
       syncConversationToUrl(id);
@@ -296,7 +303,7 @@ export function AssistantChat({
   );
 
   const startNewChat = useCallback(() => {
-    if (loading) return;
+    if (loading || sendInFlightRef.current) return;
     workflowStreamRef.current?.close();
     setConversationId(null);
     setMessages([]);
@@ -434,11 +441,11 @@ export function AssistantChat({
     });
     if (!res.ok) throw new Error('Failed to create conversation');
     const row = (await res.json()) as { id: string };
+    // Keep URL sync for after the turn completes — writing ?c= here remounted expand chat.
     setConversationId(row.id);
-    syncConversationToUrl(row.id);
     void refreshConversations();
     return row.id;
-  }, [conversationId, platformProjectId, refreshConversations, syncConversationToUrl]);
+  }, [conversationId, platformProjectId, refreshConversations]);
 
   const watchWorkflow = useCallback((runId: string) => {
     workflowStreamRef.current?.close();
@@ -546,9 +553,10 @@ export function AssistantChat({
       const images = confirmToolCall ? [] : (attachments?.images ?? pendingImages);
       const documents = confirmToolCall ? [] : (attachments?.documents ?? pendingDocuments);
       if (!trimmed && !confirmToolCall && images.length === 0 && documents.length === 0) return;
-      if (loading || attachBusy) return;
+      if (loading || attachBusy || sendInFlightRef.current) return;
 
       const optimisticId = `local-${Date.now()}`;
+      sendInFlightRef.current = true;
       setLoading(true);
       setIsStreamingText(false);
       setShowActivityTrace(true);
@@ -800,6 +808,7 @@ export function AssistantChat({
           },
         ]);
       } finally {
+        sendInFlightRef.current = false;
         setLoading(false);
         setIsStreamingText(false);
         setShowActivityTrace(false);
