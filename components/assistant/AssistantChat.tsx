@@ -36,6 +36,10 @@ import {
   mergeStreamingUiBlockUpdate,
   patchStreamingMessageMetadata,
 } from '@/lib/assistant/streaming-ui-layout';
+import {
+  clearStreamingAssistantContent,
+  finalizeStreamingAssistantMessage,
+} from '@/lib/assistant/stream-continuity';
 import { AssistantPanel } from '@/components/assistant-ui/AssistantPanel';
 import { AssistantChatComposer, type AssistantPendingDocument, type AssistantPendingImage } from '@/components/assistant/AssistantChatComposer';
 import { ReportCollectionBar, type ReportPinItem } from '@/components/assistant/ReportCollectionBar';
@@ -257,6 +261,51 @@ export function AssistantChat({
     setMessages(data.items);
   }, []);
 
+  /**
+   * Background sync after a streamed turn. Never applies an empty payload over local
+   * transcript, and keeps React keys stable so the bubble does not remount.
+   */
+  const softRefreshConversation = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(apiAssistantConversationMessages(id), { credentials: 'same-origin' });
+      if (!res.ok) return;
+      const data = (await res.json()) as { items: AssistantChatMessage[] };
+      const items = data.items ?? [];
+      if (items.length === 0) return;
+      setMessages((prev) => {
+        if (sendInFlightRef.current) return prev;
+        if (prev.some((m) => Boolean((m.metadata as { streaming?: boolean } | null)?.streaming))) {
+          return prev;
+        }
+        const prevTurns = prev.filter((m) => m.role === 'user' || m.role === 'assistant');
+        const nextTurns = items.filter((m) => m.role === 'user' || m.role === 'assistant');
+        if (nextTurns.length < prevTurns.length) return prev;
+        return items.map((serverMsg, i) => {
+          const local = prev[i];
+          if (local && local.role === serverMsg.role) {
+            return {
+              ...serverMsg,
+              id: local.id,
+              metadata: {
+                ...(serverMsg.metadata ?? {}),
+                serverMessageId: serverMsg.id,
+              },
+            };
+          }
+          return {
+            ...serverMsg,
+            metadata: {
+              ...(serverMsg.metadata ?? {}),
+              serverMessageId: serverMsg.id,
+            },
+          };
+        });
+      });
+    } catch {
+      /* ignore — local transcript already finalized */
+    }
+  }, []);
+
   const syncConversationToUrl = useCallback(
     (id: string | null) => {
       // Flyout must stay on the host route — URL sync is expand-workspace only.
@@ -457,10 +506,10 @@ export function AssistantChat({
       },
       onDone: () => {
         workflowStreamRef.current = null;
-        if (conversationId) void loadConversation(conversationId);
+        if (conversationId) void softRefreshConversation(conversationId);
       },
     });
-  }, [conversationId, loadConversation, scrollToBottom]);
+  }, [conversationId, softRefreshConversation, scrollToBottom]);
 
   const appendStreamingUiBlock = useCallback((block: UiBlock) => {
     setMessages((prev) => {
@@ -691,9 +740,10 @@ export function AssistantChat({
               });
             },
             onTokenReset: () => {
-              const streamId = `stream-${Date.now()}`;
+              // Clear draft tokens in place — do not drop the bubble (felt like an abort).
+              const streamId = streamingMessageIdRef.current ?? `stream-${Date.now()}`;
               streamingMessageIdRef.current = streamId;
-              setMessages((prev) => prev.filter((m) => !(m.metadata as { streaming?: boolean })?.streaming));
+              setMessages((prev) => clearStreamingAssistantContent(prev, streamId));
             },
             onThinkingReset: () => {
               setAgentTrace((prev) => ({ ...prev, thinking: '', thinkingLive: true }));
@@ -769,9 +819,18 @@ export function AssistantChat({
 
         setConversationId(done.conversationId);
         syncConversationToUrl(done.conversationId);
+        // Finalize the live bubble in place — do not await a hard reload (empty flash).
+        const streamId = streamingMessageIdRef.current;
+        setMessages((prev) =>
+          finalizeStreamingAssistantMessage(prev, streamId, {
+            text: done.text,
+            messageId: done.messageId,
+            metadata: done.metadata,
+          }),
+        );
         streamingMessageIdRef.current = null;
-        await loadConversation(done.conversationId);
         void refreshConversations();
+        void softRefreshConversation(done.conversationId);
         setLivePanel(presentation === 'overlay' ? null : getMessageUiPanel(done.metadata));
 
         if (done.workflowRunId) {
@@ -816,7 +875,7 @@ export function AssistantChat({
         streamingMessageIdRef.current = null;
       }
     },
-    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, softRefreshConversation, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const handleAttachFiles = useCallback(async (files: FileList | null) => {

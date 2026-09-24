@@ -56,6 +56,40 @@ function ChatTurnArticle({ turn }: { turn: ChatMessage }) {
   )
 }
 
+/** Apply stream events without remounting the assistant bubble on `done`. */
+export function applyPersonaChatStreamEvent(
+  turns: ChatMessage[],
+  streamingId: string,
+  event: ChatStreamEvent,
+): ChatMessage[] {
+  if (event.type === 'delta') {
+    return turns.map((t) =>
+      t.id === streamingId
+        ? { ...t, content: `${t.content}${event.text}`, status: 'streaming' }
+        : t,
+    )
+  }
+  if (event.type === 'done') {
+    return turns.map((t) =>
+      t.id === streamingId
+        ? {
+            ...t,
+            // Keep `id` stable — swapping to server messageId remounts the bubble.
+            content: event.text ?? t.content,
+            status: 'complete',
+            createdAt: new Date().toISOString(),
+          }
+        : t,
+    )
+  }
+  if (event.type === 'error') {
+    return turns.map((t) =>
+      t.id === streamingId ? { ...t, status: 'error', content: t.content || event.message } : t,
+    )
+  }
+  return turns
+}
+
 export function PersonaChatPanel({
   persona,
   projectId,
@@ -103,36 +137,13 @@ export function PersonaChatPanel({
   useEffect(() => () => abortRef.current?.abort(), [])
 
   function handleStreamEvent(streamingId: string, event: ChatStreamEvent) {
-    if (event.type === 'delta') {
-      setTurns((prev) =>
-        prev.map((t) =>
-          t.id === streamingId
-            ? { ...t, content: `${t.content}${event.text}`, status: 'streaming' }
-            : t,
-        ),
-      )
-    } else if (event.type === 'done') {
-      setConversationId(event.conversationId)
-      setTurns((prev) =>
-        prev.map((t) =>
-          t.id === streamingId
-            ? {
-                ...t,
-                id: event.messageId || t.id,
-                status: 'complete',
-                createdAt: new Date().toISOString(),
-              }
-            : t,
-        ),
-      )
-    } else if (event.type === 'error') {
-      setErr(event.message)
-      setTurns((prev) =>
-        prev.map((t) =>
-          t.id === streamingId ? { ...t, status: 'error', content: t.content || event.message } : t,
-        ),
-      )
-    } else if (event.type === 'tool_proposed') {
+    if (event.type === 'delta' || event.type === 'done' || event.type === 'error') {
+      if (event.type === 'done') setConversationId(event.conversationId)
+      if (event.type === 'error') setErr(event.message)
+      setTurns((prev) => applyPersonaChatStreamEvent(prev, streamingId, event))
+      return
+    }
+    if (event.type === 'tool_proposed') {
       if (!fullCapabilities) return
       setPendingTool(event)
       setToolComplete(null)

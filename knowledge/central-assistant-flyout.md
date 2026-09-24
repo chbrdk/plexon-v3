@@ -69,6 +69,12 @@ Overlay must **not** `router.replace(/assistant?c=…)` on send — that jumps u
 
 Expand used to `router.replace(?c=…)` inside `ensureConversation` **before** the stream finished. App Router soft-nav remounted `AssistantChat` / Suspense and the first reply vanished (user had to send again). Fix: `history.replaceState` only for expand URL sync; defer URL write until after create; `sendInFlightRef` blocks history/`openConversation` wipe mid-turn. Spec: `specs/domain/central-assistant-flyout.md` § First-turn continuity.
 
+### Stream continuity follow-ups (2026-09-24)
+
+- `token_reset` clears draft tokens **in place** (`clearStreamingAssistantContent`) — no bubble wipe.
+- After `done`, finalize locally (`finalizeStreamingAssistantMessage`) and **soft-refresh** the transcript (stable React keys + `serverMessageId` for pins) instead of awaiting a hard `loadConversation` that could flash empty.
+- Helpers: `lib/assistant/stream-continuity.ts`.
+
 ### Activity + answer chrome (follow-up)
 
 - `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.

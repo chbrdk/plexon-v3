@@ -13,6 +13,7 @@ import { applyConversationTargetToRecommendations } from '@/lib/assistant/projec
 import { resolveConversationTargetUrl } from '@/lib/assistant/conversation-target-url'
 import { messageUiBlocksForSurface } from '@/lib/assistant/ui-blocks/parse-metadata'
 import { findMetronShareSnapshotInBlocks } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui'
+import { resolveAssistantPinMessageId } from '@/lib/assistant/stream-continuity'
 import { MetronDashboardShareBar } from '@/components/assistant/MetronDashboardShareBar'
 import {
   ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
@@ -156,7 +157,9 @@ export function AssistantMessageList({
                   {uiBlocks.length > 0 ? (
                     <AssistantMessageBlocks
                       blocks={uiBlocks}
-                      messageId={!isUser && conversationId ? msg.id : undefined}
+                      messageId={
+                        !isUser && conversationId ? resolveAssistantPinMessageId(msg) : undefined
+                      }
                       streaming={isStreaming}
                       pinnedKeys={pinnedKeys}
                       onPinToggle={!isUser ? onPinToggle : undefined}

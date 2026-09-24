@@ -24,4 +24,14 @@ describe('EqcPersonaChatOverlay (Wave C6 native)', () => {
     );
     expect(css).toMatch(/\.plexon-tavus-video-panel iframe\s*\{[^}]*min-height:\s*80vh/s);
   });
+
+  it('keeps persona stream bubble id stable on done', () => {
+    const panel = readFileSync(
+      path.join(root, 'components/persona-chat/PersonaChatPanel.tsx'),
+      'utf8',
+    );
+    expect(panel).toContain('applyPersonaChatStreamEvent');
+    expect(panel).toContain('Keep `id` stable');
+    expect(panel).not.toMatch(/id:\s*event\.messageId/);
+  });
 });

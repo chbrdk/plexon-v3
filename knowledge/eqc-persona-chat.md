@@ -55,3 +55,8 @@ Paths: `lib/paths/audion-chat-api.ts` · proxy: `lib/integrations/audion-platfor
 4. Logged-in EQC: video toggle starts Tavus iframe inside overlay.
 5. **In Audion öffnen** opens full `/chat` deep-link.
 6. Platform FAB still orchestrates; does not replace persona chat.
+7. Persona overlay: assistant bubble keeps a stable React key through `done` (no mid-answer remount); soft-filtered `done.text` applied in place.
+
+## Stream continuity (2026-09-24)
+
+`PersonaChatPanel` must not swap turn `id` to the server `messageId` on `done` — that remounts `key={turn.id}` and feels like a reset. Same pattern as Audion `audion-chat-panel` / `knowledge/chat-stream-continuity-2026-09-24.md`.

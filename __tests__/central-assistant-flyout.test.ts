@@ -95,6 +95,14 @@ describe('central assistant flyout specs + mounts', () => {
     expect(ensureBody).not.toContain('syncConversationToUrl')
   })
 
+  it('finalizes stream turns without wiping bubbles or hard-reloading empty', () => {
+    const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
+    expect(chat).toContain('clearStreamingAssistantContent')
+    expect(chat).toContain('finalizeStreamingAssistantMessage')
+    expect(chat).toContain('softRefreshConversation')
+    expect(chat).not.toMatch(/await loadConversation\(done\.conversationId\)/)
+  })
+
   it('overlay folds side panel into message stream (no AssistantPanel column)', () => {
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     const list = readFileSync(join(root, 'components/assistant/AssistantMessageList.tsx'), 'utf8')
