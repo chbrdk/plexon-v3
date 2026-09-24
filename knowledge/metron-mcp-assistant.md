@@ -20,6 +20,8 @@
 
 Ask in assistant (from Metron or Plexon shell): “Welche Dashboards habe ich?” → `metron_dashboards_list` → `link_list`.  
 “Summarize dashboard X” / get → `metric_grid` + optional `chart` + deep link (`UiMetricGrid` / `UiChartBlock`).  
+“Was ist der Wert von KPI X?” → `metron_kpi_evaluate` / `metron_kpi_summarize` → Metric-Grid (Server-SSOT).  
+On Metron `/dashboards/:id`: entity inject — summarize without pasting the id.  
 **Share** on that turn → clipboard `/share/metron/mtn_…` (public read-only). Spec: `specs/domain/assistant-metron-share.md`.
 
-Staging (2026-09-14): MCP `tools/call` for `metron.projects_list`, `metron.dashboards_list`, and `metron.dashboard_summarize` returned live Collection data with actor injection. Empty `actorUserId` → MCP client error before Product.
+Wave 3 tools: `dataset_get` · `kpi_get` · `kpi_evaluate` · `kpi_summarize`.

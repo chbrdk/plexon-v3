@@ -22,6 +22,7 @@ import {
   PLEXON_FEDERATION_CONTRACT_VERSION,
   PLEXON_SERVICE_SECRET_HEADER,
 } from '@/lib/platform-contract';
+import { fetchMetronPlatformProjectSummary } from '@/lib/platform-project-dashboard-fetch';
 
 type BindingIds = {
   checkionProjectId?: string | null;
@@ -296,6 +297,19 @@ export async function buildCompactProjectContextBlock(
   if (bindings.audionProjectId) {
     sections.push('\n### AUDION Knowledge');
     sections.push(...(await fetchAudionProjectContext(bindings.audionProjectId, plexonUserId)));
+  }
+
+  const metron = await fetchMetronPlatformProjectSummary(platformProjectId, plexonUserId);
+  if (metron) {
+    sections.push('\n### METRON');
+    sections.push(
+      `Dashboards: ${metron.dashboardCount} · KPIs: ${metron.kpiCount} · Datasets: ${metron.datasetCount}`,
+    );
+    if (metron.topDashboards?.length) {
+      sections.push(
+        `Top boards: ${metron.topDashboards.map((d) => `${d.name} (${d.id})`).join('; ')}`,
+      );
+    }
   }
 
   return truncateAssistantText(

@@ -221,7 +221,11 @@ Owner `metron`. Agent-only (no Collection Flow nodes in Wave 9). Free-chat uses 
 | `metron.health` | metron | — | `metron_health` | read | — | Liveness |
 | `metron.projects.list` | metron | — | `metron_projects_list` | read | `metron.projects` | |
 | `metron.datasets.list` | metron | — | `metron_datasets_list` | read | `metron.datasets` | optional `platformProjectId` |
-| `metron.kpis.list` | metron | — | `metron_kpis_list` | read | `metron.kpis` | |
+| `metron.kpis.list` | metron | — | `metron_kpis_list` | read | `metron.kpis` | Auto `metric_grid` |
+| `metron.kpi.get` | metron | — | `metron_kpi_get` | read | `metron.kpis` | Formula / status |
+| `metron.kpi.evaluate` | metron | — | `metron_kpi_evaluate` | read | `metron.kpis` | Server SSOT + provenance; Auto `metric_grid` |
+| `metron.kpi.summarize` | metron | — | `metron_kpi_summarize` | read | `metron.kpis` | Bounded text + Auto UI |
+| `metron.datasets.get` | metron | — | `metron_dataset_get` | read | `metron.datasets` | Schema + honesty; Auto `link_list` |
 | `metron.dashboards.list` | metron | — | `metron_dashboards_list` | read | `metron.dashboards` | Auto `link_list` UI |
 | `metron.dashboard.get` | metron | — | `metron_dashboard_get` | read | `metron.dashboards` | Auto `metric_grid` + `chart` + `link_list` |
 | `metron.dashboard.summarize` | metron | — | `metron_dashboard_summarize` | read | `metron.dashboards` | Auto `metric_grid` + `link_list` |

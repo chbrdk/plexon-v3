@@ -166,8 +166,8 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   videon_reframe: [/^videon_reframe_/],
   metron_ops: [/^metron_health$/],
   metron_projects: [/^metron_projects_/],
-  metron_datasets: [/^metron_datasets_/],
-  metron_kpis: [/^metron_kpis_/],
+  metron_datasets: [/^metron_datasets_/, /^metron_dataset_get$/],
+  metron_kpis: [/^metron_kpis_/, /^metron_kpi_(get|evaluate|summarize)$/],
   metron_dashboards: [/^metron_dashboard(?!_create)/],
   metron_write: [
     /^metron_dashboard_create$/,

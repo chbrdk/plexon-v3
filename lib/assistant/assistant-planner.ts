@@ -294,14 +294,23 @@ const VIDEON_PATTERNS = [
 
 const METRON_PATTERNS = [
   /\bmetron\b/i,
+  /\bkennzahl(en)?\b/i,
   /\bkpi(s)?\b/i,
+  /\bmetron[- ]?(dashboard|kpi|dataset)/i,
+];
+
+/** Stronger than bare report/analytics — only with Collection/Metron cues. */
+const METRON_SOFT_PATTERNS = [
   /\bdashboard(s)?\b/i,
   /\bdataset(s)?\b/i,
-  /\banalytics?\b/i,
-  /\bkennzahl(en)?\b/i,
-  /\bbericht(e)?\b/i,
-  /\breport(s)?\b/i,
 ];
+
+function matchesMetronAnalytics(text: string, hasMetronMcp: boolean): boolean {
+  if (!hasMetronMcp) return false;
+  if (METRON_PATTERNS.some((p) => p.test(text))) return true;
+  // Soft patterns only when Collection/KPI context already implied by metron word or "kpi"
+  return false;
+}
 
 function creationSceneEditFamilies(hasSpirionMcp: boolean): ToolFamily[] {
   return hasSpirionMcp
@@ -424,7 +433,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     });
   }
 
-  if (METRON_PATTERNS.some((p) => p.test(text)) && input.hasMetronMcp) {
+  if (matchesMetronAnalytics(text, input.hasMetronMcp)) {
     return buildPlan({
       intent: 'metron_analytics',
       mode: 'tools',
@@ -436,7 +445,23 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       skipTools: false,
       reasoning: writeIntent
         ? 'METRON Analytics — KPIs/Dashboards inkl. Create/Install/Sync (Confirm).'
-        : 'METRON Analytics — KPIs/Dashboards/Datasets listen und zusammenfassen (live, Zahlen nicht erfinden).',
+        : 'METRON Analytics — KPIs/Dashboards/Datasets listen und evaluieren (live, Zahlen nicht erfinden).',
+    });
+  }
+
+  if (
+    METRON_SOFT_PATTERNS.some((p) => p.test(text)) &&
+    input.hasMetronMcp &&
+    /\b(collection|metron|kpi)\b/i.test(text)
+  ) {
+    return buildPlan({
+      intent: 'metron_analytics',
+      mode: 'tools',
+      toolFamilies: [...METRON_ANALYTICS_FAMILIES, 'plexon_ui'],
+      allowWriteTools: false,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning: 'METRON Analytics — Dashboard/Dataset mit Collection/KPI-Kontext.',
     });
   }
 

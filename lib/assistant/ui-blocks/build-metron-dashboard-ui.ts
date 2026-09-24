@@ -379,3 +379,245 @@ export function isMetronDashboardGetToolName(toolName: string): boolean {
   const n = toolName.replace(/\./g, '_');
   return n === 'metron_dashboard_get';
 }
+
+export type MetronKpiListItem = {
+  id: string;
+  name: string;
+  status?: string;
+};
+
+export type MetronKpiEvaluatePayload = {
+  id: string;
+  name: string;
+  value: number | string;
+  periodLabel?: string;
+};
+
+export type MetronDatasetListItem = {
+  id: string;
+  name: string;
+  honestyHint?: string;
+};
+
+export function parseMetronKpisListPayload(text: string): MetronKpiListItem[] | null {
+  try {
+    const raw = JSON.parse(text) as { items?: unknown; error?: unknown };
+    if (!raw || typeof raw !== 'object' || raw.error) return null;
+    if (!Array.isArray(raw.items)) return null;
+    const items: MetronKpiListItem[] = [];
+    for (const row of raw.items) {
+      if (!row || typeof row !== 'object') continue;
+      const r = row as Record<string, unknown>;
+      const id = typeof r.id === 'string' ? r.id.trim() : '';
+      const name = typeof r.name === 'string' ? r.name.trim() : '';
+      if (!id || !name) continue;
+      items.push({
+        id,
+        name,
+        status: typeof r.status === 'string' ? r.status : undefined,
+      });
+    }
+    return items;
+  } catch {
+    return null;
+  }
+}
+
+export function parseMetronKpiEvaluatePayload(text: string): MetronKpiEvaluatePayload | null {
+  try {
+    const raw = JSON.parse(text) as {
+      error?: unknown;
+      kpiId?: string;
+      value?: number | null;
+      status?: string;
+      provenance?: { period?: { grain?: string; window?: string } };
+    };
+    if (!raw || typeof raw !== 'object' || raw.error) return null;
+    if (raw.value == null) return null;
+    const id = typeof raw.kpiId === 'string' ? raw.kpiId.trim() : 'kpi';
+    const period = raw.provenance?.period;
+    return {
+      id,
+      name: id,
+      value: raw.value,
+      periodLabel: period
+        ? `${period.grain ?? ''} · ${period.window ?? ''}`.trim()
+        : undefined,
+    };
+  } catch {
+    return parseMetronKpiSummarizePayload(text);
+  }
+}
+
+export function parseMetronKpiSummarizePayload(text: string): MetronKpiEvaluatePayload | null {
+  const link = text.match(/Deep link:\s*\/kpis(?:\?focus=)?([^\s]+)?/i);
+  const name = text.match(/^KPI:\s*(.+)$/m);
+  const valueLine = text.match(/^Value:\s*(.+)$/m);
+  if (!valueLine?.[1]) return null;
+  const rawValue = valueLine[1].replace(/\s*\[error\]\s*$/i, '').trim();
+  if (rawValue === '—') return null;
+  const num = Number(rawValue);
+  const period = text.match(/^Period:\s*(.+)$/m)?.[1]?.trim();
+  const focus = link?.[1] ? decodeURIComponent(link[1].trim()) : '';
+  const title = name?.[1]?.trim() || focus || 'KPI';
+  return {
+    id: focus || title,
+    name: title,
+    value: Number.isFinite(num) ? num : rawValue,
+    periodLabel: period,
+  };
+}
+
+export function parseMetronDatasetsListPayload(text: string): MetronDatasetListItem[] | null {
+  try {
+    const raw = JSON.parse(text) as { items?: unknown; error?: unknown };
+    if (!raw || typeof raw !== 'object' || raw.error) return null;
+    if (!Array.isArray(raw.items)) return null;
+    const items: MetronDatasetListItem[] = [];
+    for (const row of raw.items) {
+      if (!row || typeof row !== 'object') continue;
+      const r = row as Record<string, unknown>;
+      const id = typeof r.id === 'string' ? r.id.trim() : '';
+      const name = typeof r.name === 'string' ? r.name.trim() : '';
+      if (!id || !name) continue;
+      const honesty =
+        typeof r.evaluateHonesty === 'string'
+          ? r.evaluateHonesty
+          : typeof r.rowHonesty === 'string'
+            ? r.rowHonesty
+            : undefined;
+      items.push({
+        id,
+        name,
+        honestyHint:
+          honesty === 'evaluated_on_preview_sample'
+            ? 'Preview sample'
+            : honesty || undefined,
+      });
+    }
+    return items;
+  } catch {
+    return null;
+  }
+}
+
+export function parseMetronDatasetGetPayload(text: string): MetronDatasetListItem | null {
+  try {
+    const raw = JSON.parse(text) as {
+      error?: unknown;
+      id?: string;
+      name?: string;
+      evaluateHonesty?: string;
+      warnings?: string[];
+    };
+    if (!raw || typeof raw !== 'object' || raw.error) return null;
+    const id = typeof raw.id === 'string' ? raw.id.trim() : '';
+    const name = typeof raw.name === 'string' ? raw.name.trim() : id;
+    if (!id) return null;
+    const warn = Array.isArray(raw.warnings) ? raw.warnings : [];
+    const honesty =
+      raw.evaluateHonesty === 'evaluated_on_preview_sample' ||
+      warn.includes('evaluated_on_preview_sample')
+        ? 'Preview sample'
+        : undefined;
+    return { id, name: name || id, honestyHint: honesty };
+  } catch {
+    return null;
+  }
+}
+
+function buildMetronKpiHref(kpiId: string): string | null {
+  const base = metronBase();
+  if (!base || !kpiId.trim()) return null;
+  return `${base}/kpis?focus=${encodeURIComponent(kpiId.trim())}`;
+}
+
+function buildMetronDatasetHref(datasetId: string): string | null {
+  const base = metronBase();
+  if (!base || !datasetId.trim()) return null;
+  return `${base}/datasets?focus=${encodeURIComponent(datasetId.trim())}`;
+}
+
+export function buildMetronKpiListBlocks(
+  items: MetronKpiListItem[],
+  meta: { source: string; toolCallId: string },
+): UiBlock[] {
+  const blocks: UiBlock[] = [];
+  const metrics = items.slice(0, UI_BLOCK_LIMITS.maxMetrics).map((i) => ({
+    label: i.name,
+    value: i.status ?? '—',
+  }));
+  appendMetricGrid(blocks, 'METRON KPIs', metrics, meta);
+  const base = metronBase();
+  if (base && items[0]) {
+    const href = buildMetronKpiHref(items[0].id);
+    if (href) appendLinkBlock(blocks, 'KPIs', 'Open in METRON', href, meta);
+  }
+  return blocks;
+}
+
+export function buildMetronKpiEvaluateBlocks(
+  payload: MetronKpiEvaluatePayload,
+  meta: { source: string; toolCallId: string },
+): UiBlock[] {
+  const blocks: UiBlock[] = [];
+  const label = payload.periodLabel
+    ? `${payload.name} (${payload.periodLabel})`
+    : payload.name;
+  appendMetricGrid(blocks, 'KPI evaluate', [{ label, value: payload.value }], meta);
+  const href = buildMetronKpiHref(payload.id);
+  if (href) appendLinkBlock(blocks, payload.name, 'Open in METRON', href, meta);
+  return blocks;
+}
+
+export function buildMetronDatasetListBlocks(
+  items: MetronDatasetListItem[],
+  meta: { source: string; toolCallId: string },
+): UiBlock[] {
+  const blocks: UiBlock[] = [];
+  const base = metronBase();
+  const links = items.slice(0, UI_BLOCK_LIMITS.maxLinks).map((i) => ({
+    label: i.honestyHint ? `${i.name} · ${i.honestyHint}` : i.name,
+    href: base
+      ? `${base}/datasets?focus=${encodeURIComponent(i.id)}`
+      : `#dataset-${encodeURIComponent(i.id)}`,
+    external: true as const,
+  }));
+  if (!links.length) return blocks;
+  const block = createUiBlock(
+    'link_list',
+    { title: 'METRON Datasets', links },
+    randomUUID(),
+    meta,
+  );
+  if (block.ok) blocks.push(block.block);
+  return blocks;
+}
+
+export function buildMetronDatasetGetBlocks(
+  item: MetronDatasetListItem,
+  meta: { source: string; toolCallId: string },
+): UiBlock[] {
+  const blocks: UiBlock[] = [];
+  const href = buildMetronDatasetHref(item.id);
+  const label = item.honestyHint ? `${item.name} · ${item.honestyHint}` : item.name;
+  if (href) appendLinkBlock(blocks, 'Dataset', label, href, meta);
+  return blocks;
+}
+
+export function isMetronKpisListToolName(toolName: string): boolean {
+  return toolName.replace(/\./g, '_') === 'metron_kpis_list';
+}
+
+export function isMetronKpiEvaluateToolName(toolName: string): boolean {
+  const n = toolName.replace(/\./g, '_');
+  return n === 'metron_kpi_evaluate' || n === 'metron_kpi_summarize';
+}
+
+export function isMetronDatasetsListToolName(toolName: string): boolean {
+  return toolName.replace(/\./g, '_') === 'metron_datasets_list';
+}
+
+export function isMetronDatasetGetToolName(toolName: string): boolean {
+  return toolName.replace(/\./g, '_') === 'metron_dataset_get';
+}

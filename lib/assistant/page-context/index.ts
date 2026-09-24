@@ -20,6 +20,11 @@ export const ASSISTANT_CAPABILITY_CREATION_EDITOR = 'creation_editor' as const
 /** Entity for an open composition scene in the CREATION editor. */
 export const ASSISTANT_ENTITY_COMPOSITION_SCENE = 'composition_scene' as const
 
+/** METRON dashboard / KPI / dataset entities (Wave 3 page context). */
+export const ASSISTANT_ENTITY_METRON_DASHBOARD = 'dashboard' as const
+export const ASSISTANT_ENTITY_METRON_KPI = 'kpi' as const
+export const ASSISTANT_ENTITY_METRON_DATASET = 'dataset' as const
+
 /** Compact page-context block budget in the system prompt. */
 export const ASSISTANT_MAX_PAGE_CONTEXT_CHARS = 6_000
 

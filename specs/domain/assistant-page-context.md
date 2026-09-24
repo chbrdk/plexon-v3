@@ -14,12 +14,12 @@ The flyout assistant MUST know which host page/entity the user is viewing so que
 
 ```ts
 type AssistantPageContext = {
-  product: 'plexon' | 'audion' | 'checkion' | 'brandion' | 'creation'
+  product: 'plexon' | 'audion' | 'checkion' | 'brandion' | 'creation' | 'metron' | …
   pathname: string
   capability?: string // e.g. ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK
   platformProjectId?: string
-  entityType?: 'event_quick_check_run' | 'composition_scene'
-  entityId?: string // workflowRunId for EQC · sceneId for CREATION editor
+  entityType?: 'event_quick_check_run' | 'composition_scene' | 'dashboard' | 'kpi' | 'dataset'
+  entityId?: string // workflowRunId · sceneId · METRON dashboard/kpi/dataset id
   entityUpdatedAt?: string // optimistic-lock token for scene_apply_ops
 }
 ```
@@ -36,7 +36,17 @@ Constants: `lib/assistant/page-context.ts` (capability / entityType ids). Never 
 
 ## Embed / products
 
-`assistant:context` MAY include the same fields (`capability`, `pathname`, `platformProjectId`, `entityType`, `entityId`). Embed page applies them into `AssistantChat`. Cross-product entity hydrate beyond EQC is deferred.
+`assistant:context` MAY include the same fields (`capability`, `pathname`, `platformProjectId`, `entityType`, `entityId`). Embed page applies them into `AssistantChat`.
+
+### METRON surfaces (Wave 3)
+
+| Constant | Value |
+|----------|--------|
+| `ASSISTANT_ENTITY_METRON_DASHBOARD` | `dashboard` |
+| `ASSISTANT_ENTITY_METRON_KPI` | `kpi` |
+| `ASSISTANT_ENTITY_METRON_DATASET` | `dataset` |
+
+Host (metron-v3): pathname `/dashboards/:id` → `entityType=dashboard` + `entityId`. System prompt gets a compact METRON Seitenkontext block (entity + deep-link hint); tool-args inject `id` for get/evaluate/summarize. Full KPI hydrate via MCP evaluate remains the SSOT (no second formula engine in Plexon).
 
 ## Complete API
 

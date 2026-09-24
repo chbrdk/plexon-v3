@@ -158,4 +158,24 @@ describe('METRON dashboard generative UI', () => {
     expect(parseMetronDashboardGetPayload('{')).toBeNull()
     expect(parseMetronDashboardGetPayload(JSON.stringify({ error: 'nope' }))).toBeNull()
   })
+
+  it('builds KPI evaluate metric_grid from evaluate JSON', async () => {
+    const { parseMetronKpiEvaluatePayload, buildMetronKpiEvaluateBlocks } = await import(
+      '@/lib/assistant/ui-blocks/build-metron-dashboard-ui'
+    )
+    const payload = parseMetronKpiEvaluatePayload(
+      JSON.stringify({
+        kpiId: 'kpi-1',
+        value: 42,
+        status: 'ok',
+        provenance: { period: { grain: 'month', window: 'current' } },
+      }),
+    )
+    expect(payload?.value).toBe(42)
+    const blocks = buildMetronKpiEvaluateBlocks(payload!, {
+      source: 'plexon_ui',
+      toolCallId: 't4',
+    })
+    expect(blocks.some((b) => b.type === 'metric_grid')).toBe(true)
+  })
 })

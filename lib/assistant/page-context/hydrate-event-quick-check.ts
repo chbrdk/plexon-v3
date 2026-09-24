@@ -4,6 +4,9 @@ import {
   ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
   ASSISTANT_ENTITY_COMPOSITION_SCENE,
   ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN,
+  ASSISTANT_ENTITY_METRON_DASHBOARD,
+  ASSISTANT_ENTITY_METRON_DATASET,
+  ASSISTANT_ENTITY_METRON_KPI,
   ASSISTANT_MAX_PAGE_CONTEXT_CHARS,
   buildPageContextRouteHint,
   type AssistantPageContext,
@@ -78,6 +81,36 @@ function isCreationEditorContext(pageContext: AssistantPageContext): boolean {
       pageContext.entityType === ASSISTANT_ENTITY_COMPOSITION_SCENE ||
       pageContext.pathname.startsWith('/editor'))
   )
+}
+
+function isMetronEntityContext(pageContext: AssistantPageContext): boolean {
+  const t = pageContext.entityType
+  return (
+    pageContext.product === 'metron' &&
+    Boolean(pageContext.entityId) &&
+    (t === ASSISTANT_ENTITY_METRON_DASHBOARD ||
+      t === ASSISTANT_ENTITY_METRON_KPI ||
+      t === ASSISTANT_ENTITY_METRON_DATASET)
+  )
+}
+
+function buildMetronEntityContextBlock(pageContext: AssistantPageContext): string {
+  const lines = [
+    '## Aktueller Seitenkontext — METRON',
+    `- pathname: ${pageContext.pathname}`,
+  ]
+  if (pageContext.platformProjectId) {
+    lines.push(`- platformProjectId: ${pageContext.platformProjectId}`)
+  }
+  if (pageContext.entityType && pageContext.entityId) {
+    lines.push(`- entityType: ${pageContext.entityType}`)
+    lines.push(`- entityId: ${pageContext.entityId}`)
+  }
+  lines.push(
+    'Der Nutzer betrachtet diese METRON-Entity. id nicht erneut erfragen — Tools injecten sie.',
+    'KPI-Zahlen nur via metron_kpi_evaluate / dashboard_get (Server-SSOT).',
+  )
+  return lines.join('\n')
 }
 
 function buildCreationEditorContextBlock(pageContext: AssistantPageContext): string {
@@ -165,6 +198,14 @@ export async function buildAssistantPageContextBlock(
   ) {
     return truncateAssistantText(
       buildCreationEditorContextBlock(pageContext),
+      ASSISTANT_MAX_PAGE_CONTEXT_CHARS,
+      'Seitenkontext',
+    )
+  }
+
+  if (isMetronEntityContext(pageContext)) {
+    return truncateAssistantText(
+      buildMetronEntityContextBlock(pageContext),
       ASSISTANT_MAX_PAGE_CONTEXT_CHARS,
       'Seitenkontext',
     )

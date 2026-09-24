@@ -9,7 +9,7 @@ import {
   buildAudionStudyUrl,
   buildAudionTargetGroupUrl,
 } from '@/lib/audion-admin-launch-url'
-import { getAudionWebOrigin, pathAssistantWithProjectAndDraft } from '@/lib/constants'
+import { getAudionWebOrigin, getMetronUrl, pathAssistantWithProjectAndDraft } from '@/lib/constants'
 import { pathCheckionDomainResult, pathCheckionScanResult } from '@/lib/paths/checkion-api'
 import { pathBrandionGuideline } from '@/lib/paths/brandion-api'
 import type {
@@ -520,6 +520,8 @@ export function MetronCapabilityView({
     platformProjectId,
     t('projects.detail.askMetronDraft'),
   )
+  const named = metron?.topDashboards?.slice(0, 3) ?? []
+  const metronBase = getMetronUrl()?.replace(/\/+$/, '') ?? ''
 
   return (
     <div className="plexon-capability-pane" data-testid="metron-capability-view">
@@ -552,6 +554,26 @@ export function MetronCapabilityView({
               ? ` · ${t('projects.detail.localId')}: ${metron.externalProjectId}`
               : ''}
           </Text>
+          {named.length > 0 ? (
+            <ul className="plexon-capability-named-list" data-testid="metron-top-dashboards">
+              {named.map((d) => {
+                const boardHref = metronBase
+                  ? `${metronBase}/dashboards/${encodeURIComponent(d.id)}`
+                  : href
+                return (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      className="plexon-capability-named-link"
+                      onClick={() => openExternal(boardHref)}
+                    >
+                      {d.name}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : null}
           {empty ? <Text role="meta">{t('projects.detail.metronCatalogEmpty')}</Text> : null}
         </>
       )}

@@ -42,6 +42,25 @@ export async function executeMetronReadCapability(
       path = `/api/kpis${platformQ(input, ctx)}`;
       catalogRoot = 'metron.kpis';
       break;
+    case 'kpi_get':
+    case 'kpi_evaluate':
+    case 'kpi_summarize': {
+      const id = typeof input.id === 'string' ? input.id.trim() : '';
+      if (!id) return { ok: false, error: 'id fehlt', catalogRoot: 'metron.kpis' };
+      path =
+        op === 'kpi_evaluate'
+          ? `/api/kpis/${encodeURIComponent(id)}/evaluate`
+          : `/api/kpis/${encodeURIComponent(id)}`;
+      catalogRoot = 'metron.kpis';
+      break;
+    }
+    case 'dataset_get': {
+      const id = typeof input.id === 'string' ? input.id.trim() : '';
+      if (!id) return { ok: false, error: 'id fehlt', catalogRoot: 'metron.datasets' };
+      path = `/api/datasets/${encodeURIComponent(id)}`;
+      catalogRoot = 'metron.datasets';
+      break;
+    }
     case 'dashboards_list':
       path = `/api/dashboards${platformQ(input, ctx)}`;
       catalogRoot = 'metron.dashboards';
@@ -62,6 +81,8 @@ export async function executeMetronReadCapability(
   const res = await metronProductFetch({
     path,
     actorUserId: ctx.actorUserId,
+    method: op === 'kpi_evaluate' ? 'POST' : undefined,
+    body: op === 'kpi_evaluate' ? {} : undefined,
   });
   if (!res.ok) {
     return { ok: false, error: res.error, catalogRoot, agentPayload: res.data };

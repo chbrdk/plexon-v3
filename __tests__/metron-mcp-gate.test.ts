@@ -51,9 +51,45 @@ describe('injectMetronToolArgs', () => {
       injectMetronToolArgs(
         'metron_dashboards_list',
         {},
-        { actorUserId: 'u1', pageContext: { product: 'metron', platformProjectId: 'col-1' } },
+        {
+          actorUserId: 'u1',
+          pageContext: { product: 'metron', pathname: '/dashboards', platformProjectId: 'col-1' },
+        },
       ),
     ).toEqual({ actorUserId: 'u1', platformProjectId: 'col-1' })
+  })
+
+  it('injects entity id for dashboard/kpi get from page context', () => {
+    expect(
+      injectMetronToolArgs(
+        'metron_dashboard_summarize',
+        {},
+        {
+          actorUserId: 'u1',
+          pageContext: {
+            product: 'metron',
+            pathname: '/dashboards/db-9',
+            entityType: 'dashboard',
+            entityId: 'db-9',
+          },
+        },
+      ),
+    ).toEqual({ actorUserId: 'u1', id: 'db-9' })
+    expect(
+      injectMetronToolArgs(
+        'metron_kpi_evaluate',
+        {},
+        {
+          actorUserId: 'u1',
+          pageContext: {
+            product: 'metron',
+            pathname: '/kpis',
+            entityType: 'kpi',
+            entityId: 'kpi-3',
+          },
+        },
+      ),
+    ).toEqual({ actorUserId: 'u1', id: 'kpi-3' })
   })
 })
 
@@ -65,6 +101,19 @@ describe('buildMetronIntegrationContextBlock', () => {
       expect(buildMetronIntegrationContextBlock({ useMetronMcp: false })).toMatch(
         /METRON_MCP_URL fehlt/,
       )
+    } finally {
+      if (prev === undefined) delete process.env.METRON_MCP_URL
+      else process.env.METRON_MCP_URL = prev
+    }
+  })
+
+  it('tool-first guidance when active', () => {
+    const prev = process.env.METRON_MCP_URL
+    process.env.METRON_MCP_URL = 'https://metron-mcp.example'
+    try {
+      const block = buildMetronIntegrationContextBlock({ useMetronMcp: true })
+      expect(block).toMatch(/Server-SSOT/)
+      expect(block).toMatch(/zuerst/)
     } finally {
       if (prev === undefined) delete process.env.METRON_MCP_URL
       else process.env.METRON_MCP_URL = prev

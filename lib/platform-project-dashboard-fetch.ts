@@ -280,16 +280,26 @@ export type MetronProjectSummary = {
   datasetCount: number;
   kpiCount: number;
   dashboardCount: number;
+  /** Top dashboards for Collection Named rows (Wave 3). */
+  topDashboards?: Array<{ id: string; name: string }>;
 };
 
 function normalizeMetronSummary(data: MetronProjectSummary): MetronProjectSummary | null {
   if (!data?.externalProjectId) return null;
+  const top = Array.isArray(data.topDashboards)
+    ? data.topDashboards
+        .filter((d) => d && typeof d.id === 'string' && typeof d.name === 'string')
+        .slice(0, 3)
+        .map((d) => ({ id: d.id.trim(), name: d.name.trim() }))
+        .filter((d) => d.id && d.name)
+    : undefined;
   return {
     externalProjectId: data.externalProjectId,
     platformProjectId: data.platformProjectId,
     datasetCount: Number(data.datasetCount) || 0,
     kpiCount: Number(data.kpiCount) || 0,
     dashboardCount: Number(data.dashboardCount) || 0,
+    ...(top?.length ? { topDashboards: top } : {}),
   };
 }
 

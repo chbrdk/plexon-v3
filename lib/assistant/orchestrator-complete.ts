@@ -72,12 +72,24 @@ import {
   buildMetronDashboardGetBlocks,
   buildMetronDashboardListBlocks,
   buildMetronDashboardSummarizeBlocks,
+  buildMetronDatasetGetBlocks,
+  buildMetronDatasetListBlocks,
+  buildMetronKpiEvaluateBlocks,
+  buildMetronKpiListBlocks,
   isMetronDashboardGetToolName,
   isMetronDashboardSummarizeToolName,
   isMetronDashboardsListToolName,
+  isMetronDatasetGetToolName,
+  isMetronDatasetsListToolName,
+  isMetronKpiEvaluateToolName,
+  isMetronKpisListToolName,
   parseMetronDashboardGetPayload,
   parseMetronDashboardSummarizePayload,
   parseMetronDashboardsListPayload,
+  parseMetronDatasetGetPayload,
+  parseMetronDatasetsListPayload,
+  parseMetronKpiEvaluatePayload,
+  parseMetronKpisListPayload,
 } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui';
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
@@ -828,6 +840,78 @@ export async function runOrchestratorComplete(
         );
         if (payload) {
           const autoBlocks = buildMetronDashboardGetBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronKpisListToolName(mcpName) || isMetronKpisListToolName(block.name)) {
+        const items = parseMetronKpisListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (items?.length) {
+          const autoBlocks = buildMetronKpiListBlocks(items, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronKpiEvaluateToolName(mcpName) || isMetronKpiEvaluateToolName(block.name)) {
+        const payload = parseMetronKpiEvaluatePayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildMetronKpiEvaluateBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronDatasetsListToolName(mcpName) || isMetronDatasetsListToolName(block.name)) {
+        const items = parseMetronDatasetsListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (items?.length) {
+          const autoBlocks = buildMetronDatasetListBlocks(items, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMetronDatasetGetToolName(mcpName) || isMetronDatasetGetToolName(block.name)) {
+        const item = parseMetronDatasetGetPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (item) {
+          const autoBlocks = buildMetronDatasetGetBlocks(item, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });

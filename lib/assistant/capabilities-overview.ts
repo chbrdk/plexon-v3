@@ -113,6 +113,7 @@ export const ASSISTANT_CAPABILITIES_SECTIONS: CapabilitySection[] = [
     rows: [
       { name: 'Dashboards listen', description: 'Collection-Dashboards auflisten und zusammenfassen' },
       { name: 'KPIs & Datasets', description: 'KPI-Definitionen und Datasets live aus METRON lesen' },
+      { name: 'KPI evaluieren', description: 'Server-SSOT Wert + Provenance (Period) — Zahlen nicht erfinden' },
       { name: 'Dashboard erstellen', description: 'Neues Dashboard anlegen (mit Bestätigung)' },
       { name: 'Starter-Pack', description: 'HDI-Recruiting-KPI-Pack installieren (mit Bestätigung)' },
       { name: 'Suite-Sync', description: 'CHECKION/AUDION/Knowledge-Pack Snapshots ziehen' },

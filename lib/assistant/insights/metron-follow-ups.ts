@@ -27,10 +27,27 @@ function metronToolsFromTrace(toolTrace: unknown): string[] {
 
 export function resolveMetronFollowUpMode(metadata: Record<string, unknown>): MetronFollowUpMode | null {
   const tools = metronToolsFromTrace(metadata.toolTrace);
-  if (tools.some((t) => t.includes('dashboard_get') || t.includes('dashboard_summarize'))) {
+  if (
+    tools.some(
+      (t) =>
+        t.includes('dashboard_get') ||
+        t.includes('dashboard_summarize') ||
+        t.includes('kpi_evaluate') ||
+        t.includes('kpi_summarize') ||
+        t.includes('kpi_get'),
+    )
+  ) {
     return 'detail';
   }
-  if (tools.some((t) => t.includes('dashboards_list') || t.includes('dashboard_list'))) {
+  if (
+    tools.some(
+      (t) =>
+        t.includes('dashboards_list') ||
+        t.includes('dashboard_list') ||
+        t.includes('kpis_list') ||
+        t.includes('datasets_list'),
+    )
+  ) {
     return 'list';
   }
   if (hasMetronShareSnapshot(metadata.uiLayout)) return 'detail';
@@ -74,6 +91,12 @@ export function buildMetronFollowUps(options: {
         reason: 'Board als Metric-Grid + Chart im Chat',
       },
       {
+        id: 'metron-eval-kpi',
+        label: 'KPI evaluieren',
+        prompt: 'Evaluiere den wichtigsten METRON-KPI dieser Collection (Server-SSOT)',
+        reason: 'kpi_evaluate statt schätzen',
+      },
+      {
         id: 'metron-summarize',
         label: 'Zusammenfassen',
         prompt: 'Fasse die METRON Dashboards dieser Collection kurz zusammen',
@@ -103,6 +126,12 @@ export function buildMetronFollowUps(options: {
         reason: 'Zurück zur Übersicht',
       },
       {
+        id: 'metron-eval-kpi',
+        label: 'KPI evaluieren',
+        prompt: 'Evaluiere den zugehörigen METRON-KPI mit metron_kpi_evaluate',
+        reason: 'Server-SSOT Wert',
+      },
+      {
         id: 'metron-starter-pack',
         label: 'Starter-Pack',
         prompt: 'Installiere das METRON KPI Starter Pack für diese Collection (mit Bestätigung)',
@@ -114,13 +143,6 @@ export function buildMetronFollowUps(options: {
         prompt: 'Synchronisiere die METRON Suite-Connectors für diese Collection (mit Bestätigung)',
         reason: 'Confirm-Write sichtbar machen',
       },
-      {
-        id: 'metron-hired-source',
-        label: 'Hired by Source?',
-        prompt:
-          'Erkläre, wie ich in METRON „Hired by Source“ als Kategorie-Breakdown setze — ohne Formeln',
-        reason: 'Guided explore für Menschen',
-      },
     ];
   }
 
@@ -130,6 +152,12 @@ export function buildMetronFollowUps(options: {
       label: 'Dashboards listen',
       prompt: 'Liste die METRON Dashboards dieser Collection',
       reason: 'Einstieg in METRON Analytics',
+    },
+    {
+      id: 'metron-eval-kpi',
+      label: 'KPI evaluieren',
+      prompt: 'Liste METRON-KPIs und evaluiere den wichtigsten (Server-SSOT)',
+      reason: 'Evaluate-first Path',
     },
     {
       id: 'metron-starter-pack',
