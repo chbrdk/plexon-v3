@@ -679,6 +679,7 @@ export async function runEventQuickCheck(
       source: EVENT_QUICK_CHECK_BINDING_SOURCE,
       domain: domainFromUrl(url),
       required: ['audion', 'checkion'],
+      plexonUserId: input.user.id,
     });
     audionProjectId = ensured.audionProjectId ?? undefined;
     checkionProjectId = ensured.checkionProjectId;

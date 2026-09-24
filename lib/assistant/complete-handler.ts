@@ -13,6 +13,7 @@ import {
 } from '@/lib/assistant/conversation-context';
 import type { AssistantStreamEvent, AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import { getProjectBindingIds } from '@/lib/assistant/workflows/create-platform-project';
+import { ensurePlatformProductBindings } from '@/lib/assistant/workflows/ensure-platform-product-bindings';
 import {
   createAssistantConversation,
   getAssistantConversationById,
@@ -188,7 +189,26 @@ export async function handleAssistantComplete(
     }));
 
   const profile = await loadUserProfile(user.id);
-  const bindingIds = platformProjectId ? await getProjectBindingIds(platformProjectId) : null;
+  let bindingIds = platformProjectId ? await getProjectBindingIds(platformProjectId) : null;
+
+  // Resolve-before-create: heal missing Audion binding when Collection already has a mirror.
+  if (platformProjectId && !bindingIds?.audionProjectId) {
+    try {
+      const ensured = await ensurePlatformProductBindings(platformProjectId, {
+        source: 'assistant-complete-heal',
+        plexonUserId: user.id,
+        required: ['audion'],
+      });
+      if (ensured.audionProjectId) {
+        bindingIds = {
+          checkionProjectId: bindingIds?.checkionProjectId ?? ensured.checkionProjectId,
+          audionProjectId: ensured.audionProjectId,
+        };
+      }
+    } catch (e) {
+      console.warn('[assistant] audion binding heal failed', e);
+    }
+  }
 
   let projectDomain: string | undefined;
   if (platformProjectId) {

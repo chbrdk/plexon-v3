@@ -114,6 +114,9 @@ export type OrchestratorCompleteOptions = {
   pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
   /** Collection id for Spirion live search injection when pageContext lacks it. */
   platformProjectId?: string | null;
+  /** Healed/bound product ids — injected into Audion/Checkion MCP tools. */
+  audionProjectId?: string | null;
+  checkionProjectId?: string | null;
   actorUserId?: string;
   maxToolRounds?: number;
   /** Override extended-thinking budget (e.g. Creation scene depth). Omit → env default. */
@@ -312,6 +315,8 @@ export async function runOrchestratorComplete(
     useMetronMcp = false,
     pageContext = null,
     platformProjectId = null,
+    audionProjectId = null,
+    checkionProjectId = null,
     actorUserId = '',
     maxToolRounds = 5,
     thinkingBudgetTokens,
@@ -680,6 +685,8 @@ export async function runOrchestratorComplete(
         pageContext,
         actorUserId,
         platformProjectId,
+        audionProjectId,
+        checkionProjectId,
         sceneLockUpdatedAt: turnSceneUpdatedAt,
       });
       const result = await callCheckionMcpTool(baseUrl, mcpName, toolInput);

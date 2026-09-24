@@ -1,4 +1,5 @@
 import { getProjectBindingIds } from '@/lib/assistant/workflows/create-platform-project';
+import { healAudionBindingFromProduct } from '@/lib/assistant/workflows/heal-audion-binding';
 import { getPlatformProjectById, updatePlatformProject } from '@/lib/db/platform-projects';
 import type { PlatformProductId } from '@/lib/platform-entitlements';
 import {
@@ -12,6 +13,8 @@ export type EnsurePlatformBindingsResult = {
   syncResults: SyncPlatformProjectResult[];
   missingRequired: PlatformProductId[];
   domainPatched: boolean;
+  /** True when Audion binding was restored from product GET (not sync PUT). */
+  audionHealed?: boolean;
 };
 
 function missingProducts(input: {
@@ -28,6 +31,7 @@ function missingProducts(input: {
 /**
  * Ensures CHECKION/AUDION bindings exist for a platform project.
  * AUDION is synced first — required for Quick Check persona + GEO questions.
+ * When sync leaves Audion unbound, heals from Audion GET (resolve existing mirror).
  */
 export async function ensurePlatformProductBindings(
   platformProjectId: string,
@@ -35,12 +39,15 @@ export async function ensurePlatformProductBindings(
     source?: string;
     domain?: string | null;
     required?: PlatformProductId[];
+    /** Actor for Audion heal GET (falls back to Collection creator). */
+    plexonUserId?: string | null;
   } = {}
 ): Promise<EnsurePlatformBindingsResult> {
   const required = options.required ?? ['audion', 'checkion'];
   const source = options.source ?? 'plexon-ensure-bindings';
   const syncResults: SyncPlatformProjectResult[] = [];
   let domainPatched = false;
+  let audionHealed = false;
 
   const domain = options.domain?.trim();
   if (domain) {
@@ -79,11 +86,25 @@ export async function ensurePlatformProductBindings(
     missing = missingProducts({ required, checkionProjectId, audionProjectId });
   }
 
+  // Asymmetric link: Audion already mirrors this Collection but binding row is empty.
+  if (required.includes('audion') && !audionProjectId) {
+    const heal = await healAudionBindingFromProduct(platformProjectId, {
+      plexonUserId: options.plexonUserId,
+      source: `${source}-heal`,
+    });
+    if (heal.healed) {
+      audionProjectId = heal.audionProjectId;
+      audionHealed = true;
+      missing = missingProducts({ required, checkionProjectId, audionProjectId });
+    }
+  }
+
   return {
     checkionProjectId,
     audionProjectId,
     syncResults,
     missingRequired: missing,
     domainPatched,
+    audionHealed,
   };
 }

@@ -94,6 +94,7 @@ export async function bootstrapEqcCollection(input: {
     source: EVENT_QUICK_CHECK_BINDING_SOURCE,
     domain: domainFromUrl(url),
     required: ['audion', 'checkion'],
+    plexonUserId: input.user.id,
   });
 
   let audionProjectId = ensured.audionProjectId ?? undefined;

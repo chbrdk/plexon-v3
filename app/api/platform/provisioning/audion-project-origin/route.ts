@@ -38,6 +38,11 @@ const bodySchema = z.object({
   /** Optional — Plexon auto-resolves / bootstraps when omitted (service secret). */
   ownerPlexonUserId: z.string().min(1).optional(),
   platformCompanyId: z.string().min(1).optional(),
+  /**
+   * When set (Audion alreadyBound rebind), assert audion binding on this Collection
+   * instead of minting a new platform project.
+   */
+  platformProjectId: z.string().min(1).optional(),
 });
 
 export async function POST(request: Request) {
@@ -76,6 +81,85 @@ export async function POST(request: Request) {
 
   const audionId = parsed.audionProjectId.trim();
 
+  const explicitPlatformId = parsed.platformProjectId?.trim() || '';
+  if (explicitPlatformId) {
+    const target = await getPlatformProjectById(explicitPlatformId);
+    if (!target) {
+      return apiError('Unknown platformProjectId', API_STATUS.NOT_FOUND);
+    }
+    await ensureBindingPlaceholders(explicitPlatformId);
+    await upsertPlatformProjectBinding({
+      platformProjectId: explicitPlatformId,
+      productId: 'audion',
+      externalProjectId: audionId,
+      syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC,
+      syncMessage: 'plexon-audion-project-origin-rebind',
+      lastSyncAt: new Date(),
+    });
+    let checkionId = await getExternalProjectId(explicitPlatformId, 'checkion');
+    let brandionId = await getExternalProjectId(explicitPlatformId, 'brandion');
+    let creationId = await getExternalProjectId(explicitPlatformId, 'creation');
+    let spirionId = await getExternalProjectId(explicitPlatformId, 'spirion');
+    if (!checkionId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(explicitPlatformId, {
+          source: 'plexon-audion-project-origin-rebind',
+          onlyProducts: ['checkion'],
+        });
+        const row = retry.find((r) => r.productId === 'checkion');
+        if (row?.ok && row.externalProjectId) checkionId = row.externalProjectId;
+      } catch {
+        /* fall through */
+      }
+    }
+    if (!brandionId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(explicitPlatformId, {
+          source: 'plexon-audion-project-origin-rebind',
+          onlyProducts: ['brandion'],
+        });
+        const row = retry.find((r) => r.productId === 'brandion');
+        if (row?.ok && row.externalProjectId) brandionId = row.externalProjectId;
+      } catch {
+        /* fall through */
+      }
+    }
+    if (!creationId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(explicitPlatformId, {
+          source: 'plexon-audion-project-origin-rebind',
+          onlyProducts: ['creation'],
+        });
+        const row = retry.find((r) => r.productId === 'creation');
+        if (row?.ok && row.externalProjectId) creationId = row.externalProjectId;
+      } catch {
+        /* fall through */
+      }
+    }
+    if (!spirionId) {
+      try {
+        const retry = await syncPlatformProjectToProducts(explicitPlatformId, {
+          source: 'plexon-audion-project-origin-rebind',
+          onlyProducts: ['spirion'],
+        });
+        const row = retry.find((r) => r.productId === 'spirion');
+        if (row?.ok && row.externalProjectId) spirionId = row.externalProjectId;
+      } catch {
+        /* fall through */
+      }
+    }
+    return platformJson({
+      platformProjectId: explicitPlatformId,
+      checkionProjectId: checkionId,
+      brandionProjectId: brandionId,
+      creationProjectId: creationId,
+      spirionProjectId: spirionId,
+      platformCompanyId: target.companyId,
+      ownerPlexonUserId: ownerId,
+      rebound: true,
+    });
+  }
+
   const existingPlatformId = await findPlatformProjectIdByProductExternal('audion', audionId);
   if (existingPlatformId) {
     const existingProject = await getPlatformProjectById(existingPlatformId);
@@ -84,6 +168,14 @@ export async function POST(request: Request) {
     }
     // Phase 1: Collection must have sibling capabilities — repair missing CHECKION/BRANDION mirrors.
     await ensureBindingPlaceholders(existingPlatformId);
+    await upsertPlatformProjectBinding({
+      platformProjectId: existingPlatformId,
+      productId: 'audion',
+      externalProjectId: audionId,
+      syncStatus: PLATFORM_PROJECT_BINDING_SYNC_STATUS.IN_SYNC,
+      syncMessage: 'plexon-audion-project-origin-idempotent',
+      lastSyncAt: new Date(),
+    });
     let checkionId = await getExternalProjectId(existingPlatformId, 'checkion');
     let brandionId = await getExternalProjectId(existingPlatformId, 'brandion');
     let creationId = await getExternalProjectId(existingPlatformId, 'creation');

@@ -241,6 +241,8 @@ export async function runAssistantAgent(
     useMetronMcp: mcpFlags.useMetronMcp,
     pageContext: input.pageContext,
     platformProjectId: input.platformProjectId,
+    audionProjectId: input.audionProjectId,
+    checkionProjectId: input.checkionProjectId,
     actorUserId: input.user.id,
     maxToolRounds: plan.maxToolRounds,
     thinkingBudgetTokens: creationBudget.thinkingBudgetTokens,

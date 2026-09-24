@@ -136,6 +136,8 @@ export function injectAssistantMcpToolArgs(
     pageContext?: AssistantPageContext | null;
     actorUserId: string;
     platformProjectId?: string | null;
+    audionProjectId?: string | null;
+    checkionProjectId?: string | null;
     sceneLockUpdatedAt?: string | null;
   },
 ): Record<string, unknown> {
@@ -155,7 +157,7 @@ export function injectAssistantMcpToolArgs(
 export function injectCheckionToolArgs(
   toolName: string,
   input: Record<string, unknown>,
-  ctx: { actorUserId: string },
+  ctx: { actorUserId: string; checkionProjectId?: string | null; platformProjectId?: string | null },
 ): Record<string, unknown> {
   if (!/^checkion([._]|$)/i.test(toolName)) return input;
   if (/health$/i.test(toolName)) return input;
@@ -163,16 +165,33 @@ export function injectCheckionToolArgs(
   if (ctx.actorUserId.trim()) {
     out.actorUserId = ctx.actorUserId.trim();
   }
+  const existingProject =
+    typeof out.projectId === 'string'
+      ? out.projectId.trim()
+      : typeof out.checkionProjectId === 'string'
+        ? out.checkionProjectId.trim()
+        : '';
+  const fromCtx = ctx.checkionProjectId?.trim() || '';
+  if (!existingProject && fromCtx) {
+    out.projectId = fromCtx;
+    out.checkionProjectId = fromCtx;
+  }
   return out;
 }
 
 /**
  * Inject authenticated session user into AUDION MCP tools (Access Model B).
+ * Also injects conversation Audion + Collection ids when the model omitted them
+ * (prevents blind create / empty list under Access Model B).
  */
 export function injectAudionToolArgs(
   toolName: string,
   input: Record<string, unknown>,
-  ctx: { actorUserId: string },
+  ctx: {
+    actorUserId: string;
+    audionProjectId?: string | null;
+    platformProjectId?: string | null;
+  },
 ): Record<string, unknown> {
   if (!/^audion([._]|$)/i.test(toolName)) return input;
   if (/health$/i.test(toolName)) return input;
@@ -180,6 +199,27 @@ export function injectAudionToolArgs(
   if (ctx.actorUserId.trim()) {
     out.actorUserId = ctx.actorUserId.trim();
   }
+
+  const fromCtxAudion = ctx.audionProjectId?.trim() || '';
+  const fromCtxPlatform = ctx.platformProjectId?.trim() || '';
+
+  const existingAudion =
+    typeof out.projectId === 'string'
+      ? out.projectId.trim()
+      : typeof out.audionProjectId === 'string'
+        ? out.audionProjectId.trim()
+        : '';
+  if (!existingAudion && fromCtxAudion) {
+    out.projectId = fromCtxAudion;
+    out.audionProjectId = fromCtxAudion;
+  }
+
+  const existingPlatform =
+    typeof out.platformProjectId === 'string' ? out.platformProjectId.trim() : '';
+  if (!existingPlatform && fromCtxPlatform) {
+    out.platformProjectId = fromCtxPlatform;
+  }
+
   return out;
 }
 

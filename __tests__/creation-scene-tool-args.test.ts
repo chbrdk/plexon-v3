@@ -240,4 +240,36 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
       injectCheckionToolArgs('checkion_v3.health', {}, { actorUserId: 'session-user' }),
     ).toEqual({})
   })
+
+  it('injects conversation audionProjectId and platformProjectId when model omitted them', () => {
+    const out = injectAudionToolArgs(
+      'audion_projects_get',
+      {},
+      {
+        actorUserId: 'session-user',
+        audionProjectId: 'aud-42',
+        platformProjectId: 'pp-99',
+      },
+    )
+    expect(out).toMatchObject({
+      actorUserId: 'session-user',
+      projectId: 'aud-42',
+      audionProjectId: 'aud-42',
+      platformProjectId: 'pp-99',
+    })
+  })
+
+  it('does not overwrite explicit audion project ids from the model', () => {
+    const out = injectAudionToolArgs(
+      'audion_create_project',
+      { projectId: 'explicit-aud', platformProjectId: 'explicit-pp' },
+      {
+        actorUserId: 'session-user',
+        audionProjectId: 'aud-42',
+        platformProjectId: 'pp-99',
+      },
+    )
+    expect(out.projectId).toBe('explicit-aud')
+    expect(out.platformProjectId).toBe('explicit-pp')
+  })
 })
