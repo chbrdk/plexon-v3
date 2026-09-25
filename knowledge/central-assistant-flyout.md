@@ -6,6 +6,16 @@ Stand: 2026-08-10 (hybrid restyle)
 
 Cross-app **platform Assistant** as a dock-end chat flyout (`min(32rem)`). **Hybrid delivery:** same-origin Plexon mounts `AssistantChat` in-process; product apps iframe Plexon `/assistant/embed` with theme sync. Audion persona chat stays separate — EQC hosts native `PersonaChatWorkspace` in its own `ChatOverlay` with Audion API via BFF (`knowledge/eqc-persona-chat.md` Wave C6).
 
+### Feature parity (cross-app)
+
+Chat chrome features (attachments, Stop, streaming plain text, markdown/tables, generative UI) live **only** in plexon-v3 `AssistantChat`. Product FABs are thin hosts: same iframe → same features after each Plexon deploy. Hosts MUST:
+
+1. Freeze `iframe.src` while the flyout is open (no remount on `assistant:conversation` / theme / entity churn) — see `specs/api/assistant-embed.md` § Iframe stability.
+2. Post `assistant:theme` with `{ themeId }` (not `theme`).
+3. Point `NEXT_PUBLIC_PLEXON_URL` at the live plexon-v3 island.
+
+**Not the same surface:** Audion `/chat` persona workspace is a separate product chat (persona Vision + document merge). Do not expect persona-only UX inside the Platform Assistant flyout.
+
 ## Specs
 
 - Domain: `specs/domain/central-assistant-flyout.md`
