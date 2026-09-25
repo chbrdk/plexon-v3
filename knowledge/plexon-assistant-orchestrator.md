@@ -230,7 +230,8 @@ Einheitliche Capabilities für Assistent **und** Collection Flow — Spec: **`sp
 | C2 | Chat startet bestehenden Collection Flow (`trigger: assistant`, intent `run_collection_flow`) | Done |
 | C3 | Promote: Chat-Trace → neuer Flow **oder** Playbook-Rezept (`promote_capability_sequence`) | Done |
 | C4 | EQC-Overlaps auf Catalog-IDs; Duplikat-Handler hinter Flag; `audion.journey_segment` Stub | Done |
-| C5 | EQC Persona-CTA → Audion `/chat` Deep-Link; optional `audion.persona_chat` Agent-only | CTA Done · chip/catalog optional |
+| C5 | EQC Persona-CTA → Audion `/chat` Deep-Link; `audion.persona_chat` Agent-only + EQC chip | Done |
+| C5+ | Planner allowlist from catalog (`planner-allowlist.ts`) + Brandion agent bindings | Done |
 
 **Nicht:** Jeder Flow-Node als Agent-Tool; Free-JS-Nodes; Explore-Tools (`plexon_ui_*`, Token-Q&A) als Canvas-Nodes; Audion-Persona-Chat in den Platform-Assistant mergen.
 

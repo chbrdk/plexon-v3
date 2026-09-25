@@ -1,5 +1,6 @@
 import { getAssistantPlannerModel } from '@/lib/constants';
 import { isPlexonUiTool } from '@/lib/assistant/ui-tools/definitions';
+import { catalogPlannerToolOverride } from '@/lib/capabilities/planner-allowlist';
 import {
   GEO_FAMILIES,
   KNOWLEDGE_QA_FAMILIES,
@@ -962,6 +963,14 @@ Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/
 export function toolAllowedByPlan(toolName: string, plan: AssistantPlan): boolean {
   if (isPlexonUiTool(toolName)) return true;
   if (plan.skipTools || plan.toolFamilies.length === 0) return false;
+
+  const catalogOverride = catalogPlannerToolOverride(toolName, plan.intent);
+  if (catalogOverride === false) return false;
+  if (catalogOverride === true) {
+    if (!plan.allowWriteTools && isDestructiveOrWriteTool(toolName)) return false;
+    return true;
+  }
+
   if (
     plan.allowWriteTools &&
     (toolMatchesFamilies(toolName, ['audion_audience_write']) ||

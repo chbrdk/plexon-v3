@@ -112,6 +112,15 @@ export {
   isCapabilityCatalogRuntimeEnabled,
 } from '@/lib/capabilities/runtime-flag';
 export {
+  capabilitiesForAgentIntent,
+  capabilitiesForAgentTool,
+  catalogCapabilityIdsForIntent,
+  catalogPlannerToolOverride,
+  catalogToolGate,
+  listCatalogAgentIntentTypes,
+  listCatalogAgentToolNames,
+} from '@/lib/capabilities/planner-allowlist';
+export {
   executeMetronRead,
   executeMetronReadCapability,
 } from '@/lib/capabilities/executors/metron-read';

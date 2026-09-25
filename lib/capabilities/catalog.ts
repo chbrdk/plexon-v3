@@ -21,7 +21,7 @@ const PILOT: CapabilityRecord[] = [
     surfaces: { agent: true, flow: true },
     agent: {
       toolNames: ['checkion_scan_single'],
-      intentTypes: ['quick_scan'],
+      intentTypes: ['quick_scan', 'checkion_scan'],
     },
     flow: { nodeKinds: ['scan'] },
     executorId: 'checkion-scan',
@@ -41,7 +41,7 @@ const PILOT: CapabilityRecord[] = [
     surfaces: { agent: true, flow: true },
     agent: {
       toolNames: ['checkion_scan_domain'],
-      intentTypes: ['domain_scan'],
+      intentTypes: ['domain_scan', 'checkion_scan'],
     },
     flow: { nodeKinds: ['domain_scan'] },
     executorId: 'checkion-domain-scan',
@@ -61,7 +61,7 @@ const PILOT: CapabilityRecord[] = [
     surfaces: { agent: true, flow: true },
     agent: {
       toolNames: ['checkion_geo_eeat'],
-      intentTypes: ['geo_analysis'],
+      intentTypes: ['geo_analysis', 'checkion_seo_geo'],
     },
     flow: { nodeKinds: ['geo_job'] },
     executorId: 'checkion-geo-job',
@@ -80,8 +80,13 @@ const PILOT: CapabilityRecord[] = [
     confirmation: 'none',
     surfaces: { agent: true, flow: true },
     agent: {
-      toolNames: [],
-      intentTypes: [],
+      toolNames: [
+        'brandion_tokens_list',
+        'brandion_guidelines_list',
+        'brandion_guideline_get',
+        'brandion_analysis_run',
+      ],
+      intentTypes: ['brandion_brand'],
     },
     flow: { nodeKinds: ['brand_measure'] },
     executorId: 'brandion-brand-measure',
@@ -119,7 +124,7 @@ const PILOT: CapabilityRecord[] = [
     surfaces: { agent: true, flow: false },
     agent: {
       toolNames: ['audion_chat'],
-      intentTypes: [],
+      intentTypes: ['audion_chat'],
     },
     flow: null,
     executorId: 'audion-persona-chat-stub',
@@ -262,7 +267,7 @@ const PILOT: CapabilityRecord[] = [
     surfaces: { agent: true, flow: false },
     agent: {
       toolNames: ['videon_media_search'],
-      intentTypes: [],
+      intentTypes: ['videon_media'],
     },
     flow: null,
     executorId: 'videon-media-search',

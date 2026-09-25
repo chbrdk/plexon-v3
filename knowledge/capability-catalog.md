@@ -52,7 +52,17 @@ Free-chat specialists that own durable jobs (`checkion_scan` / GEO / Echon / Vid
 2. „Flow speichern bestätigen“ → neuer Flow (`assistant-promote-v1`)  
 3. Nach Persona×Farbe-Chat: „Als Rezept speichern“ → Chat-Playbook (kein Canvas)
 
-Next: optional Brandion Agent surface / planner allowlist from catalog.
+Next: expand more product MCP names onto catalog `agent.toolNames` as executors land.
+
+### Planner allowlist (2026-09-25)
+
+When `CAPABILITY_CATALOG_RUNTIME` is on, `toolAllowedByPlan` consults `lib/capabilities/planner-allowlist.ts`:
+
+- Catalog tools bound to the current planner intent are **force-allowed** (even if family regex would miss).
+- Tools registered only on `surfaces.agent: false` are denied.
+- Unmapped MCP explore tools still follow `tool-catalog.ts` families.
+
+Brandion Agent surface: `brandion.brand_measure` ↔ intent `brandion_brand` + guideline/token/analysis tool names.
 
 ## Why this exists
 

@@ -398,7 +398,7 @@ MUSS: Promote never creates a node for `brandion.tokens_list` until that capabil
 | System | Stays | Changes |
 |--------|-------|---------|
 | MCP servers | Product SoT for tool schemas | Plexon Agent adapter maps MCP names → capability ids |
-| `tool-catalog.ts` families | Planner filter | Prefer capability `surfaces.agent` allowlist over time |
+| `tool-catalog.ts` families | Planner filter | Prefer capability `surfaces.agent` allowlist when `CAPABILITY_CATALOG_RUNTIME` on (`lib/capabilities/planner-allowlist.ts` → `toolAllowedByPlan`) |
 | Intent-router / playbooks | Fast paths | Handlers call catalog executors |
 | Collection Flow kinds | Closed set | New kinds only when catalog adds `surfaces.flow` |
 | EQC-as-flow | Canonical EQC | Gradually share executors with catalog |
