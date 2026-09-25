@@ -110,6 +110,9 @@ export async function POST(
       COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
       COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
       COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
+      COLLECTION_FLOW_TEMPLATE_FIX_RETEST,
+      COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE,
+      COLLECTION_FLOW_TEMPLATE_CRISIS,
     ]);
     const templateId = knownTemplates.has(rawTemplate)
       ? rawTemplate
@@ -121,6 +124,12 @@ export async function POST(
           ? 'Vaillant Group · Barrier Research (UC1)'
           : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL
             ? 'Vaillant Group · Installer Dual Perspective (UC2)'
+            : templateId === COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE
+              ? 'Launch Gate'
+              : templateId === COLLECTION_FLOW_TEMPLATE_CRISIS
+                ? 'Crisis Response'
+                : templateId === COLLECTION_FLOW_TEMPLATE_FIX_RETEST
+                  ? 'Fix + Retest'
             : templateId === COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES
             ? 'Journey + quality + issues'
             : templateId === COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES

@@ -61,6 +61,21 @@ describe('suite enterprise E5 E8 skip + E9', () => {
     )
   })
 
+  it('registers enterprise templates on flows POST knownTemplates', () => {
+    const src = readFileSync(
+      path.join(root, 'app/api/platform/projects/[platformProjectId]/flows/route.ts'),
+      'utf8'
+    )
+    expect(src).toContain('COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE')
+    expect(src).toContain('COLLECTION_FLOW_TEMPLATE_CRISIS')
+    expect(src).toContain('COLLECTION_FLOW_TEMPLATE_FIX_RETEST')
+    // Must be in knownTemplates Set — otherwise POST silently falls back to page-quality
+    const knownBlock = src.slice(src.indexOf('knownTemplates'), src.indexOf('const templateId'))
+    expect(knownBlock).toContain('COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE')
+    expect(knownBlock).toContain('COLLECTION_FLOW_TEMPLATE_CRISIS')
+    expect(knownBlock).toContain('COLLECTION_FLOW_TEMPLATE_FIX_RETEST')
+  })
+
   it('does not auto-mutate CREATION scenes from flow gate helper', () => {
     const gate = readFileSync(path.join(root, 'lib/collection-flow-client-room-gate.ts'), 'utf8')
     expect(gate).not.toMatch(/scene|creation.*patch|import-html/i)
