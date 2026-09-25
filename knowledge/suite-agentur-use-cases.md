@@ -79,7 +79,8 @@ Aufgaben, die eine Agentur oder ein Inhouse-Team in der Plattform erledigen will
 5. Research-Destillat publizieren, damit GEO-Fragen in CHECKION dieselbe Sprache sprechen.
 
 **Ergebnis:** Journey-Evidenz plus Seitenbefund.  
-**Lücke:** CHECKION startet daraus nur den Single-Scan, nicht den Deep-Crawl. Study ohne Agent-URL bleibt Fixture.
+**Lücke:** Study ohne Agent-URL bleibt **Fixture** (muss als solches gekennzeichnet sein).  
+**By design:** CHECKION-Handoff aus der Journey ist nur **Single**, nie Deep (`audion-journey-scan-trigger.md`). Deep gehört zu Use Case 2 (Retainer).
 
 ### 4. Marke führen und Kampagnenmittel prüfen
 
@@ -163,7 +164,9 @@ Aufgaben, die eine Agentur oder ein Inhouse-Team in der Plattform erledigen will
 5. Assistant im Flyout der jeweiligen App: Spezialist wählen, lange Jobs in den Flow übergeben.
 
 **Ergebnis:** Ein Mandatsordner, nachvollziehbare Läufe, Destillate statt Aktendumps.  
-**Lücke:** Mitgliederverwaltung auf der Collection-Home ist noch API-lastig. Magazine-Kacheln für CREATION, VIDEON und ECHON auf der Collection-Home sind dünner als die der anderen Capabilities.
+**Lücke:** Mitgliederverwaltung auf der Collection-Home ist noch API-lastig (Invite-API + `/invite/:token`; kein volles Roster-Panel in dieser Tranche). Capability-Panes CREATION/VIDEON/ECHON/SPIRION: Einstieg auch ohne letzten Lauf (Härte).
+
+**Verifikation:** [`suite-use-case-testing.md`](suite-use-case-testing.md) — Markierungen Live|Fixture|Demo|Geplant, CI + Staging-E2E.
 
 ---
 
@@ -178,7 +181,7 @@ Aufgaben, die eine Agentur oder ein Inhouse-Team in der Plattform erledigen will
 | Strategie / Planning | ECHON → AUDION | CHECKION GEO |
 | Full-Service-Retainer | Collection + Flow + Pack, dann die Kette aus Use Case 2, 4 und 7 | Assistant als Querfrage |
 
-Die noch offenen Ketten (Lagebild, Kundenraum, Gegentest, Audit, Launch-Gate, Kampagnenbrief) stehen im Programm `specs/domain/suite-enterprise-program.md`.
+Enterprise-Wellen E1–E9: Spec `specs/domain/suite-enterprise-program.md` (Done bzw. E9 Admin-Stub). Testing: `knowledge/suite-use-case-testing.md`.
 
 ## Nicht versprechen
 

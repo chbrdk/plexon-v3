@@ -52,7 +52,7 @@ Kontrollfläche der Suite: eine Collection pro Mandat, Produkt-Launch, gemeinsam
 | Fläche | Was Nutzer:innen tun | Status |
 |---|---|---|
 | `/projects` | Collection anlegen, listen, archivieren, wiederherstellen | Live |
-| Collection-Home | Überblick, Knowledge Pack, Capability-Zusammenfassungen, Deep-Links, Client-Page-Shares | Live; Magazine-Panes für CREATION, SPIRION, VIDEON, ECHON fehlen |
+| Collection-Home | Überblick, Knowledge Pack, Capability-Zusammenfassungen, Deep-Links, Client-Page-Shares | Live; Capability-Panes CREATION/SPIRION/VIDEON/ECHON: Einstieg auch ohne letzten Lauf (Testziel UC9, `suite-use-case-testing.md`) |
 | Knowledge Pack | Facetten lesen und pflegen (`profile`, `competitive`, `research_brief`, `geo_context`, `sources`); Produkte publizieren Destillate | Live |
 | `/products` | Produktkacheln, Health, Launch (entitlement-gesteuert) | Live |
 | Assistant (Flyout, `/assistant`, Embed) | Chat im Collection-Kontext, Verlauf, Bilder und Dokumente, Spezialisten, generative UI, Report (PDF/PPTX) | Live |
@@ -61,7 +61,7 @@ Kontrollfläche der Suite: eine Collection pro Mandat, Produkt-Launch, gemeinsam
 | Dashboard `/` | Collection-Einblicke, Produkt-Teaser, Usage | Live |
 | Settings | Profil, Sprache, Theme, Passwort, API-Tokens | Live |
 | Admin | Firmen, Mitglieder, Nutzer, Produkt-Entitlements, Client-Share-Policy | Live |
-| Einladungen | API plus Annahme `/invite/[token]` | Teilweise (kein Mitglieder-Panel auf der Collection-Home) |
+| Einladungen | API plus Annahme `/invite/[token]` | Teilweise (kein Mitglieder-Panel auf der Collection-Home; Testziel UC9 = Invite-API + Annahme-Link) |
 | Öffentliche Shares | Quick-Check, Assistant-Report, METRON-Dashboard | Live |
 | `/board` | Älteres Prompt-Board, nicht der Collection Flow | Teilweise, Admin |
 | Capability Catalog | Dieselben Job-Verträge für Assistant und Flow | Code live; Runtime-Flag `CAPABILITY_CATALOG_RUNTIME` im Code standardmäßig aus, Staging oft an |

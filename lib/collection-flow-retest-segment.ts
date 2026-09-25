@@ -22,6 +22,10 @@ import {
 } from '@/lib/integrations/checkion-scan-delta-client';
 import { runCheckionSingleScan } from '@/lib/integrations/checkion-scans-client';
 import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
+import {
+  FLOW_SKIP_REASONS,
+  isEnterpriseSoftSkipTemplate,
+} from '@/lib/collection-flow-skip';
 
 export type RetestSegmentResult =
   | {
@@ -29,6 +33,7 @@ export type RetestSegmentResult =
       ctx: CollectionFlowRunContext;
       delta: CheckionScanDeltaResult | null;
       skipped?: boolean;
+      skipReason?: string;
     }
   | {
       ok: false;
@@ -73,7 +78,13 @@ export async function runRetestSegment(input: {
   ctx: CollectionFlowRunContext;
 }): Promise<RetestSegmentResult> {
   if (!documentHasRetest(input.doc)) {
-    return { ok: true, ctx: input.ctx, delta: null, skipped: true };
+    return {
+      ok: true,
+      ctx: input.ctx,
+      delta: null,
+      skipped: true,
+      skipReason: FLOW_SKIP_REASONS.NODE_ABSENT,
+    };
   }
 
   const node = retestNode(input.doc.nodes);
@@ -100,6 +111,15 @@ export async function runRetestSegment(input: {
       input.checkionProjectId?.trim() ||
       (await getExternalProjectId(input.platformProjectId, 'checkion'));
     if (!projectId) {
+      if (isEnterpriseSoftSkipTemplate(input.doc)) {
+        return {
+          ok: true,
+          ctx: input.ctx,
+          delta: null,
+          skipped: true,
+          skipReason: FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION,
+        };
+      }
       return {
         ok: false,
         status: API_STATUS.BAD_REQUEST,

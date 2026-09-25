@@ -224,6 +224,13 @@ Plexon akzeptiert Anmeldung über das Directory der Firma (OIDC oder SAML) und M
 
 Welle E7: lesende Referenz-Links am Kampagnenbrief (`assistant-spirion-mcp.md`). Der Motiv-Korpus bleibt `spirion-campaign-motif-corpus.md` und ist keine eigene Enterprise-Welle.
 
+## Verification
+
+Playbook: `knowledge/suite-use-case-testing.md` (UC1–UC9 × E1–E9, Markierungen Live|Fixture|Demo|Geplant).  
+CI: `__tests__/suite-enterprise-*.test.ts`, `__tests__/suite-use-case-matrix.test.ts`.  
+Staging-E2E: `e2e/` + Env `E2E_BASE_URL` / `E2E_USER` / `E2E_PASSWORD` (siehe `knowledge/paths.md`).  
+E9 bleibt Admin-Stub (`ready: false`); OIDC/SAML/SCIM ist Geplant, nicht Live.
+
 ## Nicht in diesem Programm
 
 - Power-BI-Parität, Client-Formeln, Dashboard-Bau in CREATION.
@@ -232,3 +239,4 @@ Welle E7: lesende Referenz-Links am Kampagnenbrief (`assistant-spirion-mcp.md`).
 - Vermischen der GEO-Schichten.
 - Automatisches Umschreiben einer CREATION-Szene aus einem Scan.
 - Galaxy, TimesFM, Rank-Tracking als Versprechen.
+- Firmendirectory-IdP-Laufzeit (E9 Stub only in dieser Tranche).

@@ -45,6 +45,11 @@ import { runBrandMeasureSegment } from '@/lib/collection-flow-brand-segment';
 import { runRetestSegment } from '@/lib/collection-flow-retest-segment';
 import { runVideonMediaSegments } from '@/lib/collection-flow-videon-segment';
 import {
+  FLOW_SKIP_REASONS,
+  formatSkipMessage,
+  isEnterpriseSoftSkipTemplate,
+} from '@/lib/collection-flow-skip';
+import {
   persistFlowRunResult,
   toCollectionTestFlowResponse,
   type CollectionTestFlowResponse,
@@ -211,8 +216,17 @@ export async function executeCollectionFlowRun(input: {
     }
 
     const checkionProjectId = await getExternalProjectId(id, 'checkion');
+    const skipReasons: string[] = [];
     if (!checkionProjectId) {
-      return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'CHECKION binding missing — bind a Checkion project on this Collection' };
+      if (isEnterpriseSoftSkipTemplate(doc)) {
+        skipReasons.push(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION);
+      } else {
+        return {
+          ok: false as const,
+          status: API_STATUS.BAD_REQUEST,
+          message: 'CHECKION binding missing — bind a Checkion project on this Collection',
+        };
+      }
     }
 
     const hasJourney = documentHasJourneySegment(doc);
@@ -527,9 +541,12 @@ export async function executeCollectionFlowRun(input: {
     };
 
     const blockers: string[] = [];
+    for (const reason of skipReasons) {
+      blockers.push(formatSkipMessage(reason));
+    }
     let quality: QualityResult | null = null;
 
-    if (hasPageQuality) {
+    if (hasPageQuality && checkionProjectId) {
       if (useDomain) {
         if (isCapabilityCatalogRuntimeEnabled()) {
           const cap = await executeCheckionDomainScanCapability(
@@ -1103,6 +1120,11 @@ export async function executeCollectionFlowRun(input: {
       runContext = brand.ctx;
       if (!brand.ok) {
         blockers.push(brand.message);
+      } else if (brand.skipReason) {
+        skipReasons.push(brand.skipReason);
+        if (brand.status === 'skipped' && brand.skipReason !== FLOW_SKIP_REASONS.NODE_ABSENT) {
+          blockers.push(formatSkipMessage(brand.skipReason));
+        }
       }
     }
 
@@ -1117,6 +1139,11 @@ export async function executeCollectionFlowRun(input: {
       runContext = retest.ctx;
       if (!retest.ok) {
         blockers.push(retest.message);
+      } else if (retest.skipReason && retest.skipped) {
+        skipReasons.push(retest.skipReason);
+        if (retest.skipReason !== FLOW_SKIP_REASONS.NODE_ABSENT) {
+          blockers.push(formatSkipMessage(retest.skipReason));
+        }
       }
     }
 
@@ -1207,6 +1234,7 @@ export async function executeCollectionFlowRun(input: {
       context: runContext,
       compareResults,
       journeyPersonaRuns,
+      skipReasons: skipReasons.length ? skipReasons : null,
     };
 
     const saved = await persistFlowRunResult({

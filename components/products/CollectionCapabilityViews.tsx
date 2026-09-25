@@ -664,8 +664,12 @@ export function CreationCapabilityView({
         </>
       )}
 
+      <Text role="meta" data-testid="capability-entry-teaser">
+        {t('projects.detail.capabilityEntryAlways')}
+      </Text>
+
       <div className="plexon-knowledge-facet-tile-actions">
-        <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
+        <Button variant="ghost" size="md" disabled={!href} onClick={() => openExternal(href)}>
           {t('projects.detail.openCreation')}
         </Button>
       </div>
@@ -721,6 +725,10 @@ export function BoundProductCapabilityView({
           {binding!.syncMessage ? ` · ${binding!.syncMessage}` : ''}
         </Text>
       )}
+
+      <Text role="meta" data-testid="capability-entry-teaser">
+        {t('projects.detail.capabilityEntryAlways')}
+      </Text>
 
       <div className="plexon-knowledge-facet-tile-actions">
         <Button variant="ghost" size="md" disabled={!href} onClick={() => openExternal(href)}>

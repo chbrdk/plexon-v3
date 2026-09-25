@@ -21,6 +21,8 @@ describe('suite enterprise E6 E8 E9 surfaces', () => {
     expect(src).toContain('persona-pages-cta')
     expect(src).toContain('askPersonaPagesDraft')
     expect(src).toContain('pathAssistantWithProjectAndDraft')
+    expect(src).toContain('capability-entry-teaser')
+    expect(src).toContain('capabilityEntryAlways')
   })
 
   it('mounts competitive space band on collection dashboard', () => {

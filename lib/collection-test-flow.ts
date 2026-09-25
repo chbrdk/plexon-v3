@@ -329,6 +329,8 @@ export type CollectionFlowLastRun = {
   /** Wave 23 — paused on human_confirm. */
   awaitingNodeId?: string | null;
   awaitingConfirmKind?: CollectionFlowConfirmKind | null;
+  /** Enterprise E5/E8 — soft-skipped steps with stable reasons. */
+  skipReasons?: string[] | null;
 };
 
 export type CollectionVerdict = {

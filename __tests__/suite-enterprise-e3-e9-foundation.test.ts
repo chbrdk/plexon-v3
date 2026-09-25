@@ -64,7 +64,7 @@ describe('suite enterprise E3 schedule + E6–E9', () => {
     const files = [
       'app/api/platform/provisioning/collections/[platformProjectId]/activity/route.ts',
       'app/api/platform/provisioning/collections/[platformProjectId]/campaign-briefs/route.ts',
-      'app/api/admin/companies/[companyId]/directory/route.ts',
+      'app/api/admin/companies/[id]/directory/route.ts',
       'lib/collection-flow-scheduler.ts',
       'lib/collection-campaign-brief.ts',
       'lib/collection-activity.ts',

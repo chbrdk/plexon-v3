@@ -21,6 +21,10 @@ import {
   getExternalProjectId,
 } from '@/lib/db/platform-project-bindings';
 import { PLATFORM_PROJECT_BINDING_SYNC_STATUS } from '@/lib/platform-companies';
+import {
+  FLOW_SKIP_REASONS,
+  isEnterpriseSoftSkipTemplate,
+} from '@/lib/collection-flow-skip';
 
 export type BrandMeasureSegmentOk = {
   ok: true;
@@ -30,6 +34,7 @@ export type BrandMeasureSegmentOk = {
   passCount: number;
   failCount: number;
   status: string;
+  skipReason?: string;
 };
 
 export type BrandMeasureSegmentFail = {
@@ -78,11 +83,48 @@ export async function runBrandMeasureSegment(input: {
   plexonUserId?: string | null;
 }): Promise<BrandMeasureSegmentResult> {
   if (!documentHasBrandMeasure(input.doc)) {
-    return { ok: true, ctx: input.ctx, guidelineId: '', runId: '', passCount: 0, failCount: 0, status: 'skipped' };
+    return {
+      ok: true,
+      ctx: input.ctx,
+      guidelineId: '',
+      runId: '',
+      passCount: 0,
+      failCount: 0,
+      status: 'skipped',
+      skipReason: FLOW_SKIP_REASONS.NODE_ABSENT,
+    };
   }
 
   const binding = await assertBrandionBindingReady(input.platformProjectId);
   if (!binding.ok) {
+    const reason = FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_BRANDION;
+    if (isEnterpriseSoftSkipTemplate(input.doc) || binding.message.includes('binding missing')) {
+      const measure = brandMeasureNode(input.doc.nodes);
+      const skippedCtx = setContextBundle(
+        input.ctx,
+        'brand',
+        buildBrandCatalogBundle({
+          status: 'skipped',
+          guidelineId: measure?.guidelineId?.trim() || '',
+          runId: null,
+          adapter: 'fixture',
+          passCount: 0,
+          failCount: 0,
+          observationCount: 0,
+        }),
+        measure?.id
+      );
+      return {
+        ok: true,
+        ctx: skippedCtx,
+        guidelineId: '',
+        runId: '',
+        passCount: 0,
+        failCount: 0,
+        status: 'skipped',
+        skipReason: reason,
+      };
+    }
     return { ok: false, status: binding.status, message: binding.message, ctx: input.ctx };
   }
 

@@ -47,8 +47,9 @@
 - Outbox background drain: `getDb()` → `lib/platform-outbox-scheduler.ts` (env `PLEXON_OUTBOX_DRAIN_ENABLED` / `PLEXON_OUTBOX_DRAIN_INTERVAL_MS`, default 30s; not via `instrumentation.ts`)
 - Collection Flow schedule tick (Enterprise E3): `getDb()` → `lib/collection-flow-scheduler.ts` (env `PLEXON_FLOW_SCHEDULE_ENABLED` / `PLEXON_FLOW_SCHEDULE_INTERVAL_MS`, default 60s)
 - Suite Enterprise: activity `…/activity` · audit `…/audit` · campaign briefs `…/campaign-briefs` · client room `…/client-room` · directory stub `GET/PATCH /api/admin/companies/:id/directory` · knowledge `knowledge/suite-enterprise-program.md`
+- Use-case testing playbook: `knowledge/suite-use-case-testing.md` · Playwright `e2e/` · Env keys only (no values in git): `E2E_BASE_URL` (default staging plexon-v3 FQDN) · `E2E_USER` · `E2E_PASSWORD` · script `pnpm test:e2e:staging` / `npm run test:e2e:staging` · install browsers once: `npx playwright install chromium`
 - Enterprise Staging Env (plexon-v3): `PLEXON_FLOW_SCHEDULE_ENABLED` · `PLEXON_FLOW_SCHEDULE_INTERVAL_MS` · `PLEXON_OUTBOX_DRAIN_ENABLED` — siehe `knowledge/coolify-plexon-v3-env-cheatsheet.md` §3
-- Migrations pending on DB until applied: `0020_suite_enterprise_client_room_audit.sql` · `0021_suite_enterprise_activity_brief_directory.sql`
+- Enterprise SQL boot apply: `scripts/apply-enterprise-sql-migrations.mjs` (0020/0021) after drizzle push
 - Deep-link canonical query: `platformProjectId` (`lib/platform-deep-link-params.ts`); legacy alias `platformProjectHint`
 - BRANDION Collection launch: `{BRANDION}/projects?platformProjectId={id}` · guideline `{BRANDION}/guidelines/{id}` · evaluate `{BRANDION}/guidelines/{id}/evaluate` — `lib/brandion-launch-url.ts` · `lib/paths/brandion-api.ts` (`pathBrandionGuideline` / `pathBrandionGuidelineEvaluate` / `apiBrandionGuidelineAnalysisRuns`) · `dashboard-product-urls.md`
 - Collection Flow Wave 24 (Brandion Marke): `knowledge/collection-flow-brandion.md` · client `lib/integrations/brandion-analysis-runs-client.ts` · execute `lib/collection-flow-brand-execute.ts` / `lib/collection-flow-brand-segment.ts`
