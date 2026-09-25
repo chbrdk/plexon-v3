@@ -97,14 +97,17 @@ Client no longer `POST`s a conversation before the first stream. Complete omits 
 
 ### Continuity observability (2026-09-25)
 
-Staging log greps for residual remount / empty-done regressions:
+Staging signals for residual remount / empty-done regressions:
 
 | Event | When |
 |-------|------|
 | `assistant_remount_while_streaming` | `AssistantChat` unmounts while `sendInFlightRef` is true |
 | `assistant_empty_done` | Stream `done` has no text and no `uiLayout` blocks/panel |
 
-Prefix: `[assistant/continuity]`. Helper: `lib/assistant/stream-continuity-telemetry.ts`. Spec: `central-assistant-flyout.md` § Continuity observability.
+- Client: `console.info('[assistant/continuity]', …)` + beacon `POST /api/assistant/continuity` (`API_ASSISTANT_CONTINUITY`, sendBeacon/keepalive)
+- Server: same log prefix + `usage_events` (`eventType: assistant_continuity`, 0 tokens) for admin/event queries
+- Helper: `lib/assistant/stream-continuity-telemetry.ts` · Spec: `central-assistant-flyout.md` § Continuity observability
+- No message body / no PII beyond conversation id
 
 ### Activity + answer chrome (follow-up)
 

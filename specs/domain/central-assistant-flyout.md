@@ -73,7 +73,7 @@ Same stream client, history Flyout pattern, Collection picker, generative blocks
 
 **Streaming markdown:** While `metadata.streaming`, render assistant text as plain pre-wrap; run `parseChatBlocks` only after the turn completes (avoids list/heading jump on each token).
 
-**Continuity observability:** Client MUST emit structured `console.info('[assistant/continuity]', …)` events for staging log greps when (1) `AssistantChat` unmounts while a send is in flight (`assistant_remount_while_streaming`), or (2) `done` arrives with neither text nor UI layout (`assistant_empty_done`). Helper: `lib/assistant/stream-continuity-telemetry.ts`. No network beacon / no PII beyond conversation id.
+**Continuity observability:** Client MUST emit structured `console.info('[assistant/continuity]', …)` **and** best-effort `POST /api/assistant/continuity` (sendBeacon / keepalive fetch) when (1) `AssistantChat` unmounts while a send is in flight (`assistant_remount_while_streaming`), or (2) `done` arrives with neither text nor UI layout (`assistant_empty_done`). Helper: `lib/assistant/stream-continuity-telemetry.ts`. Payload MAY include conversation id / presentation / stream id — MUST NOT include message text or other PII. Server records `usage_events.eventType = assistant_continuity` (0 tokens) and mirrors the console prefix for Coolify log greps.
 
 **Overlay panel rule:** Flyout width (~32rem) cannot host a second column. Client folds open `uiLayout.panel.blocks` into the assistant message (`mergeUiLayoutBlocksWithPanel`) and does not render `AssistantPanel`. Expand workspace keeps the side panel.
 

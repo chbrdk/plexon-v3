@@ -603,6 +603,7 @@ export const API_BOARD_COMPLETE = '/api/board/complete';
 /** Assistant orchestrator chat APIs. */
 export const API_ASSISTANT_COMPLETE = '/api/assistant/complete';
 export const API_ASSISTANT_COMPLETE_STREAM = '/api/assistant/complete/stream';
+export const API_ASSISTANT_CONTINUITY = '/api/assistant/continuity';
 export const API_ASSISTANT_IMAGES_UPLOAD = '/api/assistant/images/upload';
 export const API_ASSISTANT_DOCUMENTS_UPLOAD = '/api/assistant/documents/upload';
 export const API_ASSISTANT_CONVERSATIONS = '/api/assistant/conversations';

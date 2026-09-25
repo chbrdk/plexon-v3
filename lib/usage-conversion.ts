@@ -95,6 +95,9 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
     /** BRANDION Measured evaluate / analysis-run (scripts + optional Vision). */
     case 'brandion_measure':
       return 30 * (num(r.runs, 1) || 1);
+    /** Continuity beacon — observabilty only, never bill. */
+    case 'assistant_continuity':
+      return 0;
     default:
       return DEFAULT_UNKNOWN_TOKENS;
   }

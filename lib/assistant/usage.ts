@@ -6,7 +6,7 @@ import { getCurrentPeriod, tokensFromEvent } from '@/lib/usage-conversion';
 
 export async function recordAssistantUsageEvent(input: {
   userId: string;
-  eventType: 'chat' | 'llm_request' | 'workflow_run';
+  eventType: 'chat' | 'llm_request' | 'workflow_run' | 'assistant_continuity';
   rawUnits?: Record<string, unknown>;
 }): Promise<void> {
   if (!process.env.DATABASE_URL) return;

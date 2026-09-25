@@ -3,9 +3,15 @@
  * Spec: specs/domain/central-assistant-flyout.md § Continuity observability
  */
 
+import { API_ASSISTANT_CONTINUITY } from '@/lib/constants';
+
+export const ASSISTANT_CONTINUITY_EVENT_TYPES = [
+  'assistant_remount_while_streaming',
+  'assistant_empty_done',
+] as const;
+
 export type AssistantContinuityEventType =
-  | 'assistant_remount_while_streaming'
-  | 'assistant_empty_done';
+  (typeof ASSISTANT_CONTINUITY_EVENT_TYPES)[number];
 
 export type AssistantContinuityEvent = {
   type: AssistantContinuityEventType;
@@ -34,22 +40,59 @@ export function isEmptyAssistantDone(input: {
   return blocks === 0 && panelBlocks === 0 && !panelOpen;
 }
 
+function buildBeaconPayload(event: AssistantContinuityEvent): string {
+  return JSON.stringify({
+    type: event.type,
+    conversationId: event.conversationId ?? null,
+    presentation: event.presentation ?? null,
+    hasUiLayout: event.hasUiLayout ?? null,
+    streamId: event.streamId ?? null,
+  });
+}
+
 /**
- * Emit a structured continuity event for staging log greps.
- * No network call — keep fail-closed and free of PII beyond conversation id.
+ * Best-effort POST to `/api/assistant/continuity` (sendBeacon or keepalive fetch).
+ * Fail-closed: never throws; no message content / no PII beyond conversation id.
  */
-export function reportAssistantContinuityEvent(event: AssistantContinuityEvent): void {
-  if (typeof console === 'undefined' || typeof console.info !== 'function') return;
+export function beaconAssistantContinuityEvent(event: AssistantContinuityEvent): void {
   try {
-    console.info(LOG_PREFIX, event.type, {
-      conversationId: event.conversationId ?? null,
-      presentation: event.presentation ?? null,
-      hasUiLayout: event.hasUiLayout ?? null,
-      streamId: event.streamId ?? null,
-    });
+    const body = buildBeaconPayload(event);
+    const url = API_ASSISTANT_CONTINUITY;
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const ok = navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+      if (ok) return;
+    }
+    if (typeof fetch === 'function') {
+      void fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        credentials: 'include',
+        keepalive: true,
+      }).catch(() => undefined);
+    }
   } catch {
     // ignore
   }
+}
+
+/**
+ * Emit a structured continuity event for staging log greps + durable beacon.
+ */
+export function reportAssistantContinuityEvent(event: AssistantContinuityEvent): void {
+  if (typeof console !== 'undefined' && typeof console.info === 'function') {
+    try {
+      console.info(LOG_PREFIX, event.type, {
+        conversationId: event.conversationId ?? null,
+        presentation: event.presentation ?? null,
+        hasUiLayout: event.hasUiLayout ?? null,
+        streamId: event.streamId ?? null,
+      });
+    } catch {
+      // ignore
+    }
+  }
+  beaconAssistantContinuityEvent(event);
 }
 
 export { LOG_PREFIX as ASSISTANT_CONTINUITY_LOG_PREFIX };

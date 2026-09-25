@@ -54,7 +54,7 @@
 - Default theme: `msqdx-dark` (`data-theme` on `<html>`)
 - Specs: `specs/domain/app-shell.md`
 - Specs index: `knowledge/specs-index.md`
-- Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md` · first-turn create SSOT `lib/assistant/resolve-assistant-conversation.ts` (omit `conversationId` → mint; unknown id → 404)
+- Central Assistant Flyout: `specs/domain/central-assistant-flyout.md` · `specs/api/assistant-embed.md` · `knowledge/central-assistant-flyout.md` · first-turn create SSOT `lib/assistant/resolve-assistant-conversation.ts` (omit `conversationId` → mint; unknown id → 404) · continuity beacon `POST /api/assistant/continuity` (`API_ASSISTANT_CONTINUITY`)
 - Assistant actor identity (session user for product MCP/RAG): `specs/domain/assistant-actor-identity.md` · `knowledge/assistant-actor-identity.md`
   - Block typography density: `knowledge/assistant-block-typography.md` · `components/assistant-ui/atoms/UiText.tsx`
   - Shared chat blocks (metric / kv / steps): `knowledge/assistant-chat-blocks-msqdx-ui.md` · Storybook `https://ds.projects-a.plygrnd.tech/?path=/story/organisms-chatcatalog--inventory`
