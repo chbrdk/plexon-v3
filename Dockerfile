@@ -105,6 +105,7 @@ COPY --from=builder /workspace/plexon-v3/drizzle.config.ts ./
 COPY --from=builder /workspace/plexon-v3/tsconfig.json ./
 COPY --from=builder /workspace/plexon-v3/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh
 COPY --from=builder /workspace/plexon-v3/scripts/check-database-url.mjs ./scripts/check-database-url.mjs
+COPY --from=builder /workspace/plexon-v3/scripts/apply-enterprise-sql-migrations.mjs ./scripts/apply-enterprise-sql-migrations.mjs
 COPY --from=builder /workspace/plexon-v3/scripts/migrate-checkion-users-to-plexon.mjs ./scripts/migrate-checkion-users-to-plexon.mjs
 COPY --from=builder /workspace/plexon-v3/scripts/bootstrap-vaillant-group-mafo.ts ./scripts/bootstrap-vaillant-group-mafo.ts
 COPY --from=builder /workspace/plexon-v3/scripts/run-vaillant-group-mafo-flow.ts ./scripts/run-vaillant-group-mafo-flow.ts
