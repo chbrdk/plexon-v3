@@ -5,21 +5,29 @@ import { planAssistantTurnHeuristic } from '@/lib/assistant/assistant-planner'
 import { buildPlanSystemPromptBlock } from '@/lib/assistant/assistant-planner'
 import {
   WAVE1_SPECIALIST_IDS,
+  WAVE2_SPECIALIST_IDS,
+  REGISTERED_SPECIALIST_IDS,
   resolveSpecialist,
   creationSceneSpecialistFamilies,
 } from '@/lib/assistant/specialists'
-import { SCAN_FAMILIES, METRON_ANALYTICS_FAMILIES } from '@/lib/assistant/tool-catalog'
+import {
+  SCAN_FAMILIES,
+  METRON_ANALYTICS_FAMILIES,
+  VIDEON_MEDIA_FAMILIES,
+  BRANDION_BRAND_FAMILIES,
+  ECHON_MARKET_FAMILIES,
+} from '@/lib/assistant/tool-catalog'
 
 const root = path.join(__dirname, '..')
 
 const specialistCtx = {
   useCheckionMcp: true,
   useAudionMcp: false,
-  useEchonMcp: false,
-  useBrandionMcp: false,
+  useEchonMcp: true,
+  useBrandionMcp: true,
   useCreationMcp: true,
   useSpirionMcp: false,
-  useVideonMcp: false,
+  useVideonMcp: true,
   useMetronMcp: true,
 }
 
@@ -31,7 +39,6 @@ describe('assistant domain specialists (Wave 1)', () => {
       'creation_scene_edit',
     ])
     expect(resolveSpecialist('general_chat')).toBeNull()
-    expect(resolveSpecialist('brandion_brand')).toBeNull()
 
     const metron = resolveSpecialist('metron_analytics')
     expect(metron?.label).toBe('Metron')
@@ -113,8 +120,86 @@ describe('assistant domain specialists (Wave 1)', () => {
     expect(block).toContain('Specialist: Creation Scene')
     expect(block).toContain('creation_scene_edit')
   })
+})
 
-  it('spec and knowledge are wired', () => {
+describe('assistant domain specialists (Wave 2)', () => {
+  it('registers videon / brandion / echon specialists', async () => {
+    expect(WAVE2_SPECIALIST_IDS).toEqual(['videon_media', 'brandion_brand', 'echon_market'])
+    expect(REGISTERED_SPECIALIST_IDS).toHaveLength(6)
+
+    const videon = resolveSpecialist('videon_media')
+    expect(videon?.label).toBe('Videon')
+    expect(videon?.toolFamilies).toEqual(expect.arrayContaining(VIDEON_MEDIA_FAMILIES))
+    expect(await Promise.resolve(videon!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Videon',
+    )
+
+    const brandion = resolveSpecialist('brandion_brand')
+    expect(brandion?.label).toBe('Brandion')
+    expect(brandion?.toolFamilies).toEqual(expect.arrayContaining(BRANDION_BRAND_FAMILIES))
+    expect(await Promise.resolve(brandion!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Brandion',
+    )
+
+    const echon = resolveSpecialist('echon_market')
+    expect(echon?.label).toBe('Echon')
+    expect(echon?.toolFamilies).toEqual(expect.arrayContaining(ECHON_MARKET_FAMILIES))
+    expect(await Promise.resolve(echon!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Echon',
+    )
+  })
+
+  it('planner maps media / brand / market prompts to Wave-2 specialists', () => {
+    const videonPlan = planAssistantTurnHeuristic({
+      prompt: 'Suche Clips in VIDEON und zeige Media-Hits',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: true,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(videonPlan.intent).toBe('videon_media')
+    expect(resolveSpecialist(videonPlan.intent)?.id).toBe('videon_media')
+
+    const brandPlan = planAssistantTurnHeuristic({
+      prompt: 'Zeige Brandion Guidelines und Design Tokens',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: true,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(brandPlan.intent).toBe('brandion_brand')
+    expect(resolveSpecialist(brandPlan.intent)?.id).toBe('brandion_brand')
+
+    const echonPlan = planAssistantTurnHeuristic({
+      prompt: 'Welche ECHON Signals und Waves sind aktuell?',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: true,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(echonPlan.intent).toBe('echon_market')
+    expect(resolveSpecialist(echonPlan.intent)?.id).toBe('echon_market')
+  })
+
+  it('spec, knowledge, agent and UI are wired for Wave 2', () => {
     const spec = readFileSync(
       path.join(root, 'specs/domain/assistant-domain-specialists.md'),
       'utf8',
@@ -124,22 +209,25 @@ describe('assistant domain specialists (Wave 1)', () => {
       'utf8',
     )
     const index = readFileSync(path.join(root, 'knowledge/specs-index.md'), 'utf8')
-    expect(spec).toContain('metron_analytics')
-    expect(spec).toContain('checkion_scan')
-    expect(spec).toContain('creation_scene_edit')
-    expect(spec).toContain('resolveSpecialist')
-    expect(orch).toContain('assistant-domain-specialists.md')
-    expect(orch).toContain('lib/assistant/specialists/')
-    expect(index).toContain('specs/domain/assistant-domain-specialists.md')
-  })
-
-  it('agent and free-chat surface resolve specialist meta', () => {
     const agent = readFileSync(path.join(root, 'lib/assistant/assistant-agent.ts'), 'utf8')
     const free = readFileSync(path.join(root, 'lib/assistant/handlers/free-chat.ts'), 'utf8')
-    expect(agent).toContain('resolveSpecialist')
-    expect(agent).toContain('productConnectivityBlock')
-    expect(agent).toContain('specialistId')
-    expect(free).toContain('specialistId')
+    const planner = readFileSync(
+      path.join(root, 'components/assistant/PlannerStepCard.tsx'),
+      'utf8',
+    )
+
+    expect(spec).toContain('videon_media')
+    expect(spec).toContain('brandion_brand')
+    expect(spec).toContain('echon_market')
+    expect(spec).toContain('Promise<string>')
+    expect(orch).toContain('videon_media')
+    expect(orch).toContain('brandion_brand')
+    expect(orch).toContain('echon_market')
+    expect(index).toContain('specs/domain/assistant-domain-specialists.md')
+    expect(agent).toContain('await Promise.resolve(specialist.buildSystemAddendum')
+    expect(agent).toContain('Connectivity only after plan')
     expect(free).toContain('specialistLabel')
+    expect(planner).toContain('specialistLabel')
+    expect(planner).toContain('plannerSpecialist')
   })
 })

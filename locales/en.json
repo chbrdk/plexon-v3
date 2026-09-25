@@ -733,6 +733,7 @@
     "plannerTools": "tools",
     "plannerSources": "sources",
     "plannerFamilies": "Tool families",
+    "plannerSpecialist": "Specialist",
     "plannerSearchTerms": "Search terms",
     "plannerSource": "Planner",
     "plannerIntentKnowledge": "Project knowledge",

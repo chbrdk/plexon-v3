@@ -5,6 +5,8 @@
 
 export {
   WAVE1_SPECIALIST_IDS,
+  WAVE2_SPECIALIST_IDS,
+  REGISTERED_SPECIALIST_IDS,
   creationSceneSpecialistFamilies,
   resolveSpecialist,
   isAssistantSpecialistId,

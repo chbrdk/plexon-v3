@@ -109,34 +109,6 @@ export async function runAssistantAgent(
     pageContextBlock,
   });
 
-  const audionIntegrationBlock = await buildAudionIntegrationContextBlock({
-    useAudionMcp: input.useAudionMcp,
-  });
-
-  const echonIntegrationBlock = await buildEchonIntegrationContextBlock({
-    useEchonMcp: input.useEchonMcp,
-  });
-
-  const brandionIntegrationBlock = buildBrandionIntegrationContextBlock({
-    useBrandionMcp: input.useBrandionMcp,
-  });
-
-  const creationIntegrationBlock = buildCreationIntegrationContextBlock({
-    useCreationMcp: input.useCreationMcp,
-  });
-
-  const spirionIntegrationBlock = buildSpirionIntegrationContextBlock({
-    useSpirionMcp: input.useSpirionMcp,
-  });
-
-  const videonIntegrationBlock = buildVideonIntegrationContextBlock({
-    useVideonMcp: input.useVideonMcp,
-  });
-
-  const metronIntegrationBlock = buildMetronIntegrationContextBlock({
-    useMetronMcp: input.useMetronMcp,
-  });
-
   const compactContextLoaded = baseSystemPrompt.includes('## Projektkontext (Kurzfassung)');
 
   const planningPrompt = buildPlanningPromptFromConversation(
@@ -184,16 +156,31 @@ export async function runAssistantAgent(
     useMetronMcp: mcpFlags.useMetronMcp,
   };
 
+  // Connectivity only after plan: specialist → one addendum; else full product stack.
   const productConnectivityBlock = specialist
-    ? specialist.buildSystemAddendum(specialistCtx)
+    ? await Promise.resolve(specialist.buildSystemAddendum(specialistCtx))
     : [
-        audionIntegrationBlock,
-        echonIntegrationBlock,
-        brandionIntegrationBlock,
-        creationIntegrationBlock,
-        spirionIntegrationBlock,
-        videonIntegrationBlock,
-        metronIntegrationBlock,
+        await buildAudionIntegrationContextBlock({
+          useAudionMcp: mcpFlags.useAudionMcp,
+        }),
+        await buildEchonIntegrationContextBlock({
+          useEchonMcp: mcpFlags.useEchonMcp,
+        }),
+        buildBrandionIntegrationContextBlock({
+          useBrandionMcp: mcpFlags.useBrandionMcp,
+        }),
+        buildCreationIntegrationContextBlock({
+          useCreationMcp: mcpFlags.useCreationMcp,
+        }),
+        buildSpirionIntegrationContextBlock({
+          useSpirionMcp: mcpFlags.useSpirionMcp,
+        }),
+        buildVideonIntegrationContextBlock({
+          useVideonMcp: mcpFlags.useVideonMcp,
+        }),
+        buildMetronIntegrationContextBlock({
+          useMetronMcp: mcpFlags.useMetronMcp,
+        }),
       ].join('\n\n');
 
   let retrieval: RetrievalResult | null = null;

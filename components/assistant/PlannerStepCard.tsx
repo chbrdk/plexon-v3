@@ -16,6 +16,8 @@ export type PlannerMetadata = {
   retrievalHits?: number
   retrievalVectorHits?: number
   retrievalTerms?: string[]
+  specialistId?: string | null
+  specialistLabel?: string | null
 }
 
 const INTENT_I18N: Record<string, string> = {
@@ -46,6 +48,7 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
   const modeKey = planner.mode ? MODE_I18N[planner.mode] : undefined
   const intentLabel = intentKey ? t(intentKey) : planner.intent ?? '—'
   const modeLabel = modeKey ? t(modeKey) : planner.mode ?? '—'
+  const specialistLabel = planner.specialistLabel?.trim() || null
 
   return (
     <Panel className="plexon-assistant-planner" variant="default">
@@ -54,6 +57,7 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
           {t('assistant.plannerTitle')}
         </Text>
         <Text role="meta" as="span" className="plexon-assistant-planner-summary">
+          {specialistLabel ? `${specialistLabel} · ` : ''}
           {intentLabel} · {modeLabel}
           {typeof planner.toolsOffered === 'number' && planner.toolsOffered > 0
             ? ` · ${planner.toolsOffered} ${t('assistant.plannerTools')}`
@@ -76,6 +80,12 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
       </div>
       {open ? (
         <div className="plexon-assistant-planner-details">
+          {specialistLabel ? (
+            <Text role="meta" as="p">
+              {t('assistant.plannerSpecialist')}: {specialistLabel}
+              {planner.specialistId ? ` (${planner.specialistId})` : ''}
+            </Text>
+          ) : null}
           {planner.reasoning ? (
             <Text role="meta" as="p">
               {planner.reasoning}

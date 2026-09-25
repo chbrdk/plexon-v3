@@ -1,17 +1,23 @@
 /**
- * Internal specialist registry (Wave 1).
+ * Internal specialist registry (Wave 1 + Wave 2).
  * Spec: specs/domain/assistant-domain-specialists.md
  */
 
 import type { AssistantPlanIntent } from '@/lib/assistant/assistant-planner';
 import {
+  BRANDION_BRAND_FAMILIES,
   CREATION_SCENE_EDIT_FAMILIES,
   CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
+  ECHON_MARKET_FAMILIES,
   METRON_ANALYTICS_FAMILIES,
   SCAN_FAMILIES,
+  VIDEON_MEDIA_FAMILIES,
 } from '@/lib/assistant/tool-catalog';
+import { buildBrandionIntegrationContextBlock } from '@/lib/integrations/brandion-connectivity';
 import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity';
+import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
+import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildCheckionScanSpecialistAddendum } from '@/lib/assistant/specialists/checkion-scan';
 import {
   isAssistantSpecialistId,
@@ -58,17 +64,68 @@ const CREATION_SCENE_SPECIALIST: AssistantSpecialist = {
     ),
 };
 
+const VIDEON_SPECIALIST: AssistantSpecialist = {
+  id: 'videon_media',
+  label: 'Videon',
+  toolFamilies: [...VIDEON_MEDIA_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    withSpecialistHeader(
+      'Videon',
+      buildVideonIntegrationContextBlock({ useVideonMcp: ctx.useVideonMcp }),
+    ),
+};
+
+const BRANDION_SPECIALIST: AssistantSpecialist = {
+  id: 'brandion_brand',
+  label: 'Brandion',
+  toolFamilies: [...BRANDION_BRAND_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    withSpecialistHeader(
+      'Brandion',
+      buildBrandionIntegrationContextBlock({ useBrandionMcp: ctx.useBrandionMcp }),
+    ),
+};
+
+const ECHON_SPECIALIST: AssistantSpecialist = {
+  id: 'echon_market',
+  label: 'Echon',
+  toolFamilies: [...ECHON_MARKET_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Echon',
+      await buildEchonIntegrationContextBlock({ useEchonMcp: ctx.useEchonMcp }),
+    ),
+};
+
 const REGISTRY: Record<AssistantSpecialistId, AssistantSpecialist> = {
   metron_analytics: METRON_SPECIALIST,
   checkion_scan: CHECKION_SCAN_SPECIALIST,
   creation_scene_edit: CREATION_SCENE_SPECIALIST,
+  videon_media: VIDEON_SPECIALIST,
+  brandion_brand: BRANDION_SPECIALIST,
+  echon_market: ECHON_SPECIALIST,
 };
 
-/** Wave-1 specialist ids (plan intents that map to a specialist). */
+/** @deprecated Use REGISTERED_SPECIALIST_IDS — Wave 1 subset kept for older tests. */
 export const WAVE1_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'metron_analytics',
   'checkion_scan',
   'creation_scene_edit',
+];
+
+export const WAVE2_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
+  'videon_media',
+  'brandion_brand',
+  'echon_market',
+];
+
+/** All registered specialist ids (Wave 1 + 2). */
+export const REGISTERED_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
+  ...WAVE1_SPECIALIST_IDS,
+  ...WAVE2_SPECIALIST_IDS,
 ];
 
 export function resolveSpecialist(
