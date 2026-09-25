@@ -309,6 +309,7 @@ export const API_PLATFORM_PRODUCTS = '/api/platform/products';
 export const API_PLATFORM_ME_PROJECT_INSIGHTS = '/api/platform/me/project-insights';
 /** Companies the session user can create Collections under. */
 export const API_PLATFORM_ME_COMPANIES = '/api/platform/me/companies';
+export const API_PLATFORM_ME_BOOTSTRAP_HOME = '/api/platform/me/bootstrap-home';
 
 /**
  * External product entry points.

@@ -15,6 +15,10 @@ export async function loginIfConfigured(page: Page): Promise<boolean> {
   await page.getByLabel(/passwort|password/i).fill(creds.password)
   await page.getByRole('button', { name: /anmelden|sign in|login/i }).click()
   await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 })
+  // Company + first Collection so Flow gallery / E3 / E5 smokes have a target
+  await page.request.post('/api/platform/me/bootstrap-home', {
+    data: { createCollection: true, collectionName: 'E2E Suite Collection' },
+  })
   return true
 }
 
