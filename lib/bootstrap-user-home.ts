@@ -16,6 +16,7 @@ import { upsertUserPlatformProjectAssignment } from '@/lib/db/user-platform-proj
 import { users } from '@/lib/db/schema'
 import { COMPANY_USER_ROLE } from '@/lib/platform-companies'
 import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning'
+import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory'
 import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service'
 
 export type BootstrapUserHomeResult = {
@@ -99,32 +100,37 @@ export async function bootstrapUserHome(
   let collectionError: string | undefined
 
   if (options?.createCollection !== false) {
-    const viaWorkflow = await createPlatformProjectWorkflow(
-      user,
-      {
-        name: options?.collectionName?.trim() || 'E2E Suite Collection',
-        domain: 'example.com',
-        companyId: home.companyId,
-        syncProducts: true,
-      },
-      {}
-    )
-    if (viaWorkflow.result.ok && viaWorkflow.result.platformProjectId) {
-      platformProjectId = viaWorkflow.result.platformProjectId
-      collectionCreated = true
+    const existing = await listAccessiblePlatformProjectsForUser(user.id)
+    if (existing[0]) {
+      platformProjectId = existing[0].id
     } else {
-      const seeded = await createSeedCollection({
+      const viaWorkflow = await createPlatformProjectWorkflow(
         user,
-        companyId: home.companyId,
-        name: options?.collectionName?.trim() || 'E2E Suite Collection',
-        domain: 'example.com',
-      })
-      if ('platformProjectId' in seeded) {
-        platformProjectId = seeded.platformProjectId
+        {
+          name: options?.collectionName?.trim() || 'E2E Suite Collection',
+          domain: 'example.com',
+          companyId: home.companyId,
+          syncProducts: true,
+        },
+        {}
+      )
+      if (viaWorkflow.result.ok && viaWorkflow.result.platformProjectId) {
+        platformProjectId = viaWorkflow.result.platformProjectId
         collectionCreated = true
       } else {
-        collectionError =
-          viaWorkflow.result.error ?? seeded.error ?? 'collection_create_failed'
+        const seeded = await createSeedCollection({
+          user,
+          companyId: home.companyId,
+          name: options?.collectionName?.trim() || 'E2E Suite Collection',
+          domain: 'example.com',
+        })
+        if ('platformProjectId' in seeded) {
+          platformProjectId = seeded.platformProjectId
+          collectionCreated = true
+        } else {
+          collectionError =
+            viaWorkflow.result.error ?? seeded.error ?? 'collection_create_failed'
+        }
       }
     }
   }

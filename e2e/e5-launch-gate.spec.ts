@@ -2,15 +2,14 @@
  * E5 Launch-Gate — flow gallery exposes enterprise templates.
  * Playbook: knowledge/suite-use-case-testing.md
  */
-import { e2eCredentials, expect, loginIfConfigured, test } from './helpers'
+import { e2eCredentials, expect, loginIfConfigured, test, waitForCollectionLink } from './helpers'
 
 test.describe('E5 launch gate', () => {
   test('flows gallery page loads for first visible project if any', async ({ page }) => {
     test.skip(!e2eCredentials(), 'Set E2E_USER and E2E_PASSWORD')
     await loginIfConfigured(page)
-    await page.goto('/projects')
-    const link = page.locator('a[href*="/projects/"]').first()
-    if ((await link.count()) === 0) {
+    const link = await waitForCollectionLink(page)
+    if (!link) {
       test.skip(true, 'No Collection links on /projects')
       return
     }
