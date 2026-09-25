@@ -10,6 +10,7 @@ import {
   WAVE4_SPECIALIST_IDS,
   REGISTERED_SPECIALIST_IDS,
   resolveSpecialist,
+  resolveSpecialistToolRoundBudget,
   creationSceneSpecialistFamilies,
 } from '@/lib/assistant/specialists'
 import {
@@ -523,6 +524,52 @@ describe('assistant domain specialists (Wave 4)', () => {
     expect(spec).toContain('audion_documents')
     expect(spec).toContain('checkion_journey')
     expect(spec).toContain('seventeen')
-    expect(orch).toContain('Wave 1–4')
+    expect(orch).toContain('Wave 1–5')
+  })
+})
+
+describe('assistant domain specialists (Wave 5)', () => {
+  it('applies specialist maxToolRounds as a floor', () => {
+    const metron = resolveSpecialist('metron_analytics')
+    expect(resolveSpecialistToolRoundBudget(3, metron)).toBe(
+      Math.max(3, metron?.maxToolRounds ?? 0),
+    )
+    expect(resolveSpecialistToolRoundBudget(10, metron)).toBe(10)
+    expect(resolveSpecialistToolRoundBudget(4, null)).toBe(4)
+  })
+
+  it('planner card and locales cover specialist intents', () => {
+    const planner = readFileSync(
+      path.join(root, 'components/assistant/PlannerStepCard.tsx'),
+      'utf8',
+    )
+    const de = readFileSync(path.join(root, 'locales/de.json'), 'utf8')
+    const en = readFileSync(path.join(root, 'locales/en.json'), 'utf8')
+    const agent = readFileSync(path.join(root, 'lib/assistant/assistant-agent.ts'), 'utf8')
+    const chat = readFileSync(
+      path.join(root, 'components/assistant/AssistantChat.tsx'),
+      'utf8',
+    )
+    expect(planner).toContain('plannerIntentMetron')
+    expect(planner).toContain('plannerIntentVideon')
+    expect(planner).toContain('summaryLead')
+    expect(de).toContain('plannerIntentCreationScene')
+    expect(en).toContain('plannerIntentCreationScene')
+    expect(agent).toContain('resolveSpecialistToolRoundBudget')
+    expect(chat).toContain('specialistLabel')
+  })
+
+  it('spec documents Wave 5 polish', () => {
+    const spec = readFileSync(
+      path.join(root, 'specs/domain/assistant-domain-specialists.md'),
+      'utf8',
+    )
+    const orch = readFileSync(
+      path.join(root, 'knowledge/plexon-assistant-orchestrator.md'),
+      'utf8',
+    )
+    expect(spec).toContain('Wave 5')
+    expect(spec).toContain('resolveSpecialistToolRoundBudget')
+    expect(orch).toContain('resolveSpecialistToolRoundBudget')
   })
 })

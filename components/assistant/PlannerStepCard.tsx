@@ -24,8 +24,21 @@ const INTENT_I18N: Record<string, string> = {
   project_knowledge: 'assistant.plannerIntentKnowledge',
   checkion_scan: 'assistant.plannerIntentScan',
   checkion_seo_geo: 'assistant.plannerIntentGeo',
+  checkion_journey: 'assistant.plannerIntentCheckionJourney',
   audion_persona: 'assistant.plannerIntentPersona',
-  audion_knowledge: 'assistant.plannerIntentKnowledge',
+  audion_knowledge: 'assistant.plannerIntentAudionKnowledge',
+  audion_journey: 'assistant.plannerIntentAudionJourney',
+  audion_ux_journey: 'assistant.plannerIntentAudionUxJourney',
+  audion_chat: 'assistant.plannerIntentAudionChat',
+  audion_documents: 'assistant.plannerIntentAudionDocuments',
+  echon_market: 'assistant.plannerIntentEchonMarket',
+  echon_audience: 'assistant.plannerIntentEchonAudience',
+  brandion_brand: 'assistant.plannerIntentBrandion',
+  creation_design: 'assistant.plannerIntentCreationDesign',
+  creation_scene_edit: 'assistant.plannerIntentCreationScene',
+  spirion_research: 'assistant.plannerIntentSpirion',
+  videon_media: 'assistant.plannerIntentVideon',
+  metron_analytics: 'assistant.plannerIntentMetron',
   action_write: 'assistant.plannerIntentAction',
   general_chat: 'assistant.plannerIntentGeneral',
 }
@@ -49,6 +62,12 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
   const intentLabel = intentKey ? t(intentKey) : planner.intent ?? '—'
   const modeLabel = modeKey ? t(modeKey) : planner.mode ?? '—'
   const specialistLabel = planner.specialistLabel?.trim() || null
+  // When a specialist is active, lead with its label; keep intent only if it adds distinct wording.
+  const summaryLead = specialistLabel
+    ? specialistLabel === intentLabel
+      ? specialistLabel
+      : `${specialistLabel} · ${intentLabel}`
+    : intentLabel
 
   return (
     <Panel className="plexon-assistant-planner" variant="default">
@@ -57,8 +76,7 @@ export function PlannerStepCard({ planner }: PlannerStepCardProps) {
           {t('assistant.plannerTitle')}
         </Text>
         <Text role="meta" as="span" className="plexon-assistant-planner-summary">
-          {specialistLabel ? `${specialistLabel} · ` : ''}
-          {intentLabel} · {modeLabel}
+          {summaryLead} · {modeLabel}
           {typeof planner.toolsOffered === 'number' && planner.toolsOffered > 0
             ? ` · ${planner.toolsOffered} ${t('assistant.plannerTools')}`
             : ''}

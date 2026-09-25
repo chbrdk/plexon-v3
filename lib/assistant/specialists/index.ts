@@ -11,6 +11,7 @@ export {
   REGISTERED_SPECIALIST_IDS,
   creationSceneSpecialistFamilies,
   resolveSpecialist,
+  resolveSpecialistToolRoundBudget,
   isAssistantSpecialistId,
 } from '@/lib/assistant/specialists/registry';
 export type {

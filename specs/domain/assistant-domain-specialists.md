@@ -1,6 +1,6 @@
 # Assistant domain specialists (internal)
 
-**Status:** Accepted — Wave 4 2026-09-25  
+**Status:** Accepted — Wave 5 2026-09-25 (registry complete + activity polish)  
 **Owner:** PLEXON v3 (orchestrator)  
 **Surfaces:** Free-chat only (`runAssistantAgent`) — same `/assistant` + `/assistant/embed` conversation  
 **Companions:** `knowledge/plexon-assistant-orchestrator.md` · `specs/domain/capability-catalog.md` · `lib/assistant/assistant-planner.ts`
@@ -99,8 +99,16 @@ type AssistantSpecialist = {
 - `resolveSpecialist(intent)` → specialist or `null`.
 - When a specialist is active, the agent injects **only** that specialist’s addendum (plus base system prompt / retrieval / plan block) — not the full product connectivity stack.
 - Connectivity / addenda are built **after** planning so unused product blocks are skipped.
-- Planner metadata / SSE `plan` events include `specialistId` + `specialistLabel`; `PlannerStepCard` surfaces the label in the activity trace.
+- Planner metadata / SSE `plan` events include `specialistId` + `specialistLabel`; `PlannerStepCard` surfaces the label in the activity trace (intent labels are i18n’d for all registered specialists).
+- `resolveSpecialistToolRoundBudget(planRounds, specialist)` applies specialist `maxToolRounds` as a **floor** (planner remains SoT for the base plan).
 - `echon_audience` enables Audion + Echon (+ Checkion when entitled) MCP flags so audience-write tools load.
+
+## Wave 5 (polish)
+
+- Intent i18n coverage for all registered specialist intents.
+- Activity / planner summary avoids redundant specialist+intent wording.
+- Tool-round floor from specialist profile.
+- Registry program closed for product intents; remaining non-specialist intents stay orchestrator-only.
 
 ## Non-goals
 
@@ -110,8 +118,8 @@ type AssistantSpecialist = {
 
 ## Done when
 
-1. Spec + orchestrator knowledge document Wave 1–4.
+1. Spec + orchestrator knowledge document Wave 1–5.
 2. `lib/assistant/specialists/*` registry ships all seventeen profiles.
 3. `runAssistantAgent` resolves and awaits specialist addenda; planner meta exposes specialist id/label.
-4. Activity UI shows specialist label on the planner card.
-5. Unit/smoke tests cover Wave-1–4 resolve + planner intents.
+4. Activity UI shows specialist label + i18n intent labels on the planner card.
+5. Unit/smoke tests cover Wave-1–5 resolve, budget floor, and planner intents.

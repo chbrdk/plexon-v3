@@ -309,6 +309,19 @@ export function resolveSpecialist(
   return REGISTRY[intent] ?? null;
 }
 
+/**
+ * Planner remains SoT for the live plan; specialist.maxToolRounds is a floor
+ * so domain profiles are not under-budgeted by a thin LLM plan.
+ */
+export function resolveSpecialistToolRoundBudget(
+  planMaxToolRounds: number,
+  specialist: AssistantSpecialist | null,
+): number {
+  const floor = specialist?.maxToolRounds;
+  if (typeof floor !== 'number' || floor <= 0) return planMaxToolRounds;
+  return Math.max(planMaxToolRounds, floor);
+}
+
 /** Canonical families for Creation when Spirion MCP is on (planner may widen). */
 export function creationSceneSpecialistFamilies(hasSpirionMcp: boolean) {
   return hasSpirionMcp

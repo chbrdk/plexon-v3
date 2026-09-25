@@ -16,7 +16,7 @@ import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-conn
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
-import { resolveSpecialist } from '@/lib/assistant/specialists';
+import { resolveSpecialist, resolveSpecialistToolRoundBudget } from '@/lib/assistant/specialists';
 import {
   runOrchestratorComplete,
   type OrchestratorCompleteOptions,
@@ -132,7 +132,15 @@ export async function runAssistantAgent(
     pageContext: input.pageContext,
   });
   const specialist = resolveSpecialist(plan.intent);
+  const maxToolRounds = resolveSpecialistToolRoundBudget(plan.maxToolRounds, specialist);
   input.onPlan?.(plan);
+  if (specialist) {
+    input.onProgress?.({
+      type: 'phase',
+      phase: 'planning',
+      detail: specialist.label,
+    });
+  }
 
   const mcpFlags = resolveMcpFlagsForPlan(plan, {
     useCheckionMcp: input.useCheckionMcp,
@@ -201,7 +209,7 @@ export async function runAssistantAgent(
 
   input.onProgress?.({
     type: 'phase',
-    phase: plan.maxToolRounds > 0 && !plan.skipTools ? 'tools' : 'executing',
+    phase: maxToolRounds > 0 && !plan.skipTools ? 'tools' : 'executing',
   });
 
   const scenePrefetch =
@@ -258,7 +266,7 @@ export async function runAssistantAgent(
     audionProjectId: input.audionProjectId,
     checkionProjectId: input.checkionProjectId,
     actorUserId: input.user.id,
-    maxToolRounds: plan.maxToolRounds,
+    maxToolRounds,
     thinkingBudgetTokens: creationBudget.thinkingBudgetTokens,
     skipTools: plan.skipTools,
     modelProfile: 'assistant',

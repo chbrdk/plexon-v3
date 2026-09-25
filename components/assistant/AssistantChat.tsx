@@ -681,6 +681,10 @@ export function AssistantChat({
               setAgentTrace((prev) => ({
                 ...prev,
                 plan: plan as PlannerMetadata,
+                phaseDetail:
+                  (plan as PlannerMetadata).specialistLabel?.trim() ||
+                  prev.phaseDetail ||
+                  null,
               }));
             },
             onRetrieval: (data) => {
