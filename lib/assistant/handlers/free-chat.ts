@@ -27,6 +27,7 @@ import {
   summarizeAssistantToolTrace,
   type AssistantToolTraceEntry,
 } from '@/lib/assistant/tool-trace-summary';
+import { resolveSpecialist } from '@/lib/assistant/specialists';
 
 export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
@@ -123,7 +124,8 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
           ctx.emit?.({ type: 'thinking_reset' });
         }
       },
-      onPlan: (plan) =>
+      onPlan: (plan) => {
+        const specialist = resolveSpecialist(plan.intent);
         ctx.emit?.({
           type: 'plan',
           plan: {
@@ -134,8 +136,11 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
             skipTools: plan.skipTools,
             source: plan.plannerSource,
             reasoning: plan.reasoning,
+            specialistId: specialist?.id ?? null,
+            specialistLabel: specialist?.label ?? null,
           },
-        }),
+        });
+      },
       onRetrieval: (r) =>
         ctx.emit?.({
           type: 'retrieval',
@@ -188,6 +193,8 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
         retrievalHits: result.retrieval?.hits.length ?? 0,
         retrievalVectorHits: result.retrieval?.vectorHits ?? 0,
         retrievalTerms: result.retrieval?.terms ?? [],
+        specialistId: result.specialistId ?? null,
+        specialistLabel: result.specialistLabel ?? null,
       },
       ...(toolTrace ? { toolTrace } : {}),
     };

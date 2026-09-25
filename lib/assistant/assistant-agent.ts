@@ -16,6 +16,7 @@ import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-conn
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
+import { resolveSpecialist } from '@/lib/assistant/specialists';
 import {
   runOrchestratorComplete,
   type OrchestratorCompleteOptions,
@@ -80,6 +81,8 @@ export type RunAssistantAgentResult = OrchestratorCompleteResult & {
   plan: AssistantPlan;
   retrieval?: RetrievalResult | null;
   uiLayout?: UiLayout;
+  specialistId?: string | null;
+  specialistLabel?: string | null;
 };
 
 const RETRIEVAL_INTENTS = new Set<AssistantPlan['intent']>([
@@ -156,6 +159,7 @@ export async function runAssistantAgent(
     compactContextLoaded,
     pageContext: input.pageContext,
   });
+  const specialist = resolveSpecialist(plan.intent);
   input.onPlan?.(plan);
 
   const mcpFlags = resolveMcpFlagsForPlan(plan, {
@@ -168,6 +172,29 @@ export async function runAssistantAgent(
     useVideonMcp: input.useVideonMcp,
     useMetronMcp: input.useMetronMcp,
   });
+
+  const specialistCtx = {
+    useCheckionMcp: mcpFlags.useCheckionMcp,
+    useAudionMcp: mcpFlags.useAudionMcp,
+    useEchonMcp: mcpFlags.useEchonMcp,
+    useBrandionMcp: mcpFlags.useBrandionMcp,
+    useCreationMcp: mcpFlags.useCreationMcp,
+    useSpirionMcp: mcpFlags.useSpirionMcp,
+    useVideonMcp: mcpFlags.useVideonMcp,
+    useMetronMcp: mcpFlags.useMetronMcp,
+  };
+
+  const productConnectivityBlock = specialist
+    ? specialist.buildSystemAddendum(specialistCtx)
+    : [
+        audionIntegrationBlock,
+        echonIntegrationBlock,
+        brandionIntegrationBlock,
+        creationIntegrationBlock,
+        spirionIntegrationBlock,
+        videonIntegrationBlock,
+        metronIntegrationBlock,
+      ].join('\n\n');
 
   let retrieval: RetrievalResult | null = null;
   if (
@@ -217,7 +244,7 @@ export async function runAssistantAgent(
       : null;
   const craftMemoryPrompt = craftMemoryBlock ? `\n${craftMemoryBlock}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${audionIntegrationBlock}\n\n${echonIntegrationBlock}\n\n${brandionIntegrationBlock}\n\n${creationIntegrationBlock}\n\n${spirionIntegrationBlock}\n\n${videonIntegrationBlock}\n\n${metronIntegrationBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const systemPrompt = `${baseSystemPrompt}\n\n${productConnectivityBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan, specialist)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const creationBudget = resolveCreationSceneBudget({
     intent: plan.intent,
@@ -266,5 +293,12 @@ export async function runAssistantAgent(
     creationCraftPlaybookId: plan.creationCraftPlaybookId ?? null,
   });
 
-  return { ...orchestratorResult, plan, retrieval, uiLayout: orchestratorResult.uiLayout };
+  return {
+    ...orchestratorResult,
+    plan,
+    retrieval,
+    uiLayout: orchestratorResult.uiLayout,
+    specialistId: specialist?.id ?? null,
+    specialistLabel: specialist?.label ?? null,
+  };
 }

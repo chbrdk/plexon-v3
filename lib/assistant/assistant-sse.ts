@@ -20,6 +20,8 @@ export type AssistantStreamEvent =
         skipTools: boolean;
         source: AssistantPlan['plannerSource'];
         reasoning: string;
+        specialistId?: string | null;
+        specialistLabel?: string | null;
       };
     }
   | { type: 'retrieval'; hits: number; terms: string[]; vectorHits?: number }

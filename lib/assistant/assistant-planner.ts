@@ -913,7 +913,10 @@ export async function planAssistantTurn(
   return planAssistantTurnWithLlm(apiKey, input, heuristic);
 }
 
-export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
+export function buildPlanSystemPromptBlock(
+  plan: AssistantPlan,
+  specialist?: { id: string; label: string } | null,
+): string {
   const writeToolsNote = plan.allowWriteTools
     ? plan.intent === 'creation_scene_edit'
       ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops, creation_scene_import_html und creation_site_kit_page_save (baseUpdatedAt aus Seitenkontext / vorherigem Tool-Result!). creation_scene_apply_ops: ops als natives JSON-Array von Objekten — niemals als JSON-String wrappen. Neue Seite → add_page {name?} zuerst, dann unter neuem root.id. Insert: bevorzugt insert_child MIT props (echte CTAs/Options/Texte). insert_instance nur mit props oder set_prop im selben Batch — nie nackte Instances mit Seed-Copy (Get started / Option A / Text). Niemals insert_node/add_instance/append_child. Bei op-rejected/stale-scene die Server-Felder reason, failedIndex und scene.updatedAt zitieren und Retry mit frischem baseUpdatedAt — nicht raten. Vor Abschluss: content_audit + craft_debug + preview. Nur Spezifikation ohne apply_ops = Fail.'
@@ -937,9 +940,12 @@ export function buildPlanSystemPromptBlock(plan: AssistantPlan): string {
     plan.intent === 'creation_scene_edit' && plan.creationCraftModuleIds?.length
       ? `\n- Craft-Module: ${plan.creationCraftModuleIds.join(', ')}`
       : '';
+  const specialistLine = specialist
+    ? `\n- Specialist: ${specialist.label} (${specialist.id})`
+    : '';
   return `
 ## Ausführungsplan (Planner)
-- Intent: ${plan.intent}
+- Intent: ${plan.intent}${specialistLine}
 - Modus: ${plan.mode}
 - Tool-Familien: ${plan.toolFamilies.length ? plan.toolFamilies.join(', ') : '(keine)'}
 - Schreib-Tools: ${plan.allowWriteTools ? 'ja' : 'nein'}
