@@ -87,8 +87,33 @@ function BlockView({ block, index }: { block: ChatBlock; index: number }) {
 }
 
 /** Formatted assistant answer using DS `.chat-answer-*` chrome. */
-export function AssistantChatAnswer({ answer }: { answer: string }) {
-  const blocks = useMemo(() => parseChatBlocks(answer), [answer])
+export function AssistantChatAnswer({
+  answer,
+  streaming = false,
+}: {
+  answer: string
+  /** Plain pre-wrap while tokens arrive — avoid parseChatBlocks reflow each delta. */
+  streaming?: boolean
+}) {
+  const blocks = useMemo(
+    () => (streaming ? [] : parseChatBlocks(answer)),
+    [answer, streaming],
+  )
+
+  if (streaming) {
+    return (
+      <div
+        className="chat-answer plexon-assistant-markdown chat-answer-streaming"
+        role="article"
+        aria-label="Assistant answer"
+        aria-busy="true"
+      >
+        <p className="chat-answer-p" style={{ whiteSpace: 'pre-wrap' }}>
+          {answer}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="chat-answer plexon-assistant-markdown" role="article" aria-label="Assistant answer">

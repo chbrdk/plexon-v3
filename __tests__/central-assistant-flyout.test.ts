@@ -101,6 +101,8 @@ describe('central assistant flyout specs + mounts', () => {
     expect(chat).toContain('finalizeStreamingAssistantMessage')
     expect(chat).toContain('softRefreshConversation')
     expect(chat).not.toMatch(/await loadConversation\(done\.conversationId\)/)
+    expect(chat).toContain('abortController.signal')
+    expect(chat).toContain('stopStreaming')
   })
 
   it('overlay folds side panel into message stream (no AssistantPanel column)', () => {

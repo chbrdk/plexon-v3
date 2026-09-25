@@ -75,6 +75,12 @@ Expand used to `router.replace(?c=…)` inside `ensureConversation` **before** t
 - After `done`, finalize locally (`finalizeStreamingAssistantMessage`) and **soft-refresh** the transcript (stable React keys + `serverMessageId` for pins) instead of awaiting a hard `loadConversation` that could flash empty.
 - Helpers: `lib/assistant/stream-continuity.ts`.
 
+### Stop / busy feedback / streaming plain text (2026-09-25)
+
+- Composer **Stop** aborts SSE via `AbortController` (`postAssistantCompleteStream` signal); partial answer stays.
+- Mid-flight send/attach no longer silent — short Field error hint.
+- While `metadata.streaming`, `AssistantChatAnswer` renders plain pre-wrap; markdown parse only after complete.
+
 ### Activity + answer chrome (follow-up)
 
 - `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.

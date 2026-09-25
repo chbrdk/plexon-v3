@@ -42,13 +42,15 @@ function parseSseBlock(block: string): { event: string; data: string } | null {
 
 export async function postAssistantCompleteStream(
   body: Record<string, unknown>,
-  handlers: AssistantStreamHandlers
+  handlers: AssistantStreamHandlers,
+  signal?: AbortSignal
 ): Promise<AssistantStreamDonePayload | null> {
   const res = await fetch(API_ASSISTANT_COMPLETE_STREAM, {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
     body: JSON.stringify(body),
+    signal,
   });
 
   if (!res.ok) {
@@ -69,49 +71,61 @@ export async function postAssistantCompleteStream(
     throw new Error('Stream not supported');
   }
 
+  const onAbort = () => {
+    void reader.cancel().catch(() => undefined);
+  };
+  signal?.addEventListener('abort', onAbort, { once: true });
+
   const decoder = new TextDecoder();
   let buffer = '';
   let donePayload: AssistantStreamDonePayload | null = null;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const parts = buffer.split('\n\n');
-    buffer = parts.pop() ?? '';
-
-    for (const part of parts) {
-      const parsed = parseSseBlock(part.trim());
-      if (!parsed) continue;
-      let event: AssistantStreamEvent;
-      try {
-        event = JSON.parse(parsed.data) as AssistantStreamEvent;
-      } catch {
-        continue;
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        throw new DOMException('Aborted', 'AbortError');
       }
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop() ?? '';
 
-      if (event.type === 'phase') handlers.onPhase?.(event.phase, event.detail);
-      if (event.type === 'plan') handlers.onPlan?.(event.plan);
-      if (event.type === 'retrieval') handlers.onRetrieval?.(event);
-      if (event.type === 'token') handlers.onToken?.(event.text);
-      if (event.type === 'token_reset') handlers.onTokenReset?.();
-      if (event.type === 'thinking') handlers.onThinking?.(event.text);
-      if (event.type === 'thinking_reset') handlers.onThinkingReset?.();
-      if (event.type === 'tool_call') handlers.onToolCall?.(event);
-      if (event.type === 'ui_block') handlers.onUiBlock?.(event);
-      if (event.type === 'ui_block_update') handlers.onUiBlockUpdate?.(event);
-      if (event.type === 'ui_panel') handlers.onUiPanel?.(event);
-      if (event.type === 'ui_reset') handlers.onUiReset?.();
-      if (event.type === 'workflow_run') handlers.onWorkflowRun?.(event);
-      if (event.type === 'done') {
-        donePayload = event.payload;
-        handlers.onDone?.(event.payload);
-      }
-      if (event.type === 'error') {
-        handlers.onError?.(event.message, event.details);
-        throw new Error(event.details ?? event.message);
+      for (const part of parts) {
+        const parsed = parseSseBlock(part.trim());
+        if (!parsed) continue;
+        let event: AssistantStreamEvent;
+        try {
+          event = JSON.parse(parsed.data) as AssistantStreamEvent;
+        } catch {
+          continue;
+        }
+
+        if (event.type === 'phase') handlers.onPhase?.(event.phase, event.detail);
+        if (event.type === 'plan') handlers.onPlan?.(event.plan);
+        if (event.type === 'retrieval') handlers.onRetrieval?.(event);
+        if (event.type === 'token') handlers.onToken?.(event.text);
+        if (event.type === 'token_reset') handlers.onTokenReset?.();
+        if (event.type === 'thinking') handlers.onThinking?.(event.text);
+        if (event.type === 'thinking_reset') handlers.onThinkingReset?.();
+        if (event.type === 'tool_call') handlers.onToolCall?.(event);
+        if (event.type === 'ui_block') handlers.onUiBlock?.(event);
+        if (event.type === 'ui_block_update') handlers.onUiBlockUpdate?.(event);
+        if (event.type === 'ui_panel') handlers.onUiPanel?.(event);
+        if (event.type === 'ui_reset') handlers.onUiReset?.();
+        if (event.type === 'workflow_run') handlers.onWorkflowRun?.(event);
+        if (event.type === 'done') {
+          donePayload = event.payload;
+          handlers.onDone?.(event.payload);
+        }
+        if (event.type === 'error') {
+          handlers.onError?.(event.message, event.details);
+          throw new Error(event.details ?? event.message);
+        }
       }
     }
+  } finally {
+    signal?.removeEventListener('abort', onAbort);
   }
 
   return donePayload;

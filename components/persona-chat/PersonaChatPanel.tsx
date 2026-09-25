@@ -246,7 +246,16 @@ export function PersonaChatPanel({
         setGuestRemaining((n) => (n == null ? n : Math.max(0, n - 1)))
       }
     } catch (error) {
-      if ((error as Error).name === 'AbortError') return
+      if ((error as Error).name === 'AbortError') {
+        setTurns((prev) =>
+          prev.map((t) =>
+            t.id === streamingId && t.status === 'streaming'
+              ? { ...t, status: 'complete' as const }
+              : t,
+          ),
+        )
+        return
+      }
       setErr(error instanceof Error ? error.message : 'Stream failed')
     } finally {
       setBusy(false)
@@ -309,6 +318,9 @@ export function PersonaChatPanel({
 
   function onStop() {
     abortRef.current?.abort()
+    setTurns((prev) =>
+      prev.map((t) => (t.status === 'streaming' ? { ...t, status: 'complete' as const } : t)),
+    )
     setBusy(false)
   }
 

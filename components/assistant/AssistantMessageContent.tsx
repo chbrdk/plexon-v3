@@ -9,10 +9,16 @@ type AssistantMessageContentProps = {
   role: 'user' | 'assistant' | 'system'
   content: string
   contentType?: string | null
+  streaming?: boolean
 }
 
 /** Message body — plain text for user; DS chat-answer blocks for assistant. */
-export function AssistantMessageContent({ role, content, contentType }: AssistantMessageContentProps) {
+export function AssistantMessageContent({
+  role,
+  content,
+  contentType,
+  streaming = false,
+}: AssistantMessageContentProps) {
   const isUser = role === 'user'
 
   if (isUser) {
@@ -27,5 +33,5 @@ export function AssistantMessageContent({ role, content, contentType }: Assistan
     return <AssistantCapabilitiesOverview />
   }
 
-  return <AssistantChatAnswer answer={content} />
+  return <AssistantChatAnswer answer={content} streaming={streaming} />
 }

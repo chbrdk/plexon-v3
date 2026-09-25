@@ -152,6 +152,7 @@ export function AssistantMessageList({
                           ? msg.metadata.contentType
                           : null
                       }
+                      streaming={isStreaming}
                     />
                   ) : null}
                   {uiBlocks.length > 0 ? (

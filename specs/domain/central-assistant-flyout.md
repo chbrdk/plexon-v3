@@ -67,6 +67,10 @@ Same stream client, history Flyout pattern, Collection picker, generative blocks
 
 **First-turn continuity:** Creating a conversation (or finishing a turn) MUST NOT App-Router-`replace` the expand URL mid-flight. Soft-nav remounts `AssistantChat` and drops the in-flight first reply (user had to send again). Expand URL sync uses `history.replaceState` only; overlay still never writes `?c=` (host callback only).
 
+**Stop while streaming:** Composer exposes Stop; client aborts the SSE `fetch` via `AbortController`. Partial tokens stay in the bubble (streaming flag cleared). Silent early-returns while `loading`/`attachBusy` MUST surface a short composer hint (no no-op click).
+
+**Streaming markdown:** While `metadata.streaming`, render assistant text as plain pre-wrap; run `parseChatBlocks` only after the turn completes (avoids list/heading jump on each token).
+
 **Overlay panel rule:** Flyout width (~32rem) cannot host a second column. Client folds open `uiLayout.panel.blocks` into the assistant message (`mergeUiLayoutBlocksWithPanel`) and does not render `AssistantPanel`. Expand workspace keeps the side panel.
 
 ## Collection context

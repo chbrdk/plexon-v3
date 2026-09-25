@@ -30,6 +30,10 @@ type AssistantChatComposerProps = {
   loading: boolean
   onChange: (value: string) => void
   onSubmit: () => void
+  /** Abort in-flight complete stream (Stop while loading). */
+  onStop?: () => void
+  /** Short hint when send/attach was ignored mid-flight. */
+  busyHint?: string | null
   onSuggestion?: (prompt: string) => void
   targetUrl?: string | null
   projectName?: string | null
@@ -79,6 +83,8 @@ export function AssistantChatComposer({
   loading,
   onChange,
   onSubmit,
+  onStop,
+  busyHint = null,
   onSuggestion,
   targetUrl,
   projectName,
@@ -139,6 +145,7 @@ export function AssistantChatComposer({
       data-plexon-assistant-composer
       onSubmit={(e) => {
         e.preventDefault()
+        if (loading) return
         onSubmit()
       }}
       onDragEnter={(e) => {
@@ -278,7 +285,12 @@ export function AssistantChatComposer({
             />
           </>
         ) : null}
-        <Field label={t('assistant.messageLabel')} htmlFor="plexon-chat-composer" size="md">
+        <Field
+          label={t('assistant.messageLabel')}
+          htmlFor="plexon-chat-composer"
+          size="md"
+          error={busyHint ?? undefined}
+        >
           <Textarea
             id="plexon-chat-composer"
             size="md"
@@ -299,15 +311,28 @@ export function AssistantChatComposer({
             }}
           />
         </Field>
-        <Button
-          type="submit"
-          variant="ghost"
-          size="sm"
-          className="chat-send chat-send-icon"
-          disabled={sendDisabled}
-          aria-label={t('assistant.send')}
-          icon={loading ? <Spinner size="sm" /> : <IconSend />}
-        />
+        {loading && onStop ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="chat-send"
+            aria-label={t('assistant.stop')}
+            onClick={onStop}
+          >
+            {t('assistant.stop')}
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            variant="ghost"
+            size="sm"
+            className="chat-send chat-send-icon"
+            disabled={sendDisabled}
+            aria-label={t('assistant.send')}
+            icon={loading ? <Spinner size="sm" /> : <IconSend />}
+          />
+        )}
       </div>
     </form>
   )

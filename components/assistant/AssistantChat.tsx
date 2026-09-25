@@ -104,10 +104,29 @@ export function AssistantChat({
   const [reportPins, setReportPins] = useState<ReportPinItem[]>([]);
   const streamingMessageIdRef = useRef<string | null>(null);
   const sendInFlightRef = useRef(false);
+  const streamAbortRef = useRef<AbortController | null>(null);
+  const busyHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const workflowStreamRef = useRef<EventSource | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
   const urlConversationLoadedRef = useRef(false);
+  const [composerBusyHint, setComposerBusyHint] = useState<string | null>(null);
+
+  const flashBusyHint = useCallback(
+    (message: string) => {
+      setComposerBusyHint(message);
+      if (busyHintTimerRef.current) clearTimeout(busyHintTimerRef.current);
+      busyHintTimerRef.current = setTimeout(() => setComposerBusyHint(null), 2800);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (busyHintTimerRef.current) clearTimeout(busyHintTimerRef.current);
+      streamAbortRef.current?.abort();
+    };
+  }, []);
 
   const refreshConversations = useCallback(async () => {
     setHistoryLoading(true);
@@ -602,17 +621,26 @@ export function AssistantChat({
       const images = confirmToolCall ? [] : (attachments?.images ?? pendingImages);
       const documents = confirmToolCall ? [] : (attachments?.documents ?? pendingDocuments);
       if (!trimmed && !confirmToolCall && images.length === 0 && documents.length === 0) return;
-      if (loading || attachBusy || sendInFlightRef.current) return;
+      if (loading || attachBusy || sendInFlightRef.current) {
+        flashBusyHint(
+          attachBusy ? t('assistant.busyHintAttach') : t('assistant.busyHintStreaming'),
+        );
+        return;
+      }
 
       const optimisticId = `local-${Date.now()}`;
       sendInFlightRef.current = true;
       setLoading(true);
+      setComposerBusyHint(null);
       setIsStreamingText(false);
       setShowActivityTrace(true);
       stickToBottomRef.current = true;
       setAgentTrace({ ...emptyAgentActivityTrace(), phase: 'planning' });
       setLivePanel(null);
       streamingMessageIdRef.current = null;
+      streamAbortRef.current?.abort();
+      const abortController = new AbortController();
+      streamAbortRef.current = abortController;
       try {
         const cid = await ensureConversation();
 
@@ -812,7 +840,8 @@ export function AssistantChat({
               const panel = getMessageUiPanel(payload.metadata);
               setLivePanel(panel);
             },
-          }
+          },
+          abortController.signal,
         );
 
         if (!done) throw new Error(t('common.error'));
@@ -837,6 +866,20 @@ export function AssistantChat({
           watchWorkflow(done.workflowRunId);
         }
       } catch (e) {
+        const aborted =
+          (e instanceof DOMException && e.name === 'AbortError') ||
+          (e instanceof Error && e.name === 'AbortError');
+        if (aborted) {
+          const streamId = streamingMessageIdRef.current;
+          setMessages((prev) =>
+            finalizeStreamingAssistantMessage(prev, streamId, {
+              text: undefined,
+              metadata: { contentType: 'markdown' },
+            }),
+          );
+          streamingMessageIdRef.current = null;
+          return;
+        }
         // Roll back optimistic user turn and restore pending attachments for retry.
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
         if (images.length) {
@@ -867,6 +910,9 @@ export function AssistantChat({
           },
         ]);
       } finally {
+        if (streamAbortRef.current === abortController) {
+          streamAbortRef.current = null;
+        }
         sendInFlightRef.current = false;
         setLoading(false);
         setIsStreamingText(false);
@@ -875,12 +921,17 @@ export function AssistantChat({
         streamingMessageIdRef.current = null;
       }
     },
-    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, softRefreshConversation, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, flashBusyHint, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, softRefreshConversation, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const handleAttachFiles = useCallback(async (files: FileList | null) => {
     if (!files?.length) return;
-    if (loading || attachBusy) return;
+    if (loading || attachBusy) {
+      flashBusyHint(
+        attachBusy ? t('assistant.busyHintAttach') : t('assistant.busyHintStreaming'),
+      );
+      return;
+    }
     setAttachBusy(true);
     try {
       const imageSlots = Math.max(0, ASSISTANT_IMAGE_MAX_PER_TURN - pendingImages.length);
@@ -982,7 +1033,11 @@ export function AssistantChat({
     } finally {
       setAttachBusy(false);
     }
-  }, [attachBusy, loading, pendingDocuments.length, pendingImages.length, t]);
+  }, [attachBusy, flashBusyHint, loading, pendingDocuments.length, pendingImages.length, t]);
+
+  const stopStreaming = useCallback(() => {
+    streamAbortRef.current?.abort();
+  }, []);
 
   const handleRemovePendingImage = useCallback((imageId: string) => {
     setPendingImages((prev) => prev.filter((img) => img.id !== imageId));
@@ -1126,6 +1181,8 @@ export function AssistantChat({
           loading={loading}
           onChange={setInput}
           onSubmit={() => void sendMessage(input)}
+          onStop={stopStreaming}
+          busyHint={composerBusyHint}
           onSuggestion={(prompt) => {
             setInput(prompt);
             void sendMessage(prompt);
