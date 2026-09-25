@@ -1,14 +1,19 @@
 import { randomUUID } from 'crypto';
 import { API_STATUS, apiError } from '@/lib/api-error-handler';
+import {
+  requireEventQuickCheckRunAccess,
+  resolveEqcPlatformProjectId,
+} from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import { getRequestUser } from '@/lib/auth-request-user';
-import { requireEventQuickCheckRunAccess } from '@/lib/assistant/event-quick-check/authorize-event-quick-check-run';
 import { reportFromWorkflowRun } from '@/lib/assistant/event-quick-check/execute-event-quick-check-page';
 import {
   generateEqcShareToken,
   hashReportShareToken,
 } from '@/lib/assistant/reports/share-token';
-import { createEventQuickCheckShare } from '@/lib/db/event-quick-check-shares';
+import { setClientRoomSlot } from '@/lib/collection-client-room';
 import { pathShareQuickCheck } from '@/lib/constants';
+import { createEventQuickCheckShare } from '@/lib/db/event-quick-check-shares';
+import { getPublicAppBaseUrl } from '@/lib/mail';
 
 /** Create a public read-only share link (snapshot of current report). */
 export async function POST(
@@ -34,10 +39,32 @@ export async function POST(
       reportSnapshot: report,
     });
 
+    const sharePath = pathShareQuickCheck(token);
+    const base = getPublicAppBaseUrl();
+    const shareUrl = base ? `${base}${sharePath}` : sharePath;
+
+    // Enterprise E2: publish Quick Check into Collection ClientRoom when bound.
+    // Access already enforced via requireEventQuickCheckRunAccess.
+    const platformProjectId = await resolveEqcPlatformProjectId(run);
+    if (platformProjectId) {
+      await setClientRoomSlot({
+        platformProjectId,
+        actor: user,
+        slotId: 'quick_check',
+        serviceTrusted: true,
+        slot: {
+          productId: 'plexon',
+          subjectRef: share.id,
+          title: report.meta?.title?.trim() || report.meta?.projectName?.trim() || 'Event Quick Check',
+          href: shareUrl,
+        },
+      }).catch(() => undefined);
+    }
+
     return Response.json({
       id: share.id,
       token,
-      url: pathShareQuickCheck(token),
+      url: sharePath,
       createdAt: share.createdAt.toISOString(),
     });
   } catch (e) {

@@ -25,12 +25,28 @@ describe('suite enterprise E2–E5 foundation', () => {
       'lib/collection-client-room.ts',
       'lib/suite-audit.ts',
       'app/api/platform/provisioning/collections/[platformProjectId]/client-room/route.ts',
+      'app/api/platform/provisioning/collections/[platformProjectId]/client-room/slots/[slotId]/route.ts',
       'app/api/platform/provisioning/collections/[platformProjectId]/audit/route.ts',
       'app/share/room/[token]/page.tsx',
       'components/projects/CollectionClientRoomPanel.tsx',
+      'knowledge/client-room-slots.md',
     ]) {
       expect(existsSync(path.join(root, rel)), `missing ${rel}`).toBe(true)
     }
+  })
+
+  it('service slot put trusts canView actor (product freigaben)', () => {
+    const room = readFileSync(path.join(root, 'lib/collection-client-room.ts'), 'utf8')
+    expect(room).toContain('serviceTrusted')
+    const slots = readFileSync(
+      path.join(
+        root,
+        'app/api/platform/provisioning/collections/[platformProjectId]/client-room/slots/[slotId]/route.ts',
+      ),
+      'utf8',
+    )
+    expect(slots).toContain('serviceTrusted')
+    expect(slots).toContain('actor_required')
   })
 
   it('defines closed ClientRoom slots and audit actions', () => {
@@ -78,5 +94,15 @@ describe('suite enterprise E2–E5 foundation', () => {
     )
     expect(flowsRoute).toContain('COLLECTION_FLOW_TEMPLATE_FIX_RETEST')
     expect(flowsRoute).toContain('COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE')
+  })
+
+  it('EQC share route publishes quick_check slot', () => {
+    const share = readFileSync(
+      path.join(root, 'app/api/assistant/event-quick-check/runs/[runId]/share/route.ts'),
+      'utf8',
+    )
+    expect(share).toContain("slotId: 'quick_check'")
+    expect(share).toContain('setClientRoomSlot')
+    expect(share).toContain('serviceTrusted: true')
   })
 })

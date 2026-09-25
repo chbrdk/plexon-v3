@@ -167,6 +167,11 @@ export async function setClientRoomSlot(input: {
   actor: RequestUser;
   slotId: string;
   slot: Omit<ClientRoomSlot, 'approvedAt' | 'approvedByUserId'> | null;
+  /**
+   * Skip Collection-manage check. Use only after an access gate already ran:
+   * service-secret + canView, or session freigabe (share/approve) that authorized the actor.
+   */
+  serviceTrusted?: boolean;
 }): Promise<
   | { ok: true; room: ClientRoomPublic }
   | { ok: false; status: 400 | 403 | 404; error: string }
@@ -175,6 +180,7 @@ export async function setClientRoomSlot(input: {
     return { ok: false, status: 400, error: 'slot_invalid' };
   }
   const allowed =
+    input.serviceTrusted === true ||
     isAdmin(input.actor) ||
     (await userCanManageCollectionLifecycle(input.actor, input.platformProjectId));
   if (!allowed) return { ok: false, status: 403, error: 'Forbidden' };

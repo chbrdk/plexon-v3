@@ -36,6 +36,7 @@ export async function PUT(
   }
 
   let actor: RequestUser | null = null
+  let serviceTrusted = false
 
   if (isServiceSecretAuthorized(request)) {
     if (!hasValidContractHeader(request)) {
@@ -47,6 +48,7 @@ export async function PUT(
     const canView = await userCanViewPlatformProject(actorUserId, USER_ROLE.USER, id)
     if (!canView) return apiError('Forbidden', API_STATUS.FORBIDDEN)
     actor = { id: actorUserId, role: USER_ROLE.USER }
+    serviceTrusted = true
   } else {
     actor = await getRequestUser(request)
     if (!actor) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED)
@@ -56,6 +58,7 @@ export async function PUT(
     platformProjectId: id,
     actor,
     slotId: slotId.trim(),
+    serviceTrusted,
     slot: body.clear
       ? null
       : {

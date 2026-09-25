@@ -57,7 +57,7 @@ E6 ist bereits spezifiziert. Diese Datei bindet sie ein und schreibt sie nicht n
 
 ## E2 — Kundenraum
 
-**Status:** Done (2026-09-25) — `collection_client_rooms`, API, Panel, `/share/room/[token]`; Slot-Put Session + Service-Secret.
+**Status:** Done (2026-09-25) — `collection_client_rooms`, API, Panel, `/share/room/[token]`; Slot-Put Session + Service-Secret (`serviceTrusted` nach canView). Produkt-Slot-Publish parallel in den App-Specs.
 
 **Nutzer:** Ein externer Link zeigt den zuletzt freigegebenen Stand des Mandats.
 
@@ -73,11 +73,20 @@ E6 ist bereits spezifiziert. Diese Datei bindet sie ein und schreibt sie nicht n
 
 Ein Slot zeigt nur ein Artefakt, das die Quell-App als **freigegeben** markiert hat. Ungelesene Entwürfe erscheinen nicht.
 
+**Slot-Put (Produkt → Plexon)**
+
+- `PUT …/client-room/slots/{slotId}` mit Service-Secret + Contract-Header + `actorUserId`.
+- Service-Pfad: Actor braucht Collection-**View**; Manage entfällt (`serviceTrusted`).
+- Session-Pfad: Actor braucht Collection-**Manage**.
+- `404 room_missing` ist erwartet, wenn noch kein Raum existiert — Produkte skippen still.
+- Contract-Wissen: `knowledge/client-room-slots.md`.
+
 **Acceptance**
 
 - Ein Raum, ein Token, Widerruf sperrt alle Slots.
 - Leerer Slot bleibt leer, er zeigt kein Fixture.
 - Passwort und TTL folgen der bestehenden Client-Share-Policy.
+- Produkt-Freigabe (CHECKION Overview, CREATION approved Share, BRANDION Findings, METRON Dashboard, VIDEON Cut) setzt den zugehörigen Slot, ohne Manage-Recht am Actor.
 
 ## E3 — Termin und Gegentest
 

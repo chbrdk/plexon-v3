@@ -25,6 +25,7 @@ export function CollectionClientRoomPanel({ platformProjectId }: { platformProje
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [url, setUrl] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -70,6 +71,17 @@ export function CollectionClientRoomPanel({ platformProjectId }: { platformProje
       setError(e instanceof Error ? e.message : t('projects.detail.clientRoomCreateError'))
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function copyUrl() {
+    if (!url) return
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError(t('projects.detail.clientRoomCreateError'))
     }
   }
 
@@ -134,7 +146,10 @@ export function CollectionClientRoomPanel({ platformProjectId }: { platformProje
       {error ? <Alert tone="error">{error}</Alert> : null}
       {url ? (
         <Alert tone="success">
-          {t('projects.detail.clientRoomLink')}: {url}
+          {t('projects.detail.clientRoomLink')}: {url}{' '}
+          <Button variant="ghost" size="sm" onClick={() => void copyUrl()}>
+            {copied ? t('projects.detail.clientRoomCopied') : t('projects.detail.clientRoomCopyLink')}
+          </Button>
         </Alert>
       ) : null}
 
@@ -150,6 +165,7 @@ export function CollectionClientRoomPanel({ platformProjectId }: { platformProje
               ? ` · ${t('projects.detail.clientShares.expires')} ${new Date(room.expiresAt).toLocaleDateString()}`
               : ''}
           </Text>
+          <Text role="meta">{t('projects.detail.clientRoomSlotsHint')}</Text>
           {slotEntries.length === 0 ? (
             <Text role="meta">{t('projects.detail.clientRoomSlotsEmpty')}</Text>
           ) : (

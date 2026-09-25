@@ -536,6 +536,9 @@
       "clientRoomSlotsEmpty": "Noch keine freigegebenen Slots.",
       "clientRoomApproved": "freigegeben",
       "clientRoomLink": "Öffentlicher Link",
+      "clientRoomCopyLink": "Link kopieren",
+      "clientRoomCopied": "Kopiert",
+      "clientRoomSlotsHint": "Slots füllen die Produkte nach Freigabe (CHECKION, CREATION, BRANDION, …).",
       "clientShares": {
         "title": "Client-Seitenfreigaben",
         "subtitle": "CREATION nur-lesen Links für Kunden — keine Collection-Einladungen.",

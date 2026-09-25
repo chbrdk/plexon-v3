@@ -536,6 +536,9 @@
       "clientRoomSlotsEmpty": "No approved slots yet.",
       "clientRoomApproved": "approved",
       "clientRoomLink": "Public link",
+      "clientRoomCopyLink": "Copy link",
+      "clientRoomCopied": "Copied",
+      "clientRoomSlotsHint": "Products fill slots after approval (CHECKION, CREATION, BRANDION, …).",
       "clientShares": {
         "title": "Client page shares",
         "subtitle": "CREATION view-only links for customers — not Collection invites.",

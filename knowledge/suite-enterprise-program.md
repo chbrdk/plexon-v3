@@ -8,7 +8,7 @@
 | Welle | Stand |
 |---|---|
 | E1 Lagebild | Team, Aktivität (Flows + Destillate), Capability-Panes; Activity-Ingest API |
-| E2 Kundenraum | DB + API + Panel + Share; Slot-Put mit Service-Secret |
+| E2 Kundenraum | DB + API + Panel + Share; Slot-Put Service (`serviceTrusted`); EQC → `quick_check`; Produkt-Clients (Checkion/Brandion/Creation/Metron/Videon) → `knowledge/client-room-slots.md` |
 | E3 Termin/Gegentest | CHECKION Delta; `retest`; Flow-Schedule-Scheduler live (Env Staging) |
 | E4 Audit | Session/Service-Ingest; Flow `run_finished`; Produkt-Clients |
 | E5 Gates | Fix-Retest / Launch-Gate im Katalog; Slot-Publish bei `quality_ok` |
@@ -16,6 +16,17 @@
 | E7 Kampagnenbrief | CRUD + Assistant `campaign_brief_list` / `campaign_brief_create` |
 | E8 Wettbewerb/Krise | Wettbewerbsraum-Band; Krisenvorlage im Flow-Katalog |
 | E9 Directory | Admin-Panel + API-Stub; IdP-Laufzeit bewusst später |
+
+### E2 Produkt-Slot-Matrix (2026-09-25)
+
+| Slot | App | Trigger |
+|---|---|---|
+| `quick_check` | Plexon | EQC Share anlegen |
+| `checkion_overview` | CHECKION | `POST /api/projects/:id/client-room/publish` |
+| `brand_findings` | BRANDION | `POST /api/projects/:id/client-room/publish` |
+| `creation_pages` | CREATION | Client Page Share `approve` |
+| `metron_dashboard` | METRON | Dashboard Share (neu / `clientRoom: true`) |
+| `videon_cut` | VIDEON | `POST /api/cuts/:id/client-room-approve` (+ Brand-Gate) |
 
 ## Migrationen (Staging/Prod-DB)
 
