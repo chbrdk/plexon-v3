@@ -7,6 +7,10 @@ export const apiPaths = {
     `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/audit`,
   collectionActivity: (platformProjectId: string) =>
     `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/activity`,
+  collectionClientRoom: (platformProjectId: string) =>
+    `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-room`,
+  collectionClientRoomSlot: (platformProjectId: string, slotId: string) =>
+    `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-room/slots/${encodeURIComponent(slotId)}`,
   projectFlows: (platformProjectId: string) =>
     `/api/platform/projects/${encodeURIComponent(platformProjectId)}/flows`,
   companyDirectory: (companyId: string) =>
