@@ -19,6 +19,48 @@ describe('assistant chat answer formatting', () => {
     expect(normalizeChatMarkdown('**Title:** body').startsWith('## Title')).toBe(true)
   })
 
+  it('parses GFM pipe tables (multiline + flattened)', () => {
+    const multiline = [
+      '| Projekt | Zielgruppen | Personas | Company Context |',
+      '|---|---|---|---|',
+      '| Vaillant (864db4f2) | 3 | 4 gesamt | nicht hinterlegt |',
+      '| Vaillant Group (361f189a) | 1 | 1 | vollständig |',
+      '',
+      'Inhaltlich vorhanden',
+      '',
+      'Tech Enthusiasten — detailliert.',
+    ].join('\n')
+    const blocks = parseChatBlocks(multiline)
+    const table = blocks.find((b) => b.type === 'table')
+    expect(table?.type).toBe('table')
+    if (table?.type === 'table') {
+      expect(table.headers).toHaveLength(4)
+      expect(table.rows).toHaveLength(2)
+      const firstCell = table.rows[0]![0]!
+        .map((s) => ('value' in s ? s.value : ''))
+        .join('')
+      expect(firstCell).toContain('Vaillant')
+    }
+    expect(blocks.some((b) => b.type === 'h' && b.inlines.some((s) => 'value' in s && s.value.includes('Inhaltlich')))).toBe(
+      true
+    )
+
+    const flat =
+      'Projekt | Zielgruppen | Personas | Company Context | |---|---|---|---| | Vaillant (864db4f2) | 3 | 4 gesamt | nicht hinterlegt | | Vaillant Group (361f189a) | 1 | 1 | vollständig |'
+    const flatBlocks = parseChatBlocks(flat)
+    const flatTable = flatBlocks.find((b) => b.type === 'table')
+    expect(flatTable?.type).toBe('table')
+    if (flatTable?.type === 'table') {
+      expect(flatTable.rows).toHaveLength(2)
+    }
+  })
+
+  it('AssistantChatAnswer renders table chrome', () => {
+    const src = readFileSync(path.join(root, 'components/assistant/AssistantChatAnswer.tsx'), 'utf8')
+    expect(src).toContain('chat-answer-table')
+    expect(src).toContain("block.type === 'table'")
+  })
+
   it('parses code, links, quotes and strips emoticons', () => {
     const blocks = parseChatBlocks(
       [

@@ -83,6 +83,32 @@ function BlockView({ block, index }: { block: ChatBlock; index: number }) {
       </pre>
     )
   }
+  if (block.type === 'table') {
+    return (
+      <div className="chat-answer-table-wrap">
+        <table className="chat-answer-table">
+          <thead>
+            <tr>
+              {block.headers.map((cell, j) => (
+                <th key={`${prefix}-th-${j}`}>{renderInlines(cell, `${prefix}-th-${j}`)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, r) => (
+              <tr key={`${prefix}-tr-${r}`}>
+                {row.map((cell, j) => (
+                  <td key={`${prefix}-td-${r}-${j}`}>
+                    {renderInlines(cell, `${prefix}-td-${r}-${j}`)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
   return <p className="chat-answer-p">{renderInlines(block.inlines, prefix)}</p>
 }
 

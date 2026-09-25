@@ -1780,6 +1780,35 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   font-size: 0.85em;
 }
 
+.plexon-assistant-markdown .chat-answer-table-wrap {
+  margin: 0.15rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.plexon-assistant-markdown .chat-answer-table {
+  width: 100%;
+  min-width: 16rem;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.plexon-assistant-markdown .chat-answer-table th,
+.plexon-assistant-markdown .chat-answer-table td {
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.plexon-assistant-markdown .chat-answer-table th {
+  font-weight: 600;
+  color: var(--ink);
+  border-bottom-color: color-mix(in srgb, var(--line) 60%, var(--ink));
+}
+
 .plexon-assistant-planner {
   padding: 0.3rem 0.5rem;
   font-size: var(--type-xs, 0.75rem);

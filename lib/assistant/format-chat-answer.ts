@@ -15,12 +15,14 @@ export type ChatBlock =
   | { type: 'ul'; items: ChatInline[][] }
   | { type: 'quote'; inlines: ChatInline[] }
   | { type: 'code'; lang?: string; value: string }
+  | { type: 'table'; headers: ChatInline[][]; rows: ChatInline[][][] }
 
 const HEADING_RE = /^(#{1,3})\s+(.+)$/
 const OL_RE = /^(\d+)[.)]\s+(.+)$/
 const UL_RE = /^[-*•]\s+(.+)$/
 const QUOTE_RE = /^>\s?(.*)$/
 const FENCE_OPEN_RE = /^```([\w+-]*)\s*$/
+const TABLE_SEP_RE = /^\|(\s*:?-+:?\s*\|)+$/
 const CITE_RE = /\[(\d+)\]/g
 const LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g
 
@@ -41,13 +43,88 @@ export function stripChatEmoticons(raw: string): string {
 export function normalizeChatMarkdown(raw: string): string {
   let text = stripChatEmoticons((raw ?? '').replace(/\r\n/g, '\n')).trim()
   if (!text) return ''
+  // Recover GFM pipe tables flattened onto one line (`| a | |---| | b |`)
+  text = text.replace(/\|\s+(?=\|)/g, '|\n')
   text = text.replace(/(^|\n)\*\*([^*\n]{2,120}?):\*\*\s*/g, '$1## $2\n\n')
   text = text.replace(/(^|\n)\*\*([^*\n]{2,120}?)\*\*:\s*/g, '$1## $2\n\n')
   text = text.replace(/(^|\n)__([^_\n]{2,120}?)__:\s*/g, '$1## $2\n\n')
+  // Standalone bold line → heading (common model habit without #)
+  text = text.replace(/(^|\n)\*\*([^*\n]{2,80}?)\*\*\s*(?=\n|$)/g, '$1## $2\n')
+  // Bare section title between blank lines (no trailing punct / pipes)
+  text = text.replace(/(^|\n\n)([^\n#|>\-*•][^\n]{1,60})\n\n/g, (full, lead: string, title: string) => {
+    const t = title.trim()
+    if (!t || /[.!?:]$/.test(t) || t.includes('|') || /^\d+[.)]\s/.test(t)) return full
+    return `${lead}## ${t}\n\n`
+  })
   text = text.replace(/([:；.!?])\s+(\d{1,2})[.)]\s+/g, '$1\n$2. ')
   text = text.replace(/(\S)\s+(\d{1,2})[.)]\s+(?=\*\*|__|[A-ZÄÖÜ])/g, '$1\n$2. ')
   text = text.replace(/\n{3,}/g, '\n\n')
   return text.trim()
+}
+
+/** GFM pipe table row (cells may omit leading/trailing pipe). */
+export function isChatTableRow(line: string): boolean {
+  const t = line.trim()
+  if (!t.includes('|')) return false
+  if (TABLE_SEP_RE.test(t)) return true
+  const cells = splitChatTableCells(t)
+  return cells.length >= 2
+}
+
+export function isChatTableSeparator(line: string): boolean {
+  return TABLE_SEP_RE.test(line.trim())
+}
+
+export function splitChatTableCells(line: string): string[] {
+  let t = line.trim()
+  if (t.startsWith('|')) t = t.slice(1)
+  if (t.endsWith('|')) t = t.slice(0, -1)
+  return t.split('|').map((c) => c.trim())
+}
+
+function parseTableBlock(
+  lines: string[],
+  start: number,
+): { block: Extract<ChatBlock, { type: 'table' }>; next: number } | null {
+  const first = (lines[start] ?? '').trim()
+  if (!isChatTableRow(first) || isChatTableSeparator(first)) return null
+
+  const rawRows: string[][] = []
+  let i = start
+  let sawSeparator = false
+  while (i < lines.length) {
+    const row = (lines[i] ?? '').trim()
+    if (!row) break
+    if (!isChatTableRow(row)) break
+    if (isChatTableSeparator(row)) {
+      if (rawRows.length === 0) return null
+      sawSeparator = true
+      i += 1
+      continue
+    }
+    rawRows.push(splitChatTableCells(row))
+    i += 1
+  }
+  // Need header + ≥1 body row (with or without GFM separator)
+  if (rawRows.length < 2) return null
+  if (!sawSeparator && rawRows.length < 2) return null
+
+  const colCount = Math.max(...rawRows.map((r) => r.length), 0)
+  if (colCount < 2) return null
+
+  const pad = (cells: string[]): string[] => {
+    const next = cells.slice(0, colCount)
+    while (next.length < colCount) next.push('')
+    return next
+  }
+
+  const headers = pad(rawRows[0]!).map((c) => parseChatInlines(c))
+  const rows = rawRows.slice(1).map((cells) => pad(cells).map((c) => parseChatInlines(c)))
+
+  return {
+    block: { type: 'table', headers, rows },
+    next: i,
+  }
 }
 
 export function parseChatBlocks(raw: string): ChatBlock[] {
@@ -81,6 +158,13 @@ export function parseChatBlocks(raw: string): ChatBlock[] {
         i += 1
       }
       blocks.push({ type: 'code', lang, value: body.join('\n') })
+      continue
+    }
+
+    const table = parseTableBlock(lines, i)
+    if (table) {
+      blocks.push(table.block)
+      i = table.next
       continue
     }
 
@@ -148,7 +232,8 @@ export function parseChatBlocks(raw: string): ChatBlock[] {
         OL_RE.test(t) ||
         UL_RE.test(t) ||
         QUOTE_RE.test(t) ||
-        FENCE_OPEN_RE.test(t)
+        FENCE_OPEN_RE.test(t) ||
+        isChatTableRow(t)
       ) {
         break
       }

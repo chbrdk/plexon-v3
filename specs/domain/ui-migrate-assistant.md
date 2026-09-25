@@ -35,7 +35,7 @@
 | Block chrome | `Panel` + `Text` + `.plexon-assistant-block*` |
 | Block list typography | `UiText` → DS roles: panel title `title@xl`, item title `title@lg`, prose `meta` (`knowledge/assistant-block-typography.md`) |
 | Step progress | `.plexon-assistant-steps` + `Spinner` (Audion-like status rows) |
-| Markdown blocks | `AssistantChatAnswer` / `format-chat-answer` |
+| Markdown blocks | `AssistantChatAnswer` / `format-chat-answer` (headings, lists, code, links, quotes, **GFM tables**) |
 
 ## File set (Wave 5 shell + flyout)
 
