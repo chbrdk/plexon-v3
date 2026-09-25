@@ -95,6 +95,17 @@ Client no longer `POST`s a conversation before the first stream. Complete omits 
 - Mid-flight send/attach no longer silent — short Field error hint.
 - While `metadata.streaming`, `AssistantChatAnswer` renders plain pre-wrap; markdown parse only after complete.
 
+### Continuity observability (2026-09-25)
+
+Staging log greps for residual remount / empty-done regressions:
+
+| Event | When |
+|-------|------|
+| `assistant_remount_while_streaming` | `AssistantChat` unmounts while `sendInFlightRef` is true |
+| `assistant_empty_done` | Stream `done` has no text and no `uiLayout` blocks/panel |
+
+Prefix: `[assistant/continuity]`. Helper: `lib/assistant/stream-continuity-telemetry.ts`. Spec: `central-assistant-flyout.md` § Continuity observability.
+
 ### Activity + answer chrome (follow-up)
 
 - `AgentActivityTrace` / `PlannerStepCard`: `Panel variant="default"` — never `data-msqdx-surface="light"` inside the flyout.

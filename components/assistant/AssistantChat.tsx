@@ -40,6 +40,10 @@ import {
   clearStreamingAssistantContent,
   finalizeStreamingAssistantMessage,
 } from '@/lib/assistant/stream-continuity';
+import {
+  isEmptyAssistantDone,
+  reportAssistantContinuityEvent,
+} from '@/lib/assistant/stream-continuity-telemetry';
 import { AssistantPanel } from '@/components/assistant-ui/AssistantPanel';
 import { AssistantChatComposer, type AssistantPendingDocument, type AssistantPendingImage } from '@/components/assistant/AssistantChatComposer';
 import { ReportCollectionBar, type ReportPinItem } from '@/components/assistant/ReportCollectionBar';
@@ -110,7 +114,12 @@ export function AssistantChat({
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
   const urlConversationLoadedRef = useRef(false);
+  const conversationIdRef = useRef<string | null>(null);
+  const presentationRef = useRef(presentation);
   const [composerBusyHint, setComposerBusyHint] = useState<string | null>(null);
+
+  conversationIdRef.current = conversationId;
+  presentationRef.current = presentation;
 
   const flashBusyHint = useCallback(
     (message: string) => {
@@ -124,6 +133,14 @@ export function AssistantChat({
   useEffect(() => {
     return () => {
       if (busyHintTimerRef.current) clearTimeout(busyHintTimerRef.current);
+      if (sendInFlightRef.current) {
+        reportAssistantContinuityEvent({
+          type: 'assistant_remount_while_streaming',
+          conversationId: conversationIdRef.current,
+          presentation: presentationRef.current,
+          streamId: streamingMessageIdRef.current,
+        });
+      }
       streamAbortRef.current?.abort();
     };
   }, []);
@@ -839,6 +856,20 @@ export function AssistantChat({
         syncConversationToUrl(done.conversationId);
         // Finalize the live bubble in place — do not await a hard reload (empty flash).
         const streamId = streamingMessageIdRef.current;
+        if (
+          isEmptyAssistantDone({
+            text: done.text,
+            metadata: done.metadata as Record<string, unknown> | null,
+          })
+        ) {
+          reportAssistantContinuityEvent({
+            type: 'assistant_empty_done',
+            conversationId: done.conversationId,
+            presentation,
+            streamId,
+            hasUiLayout: false,
+          });
+        }
         setMessages((prev) =>
           finalizeStreamingAssistantMessage(prev, streamId, {
             text: done.text,
