@@ -499,22 +499,6 @@ export function AssistantChat({
     return () => window.removeEventListener('plexon:quick-check-gate-complete', onGateComplete);
   }, [conversationId, loadConversation]);
 
-  const ensureConversation = useCallback(async (): Promise<string> => {
-    if (conversationId) return conversationId;
-    const res = await fetch(API_ASSISTANT_CONVERSATIONS, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platformProjectId }),
-    });
-    if (!res.ok) throw new Error('Failed to create conversation');
-    const row = (await res.json()) as { id: string };
-    // Keep URL sync for after the turn completes — writing ?c= here remounted expand chat.
-    setConversationId(row.id);
-    void refreshConversations();
-    return row.id;
-  }, [conversationId, platformProjectId, refreshConversations]);
-
   const watchWorkflow = useCallback((runId: string) => {
     workflowStreamRef.current?.close();
     workflowStreamRef.current = subscribeAssistantWorkflowStream(runId, {
@@ -642,7 +626,8 @@ export function AssistantChat({
       const abortController = new AbortController();
       streamAbortRef.current = abortController;
       try {
-        const cid = await ensureConversation();
+        // First turn: omit conversationId — server is the sole create path.
+        const cid = conversationId;
 
         if (trimmed || images.length > 0 || documents.length > 0) {
           const placeholder =
@@ -681,7 +666,7 @@ export function AssistantChat({
         const done = await postAssistantCompleteStream(
           {
             prompt: trimmed,
-            conversationId: cid,
+            ...(cid ? { conversationId: cid } : {}),
             platformProjectId: platformProjectId ?? pageContext?.platformProjectId ?? undefined,
             ...(pageContext ? { pageContext } : {}),
             ...(confirmToolCall ? { confirmToolCall } : {}),
@@ -921,7 +906,7 @@ export function AssistantChat({
         streamingMessageIdRef.current = null;
       }
     },
-    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, ensureConversation, flashBusyHint, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, softRefreshConversation, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
+    [appendStreamingUiBlock, attachBusy, clearStreamingUiBlocks, conversationId, flashBusyHint, loadConversation, loading, pageContext, pendingDocuments, pendingImages, platformProjectId, presentation, refreshConversations, scrollToBottom, softRefreshConversation, syncConversationToUrl, t, updateStreamingUiBlock, watchWorkflow]
   );
 
   const handleAttachFiles = useCallback(async (files: FileList | null) => {

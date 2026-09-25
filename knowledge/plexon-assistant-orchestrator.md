@@ -64,7 +64,7 @@ Schema: `lib/db/schema.ts`. Push: `npm run db:push`.
 
 - Sidebar links (Desktop) bzw. Drawer (Mobile): `components/assistant/AssistantConversationHistory.tsx`
 - Liste via `GET API_ASSISTANT_CONVERSATIONS`, Auswahl lädt Messages + Report-Pins + Projektkontext
-- **Neuer Chat** setzt State zurück; URL ohne Query-Param
+- **Neuer Chat** setzt State zurück; URL ohne Query-Param — erste Nachricht lässt den Server die Conversation anlegen (`resolveAssistantConversationForComplete`; kein Client-`POST` vor dem Stream)
 - Aktiver Chat: `pathAssistantChat(conversationId)` → `/assistant?c=<id>` (Bookmark / Reload)
 - Suche (aufklappbar), Umbenennen (`PATCH apiAssistantConversation(id)`), Löschen (`DELETE`, Cascade auf Messages/Pins)
 - Desktop: einklappbare Sidebar (`ASSISTANT_HISTORY_COLLAPSED_STORAGE_KEY` in localStorage), 220px / 44px Rail

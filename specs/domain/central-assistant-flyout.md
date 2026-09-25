@@ -67,6 +67,8 @@ Same stream client, history Flyout pattern, Collection picker, generative blocks
 
 **First-turn continuity:** Creating a conversation (or finishing a turn) MUST NOT App-Router-`replace` the expand URL mid-flight. Soft-nav remounts `AssistantChat` and drops the in-flight first reply (user had to send again). Expand URL sync uses `history.replaceState` only; overlay still never writes `?c=` (host callback only).
 
+**Conversation create (single path):** The client MUST NOT `POST /api/assistant/conversations` before the first complete turn. Omit `conversationId` on first send; `handleAssistantComplete` mints the row (`resolveAssistantConversationForComplete`). A provided but unknown id MUST return **404** — never mint a second conversation. Explicit `POST …/conversations` remains for ops/tests only.
+
 **Stop while streaming:** Composer exposes Stop; client aborts the SSE `fetch` via `AbortController`. Partial tokens stay in the bubble (streaming flag cleared). Silent early-returns while `loading`/`attachBusy` MUST surface a short composer hint (no no-op click).
 
 **Streaming markdown:** While `metadata.streaming`, render assistant text as plain pre-wrap; run `parseChatBlocks` only after the turn completes (avoids list/heading jump on each token).

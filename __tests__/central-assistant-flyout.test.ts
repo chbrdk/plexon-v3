@@ -82,17 +82,23 @@ describe('central assistant flyout specs + mounts', () => {
     expect(chat).not.toMatch(/syncConversationToUrl[\s\S]{0,200}router\.replace/)
   })
 
-  it('defers expand URL sync until after create so first turn is not remounted', () => {
+  it('uses server-only create on first turn (no client POST before stream)', () => {
     const chat = readFileSync(join(root, 'components/assistant/AssistantChat.tsx'), 'utf8')
     expect(chat).toContain('sendInFlightRef')
-    expect(chat).toMatch(/ensureConversation[\s\S]*?setConversationId\(row\.id\)/)
-    expect(chat).toContain('Keep URL sync for after the turn completes')
-    // ensureConversation must not call syncConversationToUrl (mid-create remount bug).
-    const ensureBody = chat.slice(
-      chat.indexOf('const ensureConversation'),
-      chat.indexOf('const watchWorkflow'),
+    expect(chat).toContain('First turn: omit conversationId')
+    expect(chat).toContain('...(cid ? { conversationId: cid } : {})')
+    expect(chat).not.toContain('Failed to create conversation')
+    expect(chat).not.toMatch(
+      /fetch\(API_ASSISTANT_CONVERSATIONS,\s*\{[^}]*method:\s*'POST'/,
     )
-    expect(ensureBody).not.toContain('syncConversationToUrl')
+    expect(chat).toContain('history.replaceState')
+
+    const resolve = readFileSync(
+      join(root, 'lib/assistant/resolve-assistant-conversation.ts'),
+      'utf8',
+    )
+    expect(resolve).toContain('Conversation not found')
+    expect(resolve).toContain('MUST NOT mint a second conversation')
   })
 
   it('finalizes stream turns without wiping bubbles or hard-reloading empty', () => {

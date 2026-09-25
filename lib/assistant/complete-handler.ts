@@ -14,9 +14,8 @@ import {
 import type { AssistantStreamEvent, AssistantStreamPhase } from '@/lib/assistant/assistant-sse';
 import { getProjectBindingIds } from '@/lib/assistant/workflows/create-platform-project';
 import { ensurePlatformProductBindings } from '@/lib/assistant/workflows/ensure-platform-product-bindings';
+import { resolveAssistantConversationForComplete } from '@/lib/assistant/resolve-assistant-conversation';
 import {
-  createAssistantConversation,
-  getAssistantConversationById,
   updateAssistantConversation,
 } from '@/lib/db/assistant-conversations';
 import {
@@ -116,48 +115,47 @@ export async function handleAssistantComplete(
 
   const modelPrompt = mergeUserMessageWithDocuments(prompt, documents);
 
-  let conversationId = typeof body.conversationId === 'string' ? body.conversationId.trim() : '';
-  let conversation = conversationId ? await getAssistantConversationById(conversationId) : null;
-  if (conversation && conversation.userId !== user.id) {
-    const err = new Error('Forbidden') as Error & { status?: number };
-    err.status = API_STATUS.FORBIDDEN;
-    throw err;
-  }
-
-  if (!conversation) {
-    const titleSeed =
-      prompt.slice(0, 80) ||
-      (documents.length ? 'Dokument-Anhang' : images.length ? 'Bild-Anhang' : 'Neuer Chat');
-    conversation = await createAssistantConversation({
-      id: randomUUID(),
-      userId: user.id,
-      title: titleSeed,
-    });
-    conversationId = conversation.id;
-  }
-
   const pageContext = parseAssistantPageContext(body.pageContext);
   if (pageContext) {
     body = { ...body, pageContext };
   }
 
-  const platformProjectId =
+  const requestedConversationId =
+    typeof body.conversationId === 'string' ? body.conversationId.trim() : '';
+  const platformProjectIdHint =
     (typeof body.platformProjectId === 'string' ? body.platformProjectId.trim() : null) ||
     pageContext?.platformProjectId ||
-    conversation.platformProjectId ||
     undefined;
 
-  if (platformProjectId) {
-    const allowed = await userCanViewPlatformProjectMembership(user.id, platformProjectId);
+  if (platformProjectIdHint) {
+    const allowed = await userCanViewPlatformProjectMembership(user.id, platformProjectIdHint);
     if (!allowed) {
       const err = new Error('Forbidden project context') as Error & { status?: number };
       err.status = API_STATUS.FORBIDDEN;
       throw err;
     }
-    if (conversation.platformProjectId !== platformProjectId) {
-      await updateAssistantConversation(conversationId, { platformProjectId });
-      conversation = { ...conversation, platformProjectId };
-    }
+  }
+
+  const titleSeed =
+    prompt.slice(0, 80) ||
+    (documents.length ? 'Dokument-Anhang' : images.length ? 'Bild-Anhang' : 'Neuer Chat');
+
+  // Sole create path: omit conversationId → mint; unknown id → 404 (never a second row).
+  const resolved = await resolveAssistantConversationForComplete({
+    conversationId: requestedConversationId || null,
+    userId: user.id,
+    titleSeed,
+    platformProjectId: platformProjectIdHint ?? null,
+  });
+  let conversation = resolved.conversation;
+  let conversationId = conversation.id;
+
+  const platformProjectId =
+    platformProjectIdHint || conversation.platformProjectId || undefined;
+
+  if (platformProjectId && conversation.platformProjectId !== platformProjectId) {
+    await updateAssistantConversation(conversationId, { platformProjectId });
+    conversation = { ...conversation, platformProjectId };
   }
 
   if (prompt || images.length > 0 || documents.length > 0) {
