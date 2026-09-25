@@ -226,7 +226,7 @@ Einheitliche Capabilities für Assistent **und** Collection Flow — Spec: **`sp
 |------|--------|--------|
 | C0 | Spec + Inventory | Done |
 | C1.0 | Registry, adapters, scan catalog normalizer, promote classify, tests; Flag default off | Done |
-| C1.1 | Shared `checkion.scan` executor wired into Flow + `quick_scan` behind `CAPABILITY_CATALOG_RUNTIME` | Done |
+| C1.1 | Shared `checkion.scan` executor wired into Flow + `quick_scan` behind `CAPABILITY_CATALOG_RUNTIME` | Done — staging Coolify `=1`; health `capabilityCatalogRuntime` |
 | C2 | Chat startet bestehenden Collection Flow (`trigger: assistant`, intent `run_collection_flow`) | Done |
 | C3 | Promote: Chat-Trace → neuer Flow **oder** Playbook-Rezept (`promote_capability_sequence`) | Done |
 | C4 | EQC-Overlaps auf Catalog-IDs; Duplikat-Handler hinter Flag; `audion.journey_segment` Stub | Done |

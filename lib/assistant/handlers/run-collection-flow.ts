@@ -72,6 +72,7 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
       url: intent.url,
       listOnly: intent.listOnly === true,
       updatedByUserId: ctx.user.id,
+      history: ctx.history,
     },
     { source: 'agent', platformProjectId: ctx.platformProjectId }
   );
@@ -231,6 +232,9 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
     assistantText: [
       `## Flow „${run.flowName}“`,
       '',
+      run.autoResolved
+        ? '_Automatisch aus Specialist-/Collection-Kontext gewählt._\n'
+        : '',
       run.summary || `Status: **${run.status}**`,
       ready ? `\n${ready}` : '',
       run.awaitingInput

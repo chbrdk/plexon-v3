@@ -72,19 +72,85 @@ describe('Wave C2 — run collection flow', () => {
     expect(isSessionOwnedFlowTrigger('service')).toBe(false);
   });
 
-  it('capability lists flows when id/name missing', async () => {
+  it('capability auto-runs the only flow when id/name missing', async () => {
     vi.mocked(listAssistantCollectionFlows).mockResolvedValue([
       { id: 'f1', name: 'Page Quality', templateId: 'page-quality' },
     ]);
+    vi.mocked(runCollectionFlowFromAssistant).mockResolvedValue({
+      ok: true,
+      flowId: 'f1',
+      flowName: 'Page Quality',
+      historyRunId: 'run-1',
+      boardPath: '/projects/pp-1/flows/f1',
+      status: 'complete',
+      verdict: {
+        status: 'pass',
+        summary: 'OK',
+        collectionReady: true,
+      } as never,
+      lastRun: { status: 'completed' } as never,
+    });
 
     const result = await executePlexonCollectionFlowRunCapability(
       { platformProjectId: 'pp-1' },
       { source: 'agent', platformProjectId: 'pp-1' }
     );
+    expect(result.ok).toBe(true);
+    expect(result.agentPayload).toMatchObject({
+      variant: 'run',
+      flowId: 'f1',
+      autoResolved: true,
+    });
+    expect(runCollectionFlowFromAssistant).toHaveBeenCalledWith(
+      expect.objectContaining({ flowId: 'f1', flowName: 'Page Quality' })
+    );
+  });
+
+  it('capability picks specialist-matched flow without explicit id/name', async () => {
+    vi.mocked(listAssistantCollectionFlows).mockResolvedValue([
+      { id: 'f1', name: 'Page Quality Scan', templateId: 'page-quality' },
+      { id: 'f2', name: 'GEO Trust', templateId: 'geo-eeat' },
+    ]);
+    vi.mocked(runCollectionFlowFromAssistant).mockResolvedValue({
+      ok: true,
+      flowId: 'f1',
+      flowName: 'Page Quality Scan',
+      historyRunId: 'run-2',
+      boardPath: '/projects/pp-1/flows/f1',
+      status: 'complete',
+      verdict: { status: 'pass', summary: 'OK', collectionReady: true } as never,
+      lastRun: { status: 'completed' } as never,
+    });
+
+    const result = await executePlexonCollectionFlowRunCapability(
+      {
+        platformProjectId: 'pp-1',
+        specialistIntent: 'checkion_scan',
+      },
+      { source: 'agent', platformProjectId: 'pp-1' }
+    );
+    expect(result.ok).toBe(true);
+    expect(result.agentPayload).toMatchObject({
+      variant: 'run',
+      flowId: 'f1',
+      autoResolved: true,
+    });
+  });
+
+  it('capability lists flows when specialist match is ambiguous', async () => {
+    vi.mocked(listAssistantCollectionFlows).mockResolvedValue([
+      { id: 'f1', name: 'Deep Scan A', templateId: 'scan-a' },
+      { id: 'f2', name: 'Deep Scan B', templateId: 'scan-b' },
+    ]);
+
+    const result = await executePlexonCollectionFlowRunCapability(
+      { platformProjectId: 'pp-1', specialistIntent: 'checkion_scan' },
+      { source: 'agent', platformProjectId: 'pp-1' }
+    );
     expect(result.ok).toBe(false);
     expect(result.agentPayload).toMatchObject({
       variant: 'list',
-      flows: [{ id: 'f1', name: 'Page Quality' }],
+      flows: [{ id: 'f1' }, { id: 'f2' }],
     });
     expect(runCollectionFlowFromAssistant).not.toHaveBeenCalled();
   });

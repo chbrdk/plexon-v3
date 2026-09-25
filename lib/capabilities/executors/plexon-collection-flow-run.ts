@@ -4,6 +4,11 @@
  */
 
 import {
+  findLastSpecialistFromHistory,
+  resolvePreferredFlowForSpecialist,
+} from '@/lib/assistant/insights/specialist-flow-handoff';
+import type { ConversationMessageWithMeta } from '@/lib/assistant/conversation-context';
+import {
   listAssistantCollectionFlows,
   runCollectionFlowFromAssistant,
 } from '@/lib/assistant/workflows/run-collection-flow';
@@ -28,7 +33,19 @@ export type CollectionFlowRunAgentPayload =
       summary?: string | null;
       collectionReady?: boolean;
       awaitingInput?: boolean;
+      /** True when Flow was auto-picked from specialist context or sole flow. */
+      autoResolved?: boolean;
     };
+
+function readSpecialistIntent(
+  input: Record<string, unknown>,
+  history?: ConversationMessageWithMeta[] | null
+): string | null {
+  if (typeof input.specialistIntent === 'string' && input.specialistIntent.trim()) {
+    return input.specialistIntent.trim();
+  }
+  return findLastSpecialistFromHistory(history);
+}
 
 export const executePlexonCollectionFlowRun: CapabilityExecutor = async (input, ctx) => {
   return executePlexonCollectionFlowRunCapability(input, ctx);
@@ -47,8 +64,14 @@ export async function executePlexonCollectionFlowRunCapability(
   }
 
   const listOnly = input.listOnly === true;
-  const flowId = typeof input.flowId === 'string' ? input.flowId : null;
-  const flowName = typeof input.flowName === 'string' ? input.flowName : null;
+  let flowId = typeof input.flowId === 'string' ? input.flowId : null;
+  let flowName = typeof input.flowName === 'string' ? input.flowName : null;
+  let autoResolved = false;
+
+  const history = Array.isArray(input.history)
+    ? (input.history as ConversationMessageWithMeta[])
+    : null;
+  const specialistIntent = readSpecialistIntent(input, history);
 
   if (listOnly || (!flowId && !flowName)) {
     const flows = await listAssistantCollectionFlows(platformProjectId);
@@ -59,18 +82,25 @@ export async function executePlexonCollectionFlowRunCapability(
         agentPayload: { variant: 'list', flows: [] },
       };
     }
-    // Listing is a successful read when caller asked to list; otherwise soft-fail for picker UX.
     if (listOnly) {
       return {
         ok: true,
         agentPayload: { variant: 'list', flows },
       };
     }
-    return {
-      ok: false,
-      error: 'Welchen Flow soll ich starten?',
-      agentPayload: { variant: 'list', flows },
-    };
+
+    const preferred = resolvePreferredFlowForSpecialist(specialistIntent, flows);
+    if (preferred) {
+      flowId = preferred.id;
+      flowName = preferred.name;
+      autoResolved = true;
+    } else {
+      return {
+        ok: false,
+        error: 'Welchen Flow soll ich starten?',
+        agentPayload: { variant: 'list', flows },
+      };
+    }
   }
 
   const result = await runCollectionFlowFromAssistant({
@@ -104,6 +134,7 @@ export async function executePlexonCollectionFlowRunCapability(
       summary: result.verdict.summary ?? null,
       collectionReady: result.verdict.collectionReady,
       awaitingInput: result.status === 'awaiting_input',
+      ...(autoResolved ? { autoResolved: true } : {}),
     },
   };
 }

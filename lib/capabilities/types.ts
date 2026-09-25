@@ -23,6 +23,7 @@ export type CapabilityId =
   | 'checkion.geo_job'
   | 'brandion.brand_measure'
   | 'audion.persona_bootstrap'
+  | 'audion.persona_chat'
   | 'audion.journey_segment'
   | 'plexon.collection_flow.run'
   | 'spirion.capture'

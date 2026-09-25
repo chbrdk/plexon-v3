@@ -117,6 +117,7 @@ Durable / multi-step work MUST prefer **Collection Flow** over endless free-chat
 | Surface | Mechanism |
 |---------|-----------|
 | Follow-ups | After specialist turns with a bound Collection: chips **Flow starten** / **Flows zeigen** / **Als Flow speichern** (`lib/assistant/insights/specialist-flow-handoff.ts`) |
+| Auto-resolve | „Flow starten“ without id/name: sole Collection Flow **or** unique name/template match for the last specialist (`resolvePreferredFlowForSpecialist`) |
 | System hint | When the user prompt looks like a long job (deep scan, research run, batch, …) and the specialist is in the handoff set, inject a Flow-Handoff block into the system prompt |
 | Intent router | `run_collection_flow` / `promote_capability_sequence` (Capability Catalog C2/C3) |
 

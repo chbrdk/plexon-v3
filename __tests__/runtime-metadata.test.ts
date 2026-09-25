@@ -13,6 +13,7 @@ describe('PLEXON runtime metadata', () => {
       runtime: 'nextjs',
       version: '0.1.0',
       federationContractVersion: '2026-05-plexon-federation-v3',
+      capabilityCatalogRuntime: false,
       passwordResetMail: {
         transport: 'log',
         smtpHttpUrlSet: false,
@@ -62,5 +63,11 @@ describe('PLEXON runtime metadata', () => {
       mailgunApiBase: 'https://api.mailgun.net',
       mailgunKeyFormatHint: 'private-key-prefix-ok',
     });
+  });
+
+  it('exposes capabilityCatalogRuntime when CAPABILITY_CATALOG_RUNTIME is on', async () => {
+    vi.stubEnv('CAPABILITY_CATALOG_RUNTIME', '1');
+    const { getRuntimeMetadata } = await import('@/lib/runtime-metadata');
+    expect(getRuntimeMetadata().capabilityCatalogRuntime).toBe(true);
   });
 });

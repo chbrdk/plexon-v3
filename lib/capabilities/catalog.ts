@@ -104,6 +104,27 @@ const PILOT: CapabilityRecord[] = [
     executorId: 'audion-persona-bootstrap',
   },
   {
+    id: 'audion.persona_chat',
+    owner: 'audion',
+    title: 'Persona chat',
+    description:
+      'Agent-only pointer to Audion persona chat (EQC overlay / /chat). Not a Flow kind — SoT remains Audion chat-api.',
+    inputFields: [
+      { name: 'personaId', required: false },
+      { name: 'projectId', required: false },
+    ],
+    outputCatalogRoot: null,
+    sideEffect: 'read',
+    confirmation: 'none',
+    surfaces: { agent: true, flow: false },
+    agent: {
+      toolNames: ['audion_chat'],
+      intentTypes: [],
+    },
+    flow: null,
+    executorId: 'audion-persona-chat-stub',
+  },
+  {
     id: 'audion.journey_segment',
     owner: 'audion',
     title: 'Journey segment',

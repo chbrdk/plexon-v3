@@ -78,6 +78,34 @@ describe('specialist → collection flow handoff', () => {
     expect(ids).toContain('flow-handoff-list')
   })
 
+  it('resolves preferred flow from specialist hints', async () => {
+    const { resolvePreferredFlowForSpecialist, findLastSpecialistFromHistory } = await import(
+      '@/lib/assistant/insights/specialist-flow-handoff'
+    )
+    expect(
+      resolvePreferredFlowForSpecialist('checkion_scan', [
+        { id: 'a', name: 'Page Quality Scan', templateId: 'page-quality' },
+        { id: 'b', name: 'GEO Trust', templateId: 'geo' },
+      ])?.id,
+    ).toBe('a')
+    expect(
+      resolvePreferredFlowForSpecialist('checkion_scan', [
+        { id: 'a', name: 'Alpha', templateId: null },
+        { id: 'b', name: 'Beta', templateId: null },
+      ]),
+    ).toBeNull()
+    expect(
+      findLastSpecialistFromHistory([
+        { role: 'user', content: 'hi' },
+        {
+          role: 'assistant',
+          content: '…',
+          metadata: { planner: { intent: 'checkion_scan', specialistId: 'checkion_scan' } },
+        },
+      ]),
+    ).toBe('checkion_scan')
+  })
+
   it('intent router recognizes expanded flow start phrasing', () => {
     expect(routeAssistantIntent('Starte den Collection Flow').type).toBe('run_collection_flow')
     expect(routeAssistantIntent('Im Flow ausführen').type).toBe('run_collection_flow')

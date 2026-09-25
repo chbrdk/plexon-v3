@@ -26,6 +26,13 @@ describe('capability catalog (Wave C1)', () => {
     expect(capabilityIdFromFlowNodeKind('scan')).toBe('checkion.scan');
   });
 
+  it('registers audion.persona_chat as agent-only stub (Wave C5)', () => {
+    const cap = getCapability('audion.persona_chat');
+    expect(cap?.surfaces).toEqual({ agent: true, flow: false });
+    expect(cap?.executorId).toBe('audion-persona-chat-stub');
+    expect(cap?.agent?.toolNames).toContain('audion_chat');
+  });
+
   it('does not map orchestration kinds to capabilities', () => {
     expect(capabilityIdFromFlowNodeKind('compare')).toBeNull();
     expect(capabilityIdFromFlowNodeKind('human_confirm')).toBeNull();

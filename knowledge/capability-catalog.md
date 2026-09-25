@@ -1,7 +1,8 @@
 # Capability Catalog — knowledge companion
 
 **Spec SoT:** `specs/domain/capability-catalog.md`  
-**Status:** Wave C4 complete — EQC + Agent overlaps on catalog executors behind `CAPABILITY_CATALOG_RUNTIME` (default **off**).  
+**Status:** Wave C4 complete — EQC + Agent overlaps on catalog executors behind `CAPABILITY_CATALOG_RUNTIME` (code default **off**; **staging Coolify = on** / `1`).  
+**Health:** `GET /api/health` → `capabilityCatalogRuntime: boolean`  
 **Related:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/collection-test-flow-smoke.md` · `specs/domain/eqc-as-collection-flow.md`
 
 ## Locked product decisions (C0→C1)
@@ -154,7 +155,7 @@ Canonical module roots:
 | `lib/capabilities/executors/audion-journey-segment.ts` | Agent pointer (guidance) | C4 |
 | `lib/capabilities/executors/plexon-collection-flow-run.ts` | Chat run Flow | C2 |
 
-Env: `CAPABILITY_CATALOG_RUNTIME` — default off; `1`/`true`/`on`/`yes` enables executor wiring.
+Env: `CAPABILITY_CATALOG_RUNTIME` — code default off; `1`/`true`/`on`/`yes` enables executor wiring. Staging plexon-v3 Coolify is **on** (`1`); confirm via health `capabilityCatalogRuntime`.
 
 ## Wave checklist (operators)
 

@@ -153,7 +153,7 @@ Rules:
 
 - WENN ein Pilot-Executor läuft, DANN MUSS `catalogBundle` (falls gesetzt) über `build*CatalogBundle` / shared normalizer laufen — nicht hand-gebaut pro Surface.
 - SOLANGE `CAPABILITY_CATALOG_RUNTIME` off ist, DÜRFEN Legacy-Pfade unverändert bleiben; Catalog-Module dürfen trotzdem importiert und getestet werden.
-- MUSS: Flag via `runtimeEnv('CAPABILITY_CATALOG_RUNTIME')` — default **off** (`1`/`true`/`on` = on).
+- MUSS: Flag via `runtimeEnv('CAPABILITY_CATALOG_RUNTIME')` — code default **off** (`1`/`true`/`on` = on). Staging Coolify plexon-v3: **on**; observable as `capabilityCatalogRuntime` on `GET /api/health`.
 
 ### Module layout
 
@@ -240,7 +240,7 @@ Owner `metron`. Agent-only (no Collection Flow nodes in Wave 9). Free-chat uses 
 
 Companions: `metron-capability.md` · `assistant-metron-mcp.md` · `metron-v3/specs/domain/mcp-server.md` · `knowledge/metron-mcp-assistant.md`.
 
-**Planned Agent-only (not Flow):** `audion.persona_chat` — maps to Audion chat-api / MCP `audion_chat_*`; SoT UI remains Audion `/chat`. See Wave C5.
+**Planned Agent-only (not Flow):** `audion.persona_chat` — maps to Audion chat-api / MCP `audion_chat_*`; SoT UI remains Audion `/chat` / EQC overlay. Registered as Agent-only stub in `lib/capabilities/catalog.ts`.
 
 Explicitly **out of pilot** as Agent tools: `compare`, `set`, `human_confirm`, Family-A micro-kinds, `research_brief`, Echon waves.
 
@@ -374,7 +374,7 @@ MUSS: Promote never creates a node for `brandion.tokens_list` until that capabil
 | Fallback | **„In Audion öffnen“** → `resolveEqcPersonaChatHref` → full `/chat?personaId=&projectId=` |
 | Guest budget | 5 turns / ~800 chars / 30 min TTL — Audion `guest-budget.ts` + stream gate |
 | Central Assistant | Orchestration + optional **short** `audion_chat` MCP turns; long sessions → same handoff (**chip optional**) |
-| Capability | Register `audion.persona_chat` as **Agent-only** (`surfaces.flow: false`) — **optional stub** |
+| Capability | Register `audion.persona_chat` as **Agent-only** (`surfaces.flow: false`) — stub in catalog |
 
 **Exit:** Public share + logged-in magazine open overlay chat without a second stack; budget hard-stop works; deep-link fallback remains. Spec companions: `eqc-as-collection-flow.md` · `ui-migrate-event-quick-check.md` · `knowledge/eqc-persona-chat.md` · Audion `chat-embed.md`.
 

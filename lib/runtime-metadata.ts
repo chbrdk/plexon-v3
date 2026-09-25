@@ -1,3 +1,4 @@
+import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import { PLEXON_FEDERATION_CONTRACT_VERSION } from '@/lib/platform-contract';
 import { getTransactionalMailDiagnostics } from '@/lib/mail';
 
@@ -35,6 +36,8 @@ export function getRuntimeMetadata() {
     version: process.env.npm_package_version?.trim() || APP_VERSION_FALLBACK,
     nodeEnv: process.env.NODE_ENV?.trim() || null,
     federationContractVersion: PLEXON_FEDERATION_CONTRACT_VERSION,
+    /** Capability Catalog shared Agent↔Flow executors (`CAPABILITY_CATALOG_RUNTIME`). */
+    capabilityCatalogRuntime: isCapabilityCatalogRuntimeEnabled(),
     /** @deprecated Prefer transactionalMail — kept for Coolify health dashboards. */
     passwordResetMail: mail,
     /** Shared SMTP/Mailgun/log transport for all transactional kinds. */

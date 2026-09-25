@@ -13,9 +13,11 @@ import {
 } from '@/lib/assistant/insights/generate-workflow-insights';
 import {
   buildWorkflowFollowUps,
+  mergeRecommendations,
   workflowSourceUrl,
 } from '@/lib/assistant/insights/follow-up-suggestions';
 import type { WorkflowFollowUpPrompt } from '@/lib/assistant/insights/follow-up-suggestions';
+import { buildEqcPersonaChatRecommendations } from '@/lib/assistant/insights/eqc-persona-chat-followups';
 import type {
   WorkflowInsightNarrative,
   WorkflowInsightSource,
@@ -105,10 +107,14 @@ export async function enrichWorkflowLayout(
   });
 
   if (source.workflowType === 'event_quick_check') {
+    const withPersona = mergeRecommendations(
+      followUpPrompts,
+      buildEqcPersonaChatRecommendations(source.quick)
+    );
     return {
       layout: resolveEventQuickCheckReportLayout(source.quick, narrative),
       narrative,
-      followUpPrompts,
+      followUpPrompts: withPersona,
       assistantInsightMarkdown: eventQuickCheckInsightMarkdown(narrative),
     };
   }
