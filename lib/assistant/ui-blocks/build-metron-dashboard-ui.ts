@@ -25,11 +25,17 @@ export type MetronDashboardGetPayload = {
   id: string;
   name: string;
   metrics: Array<{ label: string; value: number | string }>;
+  /** First chart (share v1 compat). Prefer `charts` for multi-chart Auto-UI. */
   chart: {
     title: string;
     labels: string[];
     values: number[];
   } | null;
+  charts: Array<{
+    title: string;
+    labels: string[];
+    values: number[];
+  }>;
   platformProjectId?: string | null;
 };
 
@@ -196,9 +202,10 @@ export function parseMetronDashboardGetPayload(text: string): MetronDashboardGet
       metrics.push({ label, value: ev.value });
     }
 
-    let chart: MetronDashboardGetPayload['chart'] = null;
+    const charts: MetronDashboardGetPayload['charts'] = [];
     for (const w of widgets) {
       if (w.kind !== 'chart') continue;
+      if (charts.length >= UI_BLOCK_LIMITS.maxChartSeries) break;
       const points = Array.isArray(w.chartPoints) ? w.chartPoints : [];
       const usable = points
         .map((p) => ({
@@ -208,18 +215,23 @@ export function parseMetronDashboardGetPayload(text: string): MetronDashboardGet
         .filter((p): p is { label: string; value: number } => Boolean(p.label) && p.value != null)
         .slice(0, UI_BLOCK_LIMITS.maxChartLabels);
       if (usable.length < 1) continue;
-      chart = {
+      charts.push({
         title:
           typeof w.title === 'string' && w.title.trim()
             ? w.title.trim()
             : 'METRON chart',
         labels: usable.map((p) => p.label.slice(0, 256)),
         values: usable.map((p) => p.value),
-      };
-      break;
+      });
     }
 
-    return { id, name, metrics, chart };
+    return {
+      id,
+      name,
+      metrics,
+      chart: charts[0] ?? null,
+      charts,
+    };
   } catch {
     return null;
   }
@@ -257,16 +269,22 @@ export function buildMetronShareSnapshot(input: {
   name: string;
   metrics: Array<{ label: string; value: number | string }>;
   chart: MetronDashboardGetPayload['chart'];
+  charts?: MetronDashboardGetPayload['charts'];
   platformProjectId?: string | null;
 }): MetronDashboardShareSnapshot {
   const href = buildMetronDashboardHref(input.dashboardId);
+  const charts = (input.charts?.length ? input.charts : input.chart ? [input.chart] : []).slice(
+    0,
+    UI_BLOCK_LIMITS.maxChartSeries,
+  );
   return {
     version: 1,
     dashboardId: input.dashboardId,
     name: input.name,
     platformProjectId: input.platformProjectId ?? null,
     metrics: input.metrics.slice(0, UI_BLOCK_LIMITS.maxMetrics),
-    chart: input.chart,
+    chart: charts[0] ?? null,
+    ...(charts.length > 1 ? { charts } : {}),
     href,
   };
 }
@@ -276,16 +294,16 @@ export function buildMetronShareUiLayout(snapshot: MetronDashboardShareSnapshot)
   const meta = { source: 'plexon_ui', toolCallId: 'share' };
   const blocks: UiBlock[] = [];
   appendMetricGrid(blocks, snapshot.name, snapshot.metrics, meta);
-  if (snapshot.chart) {
+  const charts =
+    snapshot.charts?.length ? snapshot.charts : snapshot.chart ? [snapshot.chart] : [];
+  for (const c of charts.slice(0, UI_BLOCK_LIMITS.maxChartSeries)) {
     const chart = createUiBlock(
       'chart',
       {
-        title: snapshot.chart.title,
+        title: c.title,
         chartType: 'bar' as const,
-        labels: snapshot.chart.labels,
-        datasets: [
-          { label: snapshot.chart.title.slice(0, 256), values: snapshot.chart.values },
-        ],
+        labels: c.labels,
+        datasets: [{ label: c.title.slice(0, 256), values: c.values }],
       },
       randomUUID(),
       meta,
@@ -332,26 +350,32 @@ export function buildMetronDashboardGetBlocks(
   meta: ToolMeta,
 ): UiBlock[] {
   const href = buildMetronDashboardHref(payload.id);
-  if (!href && !payload.metrics.length && !payload.chart) return [];
+  const charts = payload.charts?.length
+    ? payload.charts
+    : payload.chart
+      ? [payload.chart]
+      : [];
+  if (!href && !payload.metrics.length && !charts.length) return [];
   const snapshot = buildMetronShareSnapshot({
     dashboardId: payload.id,
     name: payload.name,
     metrics: payload.metrics,
-    chart: payload.chart,
+    chart: charts[0] ?? null,
+    charts,
     platformProjectId: payload.platformProjectId,
   });
   const blockMeta = { ...meta, metronShareSnapshot: snapshot };
   const blocks: UiBlock[] = [];
   appendMetricGrid(blocks, payload.name, payload.metrics, blockMeta);
 
-  if (payload.chart) {
+  for (const c of charts.slice(0, UI_BLOCK_LIMITS.maxChartSeries)) {
     const chart = createUiBlock(
       'chart',
       {
-        title: payload.chart.title,
+        title: c.title,
         chartType: 'bar' as const,
-        labels: payload.chart.labels,
-        datasets: [{ label: payload.chart.title.slice(0, 256), values: payload.chart.values }],
+        labels: c.labels,
+        datasets: [{ label: c.title.slice(0, 256), values: c.values }],
       },
       randomUUID(),
       blockMeta,

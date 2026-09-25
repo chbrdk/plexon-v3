@@ -15,7 +15,7 @@ import {
 } from '@/lib/constants'
 
 describe('metron follow-ups', () => {
-  it('resolves list vs detail from toolTrace', () => {
+  it('resolves list vs detail vs suite from toolTrace', () => {
     expect(
       resolveMetronFollowUpMode({
         toolTrace: { tools: ['metron_dashboards_list'] },
@@ -28,6 +28,11 @@ describe('metron follow-ups', () => {
     ).toBe('detail')
     expect(
       resolveMetronFollowUpMode({
+        toolTrace: { tools: ['metron_suite_connectors_sync'] },
+      }),
+    ).toBe('suite')
+    expect(
+      resolveMetronFollowUpMode({
         planner: { intent: 'metron_analytics' },
       }),
     ).toBe('generic')
@@ -37,7 +42,15 @@ describe('metron follow-ups', () => {
   it('list follow-ups include starter pack confirm discoverability', () => {
     const recs = buildMetronFollowUps({ mode: 'list' })
     expect(recs.some((r) => r.id === 'metron-starter-pack')).toBe(true)
+    expect(recs.some((r) => r.id === 'metron-create-kpi')).toBe(true)
     expect(recs.some((r) => r.prompt.includes('Bestätigung'))).toBe(true)
+  })
+
+  it('suite follow-ups chain pack then overview board', () => {
+    const recs = buildMetronFollowUps({ mode: 'suite' })
+    expect(recs.some((r) => r.id === 'metron-checkion-pack')).toBe(true)
+    expect(recs.some((r) => r.id === 'metron-site-health-board')).toBe(true)
+    expect(recs.some((r) => r.prompt.includes('checkion-site-health'))).toBe(true)
   })
 
   it('attachRecommendations merges metron follow-ups for detail turns', () => {
@@ -75,7 +88,7 @@ describe('metron follow-ups', () => {
     )
     const recs = meta?.followUpPrompts as Array<{ id: string }>
     expect(recs.some((r) => r.id === 'metron-other-board')).toBe(true)
-    expect(recs.some((r) => r.id === 'metron-hired-source')).toBe(true)
+    expect(recs.some((r) => r.id === 'metron-suite-sync')).toBe(true)
   })
 })
 

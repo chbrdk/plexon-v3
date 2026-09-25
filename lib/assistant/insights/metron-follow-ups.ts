@@ -6,7 +6,7 @@
 import type { ConversationRecommendation } from '@/lib/assistant/insights/follow-up-suggestions';
 import type { UiLayout } from '@/lib/assistant/ui-blocks/types';
 
-export type MetronFollowUpMode = 'list' | 'detail' | 'generic';
+export type MetronFollowUpMode = 'list' | 'detail' | 'suite' | 'generic';
 
 function hasMetronShareSnapshot(uiLayout: unknown): boolean {
   if (!uiLayout || typeof uiLayout !== 'object') return false;
@@ -27,6 +27,9 @@ function metronToolsFromTrace(toolTrace: unknown): string[] {
 
 export function resolveMetronFollowUpMode(metadata: Record<string, unknown>): MetronFollowUpMode | null {
   const tools = metronToolsFromTrace(metadata.toolTrace);
+  if (tools.some((t) => t.includes('suite_connectors_sync'))) {
+    return 'suite';
+  }
   if (
     tools.some(
       (t) =>
@@ -71,7 +74,7 @@ function firstDashboardName(uiLayout: unknown): string | null {
   return null;
 }
 
-/** Actionable next turns after METRON list / get / summarize. */
+/** Actionable next turns after METRON list / get / summarize / suite sync. */
 export function buildMetronFollowUps(options: {
   mode: MetronFollowUpMode;
   uiLayout?: unknown;
@@ -81,6 +84,37 @@ export function buildMetronFollowUps(options: {
   const showPrompt = name
     ? `Zeig mir das METRON Dashboard „${name}“ mit KPIs und Chart`
     : 'Zeig mir das wichtigste METRON Dashboard dieser Collection mit KPIs und Chart';
+
+  if (options.mode === 'suite') {
+    return [
+      {
+        id: 'metron-checkion-pack',
+        label: 'Site-Health Pack',
+        prompt:
+          'Installiere das METRON KPI Starter Pack checkion-site-health für diese Collection (mit Bestätigung)',
+        reason: 'Suite sync → zertifizierte CHECKION-KPIs (kein Auto-Create)',
+      },
+      {
+        id: 'metron-site-health-board',
+        label: 'Overview Board',
+        prompt:
+          'Erstelle das Overview-Dashboard „CHECKION site health“ in METRON für diese Collection (mit Bestätigung)',
+        reason: 'Pack-KPIs als Overview Board (Playbook Suite→Board)',
+      },
+      {
+        id: 'metron-list-datasets',
+        label: 'Datasets',
+        prompt: 'Liste die METRON Datasets dieser Collection nach Suite-Sync',
+        reason: 'Sync-Ergebnis prüfen',
+      },
+      {
+        id: 'metron-eval-kpi',
+        label: 'KPI evaluieren',
+        prompt: 'Evaluiere den wichtigsten METRON-KPI dieser Collection (Server-SSOT)',
+        reason: 'kpi_evaluate statt schätzen',
+      },
+    ];
+  }
 
   if (options.mode === 'list') {
     return [
@@ -113,6 +147,13 @@ export function buildMetronFollowUps(options: {
         label: 'Dashboard anlegen',
         prompt: 'Erstelle ein Overview-Dashboard in METRON für diese Collection (mit Bestätigung)',
         reason: 'Confirm-Write sichtbar machen',
+      },
+      {
+        id: 'metron-create-kpi',
+        label: 'KPI anlegen',
+        prompt:
+          'Erstelle einen draft-KPI in METRON für diese Collection (mit Bestätigung; Formula Server-SSOT)',
+        reason: 'Confirm-Write kpi_create',
       },
     ];
   }
@@ -158,6 +199,13 @@ export function buildMetronFollowUps(options: {
       label: 'KPI evaluieren',
       prompt: 'Liste METRON-KPIs und evaluiere den wichtigsten (Server-SSOT)',
       reason: 'Evaluate-first Path',
+    },
+    {
+      id: 'metron-suite-playbook',
+      label: 'Suite → Board',
+      prompt:
+        'Synchronisiere CHECKION Suite-Connectors für diese Collection (mit Bestätigung), dann installiere checkion-site-health und lege das Overview-Board an',
+      reason: 'Chat-Playbook Suite sync → Overview (kein Auto-Create)',
     },
     {
       id: 'metron-starter-pack',

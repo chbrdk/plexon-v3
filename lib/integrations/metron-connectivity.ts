@@ -55,5 +55,11 @@ export function buildMetronIntegrationContextBlock(input: {
   lines.push(
     '- Wenn Seitenkontext entityType=dashboard|kpi|dataset mit entityId: id nicht erneut erfragen; Tools injecten die id.',
   );
+  lines.push(
+    '- Suite→Overview (Chat-Playbook, kein Auto-Create): nach metron_suite_connectors_sync (Confirm) → metron_kpi_starter_pack_install packId=checkion-site-health (Confirm) → metron_dashboard_create „CHECKION site health“ (Confirm). Nie still sync+board in einem Schritt ohne Bestätigung.',
+  );
+  lines.push(
+    '- KPI anlegen: metron_kpi_create mit status=draft bevorzugen; Formula nur als valides JSON (Server-SSOT) — Confirm-Gate.',
+  );
   return lines.join('\n');
 }

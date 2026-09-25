@@ -44,6 +44,32 @@ export async function executeMetronWriteCapability(
     return { ok: true, catalogRoot: 'metron.dashboards', catalogBundle: { status: 'created' }, agentPayload: res.data };
   }
 
+  if (op === 'kpi_create') {
+    const name = typeof input.name === 'string' ? input.name.trim() : '';
+    const formula = input.formula;
+    if (!platformProjectId || !name || formula == null || typeof formula !== 'object') {
+      return {
+        ok: false,
+        error: 'platformProjectId, name und formula (Objekt) erforderlich',
+        catalogRoot: 'metron.kpis',
+      };
+    }
+    const res = await metronProductFetch({
+      path: '/api/kpis',
+      method: 'POST',
+      body: {
+        platformProjectId,
+        name,
+        description: typeof input.description === 'string' ? input.description : undefined,
+        status: typeof input.status === 'string' ? input.status : 'draft',
+        formula,
+      },
+      actorUserId: ctx.actorUserId,
+    });
+    if (!res.ok) return { ok: false, error: res.error, catalogRoot: 'metron.kpis', agentPayload: res.data };
+    return { ok: true, catalogRoot: 'metron.kpis', catalogBundle: { status: 'created' }, agentPayload: res.data };
+  }
+
   if (op === 'kpi_starter_pack_install') {
     if (!platformProjectId) {
       return { ok: false, error: 'platformProjectId fehlt', catalogRoot: 'metron.kpis' };

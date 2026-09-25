@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { resolveUseMetronMcp } from '@/lib/assistant/product-mcp-gate'
 import { injectMetronToolArgs } from '@/lib/assistant/metron-tool-args'
+import { isConfirmationRequiredToolName } from '@/lib/assistant/orchestrator-complete'
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity'
 import { PLATFORM_ENTITLEMENT_STATUS } from '@/lib/platform-entitlements'
 
@@ -91,6 +92,32 @@ describe('injectMetronToolArgs', () => {
       ),
     ).toEqual({ actorUserId: 'u1', id: 'kpi-3' })
   })
+
+  it('injects platformProjectId for kpi_create', () => {
+    expect(
+      injectMetronToolArgs(
+        'metron_kpi_create',
+        { name: 'Draft KPI', formulaJson: '{}' },
+        {
+          actorUserId: 'u1',
+          platformProjectId: 'col-9',
+        },
+      ),
+    ).toEqual({
+      actorUserId: 'u1',
+      platformProjectId: 'col-9',
+      name: 'Draft KPI',
+      formulaJson: '{}',
+    })
+  })
+})
+
+describe('metron write confirm gates', () => {
+  it('requires confirm for kpi_create and suite sync', () => {
+    expect(isConfirmationRequiredToolName('metron_kpi_create')).toBe(true)
+    expect(isConfirmationRequiredToolName('metron_suite_connectors_sync')).toBe(true)
+    expect(isConfirmationRequiredToolName('metron_kpi_evaluate')).toBe(false)
+  })
 })
 
 describe('buildMetronIntegrationContextBlock', () => {
@@ -114,6 +141,8 @@ describe('buildMetronIntegrationContextBlock', () => {
       const block = buildMetronIntegrationContextBlock({ useMetronMcp: true })
       expect(block).toMatch(/Server-SSOT/)
       expect(block).toMatch(/zuerst/)
+      expect(block).toMatch(/Suite→Overview/)
+      expect(block).toMatch(/kpi_create/)
     } finally {
       if (prev === undefined) delete process.env.METRON_MCP_URL
       else process.env.METRON_MCP_URL = prev

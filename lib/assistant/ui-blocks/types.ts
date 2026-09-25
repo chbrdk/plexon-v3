@@ -81,6 +81,8 @@ export type MetronDashboardShareSnapshot = {
   platformProjectId?: string | null;
   metrics: Array<{ label: string; value: number | string }>;
   chart: { title: string; labels: string[]; values: number[] } | null;
+  /** Optional multi-chart (Wave 4); readers fall back to `chart`. */
+  charts?: Array<{ title: string; labels: string[]; values: number[] }>;
   href: string | null;
 };
 

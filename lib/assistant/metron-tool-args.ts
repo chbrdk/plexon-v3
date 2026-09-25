@@ -5,7 +5,7 @@
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 function needsPlatformProjectId(toolName: string): boolean {
-  return /metron[._](datasets_list|kpis_list|dashboards_list|dashboard_create|kpi_starter_pack_install|suite_connectors_sync)$/i.test(
+  return /metron[._](datasets_list|kpis_list|dashboards_list|dashboard_create|kpi_create|kpi_starter_pack_install|suite_connectors_sync)$/i.test(
     toolName,
   );
 }

@@ -47,6 +47,7 @@ export type CapabilityId =
   | 'metron.dashboard.get'
   | 'metron.dashboard.summarize'
   | 'metron.dashboard.create'
+  | 'metron.kpi.create'
   | 'metron.kpi.starter_pack_install'
   | 'metron.suite_connectors.sync';
 

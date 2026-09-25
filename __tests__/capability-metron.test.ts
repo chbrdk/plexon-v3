@@ -39,6 +39,7 @@ describe('METRON Wave 9 capability catalog', () => {
         'metron.dashboard.get',
         'metron.dashboard.summarize',
         'metron.dashboard.create',
+        'metron.kpi.create',
         'metron.kpi.starter_pack_install',
         'metron.suite_connectors.sync',
       ]),
@@ -49,11 +50,13 @@ describe('METRON Wave 9 capability catalog', () => {
       flow: false,
     })
     expect(getCapability('metron.dashboard.create')?.confirmation).toBe('human_gate')
+    expect(getCapability('metron.kpi.create')?.confirmation).toBe('human_gate')
   })
 
   it('maps MCP tool names to metron capabilities', () => {
     expect(capabilityIdFromAgentTool('metron_dashboards_list')).toBe('metron.dashboards.list')
     expect(capabilityIdFromAgentTool('metron_dashboard_create')).toBe('metron.dashboard.create')
+    expect(capabilityIdFromAgentTool('metron_kpi_create')).toBe('metron.kpi.create')
   })
 
   it('read executor returns ok with mocked fetch', async () => {
@@ -133,6 +136,15 @@ describe('METRON dashboard generative UI', () => {
                 { label: 'Corporate', value: 5 },
               ],
             },
+            {
+              id: 'w4',
+              title: 'By source',
+              kind: 'chart',
+              chartPoints: [
+                { label: 'Referral', value: 7 },
+                { label: 'Jobs', value: 2 },
+              ],
+            },
           ],
         },
         evaluations: {
@@ -146,12 +158,13 @@ describe('METRON dashboard generative UI', () => {
       { label: 'Hired', value: 12 },
       { label: 'Fill', value: 0.4 },
     ])
+    expect(payload?.charts).toHaveLength(2)
     expect(payload?.chart?.labels).toEqual(['Retail', 'Corporate'])
     const blocks = buildMetronDashboardGetBlocks(payload!, {
       source: 'plexon_ui',
       toolCallId: 't3',
     })
-    expect(blocks.map((b) => b.type)).toEqual(['metric_grid', 'chart', 'link_list'])
+    expect(blocks.map((b) => b.type)).toEqual(['metric_grid', 'chart', 'chart', 'link_list'])
   })
 
   it('returns empty blocks for bad get payload', () => {

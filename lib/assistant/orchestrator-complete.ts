@@ -189,6 +189,7 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /waves_detect$/,
   /project_create$/,
   /metron_dashboard_create$/,
+  /metron_kpi_create$/,
   /metron_kpi_starter_pack_install$/,
   /metron_suite_connectors_sync$/,
 ];

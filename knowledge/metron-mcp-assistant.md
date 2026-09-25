@@ -24,4 +24,5 @@ Ask in assistant (from Metron or Plexon shell): “Welche Dashboards habe ich?�
 On Metron `/dashboards/:id`: entity inject — summarize without pasting the id.  
 **Share** on that turn → clipboard `/share/metron/mtn_…` (public read-only). Spec: `specs/domain/assistant-metron-share.md`.
 
-Wave 3 tools: `dataset_get` · `kpi_get` · `kpi_evaluate` · `kpi_summarize`.
+Wave 3 tools: `dataset_get` · `kpi_get` · `kpi_evaluate` · `kpi_summarize`.  
+Wave 4: multi-chart Auto-UI (`dashboard_get`); confirm-write `kpi_create`; chat playbook Suite sync → `checkion-site-health` → Overview Board (follow-ups, no auto-create).

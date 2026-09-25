@@ -171,6 +171,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   metron_dashboards: [/^metron_dashboard(?!_create)/],
   metron_write: [
     /^metron_dashboard_create$/,
+    /^metron_kpi_create$/,
     /^metron_kpi_starter_pack_install$/,
     /^metron_suite_connectors_sync$/,
   ],
