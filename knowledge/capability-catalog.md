@@ -41,6 +41,10 @@ Agent-only catalog caps (`metron.*`) map to MCP tools; free-chat uses `METRON_MC
 
 EQC magazine + public share → Audion `/chat/embed` in `ChatOverlay` iframe (guest budgets); deep-link fallback full `/chat`; Assistant stays orchestrator. Details: `knowledge/eqc-persona-chat.md`.
 
+### Specialist → Flow handoff (2026-09-25)
+
+Free-chat specialists that own durable jobs (`checkion_scan` / GEO / Echon / Videon / UX-Journey / Metron) offer Collection Flow follow-ups and inject a system hint when the prompt looks long-running. Spec: `specs/domain/assistant-domain-specialists.md` § Flow handoff · helper `lib/assistant/insights/specialist-flow-handoff.ts`. C2/C3 intents (`run_collection_flow`, `promote_capability_sequence`) remain the executable path.
+
 ### C3 usage (Assistant)
 
 1. Nach Scan/GEO: „Als Flow speichern“ → Vorschau  

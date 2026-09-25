@@ -110,6 +110,20 @@ type AssistantSpecialist = {
 - Tool-round floor from specialist profile.
 - Registry program closed for product intents; remaining non-specialist intents stay orchestrator-only.
 
+## Flow handoff (long jobs)
+
+Durable / multi-step work MUST prefer **Collection Flow** over endless free-chat tool rounds:
+
+| Surface | Mechanism |
+|---------|-----------|
+| Follow-ups | After specialist turns with a bound Collection: chips **Flow starten** / **Flows zeigen** / **Als Flow speichern** (`lib/assistant/insights/specialist-flow-handoff.ts`) |
+| System hint | When the user prompt looks like a long job (deep scan, research run, batch, …) and the specialist is in the handoff set, inject a Flow-Handoff block into the system prompt |
+| Intent router | `run_collection_flow` / `promote_capability_sequence` (Capability Catalog C2/C3) |
+
+Handoff specialist set: `checkion_scan`, `checkion_seo_geo`, `checkion_journey`, `echon_market`, `echon_audience`, `videon_media`, `audion_ux_journey`, `metron_analytics`.
+
+Non-goals unchanged: no second chat, no parallel LLM subagents, no free graph synthesis.
+
 ## Non-goals
 
 - Visible multi-agent UI or parallel LLM subagent rounds
@@ -118,8 +132,9 @@ type AssistantSpecialist = {
 
 ## Done when
 
-1. Spec + orchestrator knowledge document Wave 1–5.
+1. Spec + orchestrator knowledge document Wave 1–5 + Flow handoff.
 2. `lib/assistant/specialists/*` registry ships all seventeen profiles.
 3. `runAssistantAgent` resolves and awaits specialist addenda; planner meta exposes specialist id/label.
 4. Activity UI shows specialist label + i18n intent labels on the planner card.
-5. Unit/smoke tests cover Wave-1–5 resolve, budget floor, and planner intents.
+5. Unit/smoke tests cover Wave-1–5 resolve, budget floor, planner intents, and Flow handoff follow-ups/hints.
+6. Long-job specialist turns surface Collection Flow chips and optional system handoff hint.

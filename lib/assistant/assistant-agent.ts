@@ -18,6 +18,10 @@ import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-co
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
 import { resolveSpecialist, resolveSpecialistToolRoundBudget } from '@/lib/assistant/specialists';
 import {
+  buildFlowHandoffSystemHint,
+  isFlowHandoffSpecialistIntent,
+} from '@/lib/assistant/insights/specialist-flow-handoff';
+import {
   runOrchestratorComplete,
   type OrchestratorCompleteOptions,
   type OrchestratorCompleteResult,
@@ -239,7 +243,14 @@ export async function runAssistantAgent(
       : null;
   const craftMemoryPrompt = craftMemoryBlock ? `\n${craftMemoryBlock}\n` : '';
   const uiPanelHint = buildUiPanelHintForPlan(plan.intent);
-  const systemPrompt = `${baseSystemPrompt}\n\n${productConnectivityBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan, specialist)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
+  const flowHandoffHint =
+    specialist && isFlowHandoffSpecialistIntent(specialist.id)
+      ? buildFlowHandoffSystemHint({
+          specialistLabel: specialist.label,
+          prompt: input.prompt,
+        })
+      : null;
+  const systemPrompt = `${baseSystemPrompt}\n\n${productConnectivityBlock}\n${retrievalBlock}${prefetchBlock}${craftMemoryPrompt}\n${buildPlanSystemPromptBlock(plan, specialist)}${uiPanelHint ? `\n\n${uiPanelHint}` : ''}${flowHandoffHint ? `\n\n${flowHandoffHint}` : ''}\n\n${buildUiToolsPromptBlock()}`;
 
   const creationBudget = resolveCreationSceneBudget({
     intent: plan.intent,

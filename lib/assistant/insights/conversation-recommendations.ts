@@ -13,6 +13,7 @@ import {
   buildMetronFollowUps,
   resolveMetronFollowUpMode,
 } from '@/lib/assistant/insights/metron-follow-ups';
+import { buildSpecialistFlowHandoffRecommendations } from '@/lib/assistant/insights/specialist-flow-handoff';
 import { resolveAssistantTargetUrl } from '@/lib/assistant/project-target-url';
 
 export type { ConversationRecommendation };
@@ -58,7 +59,9 @@ export function attachRecommendationsToMetadata(
     );
   }
 
-  const planner = base.planner as { intent?: string } | undefined;
+  const planner = base.planner as
+    | { intent?: string; specialistId?: string | null }
+    | undefined;
   const metronMode = resolveMetronFollowUpMode(base);
   if (metronMode) {
     recs = mergeRecommendations(
@@ -67,6 +70,16 @@ export function attachRecommendationsToMetadata(
       seen
     );
   }
+
+  recs = mergeRecommendations(
+    recs,
+    buildSpecialistFlowHandoffRecommendations({
+      plannerIntent: planner?.intent,
+      specialistId: planner?.specialistId,
+      platformProjectId: ctx.platformProjectId,
+    }),
+    seen
+  );
 
   recs = mergeRecommendations(
     recs,
