@@ -2,7 +2,7 @@
  * E3 schedule/retest — flows API health + document shapes via UI entry.
  * Cron tick is covered in unit tests; E2E only ensures surface + API health.
  */
-import { e2eCredentials, expect, loginIfConfigured, test, waitForCollectionLink } from './helpers'
+import { e2eCredentials, expect, loginAndBootstrap, test, waitForCollectionLink } from './helpers'
 
 test.describe('E3 schedule retest', () => {
   test('api health reports federation contract', async ({ request }) => {
@@ -14,7 +14,7 @@ test.describe('E3 schedule retest', () => {
 
   test('collection flows route is addressable when logged in', async ({ page }) => {
     test.skip(!e2eCredentials(), 'Set E2E_USER and E2E_PASSWORD')
-    await loginIfConfigured(page)
+    await loginAndBootstrap(page)
     const link = await waitForCollectionLink(page)
     if (!link) {
       test.skip(true, 'No Collection links on /projects')

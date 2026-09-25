@@ -1,13 +1,21 @@
 /**
- * E5 Launch-Gate — flow gallery exposes enterprise templates.
+ * E5 Launch-Gate — gallery surface + template create keeps enterprise templateId.
  * Playbook: knowledge/suite-use-case-testing.md
  */
-import { e2eCredentials, expect, loginIfConfigured, test, waitForCollectionLink } from './helpers'
+import {
+  ENTERPRISE_TEMPLATE_LAUNCH_GATE,
+  apiPaths,
+  e2eCredentials,
+  expect,
+  loginAndBootstrap,
+  test,
+  waitForCollectionLink,
+} from './helpers'
 
 test.describe('E5 launch gate', () => {
   test('flows gallery page loads for first visible project if any', async ({ page }) => {
     test.skip(!e2eCredentials(), 'Set E2E_USER and E2E_PASSWORD')
-    await loginIfConfigured(page)
+    await loginAndBootstrap(page)
     const link = await waitForCollectionLink(page)
     if (!link) {
       test.skip(true, 'No Collection links on /projects')
@@ -20,7 +28,6 @@ test.describe('E5 launch gate', () => {
     await page.goto(`/projects/${id}/flows`)
     await expect(page.locator('body')).toBeVisible()
     const body = (await page.locator('body').innerText()).toLowerCase()
-    // Template labels or create UI — German or English gallery copy
     expect(
       body.includes('launch') ||
         body.includes('gate') ||
@@ -29,5 +36,23 @@ test.describe('E5 launch gate', () => {
         body.includes('template') ||
         body.includes('enterprise')
     ).toBeTruthy()
+  })
+
+  test('POST flows keeps enterprise-launch-gate-v1 templateId', async ({ page }) => {
+    test.skip(!e2eCredentials(), 'Set E2E_USER and E2E_PASSWORD')
+    const home = await loginAndBootstrap(page)
+    const res = await page.request.post(apiPaths.projectFlows(home.platformProjectId), {
+      data: {
+        name: `E2E Launch Gate ${Date.now()}`,
+        templateId: ENTERPRISE_TEMPLATE_LAUNCH_GATE,
+      },
+    })
+    expect(res.status()).toBe(201)
+    const body = (await res.json()) as {
+      templateId?: string
+      flow?: { templateId?: string }
+    }
+    expect(body.templateId).toBe(ENTERPRISE_TEMPLATE_LAUNCH_GATE)
+    expect(body.flow?.templateId).toBe(ENTERPRISE_TEMPLATE_LAUNCH_GATE)
   })
 })

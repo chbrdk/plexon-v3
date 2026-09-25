@@ -76,7 +76,7 @@ Erlaubte Werte in dieser Datei und in Contract-Tests: genau diese vier.
 | Schicht | Was | Wo |
 |---|---|---|
 | Vitest contracts | Dateien, Vorlagen, Skip-Gründe, Destillat-Inventar, Playbook-Markierungen | `__tests__/suite-*.test.ts` · `__tests__/suite-use-case-matrix.test.ts` · `__tests__/suite-distillate-inventory.test.ts` · `__tests__/suite-enterprise-skip-e5-e8-e9.test.ts` |
-| Playwright | UC1, UC9, E5, E3 speichern | `e2e/uc1-pitch-eqc.spec.ts` · `e2e/uc9-lagebild-audit.spec.ts` · `e2e/e5-launch-gate.spec.ts` · `e2e/e3-schedule-retest.spec.ts` · `npm run test:e2e:staging` |
+| Playwright | UC1, UC9 (Panes + Audit/Activity), E3, E5 templateId, E8 Crisis templateId, E9 Directory-Stub | `e2e/uc1-pitch-eqc.spec.ts` · `e2e/uc9-lagebild-audit.spec.ts` · `e2e/e3-schedule-retest.spec.ts` · `e2e/e5-launch-gate.spec.ts` · `e2e/e8-crisis-template.spec.ts` · `e2e/e9-directory-stub.spec.ts` · `npm run test:e2e:staging` |
 | Manuell | Cron-Tick abwarten, echte Deep/GEO-Keys | dieses Playbook |
 
 ## Härte-Backlog (diese Tranche)
