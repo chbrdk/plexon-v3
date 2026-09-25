@@ -385,6 +385,10 @@ VIDEON describes media; Brandion owns brand guideline truth.
 
 Cross-product flow (V6): Creation asset → VIDEON analysis → Brandion guideline check, without moving domain state into PLEXON.
 
+### CREATION consume stills (P0)
+
+CREATION MAY browse Collection-bound VIDEON media and apply a **frame still** into composition Image/`backgroundImage` props via a CREATION BFF (`creation-v3/specs/domain/videon-asset-consume.md`). Domain media state remains in VIDEON; CREATION stores `videonMediaRef` + same-origin frame URLs. Binaries MUST NOT transit Plexon. Live Video nodes and Cut-clip pick are deferred.
+
 ### Direct-video lane
 
 Qwen3.7 Flash advertises native video input on OpenRouter. VIDEON may benchmark this against the frame-evidence path for temporal/action understanding. It remains opt-in until the following are demonstrated:
