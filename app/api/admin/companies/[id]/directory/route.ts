@@ -12,16 +12,17 @@ import { eq } from 'drizzle-orm'
 /**
  * Enterprise E9 — company directory stub (OIDC/SAML/SCIM not wired yet).
  * Spec: suite-enterprise-program.md § E9
+ * Path param must be `id` to match sibling admin company routes.
  */
 export async function GET(
   request: Request,
-  ctx: { params: Promise<{ companyId: string }> }
+  ctx: { params: Promise<{ id: string }> }
 ) {
   const user = await getRequestUser(request)
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED)
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503)
 
-  const { companyId } = await ctx.params
+  const { id: companyId } = await ctx.params
   const id = companyId?.trim()
   if (!id) return apiError('Invalid company id', API_STATUS.BAD_REQUEST)
 
@@ -47,13 +48,13 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  ctx: { params: Promise<{ companyId: string }> }
+  ctx: { params: Promise<{ id: string }> }
 ) {
   const user = await getRequestUser(request)
   if (!user) return apiError('Unauthorized', API_STATUS.UNAUTHORIZED)
   if (!process.env.DATABASE_URL) return apiError('Database not configured', 503)
 
-  const { companyId } = await ctx.params
+  const { id: companyId } = await ctx.params
   const id = companyId?.trim()
   if (!id) return apiError('Invalid company id', API_STATUS.BAD_REQUEST)
 

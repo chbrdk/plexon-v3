@@ -18,6 +18,14 @@ if [ -n "$DATABASE_URL" ]; then
     exit 1
   fi
 
+  echo "[PLEXON] Applying enterprise SQL migrations (idempotent)..."
+  if node ./scripts/apply-enterprise-sql-migrations.mjs; then
+    echo "[PLEXON] Enterprise SQL migrations applied."
+  else
+    echo "[PLEXON] Enterprise SQL migrations failed. Refusing to start."
+    exit 1
+  fi
+
   echo "[PLEXON] Vaillant Group MaFo flow bootstrap (idempotent)..."
   if npx tsx scripts/bootstrap-vaillant-group-mafo.ts --corpus-no-wait; then
     echo "[PLEXON] Vaillant Group flow bootstrap complete."
