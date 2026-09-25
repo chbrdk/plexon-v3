@@ -76,6 +76,14 @@ Team UI may forward draft email as invite `toEmail` — see `knowledge/invite-to
 
 Ecosystem Team UI list: `knowledge/collection-team-ecosystem.md`.
 
+## Sample send (ops)
+
+All six kinds can be delivered as `[Sample] …` mails via:
+
+`SEND_SAMPLES=1 npm test -- --run __tests__/lib/send-sample-system-mails.test.ts`
+
+Requires `/tmp/plexon-mail-bridge.env` with `BRIDGE_TOKEN`, `BRIDGE_URL`, `SMTP_FROM` (from Coolify service `plexon-smtp-http-bridge`). Optional `MAIL_TO=a@x,b@y`. Link samples use `https://example.com/…` (not plygrnd) so Mimecast accepts `msqdx.com`.
+
 ## Later product kinds (not P0)
 
 - Creation `email_allowlist` magic-link/OTP  
