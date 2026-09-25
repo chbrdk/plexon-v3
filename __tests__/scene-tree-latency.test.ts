@@ -86,6 +86,19 @@ describe('resolveMcpFlagsForPlan', () => {
   it('leaves flags unchanged for general_chat', () => {
     expect(resolveMcpFlagsForPlan(plan('general_chat'), baseFlags)).toEqual(baseFlags)
   })
+
+  it('keeps Echon + Audion (+ Checkion) for echon_audience', () => {
+    expect(resolveMcpFlagsForPlan(plan('echon_audience'), baseFlags)).toEqual({
+      useCheckionMcp: true,
+      useAudionMcp: true,
+      useEchonMcp: true,
+      useBrandionMcp: false,
+      useCreationMcp: false,
+      useSpirionMcp: false,
+      useVideonMcp: false,
+      useMetronMcp: false,
+    })
+  })
 })
 
 describe('formatSceneTreeOutline', () => {

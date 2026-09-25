@@ -12,7 +12,13 @@ export type AssistantSpecialistId =
   | 'creation_scene_edit'
   | 'videon_media'
   | 'brandion_brand'
-  | 'echon_market';
+  | 'echon_market'
+  | 'checkion_seo_geo'
+  | 'audion_persona'
+  | 'audion_ux_journey'
+  | 'spirion_research'
+  | 'creation_design'
+  | 'echon_audience';
 
 export type SpecialistContext = {
   useCheckionMcp: boolean;
@@ -41,6 +47,12 @@ const SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'videon_media',
   'brandion_brand',
   'echon_market',
+  'checkion_seo_geo',
+  'audion_persona',
+  'audion_ux_journey',
+  'spirion_research',
+  'creation_design',
+  'echon_audience',
 ] as const;
 
 export function isAssistantSpecialistId(

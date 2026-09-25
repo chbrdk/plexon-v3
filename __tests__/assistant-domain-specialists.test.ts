@@ -6,6 +6,7 @@ import { buildPlanSystemPromptBlock } from '@/lib/assistant/assistant-planner'
 import {
   WAVE1_SPECIALIST_IDS,
   WAVE2_SPECIALIST_IDS,
+  WAVE3_SPECIALIST_IDS,
   REGISTERED_SPECIALIST_IDS,
   resolveSpecialist,
   creationSceneSpecialistFamilies,
@@ -16,6 +17,12 @@ import {
   VIDEON_MEDIA_FAMILIES,
   BRANDION_BRAND_FAMILIES,
   ECHON_MARKET_FAMILIES,
+  ECHON_TO_AUDIENCE_FAMILIES,
+  GEO_FAMILIES,
+  PERSONA_FAMILIES,
+  UX_JOURNEY_FAMILIES,
+  SPIRION_RESEARCH_FAMILIES,
+  CREATION_DESIGN_FAMILIES,
 } from '@/lib/assistant/tool-catalog'
 
 const root = path.join(__dirname, '..')
@@ -125,7 +132,9 @@ describe('assistant domain specialists (Wave 1)', () => {
 describe('assistant domain specialists (Wave 2)', () => {
   it('registers videon / brandion / echon specialists', async () => {
     expect(WAVE2_SPECIALIST_IDS).toEqual(['videon_media', 'brandion_brand', 'echon_market'])
-    expect(REGISTERED_SPECIALIST_IDS).toHaveLength(6)
+    expect(REGISTERED_SPECIALIST_IDS).toEqual(
+      expect.arrayContaining([...WAVE1_SPECIALIST_IDS, ...WAVE2_SPECIALIST_IDS]),
+    )
 
     const videon = resolveSpecialist('videon_media')
     expect(videon?.label).toBe('Videon')
@@ -229,5 +238,157 @@ describe('assistant domain specialists (Wave 2)', () => {
     expect(free).toContain('specialistLabel')
     expect(planner).toContain('specialistLabel')
     expect(planner).toContain('plannerSpecialist')
+  })
+})
+
+describe('assistant domain specialists (Wave 3)', () => {
+  it('registers GEO / Audion / Spirion / Creation Design / Echon Audience', async () => {
+    expect(WAVE3_SPECIALIST_IDS).toEqual([
+      'checkion_seo_geo',
+      'audion_persona',
+      'audion_ux_journey',
+      'spirion_research',
+      'creation_design',
+      'echon_audience',
+    ])
+    expect(REGISTERED_SPECIALIST_IDS).toHaveLength(12)
+
+    const geo = resolveSpecialist('checkion_seo_geo')
+    expect(geo?.label).toBe('Checkion GEO')
+    expect(geo?.toolFamilies).toEqual(expect.arrayContaining(GEO_FAMILIES))
+    expect(await Promise.resolve(geo!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Checkion GEO',
+    )
+
+    const persona = resolveSpecialist('audion_persona')
+    expect(persona?.label).toBe('Audion Persona')
+    expect(persona?.toolFamilies).toEqual(expect.arrayContaining(PERSONA_FAMILIES))
+    expect(await Promise.resolve(persona!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Audion Persona',
+    )
+
+    const ux = resolveSpecialist('audion_ux_journey')
+    expect(ux?.label).toBe('Audion UX Journey')
+    expect(ux?.toolFamilies).toEqual(expect.arrayContaining(UX_JOURNEY_FAMILIES))
+
+    const spirion = resolveSpecialist('spirion_research')
+    expect(spirion?.label).toBe('Spirion')
+    expect(spirion?.toolFamilies).toEqual(expect.arrayContaining(SPIRION_RESEARCH_FAMILIES))
+    expect(await Promise.resolve(spirion!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Spirion',
+    )
+
+    const design = resolveSpecialist('creation_design')
+    expect(design?.label).toBe('Creation Design')
+    expect(design?.toolFamilies).toEqual(expect.arrayContaining(CREATION_DESIGN_FAMILIES))
+
+    const audience = resolveSpecialist('echon_audience')
+    expect(audience?.label).toBe('Echon Audience')
+    expect(audience?.toolFamilies).toEqual(expect.arrayContaining(ECHON_TO_AUDIENCE_FAMILIES))
+    expect(await Promise.resolve(audience!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Echon Audience',
+    )
+  })
+
+  it('planner maps Wave-3 prompts to specialists', () => {
+    const geoPlan = planAssistantTurnHeuristic({
+      prompt: 'Wie ist unser GEO Score und SEO Ranking?',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(geoPlan.intent).toBe('checkion_seo_geo')
+    expect(resolveSpecialist(geoPlan.intent)?.id).toBe('checkion_seo_geo')
+
+    const personaPlan = planAssistantTurnHeuristic({
+      prompt: 'Zeige die Personas und Zielgruppen für dieses Projekt',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(personaPlan.intent).toBe('audion_persona')
+    expect(resolveSpecialist(personaPlan.intent)?.id).toBe('audion_persona')
+
+    const uxPlan = planAssistantTurnHeuristic({
+      prompt: 'Starte den UX-Journey-Agent und zeige Screenshots',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(uxPlan.intent).toBe('audion_ux_journey')
+    expect(resolveSpecialist(uxPlan.intent)?.id).toBe('audion_ux_journey')
+
+    const spirionPlan = planAssistantTurnHeuristic({
+      prompt: 'Suche Spirion Design-Referenzen und Screens für Moodboards',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: true,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(spirionPlan.intent).toBe('spirion_research')
+    expect(resolveSpecialist(spirionPlan.intent)?.id).toBe('spirion_research')
+
+    const designPlan = planAssistantTurnHeuristic({
+      prompt: 'Liste CREATION Library Tags und Compositions',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(designPlan.intent).toBe('creation_design')
+    expect(resolveSpecialist(designPlan.intent)?.id).toBe('creation_design')
+  })
+
+  it('spec and knowledge document Wave 3', () => {
+    const spec = readFileSync(
+      path.join(root, 'specs/domain/assistant-domain-specialists.md'),
+      'utf8',
+    )
+    const orch = readFileSync(
+      path.join(root, 'knowledge/plexon-assistant-orchestrator.md'),
+      'utf8',
+    )
+    expect(spec).toContain('checkion_seo_geo')
+    expect(spec).toContain('audion_persona')
+    expect(spec).toContain('spirion_research')
+    expect(spec).toContain('creation_design')
+    expect(spec).toContain('echon_audience')
+    expect(spec).toContain('Wave 3')
+    expect(orch).toContain('checkion_seo_geo')
+    expect(orch).toContain('audion_ux_journey')
+    expect(orch).toContain('echon_audience')
   })
 })

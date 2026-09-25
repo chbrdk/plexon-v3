@@ -143,7 +143,7 @@ Bei aktivem Projektkontext lädt `buildCompactProjectContextBlock` eine Kurzfass
 Free-Chat-Anfragen laufen über `runAssistantAgent` (`lib/assistant/assistant-agent.ts`):
 
 1. **Plan** – `assistant-planner.ts`: Heuristik (Intent, Tool-Familien, max. Runden); bei unklarem `general_chat` + Projektkontext optional LLM-Plan (Haiku).
-2. **Specialist** (Wave 1–2) – `lib/assistant/specialists/`: Lookup nach Intent (`metron_analytics`, `checkion_scan`, `creation_scene_edit`, `videon_media`, `brandion_brand`, `echon_market`). Liefert Domain-Prompt-Addendum (ggf. async, z. B. Echon); **kein** zweiter Chat. Spec: `specs/domain/assistant-domain-specialists.md`. Connectivity-Blöcke erst **nach** dem Plan.
+2. **Specialist** (Wave 1–3) – `lib/assistant/specialists/`: Lookup nach Intent (`metron_analytics`, `checkion_scan`, `creation_scene_edit`, `videon_media`, `brandion_brand`, `echon_market`, `checkion_seo_geo`, `audion_persona`, `audion_ux_journey`, `spirion_research`, `creation_design`, `echon_audience`). Liefert Domain-Prompt-Addendum (ggf. async); **kein** zweiter Chat. Spec: `specs/domain/assistant-domain-specialists.md`. Connectivity-Blöcke erst **nach** dem Plan.
 3. **Execute** – `orchestrator-complete.ts` mit gefilterten MCP-Tools (`tool-catalog.ts` Familien).
 4. **Antwort** – Claude synthetisiert aus eingebettetem Projektkontext + Tool-Ergebnissen.
 

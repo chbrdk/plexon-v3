@@ -1,6 +1,6 @@
 # Assistant domain specialists (internal)
 
-**Status:** Accepted — Wave 2 2026-09-25  
+**Status:** Accepted — Wave 3 2026-09-25  
 **Owner:** PLEXON v3 (orchestrator)  
 **Surfaces:** Free-chat only (`runAssistantAgent`) — same `/assistant` + `/assistant/embed` conversation  
 **Companions:** `knowledge/plexon-assistant-orchestrator.md` · `specs/domain/capability-catalog.md` · `lib/assistant/assistant-planner.ts`
@@ -41,7 +41,18 @@ Specialist id **equals** `AssistantPlan.intent` for these intents:
 | `brandion_brand` | Brandion | `BRANDION_BRAND_FAMILIES` |
 | `echon_market` | Echon | `ECHON_MARKET_FAMILIES` |
 
-All other intents (`general_chat`, `audion_persona`, …) resolve **no** specialist — agent stacks product connectivity blocks (built **after** the plan, using plan-narrowed MCP flags).
+### Wave 3
+
+| Id | Label | Canonical families (planner SoT) |
+|----|-------|----------------------------------|
+| `checkion_seo_geo` | Checkion GEO | `GEO_FAMILIES` |
+| `audion_persona` | Audion Persona | `PERSONA_FAMILIES` |
+| `audion_ux_journey` | Audion UX Journey | `UX_JOURNEY_FAMILIES` |
+| `spirion_research` | Spirion | `SPIRION_RESEARCH_FAMILIES` |
+| `creation_design` | Creation Design | `CREATION_DESIGN_FAMILIES` |
+| `echon_audience` | Echon Audience | `ECHON_TO_AUDIENCE_FAMILIES` |
+
+All other intents (`general_chat`, `project_knowledge`, `action_write`, remaining Audion intents, …) resolve **no** specialist — agent stacks product connectivity blocks (built **after** the plan, using plan-narrowed MCP flags).
 
 ## Contract
 
@@ -53,6 +64,12 @@ type AssistantSpecialistId =
   | 'videon_media'
   | 'brandion_brand'
   | 'echon_market'
+  | 'checkion_seo_geo'
+  | 'audion_persona'
+  | 'audion_ux_journey'
+  | 'spirion_research'
+  | 'creation_design'
+  | 'echon_audience'
 
 type AssistantSpecialist = {
   id: AssistantSpecialistId
@@ -68,6 +85,7 @@ type AssistantSpecialist = {
 - When a specialist is active, the agent injects **only** that specialist’s addendum (plus base system prompt / retrieval / plan block) — not the full product connectivity stack.
 - Connectivity / addenda are built **after** planning so unused product blocks are skipped.
 - Planner metadata / SSE `plan` events include `specialistId` + `specialistLabel`; `PlannerStepCard` surfaces the label in the activity trace.
+- `echon_audience` enables Audion + Echon (+ Checkion when entitled) MCP flags so audience-write tools load.
 
 ## Non-goals
 
@@ -77,8 +95,8 @@ type AssistantSpecialist = {
 
 ## Done when
 
-1. Spec + orchestrator knowledge document Wave 1 + Wave 2.
-2. `lib/assistant/specialists/*` registry ships all six profiles.
+1. Spec + orchestrator knowledge document Wave 1–3.
+2. `lib/assistant/specialists/*` registry ships all twelve profiles.
 3. `runAssistantAgent` resolves and awaits specialist addenda; planner meta exposes specialist id/label.
 4. Activity UI shows specialist label on the planner card.
-5. Unit/smoke tests cover Wave-1 + Wave-2 resolve + planner intents.
+5. Unit/smoke tests cover Wave-1–3 resolve + planner intents.

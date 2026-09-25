@@ -79,10 +79,20 @@ export function resolveMcpFlagsForPlan(
         useMetronMcp: flags.useMetronMcp,
       };
     case 'echon_market':
-    case 'echon_audience':
       return {
         useCheckionMcp: false,
         useAudionMcp: false,
+        useEchonMcp: flags.useEchonMcp,
+        useBrandionMcp: false,
+        useCreationMcp: false,
+        useSpirionMcp: false,
+        useVideonMcp: false,
+        useMetronMcp: false,
+      };
+    case 'echon_audience':
+      return {
+        useCheckionMcp: flags.useCheckionMcp,
+        useAudionMcp: flags.useAudionMcp,
         useEchonMcp: flags.useEchonMcp,
         useBrandionMcp: false,
         useCreationMcp: false,

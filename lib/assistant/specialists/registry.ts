@@ -1,23 +1,32 @@
 /**
- * Internal specialist registry (Wave 1 + Wave 2).
+ * Internal specialist registry (Wave 1–3).
  * Spec: specs/domain/assistant-domain-specialists.md
  */
 
 import type { AssistantPlanIntent } from '@/lib/assistant/assistant-planner';
 import {
   BRANDION_BRAND_FAMILIES,
+  CREATION_DESIGN_FAMILIES,
   CREATION_SCENE_EDIT_FAMILIES,
   CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
   ECHON_MARKET_FAMILIES,
+  ECHON_TO_AUDIENCE_FAMILIES,
+  GEO_FAMILIES,
   METRON_ANALYTICS_FAMILIES,
+  PERSONA_FAMILIES,
   SCAN_FAMILIES,
+  SPIRION_RESEARCH_FAMILIES,
+  UX_JOURNEY_FAMILIES,
   VIDEON_MEDIA_FAMILIES,
 } from '@/lib/assistant/tool-catalog';
+import { buildAudionIntegrationContextBlock } from '@/lib/integrations/audion-connectivity';
 import { buildBrandionIntegrationContextBlock } from '@/lib/integrations/brandion-connectivity';
 import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity';
 import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
+import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
+import { buildCheckionGeoSpecialistAddendum } from '@/lib/assistant/specialists/checkion-geo';
 import { buildCheckionScanSpecialistAddendum } from '@/lib/assistant/specialists/checkion-scan';
 import {
   isAssistantSpecialistId,
@@ -52,6 +61,15 @@ const CHECKION_SCAN_SPECIALIST: AssistantSpecialist = {
     buildCheckionScanSpecialistAddendum({ useCheckionMcp: ctx.useCheckionMcp }),
 };
 
+const CHECKION_GEO_SPECIALIST: AssistantSpecialist = {
+  id: 'checkion_seo_geo',
+  label: 'Checkion GEO',
+  toolFamilies: [...GEO_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    buildCheckionGeoSpecialistAddendum({ useCheckionMcp: ctx.useCheckionMcp }),
+};
+
 const CREATION_SCENE_SPECIALIST: AssistantSpecialist = {
   id: 'creation_scene_edit',
   label: 'Creation Scene',
@@ -60,6 +78,18 @@ const CREATION_SCENE_SPECIALIST: AssistantSpecialist = {
   buildSystemAddendum: (ctx) =>
     withSpecialistHeader(
       'Creation Scene',
+      buildCreationIntegrationContextBlock({ useCreationMcp: ctx.useCreationMcp }),
+    ),
+};
+
+const CREATION_DESIGN_SPECIALIST: AssistantSpecialist = {
+  id: 'creation_design',
+  label: 'Creation Design',
+  toolFamilies: [...CREATION_DESIGN_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    withSpecialistHeader(
+      'Creation Design',
       buildCreationIntegrationContextBlock({ useCreationMcp: ctx.useCreationMcp }),
     ),
 };
@@ -100,6 +130,57 @@ const ECHON_SPECIALIST: AssistantSpecialist = {
     ),
 };
 
+const ECHON_AUDIENCE_SPECIALIST: AssistantSpecialist = {
+  id: 'echon_audience',
+  label: 'Echon Audience',
+  toolFamilies: [...ECHON_TO_AUDIENCE_FAMILIES],
+  maxToolRounds: 6,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Echon Audience',
+      [
+        await buildEchonIntegrationContextBlock({ useEchonMcp: ctx.useEchonMcp }),
+        await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+      ].join('\n\n'),
+    ),
+};
+
+const AUDION_PERSONA_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_persona',
+  label: 'Audion Persona',
+  toolFamilies: [...PERSONA_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion Persona',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const AUDION_UX_JOURNEY_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_ux_journey',
+  label: 'Audion UX Journey',
+  toolFamilies: [...UX_JOURNEY_FAMILIES],
+  maxToolRounds: 6,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion UX Journey',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const SPIRION_SPECIALIST: AssistantSpecialist = {
+  id: 'spirion_research',
+  label: 'Spirion',
+  toolFamilies: [...SPIRION_RESEARCH_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    withSpecialistHeader(
+      'Spirion',
+      buildSpirionIntegrationContextBlock({ useSpirionMcp: ctx.useSpirionMcp }),
+    ),
+};
+
 const REGISTRY: Record<AssistantSpecialistId, AssistantSpecialist> = {
   metron_analytics: METRON_SPECIALIST,
   checkion_scan: CHECKION_SCAN_SPECIALIST,
@@ -107,6 +188,12 @@ const REGISTRY: Record<AssistantSpecialistId, AssistantSpecialist> = {
   videon_media: VIDEON_SPECIALIST,
   brandion_brand: BRANDION_SPECIALIST,
   echon_market: ECHON_SPECIALIST,
+  checkion_seo_geo: CHECKION_GEO_SPECIALIST,
+  audion_persona: AUDION_PERSONA_SPECIALIST,
+  audion_ux_journey: AUDION_UX_JOURNEY_SPECIALIST,
+  spirion_research: SPIRION_SPECIALIST,
+  creation_design: CREATION_DESIGN_SPECIALIST,
+  echon_audience: ECHON_AUDIENCE_SPECIALIST,
 };
 
 /** @deprecated Use REGISTERED_SPECIALIST_IDS — Wave 1 subset kept for older tests. */
@@ -122,10 +209,20 @@ export const WAVE2_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'echon_market',
 ];
 
-/** All registered specialist ids (Wave 1 + 2). */
+export const WAVE3_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
+  'checkion_seo_geo',
+  'audion_persona',
+  'audion_ux_journey',
+  'spirion_research',
+  'creation_design',
+  'echon_audience',
+];
+
+/** All registered specialist ids (Wave 1–3). */
 export const REGISTERED_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   ...WAVE1_SPECIALIST_IDS,
   ...WAVE2_SPECIALIST_IDS,
+  ...WAVE3_SPECIALIST_IDS,
 ];
 
 export function resolveSpecialist(
