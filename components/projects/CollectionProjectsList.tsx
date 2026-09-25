@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Button, EmptyState, Spinner, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
-import { apiPlatformMeProjectInsights } from '@/lib/constants'
+import { apiPlatformMeProjectInsights, pathPlatformProjectDashboard } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
 import { CollectionProjectCard } from '@/components/projects/CollectionProjectCard'
 import { CreateCollectionProjectCard } from '@/components/projects/CreateCollectionProjectForm'
+import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
+import { HubIndexLayoutSwitch, useHubIndexLayout } from '@/lib/hub-index-layout'
 
 type InsightsMeta = {
   truncated: boolean
@@ -32,6 +35,79 @@ type CollectionProjectsListProps = {
   enableLifecycle?: boolean
   /** Called after archive/restore so parent can bump refreshKey. */
   onLifecycleChange?: () => void
+  /** Show Cards | List switch (projects hub). Home teaser hides it. */
+  showLayoutSwitch?: boolean
+}
+
+function CollectionProjectListRow({
+  row,
+  index,
+  onLifecycleChange,
+}: {
+  row: CollectionProjectInsight
+  index: number
+  onLifecycleChange?: () => void
+}) {
+  const { t } = useI18n()
+  const pid = row.platformProject?.id ?? ''
+  if (!pid) return null
+
+  const canOpenPlatform = row.openPlatformProject !== false
+  const name = row.platformProject.name ?? pid
+  const domain = row.platformProject.domain?.trim() || null
+  const checkionLinked = row.checkion != null
+  const audionLinked = row.audion != null
+  const scans = checkionLinked ? String(row.checkion!.scanCount) : '—'
+  const groups = audionLinked ? String(row.audion!.targetGroupCount ?? 0) : '—'
+  const personas = audionLinked ? String(row.audion!.personaCount) : '—'
+
+  return (
+    <li className="ds-collection-hub-list-row">
+      <span className="ds-collection-hub-list-num" aria-hidden>
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <div className="ds-collection-hub-list-row__main">
+        {canOpenPlatform ? (
+          <Link href={pathPlatformProjectDashboard(pid)} className="ds-collection-hub-list-row__title">
+            {name}
+          </Link>
+        ) : (
+          <span className="ds-collection-hub-list-row__title">{name}</span>
+        )}
+        <p className="ds-collection-hub-list-meta">
+          <span>{domain || '—'}</span>
+          <span aria-hidden> · </span>
+          <span>
+            {scans} {t('dashboard.platformInsightsScans')}
+          </span>
+          <span aria-hidden> · </span>
+          <span>
+            {groups} {t('dashboard.platformInsightsTargetGroups')}
+          </span>
+          <span aria-hidden> · </span>
+          <span>
+            {personas} {t('dashboard.platformInsightsPersonas')}
+          </span>
+        </p>
+      </div>
+      <div className="ds-collection-hub-list-row__trail">
+        {canOpenPlatform ? (
+          <Link href={pathPlatformProjectDashboard(pid)}>
+            <Button variant="ghost" size="sm">
+              {t('projects.hub.open')}
+            </Button>
+          </Link>
+        ) : null}
+        {onLifecycleChange ? (
+          <CollectionLifecycleActions
+            platformProjectId={pid}
+            status={row.platformProject.status}
+            onChanged={onLifecycleChange}
+          />
+        ) : null}
+      </div>
+    </li>
+  )
 }
 
 export function CollectionProjectsList({
@@ -46,9 +122,11 @@ export function CollectionProjectsList({
   onCreated,
   enableLifecycle = false,
   onLifecycleChange,
+  showLayoutSwitch = false,
 }: CollectionProjectsListProps) {
   const { t } = useI18n()
   const controlled = controlledProjects !== undefined
+  const { layout, setLayout } = useHubIndexLayout()
 
   const [fetched, setFetched] = useState<CollectionProjectInsight[]>([])
   const [fetchLoading, setFetchLoading] = useState(!controlled)
@@ -155,8 +233,46 @@ export function CollectionProjectsList({
     )
   }
 
+  const cards = (
+    <div className="ds-collection-hub-grid" aria-label={t('projects.hub.listAria')}>
+      {showCreateCard ? <CreateCollectionProjectCard onCreated={onCreated} /> : null}
+      {projects.map((row) => (
+        <CollectionProjectCard
+          key={row.platformProject.id}
+          row={row}
+          onLifecycleChange={enableLifecycle ? onLifecycleChange : undefined}
+        />
+      ))}
+    </div>
+  )
+
+  const list = (
+    <div className="plexon-projects-list-wrap">
+      {showCreateCard ? (
+        <CreateCollectionProjectCard variant="list" onCreated={onCreated} />
+      ) : null}
+      {projects.length > 0 ? (
+        <ol className="ds-collection-hub-list" aria-label={t('projects.hub.listAria')}>
+          {projects.map((row, index) => (
+            <CollectionProjectListRow
+              key={row.platformProject.id}
+              row={row}
+              index={index}
+              onLifecycleChange={enableLifecycle ? onLifecycleChange : undefined}
+            />
+          ))}
+        </ol>
+      ) : null}
+    </div>
+  )
+
   return (
     <div className="plexon-collection-list">
+      {showLayoutSwitch ? (
+        <header className="plexon-hub-index-head plexon-hub-index-head--bare">
+          <HubIndexLayoutSwitch layout={layout} onChange={setLayout} />
+        </header>
+      ) : null}
       {meta?.truncated ? (
         <Text role="meta" as="p" className="plexon-collection-list-truncated">
           {t('dashboard.platformInsightsTruncated', {
@@ -165,16 +281,7 @@ export function CollectionProjectsList({
           })}
         </Text>
       ) : null}
-      <div className="ds-collection-hub-grid">
-        {showCreateCard ? <CreateCollectionProjectCard onCreated={onCreated} /> : null}
-        {projects.map((row) => (
-          <CollectionProjectCard
-            key={row.platformProject.id}
-            row={row}
-            onLifecycleChange={enableLifecycle ? onLifecycleChange : undefined}
-          />
-        ))}
-      </div>
+      {showLayoutSwitch && layout === 'list' ? list : cards}
       {projects.length === 0 && showCreateCard ? (
         <EmptyState className="plexon-collection-list-status">
           {t('dashboard.platformInsightsEmpty')}
@@ -197,6 +304,17 @@ export function CollectionProjectsList({
               <EmptyState className="plexon-collection-list-status">
                 {t('projects.lifecycle.archivedEmpty')}
               </EmptyState>
+            ) : showLayoutSwitch && layout === 'list' ? (
+              <ol className="ds-collection-hub-list" aria-label={t('projects.lifecycle.showArchived')}>
+                {archived.map((row, index) => (
+                  <CollectionProjectListRow
+                    key={`archived-${row.platformProject.id}`}
+                    row={row}
+                    index={index}
+                    onLifecycleChange={onLifecycleChange}
+                  />
+                ))}
+              </ol>
             ) : (
               <div className="ds-collection-hub-grid">
                 {archived.map((row) => (

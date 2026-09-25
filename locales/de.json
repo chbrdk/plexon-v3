@@ -374,7 +374,12 @@
       "noCompany": "Keine Organisation — bitte einer Organisation beitreten oder vom Admin zugewiesen werden.",
       "companiesError": "Organisationen konnten nicht geladen werden.",
       "createError": "Projekt konnte nicht angelegt werden.",
-      "loadError": "Projekte konnten nicht geladen werden."
+      "loadError": "Projekte konnten nicht geladen werden.",
+      "layoutAria": "Projektlayout",
+      "layoutCards": "Karten",
+      "layoutList": "Liste",
+      "listAria": "Collections",
+      "open": "Öffnen"
     },
     "lifecycle": {
       "archive": "Archivieren",

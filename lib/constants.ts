@@ -441,6 +441,9 @@ export const ADMIN_NAV_STORAGE_KEY = 'plexon_admin_nav_current';
 /** Cookie and localStorage key for UI language (de/en). */
 export const LOCALE_STORAGE_KEY = 'plexon_locale';
 
+/** sessionStorage: Cards | List preference for Collection projects hub (Audion pattern). */
+export const HUB_INDEX_LAYOUT_KEY = 'plexon.v3.hubIndexLayout';
+
 /** localStorage key for board page state (prismions, connections, results). */
 export const BOARD_STORAGE_KEY = 'plexon_board_state';
 

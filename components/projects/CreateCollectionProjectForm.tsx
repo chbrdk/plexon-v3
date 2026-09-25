@@ -195,8 +195,11 @@ export function CreateCollectionProjectForm({
 /** First grid tile — Audion-style create card that opens the create dialog. */
 export function CreateCollectionProjectCard({
   onCreated,
+  variant = 'card',
 }: {
   onCreated?: (platformProjectId: string) => void
+  /** `list` uses the dashed list-create row (Audion projects list). */
+  variant?: 'card' | 'list'
 }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
@@ -205,12 +208,23 @@ export function CreateCollectionProjectCard({
 
   return (
     <>
-      <CollectionHubCard
-        variant="create"
-        title={t('projects.hub.createTitle')}
-        hint={t('projects.hub.createHint')}
-        onClick={() => setOpen(true)}
-      />
+      {variant === 'list' ? (
+        <button
+          type="button"
+          className="ds-collection-hub-list-create"
+          onClick={() => setOpen(true)}
+        >
+          <span className="ds-collection-hub-list-create__label">{t('projects.hub.createTitle')}</span>
+          <span className="ds-collection-hub-list-create__deck">{t('projects.hub.createHint')}</span>
+        </button>
+      ) : (
+        <CollectionHubCard
+          variant="create"
+          title={t('projects.hub.createTitle')}
+          hint={t('projects.hub.createHint')}
+          onClick={() => setOpen(true)}
+        />
+      )}
 
       <Dialog
         open={open}

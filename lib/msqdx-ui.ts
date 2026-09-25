@@ -16,6 +16,11 @@ export type {
   CollectionHubCardProps,
   CollectionHubMetricProps,
 } from '../../msqdx-ui/packages/ui/src/components/CollectionHubCard'
+export { HubIndexLayoutSwitch } from '../../msqdx-ui/packages/ui/src/components/HubIndexLayoutSwitch'
+export type {
+  HubIndexLayout,
+  HubIndexLayoutSwitchProps,
+} from '../../msqdx-ui/packages/ui/src/components/HubIndexLayoutSwitch'
 export { Checkbox } from '../../msqdx-ui/packages/ui/src/components/Checkbox'
 export { Chip } from '../../msqdx-ui/packages/ui/src/components/Chip'
 export type { ChipProps, ChipSize } from '../../msqdx-ui/packages/ui/src/components/Chip'

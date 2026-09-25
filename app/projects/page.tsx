@@ -24,6 +24,7 @@ export default function ProjectsHubPage() {
         refreshKey={refreshKey}
         showCreateCard
         enableLifecycle
+        showLayoutSwitch
         onCreated={() => bumpList()}
         onLifecycleChange={bumpList}
       />

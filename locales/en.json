@@ -374,7 +374,12 @@
       "noCompany": "No organization — join one or ask an admin for access.",
       "companiesError": "Could not load organizations.",
       "createError": "Could not create project.",
-      "loadError": "Could not load projects."
+      "loadError": "Could not load projects.",
+      "layoutAria": "Project layout",
+      "layoutCards": "Cards",
+      "layoutList": "List",
+      "listAria": "Collections",
+      "open": "Open"
     },
     "lifecycle": {
       "archive": "Archive",
