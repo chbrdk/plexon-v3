@@ -16,6 +16,7 @@ import {
 } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { CompanyClientSharePolicyPanel } from '@/components/admin/CompanyClientSharePolicyPanel'
+import { CompanyDirectoryPanel } from '@/components/admin/CompanyDirectoryPanel'
 import {
   API_ADMIN_USERS,
   apiAdminCompany,
@@ -366,6 +367,7 @@ export default function AdminCompanyDetailPage() {
       </section>
 
       <CompanyClientSharePolicyPanel companyId={companyId} />
+      <CompanyDirectoryPanel companyId={companyId} />
 
       <section className="plexon-settings-section" aria-label={t('admin.membersTitle')}>
         <SectionChrome

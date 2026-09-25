@@ -69,7 +69,9 @@ export type AssistantIntent =
       type: 'promote_capability_sequence';
       confirm?: boolean;
       name?: string;
-    };
+    }
+  | { type: 'campaign_brief_list' }
+  | { type: 'campaign_brief_create'; title?: string };
 
 const CREATE_PATTERNS = [
   /\b(lege|erstelle|create|neues?)\b.*\b(projekt|project)\b/i,
@@ -361,6 +363,28 @@ const CAPABILITIES_PATTERNS = [
   /\bhelp\b/i,
 ];
 
+/** Enterprise E7 — Kampagnenbrief Assistant intents */
+const CAMPAIGN_BRIEF_GENERAL_PATTERNS = [
+  /\bkampagnenbriefe?\b/i,
+  /\bcampaign\s+briefs?\b/i,
+];
+
+const CAMPAIGN_BRIEF_CREATE_PATTERNS = [
+  /\b(lege|erstelle|create|neu\w*)\b.*\b(kampagnenbrief|campaign\s+brief)\b/i,
+  /\b(kampagnenbrief|campaign\s+brief)\b.*\b(anlegen|erstellen|create)\b/i,
+  /\bbrief\s+anlegen\b/i,
+  /\bkampagnenbrief\s+anlegen\b/i,
+  /\bnew\s+campaign\s+brief\b/i,
+];
+
+const CAMPAIGN_BRIEF_LIST_PATTERNS = [
+  /\b(kampagnenbriefe?|campaign\s+briefs?)\b.*\b(liste?|zeig\w*|show|übersicht|auflisten)\b/i,
+  /\b(liste?|zeig\w*|show)\b.*\b(kampagnenbriefe?|campaign\s+briefs?)\b/i,
+  /\bbrief\s+auflisten\b/i,
+  /\bkampagnenbriefe\s+auflisten\b/i,
+  /\blist\s+campaign\s+briefs?\b/i,
+];
+
 function extractDomain(text: string): string | undefined {
   const url = extractUrlFromText(text);
   if (!url) return undefined;
@@ -374,6 +398,32 @@ function extractDomain(text: string): string | undefined {
 
 function extractProjectName(text: string): string | undefined {
   return extractScopedProjectName(text);
+}
+
+function extractCampaignBriefTitle(text: string): string | undefined {
+  const quoted = text.match(/["„“]([^"„“]{2,120})["„“]/);
+  if (quoted?.[1]?.trim()) return quoted[1].trim();
+  const named = text.match(/\b(?:namens|titled|title)\s+["„«]?([^"„«»\n,.]{2,120})/i);
+  if (named?.[1]?.trim()) return named[1].trim().replace(/[.!?]+$/, '');
+  const titled = text.match(
+    /\b(?:kampagnenbrief|campaign\s+brief)\s+(?:für|for)?\s*([A-Za-zÄÖÜäöüß0-9][\wÄÖÜäöüß &\-]{1,80})/i,
+  );
+  const candidate = titled?.[1]?.trim().replace(/[.!?]+$/, '');
+  if (
+    candidate &&
+    !/^(anlegen|erstellen|create|auflisten|liste|zeigen|show|list)$/i.test(candidate)
+  ) {
+    return candidate;
+  }
+  return undefined;
+}
+
+function matchesCampaignBriefIntent(text: string): boolean {
+  return (
+    CAMPAIGN_BRIEF_GENERAL_PATTERNS.some((p) => p.test(text)) ||
+    CAMPAIGN_BRIEF_CREATE_PATTERNS.some((p) => p.test(text)) ||
+    CAMPAIGN_BRIEF_LIST_PATTERNS.some((p) => p.test(text))
+  );
 }
 
 export function routeAssistantIntent(prompt: string): AssistantIntent {
@@ -568,6 +618,21 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
 
   if (STATUS_PATTERNS.some((p) => p.test(trimmed))) {
     return { type: 'project_status' };
+  }
+
+  if (matchesCampaignBriefIntent(trimmed)) {
+    if (CAMPAIGN_BRIEF_CREATE_PATTERNS.some((p) => p.test(trimmed))) {
+      return {
+        type: 'campaign_brief_create',
+        title: extractCampaignBriefTitle(trimmed),
+      };
+    }
+    if (
+      CAMPAIGN_BRIEF_LIST_PATTERNS.some((p) => p.test(trimmed)) ||
+      CAMPAIGN_BRIEF_GENERAL_PATTERNS.some((p) => p.test(trimmed))
+    ) {
+      return { type: 'campaign_brief_list' };
+    }
   }
 
   return { type: 'free_chat' };

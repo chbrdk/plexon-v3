@@ -75,6 +75,30 @@ export function checkionApiScanScores(scanId: string): string {
   return `${checkionApiScanDetail(scanId)}/scores`;
 }
 
+/** GET /api/scans/:id/delta — Gegentest (Enterprise E3). */
+export function checkionApiScanDelta(scanId: string, previousId?: string | null): string {
+  const base = `${checkionApiScanDetail(scanId)}/delta`;
+  const prev = previousId?.trim();
+  return prev ? `${base}?previousId=${encodeURIComponent(prev)}` : base;
+}
+
+/** GET /api/domain-scans/:id/delta — Gegentest deep crawl. */
+export function checkionApiDomainScanDelta(
+  domainScanId: string,
+  previousId?: string | null
+): string {
+  const base = `${checkionApiDomainScanDetail(domainScanId)}/delta`;
+  const prev = previousId?.trim();
+  return prev ? `${base}?previousId=${encodeURIComponent(prev)}` : base;
+}
+
+/** GET /api/geo-jobs/:id/delta — Gegentest same measurement. */
+export function checkionApiGeoJobDelta(jobId: string, previousId?: string | null): string {
+  const base = `${checkionApiGeoJobDetail(jobId)}/delta`;
+  const prev = previousId?.trim();
+  return prev ? `${base}?previousId=${encodeURIComponent(prev)}` : base;
+}
+
 /** POST/GET /api/domain-scans — contracts DomainScanLight (v3). */
 export function checkionApiDomainScans(): string {
   const base = getCheckionServiceApiUrl().replace(/\/+$/, '');

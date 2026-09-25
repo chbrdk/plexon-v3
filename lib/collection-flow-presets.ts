@@ -19,7 +19,8 @@ export type CollectionFlowPresetGroup =
   | 'vergleich'
   | 'eqc'
   | 'marke'
-  | 'media';
+  | 'media'
+  | 'enterprise';
 
 export type CollectionFlowPreset = {
   id: string;
@@ -440,6 +441,25 @@ export const COLLECTION_FLOW_PRESETS: CollectionFlowPreset[] = [
       value: null,
     },
   },
+  {
+    id: 'schedule',
+    group: 'enterprise',
+    label: 'Termin',
+    kind: 'schedule',
+    defaults: {
+      label: 'Termin',
+      presetId: 'schedule',
+      cronExpression: '0 8 * * 1',
+      timezone: 'Europe/Berlin',
+    },
+  },
+  {
+    id: 'retest',
+    group: 'enterprise',
+    label: 'Gegentest',
+    kind: 'retest',
+    defaults: { label: 'Gegentest', presetId: 'retest' },
+  },
 ];
 
 export const PALETTE_JOURNEY_GROUPS: Array<{
@@ -490,6 +510,16 @@ export const PALETTE_MEDIA_GROUPS: Array<{
   title: string;
   presets: CollectionFlowPreset[];
 }> = [{ id: 'media' as const, title: 'Media' }].map(({ id, title }) => ({
+  id,
+  title,
+  presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),
+}));
+
+export const PALETTE_ENTERPRISE_GROUPS: Array<{
+  id: CollectionFlowPresetGroup;
+  title: string;
+  presets: CollectionFlowPreset[];
+}> = [{ id: 'enterprise' as const, title: 'Enterprise' }].map(({ id, title }) => ({
   id,
   title,
   presets: COLLECTION_FLOW_PRESETS.filter((p) => p.group === id),

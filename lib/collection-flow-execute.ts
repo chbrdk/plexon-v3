@@ -13,6 +13,7 @@ import {
   documentHasGeoJob,
   documentHasIssueGate,
   documentHasJourneySegment,
+  documentHasRetest,
   flowHasVideonNodes,
   geoGateNode,
   geoJobNode,
@@ -41,6 +42,7 @@ import {
   executeBrandCollectionFlowRun,
 } from '@/lib/collection-flow-brand-execute';
 import { runBrandMeasureSegment } from '@/lib/collection-flow-brand-segment';
+import { runRetestSegment } from '@/lib/collection-flow-retest-segment';
 import { runVideonMediaSegments } from '@/lib/collection-flow-videon-segment';
 import {
   persistFlowRunResult,
@@ -834,6 +836,7 @@ export async function executeCollectionFlowRun(input: {
           runContext,
           'scan',
           buildScanCatalogBundle({
+            id: quality.pageScanId ?? quality.id,
             status: quality.status,
             overallScore: quality.overallScore,
             url: quality.url || scanUrl,
@@ -1100,6 +1103,20 @@ export async function executeCollectionFlowRun(input: {
       runContext = brand.ctx;
       if (!brand.ok) {
         blockers.push(brand.message);
+      }
+    }
+
+    // Enterprise E3 — retest / Gegentest after quality (+ optional brand).
+    if (documentHasRetest(resolvedDoc)) {
+      const retest = await runRetestSegment({
+        platformProjectId: id,
+        checkionProjectId,
+        doc: resolvedDoc,
+        ctx: runContext,
+      });
+      runContext = retest.ctx;
+      if (!retest.ok) {
+        blockers.push(retest.message);
       }
     }
 

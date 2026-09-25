@@ -16,10 +16,15 @@ import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
 import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
 import { CollectionClientSharesPanel } from '@/components/projects/CollectionClientSharesPanel'
+import { CollectionClientRoomPanel } from '@/components/projects/CollectionClientRoomPanel'
+import { CollectionTeamPanel } from '@/components/projects/CollectionTeamPanel'
+import { CollectionActivityBand } from '@/components/projects/CollectionActivityBand'
+import { CollectionCompetitiveSpaceBand } from '@/components/projects/CollectionCompetitiveSpaceBand'
 import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  CreationProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -40,14 +45,29 @@ type DashboardPayload = {
   checkion: CheckionProjectSummary | null
   audion: AudionProjectSummary | null
   brandion: BrandionProjectSummary | null
+  creation: CreationProjectSummary | null
   metron: MetronProjectSummary | null
   knowledge?: DashboardKnowledgeSummary | null
   flows?: DashboardFlowsSummary | null
+  activity?: { items: Array<{
+    id: string
+    at: string
+    productId: string
+    kind: string
+    status: string
+    subjectRef: string
+    title: string
+    href: string | null
+  }> } | null
   links: {
     checkionProject: string
     audionProject: string
     brandionProject: string
+    creationProject: string
     metronProject: string
+    videonProject?: string
+    spirionProject?: string
+    echonProject?: string
   }
 }
 
@@ -156,16 +176,35 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             flows={data.flows ?? null}
             onOpenWork={openWork}
           />
+          <CollectionActivityBand
+            platformProjectId={platformProjectId}
+            flows={data.flows ?? null}
+            bindings={data.bindings}
+            activityItems={data.activity?.items ?? []}
+            onOpenWork={openWork}
+          />
+          <CollectionCompetitiveSpaceBand
+            platformProjectId={platformProjectId}
+            audion={data.audion}
+            onOpenWork={openWork}
+          />
+          <CollectionTeamPanel platformProjectId={platformProjectId} />
+          <CollectionClientRoomPanel platformProjectId={platformProjectId} />
           <CollectionClientSharesPanel platformProjectId={platformProjectId} />
           <CollectionKnowledgeBand
             platformProjectId={platformProjectId}
             audionHref={data.links.audionProject}
             checkionHref={data.links.checkionProject}
             brandionHref={data.links.brandionProject}
+            creationHref={data.links.creationProject ?? ''}
             metronHref={data.links.metronProject ?? ''}
+            videonHref={data.links.videonProject ?? ''}
+            spirionHref={data.links.spirionProject ?? ''}
+            echonHref={data.links.echonProject ?? ''}
             checkion={data.checkion}
             audion={data.audion}
             brandion={data.brandion}
+            creation={data.creation ?? null}
             metron={data.metron ?? null}
             bindings={data.bindings}
             openNav={workNav}

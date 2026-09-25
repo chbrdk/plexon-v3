@@ -198,6 +198,40 @@ export function apiPlatformProvisioningCollectionClientShareEventsExport(
   return `${apiPlatformProvisioningCollectionClientShareEvents(platformProjectId)}/export`;
 }
 
+/** Enterprise E2 ClientRoom. Spec: suite-enterprise-program.md */
+export function apiPlatformProvisioningCollectionClientRoom(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/client-room`;
+}
+export function apiPlatformProvisioningCollectionClientRoomSlot(
+  platformProjectId: string,
+  slotId: string
+): string {
+  return `${apiPlatformProvisioningCollectionClientRoom(platformProjectId)}/slots/${encodeURIComponent(slotId)}`;
+}
+export function apiPlatformProvisioningCollectionAudit(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/audit`;
+}
+export function apiPlatformProvisioningCollectionActivity(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/activity`;
+}
+export function apiPlatformProvisioningCollectionCampaignBriefs(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/campaign-briefs`;
+}
+export function apiAdminCompanyDirectory(companyId: string): string {
+  return `/api/admin/companies/${encodeURIComponent(companyId)}/directory`;
+}
+export const pathShareRoom = (token: string) =>
+  `/share/room/${encodeURIComponent(token)}`;
+
+
 /** Admin console (companies, platform projects, user directory). Requires admin role. */
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;

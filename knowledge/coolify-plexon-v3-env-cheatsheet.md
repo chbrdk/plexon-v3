@@ -73,7 +73,19 @@ PLEXON_ADMIN_EMAIL=<deine-admin@firma.tld>
 
 # Deep Links + Collection-Sync Ziel (Federation nutzt diese Origin, nicht AUDION_API_URL)
 NEXT_PUBLIC_AUDION_ADMIN_URL=https://audion-v3.projects-a.plygrnd.tech/
+
+# --- Enterprise Suite (E3 Schedule / Outbox) — Staging 2026-09-25 gesetzt ---
+PLEXON_FLOW_SCHEDULE_ENABLED=1
+PLEXON_FLOW_SCHEDULE_INTERVAL_MS=60000
+PLEXON_OUTBOX_DRAIN_ENABLED=1
 ```
+
+**Enterprise-Migrationen** (nach Deploy auf `plexon-v3-postgres` anwenden):
+
+1. `lib/db/migrations/0020_suite_enterprise_client_room_audit.sql`
+2. `lib/db/migrations/0021_suite_enterprise_activity_brief_directory.sql`
+
+**E9 Directory:** Admin-Stub speichert Intent; OIDC/SAML-Secrets erst wenn Spec § E9 `ready` (Keys `PLEXON_DIRECTORY_OIDC_*` / `PLEXON_DIRECTORY_SAML_*` — noch nicht setzen).
 
 **Collection-Sync (AUDION):** `PLEXON_SERVICE_SECRET` muss **identisch** zu Audion-v3 sein. Sync ruft
 `{NEXT_PUBLIC_AUDION_ADMIN_URL-Origin}/api/platform/provisioning/projects/{id}` auf.

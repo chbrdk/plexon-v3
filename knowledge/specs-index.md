@@ -36,6 +36,7 @@
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
 | UI migrate — event quick check | `specs/domain/ui-migrate-event-quick-check.md` |
 | PLEXON suite landing (public `/suite`) | `specs/domain/plexon-suite-landing.md` |
+| Suite Enterprise Program | `specs/domain/suite-enterprise-program.md` |
 
 ## API
 | Spec | Path |
@@ -67,7 +68,11 @@
 | Collection knowledge sync | `knowledge/collection-knowledge-sync.md` |
 | Data plane optimizations | `knowledge/plexon-data-plane-optimizations.md` |
 | UI rebuild | `knowledge/ui-rebuild-msqdx-ui.md` |
+| Suite Enterprise Program | `specs/domain/suite-enterprise-program.md` |
 | PLEXON suite landing | `knowledge/plexon-suite-landing.md` |
+| Suite-Funktionsstand (2026-09-25) | `knowledge/suite-funktionsstand.md` |
+| Suite Enterprise Program | `knowledge/suite-enterprise-program.md` |
+| Agentur-Aufgaben und Use Cases | `knowledge/suite-agentur-use-cases.md` |
 
 ## Companions
 | Doc | Path |

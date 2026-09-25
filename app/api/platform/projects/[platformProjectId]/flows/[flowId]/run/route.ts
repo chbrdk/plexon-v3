@@ -3,8 +3,10 @@ import { userCanEditKnowledgePack } from '@/lib/collection-knowledge-pack-auth';
 import { getRequestUser } from '@/lib/auth-request-user';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 import { executeCollectionFlowRun } from '@/lib/collection-flow-execute';
+import { maybePublishClientRoomFromGate } from '@/lib/collection-flow-client-room-gate';
 import { getCollectionTestFlow } from '@/lib/db/collection-test-flows';
 import { isSessionOwnedFlowTrigger } from '@/lib/collection-flow-run-triggers';
+import { recordSuiteAuditEvent } from '@/lib/suite-audit';
 import {
   closedUiRunRequest,
   createCollectionFlowRun,
@@ -147,6 +149,25 @@ export async function POST(
       lastRun: result.lastRun,
       error: result.lastRun.error ?? null,
     });
+
+    await recordSuiteAuditEvent({
+      actorUserId: user.id,
+      platformProjectId: id,
+      productId: 'plexon',
+      action: 'run_finished',
+      subjectRef: historyRunId,
+      meta: { flowId: fid, trigger: 'ui', status: runStatus },
+    });
+
+    if (runStatus === 'complete') {
+      await maybePublishClientRoomFromGate({
+        platformProjectId: id,
+        actor: user,
+        doc: result.flow,
+        verdict: result.verdict,
+        lastRun: result.lastRun,
+      });
+    }
 
     return platformJson({
       flow: result.flow,

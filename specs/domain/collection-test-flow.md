@@ -178,7 +178,7 @@ Node fields (media):
 | `hand_off` | Explicit AUDION ↔ CHECKION switch | **Deferred** — implicit handoff on segment boundary |
 | `parallel` (node) | Sibling segments as a node kind | **Deferred** — use edge `parallel` + persona slots |
 | `page` | Explicit page URL node | **Deferred** — `start.url` / empty quality URL fallback |
-| `retest` | Re-run prior segment after change note | **Deferred** (Wave 23+) |
+| `retest` | Re-run prior quality + CHECKION delta catalog | **E3** — `runRetestSegment` + Checkion `/delta` |
 
 Do **not** add Family-C node kinds to the palette. Implicit handoff + control edges cover MVP.
 

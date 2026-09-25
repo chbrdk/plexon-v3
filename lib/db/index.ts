@@ -29,6 +29,14 @@ export function getDb() {
           e instanceof Error ? e.message : e
         );
       });
+    void import('@/lib/collection-flow-scheduler')
+      .then((m) => m.startCollectionFlowScheduleScheduler())
+      .catch((e) => {
+        console.warn(
+          '[PLEXON] flow schedule scheduler boot failed',
+          e instanceof Error ? e.message : e
+        );
+      });
   }
   return globalForDb.__plexonDb.db;
 }

@@ -19,19 +19,22 @@ Primärquelle: [`specs/domain/collection-projects.md`](../../specs/domain/collec
 
 ## 2. App-Landkarte
 
+Ist-Stand der Funktionen: [`knowledge/suite-funktionsstand.md`](../suite-funktionsstand.md). Aufgaben für Agenturen: [`knowledge/suite-agentur-use-cases.md`](../suite-agentur-use-cases.md). Die Tabelle hier bleibt die Kurzfassung für Erklärformate.
+
 | Bereich | Rolle in der Suite | Geeignete Marketing- und Tutorialfrage | Statushinweis |
 |---|---|---|---|
-| **PLEXON** | Collection-Hub, gemeinsames Wissen, Capability-Übergaben, Assistant und Flows | „Wie behalte ich einen fachübergreifenden Projektkontext?“ | Produktkern |
-| **CHECKION** | Page-, Domain-, SEO- und GEO-Prüfungen | „Was ist auf der Website problematisch, wiederkehrend oder in KI-Antworten unsichtbar?“ | Tutorialreif für die ersten fünf Einstiege |
-| **AUDION** | Zielgruppen, Personas, Journeys und synthetische Forschung | „Für wen entwerfen wir und was erleben diese Menschen?“ | Vor Aufnahme Live-/Demo-Zustand prüfen |
-| **BRANDION** | Markenwissen, Guideline, Tokens sowie visuelle/sprachliche Prüfung | „Entspricht diese Arbeit der Marke?“ | Kernflows erst durchklicken |
-| **CREATION** | Compositions, Seiten und redaktionelle/visuelle Ausspielung | „Wie wird aus Erkenntnissen ein gestalteter Output?“ | Collection-Kontext und Editor prüfen |
-| **SPIRION** | Recherche- und Referenzintelligenz für Design | „Welche visuellen Referenzen helfen vor dem Entwurf?“ | Als Integration bzw. Capability erklären; keine Produktprojekt-Erzählung |
-| **ECHON** | Signale, Waves, Foresight und Research Briefings | „Welche Marktbewegung sollten wir verstehen?“ | Companion, nicht Teil der fünf Capability-Mirrors |
-| **VIDEON** | Video-Analyse und semantische Medienarbeit | „Wie wird Video durchsuchbar und wiederverwendbar?“ | Nur als Roadmap/Vorschau behandeln, bis aktiv integriert |
-| **BrandChecker2** | Vorgänger-/Legacy-Werkzeug | Nicht als neue Suite-Reise positionieren | Legacy |
+| **PLEXON** | Collection-Hub, gemeinsames Wissen, Capability-Übergaben, Assistant und Flows | „Wie behalte ich einen fachübergreifenden Projektkontext?“ | Produktkern, Live |
+| **CHECKION** | Page-, Domain-, SEO- und GEO-Prüfungen | „Was ist auf der Website problematisch, wiederkehrend oder in KI-Antworten unsichtbar?“ | Kernmessung Live; Journey-UI und Reports-Magazin sind Platzhalter |
+| **AUDION** | Zielgruppen, Personas, Journeys, Chat und UX-Studies | „Für wen entwerfen wir und was erleben diese Menschen?“ | Kern Live; Study-Agent und Video brauchen Umgebung |
+| **BRANDION** | Guideline, Tokens und gemessene Markenprüfung | „Entspricht diese Arbeit der Marke?“ | Kern Live; CREATION bindet das Active Pack |
+| **CREATION** | Compositions, Seiten, Kundenfreigabe | „Wie wird aus Erkenntnissen ein gestalteter Output?“ | Web-Editor Live; macOS-Parity und Storyblok teilweise |
+| **METRON** | Daten, KPIs, Dashboards | „Welche Zahl gilt, und woher kommt sie?“ | Hubs Live; kein BI-Studio |
+| **VIDEON** | Upload, Szenen, Schnitt, Export | „Wie wird Video durchsuchbar und wiederverwendbar?“ | Kern Live, Collection-gebunden; Cut ist der Schnitt, nicht ein zweites Projekt |
+| **SPIRION** | Design-Referenzen für Entwurf und Assistant | „Welche visuellen Referenzen helfen vor dem Entwurf?“ | MCP lesend; keine eigene Projekt-Erzählung |
+| **ECHON** | Signale, Waves, Foresight, Briefings | „Welche Marktbewegung sollten wir verstehen?“ | Companion, Live in v3; optionale Pack-Facette `market_intelligence` |
+| **BrandChecker2** | Vorgänger | Nicht als Suite-Reise positionieren | Legacy |
 
-Die fünf capability-gespiegelten Produktbereiche einer neuen Collection sind: **CHECKION, AUDION, BRANDION, CREATION und SPIRION**. ECHON ist ein eigenständiger Research-Companion. Diese Trennung ist wichtig, damit die Kommunikation keine falsche Produktarchitektur behauptet.
+Beim Anlegen einer Collection werden **CHECKION, AUDION, BRANDION, CREATION, SPIRION und METRON** gespiegelt. VIDEON arbeitet im Collection-Kontext, ECHON bindet optional. Diese Trennung ist wichtig, damit die Kommunikation keine falsche Produktarchitektur behauptet.
 
 ## 3. Erzählung der Suite
 
@@ -51,7 +54,7 @@ Inhalte und Flächen gestalten (CREATION)
 Kontext, Wissen und Übergaben erhalten (PLEXON Collection)
 ```
 
-SPIRION kann vor CREATION als Referenzquelle auftreten. Nicht jeder Ablauf braucht alle Apps; eine glaubwürdige Suite Journey beginnt mit einem realen Problem und bindet nur die Capabilities ein, die es lösen.
+SPIRION kann vor CREATION als Referenzquelle auftreten. VIDEON trägt Bewegtbild in derselben Kette (Suche, Schnitt, Marken-Check). METRON bündelt die Zahlen daraus in ein Dashboard. Nicht jeder Ablauf braucht alle Apps; eine glaubwürdige Suite Journey beginnt mit einem realen Problem und bindet nur die Capabilities ein, die es lösen. Konkrete Agenturaufgaben: [`knowledge/suite-agentur-use-cases.md`](../suite-agentur-use-cases.md).
 
 ## 4. CHECKION: geprüfte Einstiegsstory
 

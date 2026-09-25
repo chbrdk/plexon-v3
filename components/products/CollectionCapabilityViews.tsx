@@ -16,6 +16,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  CreationProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -37,6 +38,10 @@ function productLabel(productId: string): string {
   if (productId === 'audion') return 'AUDION'
   if (productId === 'brandion') return 'BRANDION'
   if (productId === 'metron') return 'METRON'
+  if (productId === 'creation') return 'CREATION'
+  if (productId === 'videon') return 'VIDEON'
+  if (productId === 'spirion') return 'SPIRION'
+  if (productId === 'echon') return 'ECHON'
   return productId
 }
 
@@ -180,9 +185,11 @@ export function CheckionCapabilityView({
 export function AudionCapabilityView({
   audion,
   href,
+  platformProjectId,
 }: {
   audion: AudionProjectSummary | null
   href: string
+  platformProjectId?: string
 }) {
   const { t } = useI18n()
   const audionOrigin = getAudionWebOrigin()
@@ -295,6 +302,26 @@ export function AudionCapabilityView({
                           >
                             {t('projects.detail.openInAudion')}
                           </Button>
+                          {platformProjectId ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              data-testid="persona-pages-cta"
+                              onClick={() =>
+                                openExternal(
+                                  pathAssistantWithProjectAndDraft(
+                                    platformProjectId,
+                                    t('projects.detail.askPersonaPagesDraft').replace(
+                                      '{name}',
+                                      persona.name
+                                    )
+                                  )
+                                )
+                              }
+                            >
+                              {t('projects.detail.personaPagesCta')}
+                            </Button>
+                          ) : null}
                           <Button
                             variant="primary"
                             size="sm"
@@ -589,6 +616,116 @@ export function MetronCapabilityView({
             </Button>
           </a>
         ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function CreationCapabilityView({
+  creation,
+  href,
+}: {
+  creation: CreationProjectSummary | null
+  href: string
+}) {
+  const { t } = useI18n()
+  const empty = Boolean(creation) && creation!.compositionCount === 0
+
+  return (
+    <div className="plexon-capability-pane" data-testid="creation-capability-view">
+      <header className="plexon-knowledge-facet-tile-head">
+        <div>
+          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+            {t('projects.detail.capabilityLocalBadge')}
+          </Text>
+          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+            CREATION
+          </Text>
+          <Text role="meta" as="p">
+            {t('projects.detail.creationCatalogSubtitle')}
+          </Text>
+        </div>
+        <Chip static size="sm">
+          {creation ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+        </Chip>
+      </header>
+
+      {!creation ? (
+        <Text role="meta">{t('projects.detail.creationEmpty')}</Text>
+      ) : (
+        <>
+          <Text role="meta">
+            {creation.compositionCount} {t('projects.detail.compositions')}
+            {creation.externalProjectId
+              ? ` · ${t('projects.detail.localId')}: ${creation.externalProjectId}`
+              : ''}
+          </Text>
+          {empty ? <Text role="meta">{t('projects.detail.creationCatalogEmpty')}</Text> : null}
+        </>
+      )}
+
+      <div className="plexon-knowledge-facet-tile-actions">
+        <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
+          {t('projects.detail.openCreation')}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export function BoundProductCapabilityView({
+  productId,
+  title,
+  subtitle,
+  binding,
+  href,
+  emptyHint,
+  openLabel,
+}: {
+  productId: string
+  title: string
+  subtitle: string
+  binding: CollectionBinding | null
+  href: string
+  emptyHint: string
+  openLabel: string
+}) {
+  const { t } = useI18n()
+  const linked = Boolean(binding?.externalProjectId)
+
+  return (
+    <div className="plexon-capability-pane" data-testid={`${productId}-capability-view`}>
+      <header className="plexon-knowledge-facet-tile-head">
+        <div>
+          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+            {t('projects.detail.capabilityLocalBadge')}
+          </Text>
+          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+            {title}
+          </Text>
+          <Text role="meta" as="p">
+            {subtitle}
+          </Text>
+        </div>
+        <Chip static size="sm">
+          {linked ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+        </Chip>
+      </header>
+
+      {!linked ? (
+        <Text role="meta">{emptyHint}</Text>
+      ) : (
+        <Text role="meta">
+          {t('projects.detail.localId')}: {binding!.externalProjectId}
+          {binding!.syncStatus ? ` · ${binding!.syncStatus}` : ''}
+          {binding!.syncMessage ? ` · ${binding!.syncMessage}` : ''}
+        </Text>
+      )}
+
+      <div className="plexon-knowledge-facet-tile-actions">
+        <Button variant="ghost" size="md" disabled={!href} onClick={() => openExternal(href)}>
+          {openLabel}
+        </Button>
       </div>
     </div>
   )

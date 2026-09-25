@@ -77,6 +77,12 @@ export const CATALOG_PATH_OPTIONS: Array<{ path: string; label: string; group: s
   { path: 'geo.geoFitness', label: 'geoFitness', group: 'geo' },
   { path: 'geo.overallScore', label: 'overallScore', group: 'geo' },
   { path: 'geo.url', label: 'url', group: 'geo' },
+  { path: 'delta.kind', label: 'kind', group: 'delta' },
+  { path: 'delta.currentId', label: 'currentId', group: 'delta' },
+  { path: 'delta.previousId', label: 'previousId', group: 'delta' },
+  { path: 'delta.newCount', label: 'newCount', group: 'delta' },
+  { path: 'delta.goneCount', label: 'goneCount', group: 'delta' },
+  { path: 'delta.sameCount', label: 'sameCount', group: 'delta' },
   { path: 'journey.taskCompleted', label: 'taskCompleted', group: 'journey' },
   { path: 'journey.validEvidence', label: 'validEvidence', group: 'journey' },
   { path: 'journey.finalUrl', label: 'finalUrl', group: 'journey' },
@@ -144,6 +150,7 @@ const ACTION_KIND_TO_ROOT: Partial<Record<string, string>> = {
   competitors_suggest: 'competitors',
   persona_bootstrap: 'persona',
   suggest_queries: 'queries',
+  retest: 'delta',
 };
 
 const ROOT_TO_ACTION_KIND: Record<string, string> = {
@@ -159,6 +166,7 @@ const ROOT_TO_ACTION_KIND: Record<string, string> = {
   competitors: 'competitors_suggest',
   persona: 'persona_bootstrap',
   queries: 'suggest_queries',
+  delta: 'retest',
 };
 
 export function catalogOutHandleId(path: string): string {
@@ -497,6 +505,7 @@ export function buildScanCatalogBundle(input: {
   status: string;
   overallScore: number | null;
   url: string;
+  id?: string | null;
   issueCount?: number | null;
   scoresByKind?: Record<string, number> | null;
   issues?: IssueGateSignals | null;
@@ -520,6 +529,7 @@ export function buildScanCatalogBundle(input: {
     title: it.title ?? null,
   }));
   return {
+    ...(input.id ? { id: input.id } : {}),
     status: input.status,
     overallScore: input.overallScore,
     url: input.url,

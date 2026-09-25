@@ -40,13 +40,16 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  CreationProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 import {
   AudionCapabilityView,
   BindingsCapabilityView,
+  BoundProductCapabilityView,
   BrandionCapabilityView,
   CheckionCapabilityView,
+  CreationCapabilityView,
   MetronCapabilityView,
   type CollectionBinding,
 } from '@/components/products/CollectionCapabilityViews'
@@ -59,10 +62,29 @@ const EDITABLE_FACETS: KnowledgeFacetId[] = [
   'sources',
 ]
 
-type CapabilityNavId = 'checkion' | 'audion' | 'brandion' | 'metron' | 'bindings'
+type CapabilityNavId =
+  | 'checkion'
+  | 'audion'
+  | 'brandion'
+  | 'creation'
+  | 'metron'
+  | 'videon'
+  | 'spirion'
+  | 'echon'
+  | 'bindings'
 export type CollectionWorkNavId = KnowledgeFacetId | CapabilityNavId
 
-const CAPABILITY_NAV_IDS: CapabilityNavId[] = ['checkion', 'audion', 'brandion', 'metron', 'bindings']
+const CAPABILITY_NAV_IDS: CapabilityNavId[] = [
+  'checkion',
+  'audion',
+  'brandion',
+  'creation',
+  'metron',
+  'videon',
+  'spirion',
+  'echon',
+  'bindings',
+]
 
 function isKnowledgeFacetId(id: CollectionWorkNavId): id is KnowledgeFacetId {
   return (KNOWLEDGE_FACET_IDS as readonly string[]).includes(id)
@@ -73,10 +95,15 @@ type Props = {
   audionHref?: string | null
   checkionHref?: string | null
   brandionHref?: string | null
+  creationHref?: string | null
   metronHref?: string | null
+  videonHref?: string | null
+  spirionHref?: string | null
+  echonHref?: string | null
   checkion?: CheckionProjectSummary | null
   audion?: AudionProjectSummary | null
   brandion?: BrandionProjectSummary | null
+  creation?: CreationProjectSummary | null
   metron?: MetronProjectSummary | null
   bindings?: CollectionBinding[]
   /** Controlled work-band TOC selection (Overview teasers jump here). */
@@ -393,8 +420,16 @@ function capabilityLabelKey(id: CapabilityNavId): string {
       return 'projects.detail.navAudion'
     case 'brandion':
       return 'projects.detail.navBrandion'
+    case 'creation':
+      return 'projects.detail.navCreation'
     case 'metron':
       return 'projects.detail.navMetron'
+    case 'videon':
+      return 'projects.detail.navVideon'
+    case 'spirion':
+      return 'projects.detail.navSpirion'
+    case 'echon':
+      return 'projects.detail.navEchon'
     case 'bindings':
       return 'projects.detail.navBindings'
   }
@@ -405,10 +440,15 @@ export function CollectionKnowledgeBand({
   audionHref,
   checkionHref,
   brandionHref,
+  creationHref,
   metronHref,
+  videonHref,
+  spirionHref,
+  echonHref,
   checkion = null,
   audion = null,
   brandion = null,
+  creation = null,
   metron = null,
   bindings = [],
   openNav: openNavProp,
@@ -705,21 +745,30 @@ export function CollectionKnowledgeBand({
 
   const capabilityToc = useMemo(
     () =>
-      CAPABILITY_NAV_IDS.map((id) => ({
-        id: id as CollectionWorkNavId,
-        empty:
+      CAPABILITY_NAV_IDS.map((id) => {
+        const bindingFor = (productId: string) =>
+          bindings.find((b) => b.productId === productId && b.externalProjectId) ?? null
+        const empty =
           id === 'checkion'
             ? !checkion
             : id === 'audion'
               ? !audion
               : id === 'brandion'
                 ? !brandion
-                : id === 'metron'
-                  ? !metron
-                  : bindings.length === 0,
-        group: 'capability' as const,
-      })),
-    [audion, bindings.length, brandion, checkion, metron],
+                : id === 'creation'
+                  ? !creation
+                  : id === 'metron'
+                    ? !metron
+                    : id === 'videon'
+                      ? !bindingFor('videon')
+                      : id === 'spirion'
+                        ? !bindingFor('spirion')
+                        : id === 'echon'
+                          ? !bindingFor('echon')
+                          : bindings.length === 0
+        return { id: id as CollectionWorkNavId, empty, group: 'capability' as const }
+      }),
+    [audion, bindings, brandion, checkion, creation, metron],
   )
 
   const renderFacetBody = (id: KnowledgeFacetId): ReactNode => {
@@ -979,7 +1028,11 @@ export function CollectionKnowledgeBand({
               data-empty={!audion ? 'true' : 'false'}
               hidden={openNav !== 'audion'}
             >
-              <AudionCapabilityView audion={audion} href={audionHref ?? ''} />
+              <AudionCapabilityView
+                audion={audion}
+                href={audionHref ?? ''}
+                platformProjectId={platformProjectId}
+              />
             </article>
 
             <article
@@ -993,6 +1046,15 @@ export function CollectionKnowledgeBand({
 
             <article
               className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'creation' ? 'true' : 'false'}
+              data-empty={!creation ? 'true' : 'false'}
+              hidden={openNav !== 'creation'}
+            >
+              <CreationCapabilityView creation={creation} href={creationHref ?? ''} />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
               data-active={openNav === 'metron' ? 'true' : 'false'}
               data-empty={!metron ? 'true' : 'false'}
               hidden={openNav !== 'metron'}
@@ -1001,6 +1063,57 @@ export function CollectionKnowledgeBand({
                 metron={metron}
                 href={metronHref ?? ''}
                 platformProjectId={platformProjectId}
+              />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'videon' ? 'true' : 'false'}
+              data-empty={!bindings.find((b) => b.productId === 'videon' && b.externalProjectId) ? 'true' : 'false'}
+              hidden={openNav !== 'videon'}
+            >
+              <BoundProductCapabilityView
+                productId="videon"
+                title="VIDEON"
+                subtitle={t('projects.detail.videonCatalogSubtitle')}
+                binding={bindings.find((b) => b.productId === 'videon') ?? null}
+                href={videonHref ?? ''}
+                emptyHint={t('projects.detail.videonEmpty')}
+                openLabel={t('projects.detail.openVideon')}
+              />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'spirion' ? 'true' : 'false'}
+              data-empty={!bindings.find((b) => b.productId === 'spirion' && b.externalProjectId) ? 'true' : 'false'}
+              hidden={openNav !== 'spirion'}
+            >
+              <BoundProductCapabilityView
+                productId="spirion"
+                title="SPIRION"
+                subtitle={t('projects.detail.spirionCatalogSubtitle')}
+                binding={bindings.find((b) => b.productId === 'spirion') ?? null}
+                href={spirionHref ?? ''}
+                emptyHint={t('projects.detail.spirionEmpty')}
+                openLabel={t('projects.detail.openSpirion')}
+              />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'echon' ? 'true' : 'false'}
+              data-empty={!bindings.find((b) => b.productId === 'echon' && b.externalProjectId) ? 'true' : 'false'}
+              hidden={openNav !== 'echon'}
+            >
+              <BoundProductCapabilityView
+                productId="echon"
+                title="ECHON"
+                subtitle={t('projects.detail.echonCatalogSubtitle')}
+                binding={bindings.find((b) => b.productId === 'echon') ?? null}
+                href={echonHref ?? ''}
+                emptyHint={t('projects.detail.echonEmpty')}
+                openLabel={t('projects.detail.openEchon')}
               />
             </article>
 

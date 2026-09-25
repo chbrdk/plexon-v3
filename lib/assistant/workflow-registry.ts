@@ -125,6 +125,19 @@ const LAZY_HANDLERS: Record<AssistantIntent['type'], () => Promise<IntentDispatc
         intent as Extract<AssistantIntent, { type: 'promote_capability_sequence' }>
       );
   },
+  campaign_brief_list: async () => {
+    const { handleCampaignBriefListIntent } = await import('@/lib/assistant/handlers/campaign-brief');
+    return (ctx, intent) =>
+      handleCampaignBriefListIntent(ctx, intent as Extract<AssistantIntent, { type: 'campaign_brief_list' }>);
+  },
+  campaign_brief_create: async () => {
+    const { handleCampaignBriefCreateIntent } = await import('@/lib/assistant/handlers/campaign-brief');
+    return (ctx, intent) =>
+      handleCampaignBriefCreateIntent(
+        ctx,
+        intent as Extract<AssistantIntent, { type: 'campaign_brief_create' }>,
+      );
+  },
   free_chat: async () => {
     const { handleFreeChatIntent } = await import('@/lib/assistant/handlers/free-chat');
     return (ctx, intent) => handleFreeChatIntent(ctx, intent as Extract<AssistantIntent, { type: 'free_chat' }>);

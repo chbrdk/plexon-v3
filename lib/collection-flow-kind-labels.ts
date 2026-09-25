@@ -34,6 +34,8 @@ export const COLLECTION_FLOW_KIND_LABEL: Record<CollectionFlowNodeKind, string> 
   persona_bootstrap: 'Persona erstellen',
   suggest_queries: 'GEO-Fragen',
   human_confirm: 'Bestätigen',
+  schedule: 'Termin',
+  retest: 'Gegentest',
   score_gate: 'Score Gate',
   issue_gate: 'Issue Gate',
   geo_gate: 'GEO Gate',

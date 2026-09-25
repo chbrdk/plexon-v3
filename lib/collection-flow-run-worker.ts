@@ -1,5 +1,5 @@
 /**
- * Async worker for Wave 15 webhook/service triggers.
+ * Async worker for Wave 15 webhook/service/schedule triggers.
  * Fire-and-forget after 202 — does not depend on the HTTP request lifetime.
  */
 
@@ -10,6 +10,7 @@ import {
   getCollectionFlowRun,
   patchCollectionFlowRun,
 } from '@/lib/db/collection-flow-runs';
+import { recordSuiteAuditEvent } from '@/lib/suite-audit';
 
 async function postCallback(
   callbackUrl: string,
@@ -53,6 +54,18 @@ export async function processCollectionFlowRun(input: {
     return;
   }
 
+  const actorUserId = row.ownerId?.trim() || null;
+  if (actorUserId) {
+    await recordSuiteAuditEvent({
+      actorUserId,
+      platformProjectId: input.platformProjectId,
+      productId: 'plexon',
+      action: 'run_started',
+      subjectRef: input.runId,
+      meta: { flowId: input.flowId, trigger: run.trigger },
+    });
+  }
+
   const doc = ensureFlowDocument(row.flow);
   const requestBody = (run.request as Record<string, unknown> | null) ?? {};
   const result = await executeCollectionFlowRun({
@@ -61,7 +74,7 @@ export async function processCollectionFlowRun(input: {
     flowName: row.name,
     doc,
     body: requestBody,
-    updatedByUserId: null,
+    updatedByUserId: actorUserId,
   });
 
   if (!result.ok) {
@@ -70,6 +83,16 @@ export async function processCollectionFlowRun(input: {
       status: 'error',
       error: result.message,
     });
+    if (actorUserId) {
+      await recordSuiteAuditEvent({
+        actorUserId,
+        platformProjectId: input.platformProjectId,
+        productId: 'plexon',
+        action: 'run_finished',
+        subjectRef: input.runId,
+        meta: { flowId: input.flowId, trigger: run.trigger, status: 'error' },
+      });
+    }
     return;
   }
 
@@ -80,6 +103,17 @@ export async function processCollectionFlowRun(input: {
     lastRun: result.lastRun,
     error: null,
   });
+
+  if (actorUserId) {
+    await recordSuiteAuditEvent({
+      actorUserId,
+      platformProjectId: input.platformProjectId,
+      productId: 'plexon',
+      action: 'run_finished',
+      subjectRef: input.runId,
+      meta: { flowId: input.flowId, trigger: run.trigger, status: 'complete' },
+    });
+  }
 
   if (run.callbackUrl) {
     const callbackStatus = await postCallback(run.callbackUrl, {

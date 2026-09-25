@@ -6,6 +6,8 @@ describe('workflow-registry', () => {
   it('registers all intent types', () => {
     const types = listRegisteredIntentTypes().sort();
     const expected: AssistantIntent['type'][] = [
+      'campaign_brief_create',
+      'campaign_brief_list',
       'capabilities',
       'contrast_check',
       'create_audion_project',

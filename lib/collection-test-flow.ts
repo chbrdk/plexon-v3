@@ -30,6 +30,12 @@ export const COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH =
   'vaillant-barrier-research-v1' as const;
 export const COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL =
   'vaillant-installer-dual-v1' as const;
+/** Enterprise E5 — Fix → brand measure → retest. */
+export const COLLECTION_FLOW_TEMPLATE_FIX_RETEST = 'enterprise-fix-retest-v1' as const;
+/** Enterprise E5 — Launch gate (quality + brand + human confirm). */
+export const COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE = 'enterprise-launch-gate-v1' as const;
+/** Enterprise E8 — crisis response chain. */
+export const COLLECTION_FLOW_TEMPLATE_CRISIS = 'enterprise-crisis-v1' as const;
 
 /**
  * Wave 5: Audion journey kinds (closed set, semantics owned by AUDION) plus PLEXON/CHECKION
@@ -73,6 +79,9 @@ export const COLLECTION_FLOW_NODE_KINDS = [
   'persona_bootstrap',
   'suggest_queries',
   'human_confirm',
+  // Enterprise E3 — schedule + retest (suite-enterprise-program.md)
+  'schedule',
+  'retest',
   // Legacy quality gates (Wave 1–8B) — migrated to `compare` on load
   'score_gate',
   'issue_gate',
@@ -190,6 +199,10 @@ export type CollectionFlowNode = {
   mediaAssetId?: string;
   /** VIDEON cut id on `videon_export_run` (V6); may come from upstream `media.cut.cutId`. */
   cutId?: string;
+  /** Enterprise E3 — cron expression on `schedule` (UTC unless timezone set). */
+  cronExpression?: string;
+  /** Enterprise E3 — IANA timezone for `schedule`. */
+  timezone?: string;
   /** VIDEON export format on `videon_export_run` — `mp4` (default) | `premiere_xml`. */
   format?: 'mp4' | 'premiere_xml' | (string & {});
   /** Palette preset id for action/measure factories (Wave 11). */
@@ -374,6 +387,8 @@ export type CollectionTestFlowDocument = {
   journeyFlow?: EmbeddedAudionJourneyFlow | null;
   lastVerdict?: CollectionVerdict | null;
   lastRun?: CollectionFlowLastRun | null;
+  /** Enterprise E3 — de-dupe key for last schedule fire (minute bucket). */
+  scheduleMeta?: { lastFiredKey?: string } | null;
 };
 
 export const DEFAULT_SCORE_GATE_THRESHOLD = 70;
@@ -476,6 +491,264 @@ export function createPageQualityTemplate(url: string): CollectionTestFlowDocume
   return {
     schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
     templateId: COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+}
+
+/** Enterprise E5 — Fix and Gegentest: scan → brand_measure → retest → human_confirm. */
+export function createFixRetestTemplate(url: string): CollectionTestFlowDocument {
+  const pageUrl = url.trim() || 'https://example.com';
+  const nodes: CollectionFlowNode[] = [
+    { id: 'n-start', kind: 'start', label: 'Start', url: pageUrl, position: { x: 0, y: 120 } },
+    {
+      id: 'n-scan',
+      kind: 'scan',
+      label: 'Page scan',
+      url: pageUrl,
+      scanMode: 'single',
+      position: { x: 200, y: 120 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Brand measure',
+      adapter: 'fixture',
+      position: { x: 420, y: 120 },
+    },
+    {
+      id: 'n-retest',
+      kind: 'retest',
+      label: 'Gegentest',
+      position: { x: 640, y: 120 },
+    },
+    {
+      id: 'n-confirm',
+      kind: 'human_confirm',
+      label: 'Freigabe',
+      confirmKind: 'deep_scan',
+      position: { x: 860, y: 120 },
+    },
+    {
+      id: 'n-ok',
+      kind: 'quality_ok',
+      label: 'Quality OK',
+      position: { x: 1080, y: 40 },
+    },
+    {
+      id: 'n-abandon',
+      kind: 'abandon',
+      label: 'Abandon',
+      position: { x: 1080, y: 200 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e1', source: 'n-start', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e2', source: 'n-scan', target: 'n-brand', edgeKind: 'then' },
+    { id: 'e3', source: 'n-brand', target: 'n-retest', edgeKind: 'then' },
+    { id: 'e4', source: 'n-retest', target: 'n-confirm', edgeKind: 'then' },
+    {
+      id: 'e5',
+      source: 'n-confirm',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e6',
+      source: 'n-confirm',
+      target: 'n-abandon',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+  ];
+  return {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_FIX_RETEST,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+}
+
+/** Enterprise E5 — Launch gate: quality_ok + brand_measure + human_confirm. */
+export function createLaunchGateTemplate(url: string): CollectionTestFlowDocument {
+  const pageUrl = url.trim() || 'https://example.com';
+  const nodes: CollectionFlowNode[] = [
+    { id: 'n-start', kind: 'start', label: 'Start', url: pageUrl, position: { x: 0, y: 120 } },
+    {
+      id: 'n-scan',
+      kind: 'scan',
+      label: 'Page scan',
+      url: pageUrl,
+      scanMode: 'single',
+      position: { x: 200, y: 120 },
+    },
+    {
+      id: 'n-score',
+      kind: 'compare',
+      label: `Score ≥ ${DEFAULT_SCORE_GATE_THRESHOLD}`,
+      path: 'scan.overallScore',
+      op: 'gte',
+      value: DEFAULT_SCORE_GATE_THRESHOLD,
+      position: { x: 420, y: 120 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Brand measure',
+      adapter: 'fixture',
+      position: { x: 640, y: 120 },
+    },
+    {
+      id: 'n-confirm',
+      kind: 'human_confirm',
+      label: 'Kundenraum freigeben',
+      confirmKind: 'deep_scan',
+      position: { x: 860, y: 120 },
+    },
+    {
+      id: 'n-ok',
+      kind: 'quality_ok',
+      label: 'Launch OK',
+      position: { x: 1080, y: 40 },
+    },
+    {
+      id: 'n-abandon',
+      kind: 'abandon',
+      label: 'Abandon',
+      position: { x: 1080, y: 200 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e1', source: 'n-start', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e2', source: 'n-scan', target: 'n-score', edgeKind: 'then' },
+    {
+      id: 'e3',
+      source: 'n-score',
+      target: 'n-brand',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e3f',
+      source: 'n-score',
+      target: 'n-abandon',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+    { id: 'e4', source: 'n-brand', target: 'n-confirm', edgeKind: 'then' },
+    {
+      id: 'e5',
+      source: 'n-confirm',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e6',
+      source: 'n-confirm',
+      target: 'n-abandon',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+  ];
+  return {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE,
+    nodes,
+    edges,
+    journeyFlow: null,
+    lastVerdict: null,
+    lastRun: null,
+  };
+}
+
+/**
+ * Enterprise E8 — Krisenvorlage: Hinweis → Persona → Single-Scan → Brand → Freigabe.
+ * Fehlende Capabilities erscheinen als übersprungene Schritte zur Laufzeit (kein Auto-Fail).
+ */
+export function createCrisisResponseTemplate(url: string): CollectionTestFlowDocument {
+  const pageUrl = url.trim() || 'https://example.com/statement';
+  const nodes: CollectionFlowNode[] = [
+    { id: 'n-start', kind: 'start', label: 'Krise starten', url: pageUrl, position: { x: 0, y: 120 } },
+    {
+      id: 'n-scan',
+      kind: 'scan',
+      label: 'Statement-URL',
+      url: pageUrl,
+      scanMode: 'single',
+      position: { x: 220, y: 120 },
+    },
+    {
+      id: 'n-persona',
+      kind: 'persona',
+      label: 'Zielgruppe',
+      position: { x: 440, y: 120 },
+    },
+    {
+      id: 'n-brand',
+      kind: 'brand_measure',
+      label: 'Brand measure',
+      adapter: 'fixture',
+      position: { x: 660, y: 120 },
+    },
+    {
+      id: 'n-confirm',
+      kind: 'human_confirm',
+      label: 'Freigabe',
+      confirmKind: 'deep_scan',
+      position: { x: 880, y: 120 },
+    },
+    {
+      id: 'n-ok',
+      kind: 'quality_ok',
+      label: 'Krise OK',
+      position: { x: 1100, y: 40 },
+    },
+    {
+      id: 'n-abandon',
+      kind: 'abandon',
+      label: 'Abandon',
+      position: { x: 1100, y: 200 },
+    },
+  ];
+  const edges: CollectionFlowEdge[] = [
+    { id: 'e1', source: 'n-start', target: 'n-scan', edgeKind: 'then' },
+    { id: 'e2', source: 'n-scan', target: 'n-persona', edgeKind: 'then' },
+    { id: 'e3', source: 'n-persona', target: 'n-brand', edgeKind: 'then' },
+    { id: 'e4', source: 'n-brand', target: 'n-confirm', edgeKind: 'then' },
+    {
+      id: 'e5',
+      source: 'n-confirm',
+      target: 'n-ok',
+      when: 'pass',
+      edgeKind: 'when',
+      label: 'pass',
+    },
+    {
+      id: 'e6',
+      source: 'n-confirm',
+      target: 'n-abandon',
+      when: 'fail',
+      edgeKind: 'otherwise',
+      label: 'fail',
+    },
+  ];
+  return {
+    schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+    templateId: COLLECTION_FLOW_TEMPLATE_CRISIS,
     nodes,
     edges,
     journeyFlow: null,
@@ -1340,6 +1613,15 @@ export const BRAND_FAMILY_KINDS = new Set<CollectionFlowNodeKind>(['brand_measur
 
 export function documentHasBrandMeasure(doc: CollectionTestFlowDocument): boolean {
   return doc.nodes.some((n) => n.kind === 'brand_measure');
+}
+
+/** Enterprise E3 — Gegentest node present. */
+export function documentHasRetest(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => n.kind === 'retest');
+}
+
+export function documentHasSchedule(doc: CollectionTestFlowDocument): boolean {
+  return doc.nodes.some((n) => n.kind === 'schedule');
 }
 
 /** Merge upstream `guideline` config onto `brand_measure` nodes missing guidelineId. */

@@ -5,12 +5,15 @@ Dieses Verzeichnis ist der Einstiegspunkt für einen Agenten, der die Marketing-
 ## In dieser Reihenfolge lesen
 
 1. [Wissensdatenbank](suite-knowledge-base.md) — Produktmodell, App-Rollen, verlässliche Aussagen und Grenzen.
-2. [Storyboard- und Produktionshandbuch](tutorial-production-storyboards.md) — Tutorialprogramm, bereits vorhandene Artefakte und Produktionsstandard.
-3. [Startprompt](continuation-prompt.md) — direkt in den neuen Agenten kopieren.
+2. [Funktionsstand](../suite-funktionsstand.md) — Ist-Stand aller Apps (2026-09-25).
+3. [Agentur-Aufgaben](../suite-agentur-use-cases.md) — konkrete Use Cases aus diesem Stand.
+4. [Enterprise-Programm](../suite-enterprise-program.md) — Wellen, noch nicht umgesetzt.
+5. [Storyboard- und Produktionshandbuch](tutorial-production-storyboards.md) — Tutorialprogramm, bereits vorhandene Artefakte und Produktionsstandard.
+6. [Startprompt](continuation-prompt.md) — direkt in den neuen Agenten kopieren.
 
 ## Arbeitsgrundsatz
 
-PLEXON hat für Nutzer:innen genau einen Projektbegriff: die **Collection**. CHECKION, AUDION, BRANDION, CREATION und SPIRION sind Capabilities innerhalb dieser Collection. Das ist keine stilistische Präferenz, sondern eine Produktinvariante.
+PLEXON hat für Nutzer:innen genau einen Projektbegriff: die **Collection**. CHECKION, AUDION, BRANDION, CREATION, SPIRION und METRON sind Capabilities innerhalb dieser Collection. VIDEON ist der Collection-gebundene Medien-Workspace, ECHON der Research-Companion. Das ist keine stilistische Präferenz, sondern eine Produktinvariante. Der Funktionsstand steht in [`knowledge/suite-funktionsstand.md`](../suite-funktionsstand.md).
 
 ## Bereits produzierte CHECKION-Artefakte
 

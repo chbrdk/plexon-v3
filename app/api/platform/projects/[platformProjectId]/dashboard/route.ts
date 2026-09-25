@@ -33,8 +33,9 @@ import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
 import { buildCreationProjectLaunchUrl } from '@/lib/creation-launch-url';
 import { buildMetronProjectLaunchUrl } from '@/lib/metron-launch-url';
-import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl, getMetronUrl } from '@/lib/constants';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl, getEchonUrl, getMetronUrl, getSpirionUrl, getVideonUrl } from '@/lib/constants';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
+import { listCollectionActivity } from '@/lib/collection-activity';
 
 const FLOW_TEASER_LIMIT = 3;
 
@@ -64,7 +65,7 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, brandionLive, creationLive, metronLive, packRow, flowRows, projection] =
+  const [checkionLive, audionLive, brandionLive, creationLive, metronLive, packRow, flowRows, projection, activity] =
     await Promise.all([
       fetchCheckionPlatformProjectSummary(ppid, user.id),
       fetchAudionPlatformProjectSummary(ppid, user.id),
@@ -74,6 +75,7 @@ export async function GET(
       getOrCreateKnowledgePack(ppid),
       listCollectionTestFlows(ppid),
       getCollectionProjection(ppid, { rebuildIfMissing: true }),
+      listCollectionActivity(ppid, { limit: 12 }),
     ]);
   const checkion = resolveCheckionCapability(checkionLive, bindings);
   const audion = resolveAudionCapability(audionLive, bindings);
@@ -116,7 +118,16 @@ export async function GET(
   const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
   const creationBase = (getCreationUrl() ?? '').replace(/\/+$/, '');
   const metronBase = (getMetronUrl() ?? '').replace(/\/+$/, '');
+  const videonBase = (getVideonUrl() ?? '').replace(/\/+$/, '');
+  const spirionBase = (getSpirionUrl() ?? '').replace(/\/+$/, '');
+  const echonBase = (getEchonUrl() ?? '').replace(/\/+$/, '');
   const companyId = project.companyId;
+
+  const withProjectQuery = (base: string, path: string) => {
+    if (!base) return '';
+    const root = `${base}${path}`;
+    return `${root}${root.includes('?') ? '&' : '?'}platformProjectId=${encodeURIComponent(ppid)}`;
+  };
 
   return Response.json({
     platformProject: project,
@@ -136,6 +147,7 @@ export async function GET(
         }
       : null,
     flows,
+    activity: { items: activity },
     links: {
       checkionProject: checkion
         ? `${checkionBase}/?platformProjectHint=${encodeURIComponent(ppid)}`
@@ -159,6 +171,9 @@ export async function GET(
         : metronBase
           ? `${metronBase}/projects`
           : '',
+      videonProject: videonBase ? withProjectQuery(videonBase, '/projects') : '',
+      spirionProject: spirionBase || '',
+      echonProject: echonBase || '',
     },
   });
 }

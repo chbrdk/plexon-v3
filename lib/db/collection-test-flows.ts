@@ -50,6 +50,12 @@ export async function listCollectionTestFlows(
     .orderBy(desc(collectionTestFlows.updatedAt));
 }
 
+/** Enterprise E3 — all flows for schedule tick (bounded scan). */
+export async function listAllCollectionTestFlows(): Promise<CollectionTestFlowRow[]> {
+  const db = getDb();
+  return db.select().from(collectionTestFlows).orderBy(desc(collectionTestFlows.updatedAt)).limit(500);
+}
+
 export async function getCollectionTestFlow(
   platformProjectId: string,
   flowId: string

@@ -6,15 +6,21 @@ import {
 import { getRequestUser } from '@/lib/auth-request-user';
 import {
   COLLECTION_FLOW_TEMPLATE_EQC_QUALITY,
+  COLLECTION_FLOW_TEMPLATE_CRISIS,
+  COLLECTION_FLOW_TEMPLATE_FIX_RETEST,
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
   COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY_ISSUES,
+  COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
   COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
   COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH,
   COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL,
+  createCrisisResponseTemplate,
   createEqcQualityTemplate,
+  createFixRetestTemplate,
   createJourneyQualityIssuesTemplate,
   createJourneyQualityTemplate,
+  createLaunchGateTemplate,
   createPageQualityIssuesTemplate,
   createPageQualityTemplate,
   createVaillantBarrierResearchTemplate,
@@ -136,6 +142,12 @@ export async function POST(
             maxPages: eqcProfile.scanMaxPages,
             includeCompetitors: eqcProfile.scanCompetitors,
           })
+        : templateId === COLLECTION_FLOW_TEMPLATE_FIX_RETEST
+          ? createFixRetestTemplate(url)
+          : templateId === COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE
+            ? createLaunchGateTemplate(url)
+            : templateId === COLLECTION_FLOW_TEMPLATE_CRISIS
+              ? createCrisisResponseTemplate(url)
         : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_BARRIER_RESEARCH
           ? createVaillantBarrierResearchTemplate({ journeyUrl: url, scanUrl: url })
           : templateId === COLLECTION_FLOW_TEMPLATE_VAILLANT_INSTALLER_DUAL

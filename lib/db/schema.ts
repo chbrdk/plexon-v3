@@ -688,3 +688,173 @@ export const creationClientShareEvents = pgTable(
     ),
   })
 );
+
+/**
+ * Enterprise E2 — one public ClientRoom per Collection (approved slots only).
+ * Spec: suite-enterprise-program.md § E2
+ */
+export const CLIENT_ROOM_SLOT_IDS = [
+  'quick_check',
+  'checkion_overview',
+  'brand_findings',
+  'creation_pages',
+  'metron_dashboard',
+  'videon_cut',
+] as const;
+
+export type ClientRoomSlotId = (typeof CLIENT_ROOM_SLOT_IDS)[number];
+
+export type ClientRoomSlot = {
+  productId: string;
+  subjectRef: string;
+  title: string;
+  href?: string | null;
+  approvedAt: string;
+  approvedByUserId: string;
+};
+
+export type ClientRoomSlots = Partial<Record<ClientRoomSlotId, ClientRoomSlot>>;
+
+export const collectionClientRooms = pgTable(
+  'collection_client_rooms',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull(),
+    passwordHash: text('password_hash'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    revision: integer('revision').notNull().default(1),
+    slots: jsonb('slots').$type<ClientRoomSlots>().notNull().default({}),
+    createdByUserId: text('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('collection_client_rooms_project_idx').on(t.platformProjectId),
+    tokenHashIdx: uniqueIndex('collection_client_rooms_token_hash_uidx').on(t.tokenHash),
+  })
+);
+
+/**
+ * Enterprise E4 — append-only suite audit.
+ * Spec: suite-enterprise-program.md § E4
+ */
+export const SUITE_AUDIT_ACTIONS = [
+  'run_started',
+  'run_finished',
+  'published',
+  'approved',
+  'revoked',
+  'exported',
+] as const;
+
+export type SuiteAuditAction = (typeof SUITE_AUDIT_ACTIONS)[number];
+
+export const suiteAuditEvents = pgTable(
+  'suite_audit_events',
+  {
+    id: text('id').primaryKey(),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+    actorUserId: text('actor_user_id').notNull(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    productId: text('product_id').notNull(),
+    action: text('action').notNull(),
+    subjectRef: text('subject_ref'),
+    modelRef: text('model_ref'),
+    meta: jsonb('meta').$type<Record<string, unknown>>().notNull().default({}),
+  },
+  (t) => ({
+    projectAtIdx: index('suite_audit_events_project_at_idx').on(t.platformProjectId, t.at),
+    actorIdx: index('suite_audit_events_actor_idx').on(t.actorUserId, t.at),
+  })
+);
+
+/**
+ * Enterprise E1 — product activity distillates for Collection Lagebild.
+ * Spec: suite-enterprise-program.md § E1
+ */
+export const collectionActivityItems = pgTable(
+  'collection_activity_items',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    productId: text('product_id').notNull(),
+    kind: text('kind').notNull(),
+    status: text('status').notNull(),
+    subjectRef: text('subject_ref').notNull(),
+    title: text('title').notNull(),
+    href: text('href'),
+    at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+    actorUserId: text('actor_user_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectAtIdx: index('collection_activity_items_project_at_idx').on(t.platformProjectId, t.at),
+  })
+);
+
+/**
+ * Enterprise E7 — CampaignBrief SSOT on the Collection.
+ * Spec: suite-enterprise-program.md § E7
+ */
+export const CAMPAIGN_BRIEF_STATUSES = ['draft', 'active', 'closed'] as const;
+export type CampaignBriefStatus = (typeof CAMPAIGN_BRIEF_STATUSES)[number];
+
+export const collectionCampaignBriefs = pgTable(
+  'collection_campaign_briefs',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    status: text('status').notNull().default('draft'),
+    marketRef: text('market_ref'),
+    personaRefs: jsonb('persona_refs').$type<string[]>().notNull().default([]),
+    guidelineId: text('guideline_id'),
+    pageRefs: jsonb('page_refs').$type<string[]>().notNull().default([]),
+    sceneId: text('scene_id'),
+    mediaRefs: jsonb('media_refs').$type<string[]>().notNull().default([]),
+    kpiRefs: jsonb('kpi_refs').$type<string[]>().notNull().default([]),
+    spirionRefs: jsonb('spirion_refs').$type<string[]>().notNull().default([]),
+    createdByUserId: text('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('collection_campaign_briefs_project_idx').on(t.platformProjectId),
+  })
+);
+
+/**
+ * Enterprise E9 — company directory stub (OIDC/SAML/SCIM config placeholder).
+ * Spec: suite-enterprise-program.md § E9
+ */
+export const COMPANY_DIRECTORY_PROVIDERS = ['none', 'oidc', 'saml'] as const;
+export type CompanyDirectoryProvider = (typeof COMPANY_DIRECTORY_PROVIDERS)[number];
+
+export const companyDirectorySettings = pgTable(
+  'company_directory_settings',
+  {
+    companyId: text('company_id')
+      .primaryKey()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull().default('none'),
+    passwordLoginDisabled: boolean('password_login_disabled').notNull().default(false),
+    /** Opaque provider config — never returned to product apps. */
+    config: jsonb('config').$type<Record<string, unknown>>().notNull().default({}),
+    scimEnabled: boolean('scim_enabled').notNull().default(false),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  }
+);

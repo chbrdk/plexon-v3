@@ -130,6 +130,8 @@ export const NODE_IO_BY_KIND: Partial<Record<CollectionFlowNodeKind, NodeIoSchem
   persona_bootstrap: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   suggest_queries: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
   human_confirm: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  schedule: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: false },
+  retest: { inputs: [FLOW_IN], controlOutputs: [THEN_OUT], catalogOutputs: true },
 };
 
 const DEFAULT_IO: NodeIoSchema = {
