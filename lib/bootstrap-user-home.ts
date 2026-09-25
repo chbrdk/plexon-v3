@@ -1,6 +1,6 @@
 /**
  * Ensure a session user has a home company (+ optional first Collection).
- * Used by register onboarding and E2E staging setup.
+ * Used by E2E staging setup and empty-account onboarding seed.
  */
 
 import { randomUUID } from 'crypto'
@@ -10,8 +10,13 @@ import { listUserCompanies } from '@/lib/assistant/user-eligibility'
 import { createPlatformProjectWorkflow } from '@/lib/assistant/workflows/create-platform-project'
 import { getDb } from '@/lib/db'
 import { addCompanyUser, createCompany } from '@/lib/db/companies'
+import { ensureBindingPlaceholders } from '@/lib/db/platform-project-bindings'
+import { createPlatformProject } from '@/lib/db/platform-projects'
+import { upsertUserPlatformProjectAssignment } from '@/lib/db/user-platform-project-assignments'
 import { users } from '@/lib/db/schema'
 import { COMPANY_USER_ROLE } from '@/lib/platform-companies'
+import { PLATFORM_PROJECT_ASSIGNMENT_ROLE } from '@/lib/platform-provisioning'
+import { syncPlatformProjectToProducts } from '@/lib/platform-project-sync-service'
 
 export type BootstrapUserHomeResult = {
   ok: true
@@ -19,6 +24,7 @@ export type BootstrapUserHomeResult = {
   companyCreated: boolean
   platformProjectId?: string
   collectionCreated: boolean
+  collectionError?: string
 }
 
 export async function ensureUserHomeCompany(user: RequestUser): Promise<{
@@ -52,6 +58,37 @@ export async function ensureUserHomeCompany(user: RequestUser): Promise<{
   return { companyId, created: true }
 }
 
+/** Seed Collection without product-entitlement gate (empty E2E accounts). */
+async function createSeedCollection(input: {
+  user: RequestUser
+  companyId: string
+  name: string
+  domain?: string
+}): Promise<{ platformProjectId: string } | { error: string }> {
+  const platformProjectId = randomUUID()
+  try {
+    await createPlatformProject({
+      id: platformProjectId,
+      companyId: input.companyId,
+      name: input.name,
+      domain: input.domain ?? null,
+      createdByUserId: input.user.id,
+    })
+    await ensureBindingPlaceholders(platformProjectId)
+    await upsertUserPlatformProjectAssignment(
+      input.user.id,
+      platformProjectId,
+      PLATFORM_PROJECT_ASSIGNMENT_ROLE.ADMIN
+    )
+    await syncPlatformProjectToProducts(platformProjectId, {
+      source: 'plexon-bootstrap-home',
+    }).catch(() => undefined)
+    return { platformProjectId }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'collection_create_failed' }
+  }
+}
+
 export async function bootstrapUserHome(
   user: RequestUser,
   options?: { createCollection?: boolean; collectionName?: string }
@@ -59,9 +96,10 @@ export async function bootstrapUserHome(
   const home = await ensureUserHomeCompany(user)
   let platformProjectId: string | undefined
   let collectionCreated = false
+  let collectionError: string | undefined
 
   if (options?.createCollection !== false) {
-    const created = await createPlatformProjectWorkflow(
+    const viaWorkflow = await createPlatformProjectWorkflow(
       user,
       {
         name: options?.collectionName?.trim() || 'E2E Suite Collection',
@@ -71,9 +109,23 @@ export async function bootstrapUserHome(
       },
       {}
     )
-    if (created.result.ok && created.result.platformProjectId) {
-      platformProjectId = created.result.platformProjectId
+    if (viaWorkflow.result.ok && viaWorkflow.result.platformProjectId) {
+      platformProjectId = viaWorkflow.result.platformProjectId
       collectionCreated = true
+    } else {
+      const seeded = await createSeedCollection({
+        user,
+        companyId: home.companyId,
+        name: options?.collectionName?.trim() || 'E2E Suite Collection',
+        domain: 'example.com',
+      })
+      if ('platformProjectId' in seeded) {
+        platformProjectId = seeded.platformProjectId
+        collectionCreated = true
+      } else {
+        collectionError =
+          viaWorkflow.result.error ?? seeded.error ?? 'collection_create_failed'
+      }
     }
   }
 
@@ -83,5 +135,6 @@ export async function bootstrapUserHome(
     companyCreated: home.created,
     platformProjectId,
     collectionCreated,
+    collectionError,
   }
 }
