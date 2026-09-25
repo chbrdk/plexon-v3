@@ -2,7 +2,7 @@
  * Apply idempotent SQL migration files (Enterprise).
  * Used when drizzle-kit push is interactive / ambiguous on new tables.
  */
-import { readFileSync, readdirSync } from 'fs'
+import { readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import pg from 'pg'
