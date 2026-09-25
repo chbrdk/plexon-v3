@@ -35,6 +35,8 @@ export type AssistantPageContext = {
   pathname: string
   capability?: string
   platformProjectId?: string
+  /** Company id for company KPI library tools (Wave 5). */
+  platformCompanyId?: string
   entityType?: string
   entityId?: string
   /** Optimistic-lock token for scene_apply_ops (CREATION editor). */
@@ -76,6 +78,9 @@ export function parseAssistantPageContext(raw: unknown): AssistantPageContext | 
   }
   if (typeof row.platformProjectId === 'string' && row.platformProjectId.trim()) {
     out.platformProjectId = row.platformProjectId.trim()
+  }
+  if (typeof row.platformCompanyId === 'string' && row.platformCompanyId.trim()) {
+    out.platformCompanyId = row.platformCompanyId.trim()
   }
   if (typeof row.entityType === 'string' && row.entityType.trim()) {
     out.entityType = row.entityType.trim()

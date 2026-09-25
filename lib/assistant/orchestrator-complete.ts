@@ -192,6 +192,8 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /metron_kpi_create$/,
   /metron_kpi_starter_pack_install$/,
   /metron_suite_connectors_sync$/,
+  /metron_external_connection_sync$/,
+  /metron_company_kpi_library_bind$/,
 ];
 
 export function isDestructiveToolName(toolName: string): boolean {

@@ -42,14 +42,22 @@ export type CapabilityId =
   | 'metron.health'
   | 'metron.projects.list'
   | 'metron.datasets.list'
+  | 'metron.datasets.get'
   | 'metron.kpis.list'
+  | 'metron.kpi.get'
+  | 'metron.kpi.evaluate'
+  | 'metron.kpi.summarize'
   | 'metron.dashboards.list'
   | 'metron.dashboard.get'
   | 'metron.dashboard.summarize'
   | 'metron.dashboard.create'
   | 'metron.kpi.create'
   | 'metron.kpi.starter_pack_install'
-  | 'metron.suite_connectors.sync';
+  | 'metron.suite_connectors.sync'
+  | 'metron.external_connections.list'
+  | 'metron.external_connection.sync'
+  | 'metron.company_kpi_library.list'
+  | 'metron.company_kpi_library.bind';
 
 export type CapabilitySurfaces = {
   agent: boolean;

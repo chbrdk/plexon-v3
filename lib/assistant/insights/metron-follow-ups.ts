@@ -131,6 +131,19 @@ export function buildMetronFollowUps(options: {
         reason: 'kpi_evaluate statt schätzen',
       },
       {
+        id: 'metron-external-list',
+        label: 'External Sync',
+        prompt: 'Liste die METRON External Connections dieser Collection und sync die aktive (mit Bestätigung)',
+        reason: 'GA4/Sheets/HubSpot Pull',
+      },
+      {
+        id: 'metron-library-bind',
+        label: 'Library binden',
+        prompt:
+          'Liste die Company-KPI-Library und binde ein Template in diese Collection (mit Bestätigung)',
+        reason: 'Company template → Collection KPI',
+      },
+      {
         id: 'metron-summarize',
         label: 'Zusammenfassen',
         prompt: 'Fasse die METRON Dashboards dieser Collection kurz zusammen',

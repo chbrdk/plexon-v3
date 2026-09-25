@@ -1,12 +1,12 @@
 # Assistant ↔ METRON MCP
 
-**Status:** Accepted — 2026-09-25 (Wave 4: multi-chart Auto-UI · `kpi_create` · Suite→Overview follow-ups)  
+**Status:** Accepted — 2026-09-25 (Wave 5: external sync · company library bind · Settings→Cursor Bearer)  
 **Depends:** `metron-v3/specs/domain/mcp-server.md` · `specs/domain/metron-capability.md` · `capability-catalog.md` METRON set  
-**Knowledge:** `knowledge/metron-mcp-assistant.md` · `knowledge/paths.md` · `metron-v3/knowledge/mcp-server.md`
+**Knowledge:** `knowledge/metron-mcp-assistant.md` · `knowledge/paths.md` · `metron-v3/knowledge/mcp-server.md` · `metron-v3/knowledge/settings-api-tokens.md`
 
 ## Purpose
 
-Wire METRON KPI/dashboard MCP tools into the Plexon free-chat orchestrator so operators can list projects, datasets, KPIs, and dashboards — **evaluate KPIs (server SSOT)** — summarize boards — and (with confirm) create KPIs / dashboards / install starter packs / suite-sync — without inventing analytics facts.
+Wire METRON KPI/dashboard MCP tools into the Plexon free-chat orchestrator so operators can list projects, datasets, KPIs, and dashboards — **evaluate KPIs (server SSOT)** — summarize boards — sync **external** connectors — **bind company KPI library** — and (with confirm) create KPIs / dashboards / install starter packs / suite-sync — without inventing analytics facts.
 
 ## Env
 
@@ -41,13 +41,15 @@ Connectivity block: `buildMetronIntegrationContextBlock`.
 | `metron_datasets` | `^metron_datasets_` / `^metron_dataset_get$` |
 | `metron_kpis` | `^metron_kpis_` / `^metron_kpi_(get\|evaluate\|summarize)$` (Anthropic: underscores) |
 | `metron_dashboards` | list / get / summarize (not create) |
-| `metron_write` | `dashboard_create` / `kpi_create` / `kpi_starter_pack_install` / `suite_connectors_sync` |
+| `metron_external` | `external_connections_list` |
+| `metron_library` | `company_kpi_library_list` |
+| `metron_write` | `dashboard_create` / `kpi_create` / `kpi_starter_pack_install` / `suite_connectors_sync` / `external_connection_sync` / `company_kpi_library_bind` |
 
 Planner intent `metron_analytics` when prompt matches **metron** / Collection KPI+dashboard (not bare `report`/`analytics`) and `hasMetronMcp`. Write verbs set `allowWriteTools` + confirm patterns.
 
-### Page context (Wave 3)
+### Page context (Wave 3–5)
 
-Metron host publishes `entityType` + `entityId` on `/dashboards/:id` (`dashboard`) and `/kpis?` detail when available. `injectMetronToolArgs` fills missing `id` for `dashboard_get` / `dashboard_summarize` / `kpi_get` / `kpi_evaluate` / `kpi_summarize` / `dataset_get` from page context. For writes, injects `platformProjectId` for list/create/sync tools including `kpi_create`.
+Metron host publishes `entityType` + `entityId` on `/dashboards/:id` (`dashboard`) and `/kpis?` detail when available. Optional `platformCompanyId` for company library list. `injectMetronToolArgs` fills missing `id` / `platformProjectId` / `platformCompanyId` for get/evaluate/sync/bind tools from page context.
 
 ## Capability Catalog mapping
 
@@ -91,3 +93,7 @@ Not a Collection Flow node. Guided confirm chain via follow-ups + connectivity p
 3. `metron_dashboard_create` name `CHECKION site health` (human_gate)
 
 Never auto-create on sync — mirrors product Apply path (`checkion-site-health-kpi-pack.md`).
+
+### Wave 5 — External + Company library
+
+Confirm-gated: `metron_external_connection_sync`, `metron_company_kpi_library_bind`. Reads: `external_connections_list`, `company_kpi_library_list`. No OAuth/credentials in chat.

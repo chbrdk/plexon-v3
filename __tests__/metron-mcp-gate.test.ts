@@ -110,13 +110,29 @@ describe('injectMetronToolArgs', () => {
       formulaJson: '{}',
     })
   })
+
+  it('injects platformCompanyId for company library list', () => {
+    expect(
+      injectMetronToolArgs(
+        'metron_company_kpi_library_list',
+        {},
+        {
+          actorUserId: 'u1',
+          platformCompanyId: 'co-1',
+        },
+      ),
+    ).toEqual({ actorUserId: 'u1', platformCompanyId: 'co-1' })
+  })
 })
 
 describe('metron write confirm gates', () => {
-  it('requires confirm for kpi_create and suite sync', () => {
+  it('requires confirm for kpi_create, suite sync, external sync, library bind', () => {
     expect(isConfirmationRequiredToolName('metron_kpi_create')).toBe(true)
     expect(isConfirmationRequiredToolName('metron_suite_connectors_sync')).toBe(true)
+    expect(isConfirmationRequiredToolName('metron_external_connection_sync')).toBe(true)
+    expect(isConfirmationRequiredToolName('metron_company_kpi_library_bind')).toBe(true)
     expect(isConfirmationRequiredToolName('metron_kpi_evaluate')).toBe(false)
+    expect(isConfirmationRequiredToolName('metron_external_connections_list')).toBe(false)
   })
 })
 
@@ -143,6 +159,8 @@ describe('buildMetronIntegrationContextBlock', () => {
       expect(block).toMatch(/zuerst/)
       expect(block).toMatch(/Suite→Overview/)
       expect(block).toMatch(/kpi_create/)
+      expect(block).toMatch(/External/)
+      expect(block).toMatch(/Company Library/)
     } finally {
       if (prev === undefined) delete process.env.METRON_MCP_URL
       else process.env.METRON_MCP_URL = prev

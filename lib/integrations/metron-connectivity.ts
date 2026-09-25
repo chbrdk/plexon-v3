@@ -61,5 +61,11 @@ export function buildMetronIntegrationContextBlock(input: {
   lines.push(
     '- KPI anlegen: metron_kpi_create mit status=draft bevorzugen; Formula nur als valides JSON (Server-SSOT) — Confirm-Gate.',
   );
+  lines.push(
+    '- External: metron_external_connections_list → metron_external_connection_sync (Confirm). Kein OAuth/Credentials im Chat.',
+  );
+  lines.push(
+    '- Company Library: metron_company_kpi_library_list → metron_company_kpi_library_bind (Confirm) mit datasetId der Collection.',
+  );
   return lines.join('\n');
 }

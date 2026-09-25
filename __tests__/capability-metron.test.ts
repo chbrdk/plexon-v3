@@ -34,7 +34,11 @@ describe('METRON Wave 9 capability catalog', () => {
         'metron.health',
         'metron.projects.list',
         'metron.datasets.list',
+        'metron.datasets.get',
         'metron.kpis.list',
+        'metron.kpi.get',
+        'metron.kpi.evaluate',
+        'metron.kpi.summarize',
         'metron.dashboards.list',
         'metron.dashboard.get',
         'metron.dashboard.summarize',
@@ -42,6 +46,10 @@ describe('METRON Wave 9 capability catalog', () => {
         'metron.kpi.create',
         'metron.kpi.starter_pack_install',
         'metron.suite_connectors.sync',
+        'metron.external_connections.list',
+        'metron.external_connection.sync',
+        'metron.company_kpi_library.list',
+        'metron.company_kpi_library.bind',
       ]),
     )
     expect(getCapability('metron.dashboards.list')?.owner).toBe('metron')
@@ -51,12 +59,21 @@ describe('METRON Wave 9 capability catalog', () => {
     })
     expect(getCapability('metron.dashboard.create')?.confirmation).toBe('human_gate')
     expect(getCapability('metron.kpi.create')?.confirmation).toBe('human_gate')
+    expect(getCapability('metron.external_connection.sync')?.confirmation).toBe('human_gate')
+    expect(getCapability('metron.company_kpi_library.bind')?.confirmation).toBe('human_gate')
   })
 
   it('maps MCP tool names to metron capabilities', () => {
     expect(capabilityIdFromAgentTool('metron_dashboards_list')).toBe('metron.dashboards.list')
     expect(capabilityIdFromAgentTool('metron_dashboard_create')).toBe('metron.dashboard.create')
     expect(capabilityIdFromAgentTool('metron_kpi_create')).toBe('metron.kpi.create')
+    expect(capabilityIdFromAgentTool('metron_kpi_evaluate')).toBe('metron.kpi.evaluate')
+    expect(capabilityIdFromAgentTool('metron_external_connection_sync')).toBe(
+      'metron.external_connection.sync',
+    )
+    expect(capabilityIdFromAgentTool('metron_company_kpi_library_bind')).toBe(
+      'metron.company_kpi_library.bind',
+    )
   })
 
   it('read executor returns ok with mocked fetch', async () => {

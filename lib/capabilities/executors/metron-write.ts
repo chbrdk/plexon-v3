@@ -102,5 +102,45 @@ export async function executeMetronWriteCapability(
     return { ok: true, catalogRoot: 'metron.suite', catalogBundle: { status: 'synced', kind }, agentPayload: res.data };
   }
 
+  if (op === 'external_connection_sync') {
+    const id = typeof input.id === 'string' ? input.id.trim() : '';
+    if (!id) {
+      return { ok: false, error: 'id fehlt', catalogRoot: 'metron.external' };
+    }
+    const res = await metronProductFetch({
+      path: `/api/external-connections/${encodeURIComponent(id)}/sync`,
+      method: 'POST',
+      body: typeof input.recipeId === 'string' ? { recipeId: input.recipeId } : {},
+      actorUserId: ctx.actorUserId,
+    });
+    if (!res.ok) return { ok: false, error: res.error, catalogRoot: 'metron.external', agentPayload: res.data };
+    return {
+      ok: true,
+      catalogRoot: 'metron.external',
+      catalogBundle: { status: 'synced' },
+      agentPayload: res.data,
+    };
+  }
+
+  if (op === 'company_kpi_library_bind') {
+    const id = typeof input.id === 'string' ? input.id.trim() : '';
+    const datasetId = typeof input.datasetId === 'string' ? input.datasetId.trim() : '';
+    if (!id || !platformProjectId || !datasetId) {
+      return {
+        ok: false,
+        error: 'id, platformProjectId und datasetId erforderlich',
+        catalogRoot: 'metron.kpis',
+      };
+    }
+    const res = await metronProductFetch({
+      path: `/api/company-kpi-library/${encodeURIComponent(id)}/bind`,
+      method: 'POST',
+      body: { platformProjectId, datasetId },
+      actorUserId: ctx.actorUserId,
+    });
+    if (!res.ok) return { ok: false, error: res.error, catalogRoot: 'metron.kpis', agentPayload: res.data };
+    return { ok: true, catalogRoot: 'metron.kpis', catalogBundle: { status: 'bound' }, agentPayload: res.data };
+  }
+
   return { ok: false, error: `unknown metron write op: ${op || '(empty)'}` };
 }

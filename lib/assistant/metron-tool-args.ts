@@ -5,13 +5,17 @@
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 
 function needsPlatformProjectId(toolName: string): boolean {
-  return /metron[._](datasets_list|kpis_list|dashboards_list|dashboard_create|kpi_create|kpi_starter_pack_install|suite_connectors_sync)$/i.test(
+  return /metron[._](datasets_list|kpis_list|dashboards_list|dashboard_create|kpi_create|kpi_starter_pack_install|suite_connectors_sync|external_connections_list|company_kpi_library_bind)$/i.test(
     toolName,
   );
 }
 
+function needsPlatformCompanyId(toolName: string): boolean {
+  return /metron[._]company_kpi_library_list$/i.test(toolName);
+}
+
 function needsEntityId(toolName: string): boolean {
-  return /metron[._](dashboard_get|dashboard_summarize|kpi_get|kpi_evaluate|kpi_summarize|dataset_get)$/i.test(
+  return /metron[._](dashboard_get|dashboard_summarize|kpi_get|kpi_evaluate|kpi_summarize|dataset_get|external_connection_sync|company_kpi_library_bind)$/i.test(
     toolName,
   );
 }
@@ -19,6 +23,8 @@ function needsEntityId(toolName: string): boolean {
 function entityTypeForTool(toolName: string): string | null {
   const n = toolName.replace(/\./g, '_').toLowerCase();
   if (n.includes('dashboard_')) return 'dashboard';
+  if (n.includes('external_connection')) return 'external_connection';
+  if (n.includes('company_kpi_library')) return 'company_kpi_template';
   if (n.includes('kpi_')) return 'kpi';
   if (n.includes('dataset_')) return 'dataset';
   return null;
@@ -31,6 +37,7 @@ export function injectMetronToolArgs(
     actorUserId: string;
     pageContext?: AssistantPageContext | null;
     platformProjectId?: string | null;
+    platformCompanyId?: string | null;
   },
 ): Record<string, unknown> {
   if (!/^metron[._]/.test(toolName)) return input;
@@ -48,6 +55,17 @@ export function injectMetronToolArgs(
       const fromConv = ctx.platformProjectId?.trim() || '';
       const id = fromPage || fromConv;
       if (id) out.platformProjectId = id;
+    }
+  }
+
+  if (needsPlatformCompanyId(toolName)) {
+    const existing =
+      typeof out.platformCompanyId === 'string' ? out.platformCompanyId.trim() : '';
+    if (!existing) {
+      const fromPage = ctx.pageContext?.platformCompanyId?.trim() || '';
+      const fromConv = ctx.platformCompanyId?.trim() || '';
+      const id = fromPage || fromConv;
+      if (id) out.platformCompanyId = id;
     }
   }
 

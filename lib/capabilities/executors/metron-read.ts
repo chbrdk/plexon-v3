@@ -73,6 +73,27 @@ export async function executeMetronReadCapability(
       catalogRoot = 'metron.dashboards';
       break;
     }
+    case 'external_connections_list': {
+      const fromInput =
+        typeof input.platformProjectId === 'string' ? input.platformProjectId.trim() : '';
+      const id = fromInput || (ctx.platformProjectId ?? '').trim();
+      if (!id) {
+        return { ok: false, error: 'platformProjectId fehlt', catalogRoot: 'metron.external' };
+      }
+      path = `/api/external-connections?platformProjectId=${encodeURIComponent(id)}`;
+      catalogRoot = 'metron.external';
+      break;
+    }
+    case 'company_kpi_library_list': {
+      const companyId =
+        typeof input.platformCompanyId === 'string' ? input.platformCompanyId.trim() : '';
+      if (!companyId) {
+        return { ok: false, error: 'platformCompanyId fehlt', catalogRoot: 'metron.kpis' };
+      }
+      path = `/api/company-kpi-library?platformCompanyId=${encodeURIComponent(companyId)}`;
+      catalogRoot = 'metron.kpis';
+      break;
+    }
     default:
       path = '/api/projects';
       catalogRoot = 'metron.projects';

@@ -45,6 +45,8 @@ export type ToolFamily =
   | 'metron_datasets'
   | 'metron_kpis'
   | 'metron_dashboards'
+  | 'metron_external'
+  | 'metron_library'
   | 'metron_write'
   | 'plexon_ui';
 
@@ -169,11 +171,15 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
   metron_datasets: [/^metron_datasets_/, /^metron_dataset_get$/],
   metron_kpis: [/^metron_kpis_/, /^metron_kpi_(get|evaluate|summarize)$/],
   metron_dashboards: [/^metron_dashboard(?!_create)/],
+  metron_external: [/^metron_external_connections_list$/],
+  metron_library: [/^metron_company_kpi_library_list$/],
   metron_write: [
     /^metron_dashboard_create$/,
     /^metron_kpi_create$/,
     /^metron_kpi_starter_pack_install$/,
     /^metron_suite_connectors_sync$/,
+    /^metron_external_connection_sync$/,
+    /^metron_company_kpi_library_bind$/,
   ],
   plexon_ui: [/^plexon_ui_/],
 };
@@ -255,6 +261,8 @@ export const PLATFORM_ASSISTANT_FAMILIES: ToolFamily[] = [
   'metron_datasets',
   'metron_kpis',
   'metron_dashboards',
+  'metron_external',
+  'metron_library',
   'metron_write',
 ];
 
@@ -290,6 +298,8 @@ export const READ_ONLY_QA_FAMILIES: ToolFamily[] = [
   'metron_datasets',
   'metron_kpis',
   'metron_dashboards',
+  'metron_external',
+  'metron_library',
 ];
 
 export const KNOWLEDGE_QA_FAMILIES: ToolFamily[] = [
@@ -319,13 +329,15 @@ export const VIDEON_MEDIA_FAMILIES: ToolFamily[] = [
   'videon_cuts',
 ];
 
-/** METRON Phase 1 read tools. */
+/** METRON read tools (incl. Wave 5 external list + company library list). */
 export const METRON_ANALYTICS_FAMILIES: ToolFamily[] = [
   'metron_ops',
   'metron_projects',
   'metron_datasets',
   'metron_kpis',
   'metron_dashboards',
+  'metron_external',
+  'metron_library',
 ];
 
 /** METRON Phase 2 writes — gated by allowWriteTools + confirm. */
