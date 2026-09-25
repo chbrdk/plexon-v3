@@ -8,6 +8,14 @@ export { Button, buttonClassName } from '../../msqdx-ui/packages/ui/src/componen
 export type { ButtonProps, ButtonVariant, ButtonSize, ButtonShape, ButtonClassNameOptions } from '../../msqdx-ui/packages/ui/src/components/Button'
 export { CardActions } from '../../msqdx-ui/packages/ui/src/components/CardActions'
 export type { CardActionsProps } from '../../msqdx-ui/packages/ui/src/components/CardActions'
+export {
+  CollectionHubCard,
+  CollectionHubMetric,
+} from '../../msqdx-ui/packages/ui/src/components/CollectionHubCard'
+export type {
+  CollectionHubCardProps,
+  CollectionHubMetricProps,
+} from '../../msqdx-ui/packages/ui/src/components/CollectionHubCard'
 export { Checkbox } from '../../msqdx-ui/packages/ui/src/components/Checkbox'
 export { Chip } from '../../msqdx-ui/packages/ui/src/components/Chip'
 export type { ChipProps, ChipSize } from '../../msqdx-ui/packages/ui/src/components/Chip'

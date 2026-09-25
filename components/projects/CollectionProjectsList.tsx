@@ -165,7 +165,7 @@ export function CollectionProjectsList({
           })}
         </Text>
       ) : null}
-      <div className="plexon-collection-grid">
+      <div className="ds-collection-hub-grid">
         {showCreateCard ? <CreateCollectionProjectCard onCreated={onCreated} /> : null}
         {projects.map((row) => (
           <CollectionProjectCard
@@ -198,7 +198,7 @@ export function CollectionProjectsList({
                 {t('projects.lifecycle.archivedEmpty')}
               </EmptyState>
             ) : (
-              <div className="plexon-collection-grid">
+              <div className="ds-collection-hub-grid">
                 {archived.map((row) => (
                   <CollectionProjectCard
                     key={`archived-${row.platformProject.id}`}

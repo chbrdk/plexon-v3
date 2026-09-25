@@ -30,7 +30,8 @@ describe('collection projects hub', () => {
     expect(form).toContain('API_PLATFORM_ME_COMPANIES')
     expect(form).toContain('pathPlatformProjectDashboard')
     expect(form).toContain('CreateCollectionProjectCard')
-    expect(form).toContain('plexon-collection-card--create')
+    expect(form).toContain('CollectionHubCard')
+    expect(form).toContain('variant="create"')
     expect(form).toContain('plexon-edit-dialog')
   })
 
@@ -44,6 +45,7 @@ describe('collection projects hub', () => {
     expect(page).not.toContain('CreateCollectionProjectForm')
     expect(list).toContain('CreateCollectionProjectCard')
     expect(list).toContain('showCreateCard')
+    expect(list).toContain('ds-collection-hub-grid')
   })
 
   it('shell nav exposes PATH_PROJECTS', () => {
@@ -60,8 +62,8 @@ describe('collection projects hub', () => {
       'utf8'
     )
     expect(card).not.toContain("data-msqdx-surface")
-    expect(card).toContain('plexon-collection-card')
-    expect(card).toContain('plexon-collection-card-stats')
+    expect(card).toContain('CollectionHubCard')
+    expect(card).toContain('CollectionHubMetric')
     expect(card).toContain('MetricIconScans')
   })
 })

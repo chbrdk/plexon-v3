@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Alert, Button, Dialog, Field, Input, Select, Text } from '@msqdx/ui'
+import { Alert, Button, CollectionHubCard, Dialog, Field, Input, Select, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_PLATFORM_ME_COMPANIES,
@@ -205,19 +205,12 @@ export function CreateCollectionProjectCard({
 
   return (
     <>
-      <button
-        type="button"
-        className="plexon-collection-card plexon-collection-card--create"
+      <CollectionHubCard
+        variant="create"
+        title={t('projects.hub.createTitle')}
+        hint={t('projects.hub.createHint')}
         onClick={() => setOpen(true)}
-      >
-        <span className="plexon-collection-card-kicker">{'\u00a0'}</span>
-        <Text role="headline" as="span" className="plexon-collection-card-title">
-          {t('projects.hub.createTitle')}
-        </Text>
-        <Text role="meta" as="span" className="plexon-collection-card-hint">
-          {t('projects.hub.createHint')}
-        </Text>
-      </button>
+      />
 
       <Dialog
         open={open}

@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import type { ReactNode } from 'react'
-import { Button, CardActions, Text } from '@msqdx/ui'
+import { Button, CardActions, CollectionHubCard, CollectionHubMetric } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   MetricIconPersonas,
@@ -19,28 +18,6 @@ type CollectionProjectCardProps = {
   onLifecycleChange?: () => void
 }
 
-function Metric({
-  icon,
-  value,
-  label,
-  linked,
-}: {
-  icon: ReactNode
-  value: string
-  label: string
-  linked: boolean
-}) {
-  return (
-    <div className="plexon-collection-metric" data-linked={linked ? 'true' : 'false'}>
-      <span className="plexon-collection-metric-icon" aria-hidden>
-        {icon}
-      </span>
-      <span className="plexon-collection-metric-value">{value}</span>
-      <span className="plexon-collection-metric-label">{label}</span>
-    </div>
-  )
-}
-
 /** Magazine tile for one Collection project — theme tokens only, no forced light surface. */
 export function CollectionProjectCard({ row, onLifecycleChange }: CollectionProjectCardProps) {
   const { t } = useI18n()
@@ -54,86 +31,68 @@ export function CollectionProjectCard({ row, onLifecycleChange }: CollectionProj
   const audionLinked = row.audion != null
 
   return (
-    <article className="plexon-collection-card">
-      <header className="plexon-collection-card-head">
-        <Text role="meta" as="p" className="plexon-collection-card-kicker">
-          {domain ?? '\u00a0'}
-        </Text>
-        {!canOpenPlatform ? (
-          <span className="plexon-collection-card-badge" title={t('dashboard.platformInsightsLegacyHint')}>
+    <CollectionHubCard
+      kicker={domain ?? '\u00a0'}
+      badge={
+        !canOpenPlatform ? (
+          <span title={t('dashboard.platformInsightsLegacyHint')}>
             {t('dashboard.platformInsightsLegacyBadge')}
           </span>
-        ) : null}
-      </header>
-
-      <Text role="headline" as="h3" className="plexon-collection-card-title">
-        {name}
-      </Text>
-
-      {!canOpenPlatform ? (
-        <Text role="meta" as="p" className="plexon-collection-card-hint">
-          {t('dashboard.platformInsightsLegacyHint')}
-        </Text>
-      ) : null}
-
-      <div className="plexon-collection-card-stats" aria-label={t('dashboard.platformInsightsSubtitle')}>
-        <Metric
-          icon={<MetricIconScans />}
-          value={checkionLinked ? String(row.checkion!.scanCount) : '—'}
-          label={t('dashboard.platformInsightsScans')}
-          linked={checkionLinked}
-        />
-        <Metric
-          icon={<MetricIconTargetGroups />}
-          value={audionLinked ? String(row.audion!.targetGroupCount ?? 0) : '—'}
-          label={t('dashboard.platformInsightsTargetGroups')}
-          linked={audionLinked}
-        />
-        <Metric
-          icon={<MetricIconPersonas />}
-          value={audionLinked ? String(row.audion!.personaCount) : '—'}
-          label={t('dashboard.platformInsightsPersonas')}
-          linked={audionLinked}
-        />
-      </div>
-
-      <CardActions className="plexon-collection-card-actions">
-        {canOpenPlatform ? (
-          <Link href={pathPlatformProjectDashboard(pid)} className="plexon-collection-card-link">
-            <Button variant="ghost" size="md">
-              {t('dashboard.platformInsightsOpenProject')}
-            </Button>
-          </Link>
-        ) : null}
-        {onLifecycleChange ? (
-          <CollectionLifecycleActions
-            platformProjectId={pid}
-            status={row.platformProject.status}
-            onChanged={onLifecycleChange}
-            size="md"
+        ) : undefined
+      }
+      title={name}
+      hint={!canOpenPlatform ? t('dashboard.platformInsightsLegacyHint') : undefined}
+      stats={
+        <div aria-label={t('dashboard.platformInsightsSubtitle')}>
+          <CollectionHubMetric
+            icon={<MetricIconScans />}
+            value={checkionLinked ? String(row.checkion!.scanCount) : '—'}
+            label={t('dashboard.platformInsightsScans')}
+            linked={checkionLinked}
           />
-        ) : null}
-        <a
-          href={row.links.checkionProject}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="plexon-collection-card-link"
-        >
-          <Button variant="ghost" size="md">
-            {t('dashboard.platformInsightsOpenCheckion')}
-          </Button>
-        </a>
-        <a
-          href={row.links.audionProject}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="plexon-collection-card-link"
-        >
-          <Button variant="ghost" size="md">
-            {t('dashboard.platformInsightsOpenAudion')}
-          </Button>
-        </a>
-      </CardActions>
-    </article>
+          <CollectionHubMetric
+            icon={<MetricIconTargetGroups />}
+            value={audionLinked ? String(row.audion!.targetGroupCount ?? 0) : '—'}
+            label={t('dashboard.platformInsightsTargetGroups')}
+            linked={audionLinked}
+          />
+          <CollectionHubMetric
+            icon={<MetricIconPersonas />}
+            value={audionLinked ? String(row.audion!.personaCount) : '—'}
+            label={t('dashboard.platformInsightsPersonas')}
+            linked={audionLinked}
+          />
+        </div>
+      }
+      actions={
+        <CardActions>
+          {canOpenPlatform ? (
+            <Link href={pathPlatformProjectDashboard(pid)}>
+              <Button variant="ghost" size="md">
+                {t('dashboard.platformInsightsOpenProject')}
+              </Button>
+            </Link>
+          ) : null}
+          {onLifecycleChange ? (
+            <CollectionLifecycleActions
+              platformProjectId={pid}
+              status={row.platformProject.status}
+              onChanged={onLifecycleChange}
+              size="md"
+            />
+          ) : null}
+          <a href={row.links.checkionProject} target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="md">
+              {t('dashboard.platformInsightsOpenCheckion')}
+            </Button>
+          </a>
+          <a href={row.links.audionProject} target="_blank" rel="noopener noreferrer">
+            <Button variant="ghost" size="md">
+              {t('dashboard.platformInsightsOpenAudion')}
+            </Button>
+          </a>
+        </CardActions>
+      }
+    />
   )
 }
