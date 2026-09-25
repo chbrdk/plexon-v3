@@ -392,6 +392,33 @@ export const PERSONA_FAMILIES: ToolFamily[] = [
   'audion_chat',
 ];
 
+export const AUDION_KNOWLEDGE_FAMILIES: ToolFamily[] = [
+  'audion_knowledge',
+  'audion_project',
+];
+
+export const AUDION_JOURNEY_FAMILIES: ToolFamily[] = [
+  'audion_journey',
+  'audion_ux_journey',
+  'audion_knowledge',
+];
+
+export const AUDION_CHAT_FAMILIES: ToolFamily[] = [
+  'audion_chat',
+  'audion_persona',
+  'audion_knowledge',
+];
+
+export const AUDION_DOCUMENTS_FAMILIES: ToolFamily[] = [
+  'audion_documents',
+  'audion_knowledge',
+];
+
+export const CHECKION_JOURNEY_FAMILIES: ToolFamily[] = [
+  'checkion_journey',
+  'checkion_scan_read',
+];
+
 export const UX_JOURNEY_FAMILIES: ToolFamily[] = [
   'audion_ux_journey',
   'audion_journey',

@@ -1,6 +1,6 @@
 # Assistant domain specialists (internal)
 
-**Status:** Accepted — Wave 3 2026-09-25  
+**Status:** Accepted — Wave 4 2026-09-25  
 **Owner:** PLEXON v3 (orchestrator)  
 **Surfaces:** Free-chat only (`runAssistantAgent`) — same `/assistant` + `/assistant/embed` conversation  
 **Companions:** `knowledge/plexon-assistant-orchestrator.md` · `specs/domain/capability-catalog.md` · `lib/assistant/assistant-planner.ts`
@@ -52,7 +52,17 @@ Specialist id **equals** `AssistantPlan.intent` for these intents:
 | `creation_design` | Creation Design | `CREATION_DESIGN_FAMILIES` |
 | `echon_audience` | Echon Audience | `ECHON_TO_AUDIENCE_FAMILIES` |
 
-All other intents (`general_chat`, `project_knowledge`, `action_write`, remaining Audion intents, …) resolve **no** specialist — agent stacks product connectivity blocks (built **after** the plan, using plan-narrowed MCP flags).
+### Wave 4
+
+| Id | Label | Canonical families (planner SoT) |
+|----|-------|----------------------------------|
+| `audion_knowledge` | Audion Knowledge | `AUDION_KNOWLEDGE_FAMILIES` |
+| `audion_journey` | Audion Journey | `AUDION_JOURNEY_FAMILIES` |
+| `audion_chat` | Audion Chat | `AUDION_CHAT_FAMILIES` |
+| `audion_documents` | Audion Documents | `AUDION_DOCUMENTS_FAMILIES` |
+| `checkion_journey` | Checkion Journey | `CHECKION_JOURNEY_FAMILIES` |
+
+All other intents (`general_chat`, `project_knowledge`, `action_write`) resolve **no** specialist — agent stacks product connectivity blocks (built **after** the plan, using plan-narrowed MCP flags). Cross-product / embedded-context turns stay on the orchestrator without a domain specialist.
 
 ## Contract
 
@@ -70,6 +80,11 @@ type AssistantSpecialistId =
   | 'spirion_research'
   | 'creation_design'
   | 'echon_audience'
+  | 'audion_knowledge'
+  | 'audion_journey'
+  | 'audion_chat'
+  | 'audion_documents'
+  | 'checkion_journey'
 
 type AssistantSpecialist = {
   id: AssistantSpecialistId
@@ -95,8 +110,8 @@ type AssistantSpecialist = {
 
 ## Done when
 
-1. Spec + orchestrator knowledge document Wave 1–3.
-2. `lib/assistant/specialists/*` registry ships all twelve profiles.
+1. Spec + orchestrator knowledge document Wave 1–4.
+2. `lib/assistant/specialists/*` registry ships all seventeen profiles.
 3. `runAssistantAgent` resolves and awaits specialist addenda; planner meta exposes specialist id/label.
 4. Activity UI shows specialist label on the planner card.
-5. Unit/smoke tests cover Wave-1–3 resolve + planner intents.
+5. Unit/smoke tests cover Wave-1–4 resolve + planner intents.

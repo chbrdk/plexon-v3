@@ -1,11 +1,16 @@
 /**
- * Internal specialist registry (Wave 1–3).
+ * Internal specialist registry (Wave 1–4).
  * Spec: specs/domain/assistant-domain-specialists.md
  */
 
 import type { AssistantPlanIntent } from '@/lib/assistant/assistant-planner';
 import {
+  AUDION_CHAT_FAMILIES,
+  AUDION_DOCUMENTS_FAMILIES,
+  AUDION_JOURNEY_FAMILIES,
+  AUDION_KNOWLEDGE_FAMILIES,
   BRANDION_BRAND_FAMILIES,
+  CHECKION_JOURNEY_FAMILIES,
   CREATION_DESIGN_FAMILIES,
   CREATION_SCENE_EDIT_FAMILIES,
   CREATION_SCENE_EDIT_WITH_SPIRION_FAMILIES,
@@ -27,6 +32,7 @@ import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-co
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildCheckionGeoSpecialistAddendum } from '@/lib/assistant/specialists/checkion-geo';
+import { buildCheckionJourneySpecialistAddendum } from '@/lib/assistant/specialists/checkion-journey';
 import { buildCheckionScanSpecialistAddendum } from '@/lib/assistant/specialists/checkion-scan';
 import {
   isAssistantSpecialistId,
@@ -169,6 +175,63 @@ const AUDION_UX_JOURNEY_SPECIALIST: AssistantSpecialist = {
     ),
 };
 
+const AUDION_KNOWLEDGE_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_knowledge',
+  label: 'Audion Knowledge',
+  toolFamilies: [...AUDION_KNOWLEDGE_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion Knowledge',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const AUDION_JOURNEY_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_journey',
+  label: 'Audion Journey',
+  toolFamilies: [...AUDION_JOURNEY_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion Journey',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const AUDION_CHAT_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_chat',
+  label: 'Audion Chat',
+  toolFamilies: [...AUDION_CHAT_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion Chat',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const AUDION_DOCUMENTS_SPECIALIST: AssistantSpecialist = {
+  id: 'audion_documents',
+  label: 'Audion Documents',
+  toolFamilies: [...AUDION_DOCUMENTS_FAMILIES],
+  maxToolRounds: 4,
+  buildSystemAddendum: async (ctx) =>
+    withSpecialistHeader(
+      'Audion Documents',
+      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+    ),
+};
+
+const CHECKION_JOURNEY_SPECIALIST: AssistantSpecialist = {
+  id: 'checkion_journey',
+  label: 'Checkion Journey',
+  toolFamilies: [...CHECKION_JOURNEY_FAMILIES],
+  maxToolRounds: 4,
+  buildSystemAddendum: (ctx) =>
+    buildCheckionJourneySpecialistAddendum({ useCheckionMcp: ctx.useCheckionMcp }),
+};
+
 const SPIRION_SPECIALIST: AssistantSpecialist = {
   id: 'spirion_research',
   label: 'Spirion',
@@ -194,6 +257,11 @@ const REGISTRY: Record<AssistantSpecialistId, AssistantSpecialist> = {
   spirion_research: SPIRION_SPECIALIST,
   creation_design: CREATION_DESIGN_SPECIALIST,
   echon_audience: ECHON_AUDIENCE_SPECIALIST,
+  audion_knowledge: AUDION_KNOWLEDGE_SPECIALIST,
+  audion_journey: AUDION_JOURNEY_SPECIALIST,
+  audion_chat: AUDION_CHAT_SPECIALIST,
+  audion_documents: AUDION_DOCUMENTS_SPECIALIST,
+  checkion_journey: CHECKION_JOURNEY_SPECIALIST,
 };
 
 /** @deprecated Use REGISTERED_SPECIALIST_IDS — Wave 1 subset kept for older tests. */
@@ -218,11 +286,20 @@ export const WAVE3_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'echon_audience',
 ];
 
-/** All registered specialist ids (Wave 1–3). */
+export const WAVE4_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
+  'audion_knowledge',
+  'audion_journey',
+  'audion_chat',
+  'audion_documents',
+  'checkion_journey',
+];
+
+/** All registered specialist ids (Wave 1–4). */
 export const REGISTERED_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   ...WAVE1_SPECIALIST_IDS,
   ...WAVE2_SPECIALIST_IDS,
   ...WAVE3_SPECIALIST_IDS,
+  ...WAVE4_SPECIALIST_IDS,
 ];
 
 export function resolveSpecialist(

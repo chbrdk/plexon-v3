@@ -7,6 +7,7 @@ import {
   WAVE1_SPECIALIST_IDS,
   WAVE2_SPECIALIST_IDS,
   WAVE3_SPECIALIST_IDS,
+  WAVE4_SPECIALIST_IDS,
   REGISTERED_SPECIALIST_IDS,
   resolveSpecialist,
   creationSceneSpecialistFamilies,
@@ -23,6 +24,11 @@ import {
   UX_JOURNEY_FAMILIES,
   SPIRION_RESEARCH_FAMILIES,
   CREATION_DESIGN_FAMILIES,
+  AUDION_CHAT_FAMILIES,
+  AUDION_DOCUMENTS_FAMILIES,
+  AUDION_JOURNEY_FAMILIES,
+  AUDION_KNOWLEDGE_FAMILIES,
+  CHECKION_JOURNEY_FAMILIES,
 } from '@/lib/assistant/tool-catalog'
 
 const root = path.join(__dirname, '..')
@@ -251,7 +257,9 @@ describe('assistant domain specialists (Wave 3)', () => {
       'creation_design',
       'echon_audience',
     ])
-    expect(REGISTERED_SPECIALIST_IDS).toHaveLength(12)
+    expect(REGISTERED_SPECIALIST_IDS).toEqual(
+      expect.arrayContaining([...WAVE3_SPECIALIST_IDS]),
+    )
 
     const geo = resolveSpecialist('checkion_seo_geo')
     expect(geo?.label).toBe('Checkion GEO')
@@ -390,5 +398,131 @@ describe('assistant domain specialists (Wave 3)', () => {
     expect(orch).toContain('checkion_seo_geo')
     expect(orch).toContain('audion_ux_journey')
     expect(orch).toContain('echon_audience')
+  })
+})
+
+describe('assistant domain specialists (Wave 4)', () => {
+  it('registers remaining Audion + Checkion Journey specialists', async () => {
+    expect(WAVE4_SPECIALIST_IDS).toEqual([
+      'audion_knowledge',
+      'audion_journey',
+      'audion_chat',
+      'audion_documents',
+      'checkion_journey',
+    ])
+    expect(REGISTERED_SPECIALIST_IDS).toHaveLength(17)
+    expect(resolveSpecialist('general_chat')).toBeNull()
+    expect(resolveSpecialist('project_knowledge')).toBeNull()
+    expect(resolveSpecialist('action_write')).toBeNull()
+
+    const knowledge = resolveSpecialist('audion_knowledge')
+    expect(knowledge?.label).toBe('Audion Knowledge')
+    expect(knowledge?.toolFamilies).toEqual(expect.arrayContaining(AUDION_KNOWLEDGE_FAMILIES))
+    expect(await Promise.resolve(knowledge!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Audion Knowledge',
+    )
+
+    const journey = resolveSpecialist('audion_journey')
+    expect(journey?.label).toBe('Audion Journey')
+    expect(journey?.toolFamilies).toEqual(expect.arrayContaining(AUDION_JOURNEY_FAMILIES))
+
+    const chat = resolveSpecialist('audion_chat')
+    expect(chat?.label).toBe('Audion Chat')
+    expect(chat?.toolFamilies).toEqual(expect.arrayContaining(AUDION_CHAT_FAMILIES))
+
+    const docs = resolveSpecialist('audion_documents')
+    expect(docs?.label).toBe('Audion Documents')
+    expect(docs?.toolFamilies).toEqual(expect.arrayContaining(AUDION_DOCUMENTS_FAMILIES))
+
+    const checkionJourney = resolveSpecialist('checkion_journey')
+    expect(checkionJourney?.label).toBe('Checkion Journey')
+    expect(checkionJourney?.toolFamilies).toEqual(
+      expect.arrayContaining(CHECKION_JOURNEY_FAMILIES),
+    )
+    expect(await Promise.resolve(checkionJourney!.buildSystemAddendum(specialistCtx))).toContain(
+      'Specialist: Checkion Journey',
+    )
+  })
+
+  it('planner maps Wave-4 prompts to specialists', () => {
+    const chatPlan = planAssistantTurnHeuristic({
+      prompt: 'Frage die Persona im Audion Chat nach Feedback',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(chatPlan.intent).toBe('audion_chat')
+    expect(resolveSpecialist(chatPlan.intent)?.id).toBe('audion_chat')
+
+    const journeyPlan = planAssistantTurnHeuristic({
+      prompt: 'Liste die AUDION Journeys und Journey-Steps',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(journeyPlan.intent).toBe('audion_journey')
+    expect(resolveSpecialist(journeyPlan.intent)?.id).toBe('audion_journey')
+
+    const docsPlan = planAssistantTurnHeuristic({
+      prompt: 'Liste die hochgeladenen Documents und PDFs in AUDION',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(docsPlan.intent).toBe('audion_documents')
+    expect(resolveSpecialist(docsPlan.intent)?.id).toBe('audion_documents')
+
+    const checkionJourneyPlan = planAssistantTurnHeuristic({
+      prompt: 'Zeige Checkion Journey Status und Journey-Steps ohne Änderungen',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      hasSpirionMcp: false,
+      hasVideonMcp: false,
+      hasMetronMcp: false,
+      compactContextLoaded: true,
+    })
+    expect(checkionJourneyPlan.intent).toBe('checkion_journey')
+    expect(resolveSpecialist(checkionJourneyPlan.intent)?.id).toBe('checkion_journey')
+  })
+
+  it('spec documents Wave 4 mop-up', () => {
+    const spec = readFileSync(
+      path.join(root, 'specs/domain/assistant-domain-specialists.md'),
+      'utf8',
+    )
+    const orch = readFileSync(
+      path.join(root, 'knowledge/plexon-assistant-orchestrator.md'),
+      'utf8',
+    )
+    expect(spec).toContain('Wave 4')
+    expect(spec).toContain('audion_documents')
+    expect(spec).toContain('checkion_journey')
+    expect(spec).toContain('seventeen')
+    expect(orch).toContain('Wave 1–4')
   })
 })

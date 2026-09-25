@@ -18,7 +18,12 @@ export type AssistantSpecialistId =
   | 'audion_ux_journey'
   | 'spirion_research'
   | 'creation_design'
-  | 'echon_audience';
+  | 'echon_audience'
+  | 'audion_knowledge'
+  | 'audion_journey'
+  | 'audion_chat'
+  | 'audion_documents'
+  | 'checkion_journey';
 
 export type SpecialistContext = {
   useCheckionMcp: boolean;
@@ -53,6 +58,11 @@ const SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'spirion_research',
   'creation_design',
   'echon_audience',
+  'audion_knowledge',
+  'audion_journey',
+  'audion_chat',
+  'audion_documents',
+  'checkion_journey',
 ] as const;
 
 export function isAssistantSpecialistId(

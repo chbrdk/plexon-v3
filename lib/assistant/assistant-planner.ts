@@ -5,6 +5,10 @@ import {
   KNOWLEDGE_QA_FAMILIES,
   PERSONA_FAMILIES,
   UX_JOURNEY_FAMILIES,
+  AUDION_CHAT_FAMILIES,
+  AUDION_DOCUMENTS_FAMILIES,
+  AUDION_JOURNEY_FAMILIES,
+  CHECKION_JOURNEY_FAMILIES,
   PLATFORM_ASSISTANT_FAMILIES,
   READ_ONLY_QA_FAMILIES,
   SCAN_FAMILIES,
@@ -484,7 +488,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'audion_chat',
       mode: 'hybrid',
-      toolFamilies: ['audion_chat', 'audion_persona', 'audion_knowledge', 'plexon_ui'],
+      toolFamilies: [...AUDION_CHAT_FAMILIES, 'plexon_ui'],
       allowWriteTools: false,
       maxToolRounds: 5,
       skipTools: false,
@@ -600,7 +604,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'audion_journey',
       mode: 'hybrid',
-      toolFamilies: ['audion_journey', 'audion_ux_journey', 'audion_knowledge', 'plexon_ui'],
+      toolFamilies: [...AUDION_JOURNEY_FAMILIES, 'plexon_ui'],
       allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
@@ -612,7 +616,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'checkion_journey',
       mode: 'hybrid',
-      toolFamilies: ['checkion_journey', 'checkion_scan_read', 'plexon_ui'],
+      toolFamilies: [...CHECKION_JOURNEY_FAMILIES, 'plexon_ui'],
       allowWriteTools: false,
       maxToolRounds: 4,
       skipTools: false,
@@ -624,7 +628,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     return buildPlan({
       intent: 'audion_documents',
       mode: 'hybrid',
-      toolFamilies: ['audion_documents', 'audion_knowledge', 'plexon_ui'],
+      toolFamilies: [...AUDION_DOCUMENTS_FAMILIES, 'plexon_ui'],
       allowWriteTools: writeIntent,
       maxToolRounds: 4,
       skipTools: false,
