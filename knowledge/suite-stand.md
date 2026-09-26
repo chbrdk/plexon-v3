@@ -102,15 +102,18 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 3. **E9 IdP** (OIDC/SAML/SCIM) Laufzeit.  
 4. **Handover/Tutorials** weiterproduzieren (`knowledge/handover/`, `knowledge/tutorials/`).  
 5. Prod-Deploy nur über control plane `chbrdk/PLEXON` — dieses Island = Federation-Staging.
-6. **Suite Cleanup** — Inventare + drop_safe Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).
+6. **Suite Cleanup** — Inventare + Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).  
+   - Netz + 9× `cleanup-inventory.md` live.  
+   - **Welle 2a** executed (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes).  
+   - **Welle 2b** awaits „los“ (Echon `deprecated/` + `v2/`, MUI reshape, …).
 
 ---
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. Suite-Cleanup Welle 2 nach Freigabe der [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md) **oder**  
+1. Suite-Cleanup **Welle 2b** nach „los“ auf [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md) **oder**  
 2. Tutorial-/Handover-Welle **oder**  
-3. Usage/JEV/SEO-Härte in den betroffenen Specs.
+3. Usage/JEV/SEO-Härte / MUI-Board-Reshape.
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 
