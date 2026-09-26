@@ -114,11 +114,11 @@ Playbook: [`suite-cleanup.md`](suite-cleanup.md) · Inventare: je Repo `knowledg
 | Prio | Repo | Ziel „sauber“ | Status |
 |---|---|---|---|
 | 0 | Querschnitt (alle) | Doc-/Barrel-/Fixture-Orphans | **done** 2026-09-26 |
-| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **done** (app imports cleared; alias/dead-code purge next) |
-| 2 | creation-v3 | Zaoly-Fixtures/Docs → Site-Kit / in-app SoT | pending |
-| 3 | videon-v3 | NLE-Chrome (Select/Badge/ToolButton) + Barrel | Barrel **done**; Rest pending |
-| 4 | msqdx-echon | lokales DS → `@msqdx/ui` | pending |
-| 5 | checkion / brandion / msqdx-ui / audion / metron | Hygiene + Gaps | Querschnitt **done** (Fixtures, Docs, lucide) |
+| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **done** 2026-09-26 (cutover + bridge/shim/alias purge; `ignoreBuildErrors: false`; tokens shim remains) |
+| 2 | creation-v3 | Zaoly-Fixtures/Docs → Site-Kit / in-app SoT | **done** 2026-09-26 (docs + `/api/compositions`→scene-store; library-catalog fixture remains for MCP) |
+| 3 | videon-v3 | NLE-Chrome (Select/Badge/ToolButton) + Barrel | **done** 2026-09-26 (Select + Badge + ToolButton-aria + NLE-hex→theme) |
+| 4 | msqdx-echon | lokales DS → `@msqdx/ui` | **done** 2026-09-26 (runtime + css/components + tokens-TS → `@msqdx/ui-tokens`) |
+| 5 | checkion / brandion / msqdx-ui / audion / metron | Hygiene + Gaps | **done** 2026-09-26 (drop_safe Orphans purged; brandion/metron/msqdx-ui hatten keine offenen drop_safe) |
 
 Nach Querschnitt: App für App in Prio-Reihenfolge (eigene Commit-Sätze, Specs-first wo Verhalten ändert).
 
@@ -126,11 +126,12 @@ Nach Querschnitt: App für App in Prio-Reihenfolge (eigene Commit-Sätze, Specs-
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. **App-Finalisierung Prio 2** — Creation Zaoly-Fixtures/Docs → Site-Kit.  
-2. Videon NLE-Chrome / Echon DS.  
-3. Plexon: dead bridge/shim files + aliases löschen (optional follow-up).
+1. Optional: Echon thin `tokens/` barrel entfernen (Stories importieren schon `@msqdx/ui-tokens`).  
+2. Handover/Tutorials wieder aufnehmen wenn gewünscht.  
+3. Test-Fixture-Typen (`__tests__`) nachziehen, falls `tsc` wieder Tests einschließen soll.
 
-Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
+Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.  
+App-Finalisierungs-Matrix Prio 0–5 + Plexon `ignoreBuildErrors` = **done**.
 
 ---
 

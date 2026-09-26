@@ -626,8 +626,8 @@ function renderChapter(key: string, ctx: ChapterCtx, stacked: boolean): React.Re
 export function EqcMagazinePdfDocument({ report }: { report: EventQuickCheckReportModel }) {
   const layout = resolveEventQuickCheckDashboardLayout(report)
   const personas = resolveReportPersonas(report)
-  const generatedAt = formatReportGeneratedAt(report.meta.generatedAt)
-  const footerTitle = report.meta.domain || report.meta.title
+  const generatedAt = formatReportGeneratedAt(report.meta.generatedAt) ?? ''
+  const footerTitle = report.meta.domain || report.meta.title || ''
   const chapterKeys = buildEqcMagazinePdfChapters(report)
   const pageGroups = packEqcMagazinePages(chapterKeys, report)
   const ctx: ChapterCtx = { report, layout, personas, generatedAt, chapterKeys }

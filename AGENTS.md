@@ -6,5 +6,5 @@
 4. No hardcoded URLs, paths, or service bases. Use `lib/constants.ts` / `lib/shell-paths.ts` / `lib/runtime-env.ts` and document canonical values in `knowledge/paths.md`.
 5. Tests with every change: UI smoke, contract checks, and build validation.
 6. Prod control plane is `chbrdk/PLEXON` — do not deploy Coolify prod from this repo. This island targets federation contract `2026-05-plexon-federation-v3`.
-7. No MUI and no `@msqdx/react` for new or rebuilt surfaces. Do not expand `lib/mui-shim.tsx` / the react bridge — rebuild the importing surface instead.
+7. No MUI and no `@msqdx/react`. Bridge/shim purged 2026-09-26 — do not reintroduce; rebuild on `@msqdx/ui`.
 8. **Do not invent product-only projects in new UX.** Creates are Collections with both product mirrors (`specs/domain/collection-projects.md` Phase 1).

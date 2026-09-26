@@ -249,7 +249,7 @@ export function setMediaCatalogLeaf(
       ? { ...(ctx.outputs.media as Record<string, unknown>) }
       : {};
   const media = { ...prev, [leaf]: bundle };
-  const outputs = { ...ctx.outputs, media };
+  const outputs: CollectionFlowRunContext['outputs'] = { ...ctx.outputs, media };
   if (nodeId) outputs[nodeId] = bundle;
   return { outputs };
 }

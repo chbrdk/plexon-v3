@@ -466,14 +466,15 @@ export function buildEventQuickCheckCrossSignals(quick: EventQuickCheckResult): 
 
     const eeat = quick.geoJob.eeatScores
     if (eeat) {
-      const dims = (
-        [
-          ['Trust', eeat.trust?.score],
-          ['Experience', eeat.experience?.score],
-          ['Expertise', eeat.expertise?.score],
-          ['Authoritativeness', eeat.authoritativeness?.score],
-        ] as const
-      ).filter((d): d is [string, number] => typeof d[1] === 'number' && !Number.isNaN(d[1]))
+      const dimCandidates: Array<[string, number | undefined]> = [
+        ['Trust', eeat.trust?.score],
+        ['Experience', eeat.experience?.score],
+        ['Expertise', eeat.expertise?.score],
+        ['Authoritativeness', eeat.authoritativeness?.score],
+      ]
+      const dims = dimCandidates.filter(
+        (d): d is [string, number] => typeof d[1] === 'number' && !Number.isNaN(d[1]),
+      )
       if (dims.length > 0) {
         const sorted = [...dims].sort((a, b) => a[1] - b[1])
         const weak = sorted[0]!

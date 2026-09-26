@@ -98,7 +98,7 @@ export function CompanyDirectoryPanel({ companyId }: Props) {
       />
       {loading ? <Spinner /> : null}
       {error ? <Alert tone="error">{error}</Alert> : null}
-      {savedMsg ? <Alert tone="success">{savedMsg}</Alert> : null}
+      {savedMsg ? <Alert tone="ok">{savedMsg}</Alert> : null}
       {!loading && state ? (
         <div className="plexon-settings-fields plexon-admin-form-narrow">
           <Text role="meta">{state.note || t('admin.directory.notReady')}</Text>

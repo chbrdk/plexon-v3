@@ -195,12 +195,12 @@ export async function generateWorkflowInsights(options: {
   workflowLabel: string
   input: EnrichWorkflowInput
 }): Promise<WorkflowInsightNarrative> {
-  const isEqc = isEqcSource(options.input.source)
-  const fallback = isEqc
+  const eqcSource = isEqcSource(options.input.source) ? options.input.source : null
+  const fallback = eqcSource
     ? narrativeFromEqcCrossSignals(
         options.input.crossSignals,
         options.workflowLabel,
-        options.input.source.quick.geoJob?.recommendations,
+        eqcSource.quick.geoJob?.recommendations,
       )
     : narrativeFromCrossSignals(options.input.crossSignals, options.workflowLabel)
 
@@ -215,10 +215,7 @@ export async function generateWorkflowInsights(options: {
     ? `\nHinweis Quer-Benchmark: ${options.input.crossBenchmarks.fetchNote}`
     : ''
 
-  const eqcSnapshot =
-    isEqc && options.input.source.workflowType === 'event_quick_check'
-      ? buildEqcInsightSnapshot(options.input.source.quick)
-      : null
+  const eqcSnapshot = eqcSource ? buildEqcInsightSnapshot(eqcSource.quick) : null
 
   const userPrompt = [
     `Workflow: ${options.workflowLabel}`,
@@ -249,7 +246,7 @@ export async function generateWorkflowInsights(options: {
       body: JSON.stringify({
         model: getAssistantCompletionModel(),
         max_tokens: 2048,
-        system: isEqc ? EQC_SYSTEM_PROMPT : SYSTEM_PROMPT,
+        system: eqcSource ? EQC_SYSTEM_PROMPT : SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }],
       }),
     })
@@ -260,9 +257,9 @@ export async function generateWorkflowInsights(options: {
     const text = data.content?.find((c) => c.type === 'text')?.text ?? ''
     const parsed = parseInsightNarrativeJson(text, fallback)
 
-    let findings = isEqc ? filterEqcMetaFindings(parsed.findings) : parsed.findings
+    let findings = eqcSource ? filterEqcMetaFindings(parsed.findings) : parsed.findings
     if (findings.length === 0 && fallback.findings.length > 0) {
-      findings = isEqc ? filterEqcMetaFindings(fallback.findings) : fallback.findings
+      findings = eqcSource ? filterEqcMetaFindings(fallback.findings) : fallback.findings
     }
 
     const crossComparisons =

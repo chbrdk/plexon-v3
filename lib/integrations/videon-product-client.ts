@@ -50,7 +50,7 @@ function platformQuery(platformProjectId: string): string {
 }
 
 async function videonFetch(input: {
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PATCH';
   path: string;
   actorUserId?: string | null;
   body?: unknown;
@@ -62,7 +62,8 @@ async function videonFetch(input: {
     const res = await fetch(`${auth.base}${input.path}`, {
       method: input.method,
       headers: withActor(auth.headers, input.actorUserId),
-      body: input.method === 'POST' ? JSON.stringify(input.body ?? {}) : undefined,
+      body:
+        input.method === 'GET' ? undefined : JSON.stringify(input.body ?? {}),
       cache: 'no-store',
     });
     const text = await res.text().catch(() => '');

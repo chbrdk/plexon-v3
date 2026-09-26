@@ -5,7 +5,7 @@ PLEXON ist eine weitere Plattform neben CHECKION mit demselben Grundgerüst: Log
 ## Struktur
 
 - **App**: Next.js 16, App Router
-- **Design**: `@msqdx/react`, `@msqdx/tokens` (wie CHECKION, gleicher DS-Pfad)
+- **Design**: `@msqdx/ui` + `@msqdx/ui-tokens` (+ optional `@msqdx/tokens` shim for legacy token reads)
 - **Auth**: NextAuth v5 (Credentials), optional Demo-User per Env
 - **i18n**: de/en über `lib/i18n` und `locales/de.json`, `locales/en.json`
 - **Pfade/URLs**: zentral in `lib/constants.ts`
@@ -28,9 +28,10 @@ PLEXON ist eine weitere Plattform neben CHECKION mit demselben Grundgerüst: Log
 
 ## MSQDX Design System
 
-- Pakete: `file:../msqdx-design-system/packages/react` und `.../tokens`.
-- `next.config.mjs`: Webpack-Alias löst `@msqdx/react` und `@msqdx/tokens` auf. Standard: `../msqdx-design-system/packages`. Wenn das Design-System woanders liegt (z. B. unter `MSQDX-DS`), Umgebungsvariable `DS_BASE` setzen (z. B. `DS_BASE=../MSQDX-DS/msqdx-design-system`).
-- Komponenten: `MsqdxAppLayout`, `MsqdxAdminNav`, `MsqdxLogo`, `MsqdxMoleculeCard`, `MsqdxFormField`, `MsqdxButton`, `MsqdxTypography` etc.
+- Sibling package: `msqdx-ui` (`@msqdx/ui`, `@msqdx/ui-tokens`). Webpack aliases in `next.config.mjs` resolve via `lib/msqdx-ui.ts` / `lib/msqdx-ui-shell.ts`.
+- Board types/chrome: `lib/board/prismion.ts` · `lib/board/board-ui.tsx` (not a separate `@msqdx/react` package).
+- Legacy `@msqdx/react` / MUI bridge deleted 2026-09-26 — see `knowledge/msqdx-shim-inventory.md`.
+- Optional: `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts` until callers use `@msqdx/ui-tokens`.
 
 ## Skripte
 

@@ -39,6 +39,7 @@ type RunSnapshot = {
   geoQuestions?: string[];
   geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
   geoHasPersona?: boolean;
+  awaitingDeepScan?: boolean;
   status?: string;
   error?: string;
 };
@@ -107,6 +108,7 @@ export function EventQuickCheckReviewGate({
                   ok?: boolean;
                   error?: string;
                   report?: unknown;
+                  awaitingDeepScan?: boolean;
                 }
               >(res);
         streamRef.current?.close();

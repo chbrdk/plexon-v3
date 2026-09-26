@@ -214,7 +214,7 @@ export function CollectionTeamPanel({ platformProjectId }: { platformProjectId: 
         </Text>
       ) : null}
       {error ? <Alert tone="error">{error}</Alert> : null}
-      {notice ? <Alert tone="success">{notice}</Alert> : null}
+      {notice ? <Alert tone="ok">{notice}</Alert> : null}
 
       {!loading ? (
         <>

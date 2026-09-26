@@ -153,7 +153,7 @@ export async function pollCheckionSingleScan(
   scanId: string,
   options?: { intervalMs?: number; maxMs?: number }
 ): Promise<
-  | { ok: true; scan: CheckionScanSummary }
+  | { ok: true; value: CheckionScanSummary }
   | { ok: false; error: string; lastStatus?: string }
 > {
   return pollUntil({

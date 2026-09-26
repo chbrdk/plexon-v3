@@ -117,7 +117,7 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
       prompt: `Starte Flow ${f.id}`,
     }));
 
-    await updateAssistantWorkflowRun(workflowRun.id, { steps, status: 'complete' });
+    await updateAssistantWorkflowRun(workflowRun.id, { steps, status: 'completed' });
     await recordAssistantUsageEvent({
       userId: ctx.user.id,
       eventType: 'workflow_run',
@@ -142,7 +142,11 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
           : ASSISTANT_MESSAGE_CONTENT_TYPE.MARKDOWN,
         followUpPrompts,
         ...(alert.ok ? { uiLayout: buildUiLayoutFromBlocks([alert.block]) } : {}),
-        ...metadataWithWorkflowSteps(steps, 'run_collection_flow'),
+        ...metadataWithWorkflowSteps(
+          { workflowType: 'run_collection_flow', workflowRunId: workflowRun.id },
+          steps,
+          'Collection Flow',
+        ),
       },
     };
   }
@@ -157,13 +161,17 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
       workflowType: 'run_collection_flow',
       title: 'Collection Flow',
     });
-    await updateAssistantWorkflowRun(workflowRun.id, { steps, status: 'error' });
+    await updateAssistantWorkflowRun(workflowRun.id, { steps, status: 'failed' });
     return {
       assistantText: `## Flow fehlgeschlagen\n\n${cap.error ?? 'Unbekannter Fehler'}`,
       workflowRunId: workflowRun.id,
       metadata: {
         contentType: ASSISTANT_MESSAGE_CONTENT_TYPE.MARKDOWN,
-        ...metadataWithWorkflowSteps(steps, 'run_collection_flow'),
+        ...metadataWithWorkflowSteps(
+          { workflowType: 'run_collection_flow', workflowRunId: workflowRun.id },
+          steps,
+          'Collection Flow',
+        ),
       },
     };
   }
@@ -202,7 +210,7 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
 
   await updateAssistantWorkflowRun(workflowRun.id, {
     steps,
-    status: run.status === 'error' ? 'error' : 'complete',
+    status: run.status === 'error' ? 'failed' : 'completed',
   });
   await recordAssistantUsageEvent({
     userId: ctx.user.id,
@@ -257,7 +265,11 @@ export const handleRunCollectionFlowIntent: IntentHandler<'run_collection_flow'>
         },
       ],
       ...(alert.ok ? { uiLayout: buildUiLayoutFromBlocks([alert.block]) } : {}),
-      ...metadataWithWorkflowSteps(steps, 'run_collection_flow'),
+      ...metadataWithWorkflowSteps(
+        { workflowType: 'run_collection_flow', workflowRunId: workflowRun.id },
+        steps,
+        'Collection Flow',
+      ),
     },
   };
 };

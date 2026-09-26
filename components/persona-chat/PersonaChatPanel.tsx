@@ -72,6 +72,9 @@ function ChatTurnArticle({ turn }: { turn: ChatMessage }) {
   )
 }
 
+/** Published `@audion-v3/contracts` dist may lag `src` — runtime sends optional final `text`. */
+type ChatStreamDoneWithText = Extract<ChatStreamEvent, { type: 'done' }> & { text?: string }
+
 /** Apply stream events without remounting the assistant bubble on `done`. */
 export function applyPersonaChatStreamEvent(
   turns: ChatMessage[],
@@ -86,12 +89,13 @@ export function applyPersonaChatStreamEvent(
     )
   }
   if (event.type === 'done') {
+    const done = event as ChatStreamDoneWithText
     return turns.map((t) =>
       t.id === streamingId
         ? {
             ...t,
             // Keep `id` stable — swapping to server messageId remounts the bubble.
-            content: event.text ?? t.content,
+            content: done.text ?? t.content,
             status: 'complete',
             createdAt: new Date().toISOString(),
           }

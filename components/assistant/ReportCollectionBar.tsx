@@ -173,12 +173,18 @@ export function ReportCollectionBar({ conversationId, pins, onPinsChange }: Repo
                 total: pins.length,
               })}
             </Text>
-            <Checkbox
-              checked={allSelected}
-              indeterminate={selectedCount > 0 && !allSelected}
-              onChange={() => toggleAllPins()}
-              label={t('assistant.report.selectAllPins')}
-            />
+            <label className="ds-check-label">
+              <input
+                type="checkbox"
+                className="ds-checkbox"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = selectedCount > 0 && !allSelected
+                }}
+                onChange={() => toggleAllPins()}
+              />
+              <span className="ds-check-text">{t('assistant.report.selectAllPins')}</span>
+            </label>
           </div>
 
           <ul className="plexon-report-cart-pins">

@@ -22,7 +22,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 
 | Wave | Surface | Status |
 |------|---------|--------|
-| 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors` until waves clear shim gaps |
+| 0 | Foundation (wiring, AppShell/NavRail, Auth) | wiring + auth + specs done; `ignoreBuildErrors: false` (2026-09-26) |
 | 1 | Dashboard `/` | adapter pass done; **challenge revisit** open (admin-on-home, Dash* adapters); insights copy = Collections |
 | 2 | Settings `/settings` | done — Audion-like SectionChrome/Field/ToggleGroup; theme + brand; APIs kept |
 | 3 | Products + Platform projects | done — catalog + project detail on SectionChrome/Panel/Lede; Collection wording |
@@ -41,16 +41,14 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 | 3 Legacy backfill | **cancelled** — v3 fresh DB, no migration |
 | 4 Canonical list + create hub | done — `/projects` Nav + create form |
 
-## Compatibility (temporary)
-
-Until Waves 2–7 finish, webpack aliases keep legacy imports compiling for non-rebuilt files:
+## Compatibility
 
 - `@msqdx/ui` → curated barrel (`lib/msqdx-ui.ts`)
-- `@msqdx/react` → bridge (`lib/msqdx-react-bridge/`)
-- `@mui/material` → shim (`lib/mui-shim.tsx`) — **not** real MUI; remove in Wave 7
-- `@msqdx/tokens` → legacy tokens for board DS only
+- `@msqdx/ui-shell` → `lib/msqdx-ui-shell.ts`
+- `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts` (legacy token reads only)
+- `@msqdx/react` / `@mui/material` bridge+shim — **deleted** 2026-09-26
 
-**Target:** every surface imports `@msqdx/ui` only; delete bridge + shim.
+**Target:** every surface imports `@msqdx/ui`; tokens shim drops when callers use `@msqdx/ui-tokens`.
 
 ## Pattern (from audion-v3)
 

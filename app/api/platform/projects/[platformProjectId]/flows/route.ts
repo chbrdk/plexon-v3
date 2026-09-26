@@ -102,7 +102,7 @@ export async function POST(
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     const rawTemplate =
       typeof body?.templateId === 'string' ? body.templateId.trim() : COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY;
-    const knownTemplates = new Set([
+    const knownTemplateIds = [
       COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY,
       COLLECTION_FLOW_TEMPLATE_JOURNEY_QUALITY,
       COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY_ISSUES,
@@ -113,8 +113,8 @@ export async function POST(
       COLLECTION_FLOW_TEMPLATE_FIX_RETEST,
       COLLECTION_FLOW_TEMPLATE_LAUNCH_GATE,
       COLLECTION_FLOW_TEMPLATE_CRISIS,
-    ]);
-    const templateId = knownTemplates.has(rawTemplate)
+    ] as const;
+    const templateId = (knownTemplateIds as readonly string[]).includes(rawTemplate)
       ? rawTemplate
       : COLLECTION_FLOW_TEMPLATE_PAGE_QUALITY;
     const defaultName =

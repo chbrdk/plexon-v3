@@ -45,7 +45,7 @@ export async function GET(
       return apiError('studyId/waveId missing — run a journey first', API_STATUS.BAD_REQUEST);
     }
 
-    const wave = await fetchStudyWave({ studyId, waveId });
+    const wave = await fetchStudyWave({ studyId, waveId, plexonUserId: user.id });
     if (!wave.ok) return apiError(wave.error, 502);
 
     const softScores = wave.wave.evaluation?.softScores ?? {};

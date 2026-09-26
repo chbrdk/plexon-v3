@@ -753,11 +753,11 @@
   },
   "designSystem": {
     "title": "Design System – New Components",
-    "subtitle": "Overview of the new board and Prismion components from the MSQDX Design System (@msqdx/react).",
+    "subtitle": "Overview of board and Prismion components used by the PLEXON board (`lib/board/*` + `@msqdx/ui`).",
     "tableTitle": "Component → MSQDX equivalent",
     "columnComponent": "Component",
     "columnMsqdx": "MSQDX equivalent",
-    "tableNote": "Live demos of these components appear when the installed @msqdx/react package exports the prismion module (e.g. after building from the MSQDX-DS repo)."
+    "tableNote": "Live demos use local board modules and `@msqdx/ui` — not a separate `@msqdx/react` package."
   },
   "language": {
     "de": "Deutsch",

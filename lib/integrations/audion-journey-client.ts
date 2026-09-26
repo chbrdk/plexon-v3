@@ -272,7 +272,7 @@ export async function pollJourneyJob(
   plexonUserId: string,
   options?: { intervalMs?: number; maxMs?: number }
 ): Promise<
-  | { ok: true; job: AudionJourneyJobSnapshot }
+  | { ok: true; value: AudionJourneyJobSnapshot }
   | { ok: false; error: string; lastStatus?: string }
 > {
   const TERMINAL = new Set(['complete', 'error']);

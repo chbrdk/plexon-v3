@@ -1072,7 +1072,7 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
                       size="xs"
                       title="Schriftgröße"
                       sx={{ minWidth: 28, height: 28 }}
-                      onMouseDown={(e) => {
+                      onMouseDown={(e: React.MouseEvent<HTMLElement>) => {
                         e.preventDefault();
                         setFontSizeAnchor(e.currentTarget as HTMLElement);
                       }}
@@ -1086,9 +1086,6 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                       slotProps={{ paper: { sx: { mt: 0.5 } } }}
-                      disableAutoFocus
-                      disableEnforceFocus
-                      disableRestoreFocus
                     >
                       <Box onMouseDown={(e) => e.preventDefault()} sx={{ p: 0.5, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                         {([12, 14, 16] as const).map((px) => (
@@ -1124,7 +1121,7 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
                       size="xs"
                       title="Textfarbe"
                       sx={{ minWidth: 28, height: 28 }}
-                      onMouseDown={(e) => {
+                      onMouseDown={(e: React.MouseEvent<HTMLElement>) => {
                         e.preventDefault();
                         setColorAnchor(e.currentTarget as HTMLElement);
                       }}
@@ -1138,9 +1135,6 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
                       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                       slotProps={{ paper: { sx: { mt: 0.5 } } }}
-                      disableAutoFocus
-                      disableEnforceFocus
-                      disableRestoreFocus
                     >
                       <Box onMouseDown={(e) => e.preventDefault()} sx={{ p: 0.5, display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 160 }}>
                         {editorPresetColors.map((hex) => (
@@ -1287,7 +1281,6 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
                     }}
                     placeholder="Enter your prompt..."
                     fullWidth
-                    size="small"
                     sx={{ '& input': { fontSize: MSQDX_TYPOGRAPHY.fontSize['2xs'] } }}
                   />
                   <MsqdxIconButton
@@ -1330,7 +1323,6 @@ function CardNode({ data, selected, id }: { data: NodeData; selected?: boolean; 
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               placeholder="Enter your prompt..."
               fullWidth
-              size="small"
               sx={{ margin: 0, '& input': { fontSize: MSQDX_TYPOGRAPHY.fontSize['2xs'] } }}
             />
             <MsqdxIconButton

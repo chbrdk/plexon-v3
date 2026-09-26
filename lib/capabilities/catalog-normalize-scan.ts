@@ -36,10 +36,10 @@ export function normalizeScanCatalogFromAgentPreview(
   const seriousCount = scan.stats?.warnings ?? 0;
   const issueCount = scan.stats?.total ?? scan.issues?.length ?? criticalCount + seriousCount;
   const issueItems = (scan.issues ?? []).map((it) => ({
-    id: it.id ?? null,
-    severity: it.severity ?? null,
-    ruleId: it.ruleId ?? null,
-    title: it.title ?? null,
+    id: it.id ?? undefined,
+    severity: it.severity ?? undefined,
+    ruleId: it.ruleId ?? undefined,
+    title: it.title ?? undefined,
   }));
 
   return buildScanCatalogBundle({
@@ -84,6 +84,11 @@ export function normalizeScanCatalogFromFlowFields(input: {
       seriousCount: input.seriousCount ?? 0,
       issueCount: input.issueCount ?? 0,
     },
-    issueItems: input.issueItems,
+    issueItems: input.issueItems?.map((it) => ({
+      id: it.id ?? undefined,
+      severity: it.severity ?? undefined,
+      ruleId: it.ruleId ?? undefined,
+      title: it.title ?? undefined,
+    })),
   });
 }

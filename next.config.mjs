@@ -25,9 +25,8 @@ const nextConfig = {
     '@napi-rs/canvas',
   ],
   typescript: {
-    // Temporary: generative UI + board still on @msqdx/react / MUI shims.
-    // Inventory: knowledge/msqdx-shim-inventory.md — flip to false when that set is small + tsc clean.
-    ignoreBuildErrors: true,
+    // App/lib/components typecheck is clean (`tsc --noEmit`; tests excluded — see tsconfig exclude).
+    ignoreBuildErrors: false,
   },
   experimental: {
     // Lower peak RSS during Coolify/Docker webpack builds.
@@ -45,14 +44,8 @@ const nextConfig = {
       '@msqdx/ui-shell': resolve(__dirname, 'lib/msqdx-ui-shell.ts'),
       '@msqdx/ui/styles.css': resolve(msqdxUiRoot, 'packages/ui/src/styles.css'),
       '@msqdx/ui-tokens': resolve(msqdxUiRoot, 'packages/ui-tokens/dist/index.js'),
-      '@msqdx/react': resolve(__dirname, 'lib/msqdx-react-bridge/index.ts'),
       '@msqdx/tokens': resolve(__dirname, 'lib/msqdx-tokens-shim.ts'),
       '@react-pdf/renderer': resolve(__dirname, 'node_modules/@react-pdf/renderer'),
-      '@mui/material': resolve(__dirname, 'lib/mui-shim.tsx'),
-      '@mui/material/Popper': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
-      '@mui/material/Toolbar': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
-      '@mui/material/Snackbar': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
-      '@mui/material/Slider': resolve(__dirname, 'lib/mui-subpath-shims.ts'),
     }
     return config
   },

@@ -9,11 +9,13 @@ import {
   KNOWLEDGE_FACET_IDS,
   KNOWLEDGE_PACK_SCHEMA_VERSION,
   assertFacetSize,
+  assignFacetDocument,
+  buildFacetDocument,
   createEmptyFacets,
   ensureFacetsShape,
   normalizeFacetData,
-  normalizeProvenance,
   toKnowledgePackResponse,
+  type FacetDocument,
   type KnowledgeFacetId,
   type KnowledgePackFacets,
 } from '@/lib/collection-knowledge-pack';
@@ -117,18 +119,21 @@ export async function PUT(
       }
       const data = normalizeFacetData(facetId, doc.data ?? doc);
       assertFacetSize(facetId, data);
-      facets[facetId] = {
+      assignFacetDocument(
+        facets,
         facetId,
-        schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
-        updatedAt: at,
-        provenance: normalizeProvenance(doc.provenance, {
-          actorType: 'user',
-          actorUserId: user.id,
-          productId: 'plexon',
-          note: 'admin replace',
-        }),
-        data: data as never,
-      } as KnowledgePackFacets[typeof facetId];
+        buildFacetDocument(facetId, {
+          at,
+          doc: doc as Partial<FacetDocument<unknown>>,
+          data: data as KnowledgePackFacets[typeof facetId]['data'],
+          fallbackProvenance: {
+            actorType: 'user',
+            actorUserId: user.id,
+            productId: 'plexon',
+            note: 'admin replace',
+          },
+        })
+      );
     }
 
     const result = await replaceKnowledgePackFacets({

@@ -364,7 +364,7 @@ async function executeEventQuickCheckRunLocked(
     return {
       ok: true,
       workflowRunId: run.id,
-      report,
+      report: report ?? undefined,
       steps: run.steps,
       platformProjectId:
         typeof stored.platformProjectId === 'string' ? stored.platformProjectId : undefined,

@@ -16,8 +16,9 @@
 
 | Area | Notes |
 |---|---|
-| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | **drop_safe** after board cutover (2026-09-26) — no app imports; purge aliases next |
+| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | **dropped** 2026-09-26 — files + aliases purged (`@msqdx/tokens` shim remains) |
 | `components/board/ReactFlowBoard.tsx` | On `lib/board/*` + `@msqdx/ui`; Collection Flows remain SoT for new orchestration |
+| `knowledge/plexon-setup.md` · locales `designSystem` | Ops/copy → `@msqdx/ui` / board modules (reshape slice) |
 
 ## Drop / reference-only (candidates — see inventory)
 

@@ -145,7 +145,7 @@ export function CollectionClientRoomPanel({ platformProjectId }: { platformProje
       ) : null}
       {error ? <Alert tone="error">{error}</Alert> : null}
       {url ? (
-        <Alert tone="success">
+        <Alert tone="ok">
           {t('projects.detail.clientRoomLink')}: {url}{' '}
           <Button variant="ghost" size="sm" onClick={() => void copyUrl()}>
             {copied ? t('projects.detail.clientRoomCopied') : t('projects.detail.clientRoomCopyLink')}

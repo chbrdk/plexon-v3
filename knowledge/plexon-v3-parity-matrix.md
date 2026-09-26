@@ -56,7 +56,7 @@
 | Generative UI blocks still on bridge | **Polish** | Wave-7 island; see shim inventory |
 | Board Prismion canvas bridge | **Polish** | Documented island |
 | Dashboard admin user edit off `/` | **Done** | `/admin/users/[id]` |
-| `ignoreBuildErrors: true` | **Polish** | Kept while ~40 `@msqdx/react` + MUI shim consumers remain |
+| `ignoreBuildErrors: false` | **done** 2026-09-26 | App `tsc` clean; tests excluded from Next typecheck |
 
 ## P2 — Ökosystem / später
 

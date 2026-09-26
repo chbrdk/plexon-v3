@@ -38,7 +38,7 @@ export function EventQuickCheckReadinessBanner() {
   if (!payload || payload.ready) return null
 
   return (
-    <Alert tone="warning" className="plexon-eqc-readiness">
+    <Alert tone="info" className="plexon-eqc-readiness">
       <Text role="title" as="p">
         {EQC_PAGE_COPY.readinessTitle}
       </Text>

@@ -44,6 +44,16 @@ describe('ui rebuild foundation inventory', () => {
     expect(pkg.dependencies['@mui/material']).toBeUndefined()
   })
 
+  it('has purged mui-shim and @msqdx/react bridge', () => {
+    expect(existsSync(path.join(root, 'lib/msqdx-react-bridge'))).toBe(false)
+    expect(existsSync(path.join(root, 'lib/mui-shim.tsx'))).toBe(false)
+    expect(existsSync(path.join(root, 'lib/mui-subpath-shims.ts'))).toBe(false)
+    const nextCfg = readFileSync(path.join(root, 'next.config.mjs'), 'utf8')
+    expect(nextCfg).not.toContain('@msqdx/react')
+    expect(nextCfg).not.toContain('@mui/material')
+    expect(nextCfg).toContain('@msqdx/tokens')
+  })
+
   it('imports @msqdx/ui styles in globals', () => {
     const css = readFileSync(path.join(root, 'styles/globals.css'), 'utf8')
     expect(

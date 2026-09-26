@@ -30,13 +30,12 @@ describe('applyPersonaChatStreamEvent', () => {
   })
 
   it('keeps the local id on done and applies final text', () => {
-    const done: ChatStreamEvent = {
+    const next = applyPersonaChatStreamEvent(base, 'local-asst-1', {
       type: 'done',
       conversationId: 'conv-1',
       messageId: 'server-msg-should-not-become-key',
       text: 'Hallo Welt.',
-    }
-    const next = applyPersonaChatStreamEvent(base, 'local-asst-1', done)
+    } as ChatStreamEvent)
     expect(next[1]?.id).toBe('local-asst-1')
     expect(next[1]?.content).toBe('Hallo Welt.')
     expect(next[1]?.status).toBe('complete')

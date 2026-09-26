@@ -17,6 +17,7 @@ const MAX_CONSECUTIVE_NETWORK_FAILURES = 8;
 
 export type EventQuickCheckRunPollResult = {
   ok: boolean;
+  status?: string;
   report?: EventQuickCheckReportModel;
   steps?: WorkflowStep[];
   platformProjectId?: string;

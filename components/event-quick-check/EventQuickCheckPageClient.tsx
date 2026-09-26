@@ -415,6 +415,7 @@ export function EventQuickCheckPageClient() {
                 awaitingCompetitors?: boolean;
                 competitors?: string[];
                 maxCompetitors?: number;
+                awaitingDeepScan?: boolean;
                 deepScanProgress?: { complete: number; total: number; detail: string };
                 checkionProjectId?: string;
               }>(res);
@@ -512,6 +513,7 @@ export function EventQuickCheckPageClient() {
                 geoQuestions?: string[];
                 geoQuestionsByPersona?: PersonaGeoQuestionGroup[];
                 geoHasPersona?: boolean;
+                awaitingDeepScan?: boolean;
                 deepScanProgress?: { complete: number; total: number; detail: string };
                 checkionProjectId?: string;
               }>(res);

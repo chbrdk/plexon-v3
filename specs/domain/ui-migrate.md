@@ -19,7 +19,7 @@ This is **not** a 1:1 visual migration of legacy JSX.
 2. **Reuse before invent.** Prefer `@msqdx/ui` primitives and **Audion composition patterns** (chat panel/workspace, settings bands, SectionChrome magazines). Do not invent a second chat UI, second settings chrome, or app-local DS clones.
 3. **Capability ≠ chrome.** Backend contracts (NextAuth, Drizzle, federation APIs, assistant orchestrator, EQC workflows) stay unless a wave explicitly redesigns them. UI chrome can be rewritten.
 4. **Specs first.** Update the wave spec with keep/reshape/drop + reuse map before implementation.
-5. **No bridge expansion.** Do not grow `mui-shim` / `@msqdx/react` bridge for new work.
+5. **No legacy bridges.** MUI / `@msqdx/react` bridge deleted (2026-09-26). Do not reintroduce.
 
 ## Wave order
 
@@ -44,13 +44,12 @@ This is **not** a 1:1 visual migration of legacy JSX.
 | Settings bands | Mirror `audion-v3` settings page (SectionChrome + Field + ToggleGroup) |
 | Magazine bands | `SectionChrome` + Audion magazine layout patterns |
 
-## Temporary bridges (delete in Wave 7)
+## Legacy bridges
 
-| Alias | File | Purpose |
-|-------|------|---------|
-| `@msqdx/react` | `lib/msqdx-react-bridge/` | Legacy until cutover |
-| `@mui/material` | `lib/mui-shim.tsx` | Stub only |
-| `@msqdx/tokens` | legacy tokens | Board Prismion only |
+| Alias | Status |
+|-------|--------|
+| `@msqdx/react` · `@mui/material` | **Deleted** 2026-09-26 (Wave 7 + purge) |
+| `@msqdx/tokens` | `lib/msqdx-tokens-shim.ts` — keep until callers move to `@msqdx/ui-tokens` |
 
 ## Agent checklist per wave
 

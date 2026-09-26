@@ -1011,6 +1011,11 @@ export async function executeCollectionFlowRun(input: {
             catalogBundle: cap.catalogBundle,
           };
         }
+      } else if (!checkionProjectId) {
+        geoOutcome = {
+          ok: false,
+          error: formatSkipMessage(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION),
+        };
       } else {
         const geoResult = await runCheckionGeoJobV3({
           projectId: checkionProjectId,

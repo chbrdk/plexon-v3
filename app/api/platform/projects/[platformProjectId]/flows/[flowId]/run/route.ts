@@ -159,11 +159,11 @@ export async function POST(
       meta: { flowId: fid, trigger: 'ui', status: runStatus },
     });
 
-    if (runStatus === 'complete') {
+    if (runStatus === 'complete' && result.flow) {
       await maybePublishClientRoomFromGate({
         platformProjectId: id,
         actor: user,
-        doc: result.flow,
+        doc: result.flow.flow,
         verdict: result.verdict,
         lastRun: result.lastRun,
       });

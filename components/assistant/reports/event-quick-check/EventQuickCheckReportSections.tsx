@@ -291,8 +291,6 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
         {persona.goals.length > 0 ? (
           <UiFindingList
             title={EQC_REPORT_COPY.sectionGoals}
-            showSeverityBadge={false}
-            itemTint
             items={persona.goals.map((g) => ({
               title: g,
               description: '',
@@ -303,8 +301,6 @@ export function EventQuickCheckPersonaSection({ report }: SectionProps) {
         {persona.painPoints.length > 0 ? (
           <UiFindingList
             title={EQC_REPORT_COPY.sectionPainPoints}
-            showSeverityBadge={false}
-            itemTint
             items={persona.painPoints.map((p) => ({
               title: p,
               description: '',

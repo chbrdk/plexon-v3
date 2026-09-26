@@ -68,6 +68,8 @@ export const UI_BLOCK_ICONS: Record<UiBlockType, string> = {
   quote_list: 'format_quote',
   event_quick_check_report: 'assignment',
   event_quick_check_review_gate: 'fact_check',
+  video_hit_strip: 'movie',
+  video_status_card: 'videocam',
 };
 
 export function uiBlockIconForTone(tone: UiTone): string {

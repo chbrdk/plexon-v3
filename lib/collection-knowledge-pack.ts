@@ -768,6 +768,35 @@ export function normalizeProvenance(
   };
 }
 
+export function buildFacetDocument<K extends KnowledgeFacetId>(
+  facetId: K,
+  input: {
+    at: string;
+    doc: Partial<FacetDocument<unknown>>;
+    data: KnowledgePackFacets[K]['data'];
+    fallbackProvenance: FacetProvenance;
+  }
+): KnowledgePackFacets[K] {
+  return {
+    facetId,
+    schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
+    updatedAt: typeof input.doc.updatedAt === 'string' ? input.doc.updatedAt : input.at,
+    provenance: normalizeProvenance(input.doc.provenance, input.fallbackProvenance),
+    freshness: normalizeFacetFreshness(
+      (input.doc as { freshness?: unknown }).freshness ?? 'fresh'
+    ),
+    data: input.data,
+  } as KnowledgePackFacets[K];
+}
+
+export function assignFacetDocument<K extends KnowledgeFacetId>(
+  facets: KnowledgePackFacets,
+  facetId: K,
+  doc: KnowledgePackFacets[K]
+): void {
+  facets[facetId] = doc;
+}
+
 export function ensureFacetsShape(facets: unknown, at = new Date().toISOString()): KnowledgePackFacets {
   const empty = createEmptyFacets(at);
   if (!facets || typeof facets !== 'object') return empty;
@@ -777,17 +806,17 @@ export function ensureFacetsShape(facets: unknown, at = new Date().toISOString()
     const facet = raw[id];
     if (!facet || typeof facet !== 'object') continue;
     const doc = facet as Partial<FacetDocument<unknown>>;
-    const data = normalizeFacetData(id, doc.data);
-    out[id] = {
-      facetId: id,
-      schemaVersion: KNOWLEDGE_PACK_SCHEMA_VERSION,
-      updatedAt: typeof doc.updatedAt === 'string' ? doc.updatedAt : at,
-      provenance: normalizeProvenance(doc.provenance, empty[id].provenance),
-      freshness: normalizeFacetFreshness(
-        (doc as { freshness?: unknown }).freshness ?? empty[id].freshness
-      ),
-      data: data as never,
-    } as KnowledgePackFacets[typeof id];
+    const data = normalizeFacetData(id, doc.data) as KnowledgePackFacets[typeof id]['data'];
+    assignFacetDocument(
+      out,
+      id,
+      buildFacetDocument(id, {
+        at,
+        doc,
+        data,
+        fallbackProvenance: empty[id].provenance,
+      })
+    );
   }
   return out;
 }

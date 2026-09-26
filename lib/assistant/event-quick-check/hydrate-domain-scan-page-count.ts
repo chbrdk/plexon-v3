@@ -135,11 +135,12 @@ async function resolveReportDomainScanId(
     .find(isRealScanId);
 
   if (!scanId && report.domain) {
-    scanId = await findCheckionDomainScanIdByUrl({
-      url: report.domain.url || report.meta.url,
-      domain: report.domain.domain || report.meta.domain,
-      score: report.domain.score,
-    });
+    scanId =
+      (await findCheckionDomainScanIdByUrl({
+        url: report.domain.url || report.meta.url,
+        domain: report.domain.domain || report.meta.domain,
+        score: report.domain.score,
+      })) ?? undefined;
   }
   return scanId;
 }

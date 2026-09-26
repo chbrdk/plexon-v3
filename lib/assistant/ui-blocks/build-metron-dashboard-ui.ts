@@ -47,7 +47,7 @@ export type MetronDashboardSummarizePayload = {
 };
 
 type ToolMeta = {
-  source: string;
+  source: 'plexon_ui';
   toolCallId: string;
   metronShareSnapshot?: MetronDashboardShareSnapshot;
 };
@@ -291,7 +291,7 @@ export function buildMetronShareSnapshot(input: {
 
 /** Rebuild Auto-UI blocks from a stored public share snapshot. */
 export function buildMetronShareUiLayout(snapshot: MetronDashboardShareSnapshot): UiLayout {
-  const meta = { source: 'plexon_ui', toolCallId: 'share' };
+  const meta = { source: 'plexon_ui' as const, toolCallId: 'share' };
   const blocks: UiBlock[] = [];
   appendMetricGrid(blocks, snapshot.name, snapshot.metrics, meta);
   const charts =
@@ -564,7 +564,7 @@ function buildMetronDatasetHref(datasetId: string): string | null {
 
 export function buildMetronKpiListBlocks(
   items: MetronKpiListItem[],
-  meta: { source: string; toolCallId: string },
+  meta: ToolMeta,
 ): UiBlock[] {
   const blocks: UiBlock[] = [];
   const metrics = items.slice(0, UI_BLOCK_LIMITS.maxMetrics).map((i) => ({
@@ -582,7 +582,7 @@ export function buildMetronKpiListBlocks(
 
 export function buildMetronKpiEvaluateBlocks(
   payload: MetronKpiEvaluatePayload,
-  meta: { source: string; toolCallId: string },
+  meta: ToolMeta,
 ): UiBlock[] {
   const blocks: UiBlock[] = [];
   const label = payload.periodLabel
@@ -596,7 +596,7 @@ export function buildMetronKpiEvaluateBlocks(
 
 export function buildMetronDatasetListBlocks(
   items: MetronDatasetListItem[],
-  meta: { source: string; toolCallId: string },
+  meta: ToolMeta,
 ): UiBlock[] {
   const blocks: UiBlock[] = [];
   const base = metronBase();
@@ -620,7 +620,7 @@ export function buildMetronDatasetListBlocks(
 
 export function buildMetronDatasetGetBlocks(
   item: MetronDatasetListItem,
-  meta: { source: string; toolCallId: string },
+  meta: ToolMeta,
 ): UiBlock[] {
   const blocks: UiBlock[] = [];
   const href = buildMetronDatasetHref(item.id);

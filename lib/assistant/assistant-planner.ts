@@ -446,7 +446,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     });
   }
 
-  if (matchesMetronAnalytics(text, input.hasMetronMcp)) {
+  if (matchesMetronAnalytics(text, input.hasMetronMcp ?? false)) {
     return buildPlan({
       intent: 'metron_analytics',
       mode: 'tools',

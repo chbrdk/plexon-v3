@@ -46,9 +46,16 @@ export function BoardIconButton({ sx, style, children, size: _size, ...rest }: B
   )
 }
 
-export function BoardInput(props: InputHTMLAttributes<HTMLInputElement> & { fullWidth?: boolean; sx?: LegacySx }) {
-  const { fullWidth, sx, style, ...rest } = props
-  return <Input block={fullWidth} style={sxStyle(sx, style)} {...rest} />
+type BoardInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+  fullWidth?: boolean
+  sx?: LegacySx
+  /** Legacy MUI density — maps to `@msqdx/ui` field size (not HTML `size`). */
+  size?: 'small' | 'medium' | string
+}
+
+export function BoardInput({ fullWidth, sx, style, size: legacySize, ...rest }: BoardInputProps) {
+  const dsSize = legacySize === 'small' ? 'sm' : legacySize === 'medium' ? 'md' : undefined
+  return <Input block={fullWidth} size={dsSize} style={sxStyle(sx, style)} {...rest} />
 }
 
 export function BoardMarkdown({ content, className }: { content: string; className?: string }) {

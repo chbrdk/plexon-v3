@@ -624,35 +624,34 @@ function parseCorpusPages(body: unknown): CheckionDomainCorpusPagesResult | null
   if (!body || typeof body !== 'object') return null;
   const o = body as Record<string, unknown>;
   const itemsRaw = Array.isArray(o.items) ? o.items : [];
-  const items: CheckionCorpusPageRow[] = itemsRaw
-    .map((row) => {
-      if (!row || typeof row !== 'object') return null;
-      const r = row as Record<string, unknown>;
-      const url = typeof r.url === 'string' ? r.url : '';
-      const scanId = typeof r.scanId === 'string' ? r.scanId : '';
-      if (!url || !scanId) return null;
-      const classification =
-        r.classification && typeof r.classification === 'object'
-          ? (r.classification as CheckionCorpusPageRow['classification'])
-          : null;
-      return {
-        url,
-        scanId,
-        overallScore:
-          typeof r.overallScore === 'number' && Number.isFinite(r.overallScore)
-            ? r.overallScore
-            : null,
-        errors: Number(r.errors ?? 0),
-        warnings: Number(r.warnings ?? 0),
-        scores:
-          r.scores && typeof r.scores === 'object'
-            ? (r.scores as CheckionCorpusPageRow['scores'])
-            : undefined,
-        classification,
-        resultsPath: typeof r.resultsPath === 'string' ? r.resultsPath : `/results/${scanId}/overview`,
-      };
-    })
-    .filter((row): row is CheckionCorpusPageRow => row != null);
+  const items: CheckionCorpusPageRow[] = [];
+  for (const row of itemsRaw) {
+    if (!row || typeof row !== 'object') continue;
+    const r = row as Record<string, unknown>;
+    const url = typeof r.url === 'string' ? r.url : '';
+    const scanId = typeof r.scanId === 'string' ? r.scanId : '';
+    if (!url || !scanId) continue;
+    const classification =
+      r.classification && typeof r.classification === 'object'
+        ? (r.classification as CheckionCorpusPageRow['classification'])
+        : null;
+    const parsed: CheckionCorpusPageRow = {
+      url,
+      scanId,
+      overallScore:
+        typeof r.overallScore === 'number' && Number.isFinite(r.overallScore)
+          ? r.overallScore
+          : null,
+      errors: Number(r.errors ?? 0),
+      warnings: Number(r.warnings ?? 0),
+      classification,
+      resultsPath: typeof r.resultsPath === 'string' ? r.resultsPath : `/results/${scanId}/overview`,
+    };
+    if (r.scores && typeof r.scores === 'object') {
+      parsed.scores = r.scores as CheckionCorpusPageRow['scores'];
+    }
+    items.push(parsed);
+  }
   const domainScanId = typeof o.domainScanId === 'string' ? o.domainScanId : '';
   if (!domainScanId) return null;
   return {

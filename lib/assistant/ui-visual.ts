@@ -17,6 +17,7 @@ export const UI_BRAND_HEX: Record<BrandColor, string> = {
   pink: MSQDX_COLORS.brand.pink,
   orange: MSQDX_COLORS.brand.orange,
   green: MSQDX_COLORS.brand.green,
+  black: '#000000',
 };
 
 export const UI_TONE_BRAND: Record<UiTone, UiAccent | undefined> = {

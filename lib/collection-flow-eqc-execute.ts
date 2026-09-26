@@ -365,6 +365,7 @@ export async function executeEqcCollectionFlowRun(input: {
         overallScore: number | null;
         pageCount?: number | null;
         url?: string;
+        scoresByKind?: Record<string, number> | null;
       } | null = null;
       let domainError: string | undefined;
 
