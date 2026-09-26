@@ -5,12 +5,13 @@ Dieses Verzeichnis ist der Einstiegspunkt für einen Agenten, der die Marketing-
 ## In dieser Reihenfolge lesen
 
 1. [**Suite-Stand (Checkpoint)**](../suite-stand.md) — **wo stehen wir?** Enterprise E1–E9, Share-Links, Härte, E2E, offen. Immer zuerst.
-2. [Wissensdatenbank](suite-knowledge-base.md) — Produktmodell, App-Rollen, verlässliche Aussagen und Grenzen.
-3. [Funktionsstand](../suite-funktionsstand.md) — Feature-Landkarte aller Apps.
-4. [Agentur-Aufgaben](../suite-agentur-use-cases.md) — konkrete Use Cases aus diesem Stand.
-5. [Enterprise-Programm](../suite-enterprise-program.md) — Wellen-Detail (Spiegel der Spec).
-6. [Storyboard- und Produktionshandbuch](tutorial-production-storyboards.md) — Tutorialprogramm, bereits vorhandene Artefakte und Produktionsstandard.
-7. [Startprompt](continuation-prompt.md) — direkt in den neuen Agenten kopieren.
+2. [**Suite Cleanup**](../suite-cleanup.md) — Aufräumnetz (Inventor/Gatekeeper/Sweeper); Inventare pro App.
+3. [Wissensdatenbank](suite-knowledge-base.md) — Produktmodell, App-Rollen, verlässliche Aussagen und Grenzen.
+4. [Funktionsstand](../suite-funktionsstand.md) — Feature-Landkarte aller Apps.
+5. [Agentur-Aufgaben](../suite-agentur-use-cases.md) — konkrete Use Cases aus diesem Stand.
+6. [Enterprise-Programm](../suite-enterprise-program.md) — Wellen-Detail (Spiegel der Spec).
+7. [Storyboard- und Produktionshandbuch](tutorial-production-storyboards.md) — Tutorialprogramm, bereits vorhandene Artefakte und Produktionsstandard.
+8. [Startprompt](continuation-prompt.md) — direkt in den neuen Agenten kopieren.
 
 ## Arbeitsgrundsatz
 

@@ -102,14 +102,15 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 3. **E9 IdP** (OIDC/SAML/SCIM) Laufzeit.  
 4. **Handover/Tutorials** weiterproduzieren (`knowledge/handover/`, `knowledge/tutorials/`).  
 5. Prod-Deploy nur über control plane `chbrdk/PLEXON` — dieses Island = Federation-Staging.
+6. **Suite Cleanup** — Inventare + drop_safe Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).
 
 ---
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. Tutorial-/Handover-Welle (wenn Inhalte) **oder**  
-2. Usage/JEV/SEO-Härte in den betroffenen Specs **oder**  
-3. Kundenraum-UX nur nach explizitem Wunsch.
+1. Suite-Cleanup Welle 2 nach Freigabe der [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md) **oder**  
+2. Tutorial-/Handover-Welle **oder**  
+3. Usage/JEV/SEO-Härte in den betroffenen Specs.
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 
