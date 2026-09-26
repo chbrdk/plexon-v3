@@ -25,6 +25,13 @@ PLEXON hat für Nutzer:innen genau einen Projektbegriff: die **Collection**. CHE
 - Originale und annotierte Screenshots: [`knowledge/tutorials/assets/checkion-article/`](../tutorials/assets/checkion-article/)
 - Vorhandener Screencast: [`knowledge/tutorials/assets/checkion-01-create-project.mp4`](../tutorials/assets/checkion-01-create-project.mp4)
 
+## BRANDION — Sprechertexte (Welle Tutorial)
+
+- Übersicht: [`knowledge/tutorials/brandion-first-two.md`](../tutorials/brandion-first-two.md)
+- BRN-QS-01 Measured evaluate PDF: [`brandion-01-measured-evaluate-pdf.md`](../tutorials/brandion-01-measured-evaluate-pdf.md)
+- BRN-QS-02 Guideline Activate: [`brandion-02-guideline-activate.md`](../tutorials/brandion-02-guideline-activate.md)
+- Aufnahme noch offen — vor Publish Staging durchklicken (`/analysis`, nicht Detection Lab).
+
 ## Was ein neuer Agent vor jeder Veröffentlichung tun muss
 
 1. Die Zielumgebung öffnen und den Flow erneut durchklicken.

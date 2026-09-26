@@ -101,6 +101,8 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 2. **Audion** in Share-Links Hub.  
 3. **E9 IdP** (OIDC/SAML/SCIM) Laufzeit.  
 4. **Handover/Tutorials** weiterproduzieren (`knowledge/handover/`, `knowledge/tutorials/`).  
+   - CHECKION erste fünf: Sprechertexte + Artikel.  
+   - **BRANDION** BRN-QS-01/02 Sprechertexte **ausgearbeitet** (2026-09-26); Aufnahme/Screenshots offen.  
 5. Prod-Deploy nur über control plane `chbrdk/PLEXON` — dieses Island = Federation-Staging.
 6. **Suite Cleanup** — Inventare + Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).  
    - Netz + 9× `cleanup-inventory.md` live.  
@@ -111,9 +113,9 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. MUI-Board-Reshape / Bridge-Cutover **oder**  
-2. Tutorial-/Handover-Welle **oder**  
-3. Usage/JEV/SEO-Härte / Creation Zaoly-Parity.
+1. BRANDION-Tutorials **aufnehmen** (Staging-Login) + Screenshots **oder**  
+2. ECH-QS-01 / CRT-QS-01 Sprechertexte **oder**  
+3. MUI-Board-Reshape / Bridge-Cutover.
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 

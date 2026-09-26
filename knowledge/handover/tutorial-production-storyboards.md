@@ -16,6 +16,17 @@ Die Tutorials sollen nicht erklären, wo einzelne Buttons liegen. Jede Folge zei
 | Bilder | Original-Screenshot archivieren; eine separate, additive Highlight-Variante mit Nummern erzeugen. |
 | Schluss | Nächster sinnvoller Schritt innerhalb derselben Collection. |
 
+## Storyboard: BRANDION, die ersten zwei Quick Starts
+
+| ID | Hook | Ablauf in Bildern | Kernaussage | Nächste Folge |
+|---|---|---|---|---|
+| BRN-QS-01 | „Wir messen ein PDF gegen die Markenregeln.“ | Analysis → Guideline → PDF upload → Run evaluate → Findings | Measured evaluate ersetzt Detection Lab; Pass/Fail ist Regelwahrheit. | Guideline aktivieren |
+| BRN-QS-02 | „Nur die aktive Guideline ist das Pack der Collection.“ | Guidelines → öffnen → Activate → Active-Chip | Active demoted andere; CREATION liest active-pack. | Tokens pflegen / Evaluate |
+
+Sprechertexte: `knowledge/tutorials/brandion-01-measured-evaluate-pdf.md`, `brandion-02-guideline-activate.md`, Übersicht `brandion-first-two.md`.
+
+**Produktnotiz:** `/detection-lab` redirected auf `/analysis` — nicht als eigener Hub aufnehmen.
+
 ## Storyboard: CHECKION, die ersten fünf Folgen
 
 | ID | Hook | Ablauf in Bildern | Kernaussage | Nächste Folge |
@@ -45,7 +56,7 @@ Hinweis: Highlight-Bilder sind lediglich visuelle Erklärhilfen. Das unbearbeite
 ## Produktionsreihenfolge für die Suite
 
 1. **CHECKION** — erste fünf Folgen sind geplant und textlich ausgearbeitet.
-2. **BRANDION** — Detection Lab, Guideline aktivieren, Tokens/Markenregeln, Evaluation.
+2. **BRANDION** — Measured evaluate (PDF) + Guideline aktivieren (**Sprechertexte ausgearbeitet**); danach Tokens/Evaluate-Kernworkflows.
 3. **ECHON** — Tagespuls, Signal zu Wave, Recherchebriefing.
 4. **CREATION** — Collection/Composition öffnen, einfache Landingpage, Canvas und Scene Board.
 5. **AUDION** — erst nach überprüftem Demo-/API-Zustand: Easy Setup, Persona, Zielgruppe, Journey, Study.

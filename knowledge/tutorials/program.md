@@ -67,8 +67,8 @@ Artikel-Alternative zum ersten Lernpfad: [`articles/checkion-fuenf-pruefungen.md
 
 | ID | Format | Tutorial | Ergebnis | Status |
 |---|---|---|---|---|
-| BRN-QS-01 | Quick Start | Brand-Datei im Detection Lab untersuchen | Farben, Schriften und Strukturen sind inventarisiert | Planen |
-| BRN-QS-02 | Quick Start | Eine Guideline öffnen und aktivieren | Aktives Brand Pack ist verstanden | Planen |
+| BRN-QS-01 | Quick Start | PDF im Measured evaluate prüfen | Pass/Fail-Findings zu einer Demo-PDF | **Ausgearbeitet** (Detection Lab → `/analysis`) |
+| BRN-QS-02 | Quick Start | Eine Guideline öffnen und aktivieren | Aktives Brand Pack ist verstanden | **Ausgearbeitet** |
 | BRN-CORE-01 | Kernworkflow | Design Tokens und Markenregeln pflegen | Wiederverwendbare Markengrundlage | Planen |
 | BRN-CORE-02 | Kernworkflow | Ein PDF oder Bild gegen die Marke prüfen | Verankerte Findings und Score | Planen |
 | BRN-CORE-03 | Kernworkflow | Website oder HTML bewerten | Digitale Markenkonsistenz | Planen |
@@ -130,10 +130,11 @@ Artikel-Alternative zum ersten Lernpfad: [`articles/checkion-fuenf-pruefungen.md
 3. CHK-CORE-02 — Komplette Domain untersuchen
 4. CHK-CORE-03 — SEO-Abdeckung einer Domain prüfen
 5. CHK-CORE-04 — GEO Model Memory messen
-6. BRN-QS-01 — Datei im Detection Lab untersuchen
-7. ECH-QS-01 — Tagespuls lesen
-8. CRT-QS-01 — Collection und Composition öffnen
-9. AUD-QS-01 — Easy Setup, sobald Demo/API-Zustand eindeutig ist
+6. BRN-QS-01 — PDF im Measured evaluate prüfen (`/analysis`; Detection Lab entfallen)
+7. BRN-QS-02 — Guideline aktivieren
+8. ECH-QS-01 — Tagespuls lesen
+9. CRT-QS-01 — Collection und Composition öffnen
+10. AUD-QS-01 — Easy Setup, sobald Demo/API-Zustand eindeutig ist
 
 ### Welle 2 — fachliche Kernworkflows
 
