@@ -104,7 +104,7 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 5. Prod-Deploy nur über control plane `chbrdk/PLEXON` — dieses Island = Federation-Staging.
 6. **Suite Cleanup** — Inventare + Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).  
    - Netz + 9× `cleanup-inventory.md` live.  
-   - **Welle 2a** executed (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes).  
+   - **Welle 2a** executed (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes) + follow-ups (videon orphan CSS, creation `.tmp/`/`.build/` gitignore).  
    - **Welle 2b** awaits „los“ (Echon `deprecated/` + `v2/`, MUI reshape, …).
 
 ---
