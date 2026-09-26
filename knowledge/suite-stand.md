@@ -105,15 +105,15 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 6. **Suite Cleanup** — Inventare + Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).  
    - Netz + 9× `cleanup-inventory.md` live.  
    - **Welle 2a** executed (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes) + follow-ups (videon orphan CSS, creation `.tmp/`/`.build/` gitignore).  
-   - **Welle 2b** awaits „los“ (Echon `deprecated/` + `v2/`, MUI reshape, …).
+   - **Welle 2b** executed 2026-09-26: Echon `deprecated/` + `v2/` (+ forecast CI), plexon glass-chat helpers, msqdx-ui multi-bump. **Nicht** angegangen: MUI-Board reshape, Zaoly runtime, Audion migrate script.
 
 ---
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. Suite-Cleanup **Welle 2b** nach „los“ auf [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md) **oder**  
+1. MUI-Board-Reshape / Bridge-Cutover **oder**  
 2. Tutorial-/Handover-Welle **oder**  
-3. Usage/JEV/SEO-Härte / MUI-Board-Reshape.
+3. Usage/JEV/SEO-Härte / Creation Zaoly-Parity.
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 

@@ -8,68 +8,34 @@
 
 | Repo | drop_safe | reshape | defer / rebuild |
 |---|---|---|---|
-| plexon-v3 | 6 | MUI/Board/Bridge | ClientRoom panel, lab-tile note |
-| checkion-v3 | 5 | fixtures | scoring/ops notes, missing companion docs |
-| audion-v3 | ~12 | fixture vs api | ueq-runs/, Share-Links |
-| brandion-v3 | 0–wenige | lucide dep | Chromium crawl (not present) |
-| creation-v3 | siehe Inventar | Zaoly runtime | Zaoly editor |
-| videon-v3 | wenige docs | NLE hex CSS | PlatformAssistantHost |
+| plexon-v3 | 2a + glass-chat **done** | MUI/Board/Bridge | ClientRoom panel, lab-tile note |
+| checkion-v3 | 2a **done** | fixtures | scoring/ops notes |
+| audion-v3 | 2a **done** | fixture vs api | migrate script **keep**, Share-Links |
+| brandion-v3 | 0–wenige | lucide dep | — |
+| creation-v3 | 2a follow-ups **done** | Zaoly runtime | Zaoly editor (**not** purged) |
+| videon-v3 | 2a CSS **done** | NLE hex CSS | PlatformAssistantHost |
 | metron-v3 | **0** | — | deferred KPI docs (keep) |
-| msqdx-ui | 1 conditional | bump chain, dual tokens | — |
-| msqdx-echon | `deprecated/**` groups | — | **entire `v2/`** |
+| msqdx-ui | multi-bump **done** | bump chain, dual tokens | — |
+| msqdx-echon | `deprecated/**` + `v2/**` **done** | — | — |
 
-## Welle 2a — Freigabe durch Plan-Implementierung (unreferenziert, verifiziert)
+## Welle 2a — ausgeführt
 
-Diese Zeilen dürfen der Sweeper **jetzt** löschen (Orchestrator hat Refs nochmals geprüft):
+Siehe Commit-Historie (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes, videon CSS, creation gitignore).
 
-### plexon-v3
-- `components/InfoTooltip.tsx`
-- `components/Sidebar.tsx`
-- `components/layout/PlexonPageChrome.tsx`
-- `components/layout/PlexonAppHeaderV2.tsx`
-- `components/assistant/AssistantSurfaceIconButton.tsx`
-- `knowledge/magazine-button.md`
-- `knowledge/magazine-lede.md`
+## Welle 2b — Freigabe „los“ 2026-09-26 — ausgeführt
 
-### audion-v3
-- `tmp/migrate-v2-v3/` (gesamter Ordner)
-- `knowledge/ebm-comparison-2026-08-19.json`
-- `knowledge/ebm-ai-concrete-results-2026-08-19.html`
-- `knowledge/ebm-human-vs-ai-findings-2026-08-19.html`
-- `knowledge/bsh-home-concrete-results-2026-08-19.html`
-- `knowledge/bsh-human-vs-ai-2026-08-19.html`
-- `knowledge/ueq-ebike-*-2026-08-19.html` (alle HTML-Reports dieser Welle)
-- `knowledge/coolify-web-deploy-fail-copy-next-2026-08-03.md`
-- `knowledge/knowledge-sync-after-bind-2026-08-03.md`
-
-### checkion-v3
-- `knowledge/magazine-button.md`
-- `knowledge/magazine-lede-filter.md`
-- `knowledge/coolify-build-fix-2026-08-11-chatoverlay.md`
-- `knowledge/coolify-build-fix-2026-09-17-labtile.md`
-- `knowledge/sefe-staging-reset-2026-09-21.md`
-
-### videon-v3
-- Orphan CSS `.videon-nle__toolbar-menu*` in `apps/web/app/globals.css` (**done** 2026-09-26)
-
-### creation-v3
-- Doc fix `coolify-operator-handoff.md` CREATION_EDITOR row (**done**)
-- `.tmp/` + root `.build/` in `.gitignore` (**done**)
-
-## Welle 2b — braucht explizites „los“
-
-| Item | Warum Gate |
+| Item | Status |
 |---|---|
-| msqdx-echon `deprecated/**` (~290 Dateien) | Knowledge-Salvage prüfen |
-| msqdx-echon `v2/**` | CI forecast workflow + ops docs |
-| plexon MUI shim / Board / Bridge | reshape zuerst |
-| plexon glass-chat helpers + Tests | Tests mitlöschen |
-| audion migrate script + knowledge doc | Script behalten oder beides droppen |
-| msqdx-ui creation-*-bump chain | Consolidate first |
-| creation Zaoly runtime | Parity |
+| msqdx-echon `deprecated/**` | **done** (~304 files) |
+| msqdx-echon `v2/**` + forecast CI + root v2 compose/symlinks | **done** (Coolify legacy app already exited; `echon-v3` healthy) |
+| plexon glass-chat helpers + Tests | **done** |
+| msqdx-ui `creation-layers-panel-multi-bump.md` | **done** |
+| plexon MUI shim / Board / Bridge | **skipped** — bleibt reshape |
+| audion migrate script + knowledge | **skipped** — keep (Migration nicht „complete“) |
+| creation Zaoly runtime | **skipped** — Parity / defer |
 
 ## Checkbox Freigabe 2b
 
-- [ ] Owner: „los“ auf Welle 2b (oder genannte Zeilen)
-- [ ] Sweeper + Verifier pro Repo
-- [ ] `suite-stand.md` Cleanup-Abschnitt aktualisieren
+- [x] Owner: „los“ auf Welle 2b
+- [x] Sweeper + Verifier pro Repo
+- [x] `suite-stand.md` Cleanup-Abschnitt aktualisieren
