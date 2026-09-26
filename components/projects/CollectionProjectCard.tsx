@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Button, CardActions, CollectionHubCard, CollectionHubMetric } from '@msqdx/ui'
+import { buttonClassName, CardActions, CollectionHubCard, CollectionHubMetric } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   MetricIconPersonas,
@@ -67,10 +67,11 @@ export function CollectionProjectCard({ row, onLifecycleChange }: CollectionProj
       actions={
         <CardActions>
           {canOpenPlatform ? (
-            <Link href={pathPlatformProjectDashboard(pid)}>
-              <Button variant="ghost" size="md">
-                {t('dashboard.platformInsightsOpenProject')}
-              </Button>
+            <Link
+              href={pathPlatformProjectDashboard(pid)}
+              className={buttonClassName({ variant: 'ghost', size: 'md' })}
+            >
+              {t('dashboard.platformInsightsOpenProject')}
             </Link>
           ) : null}
           {onLifecycleChange ? (
@@ -81,15 +82,21 @@ export function CollectionProjectCard({ row, onLifecycleChange }: CollectionProj
               size="md"
             />
           ) : null}
-          <a href={row.links.checkionProject} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="md">
-              {t('dashboard.platformInsightsOpenCheckion')}
-            </Button>
+          <a
+            href={row.links.checkionProject}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClassName({ variant: 'ghost', size: 'md' })}
+          >
+            {t('dashboard.platformInsightsOpenCheckion')}
           </a>
-          <a href={row.links.audionProject} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="md">
-              {t('dashboard.platformInsightsOpenAudion')}
-            </Button>
+          <a
+            href={row.links.audionProject}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClassName({ variant: 'ghost', size: 'md' })}
+          >
+            {t('dashboard.platformInsightsOpenAudion')}
           </a>
         </CardActions>
       }

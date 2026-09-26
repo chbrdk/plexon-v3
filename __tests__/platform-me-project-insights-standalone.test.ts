@@ -54,6 +54,7 @@ describe('platform-me-project-insights-standalone', () => {
           platformCompanyId: null,
           checkionProjectId: null,
           personaCount: 5,
+          targetGroupCount: 1,
         },
       ],
     });

@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { getDb } from './index';
 import { platformProjectProductBindings } from './schema';
 import type { PlatformProductId } from '@/lib/platform-entitlements';
@@ -50,6 +50,17 @@ export async function getBindingsForPlatformProject(platformProjectId: string) {
     .select()
     .from(platformProjectProductBindings)
     .where(eq(platformProjectProductBindings.platformProjectId, platformProjectId));
+}
+
+/** Batch bindings for insights / hub lists — one query instead of N. */
+export async function getBindingsForPlatformProjects(platformProjectIds: string[]) {
+  const ids = [...new Set(platformProjectIds.map((id) => id.trim()).filter(Boolean))];
+  if (ids.length === 0) return [];
+  const db = getDb();
+  return db
+    .select()
+    .from(platformProjectProductBindings)
+    .where(inArray(platformProjectProductBindings.platformProjectId, ids));
 }
 
 export async function getExternalProjectId(

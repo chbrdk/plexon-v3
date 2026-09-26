@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Button, EmptyState, Spinner, Text } from '@msqdx/ui'
+import { Button, buttonClassName, EmptyState, Spinner, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformMeProjectInsights, pathPlatformProjectDashboard } from '@/lib/constants'
 import type { CollectionProjectInsight } from '@/lib/collection-project-insight'
@@ -92,10 +92,11 @@ function CollectionProjectListRow({
       </div>
       <div className="ds-collection-hub-list-row__trail">
         {canOpenPlatform ? (
-          <Link href={pathPlatformProjectDashboard(pid)}>
-            <Button variant="ghost" size="sm">
-              {t('projects.hub.open')}
-            </Button>
+          <Link
+            href={pathPlatformProjectDashboard(pid)}
+            className={buttonClassName({ variant: 'ghost', size: 'sm' })}
+          >
+            {t('projects.hub.open')}
           </Link>
         ) : null}
         {onLifecycleChange ? (

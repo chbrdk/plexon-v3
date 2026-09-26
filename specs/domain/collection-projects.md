@@ -32,6 +32,7 @@ Users see **one project** (a Collection). CHECKION, AUDION, BRANDION, CREATION, 
    **Company membership alone does not grant Collection visibility.** Global Plexon admins see all. Company owner/admin may still **archive/restore** company Collections (lifecycle) and list them in **admin** company detail — that is not the member hub/product picker catalog.
    Assignments expand to product-local `projectAssignments` via bindings for provisioning; product UIs must filter capability lists to the same accessible set (P71 `accessible-collections` and/or local `ownerPlexonUserId` + assignment sync).
 6. **Insights list Collections only** — no synthetic product-only cards (v3 fresh DB).
+7. **Insights list is light** — `GET /api/platform/me/project-insights` must not call per-Collection product HTTP summaries. Use Plexon bindings (batch) + product DB metric queries (`lib/user-product-projects-for-insights.ts`). Full catalogs stay on Collection detail (`PlatformProjectDashboard`).
 
 ## What users see vs internal
 

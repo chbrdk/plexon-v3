@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getRequestUser } from '@/lib/auth-request-user';
-import {
-  fetchAudionPlatformProjectSummary,
-  fetchBrandionPlatformProjectSummary,
-  fetchCheckionPlatformProjectSummary,
-} from '@/lib/platform-project-dashboard-fetch';
+import { getBindingsForPlatformProjects } from '@/lib/db/platform-project-bindings';
 import { listAccessiblePlatformProjectsForUser } from '@/lib/platform-project-directory';
+import {
+  fetchAudionUserProjectsForInsights,
+  fetchCheckionUserProjectsForInsights,
+} from '@/lib/user-product-projects-for-insights';
 
 vi.mock('@/lib/auth-request-user', () => ({
   getRequestUser: vi.fn(),
@@ -16,14 +16,13 @@ vi.mock('@/lib/platform-project-directory', () => ({
   listAccessiblePlatformProjectsForUser: vi.fn(),
 }));
 
-vi.mock('@/lib/platform-project-dashboard-fetch', () => ({
-  fetchCheckionPlatformProjectSummary: vi.fn(),
-  fetchAudionPlatformProjectSummary: vi.fn(),
-  fetchBrandionPlatformProjectSummary: vi.fn(),
+vi.mock('@/lib/db/platform-project-bindings', () => ({
+  getBindingsForPlatformProjects: vi.fn(),
 }));
 
-vi.mock('@/lib/db/platform-project-bindings', () => ({
-  getBindingsForPlatformProject: vi.fn().mockResolvedValue([]),
+vi.mock('@/lib/user-product-projects-for-insights', () => ({
+  fetchCheckionUserProjectsForInsights: vi.fn(),
+  fetchAudionUserProjectsForInsights: vi.fn(),
 }));
 
 describe('GET /api/platform/me/project-insights', () => {
@@ -31,7 +30,9 @@ describe('GET /api/platform/me/project-insights', () => {
     vi.resetAllMocks();
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.stubEnv('NEXT_PUBLIC_BRANDION_URL', 'https://brandion-v3.test');
-    vi.mocked(fetchBrandionPlatformProjectSummary).mockResolvedValue(null);
+    vi.mocked(getBindingsForPlatformProjects).mockResolvedValue([]);
+    vi.mocked(fetchCheckionUserProjectsForInsights).mockResolvedValue([]);
+    vi.mocked(fetchAudionUserProjectsForInsights).mockResolvedValue([]);
   });
 
   it('returns 401 when unauthenticated', async () => {
@@ -49,7 +50,7 @@ describe('GET /api/platform/me/project-insights', () => {
     expect(res.status).toBe(503);
   });
 
-  it('aggregates summaries for accessible Collections (capped)', async () => {
+  it('assembles light rows from bindings + product DB metrics (capped, no per-project HTTP)', async () => {
     vi.stubEnv('DATABASE_URL', 'postgres://plexon.test/db');
     vi.mocked(getRequestUser).mockResolvedValue({ id: 'u1', role: 'user' });
     const now = new Date();
@@ -65,32 +66,59 @@ describe('GET /api/platform/me/project-insights', () => {
       updatedAt: now,
     }));
     vi.mocked(listAccessiblePlatformProjectsForUser).mockResolvedValue(rows);
-    vi.mocked(fetchCheckionPlatformProjectSummary).mockImplementation(async (id) => ({
-      externalProjectId: `chk-${id}`,
-      scanCount: 1,
-      domainScanCount: 0,
-      standaloneScanCount: 1,
-      domainScans: [],
-      standaloneScans: [],
-    }));
-    vi.mocked(fetchAudionPlatformProjectSummary).mockImplementation(async (id) => ({
-      externalProjectId: `aud-${id}`,
-      personaCount: 2,
-      targetGroupCount: 1,
-      journeyCount: 0,
-      studyCount: 0,
-      targetGroups: [],
-      personas: [],
-      journeys: [],
-      studies: [],
-    }));
-    vi.mocked(fetchBrandionPlatformProjectSummary).mockImplementation(async (id) => ({
-      externalProjectId: `br-${id}`,
-      analysisCount: 0,
-      guidelineCount: 1,
-      analyses: [],
-      guidelines: [],
-    }));
+    vi.mocked(getBindingsForPlatformProjects).mockResolvedValue([
+      {
+        platformProjectId: 'p0',
+        productId: 'checkion',
+        externalProjectId: 'chk-p0',
+        syncStatus: 'in_sync',
+        syncMessage: null,
+        lastSyncAt: null,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        platformProjectId: 'p0',
+        productId: 'audion',
+        externalProjectId: 'aud-p0',
+        syncStatus: 'in_sync',
+        syncMessage: null,
+        lastSyncAt: null,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        platformProjectId: 'p0',
+        productId: 'brandion',
+        externalProjectId: 'br-p0',
+        syncStatus: 'in_sync',
+        syncMessage: null,
+        lastSyncAt: null,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ] as Awaited<ReturnType<typeof getBindingsForPlatformProjects>>);
+    vi.mocked(fetchCheckionUserProjectsForInsights).mockResolvedValue([
+      {
+        id: 'chk-p0',
+        name: 'Chk',
+        domain: 'p0.test',
+        platformProjectId: 'p0',
+        platformCompanyId: 'c1',
+        scanCount: 7,
+      },
+    ]);
+    vi.mocked(fetchAudionUserProjectsForInsights).mockResolvedValue([
+      {
+        id: 'aud-p0',
+        name: 'Aud',
+        platformProjectId: 'p0',
+        platformCompanyId: 'c1',
+        checkionProjectId: 'chk-p0',
+        personaCount: 3,
+        targetGroupCount: 2,
+      },
+    ]);
 
     const { GET } = await import('@/app/api/platform/me/project-insights/route');
     const res = await GET(new Request('http://localhost/api/platform/me/project-insights'));
@@ -100,8 +128,13 @@ describe('GET /api/platform/me/project-insights', () => {
     expect(body.truncated).toBe(true);
     expect(body.shown).toBe(30);
     expect(body.projects).toHaveLength(30);
-    expect(body.projects[0].checkion?.scanCount).toBe(1);
-    expect(body.projects[0].brandion?.guidelineCount).toBe(1);
+    expect(getBindingsForPlatformProjects).toHaveBeenCalledTimes(1);
+    expect(fetchCheckionUserProjectsForInsights).toHaveBeenCalledTimes(1);
+    expect(fetchAudionUserProjectsForInsights).toHaveBeenCalledTimes(1);
+    expect(body.projects[0].checkion?.scanCount).toBe(7);
+    expect(body.projects[0].audion?.personaCount).toBe(3);
+    expect(body.projects[0].audion?.targetGroupCount).toBe(2);
+    expect(body.projects[0].brandion?.externalProjectId).toBe('br-p0');
     expect(body.projects[0].openPlatformProject).toBe(true);
     expect(body.projects[0].links.checkionProject).toContain('platformProjectHint=');
     expect(body.projects[0].links.audionProject).toContain('platformCompanyId=c1');
@@ -120,8 +153,8 @@ describe('GET /api/platform/me/project-insights', () => {
     const body = await res.json();
     expect(body.totalAccessible).toBe(0);
     expect(body.projects).toEqual([]);
-    expect(fetchCheckionPlatformProjectSummary).not.toHaveBeenCalled();
-    expect(fetchAudionPlatformProjectSummary).not.toHaveBeenCalled();
-    expect(fetchBrandionPlatformProjectSummary).not.toHaveBeenCalled();
+    expect(fetchCheckionUserProjectsForInsights).not.toHaveBeenCalled();
+    expect(fetchAudionUserProjectsForInsights).not.toHaveBeenCalled();
+    expect(getBindingsForPlatformProjects).not.toHaveBeenCalled();
   });
 });

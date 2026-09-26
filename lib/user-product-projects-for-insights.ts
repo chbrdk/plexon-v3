@@ -26,6 +26,7 @@ export type AudionUserProjectInsightRow = {
   platformCompanyId: string | null;
   checkionProjectId: string | null;
   personaCount: number;
+  targetGroupCount: number;
 };
 
 /**
@@ -108,7 +109,11 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
       coalesce(
         (select count(*)::int from ${schema}.personas pe where pe.project_id = pr.id),
         0
-      )::text as persona_count
+      )::text as persona_count,
+      coalesce(
+        (select count(*)::int from ${schema}.target_groups tg where tg.project_id = pr.id),
+        0
+      )::text as target_group_count
     from ${schema}.projects pr
     where exists (
       select 1 from ${schema}.users u
@@ -136,6 +141,7 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
       platform_company_id: string | null;
       checkion_project_id: string | null;
       persona_count: string;
+      target_group_count: string;
     }>(sql, [plexonUserId]);
     return res.rows.map((r) => ({
       id: r.id,
@@ -144,6 +150,7 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
       platformCompanyId: r.platform_company_id,
       checkionProjectId: r.checkion_project_id,
       personaCount: Number.parseInt(r.persona_count, 10) || 0,
+      targetGroupCount: Number.parseInt(r.target_group_count, 10) || 0,
     }));
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -156,6 +163,7 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
           platform_company_id: string | null;
           checkion_project_id: string | null;
           persona_count: string;
+          target_group_count: string;
         }>(
           `
           select
@@ -167,7 +175,11 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
             coalesce(
               (select count(*)::int from ${schema}.personas pe where pe.project_id = pr.id),
               0
-            )::text as persona_count
+            )::text as persona_count,
+            coalesce(
+              (select count(*)::int from ${schema}.target_groups tg where tg.project_id = pr.id),
+              0
+            )::text as target_group_count
           from ${schema}.projects pr
           where exists (
             select 1 from ${schema}.users u
@@ -192,6 +204,7 @@ export async function fetchAudionUserProjectsForInsights(plexonUserId: string): 
           platformCompanyId: r.platform_company_id,
           checkionProjectId: r.checkion_project_id,
           personaCount: Number.parseInt(r.persona_count, 10) || 0,
+          targetGroupCount: Number.parseInt(r.target_group_count, 10) || 0,
         }));
       } catch (e2) {
         console.error('[PLEXON] fetchAudionUserProjectsForInsights (fallback) failed:', e2);
