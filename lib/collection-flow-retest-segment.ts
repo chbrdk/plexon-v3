@@ -219,6 +219,16 @@ export async function runRetestSegment(input: {
     return { ok: true, ctx, delta: deltaRes.delta };
   }
 
+  if (isEnterpriseSoftSkipTemplate(input.doc)) {
+    return {
+      ok: true,
+      ctx: input.ctx,
+      delta: null,
+      skipped: true,
+      skipReason: FLOW_SKIP_REASONS.RETEST_NO_PRIOR,
+    };
+  }
+
   return {
     ok: false,
     status: 409,

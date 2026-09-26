@@ -49,6 +49,23 @@ describe('suite enterprise E1 lagebild', () => {
     )
     expect(views).toContain('CreationCapabilityView')
     expect(views).toContain('BoundProductCapabilityView')
+    // Entry CTA even without last run / empty catalog (Härte-Backlog)
+    expect(views).toContain('capability-entry-teaser')
+    expect(views).toContain('capabilityEntryAlways')
+    expect(views).toContain("data-testid={`${productId}-capability-view`}")
+    expect(views).toContain('data-testid="creation-capability-view"')
+    expect(views).toContain('creationCatalogEmpty')
+  })
+
+  it('knowledge band always lists creation/videon/spirion/echon nav ids', () => {
+    const band = readFileSync(
+      path.join(root, 'components/products/CollectionKnowledgeBand.tsx'),
+      'utf8',
+    )
+    expect(band).toMatch(/CAPABILITY_NAV_IDS[\s\S]*'creation'/)
+    expect(band).toContain("'videon'")
+    expect(band).toContain("'spirion'")
+    expect(band).toContain("'echon'")
   })
 
   it('dashboard API exposes creation + companion launch links', () => {

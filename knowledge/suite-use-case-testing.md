@@ -79,12 +79,14 @@ Erlaubte Werte in dieser Datei und in Contract-Tests: genau diese vier.
 | Playwright | UC1, UC9 (Panes + Audit/Activity), E2 ClientRoom API, Share-Links Hub, E3, E5 templateId, E8 Crisis templateId, E9 Directory-Stub | `e2e/uc1-pitch-eqc.spec.ts` · `e2e/uc9-lagebild-audit.spec.ts` · `e2e/e2-client-room.spec.ts` · `e2e/share-links-hub.spec.ts` · `e2e/e3-schedule-retest.spec.ts` · `e2e/e5-launch-gate.spec.ts` · `e2e/e8-crisis-template.spec.ts` · `e2e/e9-directory-stub.spec.ts` · `npm run test:e2e:staging` |
 | Manuell | Cron-Tick abwarten, echte Deep/GEO-Keys | dieses Playbook |
 
-## Härte-Backlog (diese Tranche)
+## Härte-Backlog
 
-- Flow-Skip mit stabilem `skipReason` bei fehlender Capability
-- CREATION/VIDEON/ECHON/SPIRION Pane-Einstieg auch ohne letzten Lauf
-- AUDION Study Fixture-Label ohne Agent-URL
-- Destillat Call-Site Inventory in Product-Repos
+| Item | Stand (2026-09-26) |
+|---|---|
+| Flow-Skip mit stabilem `skipReason` bei fehlender Capability | Done — Catalog `skipped` + Codes für Checkion/Audion/Videon/Retest (`collection-flow-skip.ts`) |
+| CREATION/VIDEON/ECHON/SPIRION Pane-Einstieg auch ohne letzten Lauf | Done — `capability-entry-teaser` + Nav immer |
+| AUDION Study Fixture-Label ohne Agent-URL | Done — `study-evidence-mode` + UI-Asserts |
+| Destillat Call-Site Inventory in Product-Repos | Done — `knowledge/distillate-call-sites.md` + Contract-Tests |
 
 ## Explizit out of scope
 

@@ -18,21 +18,28 @@ import {
   type CollectionFlowRunContext,
 } from '@/lib/collection-flow-run-context';
 import {
+  FLOW_SKIP_REASONS,
+  isEnterpriseSoftSkipTemplate,
+} from '@/lib/collection-flow-skip';
+import {
   flowHasVideonNodes,
   mergeVideonMediaAssetId,
   type CollectionFlowNode,
   type CollectionTestFlowDocument,
 } from '@/lib/collection-test-flow';
+import { getExternalProjectId } from '@/lib/db/platform-project-bindings';
 import {
   analysisRun,
   cutCreate,
   exportRun,
 } from '@/lib/integrations/videon-product-client';
+import type { PlatformProductId } from '@/lib/platform-entitlements';
 
 export type VideonSegmentOk = {
   ok: true;
   ctx: CollectionFlowRunContext;
   status: string;
+  skipReason?: string;
 };
 
 export type VideonSegmentFail = {
@@ -410,7 +417,33 @@ export async function runVideonMediaSegments(input: {
   plexonUserId?: string | null;
 }): Promise<VideonSegmentResult> {
   if (!flowHasVideonNodes(input.doc)) {
-    return { ok: true, ctx: input.ctx, status: 'skipped' };
+    return { ok: true, ctx: input.ctx, status: 'skipped', skipReason: FLOW_SKIP_REASONS.NODE_ABSENT };
+  }
+
+  // Soft-skip when Collection has no VIDEON binding (enterprise templates).
+  const videonBound = await getExternalProjectId(
+    input.platformProjectId,
+    'videon' as PlatformProductId
+  );
+  if (!videonBound && isEnterpriseSoftSkipTemplate(input.doc)) {
+    const analysisNode = findKind(input.doc.nodes, 'videon_analysis_run');
+    const skippedCtx = setMediaCatalogLeaf(
+      input.ctx,
+      'analysis',
+      buildMediaAnalysisCatalogBundle({
+        status: 'skipped',
+        mediaAssetId: analysisNode?.mediaAssetId?.trim() || '',
+        analysisRunId: null,
+        platformProjectId: input.platformProjectId,
+      }),
+      analysisNode?.id
+    );
+    return {
+      ok: true,
+      ctx: skippedCtx,
+      status: 'skipped',
+      skipReason: FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_VIDEON,
+    };
   }
 
   let ctx = input.ctx;

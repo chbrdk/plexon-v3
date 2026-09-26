@@ -1,7 +1,7 @@
 # Suite Enterprise Program — Wissen
 
 **Spec:** `specs/domain/suite-enterprise-program.md`  
-**Stand:** 2026-09-25 — E1–E9 Surfaces in Plexon; Produkt-Audit/Activity-Clients live; Staging-Env Schedule gesetzt.
+**Stand:** 2026-09-26 — E1–E9 Surfaces in Plexon; Share-Links Hub writers live; Härte-Backlog (skipReasons Catalog, Capability-Panes, AUDION Fixture-Label, Destillat-Inventar) closed.
 
 ## Fortschritt
 

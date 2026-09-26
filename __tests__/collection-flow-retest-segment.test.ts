@@ -90,10 +90,32 @@ describe('collection-flow-retest-segment', () => {
     expect(result.ctx.outputs.scan?.id).toBe('scan-new')
   })
 
-  it('returns no_baseline when quality catalog missing', async () => {
+  it('soft-skips no_baseline on enterprise fix-retest template', async () => {
     const doc = {
       schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
       templateId: 'enterprise-fix-retest-v1',
+      nodes: [{ id: 'n-retest', kind: 'retest' as const, label: 'Gegentest' }],
+      edges: [],
+      journeyFlow: null,
+      lastVerdict: null,
+      lastRun: null,
+    }
+    const result = await runRetestSegment({
+      platformProjectId: 'pp-1',
+      checkionProjectId: 'chk-1',
+      doc,
+      ctx: emptyRunContext(),
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.skipped).toBe(true)
+    expect(result.skipReason).toBe('retest_no_prior_run')
+  })
+
+  it('returns no_baseline 409 when quality catalog missing on non-enterprise template', async () => {
+    const doc = {
+      schemaVersion: COLLECTION_FLOW_SCHEMA_VERSION,
+      templateId: 'page-quality',
       nodes: [{ id: 'n-retest', kind: 'retest' as const, label: 'Gegentest' }],
       edges: [],
       journeyFlow: null,

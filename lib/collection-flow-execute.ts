@@ -324,10 +324,31 @@ export async function executeCollectionFlowRun(input: {
       if (stepUrl) scanUrl = stepUrl;
     } else if (hasJourney) {
       const audionProjectId = await getExternalProjectId(id, 'audion');
-      if (!audionProjectId) {
+      if (!audionProjectId && isEnterpriseSoftSkipTemplate(doc)) {
+        skipReasons.push(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_AUDION);
+        taskCompleted = true;
+        journeyValidEvidence = true;
+        runContext = setContextBundle(
+          runContext,
+          'journey',
+          {
+            ...buildJourneyCatalogBundle({
+              taskCompleted: true,
+              validEvidence: true,
+              finalUrl: null,
+              personaCount: 0,
+            }),
+            status: 'skipped',
+            skipReason: FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_AUDION,
+          }
+        );
+      } else if (!audionProjectId) {
         return { ok: false as const, status: API_STATUS.BAD_REQUEST, message: 'AUDION binding missing — bind an Audion project on this Collection' };
       }
 
+      if (!audionProjectId) {
+        // Soft-skipped above — continue to quality path.
+      } else {
       const slots = listJourneyPersonaSlots(doc);
       const runSlots =
         slots.length > 0
@@ -507,6 +528,7 @@ export async function executeCollectionFlowRun(input: {
       if (postJourneyUrls.geoUrl) geoUrlResolved = postJourneyUrls.geoUrl;
       const reCompany = resolveFlowParamString(runContext, resolvedGeoNode?.companyName);
       if (reCompany) geoCompany = reCompany;
+      } // audion bound — journey executed
     }
 
     // qualityNode already resolved above (Wave 8B may be geo-only)
@@ -545,6 +567,39 @@ export async function executeCollectionFlowRun(input: {
       blockers.push(formatSkipMessage(reason));
     }
     let quality: QualityResult | null = null;
+
+    // Soft-skip quality catalog when Checkion unbound (E5/E8).
+    if (
+      hasPageQuality &&
+      !checkionProjectId &&
+      isEnterpriseSoftSkipTemplate(doc) &&
+      skipReasons.includes(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION)
+    ) {
+      if (useDomain) {
+        runContext = setContextBundle(
+          runContext,
+          'domain',
+          buildDomainCatalogBundle({
+            status: 'skipped',
+            overallScore: null,
+            url: scanUrl || runUrl,
+            scanId: null,
+          }),
+          qualityNode?.id
+        );
+      } else {
+        runContext = setContextBundle(
+          runContext,
+          'scan',
+          buildScanCatalogBundle({
+            status: 'skipped',
+            overallScore: null,
+            url: scanUrl || runUrl,
+          }),
+          qualityNode?.id
+        );
+      }
+    }
 
     if (hasPageQuality && checkionProjectId) {
       if (useDomain) {
@@ -874,7 +929,25 @@ export async function executeCollectionFlowRun(input: {
     let geoOverall: number | null = null;
     let geoUrl = quality?.url || scanUrl || runUrl;
 
-    if (hasGeo) {
+    if (hasGeo && !checkionProjectId && isEnterpriseSoftSkipTemplate(doc)) {
+      if (!skipReasons.includes(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION)) {
+        skipReasons.push(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION);
+        blockers.push(formatSkipMessage(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION));
+      }
+      geoStatus = 'skipped';
+      runContext = setContextBundle(
+        runContext,
+        'geo',
+        buildGeoCatalogBundle({
+          status: 'skipped',
+          citedShare: null,
+          geoFitness: null,
+          overallScore: null,
+          url: geoUrl || runUrl,
+        }),
+        geoNode?.id
+      );
+    } else if (hasGeo) {
       const queries = geoJobQueriesFromText(resolvedGeoNode?.text ?? geoNode?.text);
       const geoCompanyName =
         (typeof body.companyName === 'string' && body.companyName.trim()
@@ -1106,6 +1179,9 @@ export async function executeCollectionFlowRun(input: {
       runContext = media.ctx;
       if (!media.ok) {
         blockers.push(media.message);
+      } else if (media.skipReason && media.skipReason !== FLOW_SKIP_REASONS.NODE_ABSENT) {
+        skipReasons.push(media.skipReason);
+        blockers.push(formatSkipMessage(media.skipReason));
       }
     }
 

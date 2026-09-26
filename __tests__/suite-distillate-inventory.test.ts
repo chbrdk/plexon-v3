@@ -33,6 +33,21 @@ describe('suite distillate product inventory', () => {
     }
   })
 
+  it('each product ships distillate call-site inventory + contract test', () => {
+    for (const product of PRODUCTS) {
+      const inventory = path.join(github, product, 'knowledge/distillate-call-sites.md')
+      const testFile = path.join(
+        github,
+        product,
+        'apps/web/__tests__/distillate-call-sites.test.ts'
+      )
+      expect(existsSync(inventory), `missing ${inventory}`).toBe(true)
+      expect(existsSync(testFile), `missing ${testFile}`).toBe(true)
+      const md = readFileSync(inventory, 'utf8')
+      expect(md).toMatch(/Activity|Audit|schedule/)
+    }
+  })
+
   it('known call sites still reference the clients', () => {
     const hooks: Array<{ file: string; needle: string }> = [
       {

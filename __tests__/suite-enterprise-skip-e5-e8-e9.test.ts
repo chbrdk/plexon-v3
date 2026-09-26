@@ -46,7 +46,32 @@ describe('suite enterprise E5 E8 skip + E9', () => {
 
   it('exposes stable skip reason codes', () => {
     expect(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_BRANDION).toBe('capability_unbound:brandion')
+    expect(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_CHECKION).toBe('capability_unbound:checkion')
+    expect(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_AUDION).toBe('capability_unbound:audion')
+    expect(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_VIDEON).toBe('capability_unbound:videon')
+    expect(FLOW_SKIP_REASONS.RETEST_NO_PRIOR).toBe('retest_no_prior_run')
     expect(formatSkipMessage(FLOW_SKIP_REASONS.CAPABILITY_UNBOUND_BRANDION)).toContain('BRANDION')
+  })
+
+  it('runtime soft-skips write catalog status skipped for unbound Checkion', () => {
+    const execute = readFileSync(path.join(root, 'lib/collection-flow-execute.ts'), 'utf8')
+    expect(execute).toContain("status: 'skipped'")
+    expect(execute).toContain('CAPABILITY_UNBOUND_CHECKION')
+    expect(execute).toContain('CAPABILITY_UNBOUND_AUDION')
+    expect(execute).toContain('buildScanCatalogBundle')
+    expect(execute).toContain('buildGeoCatalogBundle')
+  })
+
+  it('retest soft-skips no_baseline with RETEST_NO_PRIOR', () => {
+    const retest = readFileSync(path.join(root, 'lib/collection-flow-retest-segment.ts'), 'utf8')
+    expect(retest).toContain('RETEST_NO_PRIOR')
+    expect(retest).toContain('isEnterpriseSoftSkipTemplate')
+  })
+
+  it('videon soft-skips unbound with CAPABILITY_UNBOUND_VIDEON', () => {
+    const videon = readFileSync(path.join(root, 'lib/collection-flow-videon-segment.ts'), 'utf8')
+    expect(videon).toContain('CAPABILITY_UNBOUND_VIDEON')
+    expect(videon).toContain("status: 'skipped'")
   })
 
   it('ships directory route under [id] and refuses password-disable without provider in source', () => {
