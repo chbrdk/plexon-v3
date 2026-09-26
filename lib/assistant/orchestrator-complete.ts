@@ -168,6 +168,8 @@ export type OrchestratorCompleteResult = {
   text: string;
   toolsOffered?: number;
   uiLayout?: UiLayout;
+  /** Anthropic usage across tool rounds when available. */
+  usage?: { input_tokens: number; output_tokens: number };
   pendingConfirmation?: {
     toolUseId: string;
     toolName: string;
@@ -457,6 +459,7 @@ export async function runOrchestratorComplete(
   const timeline: OrchestratorTimelineItem[] = [];
   const qualityTraces: Array<{ name: string; preview: string }> = [];
   let lastText = '';
+  const usageTotals = { input_tokens: 0, output_tokens: 0 };
 
   const publishCraftMemoryIfReady = () => {
     if (!creationQualityGate || !platformProjectId) return;
@@ -542,6 +545,10 @@ export async function runOrchestratorComplete(
       });
       content = streamed.content;
       stopReason = streamed.stop_reason;
+      if (streamed.usage) {
+        usageTotals.input_tokens += streamed.usage.input_tokens;
+        usageTotals.output_tokens += streamed.usage.output_tokens;
+      }
     } else {
       const data = (await res.json()) as {
         content?: Array<{
@@ -552,9 +559,14 @@ export async function runOrchestratorComplete(
           input?: Record<string, unknown>;
         }>;
         stop_reason?: string;
+        usage?: { input_tokens?: number; output_tokens?: number };
       };
       content = data.content ?? [];
       stopReason = data.stop_reason ?? 'end_turn';
+      if (data.usage) {
+        usageTotals.input_tokens += data.usage.input_tokens ?? 0;
+        usageTotals.output_tokens += data.usage.output_tokens ?? 0;
+      }
     }
 
     const textBlock = content.find((c) => c.type === 'text');
@@ -585,7 +597,14 @@ export async function runOrchestratorComplete(
         }
       }
       publishCraftMemoryIfReady();
-      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
+      return {
+        text: lastText,
+        toolsOffered,
+        uiLayout: uiAccumulator.getLayout(),
+        ...(usageTotals.input_tokens > 0 || usageTotals.output_tokens > 0
+          ? { usage: { ...usageTotals } }
+          : {}),
+      };
     }
 
     const toolUseBlocks = content.filter(
@@ -601,7 +620,14 @@ export async function runOrchestratorComplete(
         }
       }
       publishCraftMemoryIfReady();
-      return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
+      return {
+        text: lastText,
+        toolsOffered,
+        uiLayout: uiAccumulator.getLayout(),
+        ...(usageTotals.input_tokens > 0 || usageTotals.output_tokens > 0
+          ? { usage: { ...usageTotals } }
+          : {}),
+      };
     }
 
     onToolRound?.();
@@ -619,6 +645,9 @@ export async function runOrchestratorComplete(
               text: lastText,
               toolsOffered,
               uiLayout: uiAccumulator.getLayout(),
+              ...(usageTotals.input_tokens > 0 || usageTotals.output_tokens > 0
+                ? { usage: { ...usageTotals } }
+                : {}),
               pendingConfirmation: {
                 toolUseId: block.id,
                 toolName: block.name,
@@ -637,6 +666,9 @@ export async function runOrchestratorComplete(
           text: lastText,
           toolsOffered,
           uiLayout: uiAccumulator.getLayout(),
+          ...(usageTotals.input_tokens > 0 || usageTotals.output_tokens > 0
+            ? { usage: { ...usageTotals } }
+            : {}),
           pendingConfirmation: {
             toolUseId: block.id,
             toolName: block.name,
@@ -975,5 +1007,12 @@ export async function runOrchestratorComplete(
   }
 
   publishCraftMemoryIfReady();
-  return { text: lastText, toolsOffered, uiLayout: uiAccumulator.getLayout() };
+  return {
+        text: lastText,
+        toolsOffered,
+        uiLayout: uiAccumulator.getLayout(),
+        ...(usageTotals.input_tokens > 0 || usageTotals.output_tokens > 0
+          ? { usage: { ...usageTotals } }
+          : {}),
+      };
 }

@@ -79,7 +79,18 @@ describe('usage-conversion', () => {
 
     it('vendor_cost: cost_usd × 100_000', () => {
       expect(tokensFromEvent('vendor_cost', { cost_usd: 0.002 })).toBe(200);
-      expect(tokensFromEvent('vendor_cost', {})).toBe(10);
+      expect(tokensFromEvent('vendor_cost', {})).toBe(0);
+    });
+
+    it('workflow_run: documented floors', () => {
+      expect(tokensFromEvent('workflow_run', { workflow: 'domain-scan' })).toBe(120);
+      expect(tokensFromEvent('workflow_run', { workflow: 'geo-analysis' })).toBe(100);
+      expect(tokensFromEvent('workflow_run', { workflow: 'persona-suggest' })).toBe(80);
+      expect(tokensFromEvent('workflow_run', { workflow: 'other' })).toBe(50);
+    });
+
+    it('unknown event_type: 0 (not disguised as a rate)', () => {
+      expect(tokensFromEvent('unknown_type', {})).toBe(0);
     });
 
     it('llm_request accepts prompt_tokens / completion_tokens aliases', () => {
@@ -118,10 +129,6 @@ describe('usage-conversion', () => {
       expect(tokensFromEvent('tool_extract', { requests: 1 })).toBe(28);
       expect(tokensFromEvent('wayback_lookup', {})).toBe(6);
       expect(tokensFromEvent('ssl_labs_analyze', { requests: 2 })).toBe(36);
-    });
-
-    it('unknown event_type: default 10', () => {
-      expect(tokensFromEvent('unknown_type', {})).toBe(10);
     });
   });
 

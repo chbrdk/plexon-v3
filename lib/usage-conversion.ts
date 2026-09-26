@@ -88,7 +88,16 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
       if (!Number.isNaN(cost) && cost >= 0) {
         return Math.max(1, Math.round(cost * 100_000));
       }
-      return DEFAULT_UNKNOWN_TOKENS;
+      return 0;
+    }
+    /** Assistant tool workflows — documented floor, not unknown default. */
+    case 'workflow_run': {
+      const named = typeof r.workflow === 'string' ? r.workflow : '';
+      // Floor when downstream product spend is not yet attributed.
+      if (named.includes('domain') || named.includes('scan')) return 120;
+      if (named.includes('geo')) return 100;
+      if (named.includes('persona') || named.includes('journey')) return 80;
+      return 50;
     }
     case 'tool_extract':
       return 28 * (num(r.requests, 1) || 1);
@@ -124,7 +133,8 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
     case 'assistant_continuity':
       return 0;
     default:
-      return DEFAULT_UNKNOWN_TOKENS;
+      // Unknown event types must not look like a real conversion rate.
+      return 0;
   }
 }
 

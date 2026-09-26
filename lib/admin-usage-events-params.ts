@@ -1,6 +1,6 @@
 /** Parse GET /api/admin/usage/events query string (shared with tests). */
 
-export const ADMIN_USAGE_EVENTS_SERVICES = ['checkion', 'audion', 'videon', 'brandion', 'metron'] as const;
+export const ADMIN_USAGE_EVENTS_SERVICES = ['checkion', 'audion', 'videon', 'brandion', 'metron', 'echon'] as const;
 export type AdminUsageEventsService = (typeof ADMIN_USAGE_EVENTS_SERVICES)[number];
 
 export type ParsedAdminUsageEventsParams = {

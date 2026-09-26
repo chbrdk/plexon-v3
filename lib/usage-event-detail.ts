@@ -82,5 +82,15 @@ export function formatUsageEventDetail(eventType: string, rawUnits: Raw): string
     return `${costPart}${ep}`;
   }
 
+  if (eventType === 'workflow_run') {
+    const wf = typeof rawUnits.workflow === 'string' ? rawUnits.workflow : 'workflow';
+    return `floor · ${trunc(wf, 28)}`;
+  }
+
+  if (eventType === 'vendor_cost') {
+    const cost = rawUnits.cost_usd;
+    return typeof cost === 'number' && !Number.isNaN(cost) ? `$${cost.toFixed(4)}` : '';
+  }
+
   return '';
 }

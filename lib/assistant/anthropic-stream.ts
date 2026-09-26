@@ -11,6 +11,7 @@ export type AnthropicStreamContentItem = {
 export type AnthropicStreamParseResult = {
   content: AnthropicStreamContentItem[];
   stop_reason: string;
+  usage?: { input_tokens: number; output_tokens: number };
 };
 
 export type AnthropicStreamCallbacks = {
@@ -37,9 +38,21 @@ function applyStreamPayload(
   activeTools: Record<number, ActiveToolBlock>,
   activeThinking: Record<number, ActiveThinkingBlock>,
   callbacks: AnthropicStreamCallbacks,
-  setStopReason: (reason: string) => void
+  setStopReason: (reason: string) => void,
+  accumulateUsage: (partial: { input_tokens?: number; output_tokens?: number }) => void
 ): void {
   const type = String(payload.type ?? eventType);
+
+  if (type === 'message_start') {
+    const message = payload.message as Record<string, unknown> | undefined;
+    const usage = message?.usage as Record<string, unknown> | undefined;
+    if (usage) {
+      accumulateUsage({
+        input_tokens: typeof usage.input_tokens === 'number' ? usage.input_tokens : undefined,
+        output_tokens: typeof usage.output_tokens === 'number' ? usage.output_tokens : undefined,
+      });
+    }
+  }
 
   if (type === 'content_block_start') {
     const index = typeof payload.index === 'number' ? payload.index : 0;
@@ -119,6 +132,13 @@ function applyStreamPayload(
     if (typeof delta?.stop_reason === 'string') {
       setStopReason(delta.stop_reason);
     }
+    const usage = payload.usage as Record<string, unknown> | undefined;
+    if (usage) {
+      accumulateUsage({
+        input_tokens: typeof usage.input_tokens === 'number' ? usage.input_tokens : undefined,
+        output_tokens: typeof usage.output_tokens === 'number' ? usage.output_tokens : undefined,
+      });
+    }
   }
 
   if (type === 'error') {
@@ -142,6 +162,7 @@ export async function parseAnthropicMessageStream(
   const decoder = new TextDecoder();
   let buffer = '';
   let stopReason = 'end_turn';
+  let usageAcc = { input_tokens: 0, output_tokens: 0 };
 
   const contentBlocks: AnthropicStreamContentItem[] = [];
   const activeText: Record<number, string> = {};
@@ -184,12 +205,20 @@ export async function parseAnthropicMessageStream(
         callbacks,
         (reason) => {
           stopReason = reason;
+        },
+        (partial) => {
+          if (typeof partial.input_tokens === 'number') usageAcc.input_tokens = partial.input_tokens;
+          if (typeof partial.output_tokens === 'number') usageAcc.output_tokens = partial.output_tokens;
         }
       );
     }
   }
 
-  return { content: contentBlocks.filter(Boolean), stop_reason: stopReason };
+  return {
+    content: contentBlocks.filter(Boolean),
+    stop_reason: stopReason,
+    ...(usageAcc.input_tokens > 0 || usageAcc.output_tokens > 0 ? { usage: usageAcc } : {}),
+  };
 }
 
 /** Parse SSE blocks from a string (for unit tests). */
@@ -221,6 +250,9 @@ export function parseAnthropicSseBlocks(
       callbacks,
       (reason) => {
         stopReason = reason;
+      },
+      () => {
+        /* usage optional in SSE string parser */
       }
     );
   }

@@ -212,10 +212,25 @@ export const handleFreeChatIntent: IntentHandler<'free_chat'> = async (ctx) => {
     void recordAssistantUsageEvent({
       userId: ctx.user.id,
       eventType: 'chat',
-      rawUnits: {
-        input_tokens: Math.round(ctx.prompt.length / 4),
-        output_tokens: Math.round(assistantText.length / 4),
-      },
+      rawUnits: (() => {
+        const provider = result.usage;
+        if (
+          provider &&
+          (provider.input_tokens > 0 || provider.output_tokens > 0)
+        ) {
+          return {
+            input_tokens: provider.input_tokens,
+            output_tokens: provider.output_tokens,
+            surface: 'assistant.free_chat',
+          };
+        }
+        return {
+          input_tokens: Math.max(1, Math.round(ctx.prompt.length / 4)),
+          output_tokens: Math.max(1, Math.round(assistantText.length / 4) || 1),
+          estimated: true,
+          surface: 'assistant.free_chat',
+        };
+      })(),
     });
 
     return { assistantText, metadata };
