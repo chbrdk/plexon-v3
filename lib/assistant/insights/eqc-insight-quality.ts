@@ -1,4 +1,7 @@
 import type { CrossSignal, WorkflowInsightFinding } from '@/lib/assistant/insights/types'
+import { JEV_USE_CASES } from '@/lib/jev/catalog'
+import { scheduleJevShadow } from '@/lib/jev/schedule'
+import type { JevQuestions } from '@/lib/jev/types'
 
 /** Cross-signal IDs that are LLM context only — never findings. */
 export const EQC_META_SIGNAL_IDS = new Set([
@@ -17,7 +20,18 @@ export const EQC_META_FINDING_TITLES = new Set([
 ])
 
 export function isEqcMetaSignal(signal: CrossSignal): boolean {
-  return signal.role === 'context' || EQC_META_SIGNAL_IDS.has(signal.id)
+  const result = signal.role === 'context' || EQC_META_SIGNAL_IDS.has(signal.id)
+  const questions: JevQuestions = {
+    drop: { type: 'noul', description: 'Is this an EQC meta/context signal to drop?' },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.eqcInsightMetaFilter,
+    state: { id: signal.id, role: signal.role, title: String(signal.title ?? '').slice(0, 200) },
+    questions,
+    baseline: result,
+    extractNoulKey: 'drop',
+  })
+  return result
 }
 
 export function insightEligibleSignals(signals: CrossSignal[]): CrossSignal[] {

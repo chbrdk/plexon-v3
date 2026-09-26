@@ -7,6 +7,9 @@
  */
 
 import type { CreationSceneQualityJob } from '@/lib/assistant/creation-scene-quality';
+import { JEV_USE_CASES } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
+import type { JevQuestions } from '@/lib/jev/types';
 
 export type CreationCraftPlaybookId =
   | 'creation_landing_v1'
@@ -250,13 +253,35 @@ export function resolveCreationCraftPlaybook(
   userPrompt: string | null | undefined,
 ): CreationCraftPlaybook | null {
   const text = userPrompt?.trim() ?? '';
-  if (!text) return null;
-  if (PAGE_AS_PATTERN_RE.test(text)) return CATALOG.creation_page_as_pattern_v1;
-  if (NEWSLETTER_RE.test(text)) return CATALOG.creation_newsletter_v1;
-  if (PRINT_REPORT_RE.test(text)) return CATALOG.creation_print_report_v1;
-  if (PRINT_MAGAZINE_RE.test(text)) return CATALOG.creation_print_magazine_v1;
-  if (LANDING_RE.test(text)) return CATALOG.creation_landing_v1;
-  return null;
+  let result: CreationCraftPlaybook | null = null
+  if (text) {
+    if (PAGE_AS_PATTERN_RE.test(text)) result = CATALOG.creation_page_as_pattern_v1;
+    else if (NEWSLETTER_RE.test(text)) result = CATALOG.creation_newsletter_v1;
+    else if (PRINT_REPORT_RE.test(text)) result = CATALOG.creation_print_report_v1;
+    else if (PRINT_MAGAZINE_RE.test(text)) result = CATALOG.creation_print_magazine_v1;
+    else if (LANDING_RE.test(text)) result = CATALOG.creation_landing_v1;
+  }
+  const questions: JevQuestions = {
+    playbook: {
+      type: 'choice',
+      options: [
+        'none',
+        'creation_landing_v1',
+        'creation_newsletter_v1',
+        'creation_print_magazine_v1',
+        'creation_print_report_v1',
+        'creation_page_as_pattern_v1',
+      ],
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantCreationCraftPlaybook,
+    state: { prompt: text.slice(0, 1500) },
+    questions,
+    baseline: result?.id ?? 'none',
+    extractChoiceKey: 'playbook',
+  })
+  return result
 }
 
 export function getCreationCraftPlaybook(

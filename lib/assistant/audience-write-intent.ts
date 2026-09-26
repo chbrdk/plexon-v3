@@ -1,5 +1,8 @@
 /** Detect prompts that should enable AUDION target-group/persona write MCP tools. */
 
+import { JEV_USE_CASES, questionsWriteIntent } from '@/lib/jev/catalog'
+import { scheduleJevShadow } from '@/lib/jev/schedule'
+
 const WRITE_VERB_PATTERN =
   /\b(starte|start|erstelle|create|generiere|generate|lösche|delete|anleg\w*|ableit\w*)\b/i;
 
@@ -7,14 +10,22 @@ const AUDIENCE_ENTITY_PATTERN = /\b(zielgruppe|zielgruppen|target\s*groups?|pers
 
 export function hasAudienceWriteIntent(text: string): boolean {
   const trimmed = text.trim();
-  if (!trimmed) return false;
-  if (!AUDIENCE_ENTITY_PATTERN.test(trimmed) && !/\baudion\b/i.test(trimmed)) {
-    return false;
+  let result = false
+  if (trimmed) {
+    if (AUDIENCE_ENTITY_PATTERN.test(trimmed) || /\baudion\b/i.test(trimmed)) {
+      result =
+        WRITE_VERB_PATTERN.test(trimmed) ||
+        /\b(anleg|ableit|erstell|generier|bootstrap)\w*/i.test(trimmed)
+    }
   }
-  return (
-    WRITE_VERB_PATTERN.test(trimmed) ||
-    /\b(anleg|ableit|erstell|generier|bootstrap)\w*/i.test(trimmed)
-  );
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantAudienceWriteIntent,
+    state: { prompt: trimmed.slice(0, 1500) },
+    questions: questionsWriteIntent('audience'),
+    baseline: result,
+    extractNoulKey: 'write',
+  })
+  return result
 }
 
 export function buildPlanningPromptFromConversation(

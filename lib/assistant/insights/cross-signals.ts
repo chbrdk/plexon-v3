@@ -8,11 +8,28 @@ import type { ReadabilityCheckPreview } from '@/lib/integrations/checkion-tools-
 import type { CrossBenchmarks, CrossSignal, WorkflowInsightSource } from '@/lib/assistant/insights/types';
 import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-quick-check';
 import type { UiTone } from '@/lib/assistant/ui-blocks/types';
+import { JEV_USE_CASES } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
+import type { JevQuestions } from '@/lib/jev/types';
 
 function scoreTone(score: number): UiTone {
-  if (score >= 85) return 'success';
-  if (score >= 65) return 'warning';
-  return 'error';
+  const tone: UiTone =
+    score >= 85 ? 'success' : score >= 65 ? 'warning' : 'error'
+  const questions: JevQuestions = {
+    tone: {
+      type: 'choice',
+      options: ['success', 'warning', 'error'],
+      description: 'Cross-signal severity tone for a 0–100 score',
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantCrossSignalSeverity,
+    state: { score },
+    questions,
+    baseline: tone,
+    extractChoiceKey: 'tone',
+  })
+  return tone
 }
 
 function avgCompetitorScore(job: GeoEeatJobPreview): number | null {

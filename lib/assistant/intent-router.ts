@@ -9,6 +9,8 @@ import {
 } from '@/lib/assistant/conversation-context';
 import { inferPersonaPageSpineUrlHint } from '@/lib/integrations/persona-page-relevance-client';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
+import { JEV_USE_CASES, questionsAssistantIntent } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 export type AssistantIntent =
   | { type: 'free_chat' }
@@ -427,6 +429,18 @@ function matchesCampaignBriefIntent(text: string): boolean {
 }
 
 export function routeAssistantIntent(prompt: string): AssistantIntent {
+  const intent = routeAssistantIntentCore(prompt)
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantIntent,
+    state: { prompt: prompt.trim().slice(0, 2000) },
+    questions: questionsAssistantIntent(),
+    baseline: intent.type,
+    extractChoiceKey: 'intent',
+  })
+  return intent
+}
+
+function routeAssistantIntentCore(prompt: string): AssistantIntent {
   const trimmed = prompt.trim();
   if (!trimmed) return { type: 'free_chat' };
 

@@ -4,6 +4,9 @@
  * Wave A1/B: specs/domain/assistant-creation-agi-lite.md
  */
 
+import { JEV_USE_CASES, questionsSceneQuality } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
+
 export type CreationQualityToolTrace = {
   name: string;
   preview?: string;
@@ -257,6 +260,25 @@ export function previewRequirementMet(traces: CreationQualityToolTrace[]): boole
 }
 
 export function evaluateCreationSceneQuality(
+  traces: CreationQualityToolTrace[],
+  options?: CreationSceneQualityOptions,
+): CreationSceneQualityVerdict {
+  const verdict = evaluateCreationSceneQualityCore(traces, options)
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantCreationSceneQuality,
+    state: {
+      job: verdict.job,
+      toolNames: traces.map((t) => t.name).slice(0, 30),
+      findingCount: verdict.findings.length,
+    },
+    questions: questionsSceneQuality(),
+    baseline: verdict.pass,
+    extractNoulKey: 'pass',
+  })
+  return verdict
+}
+
+function evaluateCreationSceneQualityCore(
   traces: CreationQualityToolTrace[],
   options?: CreationSceneQualityOptions,
 ): CreationSceneQualityVerdict {

@@ -29,6 +29,8 @@ import { injectAssistantMcpToolArgs, extractCreationSceneUpdatedAt } from '@/lib
 import { shouldRunAssistantToolsInParallel } from '@/lib/assistant/mcp-tool-parallel';
 import { evaluateCreationSceneQuality, resolveCreationSceneQualityJob } from '@/lib/assistant/creation-scene-quality';
 import { distillCreationCraftToKnowledgePack } from '@/lib/assistant/knowledge-pack/distill-creation-craft';
+import { JEV_USE_CASES, questionsToolConfirm } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 import {
   formatToolResultForAnthropic,
   isCreationScenePreviewToolName,
@@ -201,10 +203,17 @@ export function isDestructiveToolName(toolName: string): boolean {
 }
 
 export function isConfirmationRequiredToolName(toolName: string): boolean {
-  return (
+  const result =
     isDestructiveToolName(toolName) ||
     WRITE_CONFIRM_TOOL_PATTERNS.some((p) => p.test(toolName))
-  );
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantToolConfirmRequired,
+    state: { toolName },
+    questions: questionsToolConfirm(),
+    baseline: result,
+    extractNoulKey: 'confirm_required',
+  })
+  return result
 }
 
 export function normalizeMessageHistory(rawMessages: unknown[], maxHistory = 50): OrchestratorMessage[] {

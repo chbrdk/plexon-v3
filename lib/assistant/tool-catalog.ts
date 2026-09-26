@@ -3,6 +3,10 @@
  * Anthropic tool names use underscores (checkion.scan_get → checkion_scan_get).
  */
 
+import { JEV_USE_CASES } from '@/lib/jev/catalog'
+import { scheduleJevShadow } from '@/lib/jev/schedule'
+import type { JevQuestions } from '@/lib/jev/types'
+
 export type ToolFamily =
   | 'checkion_project'
   | 'checkion_scan_read'
@@ -189,10 +193,27 @@ const WRITE_ACTION =
   /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import|update|upsert|replace|evaluate)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
+  let result: ToolFamily | null = null
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS) as [ToolFamily, RegExp[]][]) {
-    if (patterns.some((p) => p.test(toolName))) return family;
+    if (patterns.some((p) => p.test(toolName))) {
+      result = family
+      break
+    }
   }
-  return null;
+  const questions: JevQuestions = {
+    family: {
+      type: 'choice',
+      options: ['none', ...(Object.keys(FAMILY_PATTERNS) as ToolFamily[])],
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantToolFamily,
+    state: { toolName },
+    questions,
+    baseline: result ?? 'none',
+    extractChoiceKey: 'family',
+  })
+  return result
 }
 
 export function isDestructiveOrWriteTool(toolName: string): boolean {

@@ -4,6 +4,9 @@
  */
 
 import type { AssistantPlanIntent } from '@/lib/assistant/assistant-planner';
+import { JEV_USE_CASES } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
+import type { JevQuestions } from '@/lib/jev/types';
 import {
   AUDION_CHAT_FAMILIES,
   AUDION_DOCUMENTS_FAMILIES,
@@ -305,8 +308,21 @@ export const REGISTERED_SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
 export function resolveSpecialist(
   intent: AssistantPlanIntent | string,
 ): AssistantSpecialist | null {
-  if (!isAssistantSpecialistId(intent)) return null;
-  return REGISTRY[intent] ?? null;
+  const result = isAssistantSpecialistId(intent) ? REGISTRY[intent] ?? null : null
+  const questions: JevQuestions = {
+    specialist: {
+      type: 'choice',
+      options: ['none', ...REGISTERED_SPECIALIST_IDS],
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantSpecialist,
+    state: { intent: String(intent) },
+    questions,
+    baseline: result?.id ?? 'none',
+    extractChoiceKey: 'specialist',
+  })
+  return result
 }
 
 /**

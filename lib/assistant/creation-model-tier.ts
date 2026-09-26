@@ -10,6 +10,8 @@ import {
 import { runtimeEnv } from '@/lib/runtime-env';
 import type { CreationCraftPlaybookId } from '@/lib/assistant/creation-craft-playbooks';
 import { getCreationSceneThinkingBudgetTokens } from '@/lib/assistant/creation-scene-depth';
+import { JEV_USE_CASES, questionsCreationModelTier } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 export type CreationModelTier = 'low' | 'mid' | 'high';
 
@@ -45,12 +47,30 @@ export function resolveCreationModelTier(
   input: ResolveCreationModelTierInput,
 ): CreationModelTier {
   const override = parseTierOverride();
-  if (override) return override;
-
-  if (input.intent !== 'creation_scene_edit') return 'low';
-  if (!input.allowWriteTools) return 'low';
-  if (input.playbookId && HIGH_PLAYBOOKS.has(input.playbookId)) return 'high';
-  return 'mid';
+  let tier: CreationModelTier
+  if (override) {
+    tier = override
+  } else if (input.intent !== 'creation_scene_edit') {
+    tier = 'low'
+  } else if (!input.allowWriteTools) {
+    tier = 'low'
+  } else if (input.playbookId && HIGH_PLAYBOOKS.has(input.playbookId)) {
+    tier = 'high'
+  } else {
+    tier = 'mid'
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantCreationModelTier,
+    state: {
+      intent: input.intent,
+      allowWriteTools: Boolean(input.allowWriteTools),
+      playbookId: input.playbookId ?? null,
+    },
+    questions: questionsCreationModelTier(),
+    baseline: tier,
+    extractChoiceKey: 'tier',
+  })
+  return tier
 }
 
 /** Thinking budget for the resolved tier. Global thinking off stays off. */

@@ -10,6 +10,9 @@
 
 import type { CreationCraftPlaybookId } from '@/lib/assistant/creation-craft-playbooks';
 import { promptLooksLikeWireframeBrief } from '@/lib/assistant/creation-craft-playbooks';
+import { JEV_USE_CASES } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
+import type { JevQuestions } from '@/lib/jev/types';
 
 export type CreationCraftModuleId =
   | 'spirion_section_ref_v1'
@@ -338,6 +341,20 @@ export function resolveCreationCraftModules(
   if (promptLooksLikeBrandionBind(userPrompt)) push('brandion_bind_pass_v1');
   if (shouldAttachPrintChapterRhythm(pb, userPrompt)) push('print_chapter_rhythm_v1');
 
+  const questions: JevQuestions = {
+    primary_module: {
+      type: 'choice',
+      options: ['none', ...out, 'other'],
+      description: 'Primary craft module for this turn',
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantCreationCraftModules,
+    state: { prompt: (userPrompt ?? '').slice(0, 1500), playbookId: pb, modules: out },
+    questions,
+    baseline: out[0] ?? 'none',
+    extractChoiceKey: 'primary_module',
+  })
   return out;
 }
 

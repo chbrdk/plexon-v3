@@ -1,4 +1,7 @@
 import type { GeoMeasurement } from '@/lib/geo/measurement'
+import { JEV_USE_CASES } from '@/lib/jev/catalog'
+import { scheduleJevShadow } from '@/lib/jev/schedule'
+import type { JevQuestions } from '@/lib/jev/types'
 
 /** Layer 2 (live) — curated cost/latency trio. */
 export const EQC_GEO_LIVE_MODELS = [
@@ -59,5 +62,21 @@ export function sanitizeEqcGeoModels(
     if (!allowed.has(modelId)) return false
     return requested.indexOf(modelId) === index
   })
-  return filtered.length > 0 ? filtered : defaults
+  const result = filtered.length > 0 ? filtered : defaults
+  const options = [...allowed]
+  const questions: JevQuestions = {
+    model_set: {
+      type: 'choice',
+      options: options.length ? options : ['default'],
+      description: 'Primary GEO model pick for sanitize shadow (set compare uses join)',
+    },
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.eqcGeoModelSanitize,
+    state: { measurement: measurement ?? 'recall', requested, result },
+    questions,
+    baseline: result[0] ?? 'default',
+    extractChoiceKey: 'model_set',
+  })
+  return result
 }

@@ -23,6 +23,8 @@ import {
   toCollectionTestFlowResponse,
   type CollectionTestFlowResponse,
 } from '@/lib/db/collection-test-flows';
+import { JEV_USE_CASES, questionsPromoteClassify } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 export const COLLECTION_FLOW_TEMPLATE_ASSISTANT_PROMOTE = 'assistant-promote-v1' as const;
 
@@ -68,6 +70,20 @@ const WORKFLOW_TO_CAPABILITY: Record<string, string> = {
  * Explore-only → playbook (ok with target playbook), not a hard reject — callers choose UX.
  */
 export function classifyPromoteTrace(steps: PromoteTraceStep[]): PromoteClassification {
+  const classified = classifyPromoteTraceCore(steps)
+  const baseline =
+    !classified.ok ? 'reject' : classified.target === 'playbook' ? 'playbook' : 'flow'
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.capabilityPromoteClassify,
+    state: { stepIds: steps.map((s) => s.capabilityId).slice(0, 40) },
+    questions: questionsPromoteClassify(),
+    baseline,
+    extractChoiceKey: 'kind',
+  })
+  return classified
+}
+
+function classifyPromoteTraceCore(steps: PromoteTraceStep[]): PromoteClassification {
   if (!steps.length) {
     return { ok: false, code: 'empty_trace', message: 'No capability steps to promote' };
   }

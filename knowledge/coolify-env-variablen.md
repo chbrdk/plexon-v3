@@ -18,6 +18,11 @@ In Coolify: **Application** PLEXON → **Environment Variables**.
 | `NEXTAUTH_URL` | Ja | Exakte öffentliche URL von PLEXON, z. B. `https://plexon.deine-domain.com`. **Mit `BASE_PATH`** muss die URL den **Pfad enthalten** (z. B. `https://host/plexon`), sonst bricht NextAuth/Cookies – siehe `knowledge/single-platform-auth-troubleshooting.md`. |
 | `PLEXON_SERVICE_SECRET` | Empfohlen | Shared Secret für Service-zu-Service (CHECKION/AUDION → PLEXON Auth). Min. 16 Zeichen. |
 | `ANTHROPIC_API_KEY` | Ja (für Board) | API-Key für Claude (Board-Prompt-Completion). |
+| `OPENROUTER_API_KEY` | Nein (Jev Shadow) | OpenRouter für System One Decisions (`typesafe/jev-1.13`). |
+| `OPENROUTER_API_BASE_URL` | Nein | Default `https://openrouter.ai`. |
+| `JEV_MODEL_ID` | Nein | Default `typesafe/jev-1.13` (pin; nicht `jev-latest`). |
+| `JEV_SHADOW_ENABLED` | Nein | `1` aktiviert Jev-Shadow für fuzzy Decisions (`lib/jev/`). |
+| `JEV_TIMEOUT_MS` | Nein | Default `800`. |
 | `ANTHROPIC_BOARD_MODEL` | Nein | Override für Claude-Modell (Standard: Sonnet 4 ohne MCP, Sonnet 4.6 mit MCP). |
 
 ### Passwort-Reset (E-Mail)

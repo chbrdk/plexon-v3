@@ -154,3 +154,4 @@
 - Companions: `audion-v3/specs/domain/knowledge-pack-publish.md` · `checkion-v3/specs/domain/geo-knowledge-consume.md`
 - UI rebuild progress: `knowledge/ui-rebuild-msqdx-ui.md`
 - Prod freeze: `chbrdk/PLEXON` — never deploy Coolify prod from this repo
+- Jev System One (shadow decisions): `specs/domain/jev-decisions.md` · catalog `specs/domain/jev-use-case-catalog.md` · `lib/jev/` · OpenRouter Decisions `POST {OPENROUTER_API_BASE_URL}/api/alpha/decisions` · model `JEV_MODEL_ID` default `typesafe/jev-1.13` · env `OPENROUTER_API_KEY` · `OPENROUTER_API_BASE_URL` · `JEV_SHADOW_ENABLED` · `JEV_SHADOW_<USE_CASE>` · `JEV_ACT_<USE_CASE>` · `JEV_TIMEOUT_MS` · flip `knowledge/jev-flip-runbook.md` · Coolify keys in `knowledge/coolify-env-variablen.md`

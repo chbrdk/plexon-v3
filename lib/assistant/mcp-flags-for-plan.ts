@@ -1,4 +1,6 @@
 import type { AssistantPlan } from '@/lib/assistant/assistant-planner';
+import { JEV_USE_CASES, questionsMcpFlags } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 export type AssistantMcpFlags = {
   useCheckionMcp: boolean;
@@ -16,6 +18,29 @@ export type AssistantMcpFlags = {
  * Avoids sequential initialize+tools/list on all servers when only one product is needed.
  */
 export function resolveMcpFlagsForPlan(
+  plan: AssistantPlan,
+  flags: AssistantMcpFlags,
+): AssistantMcpFlags {
+  const resolved = resolveMcpFlagsForPlanCore(plan, flags)
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantMcpFlagsForPlan,
+    state: { intent: plan.intent, flags },
+    questions: questionsMcpFlags(),
+    baseline: {
+      use_creation: resolved.useCreationMcp,
+      use_checkion: resolved.useCheckionMcp,
+      use_audion: resolved.useAudionMcp,
+      use_echon: resolved.useEchonMcp,
+      use_brandion: resolved.useBrandionMcp,
+      use_videon: resolved.useVideonMcp,
+      use_metron: resolved.useMetronMcp,
+    },
+    extractNoulKey: 'use_creation',
+  })
+  return resolved
+}
+
+function resolveMcpFlagsForPlanCore(
   plan: AssistantPlan,
   flags: AssistantMcpFlags,
 ): AssistantMcpFlags {

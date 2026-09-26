@@ -1,6 +1,8 @@
 import { getAssistantPlannerModel } from '@/lib/constants';
 import { isPlexonUiTool } from '@/lib/assistant/ui-tools/definitions';
 import { catalogPlannerToolOverride } from '@/lib/capabilities/planner-allowlist';
+import { JEV_USE_CASES, questionsPlanner, questionsShouldRefinePlan } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 import {
   GEO_FAMILIES,
   KNOWLEDGE_QA_FAMILIES,
@@ -891,20 +893,33 @@ Regeln:
 
 /** Use LLM planner when heuristic is ambiguous (general_chat with MCP). */
 export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: PlannerInput): boolean {
+  let result = false
   if (
-    !input.hasCheckionMcp &&
-    !input.hasAudionMcp &&
-    !input.hasEchonMcp &&
-    !input.hasBrandionMcp &&
-    !input.hasCreationMcp &&
-    !input.hasSpirionMcp &&
-    !input.hasVideonMcp &&
-    !input.hasMetronMcp
-  )
-    return false;
-  if (heuristic.intent !== 'general_chat') return false;
-  if (input.hasProjectContext) return true;
-  return input.prompt.trim().length > 120;
+    input.hasCheckionMcp ||
+    input.hasAudionMcp ||
+    input.hasEchonMcp ||
+    input.hasBrandionMcp ||
+    input.hasCreationMcp ||
+    input.hasSpirionMcp ||
+    input.hasVideonMcp ||
+    input.hasMetronMcp
+  ) {
+    if (heuristic.intent === 'general_chat') {
+      result = input.hasProjectContext || input.prompt.trim().length > 120
+    }
+  }
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantShouldRefinePlan,
+    state: {
+      intent: heuristic.intent,
+      promptLen: input.prompt.trim().length,
+      hasProjectContext: Boolean(input.hasProjectContext),
+    },
+    questions: questionsShouldRefinePlan(),
+    baseline: result,
+    extractNoulKey: 'refine',
+  })
+  return result
 }
 
 export async function planAssistantTurn(
@@ -912,6 +927,16 @@ export async function planAssistantTurn(
   input: PlannerInput
 ): Promise<AssistantPlan> {
   const heuristic = planAssistantTurnHeuristic(input);
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantPlanner,
+    state: {
+      prompt: (input.planningPrompt ?? input.prompt).trim().slice(0, 2000),
+      hasCreationMcp: Boolean(input.hasCreationMcp),
+    },
+    questions: questionsPlanner(),
+    baseline: { intent: heuristic.intent, allowWrite: heuristic.allowWriteTools },
+    extractChoiceKey: 'intent',
+  })
   if (!apiKey || !shouldRefinePlanWithLlm(heuristic, input)) {
     return heuristic;
   }

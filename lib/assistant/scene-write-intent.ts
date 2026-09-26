@@ -3,6 +3,8 @@ import {
   ASSISTANT_ENTITY_COMPOSITION_SCENE,
   type AssistantPageContext,
 } from '@/lib/assistant/page-context';
+import { JEV_USE_CASES, questionsWriteIntent } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 const SCENE_WRITE_VERB_PATTERNS = [
   /\b(füge|einfüg\w*|hinzufüg\w*|insert|add|append)\b/i,
@@ -34,10 +36,22 @@ export function hasSceneWriteIntent(
   pageContext?: AssistantPageContext | null,
 ): boolean {
   const trimmed = text.trim();
-  if (!trimmed) return false;
-  if (SCENE_WRITE_VERB_PATTERNS.some((p) => p.test(trimmed))) return true;
-  if (hasCreationEditorSceneContext(pageContext) && SCENE_WRITE_CONFIRM_PATTERNS.test(trimmed)) {
-    return true;
+  let result = false
+  if (trimmed) {
+    if (SCENE_WRITE_VERB_PATTERNS.some((p) => p.test(trimmed))) result = true
+    else if (
+      hasCreationEditorSceneContext(pageContext) &&
+      SCENE_WRITE_CONFIRM_PATTERNS.test(trimmed)
+    ) {
+      result = true
+    }
   }
-  return false;
+  scheduleJevShadow({
+    useCaseId: JEV_USE_CASES.assistantSceneWriteIntent,
+    state: { prompt: trimmed.slice(0, 1500), hasEditor: hasCreationEditorSceneContext(pageContext) },
+    questions: questionsWriteIntent('scene'),
+    baseline: result,
+    extractNoulKey: 'write',
+  })
+  return result
 }
