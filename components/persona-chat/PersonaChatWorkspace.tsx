@@ -58,6 +58,7 @@ export function PersonaChatWorkspace({
         if (!cancelled) {
           setPersona({
             id: data.id,
+            slug: data.slug || data.id,
             name: data.name,
             role: data.role,
             projectId: data.projectId,
