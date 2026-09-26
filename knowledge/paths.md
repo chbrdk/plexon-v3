@@ -4,6 +4,7 @@
 - Shared UI repo: `/Users/christoph.bordeck/Desktop/GITHUB/msqdx-ui`
 - Shared UI package dep: `../msqdx-ui/packages/ui`
 - Shared token package dep: `../msqdx-ui/packages/ui-tokens`
+- Audion contracts dep: `../audion-v3/packages/contracts` (`@audion-v3/contracts`) — Coolify `Dockerfile` clones `audion-v3` and builds contracts (required once `ignoreBuildErrors: false`)
 - Consumer barrels: `lib/msqdx-ui.ts` · `lib/msqdx-ui-shell.ts`
 - Shell config: `lib/shell-paths.ts` (`shellPaths` / `paths`)
 - Route constants: `lib/constants.ts` · `lib/paths/*`

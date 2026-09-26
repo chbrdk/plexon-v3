@@ -1,6 +1,6 @@
 # PLEXON v3 – Docker image for Coolify / self-hosted.
 # Context: repository root (plexon-v3).
-# Sibling design system: clones github.com/chbrdk/msqdx-ui so webpack aliases resolve.
+# Sibling clones (build-time): msqdx-ui, msqdx-design-system, audion-v3 (contracts).
 # Coolify: Dockerfile path `Dockerfile`, domain https://plexon-v3.projects-a.plygrnd.tech
 
 ARG NODE_IMAGE=node:22-bookworm-slim
@@ -15,12 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable
 
-# ---- Design system (msqdx-ui + legacy prismion for board) ----
+# ---- Design system (msqdx-ui + legacy prismion for board) + Audion contracts ----
 FROM base AS ds
 ARG MSQDX_UI_REPO=https://github.com/chbrdk/msqdx-ui.git
 ARG MSQDX_UI_BRANCH=main
 ARG MSQDX_DS_REPO=https://github.com/chbrdk/msqdx-design-system.git
 ARG MSQDX_DS_BRANCH=main
+ARG AUDION_V3_REPO=https://github.com/chbrdk/audion-v3.git
+ARG AUDION_V3_BRANCH=main
 RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/msqdx-ui \
     && cd /workspace/msqdx-ui \
     && pnpm install --frozen-lockfile \
@@ -28,6 +30,10 @@ RUN git clone --depth 1 -b "${MSQDX_UI_BRANCH}" "${MSQDX_UI_REPO}" /workspace/ms
     && git clone --depth 1 -b "${MSQDX_DS_BRANCH}" "${MSQDX_DS_REPO}" /workspace/msqdx-design-system \
     && cd /workspace/msqdx-design-system \
     && npm install \
+    && npm run build \
+    && git clone --depth 1 -b "${AUDION_V3_BRANCH}" "${AUDION_V3_REPO}" /workspace/audion-v3 \
+    && cd /workspace/audion-v3/packages/contracts \
+    && npm install --no-audit --no-fund \
     && npm run build
 
 # ---- Builder ----
@@ -36,10 +42,13 @@ ARG MSQDX_UI_REPO=https://github.com/chbrdk/msqdx-ui.git
 ARG MSQDX_UI_BRANCH=main
 ARG MSQDX_DS_REPO=https://github.com/chbrdk/msqdx-design-system.git
 ARG MSQDX_DS_BRANCH=main
+ARG AUDION_V3_REPO=https://github.com/chbrdk/audion-v3.git
+ARG AUDION_V3_BRANCH=main
 # Keep deps installable even if Coolify injects NODE_ENV=production as a build ARG.
 ENV NODE_ENV=development
 COPY --from=ds /workspace/msqdx-ui /workspace/msqdx-ui
 COPY --from=ds /workspace/msqdx-design-system /workspace/msqdx-design-system
+COPY --from=ds /workspace/audion-v3 /workspace/audion-v3
 COPY . /workspace/plexon-v3
 WORKDIR /workspace/plexon-v3
 
@@ -57,6 +66,13 @@ RUN cd /workspace/msqdx-ui \
         && git reset --hard "origin/${MSQDX_DS_BRANCH}" \
         || echo "msqdx-design-system refresh skipped — using ds-stage clone") \
     && npm install \
+    && npm run build \
+    && cd /workspace/audion-v3 \
+    && (git fetch origin "${AUDION_V3_BRANCH}" --depth 1 \
+        && git reset --hard "origin/${AUDION_V3_BRANCH}" \
+        || echo "audion-v3 refresh skipped — using ds-stage clone") \
+    && cd /workspace/audion-v3/packages/contracts \
+    && npm install --no-audit --no-fund \
     && npm run build
 
 # --include=dev: Coolify may force NODE_ENV=production before this stage; without it,
@@ -66,7 +82,9 @@ RUN --mount=type=cache,target=/root/.npm \
 
 RUN test -d /workspace/msqdx-ui/packages/ui/src \
     && test -f /workspace/msqdx-ui/packages/ui-tokens/dist/index.js \
-    && test -f /workspace/msqdx-design-system/packages/react/src/index.ts
+    && test -f /workspace/msqdx-design-system/packages/react/src/index.ts \
+    && test -f /workspace/audion-v3/packages/contracts/dist/index.d.ts \
+    && test -e /workspace/plexon-v3/node_modules/@audion-v3/contracts
 
 ENV MSQDX_UI_BASE=../msqdx-ui
 ENV DS_BASE=../msqdx-design-system
@@ -111,6 +129,7 @@ COPY --from=builder /workspace/plexon-v3/scripts/bootstrap-vaillant-group-mafo.t
 COPY --from=builder /workspace/plexon-v3/scripts/run-vaillant-group-mafo-flow.ts ./scripts/run-vaillant-group-mafo-flow.ts
 COPY --from=builder /workspace/msqdx-ui /workspace/msqdx-ui
 COPY --from=builder /workspace/msqdx-design-system /workspace/msqdx-design-system
+COPY --from=builder /workspace/audion-v3/packages/contracts /workspace/audion-v3/packages/contracts
 RUN chmod +x ./scripts/docker-entrypoint.sh ./scripts/check-database-url.mjs
 
 CMD ["./scripts/docker-entrypoint.sh"]

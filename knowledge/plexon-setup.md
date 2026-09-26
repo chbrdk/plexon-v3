@@ -29,6 +29,7 @@ PLEXON ist eine weitere Plattform neben CHECKION mit demselben Grundgerüst: Log
 ## MSQDX Design System
 
 - Sibling package: `msqdx-ui` (`@msqdx/ui`, `@msqdx/ui-tokens`). Webpack aliases in `next.config.mjs` resolve via `lib/msqdx-ui.ts` / `lib/msqdx-ui-shell.ts`.
+- Sibling contracts: `audion-v3/packages/contracts` (`@audion-v3/contracts`) for persona chat types. Docker build clones + builds this package (see root `Dockerfile`).
 - Board types/chrome: `lib/board/prismion.ts` · `lib/board/board-ui.tsx` (not a separate `@msqdx/react` package).
 - Legacy `@msqdx/react` / MUI bridge deleted 2026-09-26 — see `knowledge/msqdx-shim-inventory.md`.
 - Optional: `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts` until callers use `@msqdx/ui-tokens`.
