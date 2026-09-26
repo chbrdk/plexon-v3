@@ -1,6 +1,6 @@
 # Suite-Funktionsstand
 
-**Stand:** 2026-09-25  
+**Stand:** 2026-09-25 (Feature-Landkarte) · **Fortschritt/Checkpoint:** [`suite-stand.md`](suite-stand.md) (2026-09-26)  
 **Zweck:** zentraler Ist-Stand aller Nutzerfunktionen der PLEXON-Suite. Ausgangspunkt für Agentur-Aufgaben: [`suite-agentur-use-cases.md`](suite-agentur-use-cases.md).  
 **Methode:** Screening der Domain-Specs, Routen und Capability-Kataloge in den Produkt-Repos. Kein Staging-Klickdurchlauf. Env, API-Keys und Federation-Modus können eine **Live**-Funktion in einer konkreten Umgebung auf Fixture oder aus schalten.
 

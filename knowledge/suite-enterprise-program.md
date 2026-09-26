@@ -1,14 +1,15 @@
 # Suite Enterprise Program — Wissen
 
 **Spec:** `specs/domain/suite-enterprise-program.md`  
-**Stand:** 2026-09-26 — E1–E9 Surfaces in Plexon; Share-Links Hub writers live; Härte-Backlog (skipReasons Catalog, Capability-Panes, AUDION Fixture-Label, Destillat-Inventar) closed.
+**Checkpoint:** [`suite-stand.md`](suite-stand.md) (SSOT „wo stehen wir?“)  
+**Stand:** 2026-09-26 — E1–E9 Done (E2 UX deferred → Share-Links Hub); Härte-Backlog closed; Hub-Revoke Checkion/Metron + Creation `href`; Staging-E2E 13/13 grün.
 
 ## Fortschritt
 
 | Welle | Stand |
 |---|---|
 | E1 Lagebild | Team, Aktivität (Flows + Destillate), Capability-Panes; Activity-Ingest API |
-| E2 Kundenraum | API/DB live; Collection-Home UX deferred — Share-Links-Hub (`collection-share-links.md`) writers: Creation, EQC, Metron, Checkion, Brandion, Videon |
+| E2 Kundenraum | API/DB live; Collection-Home UX deferred — **Share-Links-Hub** writers live (Creation+href, EQC, Metron, Checkion, Brandion, Videon); Hub-Revoke fan-out Checkion/Metron; Audion deferred |
 | E3 Termin/Gegentest | CHECKION Delta; `retest`; Flow-Schedule-Scheduler live (Env Staging) |
 | E4 Audit | Session/Service-Ingest; Flow `run_finished`; Produkt-Clients |
 | E5 Gates | Fix-Retest / Launch-Gate im Katalog; Slot-Publish bei `quality_ok` |
@@ -46,7 +47,8 @@ Restart nötig, damit Runtime die Keys liest. Code-Deploy bringt Scheduler erst 
 
 ## Lesereihenfolge
 
-1. `knowledge/suite-funktionsstand.md`
-2. `knowledge/suite-agentur-use-cases.md`
-3. `specs/domain/suite-enterprise-program.md`
-4. Dieselbe Datei im Produkt-Repo, bevor eine Welle dort angefasst wird.
+1. `knowledge/suite-stand.md` ← Checkpoint zuerst
+2. `knowledge/suite-funktionsstand.md`
+3. `knowledge/suite-agentur-use-cases.md`
+4. `specs/domain/suite-enterprise-program.md`
+5. Dieselbe Datei im Produkt-Repo, bevor eine Welle dort angefasst wird.

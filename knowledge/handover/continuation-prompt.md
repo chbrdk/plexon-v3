@@ -8,21 +8,22 @@ Du übernimmst die Marketing-, Tutorial- und Wissensarbeit für **PLEXON v3**. A
 
 Lies zuerst vollständig:
 
-1. `knowledge/handover/README.md`
-2. `knowledge/handover/suite-knowledge-base.md`
-3. `knowledge/handover/tutorial-production-storyboards.md`
-4. `specs/domain/collection-projects.md`
-5. `knowledge/tutorials/program.md`
+1. `knowledge/suite-stand.md` — **aktueller Suite-Checkpoint**
+2. `knowledge/handover/README.md`
+3. `knowledge/handover/suite-knowledge-base.md`
+4. `knowledge/handover/tutorial-production-storyboards.md`
+5. `specs/domain/collection-projects.md`
+6. `knowledge/tutorials/program.md`
 
 Grundregel: Eine **Collection** ist das einzige nutzerseitige Projekt. CHECKION, AUDION, BRANDION, CREATION und SPIRION sind Capabilities der Collection. Verwende keine Produktprojekte als eigenständigen fachlichen Projekttyp.
 
-Aktueller Stand:
+Aktueller Stand (Kurz — Details in `suite-stand.md`):
 
-- Das Tutorialprogramm für die ganze Suite ist geplant.
-- Die ersten fünf CHECKION-Tutorials sind als Sprechertexte ausgearbeitet.
-- Der Artikel `knowledge/tutorials/articles/checkion-fuenf-pruefungen.md` enthält den zusammenhängenden CHECKION-Einstieg.
-- Screenshots und Highlight-Versionen liegen in `knowledge/tutorials/assets/checkion-article/`.
-- Eine echte Demo-Collection existiert unter dem Namen `PLEXON Tutorial Demo`; benutze keine sichtbaren Platzhalter-URLs als produktive Empfehlung.
+- Enterprise E1–E9 spezifikatorisch Done; E2 Collection-Home UX = Share-Links-Hub (Room deferred); E9 IdP Stub.
+- Share-Links Hub writers live (ohne Audion); Hub-Revoke Checkion/Metron; Creation `href` dual-write.
+- Härte-Backlog closed; Staging-E2E 13/13 grün (2026-09-26).
+- Tutorialprogramm geplant; erste fünf CHECKION-Tutorials + Artikel/Screenshots vorhanden.
+- Parallel: Usage-Metering / JEV / CHECKION SEO — Specs im jeweiligen Repo.
 
 Arbeitsauftrag:
 

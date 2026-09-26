@@ -1,6 +1,7 @@
 # Suite Use-Case Testing
 
-**Stand:** 2026-09-25  
+**Stand:** 2026-09-26  
+**Checkpoint:** [`suite-stand.md`](suite-stand.md)  
 **Zweck:** Verifikation der Agentur-Ketten aus [`suite-agentur-use-cases.md`](suite-agentur-use-cases.md) und der Enterprise-Wellen aus [`specs/domain/suite-enterprise-program.md`](../specs/domain/suite-enterprise-program.md).  
 **Staging-SSOT:** [`paths.md`](paths.md) — FQDN nur dort / Env-Keys, keine Hardcodes in Tests.
 
@@ -76,7 +77,7 @@ Erlaubte Werte in dieser Datei und in Contract-Tests: genau diese vier.
 | Schicht | Was | Wo |
 |---|---|---|
 | Vitest contracts | Dateien, Vorlagen, Skip-Gründe, Destillat-Inventar, Playbook-Markierungen | `__tests__/suite-*.test.ts` · `__tests__/suite-use-case-matrix.test.ts` · `__tests__/suite-distillate-inventory.test.ts` · `__tests__/suite-enterprise-skip-e5-e8-e9.test.ts` |
-| Playwright | UC1, UC9 (Panes + Audit/Activity), E2 ClientRoom API, Share-Links Hub, E3, E5 templateId, E8 Crisis templateId, E9 Directory-Stub | `e2e/uc1-pitch-eqc.spec.ts` · `e2e/uc9-lagebild-audit.spec.ts` · `e2e/e2-client-room.spec.ts` · `e2e/share-links-hub.spec.ts` · `e2e/e3-schedule-retest.spec.ts` · `e2e/e5-launch-gate.spec.ts` · `e2e/e8-crisis-template.spec.ts` · `e2e/e9-directory-stub.spec.ts` · `npm run test:e2e:staging` |
+| Playwright | UC1, UC9 (Panes + Audit/Activity), E2 ClientRoom API, Share-Links Hub, E3, E5 templateId, E8 Crisis templateId, E9 Directory-Stub | `e2e/…` · `npm run test:e2e:staging` · **2026-09-26: 13/13 grün** |
 | Manuell | Cron-Tick abwarten, echte Deep/GEO-Keys | dieses Playbook |
 
 ## Härte-Backlog
