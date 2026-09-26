@@ -100,22 +100,35 @@ Bei Usage/JEV/SEO immer Specs im jeweiligen Repo lesen — hier nur Orientierung
 1. **Kundenraum-UX** auf Collection-Home wieder einblenden (API bleibt; jetzige UX = Share-Links-Hub).  
 2. **Audion** in Share-Links Hub.  
 3. **E9 IdP** (OIDC/SAML/SCIM) Laufzeit.  
-4. **Handover/Tutorials** weiterproduzieren (`knowledge/handover/`, `knowledge/tutorials/`).  
-   - CHECKION erste fünf: Sprechertexte + Artikel.  
-   - **BRANDION** BRN-QS-01/02 Sprechertexte **ausgearbeitet** (2026-09-26); Aufnahme/Screenshots offen.  
+4. **Handover/Tutorials** — **pausiert** (2026-09-26). Sprechertexte bleiben im Repo; keine weitere Content-/Aufnahme-Welle bis App-Finalisierung durch ist.  
 5. Prod-Deploy nur über control plane `chbrdk/PLEXON` — dieses Island = Federation-Staging.
 6. **Suite Cleanup** — Inventare + Freigabe: [`suite-cleanup.md`](suite-cleanup.md) · [`suite-cleanup-drop-safe.md`](suite-cleanup-drop-safe.md).  
-   - Netz + 9× `cleanup-inventory.md` live.  
-   - **Welle 2a** executed (plexon dead chrome, audion tmp/HTML dumps, checkion orphan ops notes) + follow-ups (videon orphan CSS, creation `.tmp/`/`.build/` gitignore).  
-   - **Welle 2b** executed 2026-09-26: Echon `deprecated/` + `v2/` (+ forecast CI), plexon glass-chat helpers, msqdx-ui multi-bump. **Nicht** angegangen: MUI-Board reshape, Zaoly runtime, Audion migrate script.
+   - Welle 2a/2b executed. Reshape-Blöcke (MUI-Board, Zaoly, NLE, Echon-DS) = App-Finalisierung unten.
+
+---
+
+## App-Finalisierung (Prioritätsmatrix)
+
+Playbook: [`suite-cleanup.md`](suite-cleanup.md) · Inventare: je Repo `knowledge/cleanup-inventory.md`.
+
+| Prio | Repo | Ziel „sauber“ | Status |
+|---|---|---|---|
+| 0 | Querschnitt (alle) | Doc-/Barrel-/Fixture-Orphans | **done** 2026-09-26 |
+| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **next** |
+| 2 | creation-v3 | Zaoly-Fixtures/Docs → Site-Kit / in-app SoT | pending |
+| 3 | videon-v3 | NLE-Chrome (Select/Badge/ToolButton) + Barrel | Barrel **done**; Rest pending |
+| 4 | msqdx-echon | lokales DS → `@msqdx/ui` | pending |
+| 5 | checkion / brandion / msqdx-ui / audion / metron | Hygiene + Gaps | Querschnitt **done** (Fixtures, Docs, lucide) |
+
+Nach Querschnitt: App für App in Prio-Reihenfolge (eigene Commit-Sätze, Specs-first wo Verhalten ändert).
 
 ---
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. BRANDION-Tutorials **aufnehmen** (Staging-Login) + Screenshots **oder**  
-2. ECH-QS-01 / CRT-QS-01 Sprechertexte **oder**  
-3. MUI-Board-Reshape / Bridge-Cutover.
+1. **App-Finalisierung Prio 1** — Plexon MUI/Board/Bridge Cutover.  
+2. Creation Zaoly-Reshape / Videon NLE / Echon DS.  
+3. Tutorials erst wieder nach stabilen App-Oberflächen.
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 
