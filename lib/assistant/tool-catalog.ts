@@ -5,7 +5,7 @@
 
 import { JEV_USE_CASES } from '@/lib/jev/catalog'
 import { scheduleJevShadow } from '@/lib/jev/schedule'
-import type { JevQuestions } from '@/lib/jev/types'
+import { choiceQuestion, type JevQuestions } from '@/lib/jev/types'
 
 export type ToolFamily =
   | 'checkion_project'
@@ -201,10 +201,10 @@ export function classifyToolFamily(toolName: string): ToolFamily | null {
     }
   }
   const questions: JevQuestions = {
-    family: {
-      type: 'choice',
-      options: ['none', ...(Object.keys(FAMILY_PATTERNS) as ToolFamily[])],
-    },
+    family: choiceQuestion('Tool family for this MCP tool name', [
+      'none',
+      ...(Object.keys(FAMILY_PATTERNS) as ToolFamily[]),
+    ]),
   }
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantToolFamily,

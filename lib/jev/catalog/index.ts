@@ -1,4 +1,10 @@
-import type { JevQuestions } from '@/lib/jev/types'
+import {
+  choiceQuestion,
+  noulQuestion,
+  scoreLevelCriteria,
+  scoreQuestion,
+  type JevQuestions,
+} from '@/lib/jev/types'
 
 /** Canonical P0–P2 use-case ids — specs/domain/jev-use-case-catalog.md */
 export const JEV_USE_CASES = {
@@ -72,130 +78,130 @@ export const ASSISTANT_INTENT_OPTIONS = [
 
 export function questionsAssistantIntent(): JevQuestions {
   return {
-    intent: {
-      type: 'choice',
-      options: [...ASSISTANT_INTENT_OPTIONS],
-      description: 'Primary assistant intent for this user prompt',
-    },
+    intent: choiceQuestion(
+      'Primary assistant intent for this user prompt',
+      ASSISTANT_INTENT_OPTIONS,
+    ),
   }
 }
 
 export function questionsCreationModelTier(): JevQuestions {
   return {
-    tier: {
-      type: 'choice',
-      options: ['low', 'mid', 'high'],
-      description: 'Creation assistant cost / thinking tier',
-    },
+    tier: choiceQuestion('Creation assistant cost / thinking tier', [
+      'low',
+      'mid',
+      'high',
+    ]),
   }
 }
 
 export function questionsShouldRefinePlan(): JevQuestions {
   return {
-    refine: {
-      type: 'noul',
-      description: 'Should the heuristic plan be refined with a planner LLM?',
-    },
+    refine: noulQuestion(
+      'Should the heuristic plan be refined with a planner LLM?',
+      'Plan is incomplete, ambiguous, or high-stakes — refine with LLM.',
+      'Heuristic plan is sufficient; skip planner LLM.',
+    ),
   }
 }
 
 export function questionsWriteIntent(kind: 'scene' | 'audience'): JevQuestions {
   return {
-    write: {
-      type: 'noul',
-      description: `Does the prompt request a ${kind} write/mutation?`,
-    },
+    write: noulQuestion(
+      `Does the prompt request a ${kind} write/mutation?`,
+      `User asks to create, edit, or mutate ${kind} content.`,
+      `User is asking a question or reading without write intent.`,
+    ),
   }
 }
 
 export function questionsToolConfirm(): JevQuestions {
   return {
-    confirm_required: {
-      type: 'noul',
-      description: 'Is human confirmation required before running this tool?',
-    },
+    confirm_required: noulQuestion(
+      'Is human confirmation required before running this tool?',
+      'Tool is destructive, expensive, or irreversible — require confirm.',
+      'Tool is safe/read-only; can run without confirm.',
+    ),
   }
 }
 
 export function questionsPromoteClassify(): JevQuestions {
   return {
-    kind: {
-      type: 'choice',
-      options: ['flow', 'playbook', 'reject'],
-      description: 'Capability promote classification',
-    },
+    kind: choiceQuestion('Capability promote classification', [
+      'flow',
+      'playbook',
+      'reject',
+    ]),
   }
 }
 
 export function questionsSceneQuality(): JevQuestions {
   return {
-    pass: {
-      type: 'noul',
-      description: 'Does the creation scene pass the quality gate?',
-    },
-    severity: {
-      type: 'score',
-      levels: 5,
-      description: 'Quality issue severity 0–4',
-    },
+    pass: noulQuestion(
+      'Does the creation scene pass the quality gate?',
+      'Scene meets layout, token, and content quality bars.',
+      'Scene has blocking quality issues.',
+    ),
+    severity: scoreQuestion(
+      'Quality issue severity',
+      scoreLevelCriteria(5),
+    ),
   }
 }
 
 export function questionsPlanner(): JevQuestions {
   return {
-    intent: {
-      type: 'choice',
-      options: [
-        'general_chat',
-        'creation_scene_edit',
-        'geo_analysis',
-        'event_quick_check',
-        'other',
-      ],
-    },
-    allow_write: {
-      type: 'noul',
-      description: 'Allow write tools for this turn?',
-    },
+    intent: choiceQuestion('Planner intent bucket for this turn', [
+      'general_chat',
+      'creation_scene_edit',
+      'geo_analysis',
+      'event_quick_check',
+      'other',
+    ]),
+    allow_write: noulQuestion(
+      'Allow write tools for this turn?',
+      'User intent includes mutating project/scene/data — allow writes.',
+      'Read-only or clarifying turn — deny writes.',
+    ),
   }
 }
 
 export function questionsMcpFlags(): JevQuestions {
+  const attach = (product: string) =>
+    noulQuestion(
+      `Attach ${product} MCP for this plan?`,
+      `Plan needs ${product} tools or data.`,
+      `Plan does not need ${product}.`,
+    )
   return {
-    use_creation: { type: 'noul', description: 'Attach Creation MCP?' },
-    use_checkion: { type: 'noul', description: 'Attach Checkion MCP?' },
-    use_audion: { type: 'noul', description: 'Attach Audion MCP?' },
-    use_echon: { type: 'noul', description: 'Attach Echon MCP?' },
-    use_brandion: { type: 'noul', description: 'Attach Brandion MCP?' },
-    use_videon: { type: 'noul', description: 'Attach Videon MCP?' },
-    use_metron: { type: 'noul', description: 'Attach Metron MCP?' },
+    use_creation: attach('Creation'),
+    use_checkion: attach('Checkion'),
+    use_audion: attach('Audion'),
+    use_echon: attach('Echon'),
+    use_brandion: attach('Brandion'),
+    use_videon: attach('Videon'),
+    use_metron: attach('Metron'),
   }
 }
 
 export function questionsScoreTone(): JevQuestions {
   return {
-    tone: {
-      type: 'choice',
-      options: ['pos', 'low', 'neg'],
-      description: 'UI tone for a 0–100 score',
-    },
+    tone: choiceQuestion('UI tone for a 0–100 score', ['pos', 'low', 'neg'], {
+      pos: 'Positive / healthy score',
+      low: 'Neutral / middling score',
+      neg: 'Negative / concerning score',
+    }),
   }
 }
 
 export function questionsFrictionSeverity(): JevQuestions {
   return {
-    severity: {
-      type: 'choice',
-      options: ['high', 'medium', 'low'],
-    },
+    severity: choiceQuestion('Friction severity', ['high', 'medium', 'low']),
   }
 }
 
 export function questionsFollowUpMode(): JevQuestions {
   return {
-    mode: {
-      type: 'choice',
-      options: ['none', 'suggest', 'auto'],
-    },
+    mode: choiceQuestion('Follow-up mode', ['none', 'suggest', 'auto']),
   }
 }

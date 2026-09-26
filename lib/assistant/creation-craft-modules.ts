@@ -12,7 +12,7 @@ import type { CreationCraftPlaybookId } from '@/lib/assistant/creation-craft-pla
 import { promptLooksLikeWireframeBrief } from '@/lib/assistant/creation-craft-playbooks';
 import { JEV_USE_CASES } from '@/lib/jev/catalog';
 import { scheduleJevShadow } from '@/lib/jev/schedule';
-import type { JevQuestions } from '@/lib/jev/types';
+import { choiceQuestion, type JevQuestions } from '@/lib/jev/types';
 
 export type CreationCraftModuleId =
   | 'spirion_section_ref_v1'
@@ -342,11 +342,10 @@ export function resolveCreationCraftModules(
   if (shouldAttachPrintChapterRhythm(pb, userPrompt)) push('print_chapter_rhythm_v1');
 
   const questions: JevQuestions = {
-    primary_module: {
-      type: 'choice',
-      options: ['none', ...out, 'other'],
-      description: 'Primary craft module for this turn',
-    },
+    primary_module: choiceQuestion(
+      'Primary craft module for this turn',
+      ['none', ...out, 'other'],
+    ),
   }
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantCreationCraftModules,

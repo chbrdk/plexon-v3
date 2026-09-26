@@ -8,6 +8,23 @@
 
 Jev returns typed decisions (Choice / Score / Noul) with calibrated probabilities. It does **not** generate prose. PLEXON uses Jev for fuzzy routing and classification; Anthropic/OpenAI remain for free-chat and narratives.
 
+## Request shape (OpenRouter Decisions)
+
+`POST {OPENROUTER_API_BASE_URL}/api/alpha/decisions` with:
+
+| Field | Shape |
+|-------|--------|
+| `model` | Pin `typesafe/jev-1.13` |
+| `state` | string **or** JSON object/array of context |
+| `questions` | Record of `{ type, instructions, criteria }` |
+
+Criteria by type:
+
+- **choice** / **noul**: `criteria` is a record (`optionKey → label`; noul uses `true` / `false`)
+- **score**: `criteria` is an ordered string array (index = level)
+
+Response: flat `answers` map (`type: choice|noul|score`) plus `usage.cost` / `usage.input_tokens`. Do **not** send legacy `options` / `description` / `levels` — OpenRouter rejects them.
+
 ## Shadow contract
 
 1. Existing heuristic or LLM remains **source of truth** until `JEV_ACT_<USE_CASE>=1`.

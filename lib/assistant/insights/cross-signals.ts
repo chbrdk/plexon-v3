@@ -10,17 +10,16 @@ import type { EventQuickCheckResult } from '@/lib/assistant/playbooks/run-event-
 import type { UiTone } from '@/lib/assistant/ui-blocks/types';
 import { JEV_USE_CASES } from '@/lib/jev/catalog';
 import { scheduleJevShadow } from '@/lib/jev/schedule';
-import type { JevQuestions } from '@/lib/jev/types';
+import { choiceQuestion, type JevQuestions } from '@/lib/jev/types';
 
 function scoreTone(score: number): UiTone {
   const tone: UiTone =
     score >= 85 ? 'success' : score >= 65 ? 'warning' : 'error'
   const questions: JevQuestions = {
-    tone: {
-      type: 'choice',
-      options: ['success', 'warning', 'error'],
-      description: 'Cross-signal severity tone for a 0–100 score',
-    },
+    tone: choiceQuestion(
+      'Cross-signal severity tone for a 0–100 score',
+      ['success', 'warning', 'error'],
+    ),
   }
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantCrossSignalSeverity,

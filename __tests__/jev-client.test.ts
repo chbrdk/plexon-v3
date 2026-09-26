@@ -59,6 +59,30 @@ describe('parseDecisionsResponse', () => {
     expect(r.usage?.cost).toBe(0.0001)
     expect(r.latencyMs).toBe(120)
   })
+
+  it('parses OpenRouter answers map', () => {
+    const r = parseDecisionsResponse(
+      {
+        model: 'typesafe/jev-1.13-20260917',
+        answers: {
+          intent: {
+            type: 'choice',
+            choice: 'free_chat',
+            confidence: 0.8,
+            probabilities: { free_chat: 0.8, other: 0.2 },
+          },
+          refine: { type: 'noul', noul: 0.15 },
+          severity: { type: 'score', score: 2.1, confidence: 0.9 },
+        },
+        usage: { cost: 0.00002, input_tokens: 100 },
+      },
+      90,
+    )
+    expect(r.choices.intent.key).toBe('free_chat')
+    expect(r.nouls.refine.probability).toBe(0.15)
+    expect(r.scores.severity.score).toBe(2.1)
+    expect(r.usage?.promptTokens).toBe(100)
+  })
 })
 
 describe('createJevDecisions', () => {

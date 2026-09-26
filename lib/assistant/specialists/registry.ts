@@ -6,7 +6,7 @@
 import type { AssistantPlanIntent } from '@/lib/assistant/assistant-planner';
 import { JEV_USE_CASES } from '@/lib/jev/catalog';
 import { scheduleJevShadow } from '@/lib/jev/schedule';
-import type { JevQuestions } from '@/lib/jev/types';
+import { choiceQuestion, type JevQuestions } from '@/lib/jev/types';
 import {
   AUDION_CHAT_FAMILIES,
   AUDION_DOCUMENTS_FAMILIES,
@@ -310,10 +310,10 @@ export function resolveSpecialist(
 ): AssistantSpecialist | null {
   const result = isAssistantSpecialistId(intent) ? REGISTRY[intent] ?? null : null
   const questions: JevQuestions = {
-    specialist: {
-      type: 'choice',
-      options: ['none', ...REGISTERED_SPECIALIST_IDS],
-    },
+    specialist: choiceQuestion('Assistant specialist for this intent', [
+      'none',
+      ...REGISTERED_SPECIALIST_IDS,
+    ]),
   }
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantSpecialist,

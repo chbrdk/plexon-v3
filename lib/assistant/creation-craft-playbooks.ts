@@ -9,7 +9,7 @@
 import type { CreationSceneQualityJob } from '@/lib/assistant/creation-scene-quality';
 import { JEV_USE_CASES } from '@/lib/jev/catalog';
 import { scheduleJevShadow } from '@/lib/jev/schedule';
-import type { JevQuestions } from '@/lib/jev/types';
+import { choiceQuestion, type JevQuestions } from '@/lib/jev/types';
 
 export type CreationCraftPlaybookId =
   | 'creation_landing_v1'
@@ -262,17 +262,14 @@ export function resolveCreationCraftPlaybook(
     else if (LANDING_RE.test(text)) result = CATALOG.creation_landing_v1;
   }
   const questions: JevQuestions = {
-    playbook: {
-      type: 'choice',
-      options: [
-        'none',
-        'creation_landing_v1',
-        'creation_newsletter_v1',
-        'creation_print_magazine_v1',
-        'creation_print_report_v1',
-        'creation_page_as_pattern_v1',
-      ],
-    },
+    playbook: choiceQuestion('Creation craft playbook for this prompt', [
+      'none',
+      'creation_landing_v1',
+      'creation_newsletter_v1',
+      'creation_print_magazine_v1',
+      'creation_print_report_v1',
+      'creation_page_as_pattern_v1',
+    ]),
   }
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantCreationCraftPlaybook,
