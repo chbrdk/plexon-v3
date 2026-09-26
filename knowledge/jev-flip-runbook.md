@@ -36,7 +36,7 @@ Specs: PLEXON `specs/domain/jev-decisions.md` · catalog `jev-use-case-catalog.m
 | App | Flags set | Residual |
 |-----|-----------|----------|
 | echon-v3 `wckcahadnuy7vv4yrjxf6fbm` | `JEV_ACT_ECHON_LIGHT_CLASSIFY=1`, `ECHON_V3_CLASSIFY_PROVIDER=jev` (shadow unchanged; news radar Act already on) | Soak note in Echon `v3/knowledge/news-radar-soak-2026-09-26.md` |
-| plexon-v3 `n6f9gy85xsk3a0txflzavk3j` | `JEV_ACT_ASSISTANT_INTENT=1`, `JEV_ACT_ASSISTANT_PLANNER=1` | Shadow logs thin; Act does **not** yet override heuristic SoT — see `knowledge/jev-p0-act-residual-2026-09-26.md` |
+| plexon-v3 `n6f9gy85xsk3a0txflzavk3j` | `JEV_ACT_ASSISTANT_INTENT=1`, `JEV_ACT_ASSISTANT_PLANNER=1` | Act-apply **wired** (`resolveAssistantIntent` / `planAssistantTurn` → SoT override + `[jev-act]`). Shadow evidence still thin — see `knowledge/jev-p0-act-residual-2026-09-26.md` |
 
 Rollback: `JEV_ACT_*=0` (+ echon classify provider → `auto`/`rules`).
 

@@ -6,7 +6,7 @@ import {
   ASSISTANT_DOCUMENT_ATTACHMENT_PLACEHOLDER,
   ASSISTANT_IMAGE_ATTACHMENT_PLACEHOLDER,
 } from '@/lib/constants';
-import { routeAssistantIntent } from '@/lib/assistant/intent-router';
+import { resolveAssistantIntent } from '@/lib/assistant/intent-router';
 import {
   extractPendingDomainFromHistory,
   extractPendingProjectNameFromHistory,
@@ -220,7 +220,7 @@ export async function handleAssistantComplete(
     ? { type: 'free_chat' as const }
     : hasAttachments
       ? { type: 'free_chat' as const }
-      : routeAssistantIntent(prompt);
+      : await resolveAssistantIntent(prompt);
 
   const handlerCtx: AssistantHandlerContext = {
     user,

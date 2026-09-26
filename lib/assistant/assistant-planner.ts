@@ -1,8 +1,14 @@
 import { getAssistantPlannerModel } from '@/lib/constants';
 import { isPlexonUiTool } from '@/lib/assistant/ui-tools/definitions';
 import { catalogPlannerToolOverride } from '@/lib/capabilities/planner-allowlist';
+import {
+  logJevAct,
+  parsePlannerJevBucket,
+} from '@/lib/jev/act-apply';
 import { JEV_USE_CASES, questionsPlanner, questionsShouldRefinePlan } from '@/lib/jev/catalog';
+import { isJevActEnabled } from '@/lib/jev/env';
 import { scheduleJevShadow } from '@/lib/jev/schedule';
+import { runShadowDecision } from '@/lib/jev/shadow';
 import {
   GEO_FAMILIES,
   KNOWLEDGE_QA_FAMILIES,
@@ -924,23 +930,148 @@ export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: Planner
 
 export async function planAssistantTurn(
   apiKey: string | undefined,
-  input: PlannerInput
+  input: PlannerInput,
+  opts?: { fetchImpl?: typeof fetch },
 ): Promise<AssistantPlan> {
   const heuristic = planAssistantTurnHeuristic(input);
-  scheduleJevShadow({
+  let plan = heuristic;
+
+  if (isJevActEnabled(JEV_USE_CASES.assistantPlanner)) {
+    plan = await applyPlannerJevAct(heuristic, input, opts?.fetchImpl);
+  } else {
+    scheduleJevShadow({
+      useCaseId: JEV_USE_CASES.assistantPlanner,
+      state: {
+        prompt: (input.planningPrompt ?? input.prompt).trim().slice(0, 2000),
+        hasCreationMcp: Boolean(input.hasCreationMcp),
+      },
+      questions: questionsPlanner(),
+      baseline: { intent: heuristic.intent, allowWrite: heuristic.allowWriteTools },
+      extractChoiceKey: 'intent',
+    });
+  }
+
+  if (!apiKey || !shouldRefinePlanWithLlm(plan, input)) {
+    return plan;
+  }
+  return planAssistantTurnWithLlm(apiKey, input, plan);
+}
+
+async function applyPlannerJevAct(
+  heuristic: AssistantPlan,
+  input: PlannerInput,
+  fetchImpl?: typeof fetch,
+): Promise<AssistantPlan> {
+  const text = (input.planningPrompt ?? input.prompt).trim();
+  const compare = await runShadowDecision({
     useCaseId: JEV_USE_CASES.assistantPlanner,
     state: {
-      prompt: (input.planningPrompt ?? input.prompt).trim().slice(0, 2000),
+      prompt: text.slice(0, 2000),
       hasCreationMcp: Boolean(input.hasCreationMcp),
     },
     questions: questionsPlanner(),
     baseline: { intent: heuristic.intent, allowWrite: heuristic.allowWriteTools },
-    extractChoiceKey: 'intent',
-  })
-  if (!apiKey || !shouldRefinePlanWithLlm(heuristic, input)) {
+    extractJev: (r) => ({
+      intent: r.choices.intent?.key ?? null,
+      allowWrite:
+        typeof r.nouls.allow_write?.probability === 'number'
+          ? r.nouls.allow_write.probability >= 0.5
+          : null,
+    }),
+    awaitResult: true,
+    fetchImpl,
+    agree: (baseline, jev) => {
+      const b = baseline as { intent: string; allowWrite: boolean };
+      const j = jev as { intent: string | null; allowWrite: boolean | null };
+      return b.intent === j.intent && (j.allowWrite == null || b.allowWrite === j.allowWrite);
+    },
+  });
+
+  if (!compare || compare.error || compare.jev == null) {
+    logJevAct({
+      useCaseId: JEV_USE_CASES.assistantPlanner,
+      baseline: { intent: heuristic.intent, allowWrite: heuristic.allowWriteTools },
+      jev: null,
+      applied: false,
+      latencyMs: compare?.latencyMs ?? null,
+    });
     return heuristic;
   }
-  return planAssistantTurnWithLlm(apiKey, input, heuristic);
+
+  const jev = compare.jev as {
+    intent: string | null;
+    allowWrite: boolean | null;
+  };
+  let plan = heuristic;
+  let applied = false;
+  const bucket = parsePlannerJevBucket(jev.intent);
+
+  if (bucket === 'general_chat' && plan.intent !== 'general_chat') {
+    plan = buildPlan({
+      intent: 'general_chat',
+      mode: hasMcp(input) ? 'tools' : 'embedded_context',
+      toolFamilies: hasMcp(input)
+        ? jev.allowWrite
+          ? PLATFORM_ASSISTANT_FAMILIES
+          : READ_ONLY_QA_FAMILIES
+        : [],
+      allowWriteTools: Boolean(jev.allowWrite),
+      maxToolRounds: hasMcp(input) ? 5 : 0,
+      skipTools: !hasMcp(input),
+      reasoning: 'Jev Act — general_chat bucket.',
+    });
+    applied = true;
+  } else if (
+    bucket === 'creation_scene_edit' &&
+    input.hasCreationMcp &&
+    plan.intent !== 'creation_scene_edit'
+  ) {
+    plan = withCreationCraftPlaybook(
+      {
+        intent: 'creation_scene_edit',
+        mode: 'hybrid',
+        toolFamilies: creationSceneEditFamilies(Boolean(input.hasSpirionMcp)),
+        allowWriteTools:
+          typeof jev.allowWrite === 'boolean'
+            ? jev.allowWrite
+            : heuristic.allowWriteTools,
+        maxToolRounds: getCreationSceneMaxToolRounds(),
+        skipTools: false,
+        reasoning: 'Jev Act — creation_scene_edit bucket.',
+      },
+      text,
+    );
+    applied = true;
+  } else if (
+    bucket === 'geo_analysis' &&
+    input.hasCheckionMcp &&
+    plan.intent !== 'checkion_seo_geo'
+  ) {
+    plan = buildPlan({
+      intent: 'checkion_seo_geo',
+      mode: 'hybrid',
+      toolFamilies: GEO_FAMILIES,
+      allowWriteTools: false,
+      maxToolRounds: 4,
+      skipTools: false,
+      reasoning: 'Jev Act — geo_analysis bucket.',
+    });
+    applied = true;
+  }
+
+  if (typeof jev.allowWrite === 'boolean' && jev.allowWrite !== plan.allowWriteTools) {
+    plan = { ...plan, allowWriteTools: jev.allowWrite };
+    applied = true;
+  }
+
+  logJevAct({
+    useCaseId: JEV_USE_CASES.assistantPlanner,
+    baseline: { intent: heuristic.intent, allowWrite: heuristic.allowWriteTools },
+    jev,
+    applied,
+    latencyMs: compare.latencyMs,
+  });
+  return plan;
 }
 
 export function buildPlanSystemPromptBlock(

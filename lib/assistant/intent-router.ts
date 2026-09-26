@@ -9,8 +9,9 @@ import {
 } from '@/lib/assistant/conversation-context';
 import { inferPersonaPageSpineUrlHint } from '@/lib/integrations/persona-page-relevance-client';
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows';
+import { applyAssistantIntentAct, logJevAct } from '@/lib/jev/act-apply';
 import { JEV_USE_CASES, questionsAssistantIntent } from '@/lib/jev/catalog';
-import { scheduleJevShadow } from '@/lib/jev/schedule';
+import { resolveJevActOrShadow, scheduleJevShadow } from '@/lib/jev/schedule';
 
 export type AssistantIntent =
   | { type: 'free_chat' }
@@ -428,6 +429,7 @@ function matchesCampaignBriefIntent(text: string): boolean {
   );
 }
 
+/** Sync: heuristic SoT + fire-and-forget shadow (unit tests / non-Act). */
 export function routeAssistantIntent(prompt: string): AssistantIntent {
   const intent = routeAssistantIntentCore(prompt)
   scheduleJevShadow({
@@ -436,6 +438,37 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
     questions: questionsAssistantIntent(),
     baseline: intent.type,
     extractChoiceKey: 'intent',
+  })
+  return intent
+}
+
+/**
+ * Request path: when `JEV_ACT_ASSISTANT_INTENT=1`, await Jev and apply Choice as SoT.
+ * Spec: specs/domain/jev-decisions.md § Act-apply
+ */
+export async function resolveAssistantIntent(
+  prompt: string,
+  opts?: { fetchImpl?: typeof fetch },
+): Promise<AssistantIntent> {
+  const baseline = routeAssistantIntentCore(prompt)
+  const compare = await resolveJevActOrShadow({
+    useCaseId: JEV_USE_CASES.assistantIntent,
+    state: { prompt: prompt.trim().slice(0, 2000) },
+    questions: questionsAssistantIntent(),
+    baseline: baseline.type,
+    extractChoiceKey: 'intent',
+    fetchImpl: opts?.fetchImpl,
+  })
+  if (!compare || compare.error || compare.jev == null) {
+    return baseline
+  }
+  const { intent, applied } = applyAssistantIntentAct(prompt, baseline, compare.jev)
+  logJevAct({
+    useCaseId: JEV_USE_CASES.assistantIntent,
+    baseline: baseline.type,
+    jev: compare.jev,
+    applied,
+    latencyMs: compare.latencyMs,
   })
   return intent
 }

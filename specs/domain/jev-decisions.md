@@ -36,6 +36,21 @@ Response: flat `answers` map (`type: choice|noul|score`) plus `usage.cost` / `us
 
 Enable `JEV_ACT_<USE_CASE>` only after shadow window meets criteria in `knowledge/jev-flip-runbook.md` (agreement, p95 latency, cost/1k, tests green).
 
+### Act-apply (SoT)
+
+When `JEV_ACT_<USE_CASE>=1`:
+
+1. **Await** the Decisions call on the request path (same timeout / fail-open as shadow).
+2. On success, **override** the heuristic baseline with the extracted Jev value (Choice key / Noul boolean).
+3. On error, timeout, or unmappable value → keep heuristic (fail-open).
+4. Log `[jev-act]` with `useCaseId`, `baseline`, `jev`, `applied` (boolean), `latencyMs`.
+5. Shadow-only (`JEV_SHADOW_*` without Act) stays fire-and-forget and must **not** change SoT.
+
+P0 apply surfaces:
+
+- `assistant.intent` → `resolveAssistantIntent` (async); sync `routeAssistantIntent` remains heuristic + shadow schedule for unit tests.
+- `assistant.planner` → `planAssistantTurn` awaits Act and may rematerialize coarse buckets (`general_chat` / `creation_scene_edit` / `geo_analysis`) plus `allow_write` Noul.
+
 ## Exclusion — do not call Jev
 
 Deterministic gates stay code-only:
