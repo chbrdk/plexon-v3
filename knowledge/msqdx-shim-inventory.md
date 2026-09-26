@@ -1,7 +1,7 @@
-# Msqdx / MUI shim inventory (Wave-7 start)
+# Msqdx / MUI shim inventory (App-Finalisierung)
 
-**Date:** 2026-08  
-**Context:** Parity Phase C — shrink bridge surface; only flip `typescript.ignoreBuildErrors` when the remaining set is small and typed cleanly.
+**Date:** 2026-09-26  
+**Context:** Shrink bridge surface; only flip `typescript.ignoreBuildErrors` when the remaining set is small and typed cleanly.
 
 ## Build gate
 
@@ -11,27 +11,25 @@
 - `@mui/material` → `lib/mui-shim.tsx` (+ subpath shims)
 - `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts`
 
-Rough consumer count (app/components/lib, excluding `__tests__`): **~30+ `@msqdx/react`**, **~35+ `@mui/material`** — too large to remove the build ignore without a dedicated typing pass.
-
-## Cleared in Parity Phases A–C (no longer on MUI / `@msqdx/react`)
-
-- EQC page + workflow clients (Wave 6)
-- `EventQuickCheckReportSections` + `ReportSectionHeader`
-- `ReportCollectionBar`, `ReportBinaryDownloadButton`, `ReportPdfDownloadButton`
-- `PublicReportView`, `app/share/reports/[token]/page.tsx`
-- Dashboard admin user edit → `/admin/users/[id]` (`AdminUserEditForm`)
-
-## Remaining islands (keep bridge intentionally)
+## Remaining islands (intentional)
 
 | Area | Why still shimmed |
 |------|-------------------|
-| `components/board/ReactFlowBoard.tsx` | Prismion / canvas island |
-| `Sidebar`, layout chrome leftovers | Low priority |
-| Some `lib/assistant/ui-visual.ts` helpers | May still type bridge accents until callers drop |
+| `components/board/ReactFlowBoard.tsx` | Prismion / ReactFlow canvas island |
+| `lib/board-*.ts` | Prismion/Connection types + `wouldOverlap` from bridge |
 
-**Cleared Wave 7 (2026-08-10):** `components/assistant-ui/**`, `ReportPinButton`, assistant capabilities overview — target `@msqdx/ui` only.
+## Cleared (2026-09-26 Prio-1 slice)
 
-## Next cut order (suggested)
+- `components/auth/RequireAdminRole.tsx` → `@msqdx/ui` Spinner + CSS
+- `lib/assistant/ui-visual.ts` — local `alpha`, `BrandColor` from `lib/assistant/brand-color.ts`
+- `lib/assistant/ui-typography.ts` — same local `BrandColor`
 
-1. Board: document as permanent island **or** rewrite  
-2. Re-run `tsc --noEmit`; if clean, set `ignoreBuildErrors: false`
+## Cleared earlier (Parity / Wave 7)
+
+- EQC, reports, dashboard admin edit, `components/assistant-ui/**`, orphan layout chrome (Welle 2a)
+
+## Next cut order
+
+1. Extract Prismion types to plexon-owned module **or** rewrite ReactFlowBoard off legacy DS
+2. Drop bridge + mui-shim aliases when board island is gone
+3. Re-run `tsc --noEmit`; if clean, set `ignoreBuildErrors: false`

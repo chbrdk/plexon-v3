@@ -21,11 +21,17 @@
 
 ## Island (documented)
 
-- `components/board/ReactFlowBoard.tsx` — **only** remaining board surface on bridge
+- `components/board/ReactFlowBoard.tsx` — **only** remaining board UI surface on bridge + MUI
+- Board libs (`lib/board-*.ts`) — type/utils imports from bridge (`Prismion`, `wouldOverlap`)
+
+## Shrink progress (2026-09-26 App-Finalisierung Prio 1 slice)
+
+- `RequireAdminRole` cleared off MUI/`@msqdx/react` (used by `/board` + `/design-system` layouts).
+- Assistant `ui-visual` / `ui-typography` no longer import bridge or MUI `alpha`.
 
 ## Acceptance
 
 1. Board page chrome has no direct `@mui/material` imports. ✅
 2. Prismion adapter documented as the only board legacy island. ✅
-3. Full bridge removal — **not yet** (island + progressive assistant blocks).
-4. Progress Wave 7 → **chrome done / island remains**.
+3. Full bridge removal — **not yet** (canvas island + board type libs).
+4. Progress Wave 7 → **chrome done / island remains**; gate chrome cleared 2026-09-26.

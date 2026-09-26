@@ -1,7 +1,12 @@
-import { alpha } from '@mui/material';
 import { MSQDX_COLORS, MSQDX_SPACING, MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
-import type { BrandColor } from '@msqdx/react';
+import type { BrandColor } from '@/lib/assistant/brand-color';
 import type { UiTone } from '@/lib/assistant/ui-blocks/types';
+
+/** Local alpha (was `@mui/material` shim) — CSS color-mix. */
+export function alpha(color: string, opacity: number): string {
+  const pct = Math.round(Math.min(1, Math.max(0, opacity)) * 100);
+  return `color-mix(in srgb, ${color} ${pct}%, transparent)`;
+}
 
 /** MSQDX palette, user theme accent, or neutral (slate) — avoids default purple on every block. */
 export type UiAccent = BrandColor | 'neutral' | 'theme';

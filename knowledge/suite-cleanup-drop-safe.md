@@ -8,7 +8,7 @@
 
 | Repo | drop_safe | reshape | defer / rebuild |
 |---|---|---|---|
-| plexon-v3 | 2a + glass-chat **done** | MUI/Board/Bridge | ClientRoom panel, lab-tile note |
+| plexon-v3 | 2a + glass-chat + **RequireAdminRole** **done** | Board canvas island | ClientRoom panel |
 | checkion-v3 | 2a **done** | fixtures | scoring/ops notes |
 | audion-v3 | 2a **done** | fixture vs api | migrate script **keep**, Share-Links |
 | brandion-v3 | lucide dep **done** | — | — |

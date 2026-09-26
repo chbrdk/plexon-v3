@@ -1,5 +1,5 @@
 import { MSQDX_TYPOGRAPHY } from '@msqdx/tokens';
-import type { BrandColor } from '@msqdx/react';
+import type { BrandColor } from '@/lib/assistant/brand-color';
 import type { UiAccent } from '@/lib/assistant/ui-visual';
 import type { UiBlockType, UiTone } from '@/lib/assistant/ui-blocks/types';
 import { UI_TONE_BRAND } from '@/lib/assistant/ui-visual';

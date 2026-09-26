@@ -13,6 +13,14 @@ describe('board ui rebuild (wave 7 chrome)', () => {
     expect(page).toContain('plexon-board-stage')
   })
 
+  it('RequireAdminRole gate has no @mui or @msqdx/react', () => {
+    const gate = readFileSync(path.join(root, 'components/auth/RequireAdminRole.tsx'), 'utf8')
+    expect(gate).not.toContain("from '@mui/material'")
+    expect(gate).not.toContain("from '@msqdx/react'")
+    expect(gate).toContain("from '@msqdx/ui'")
+    expect(gate).toContain('Spinner')
+  })
+
   it('documents Prismion canvas as bridge island', () => {
     const canvas = readFileSync(path.join(root, 'components/board/ReactFlowBoard.tsx'), 'utf8')
     expect(canvas).toContain("from '@msqdx/react'")

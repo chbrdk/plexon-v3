@@ -9,7 +9,7 @@
 
 | Capability | Decision | Notes |
 |------------|----------|-------|
-| Admin gate (role + layout) | **keep** | Already `@msqdx/ui` |
+| Admin gate (role + layout) | **reshape** | `RequireAdminRole` on `@msqdx/ui` Spinner (2026-09-26); no MUI/bridge |
 | Subnav + last-visited | **reshape** | Active link via `--accent` CSS; drop inline theme-accent sx |
 | Overview stats + deep links | **reshape** | StatLede + SectionChrome; federation contract meta |
 | Users list / search / delete | **keep** | Semantic table + Field search |
@@ -33,6 +33,7 @@
 - `app/admin/companies/page.tsx`
 - `app/admin/companies/[companyId]/page.tsx`
 - `components/admin/AdminSubnav.tsx`
+- `components/auth/RequireAdminRole.tsx` — Spinner + CSS gate (no MUI / `@msqdx/react`)
 
 ## Acceptance
 

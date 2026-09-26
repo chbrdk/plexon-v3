@@ -2873,6 +2873,24 @@ button.plexon-collection-card--create:hover .plexon-collection-card-title {
   gap: var(--space-5, 1.5rem);
 }
 
+.plexon-admin-gate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 15rem;
+  padding: var(--space-4, 1.25rem);
+}
+
+.plexon-admin-gate--forbidden {
+  justify-content: flex-start;
+}
+
+.plexon-admin-gate__msg {
+  margin: 0;
+  color: var(--color-text-muted-on-light, #64748b);
+  font-size: 0.875rem;
+}
+
 .plexon-admin-toolbar {
   display: flex;
   flex-wrap: wrap;

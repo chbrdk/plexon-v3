@@ -16,7 +16,7 @@
 
 | Area | Notes |
 |---|---|
-| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | Board still imports `@msqdx/react` — rebuild importing surface first (`AGENTS.md`) |
+| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | Board canvas island remains — gate/assistant helpers cleared 2026-09-26 |
 | `components/board/ReactFlowBoard.tsx` | Legacy board; Collection Flows are SoT |
 
 ## Drop / reference-only (candidates — see inventory)

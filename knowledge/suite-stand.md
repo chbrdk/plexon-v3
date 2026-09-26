@@ -114,7 +114,7 @@ Playbook: [`suite-cleanup.md`](suite-cleanup.md) · Inventare: je Repo `knowledg
 | Prio | Repo | Ziel „sauber“ | Status |
 |---|---|---|---|
 | 0 | Querschnitt (alle) | Doc-/Barrel-/Fixture-Orphans | **done** 2026-09-26 |
-| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **next** |
+| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **in progress** — gate + assistant helpers cleared; canvas island remains |
 | 2 | creation-v3 | Zaoly-Fixtures/Docs → Site-Kit / in-app SoT | pending |
 | 3 | videon-v3 | NLE-Chrome (Select/Badge/ToolButton) + Barrel | Barrel **done**; Rest pending |
 | 4 | msqdx-echon | lokales DS → `@msqdx/ui` | pending |
