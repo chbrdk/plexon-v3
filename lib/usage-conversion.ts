@@ -82,6 +82,14 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
       const units = num(r.soft_cap_units ?? r.units, 1) || 1;
       return Math.max(1, Math.round(units * 1000));
     }
+    /** Generic vendor USD (OpenRouter Decisions / Jev, etc.) — same anchor as seo_dataforseo. */
+    case 'vendor_cost': {
+      const cost = num(r.cost_usd, NaN);
+      if (!Number.isNaN(cost) && cost >= 0) {
+        return Math.max(1, Math.round(cost * 100_000));
+      }
+      return DEFAULT_UNKNOWN_TOKENS;
+    }
     case 'tool_extract':
       return 28 * (num(r.requests, 1) || 1);
     case 'wayback_lookup':

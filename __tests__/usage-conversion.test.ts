@@ -77,6 +77,11 @@ describe('usage-conversion', () => {
       expect(tokensFromEvent('seo_dataforseo', { soft_cap_units: 2 })).toBe(2000);
     });
 
+    it('vendor_cost: cost_usd × 100_000', () => {
+      expect(tokensFromEvent('vendor_cost', { cost_usd: 0.002 })).toBe(200);
+      expect(tokensFromEvent('vendor_cost', {})).toBe(10);
+    });
+
     it('llm_request accepts prompt_tokens / completion_tokens aliases', () => {
       expect(
         tokensFromEvent('llm_request', { prompt_tokens: 100, completion_tokens: 50 }),
