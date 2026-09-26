@@ -33,14 +33,21 @@ import {
   type OnInit,
 } from '@xyflow/react';
 import { Plus, MessageSquare, FileText, Image, Video, Link as LinkIcon, Plug, ArrowRight, ArrowLeft, Bold, Italic, Underline, Type, Palette, Move } from 'lucide-react';
-import { Box, Popover } from '@mui/material';
+import { Box } from '@/components/ui/layout';
 import { isHtmlContent, sanitizeCardContentHtml } from '@/lib/board-card-content';
 import { getThreadRootId, getThreadChildrenInOrder, getThreadRootIdFromParent, getChildrenInOrder, getThreadSequenceFlattened, getThreadSequenceFlattenedFromConnections, type ParentByPrismionId } from '@/lib/board-thread';
 import '@xyflow/react/dist/style.css';
-import type { Prismion } from '@msqdx/react';
-import type { Connection as BoardConnection } from '@msqdx/react';
-import type { PrismionResultItem } from '@msqdx/react';
-import { MsqdxInput, MsqdxIconButton, MsqdxIcon, MarkdownContent, MsqdxPrismionToolbar } from '@msqdx/react';
+import type { Prismion } from '@/lib/board/prismion';
+import type { Connection as BoardConnection } from '@/lib/board/prismion';
+import type { PrismionResultItem } from '@/lib/board/prismion';
+import {
+  BoardInput as MsqdxInput,
+  BoardIconButton as MsqdxIconButton,
+  BoardIcon as MsqdxIcon,
+  BoardMarkdown as MarkdownContent,
+  BoardPrismionToolbar as MsqdxPrismionToolbar,
+  BoardPopover as Popover,
+} from '@/lib/board/board-ui';
 import { MSQDX_EFFECTS, MSQDX_NEUTRAL, MSQDX_BRAND_COLOR_CSS, MSQDX_TYPOGRAPHY, MSQDX_BRAND_PRIMARY } from '@msqdx/tokens';
 
 const NODE_TYPE_PROMPT = 'promptCard';

@@ -114,7 +114,7 @@ Playbook: [`suite-cleanup.md`](suite-cleanup.md) · Inventare: je Repo `knowledg
 | Prio | Repo | Ziel „sauber“ | Status |
 |---|---|---|---|
 | 0 | Querschnitt (alle) | Doc-/Barrel-/Fixture-Orphans | **done** 2026-09-26 |
-| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **in progress** — gate + assistant helpers cleared; canvas island remains |
+| 1 | plexon-v3 | MUI-Shim / Board / `@msqdx/react`-Bridge Cutover | **done** (app imports cleared; alias/dead-code purge next) |
 | 2 | creation-v3 | Zaoly-Fixtures/Docs → Site-Kit / in-app SoT | pending |
 | 3 | videon-v3 | NLE-Chrome (Select/Badge/ToolButton) + Barrel | Barrel **done**; Rest pending |
 | 4 | msqdx-echon | lokales DS → `@msqdx/ui` | pending |
@@ -126,9 +126,9 @@ Nach Querschnitt: App für App in Prio-Reihenfolge (eigene Commit-Sätze, Specs-
 
 ## Empfohlene nächste Foki (Priorität)
 
-1. **App-Finalisierung Prio 1** — Plexon MUI/Board/Bridge Cutover.  
-2. Creation Zaoly-Reshape / Videon NLE / Echon DS.  
-3. Tutorials erst wieder nach stabilen App-Oberflächen.
+1. **App-Finalisierung Prio 2** — Creation Zaoly-Fixtures/Docs → Site-Kit.  
+2. Videon NLE-Chrome / Echon DS.  
+3. Plexon: dead bridge/shim files + aliases löschen (optional follow-up).
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.
 

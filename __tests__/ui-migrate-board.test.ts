@@ -21,11 +21,14 @@ describe('board ui rebuild (wave 7 chrome)', () => {
     expect(gate).toContain('Spinner')
   })
 
-  it('documents Prismion canvas as bridge island', () => {
+  it('board canvas has no @mui or @msqdx/react (local board modules)', () => {
     const canvas = readFileSync(path.join(root, 'components/board/ReactFlowBoard.tsx'), 'utf8')
-    expect(canvas).toContain("from '@msqdx/react'")
+    expect(canvas).not.toContain("from '@msqdx/react'")
+    expect(canvas).not.toContain("from '@mui/material'")
+    expect(canvas).toContain("from '@/lib/board/prismion'")
+    expect(canvas).toContain("from '@/lib/board/board-ui'")
     const spec = readFileSync(path.join(root, 'specs/domain/ui-migrate-board.md'), 'utf8')
-    expect(spec).toContain('island')
     expect(spec).toContain('ReactFlowBoard')
+    expect(spec).toContain('lib/board')
   })
 })

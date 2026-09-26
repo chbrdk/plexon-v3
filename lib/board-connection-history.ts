@@ -1,4 +1,4 @@
-import type { Connection, Prismion, PrismionResultItem } from '@msqdx/react';
+import type { Connection, Prismion, PrismionResultItem } from '@/lib/board/prismion';
 
 /**
  * Collects all card IDs that are "upstream" of the given card (connections

@@ -1,29 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-
-vi.mock('@msqdx/react', () => {
-  function wouldOverlap(
-    excludeId: string,
-    position: { x: number; y: number },
-    size: { w: number; h: number },
-    allPrismions: { id: string; position: { x: number; y: number }; size: { w: number; h: number } }[]
-  ): boolean {
-    const left = position.x;
-    const right = position.x + size.w;
-    const top = position.y;
-    const bottom = position.y + size.h;
-    for (const p of allPrismions) {
-      if (p.id === excludeId) continue;
-      const oLeft = p.position.x;
-      const oRight = p.position.x + p.size.w;
-      const oTop = p.position.y;
-      const oBottom = p.position.y + p.size.h;
-      if (left < oRight && right > oLeft && top < oBottom && bottom > oTop) return true;
-    }
-    return false;
-  }
-  return { wouldOverlap };
-});
-
+import { describe, it, expect } from 'vitest';
+import type { Prismion } from '@/lib/board/prismion';
 import { findNonOverlappingPosition } from '@/lib/board-collision';
 
 /** Minimal shape for overlap check (id, position, size). */

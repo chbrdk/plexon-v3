@@ -1,35 +1,34 @@
 # Msqdx / MUI shim inventory (App-Finalisierung)
 
 **Date:** 2026-09-26  
-**Context:** Shrink bridge surface; only flip `typescript.ignoreBuildErrors` when the remaining set is small and typed cleanly.
+**Context:** Board cutover slice — app code no longer imports `@msqdx/react` or `@mui/material`.
 
 ## Build gate
 
-`next.config.mjs` still has `typescript.ignoreBuildErrors: true` because production imports still resolve through:
+`next.config.mjs` may still alias:
 
 - `@msqdx/react` → `lib/msqdx-react-bridge/`
-- `@mui/material` → `lib/mui-shim.tsx` (+ subpath shims)
+- `@mui/material` → `lib/mui-shim.tsx`
 - `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts`
 
-## Remaining islands (intentional)
+These are **legacy aliases** after the board cutover. Safe to remove in a follow-up once Vitest/webpack configs and dead bridge files are deleted.
 
-| Area | Why still shimmed |
-|------|-------------------|
-| `components/board/ReactFlowBoard.tsx` | Prismion / ReactFlow canvas island |
-| `lib/board-*.ts` | Prismion/Connection types + `wouldOverlap` from bridge |
+## App import status (2026-09-26)
 
-## Cleared (2026-09-26 Prio-1 slice)
+| Alias | App/components/lib imports |
+|-------|----------------------------|
+| `@msqdx/react` | **none** |
+| `@mui/material` | **none** |
 
-- `components/auth/RequireAdminRole.tsx` → `@msqdx/ui` Spinner + CSS
-- `lib/assistant/ui-visual.ts` — local `alpha`, `BrandColor` from `lib/assistant/brand-color.ts`
-- `lib/assistant/ui-typography.ts` — same local `BrandColor`
+Board SoT: `lib/board/prismion.ts` · `lib/board/board-ui.tsx` · `components/ui/layout` (`Box`).
 
-## Cleared earlier (Parity / Wave 7)
+## Cleared this slice
 
-- EQC, reports, dashboard admin edit, `components/assistant-ui/**`, orphan layout chrome (Welle 2a)
+- `ReactFlowBoard` + `lib/board-*.ts` + `app/board/page.tsx` off bridge/MUI
+- Collision test no longer mocks `@msqdx/react`
 
-## Next cut order
+## Next
 
-1. Extract Prismion types to plexon-owned module **or** rewrite ReactFlowBoard off legacy DS
-2. Drop bridge + mui-shim aliases when board island is gone
-3. Re-run `tsc --noEmit`; if clean, set `ignoreBuildErrors: false`
+1. Delete `lib/msqdx-react-bridge/` + unused `lib/mui-shim.tsx` (or keep shim only if something still resolves subpaths)
+2. Drop webpack/tsconfig/vitest aliases
+3. `tsc --noEmit`; set `ignoreBuildErrors: false` when clean

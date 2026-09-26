@@ -16,8 +16,8 @@
 
 | Area | Notes |
 |---|---|
-| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | Board canvas island remains — gate/assistant helpers cleared 2026-09-26 |
-| `components/board/ReactFlowBoard.tsx` | Legacy board; Collection Flows are SoT |
+| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | **drop_safe** after board cutover (2026-09-26) — no app imports; purge aliases next |
+| `components/board/ReactFlowBoard.tsx` | On `lib/board/*` + `@msqdx/ui`; Collection Flows remain SoT for new orchestration |
 
 ## Drop / reference-only (candidates — see inventory)
 

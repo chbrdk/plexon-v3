@@ -1,4 +1,4 @@
-import type { Connection, Prismion } from '@msqdx/react';
+import type { Connection, Prismion } from '@/lib/board/prismion';
 import { getUpstreamCardIdsInOrder } from './board-connection-history';
 
 /** Map: child prismion id -> parent prismion id. Used for explicit nesting. */

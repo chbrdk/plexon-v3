@@ -1,5 +1,5 @@
-import type { Prismion } from '@msqdx/react';
-import { wouldOverlap } from '@msqdx/react';
+import type { Prismion } from '@/lib/board/prismion';
+import { wouldOverlap } from '@/lib/board/prismion';
 
 const MAX_ITERATIONS = 50;
 const DEFAULT_GAP = 24;

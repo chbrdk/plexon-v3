@@ -2,8 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Button } from '@msqdx/ui';
-import { type Prismion, type Board, type Connection } from '../../../msqdx-design-system/packages/react/src/types/prismion';
-import type { PrismionResultItem } from '@/lib/msqdx-react-bridge';
+import { type Prismion, type Board, type Connection, type PrismionResultItem } from '@/lib/board/prismion';
 import { ReactFlowBoard } from '@/components/board/ReactFlowBoard';
 import { useI18n } from '@/components/i18n/I18nProvider';
 import {
