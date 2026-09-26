@@ -699,6 +699,7 @@ export const COLLECTION_SHARE_LINK_PRODUCT_IDS = [
   'metron',
   'videon',
   'checkion',
+  'brandion',
 ] as const;
 
 export type CollectionShareLinkProductId = (typeof COLLECTION_SHARE_LINK_PRODUCT_IDS)[number];
@@ -708,6 +709,8 @@ export const COLLECTION_SHARE_LINK_KINDS = [
   'quick_check',
   'dashboard',
   'cut',
+  'scan_overview',
+  'brand_findings',
 ] as const;
 
 export type CollectionShareLinkKind = (typeof COLLECTION_SHARE_LINK_KINDS)[number];

@@ -34,9 +34,15 @@ describe('collection share links hub', () => {
     expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('creation')
     expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('metron')
     expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('plexon')
+    expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('checkion')
+    expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('brandion')
+    expect(COLLECTION_SHARE_LINK_PRODUCT_IDS).toContain('videon')
     expect(COLLECTION_SHARE_LINK_KINDS).toContain('client_page')
     expect(COLLECTION_SHARE_LINK_KINDS).toContain('quick_check')
     expect(COLLECTION_SHARE_LINK_KINDS).toContain('dashboard')
+    expect(COLLECTION_SHARE_LINK_KINDS).toContain('scan_overview')
+    expect(COLLECTION_SHARE_LINK_KINDS).toContain('brand_findings')
+    expect(COLLECTION_SHARE_LINK_KINDS).toContain('cut')
   })
 
   it('exposes path helpers', () => {

@@ -8,7 +8,7 @@
 | Welle | Stand |
 |---|---|
 | E1 Lagebild | Team, Aktivität (Flows + Destillate), Capability-Panes; Activity-Ingest API |
-| E2 Kundenraum | API/DB live; Collection-Home UX deferred — Share-Links-Hub (`collection-share-links.md`) |
+| E2 Kundenraum | API/DB live; Collection-Home UX deferred — Share-Links-Hub (`collection-share-links.md`) writers: Creation, EQC, Metron, Checkion, Brandion, Videon |
 | E3 Termin/Gegentest | CHECKION Delta; `retest`; Flow-Schedule-Scheduler live (Env Staging) |
 | E4 Audit | Session/Service-Ingest; Flow `run_finished`; Produkt-Clients |
 | E5 Gates | Fix-Retest / Launch-Gate im Katalog; Slot-Publish bei `quality_ok` |

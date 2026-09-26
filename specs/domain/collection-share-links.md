@@ -13,13 +13,17 @@ Dies ist **kein** Kundenraum: kein gemeinsames Token, keine Slots. Invite-Links 
 
 ## Geschlossene productId
 
-| productId | kind (geschlossen, v1) | Quelle |
+| productId | kind (geschlossen) | Quelle |
 |---|---|---|
 | `creation` | `client_page` | Creation Client Page Share Projection |
 | `plexon` | `quick_check` | Event Quick Check share |
 | `metron` | `dashboard` | METRON App `/api/share` und/oder Assistant dashboard share |
-| `videon` | `cut` | Follow-up (Spec only) |
-| `checkion` | — | Follow-up |
+| `checkion` | `scan_overview` | Public Scan/Domain Share (`/api/share`) **oder** Overview-Freigabe (ClientRoom publish) |
+| `brandion` | `brand_findings` | Brand findings Freigabe (`…/client-room/publish`) — href oft session-gated |
+| `videon` | `cut` | Cut Export-Freigabe (`…/client-room-approve`) — href oft session-gated |
+| `audion` | — | Deferred (ephemeral Chat-Deep-Links, kein Create/Revoke-Store) |
+
+`href` darf fehlen oder auf eine app-interne URL zeigen, wenn kein anonymer Public-Viewer existiert. Token/Secrets nie im Registry-Payload.
 
 ## Projection `collection_share_links`
 
@@ -60,12 +64,15 @@ POST Body:
 
 Clear/revoke via DELETE oder POST mit `"revoked": true`.
 
-## Writers (v1)
+## Writers
 
 - Creation: dual-write aus `upsertClientShareProjection` / revoke.
 - EQC: beim Share-Create.
 - Metron Assistant Share: beim Create wenn `platformProjectId` gesetzt.
 - Metron App: Client `plexon-share-links.ts` bei Share create/revoke.
+- Checkion: `plexon-share-links.ts` bei `/api/share` create/revoke **und** Overview-Freigabe.
+- Brandion: `plexon-share-links.ts` bei ClientRoom Freigabe `brand_findings`.
+- Videon: `plexon-share-links.ts` bei Cut ClientRoom-Approve.
 
 ## UI
 
@@ -74,7 +81,7 @@ Kundenraum-Panel ist in der UX **ausgeblendet** (API bleibt).
 
 ## Acceptance
 
-- Manager sehen aktive Links aller v1-Quellen in einer Liste.
+- Manager sehen aktive Links aller Writers (Creation, EQC, Metron, Checkion, Brandion, Videon) in einer Liste.
 - Revoke eines Creation-Links cleart Projection und fan-out wie bisher.
 - Leere Liste zeigt keinen Fixture-Eintrag.
 - Kein Token im Registry-Payload.
