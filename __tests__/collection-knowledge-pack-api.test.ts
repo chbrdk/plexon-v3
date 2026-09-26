@@ -168,7 +168,7 @@ describe('Collection Knowledge Pack API', () => {
     expect(res.status).toBe(422);
   });
 
-  it('publish research_brief requires audion productId', async () => {
+  it('publish research_brief allows audion and checkion; denies unrelated products', async () => {
     const { POST } = await import(
       '@/app/api/platform/projects/[platformProjectId]/knowledge/facets/[facetId]/publish/route'
     );
@@ -181,7 +181,7 @@ describe('Collection Knowledge Pack API', () => {
           body: JSON.stringify({
             mode: 'replace',
             expectedRevision: 1,
-            provenance: { actorType: 'service', productId: 'checkion' },
+            provenance: { actorType: 'service', productId: 'echon' },
             data: { summary: 'nope' },
           }),
         }
@@ -192,7 +192,7 @@ describe('Collection Knowledge Pack API', () => {
 
     const next = packRow(2);
     vi.mocked(patchKnowledgePackFacet).mockResolvedValue(next);
-    const ok = await POST(
+    const okAudion = await POST(
       new Request(
         'http://localhost/api/platform/projects/pp-1/knowledge/facets/research_brief/publish',
         {
@@ -208,7 +208,42 @@ describe('Collection Knowledge Pack API', () => {
       ),
       { params: Promise.resolve({ platformProjectId: 'pp-1', facetId: 'research_brief' }) }
     );
-    expect(ok.status).toBe(200);
+    expect(okAudion.status).toBe(200);
+
+    vi.mocked(patchKnowledgePackFacet).mockResolvedValue(packRow(3));
+    const okCheckion = await POST(
+      new Request(
+        'http://localhost/api/platform/projects/pp-1/knowledge/facets/research_brief/publish',
+        {
+          method: 'POST',
+          headers: serviceHeaders(),
+          body: JSON.stringify({
+            mode: 'merge',
+            expectedRevision: 2,
+            provenance: {
+              actorType: 'service',
+              productId: 'checkion',
+              runId: 'suggest-1',
+              note: 'market-suggest-agent',
+            },
+            data: {
+              summary: 'Vaillant heating systems',
+              topics: ['Wärmepumpe'],
+              sections: [
+                {
+                  id: 'market-suggest',
+                  title: 'Market Suggest brief',
+                  plainText: 'Heat pumps and boilers',
+                  bullets: ['Wärmepumpe'],
+                },
+              ],
+            },
+          }),
+        }
+      ),
+      { params: Promise.resolve({ platformProjectId: 'pp-1', facetId: 'research_brief' }) }
+    );
+    expect(okCheckion.status).toBe(200);
   });
 
   it('returns 409 on revision conflict', async () => {

@@ -120,7 +120,7 @@ Conflicts: `409` when `expectedRevision` mismatches.
 |-------|--------------------------------|
 | `profile` | `plexon` (human); limited fields from `audion` / `checkion` with merge |
 | `competitive` | `plexon`, `checkion`, `audion` (merge) |
-| `research_brief` | `audion` (primary), `plexon` (human edit) |
+| `research_brief` | `audion` (primary dossier), `checkion` (Market Suggest Research Agent distillate), `plexon` (human edit) |
 | `geo_context` | `checkion` |
 | `brand` | `brandion` only when active; others → `403` |
 | `sources` | any authenticated publisher with URL allowlist rules |

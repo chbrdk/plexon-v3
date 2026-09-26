@@ -56,7 +56,7 @@ Collections accumulate **heterogeneous** knowledge over years: Audion research d
 |---------|-------|
 | Pack CRUD, versioning, Collection Knowledge UI | **PLEXON** |
 | Research dossier + publish distillates → `research_brief` | **AUDION** |
-| GEO jobs + launch suggest; publish → `geo_context` / `competitive` | **CHECKION** |
+| GEO jobs + launch suggest; publish → `geo_context` / `competitive`; Market Suggest Agent → `research_brief` (+ profile/geo seeds) | **CHECKION** |
 | Guideline / tokens / voice → `brand` | **BRANDION** (refs / distillates only) |
 | Media / scene distillates → `media_insights` | **VIDEON** |
 | Identity (`name`, `domain`, bindings) | **PLEXON** (already) |

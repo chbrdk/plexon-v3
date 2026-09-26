@@ -292,7 +292,8 @@ export function isKnowledgeFacetId(value: string): value is KnowledgeFacetId {
 export const FACET_PUBLISH_OWNERS: Record<KnowledgeFacetId, KnowledgeProductId[]> = {
   profile: ['plexon', 'audion', 'checkion'],
   competitive: ['plexon', 'checkion', 'audion'],
-  research_brief: ['audion', 'plexon'],
+  /** Audion = research dossier distillates; Checkion = Market Suggest Research Agent brief. */
+  research_brief: ['audion', 'plexon', 'checkion'],
   geo_context: ['checkion'],
   market_intelligence: ['echon', 'plexon'],
   media_insights: ['videon', 'plexon'],

@@ -27,7 +27,7 @@ describe('collection knowledge pack merge', () => {
 
   it('enforces facet publish ownership', () => {
     expect(productMayPublishFacet('research_brief', 'audion')).toBe(true);
-    expect(productMayPublishFacet('research_brief', 'checkion')).toBe(false);
+    expect(productMayPublishFacet('research_brief', 'checkion')).toBe(true);
     expect(productMayPublishFacet('geo_context', 'checkion')).toBe(true);
     expect(productMayPublishFacet('market_intelligence', 'echon')).toBe(true);
     expect(productMayPublishFacet('media_insights', 'videon')).toBe(true);
