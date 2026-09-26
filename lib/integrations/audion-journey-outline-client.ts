@@ -28,6 +28,8 @@ import type {
   JourneyQuoteOutlineInput,
   JourneyRecommendationOutlineInput,
 } from '@/lib/assistant/ui-blocks/build-journey-outline-ui';
+import { JEV_USE_CASES, questionsFrictionSeverity } from '@/lib/jev/catalog';
+import { scheduleJevShadow } from '@/lib/jev/schedule';
 
 const MOMENT_KINDS = new Set([
   'action',
@@ -134,6 +136,15 @@ function mapPhases(raw: RawJourneyPhase[] | undefined): JourneyPhaseOutlineInput
 function frictionSeverity(
   severity: string | undefined
 ): JourneyFindingOutlineInput['severity'] {
+  if (severity === 'high' || severity === 'medium' || severity === 'low') {
+    scheduleJevShadow({
+      useCaseId: JEV_USE_CASES.audionFrictionSeverity,
+      state: { severity, baseline: severity },
+      questions: questionsFrictionSeverity(),
+      baseline: severity,
+      extractChoiceKey: 'severity',
+    });
+  }
   if (severity === 'high') return 'error';
   if (severity === 'medium') return 'warning';
   if (severity === 'low') return 'info';

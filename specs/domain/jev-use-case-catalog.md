@@ -38,7 +38,8 @@ Shadow-first. Env suffix = uppercase id with dots → underscores (`assistant.in
 | `assistant.tool_family` | `classifyToolFamily` | Choice |
 | `assistant.model_profile` | board vs assistant | Choice |
 | `eqc.dashboard_bands` | layout resolvers | Choice band set |
-| `audion.friction_severity` | `frictionSeverity` | Choice |
+| `audion.friction_severity` | `frictionSeverity` / journey validate friction | Choice high/medium/low |
+| `audion.insight_triage` | UX-study / validate finding severity → triage | Choice act_now/watch/noise |
 
 ## P2 — small maps
 

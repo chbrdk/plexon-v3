@@ -36,6 +36,7 @@ export const JEV_USE_CASES = {
   assistantModelProfile: 'assistant.model_profile',
   eqcDashboardBands: 'eqc.dashboard_bands',
   audionFrictionSeverity: 'audion.friction_severity',
+  audionInsightTriage: 'audion.insight_triage',
   uiScoreTone: 'ui.score_tone',
   eqcEeatReadingVariant: 'eqc.eeat_reading_variant',
   assistantCompanyBriefUseLlm: 'assistant.company_brief_use_llm',
@@ -197,6 +198,16 @@ export function questionsScoreTone(): JevQuestions {
 export function questionsFrictionSeverity(): JevQuestions {
   return {
     severity: choiceQuestion('Friction severity', ['high', 'medium', 'low']),
+  }
+}
+
+export function questionsInsightTriage(): JevQuestions {
+  return {
+    triage: choiceQuestion('UX finding triage', ['act_now', 'watch', 'noise'], {
+      act_now: 'Actionable now — prioritize fix or follow-up',
+      watch: 'Worth monitoring; not urgent',
+      noise: 'Low signal / discard as noise',
+    }),
   }
 }
 
