@@ -129,7 +129,7 @@ Nach Querschnitt: App für App in Prio-Reihenfolge (eigene Commit-Sätze, Specs-
 1. Handover/Tutorials wieder aufnehmen wenn gewünscht.  
 2. Test-Fixture-Typen (`__tests__` in plexon) nachziehen, falls `tsc` wieder Tests einschließen soll.  
 3. creation-v3: uncommitted Mac/native + web-Diffs committen (separates Scope).  
-4. Optional: Plexon `@msqdx/tokens` shim → `@msqdx/ui-tokens` cutover.
+4. ~~Optional: Plexon `@msqdx/tokens` shim → `@msqdx/ui-tokens` cutover.~~ **done** 2026-09-26 (facade).
 
 Kein paralleles Enterprise-Objekt nötigen — E1–E9 + Hub + Härte + E2E sind Checkpoint-fertig.  
 App-Finalisierungs-Matrix Prio 0–5 + Plexon `ignoreBuildErrors` + Staging-Redeploy = **done**.

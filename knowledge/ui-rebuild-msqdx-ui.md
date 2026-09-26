@@ -45,7 +45,7 @@ Per wave: `ui-migrate-dashboard.md` · `ui-migrate-settings.md` · `ui-migrate-p
 
 - `@msqdx/ui` → curated barrel (`lib/msqdx-ui.ts`)
 - `@msqdx/ui-shell` → `lib/msqdx-ui-shell.ts`
-- `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts` (legacy token reads only)
+- `@msqdx/tokens` → `lib/msqdx-tokens-shim.ts` (ui-tokens-backed `MSQDX_*` facade)
 - `@msqdx/react` / `@mui/material` bridge+shim — **deleted** 2026-09-26
 
 **Target:** every surface imports `@msqdx/ui`; tokens shim drops when callers use `@msqdx/ui-tokens`.

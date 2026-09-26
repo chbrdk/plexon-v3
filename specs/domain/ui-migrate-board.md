@@ -12,7 +12,7 @@
 |------------|----------|-------|
 | Board page chrome (stage, add-prompt) | **reshape** ✅ | `@msqdx/ui` Button + `.plexon-board-*` |
 | Prismion / ReactFlow canvas | **reshape** ✅ (2026-09-26) | Types + chrome via `lib/board/prismion` + `lib/board/board-ui`; `Box` from `@/components/ui/layout` |
-| Bridge + mui-shim deletion | **drop** ✅ (2026-09-26) | Files + webpack/tsconfig/vitest aliases deleted; `@msqdx/tokens` shim kept |
+| Bridge + mui-shim deletion | **drop** ✅ (2026-09-26) | Files + webpack/tsconfig/vitest aliases deleted; `@msqdx/tokens` = ui-tokens facade |
 
 ## File set
 

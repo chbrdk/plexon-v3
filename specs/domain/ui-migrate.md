@@ -49,7 +49,7 @@ This is **not** a 1:1 visual migration of legacy JSX.
 | Alias | Status |
 |-------|--------|
 | `@msqdx/react` · `@mui/material` | **Deleted** 2026-09-26 (Wave 7 + purge) |
-| `@msqdx/tokens` | `lib/msqdx-tokens-shim.ts` — keep until callers move to `@msqdx/ui-tokens` |
+| `@msqdx/tokens` | `lib/msqdx-tokens-shim.ts` — ui-tokens-backed `MSQDX_*` facade (no design-system tokens package) |
 
 ## Agent checklist per wave
 

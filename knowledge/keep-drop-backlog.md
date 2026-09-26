@@ -16,7 +16,8 @@
 
 | Area | Notes |
 |---|---|
-| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | **dropped** 2026-09-26 — files + aliases purged (`@msqdx/tokens` shim remains) |
+| `lib/mui-shim.tsx` + `lib/msqdx-react-bridge/` | **dropped** 2026-09-26 — files + aliases purged |
+| `@msqdx/tokens` → design-system package | **reshaped** 2026-09-26 — facade from `@msqdx/ui-tokens` |
 | `components/board/ReactFlowBoard.tsx` | On `lib/board/*` + `@msqdx/ui`; Collection Flows remain SoT for new orchestration |
 | `knowledge/plexon-setup.md` · locales `designSystem` | Ops/copy → `@msqdx/ui` / board modules (reshape slice) |
 
