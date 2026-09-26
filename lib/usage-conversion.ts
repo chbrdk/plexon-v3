@@ -118,6 +118,12 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
       return 75 * (num(r.runs, 1) || 1);
     case 'retrieval_query':
       return 18 * (num(r.queries, 1) || 1);
+    /** VIDEON OpenRouter Whisper — minutes of audio (fallback when no token block). */
+    case 'transcription':
+      return 80 * (num(r.minutes, 1) || 1);
+    /** VIDEON Seedance / video gen — expensive floor until provider cost_usd is wired. */
+    case 'video_generation':
+      return 800 * (num(r.runs, 1) || 1);
     /** BRANDION Lab detect — scripts/PDF/image inventory (no OpenAI required). */
     case 'brandion_detect': {
       const kind = typeof r.kind === 'string' ? r.kind : 'image';

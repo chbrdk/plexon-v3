@@ -93,6 +93,12 @@ describe('usage-conversion', () => {
       expect(tokensFromEvent('unknown_type', {})).toBe(0);
     });
 
+    it('transcription / video_generation floors', () => {
+      expect(tokensFromEvent('transcription', { minutes: 1 })).toBe(80);
+      expect(tokensFromEvent('transcription', { minutes: 3 })).toBe(240);
+      expect(tokensFromEvent('video_generation', { runs: 1 })).toBe(800);
+    });
+
     it('llm_request accepts prompt_tokens / completion_tokens aliases', () => {
       expect(
         tokensFromEvent('llm_request', { prompt_tokens: 100, completion_tokens: 50 }),
