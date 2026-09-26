@@ -49,6 +49,13 @@ Diese Zeilen dürfen der Sweeper **jetzt** löschen (Orchestrator hat Refs nochm
 - `knowledge/coolify-build-fix-2026-09-17-labtile.md`
 - `knowledge/sefe-staging-reset-2026-09-21.md`
 
+### videon-v3
+- Orphan CSS `.videon-nle__toolbar-menu*` in `apps/web/app/globals.css` (**done** 2026-09-26)
+
+### creation-v3
+- Doc fix `coolify-operator-handoff.md` CREATION_EDITOR row (**done**)
+- `.tmp/` + root `.build/` in `.gitignore` (**done**)
+
 ## Welle 2b — braucht explizites „los“
 
 | Item | Warum Gate |
