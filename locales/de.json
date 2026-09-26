@@ -542,6 +542,8 @@
       "clientShares": {
         "title": "Client-Seitenfreigaben",
         "subtitle": "CREATION nur-lesen Links für Kunden — keine Collection-Einladungen.",
+        "policyTitle": "Creation Share-Policy",
+        "policySubtitle": "Organisations- und Collection-Regeln für CREATION Client-Links.",
         "loadError": "Client-Share-Policy konnte nicht geladen werden.",
         "saveError": "Client-Share-Policy konnte nicht gespeichert werden.",
         "saved": "Policy gespeichert.",
@@ -565,6 +567,15 @@
         "exportAudit": "Audit-CSV exportieren",
         "exportError": "Audit-CSV konnte nicht exportiert werden.",
         "companyCeilingHint": "Werte sind durch Organisations-Defaults begrenzt. Lockern über die Company-Policy wird abgelehnt."
+      },
+      "shareLinks": {
+        "title": "Freigaben / Share-Links",
+        "subtitle": "Alle kundennahe Links dieser Collection — Creation, Quick Check, Metron und weitere.",
+        "empty": "Noch keine Share-Links für diese Collection.",
+        "loadError": "Share-Links konnten nicht geladen werden.",
+        "revoke": "Widerrufen",
+        "revokeConfirm": "Diesen Share-Link widerrufen?",
+        "revokeError": "Widerruf fehlgeschlagen."
       },
       "knowledgeTitle": "Collection-Wissen",
       "knowledgeSubtitle": "Plattform-Quelle der Wahrheit — gemeinsamer Brief für CHECKION und AUDION.",

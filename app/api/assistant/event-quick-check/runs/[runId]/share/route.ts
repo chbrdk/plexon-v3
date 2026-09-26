@@ -11,6 +11,7 @@ import {
   hashReportShareToken,
 } from '@/lib/assistant/reports/share-token';
 import { setClientRoomSlot } from '@/lib/collection-client-room';
+import { upsertCollectionShareLink } from '@/lib/collection-share-links';
 import { pathShareQuickCheck } from '@/lib/constants';
 import { createEventQuickCheckShare } from '@/lib/db/event-quick-check-shares';
 import { getPublicAppBaseUrl } from '@/lib/mail';
@@ -42,11 +43,24 @@ export async function POST(
     const sharePath = pathShareQuickCheck(token);
     const base = getPublicAppBaseUrl();
     const shareUrl = base ? `${base}${sharePath}` : sharePath;
+    const title =
+      report.meta?.title?.trim() || report.meta?.projectName?.trim() || 'Event Quick Check';
 
-    // Enterprise E2: publish Quick Check into Collection ClientRoom when bound.
-    // Access already enforced via requireEventQuickCheckRunAccess.
     const platformProjectId = await resolveEqcPlatformProjectId(run);
     if (platformProjectId) {
+      await upsertCollectionShareLink({
+        platformProjectId,
+        productId: 'plexon',
+        shareId: share.id,
+        kind: 'quick_check',
+        title,
+        href: shareUrl,
+        serviceTrusted: true,
+        actor: user,
+        meta: { runId: run.id },
+      }).catch(() => undefined);
+
+      // ClientRoom slot remains available for later UX reuse.
       await setClientRoomSlot({
         platformProjectId,
         actor: user,
@@ -55,7 +69,7 @@ export async function POST(
         slot: {
           productId: 'plexon',
           subjectRef: share.id,
-          title: report.meta?.title?.trim() || report.meta?.projectName?.trim() || 'Event Quick Check',
+          title,
           href: shareUrl,
         },
       }).catch(() => undefined);

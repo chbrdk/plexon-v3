@@ -25,12 +25,19 @@ describe('collection client shares UI (P4)', () => {
     expect(src).toContain('data-testid="collection-client-shares-panel"')
   })
 
-  it('Collection detail mounts the panel', () => {
+  it('Collection detail mounts share-links hub (embeds policy panel)', () => {
     const dash = readFileSync(
       path.join(root, 'components/products/PlatformProjectDashboard.tsx'),
       'utf8'
     )
-    expect(dash).toContain('CollectionClientSharesPanel')
+    expect(dash).toContain('CollectionShareLinksPanel')
+    expect(dash).not.toContain('CollectionClientRoomPanel')
+    const hub = readFileSync(
+      path.join(root, 'components/projects/CollectionShareLinksPanel.tsx'),
+      'utf8'
+    )
+    expect(hub).toContain('CollectionClientSharesPanel')
+    expect(hub).toContain('policyOnly')
   })
 
   it('locales expose clientShares keys', () => {

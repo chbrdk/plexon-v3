@@ -13,6 +13,7 @@ const migrationsDir = path.join(__dirname, '../lib/db/migrations')
 const FILES = [
   '0020_suite_enterprise_client_room_audit.sql',
   '0021_suite_enterprise_activity_brief_directory.sql',
+  '0022_collection_share_links.sql',
 ]
 
 async function main() {

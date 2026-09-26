@@ -690,6 +690,52 @@ export const creationClientShareEvents = pgTable(
 );
 
 /**
+ * Cross-product share-link registry (metadata only).
+ * Spec: collection-share-links.md
+ */
+export const COLLECTION_SHARE_LINK_PRODUCT_IDS = [
+  'creation',
+  'plexon',
+  'metron',
+  'videon',
+  'checkion',
+] as const;
+
+export type CollectionShareLinkProductId = (typeof COLLECTION_SHARE_LINK_PRODUCT_IDS)[number];
+
+export const COLLECTION_SHARE_LINK_KINDS = [
+  'client_page',
+  'quick_check',
+  'dashboard',
+  'cut',
+] as const;
+
+export type CollectionShareLinkKind = (typeof COLLECTION_SHARE_LINK_KINDS)[number];
+
+export const collectionShareLinks = pgTable(
+  'collection_share_links',
+  {
+    productId: text('product_id').notNull(),
+    shareId: text('share_id').notNull(),
+    platformProjectId: text('platform_project_id')
+      .notNull()
+      .references(() => platformProjects.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    href: text('href'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    meta: jsonb('meta').$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.productId, t.shareId] }),
+    projectIdx: index('collection_share_links_project_idx').on(t.platformProjectId, t.createdAt),
+  })
+);
+
+/**
  * Enterprise E2 — one public ClientRoom per Collection (approved slots only).
  * Spec: suite-enterprise-program.md § E2
  */

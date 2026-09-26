@@ -27,6 +27,8 @@ type Props = {
   platformProjectId: string
   /** When false, policy PATCH / revoke are hidden (viewers). Default true for managers. */
   canManage?: boolean
+  /** When true, only policy controls (no Creation-only inventory). Spec: collection-share-links.md */
+  policyOnly?: boolean
 }
 
 const emptyPolicy: ClientSharePolicy = {
@@ -42,6 +44,7 @@ const emptyPolicy: ClientSharePolicy = {
 export function CollectionClientSharesPanel({
   platformProjectId,
   canManage = true,
+  policyOnly = false,
 }: Props) {
   const { t } = useI18n()
   const [policy, setPolicy] = useState<ClientSharePolicy | null>(null)
@@ -58,29 +61,34 @@ export function CollectionClientSharesPanel({
     setLoading(true)
     setError(null)
     try {
-      const [policyRes, listRes] = await Promise.all([
-        fetch(apiPlatformProvisioningCollectionClientSharePolicy(platformProjectId), {
-          credentials: 'same-origin',
-        }),
-        fetch(apiPlatformProvisioningCollectionClientShares(platformProjectId), {
-          credentials: 'same-origin',
-        }),
-      ])
+      const policyRes = await fetch(
+        apiPlatformProvisioningCollectionClientSharePolicy(platformProjectId),
+        { credentials: 'same-origin' },
+      )
       if (!policyRes.ok) {
         throw new Error(t('projects.detail.clientShares.loadError'))
       }
-      if (!listRes.ok) {
-        throw new Error(t('projects.detail.clientShares.loadError'))
-      }
       const nextPolicy = (await policyRes.json()) as ClientSharePolicy
-      const listBody = (await listRes.json()) as { items?: ShareItem[] }
       setPolicy(nextPolicy)
       setTtlDraft(
         nextPolicy.maxTtlDays === null || nextPolicy.maxTtlDays === undefined
           ? ''
           : String(nextPolicy.maxTtlDays)
       )
-      setItems(Array.isArray(listBody.items) ? listBody.items : [])
+
+      if (!policyOnly) {
+        const listRes = await fetch(
+          apiPlatformProvisioningCollectionClientShares(platformProjectId),
+          { credentials: 'same-origin' },
+        )
+        if (!listRes.ok) {
+          throw new Error(t('projects.detail.clientShares.loadError'))
+        }
+        const listBody = (await listRes.json()) as { items?: ShareItem[] }
+        setItems(Array.isArray(listBody.items) ? listBody.items : [])
+      } else {
+        setItems([])
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : t('projects.detail.clientShares.loadError'))
       setPolicy(null)
@@ -88,7 +96,7 @@ export function CollectionClientSharesPanel({
     } finally {
       setLoading(false)
     }
-  }, [platformProjectId, t])
+  }, [platformProjectId, policyOnly, t])
 
   useEffect(() => {
     void load()
@@ -205,9 +213,20 @@ export function CollectionClientSharesPanel({
       aria-label={t('projects.detail.clientShares.title')}
     >
       <SectionChrome
-        title={t('projects.detail.clientShares.title')}
-        meta={<Text role="meta">{t('projects.detail.clientShares.subtitle')}</Text>}
+        title={
+          policyOnly
+            ? t('projects.detail.clientShares.policyTitle')
+            : t('projects.detail.clientShares.title')
+        }
+        meta={
+          <Text role="meta">
+            {policyOnly
+              ? t('projects.detail.clientShares.policySubtitle')
+              : t('projects.detail.clientShares.subtitle')}
+          </Text>
+        }
         action={
+          policyOnly ? null : (
           <Button
             variant="ghost"
             size="sm"
@@ -219,6 +238,7 @@ export function CollectionClientSharesPanel({
               ? t('common.loading')
               : t('projects.detail.clientShares.exportAudit')}
           </Button>
+          )
         }
       />
 
@@ -315,6 +335,7 @@ export function CollectionClientSharesPanel({
             )}
           </div>
 
+          {!policyOnly ? (
           <div className="plexon-collection-client-shares-list">
             <Text as="h3" role="label">
               {t('projects.detail.clientShares.inventoryTitle')}
@@ -362,6 +383,7 @@ export function CollectionClientSharesPanel({
               </Text>
             ) : null}
           </div>
+          ) : null}
         </>
       ) : null}
     </section>

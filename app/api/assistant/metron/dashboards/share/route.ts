@@ -6,7 +6,9 @@ import {
   generateMetronShareToken,
   hashReportShareToken,
 } from '@/lib/assistant/reports/share-token';
+import { upsertCollectionShareLink } from '@/lib/collection-share-links';
 import { createMetronDashboardShare } from '@/lib/db/metron-dashboard-shares';
+import { getPublicAppBaseUrl } from '@/lib/mail';
 import { pathShareMetron } from '@/lib/constants';
 
 /** Create a public read-only METRON dashboard share link (snapshot). */
@@ -44,10 +46,28 @@ export async function POST(request: Request) {
     reportSnapshot: snapshot,
   });
 
+  const sharePath = pathShareMetron(token);
+  const base = getPublicAppBaseUrl();
+  const shareUrl = base ? `${base}${sharePath}` : sharePath;
+  const platformProjectId = snapshot.platformProjectId?.trim();
+  if (platformProjectId) {
+    await upsertCollectionShareLink({
+      platformProjectId,
+      productId: 'metron',
+      shareId: share.id,
+      kind: 'dashboard',
+      title: snapshot.name?.trim() || snapshot.dashboardId || 'Dashboard',
+      href: shareUrl,
+      serviceTrusted: true,
+      actor: user,
+      meta: { dashboardId: snapshot.dashboardId, source: 'assistant' },
+    }).catch(() => undefined);
+  }
+
   return Response.json({
     id: share.id,
     token,
-    url: pathShareMetron(token),
+    url: sharePath,
     createdAt: share.createdAt.toISOString(),
   });
 }

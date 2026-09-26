@@ -57,7 +57,7 @@ E6 ist bereits spezifiziert. Diese Datei bindet sie ein und schreibt sie nicht n
 
 ## E2 — Kundenraum
 
-**Status:** Done (2026-09-25) — `collection_client_rooms`, API, Panel, `/share/room/[token]`; Slot-Put Session + Service-Secret (`serviceTrusted` nach canView). Produkt-Slot-Publish parallel in den App-Specs.
+**Status:** Done (API/DB 2026-09-25) — UX auf Collection-Home **deferred** (2026-09-26). Operative Fläche für Freigabe-Links: `collection-share-links.md` (Share-Links-Hub). Slot-APIs und `serviceTrusted` bleiben für späteren Room-Reuse.
 
 **Nutzer:** Ein externer Link zeigt den zuletzt freigegebenen Stand des Mandats.
 

@@ -8,7 +8,7 @@
 | Welle | Stand |
 |---|---|
 | E1 Lagebild | Team, Aktivität (Flows + Destillate), Capability-Panes; Activity-Ingest API |
-| E2 Kundenraum | DB + API + Panel + Share; Slot-Put Service (`serviceTrusted`); EQC → `quick_check`; Produkt-Clients (Checkion/Brandion/Creation/Metron/Videon) → `knowledge/client-room-slots.md` |
+| E2 Kundenraum | API/DB live; Collection-Home UX deferred — Share-Links-Hub (`collection-share-links.md`) |
 | E3 Termin/Gegentest | CHECKION Delta; `retest`; Flow-Schedule-Scheduler live (Env Staging) |
 | E4 Audit | Session/Service-Ingest; Flow `run_finished`; Produkt-Clients |
 | E5 Gates | Fix-Retest / Launch-Gate im Katalog; Slot-Publish bei `quality_ok` |
@@ -32,6 +32,7 @@
 
 1. `lib/db/migrations/0020_suite_enterprise_client_room_audit.sql`
 2. `lib/db/migrations/0021_suite_enterprise_activity_brief_directory.sql`
+3. `lib/db/migrations/0022_collection_share_links.sql`
 
 ## Env (plexon-v3 Staging)
 

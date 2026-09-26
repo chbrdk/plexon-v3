@@ -356,6 +356,22 @@ export async function upsertClientShareProjection(
         updatedAt: now,
       },
     });
+
+  const { dualWriteCreationShareLink } = await import('@/lib/collection-share-links');
+  await dualWriteCreationShareLink({
+    platformProjectId,
+    shareId: input.shareId.trim(),
+    title: (input.label?.trim() || `Client pages · ${input.sceneId.trim()}`).slice(0, 200),
+    expiresAt: input.expiresAt ?? null,
+    revoked: Boolean(input.revokedAt),
+    meta: {
+      sceneId: input.sceneId.trim(),
+      accessMode: input.accessMode || 'password',
+      contentMode: input.contentMode || 'pinned_revision',
+    },
+    actor,
+  });
+
   return { ok: true };
 }
 
@@ -435,6 +451,16 @@ export async function revokeClientShareProjection(
     actorUserId: actor.id,
     meta: { source: 'plexon_collection' },
   }).catch(() => undefined);
+
+  const { dualWriteCreationShareLink } = await import('@/lib/collection-share-links');
+  await dualWriteCreationShareLink({
+    platformProjectId,
+    shareId,
+    title: 'Client pages (revoked)',
+    revoked: true,
+    actor,
+  });
+
   return { ok: true };
 }
 

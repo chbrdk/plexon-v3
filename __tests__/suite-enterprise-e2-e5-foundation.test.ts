@@ -75,12 +75,13 @@ describe('suite enterprise E2–E5 foundation', () => {
     expect(gate.nodes.some((n) => n.kind === 'human_confirm')).toBe(true)
   })
 
-  it('wires ClientRoom panel and enterprise palette on Collection surfaces', () => {
+  it('wires Share Links hub and enterprise palette on Collection surfaces', () => {
     const dash = readFileSync(
       path.join(root, 'components/products/PlatformProjectDashboard.tsx'),
       'utf8',
     )
-    expect(dash).toContain('CollectionClientRoomPanel')
+    expect(dash).toContain('CollectionShareLinksPanel')
+    expect(dash).not.toContain('CollectionClientRoomPanel')
 
     const board = readFileSync(
       path.join(root, 'components/flows/CollectionFlowBoard.tsx'),

@@ -15,8 +15,7 @@ import {
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { apiPlatformProjectDashboard, pathAssistantWithProject } from '@/lib/constants'
 import { CollectionLifecycleActions } from '@/components/projects/CollectionLifecycleActions'
-import { CollectionClientSharesPanel } from '@/components/projects/CollectionClientSharesPanel'
-import { CollectionClientRoomPanel } from '@/components/projects/CollectionClientRoomPanel'
+import { CollectionShareLinksPanel } from '@/components/projects/CollectionShareLinksPanel'
 import { CollectionTeamPanel } from '@/components/projects/CollectionTeamPanel'
 import { CollectionActivityBand } from '@/components/projects/CollectionActivityBand'
 import { CollectionCompetitiveSpaceBand } from '@/components/projects/CollectionCompetitiveSpaceBand'
@@ -189,8 +188,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             onOpenWork={openWork}
           />
           <CollectionTeamPanel platformProjectId={platformProjectId} />
-          <CollectionClientRoomPanel platformProjectId={platformProjectId} />
-          <CollectionClientSharesPanel platformProjectId={platformProjectId} />
+          <CollectionShareLinksPanel platformProjectId={platformProjectId} />
           <CollectionKnowledgeBand
             platformProjectId={platformProjectId}
             audionHref={data.links.audionProject}

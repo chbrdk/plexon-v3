@@ -198,6 +198,21 @@ export function apiPlatformProvisioningCollectionClientShareEventsExport(
   return `${apiPlatformProvisioningCollectionClientShareEvents(platformProjectId)}/export`;
 }
 
+/** Cross-product share links registry. Spec: collection-share-links.md */
+export function apiPlatformProvisioningCollectionShareLinks(
+  platformProjectId: string
+): string {
+  return `/api/platform/provisioning/collections/${encodeURIComponent(platformProjectId)}/share-links`;
+}
+export function apiPlatformProvisioningCollectionShareLink(
+  platformProjectId: string,
+  shareId: string,
+  productId: string
+): string {
+  const base = `${apiPlatformProvisioningCollectionShareLinks(platformProjectId)}/${encodeURIComponent(shareId)}`;
+  return `${base}?productId=${encodeURIComponent(productId)}`;
+}
+
 /** Enterprise E2 ClientRoom. Spec: suite-enterprise-program.md */
 export function apiPlatformProvisioningCollectionClientRoom(
   platformProjectId: string

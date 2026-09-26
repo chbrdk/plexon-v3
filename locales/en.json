@@ -542,6 +542,8 @@
       "clientShares": {
         "title": "Client page shares",
         "subtitle": "CREATION view-only links for customers — not Collection invites.",
+        "policyTitle": "Creation share policy",
+        "policySubtitle": "Organization and Collection rules for CREATION client links.",
         "loadError": "Could not load client share policy.",
         "saveError": "Could not save client share policy.",
         "saved": "Policy saved.",
@@ -565,6 +567,15 @@
         "exportAudit": "Export audit CSV",
         "exportError": "Could not export audit CSV.",
         "companyCeilingHint": "Values are capped by organization defaults. Loosening past the company policy is rejected."
+      },
+      "shareLinks": {
+        "title": "Approvals / share links",
+        "subtitle": "All customer-facing links for this Collection — Creation, Quick Check, Metron, and more.",
+        "empty": "No share links for this Collection yet.",
+        "loadError": "Could not load share links.",
+        "revoke": "Revoke",
+        "revokeConfirm": "Revoke this share link?",
+        "revokeError": "Revoke failed."
       },
       "knowledgeTitle": "Collection knowledge",
       "knowledgeSubtitle": "Platform source of truth — shared brief across CHECKION and AUDION.",
