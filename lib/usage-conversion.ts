@@ -16,8 +16,11 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
   };
   switch (eventType) {
     case 'llm_request':
-    case 'chat':
-      return num(r.input_tokens, 0) + 2 * num(r.output_tokens, 0);
+    case 'chat': {
+      const inputTok = num(r.input_tokens ?? r.prompt_tokens, 0);
+      const outputTok = num(r.output_tokens ?? r.completion_tokens, 0);
+      return inputTok + 2 * outputTok;
+    }
     case 'scan_wcag':
       return 50 * (num(r.scans, 1) || 1);
     case 'scan_screenshot':
@@ -65,6 +68,20 @@ export function tokensFromEvent(eventType: string, rawUnits: RawUnits): number {
     }
     case 'serp_refresh':
       return 35 * (num(r.keywords, 1) || 1);
+    /**
+     * CHECKION Market SEO — DataForSEO vendor cost in USD.
+     * Anchor: $1 USD ≈ 100_000 Plexon billable units (so $0.002 ≈ 200 tokens).
+     * Prefer real `cost_usd` from the vendor envelope over soft-cap unit proxies.
+     */
+    case 'seo_dataforseo': {
+      const cost = num(r.cost_usd, NaN);
+      if (!Number.isNaN(cost) && cost >= 0) {
+        return Math.max(1, Math.round(cost * 100_000));
+      }
+      // Fallback: soft-cap units are ceil(cost_usd * 100) in Checkion.
+      const units = num(r.soft_cap_units ?? r.units, 1) || 1;
+      return Math.max(1, Math.round(units * 1000));
+    }
     case 'tool_extract':
       return 28 * (num(r.requests, 1) || 1);
     case 'wayback_lookup':

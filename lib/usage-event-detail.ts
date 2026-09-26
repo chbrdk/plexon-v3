@@ -63,10 +63,23 @@ export function formatUsageEventDetail(eventType: string, rawUnits: Raw): string
     const inp = rawUnits.input_tokens ?? rawUnits.prompt_tokens;
     const out = rawUnits.output_tokens ?? rawUnits.completion_tokens;
     const model = typeof rawUnits.model === 'string' ? rawUnits.model.trim() : '';
+    const surface = typeof rawUnits.surface === 'string' ? rawUnits.surface.trim() : '';
+    const estimated = rawUnits.estimated === true;
     const modelPart = model ? ` · ${trunc(model, 24)}` : '';
+    const surfacePart = surface ? ` · ${trunc(surface, 16)}` : '';
+    const estPart = estimated ? ' · est' : '';
     if (typeof inp === 'number' || typeof out === 'number') {
-      return `in ${inp ?? '—'} · out ${out ?? '—'}${modelPart}`;
+      return `in ${inp ?? '—'} · out ${out ?? '—'}${modelPart}${surfacePart}${estPart}`;
     }
+  }
+
+  if (eventType === 'seo_dataforseo') {
+    const cost = rawUnits.cost_usd;
+    const endpoint = typeof rawUnits.endpoint === 'string' ? rawUnits.endpoint : '';
+    const costPart =
+      typeof cost === 'number' && !Number.isNaN(cost) ? `$${cost.toFixed(4)}` : 'cost:?';
+    const ep = endpoint ? ` · ${trunc(endpoint, 28)}` : '';
+    return `${costPart}${ep}`;
   }
 
   return '';
