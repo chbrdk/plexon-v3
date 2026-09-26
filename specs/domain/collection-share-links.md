@@ -66,13 +66,24 @@ Clear/revoke via DELETE oder POST mit `"revoked": true`.
 
 ## Writers
 
-- Creation: dual-write aus `upsertClientShareProjection` / revoke.
+- Creation: dual-write aus `upsertClientShareProjection` / revoke — inkl. öffentlichem `href` (`/share/p/:token`) wenn Token bekannt.
 - EQC: beim Share-Create.
 - Metron Assistant Share: beim Create wenn `platformProjectId` gesetzt.
 - Metron App: Client `plexon-share-links.ts` bei Share create/revoke.
 - Checkion: `plexon-share-links.ts` bei `/api/share` create/revoke **und** Overview-Freigabe.
 - Brandion: `plexon-share-links.ts` bei ClientRoom Freigabe `brand_findings`.
 - Videon: `plexon-share-links.ts` bei Cut ClientRoom-Approve.
+
+## Hub-Revoke Fan-out
+
+| productId | Fan-out |
+|---|---|
+| `creation` | `revokeClientShareProjection` → Creation provisioning DELETE (bestehend) |
+| `checkion` | best-effort DELETE `{CHECKION}/api/platform/provisioning/collections/:id/share-links/:token` |
+| `metron` | best-effort DELETE `{METRON}/api/platform/provisioning/collections/:id/share-links/:token` |
+| andere | nur Registry `revokedAt` |
+
+404 am Produkt gilt als Erfolg (bereits widerrufen / unbekannt).
 
 ## UI
 
@@ -82,6 +93,7 @@ Kundenraum-Panel ist in der UX **ausgeblendet** (API bleibt).
 ## Acceptance
 
 - Manager sehen aktive Links aller Writers (Creation, EQC, Metron, Checkion, Brandion, Videon) in einer Liste.
-- Revoke eines Creation-Links cleart Projection und fan-out wie bisher.
+- Creation-Projection schreibt `href` auf den öffentlichen Viewer, wenn `tokenPlain` vorhanden.
+- Hub-Revoke für Creation, Checkion und Metron widerruft Produkt-Token (best-effort) und markiert Registry.
 - Leere Liste zeigt keinen Fixture-Eintrag.
-- Kein Token im Registry-Payload.
+- Kein Token im Registry-`meta`-Payload (Token nur im path von `href` wenn Public-Viewer).

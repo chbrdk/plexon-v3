@@ -307,6 +307,8 @@ export type ClientShareProjectionInput = {
   accessMode: string;
   contentMode: string;
   label?: string | null;
+  /** Public viewer URL (no secret beyond share token in path). */
+  href?: string | null;
   expiresAt?: string | null;
   revokedAt?: string | null;
   createdAt?: string | null;
@@ -362,6 +364,7 @@ export async function upsertClientShareProjection(
     platformProjectId,
     shareId: input.shareId.trim(),
     title: (input.label?.trim() || `Client pages · ${input.sceneId.trim()}`).slice(0, 200),
+    href: input.href?.trim() || null,
     expiresAt: input.expiresAt ?? null,
     revoked: Boolean(input.revokedAt),
     meta: {

@@ -80,6 +80,16 @@ describe('collection share links hub', () => {
 
     const creation = readFileSync(path.join(root, 'lib/creation-client-share.ts'), 'utf8')
     expect(creation).toContain('dualWriteCreationShareLink')
+    expect(creation).toContain('href: input.href')
+  })
+
+  it('hub revoke fans out to checkion and metron provisioning', () => {
+    const lib = readFileSync(path.join(root, 'lib/collection-share-links.ts'), 'utf8')
+    expect(lib).toContain('pushProductShareRevoke')
+    expect(lib).toContain("productId === 'checkion'")
+    expect(lib).toContain("productId === 'metron'")
+    expect(lib).toContain('/share-links/')
+    expect(lib).toContain('href: input.href')
   })
 
   it('enterprise SQL apply list includes 0022', () => {

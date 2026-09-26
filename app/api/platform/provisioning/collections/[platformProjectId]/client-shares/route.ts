@@ -55,6 +55,7 @@ export async function POST(
     accessMode: typeof body.accessMode === 'string' ? body.accessMode : 'password',
     contentMode: typeof body.contentMode === 'string' ? body.contentMode : 'pinned_revision',
     label: typeof body.label === 'string' ? body.label : null,
+    href: typeof body.href === 'string' ? body.href : null,
     expiresAt: typeof body.expiresAt === 'string' ? body.expiresAt : null,
     revokedAt: typeof body.revokedAt === 'string' ? body.revokedAt : null,
     createdAt: typeof body.createdAt === 'string' ? body.createdAt : null,

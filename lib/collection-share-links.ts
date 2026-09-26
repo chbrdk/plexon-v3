@@ -210,6 +210,7 @@ export async function dualWriteCreationShareLink(input: {
   platformProjectId: string;
   shareId: string;
   title: string;
+  href?: string | null;
   expiresAt?: string | null;
   revoked?: boolean;
   meta?: Record<string, unknown>;
@@ -222,7 +223,7 @@ export async function dualWriteCreationShareLink(input: {
       shareId: input.shareId,
       kind: 'client_page',
       title: input.title,
-      href: null,
+      href: input.href?.trim() || null,
       expiresAt: input.expiresAt,
       revoked: input.revoked,
       meta: input.meta,
@@ -234,12 +235,63 @@ export async function dualWriteCreationShareLink(input: {
   }
 }
 
+async function pushProductShareRevoke(input: {
+  product: 'checkion' | 'metron';
+  platformProjectId: string;
+  shareId: string;
+  actorUserId: string;
+}): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
+  const { getCheckionServiceApiUrl, getMetronServiceApiUrl } = await import('@/lib/constants');
+  const {
+    PLEXON_FEDERATION_CONTRACT_VERSION,
+    PLEXON_CONTRACT_VERSION_HEADER,
+    PLEXON_SERVICE_SECRET_HEADER,
+  } = await import('@/lib/platform-contract');
+
+  const base =
+    input.product === 'checkion'
+      ? getCheckionServiceApiUrl()?.replace(/\/+$/, '')
+      : getMetronServiceApiUrl()?.replace(/\/+$/, '');
+  if (!base) return { ok: true }; // no product URL → registry-only (local/dev)
+
+  const serviceSecret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!serviceSecret) {
+    return { ok: false, status: 503, error: 'PLEXON_SERVICE_SECRET not configured' };
+  }
+
+  const url = `${base}/api/platform/provisioning/collections/${encodeURIComponent(input.platformProjectId)}/share-links/${encodeURIComponent(input.shareId)}`;
+  try {
+    const res = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+        [PLEXON_SERVICE_SECRET_HEADER]: serviceSecret,
+        'X-Plexon-User-Id': input.actorUserId,
+      },
+      cache: 'no-store',
+    });
+    if (res.ok || res.status === 404) return { ok: true };
+    const text = await res.text().catch(() => '');
+    return {
+      ok: false,
+      status: res.status >= 400 && res.status < 600 ? res.status : 502,
+      error: text.slice(0, 200) || `${input.product} revoke failed (${res.status})`,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      status: 502,
+      error: e instanceof Error ? e.message : `${input.product} revoke failed`,
+    };
+  }
+}
+
 export async function revokeCollectionShareLink(input: {
   platformProjectId: string;
   productId: string;
   shareId: string;
   actor: RequestUser;
-}): Promise<{ ok: true } | { ok: false; status: 400 | 403 | 404; error: string }> {
+}): Promise<{ ok: true } | { ok: false; status: 400 | 403 | 404 | 502 | 503; error: string }> {
   const platformProjectId = input.platformProjectId.trim();
   const productId = input.productId.trim();
   const shareId = input.shareId.trim();
@@ -256,11 +308,33 @@ export async function revokeCollectionShareLink(input: {
     const fanout = await revokeClientShareProjection(platformProjectId, shareId, input.actor);
     if (!fanout.ok) {
       const status =
-        fanout.status === 404 ? 404 : fanout.status === 403 ? 403 : 400;
+        fanout.status === 404
+          ? 404
+          : fanout.status === 403
+            ? 403
+            : fanout.status === 503
+              ? 503
+              : fanout.status === 502
+                ? 502
+                : 400;
       return { ok: false, status, error: fanout.error || 'creation_revoke_failed' };
     }
     // revokeClientShareProjection dual-writes revoked into collection_share_links
     return { ok: true };
+  }
+
+  if (productId === 'checkion' || productId === 'metron') {
+    const fanout = await pushProductShareRevoke({
+      product: productId,
+      platformProjectId,
+      shareId,
+      actorUserId: input.actor.id,
+    });
+    if (!fanout.ok) {
+      const status =
+        fanout.status === 503 ? 503 : fanout.status === 502 ? 502 : 400;
+      return { ok: false, status, error: fanout.error };
+    }
   }
 
   const db = getDb();
