@@ -146,7 +146,8 @@ function resolveMcpFlagsForPlanCore(
     case 'checkion_journey':
       return {
         useCheckionMcp: flags.useCheckionMcp,
-        useAudionMcp: false,
+        // Collection cross-ask from CHECKION shell (e.g. “finde Persona Markus …”).
+        useAudionMcp: flags.useAudionMcp,
         useEchonMcp: false,
         useBrandionMcp: false,
         useCreationMcp: false,

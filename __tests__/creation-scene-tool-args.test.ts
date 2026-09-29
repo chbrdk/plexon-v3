@@ -275,6 +275,21 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
     expect(out.project_id).toBeUndefined()
   })
 
+  it('never auto-scopes personas_list to conversation project (discovery)', () => {
+    const out = injectAudionToolArgs(
+      'audion.personas_list',
+      {},
+      {
+        actorUserId: 'session-user',
+        audionProjectId: 'aud-42',
+        platformProjectId: 'pp-99',
+      },
+    )
+    expect(out.projectId).toBeUndefined()
+    expect(out.project_id).toBeUndefined()
+    expect(out.actorUserId).toBe('session-user')
+  })
+
   it('does not overwrite explicit audion project ids from the model', () => {
     const out = injectAudionToolArgs(
       'audion_create_project',

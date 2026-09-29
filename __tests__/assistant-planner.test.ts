@@ -106,6 +106,28 @@ describe('tool-catalog', () => {
 });
 
 describe('assistant-planner heuristic', () => {
+  it('routes Markus Reinhardt name lookup to audion_persona (Checkion cross-ask)', () => {
+    for (const prompt of [
+      'suche Markus Reinhard',
+      'Zeig mir Markus Reinhardt',
+      'finde Markus Reinhardt',
+      'Markus Reinhardt',
+      'Wo ist Markus Reinhardt?',
+    ]) {
+      const plan = planAssistantTurnHeuristic({
+        prompt,
+        hasProjectContext: true,
+        hasCheckionMcp: true,
+        hasAudionMcp: true,
+        hasEchonMcp: false,
+        hasBrandionMcp: false,
+        compactContextLoaded: true,
+      });
+      expect(plan.intent, prompt).toBe('audion_persona');
+      expect(plan.toolFamilies).toContain('audion_persona');
+    }
+  });
+
   it('uses embedded context for project knowledge questions', () => {
     const plan = planAssistantTurnHeuristic({
       prompt: 'was hast du zur Haftpflichtkasse',

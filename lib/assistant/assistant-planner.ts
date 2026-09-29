@@ -150,6 +150,11 @@ const PERSONA_PATTERNS = [
   /\btarget\s*group/i,
   /\bcustomer\s*journey/i,
   /\bkundenreise/i,
+  /** “Finde Markus Reinhardt” / “Zeig mir Anna Schmidt” without saying Persona */
+  /\b(finde|such\w*|zeig\w*|wo\s+ist)\b[^.?!\n]{0,48}\b[A-ZÄÖÜ][a-zäöüß'-]+\s+[A-ZÄÖÜ][a-zäöüß'-]+/iu,
+  /\baudion\b[^.?!\n]{0,40}\b(persona|zielgruppe|finde|such\w*|zeig\w*)/i,
+  /** Bare full name as the whole prompt */
+  /^\s*[A-ZÄÖÜ][a-zäöüß'-]+\s+[A-ZÄÖÜ][a-zäöüß'-]+\s*[.?!]?\s*$/u,
 ];
 
 const WRITE_PATTERNS = [
@@ -952,9 +957,38 @@ export async function planAssistantTurn(
   }
 
   if (!apiKey || !shouldRefinePlanWithLlm(plan, input)) {
+    return preferPersonaLookupPlan(plan, input);
+  }
+  const refined = await planAssistantTurnWithLlm(apiKey, input, plan);
+  return preferPersonaLookupPlan(refined, input);
+}
+
+/** Keep Audion persona tools when the user is clearly looking up a person by name. */
+function preferPersonaLookupPlan(plan: AssistantPlan, input: PlannerInput): AssistantPlan {
+  const text = (input.planningPrompt ?? input.prompt).trim();
+  if (!input.hasAudionMcp) return plan;
+  if (!PERSONA_PATTERNS.some((p) => p.test(text))) return plan;
+  if (
+    plan.intent === 'audion_persona' ||
+    plan.intent === 'audion_chat' ||
+    plan.intent === 'audion_knowledge' ||
+    plan.intent === 'audion_journey' ||
+    plan.intent === 'audion_ux_journey' ||
+    plan.intent === 'audion_documents' ||
+    plan.intent === 'action_write'
+  ) {
     return plan;
   }
-  return planAssistantTurnWithLlm(apiKey, input, plan);
+  return buildPlan({
+    intent: 'audion_persona',
+    mode: 'hybrid',
+    toolFamilies: [...PERSONA_FAMILIES],
+    allowWriteTools: false,
+    maxToolRounds: Math.max(plan.maxToolRounds, 5),
+    skipTools: false,
+    reasoning: `${plan.reasoning} → override: Persona-Namenslookup (AUDION).`,
+    plannerSource: plan.plannerSource,
+  });
 }
 
 async function applyPlannerJevAct(
