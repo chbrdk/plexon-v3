@@ -20,6 +20,40 @@ describe('tool-catalog', () => {
     expect(classifyToolFamily('audion_persona_get')).toBe('audion_persona');
   });
 
+  it('classifies CHECKION v3 MCP tool names used in free-chat', () => {
+    expect(classifyToolFamily('checkion_v3_domain_scan_overview')).toBe('checkion_scan_read');
+    expect(classifyToolFamily('checkion_v3_domain_scan_seo_reading')).toBe('checkion_scan_read');
+    expect(classifyToolFamily('checkion_v3_domain_scans_list')).toBe('checkion_scan_read');
+    expect(classifyToolFamily('checkion_v3_scans_list')).toBe('checkion_scan_read');
+    expect(classifyToolFamily('checkion_v3_scan_start')).toBe('checkion_scan_write');
+    expect(classifyToolFamily('checkion_v3_geo_jobs_list')).toBe('checkion_geo');
+    expect(classifyToolFamily('checkion_v3_geo_job_reading')).toBe('checkion_geo');
+    expect(classifyToolFamily('checkion_v3_seo_overview')).toBe('checkion_geo');
+    expect(classifyToolFamily('checkion_v3_projects_list')).toBe('checkion_project');
+    expect(
+      toolMatchesFamilies('checkion_v3_domain_scan_seo_reading', [
+        'checkion_geo',
+        'checkion_project',
+        'checkion_scan_read',
+      ]),
+    ).toBe(true);
+  });
+
+  it('allows v3 domain/geo tools on GEO specialist plan', () => {
+    const plan = {
+      intent: 'checkion_seo_geo' as const,
+      mode: 'tools' as const,
+      toolFamilies: ['checkion_geo', 'checkion_project', 'checkion_scan_read', 'plexon_ui'],
+      allowWriteTools: false,
+      maxToolRounds: 6,
+      skipTools: false,
+      reasoning: 'test',
+    };
+    expect(toolAllowedByPlan('checkion_v3_domain_scan_overview', plan)).toBe(true);
+    expect(toolAllowedByPlan('checkion_v3_geo_job_reading', plan)).toBe(true);
+    expect(toolAllowedByPlan('checkion_v3_domain_scan_start', plan)).toBe(false);
+  });
+
   it('classifies echon tools', () => {
     expect(classifyToolFamily('echon_signals_list')).toBe('echon_signals');
     expect(classifyToolFamily('echon_research_run_start')).toBe('echon_research');

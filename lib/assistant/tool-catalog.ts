@@ -59,15 +59,25 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^checkion_project/,
     /^checkion_projects_list$/,
     /^checkion_search$/,
+    /^checkion_v3_health$/,
+    /^checkion_v3_project/,
+    /^checkion_v3_projects_list$/,
   ],
   checkion_scan_read: [
     /^checkion_scans?_list$/,
     /^checkion_scan_summarize$/,
     /^checkion_scan_screenshot$/,
     /^checkion_scan_domain_(status|summary|summarize|pages_list)$/,
-    /^checkion_v3_domain_scan_pages_list$/,
     /^checkion_scans_domain_list$/,
     /^checkion_saliency_result$/,
+    // CHECKION v3 MCP (dots → underscores)
+    /^checkion_v3_scans_list$/,
+    /^checkion_v3_scan_(get|issues|overview|scores|screenshot|weakest_signal)$/,
+    /^checkion_v3_domain_scans_list$/,
+    /^checkion_v3_domain_scan_(get|issues|overview|pages_list|seo_reading|trust_reading)$/,
+    /^checkion_v3_project_active_domain_scans$/,
+    /^checkion_v3_fetch_page$/,
+    /^checkion_v3_share_get$/,
   ],
   checkion_scan_write: [
     /^checkion_scan_single$/,
@@ -77,8 +87,15 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^checkion_saliency_generate$/,
     /^checkion_scan_assign/,
     /^checkion_scan_domain_assign/,
+    /^checkion_v3_scan_(start|delete)$/,
+    /^checkion_v3_domain_scan_(start|control)$/,
+    /^checkion_v3_share_create$/,
   ],
-  checkion_geo: [/^checkion_geo_eeat/],
+  checkion_geo: [
+    /^checkion_geo_eeat/,
+    /^checkion_v3_geo_/,
+    /^checkion_v3_seo_/,
+  ],
   checkion_tools: [/^checkion_tools_/],
   checkion_journey: [/^checkion_(scan_)?journey/, /^checkion_journeys_/],
   audion_project: [
@@ -190,7 +207,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
 
 const DESTRUCTIVE = /(?:^|_)(delete|revoke|archive)(?:_|$)/i;
 const WRITE_ACTION =
-  /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import|update|upsert|replace|evaluate)(?:_|$)/i;
+  /(?:^|_)(create|start|generate|patch|save|rerun|ingest|detect|apply|import|update|upsert|replace|evaluate|publish|control|refresh)(?:_|$)/i;
 
 export function classifyToolFamily(toolName: string): ToolFamily | null {
   let result: ToolFamily | null = null
@@ -402,9 +419,15 @@ export const SCAN_FAMILIES: ToolFamily[] = [
   'checkion_scan_read',
   'checkion_scan_write',
   'checkion_tools',
+  'checkion_project',
 ];
 
-export const GEO_FAMILIES: ToolFamily[] = ['checkion_geo', 'checkion_project'];
+/** GEO / SEO specialist — includes domain-scan reads (deep-scan → GEO readings). */
+export const GEO_FAMILIES: ToolFamily[] = [
+  'checkion_geo',
+  'checkion_project',
+  'checkion_scan_read',
+];
 
 export const PERSONA_FAMILIES: ToolFamily[] = [
   'audion_persona',

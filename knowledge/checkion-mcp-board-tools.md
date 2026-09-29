@@ -2,6 +2,10 @@
 
 When the PLEXON board prompt card sends a request to `/api/board/complete`, the backend can use **CHECKION MCP tools** so that Claude can call CHECKION (scans, projects, journeys, etc.) while answering.
 
+## Tool naming (2026-09)
+
+CHECKION MCP registers tools as `checkion_v3.*`. Plexon converts dots to underscores for Anthropic (`checkion_v3_domain_scan_overview`). Planner families in `lib/assistant/tool-catalog.ts` MUST match these `checkion_v3_*` names — legacy `checkion_scan_*` / `checkion_geo_eeat*` patterns alone will filter the live MCP surface to nearly empty and the model invents dead tool names.
+
 ## Enabling MCP on the board
 
 - **Port toolbar:** On any card, click the **+** on a port (top/right/bottom/left) to open the circular port menu. The menu shows options for Prompt, Dokument, Bild, Video, Link and **CHECKION** (plug icon). Click **CHECKION** to toggle MCP on or off. When on, the CHECKION option is highlighted (accent background).

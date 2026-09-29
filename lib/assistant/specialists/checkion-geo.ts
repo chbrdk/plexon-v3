@@ -35,13 +35,13 @@ export function buildCheckionGeoSpecialistAddendum(input: {
 
   lines.push(`- MCP-Tools: **aktiv** (Server: ${diag.mcpUrlPrefix ?? '…'}…)`);
   lines.push(
-    '- Bei SEO/GEO-/Wettbewerbs-Fragen **zuerst** checkion geo_* / seo_* / project tools — limit ≤ 10.',
+    '- Bei SEO/GEO-/Wettbewerbs-Fragen **zuerst** checkion_v3_geo_jobs_list / geo_job_reading / seo_overview / seo_keywords — limit ≤ 10.',
   );
   lines.push(
-    '- Quality SEO = Domain-Crawl (`domain_scan_*`); Market SEO = project-scoped `seo_overview` / `seo_keywords` / `seo_domain` / `seo_backlinks` / `seo_rank_configs_*` / `seo_competitors` / `seo_gsc`.',
+    '- Quality SEO aus Deep Scan: checkion_v3_domain_scans_list → domain_scan_seo_reading / trust_reading / overview (nicht inventieren).',
   );
   lines.push(
-    '- Scores, Zitationsanteile, Rankings und Competitor-URLs **nur** aus Tool-Ergebnissen — keine erfundenen Rankings.',
+    '- Scores, Zitationsanteile, Rankings und Competitor-URLs **nur** aus Tool-Ergebnissen — keine Legacy-Namen (geo_eeat_history) erfinden.',
   );
   lines.push(
     '- Collection-Kontext: checkionProjectId / platformProjectId aus dem Prompt-Kontext nutzen.',

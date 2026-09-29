@@ -50,8 +50,10 @@ ${ctx.audionProjectId ? `- audionProjectId: ${ctx.audionProjectId}` : ''}
   const toolGuidance = `
 MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - Nutze zuerst die eingebettete Projektkurzinfo unten, bevor du große Daten lädst.
-- Bevorzuge summarize/list-Tools gegenüber vollen Rohdaten (z. B. scan_summarize statt scan_get, geo_eeat_history mit limit).
-- checkion.scans_list / scans_domain_list: limit ≤ 10.
+- CHECKION-MCP-Tools heißen **checkion_v3_*** (Anthropic-Namen mit Unterstrichen). Erfinde keine Legacy-Namen wie domain_scan_summarize / geo_eeat_history.
+- Deep Scan / Domain: zuerst checkion_v3_domain_scans_list oder checkion_v3_project_active_domain_scans, dann checkion_v3_domain_scan_overview / seo_reading / trust_reading / issues (limit klein).
+- GEO-Jobs: checkion_v3_geo_jobs_list → checkion_v3_geo_job_reading / geo_job_get — keine erfundenen Scores.
+- Page-Scans: checkion_v3_scans_list → checkion_v3_scan_overview / scan_scores / scan_issues.
 - audion.target_group_knowledge_chunks nur gezielt; lade nie alle Chunks aller Zielgruppen auf einmal.
 - Zielgruppen/Personas **anlegen**: audion_target_group_create, audion_persona_create (Schreib-Tools; ggf. Nutzerbestätigung).
 - Wenn **audionProjectId** / **platformProjectId** im Kontext stehen: bestehendes AUDION-/Collection nutzen — **kein** neues AUDION- oder Plattform-Projekt anlegen.

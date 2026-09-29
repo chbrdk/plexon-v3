@@ -20,7 +20,7 @@ const PILOT: CapabilityRecord[] = [
     confirmation: 'none',
     surfaces: { agent: true, flow: true },
     agent: {
-      toolNames: ['checkion_scan_single'],
+      toolNames: ['checkion_scan_single', 'checkion_v3_scan_start', 'checkion_v3_scan_overview'],
       intentTypes: ['quick_scan', 'checkion_scan'],
     },
     flow: { nodeKinds: ['scan'] },
@@ -40,7 +40,12 @@ const PILOT: CapabilityRecord[] = [
     confirmation: 'none',
     surfaces: { agent: true, flow: true },
     agent: {
-      toolNames: ['checkion_scan_domain'],
+      toolNames: [
+        'checkion_scan_domain',
+        'checkion_v3_domain_scan_start',
+        'checkion_v3_domain_scan_overview',
+        'checkion_v3_domain_scans_list',
+      ],
       intentTypes: ['domain_scan', 'checkion_scan'],
     },
     flow: { nodeKinds: ['domain_scan'] },
@@ -60,7 +65,12 @@ const PILOT: CapabilityRecord[] = [
     confirmation: 'none',
     surfaces: { agent: true, flow: true },
     agent: {
-      toolNames: ['checkion_geo_eeat'],
+      toolNames: [
+        'checkion_geo_eeat',
+        'checkion_v3_geo_jobs_list',
+        'checkion_v3_geo_job_reading',
+        'checkion_v3_seo_overview',
+      ],
       intentTypes: ['geo_analysis', 'checkion_seo_geo'],
     },
     flow: { nodeKinds: ['geo_job'] },

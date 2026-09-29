@@ -35,13 +35,13 @@ export function buildCheckionScanSpecialistAddendum(input: {
 
   lines.push(`- MCP-Tools: **aktiv** (Server: ${diag.mcpUrlPrefix ?? '…'}…)`);
   lines.push(
-    '- Bei Scan-/Accessibility-Fragen **zuerst** checkion scans_list / scans_domain_list / scan get / issues — limit ≤ 10.',
+    '- Bei Scan-/Accessibility-Fragen **zuerst** checkion_v3_scans_list / checkion_v3_domain_scans_list / checkion_v3_scan_overview / checkion_v3_domain_scan_overview — limit ≤ 10.',
   );
   lines.push(
-    '- Scores, Issue-Counts und URLs **nur** aus Tool-Ergebnissen; keine geschätzten Grade.',
+    '- Scores, Issue-Counts und URLs **nur** aus Tool-Ergebnissen; keine geschätzten Grade. Keine Legacy-Toolnamen erfinden.',
   );
   lines.push(
-    '- Neue Scans nur wenn der Nutzer das explizit will (Confirm-Gate für Write-Tools).',
+    '- Neue Scans nur wenn der Nutzer das explizit will (Confirm-Gate für Write-Tools: checkion_v3_scan_start / domain_scan_start).',
   );
   lines.push(
     '- Collection-Kontext: checkionProjectId / platformProjectId aus dem Prompt-Kontext nutzen, nicht neu erfragen.',
