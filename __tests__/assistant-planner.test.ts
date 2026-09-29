@@ -72,7 +72,25 @@ describe('tool-catalog', () => {
     expect(classifyToolFamily('audion_persona_admin_ux_journey_runs_list')).toBe(
       'audion_ux_journey'
     );
+    expect(classifyToolFamily('audion_ux_study_list')).toBe('audion_ux_journey');
+    expect(classifyToolFamily('audion_ux_wave_get')).toBe('audion_ux_journey');
     expect(classifyToolFamily('audion_chat_message')).toBe('audion_chat');
+  });
+
+  it('classifies audion ops, spirion dig, and videon media tools from live MCP', () => {
+    expect(classifyToolFamily('audion_health')).toBe('audion_project');
+    expect(classifyToolFamily('audion_auth_me')).toBe('audion_project');
+    expect(classifyToolFamily('audion_settings_ai_providers')).toBe('audion_project');
+    expect(classifyToolFamily('audion_queue_stats')).toBe('audion_project');
+    expect(classifyToolFamily('audion_ai_assist_assist')).toBe('audion_project');
+    expect(classifyToolFamily('spirion_assets_list')).toBe('spirion_references');
+    expect(classifyToolFamily('spirion_job_start')).toBe('spirion_screens');
+    expect(classifyToolFamily('spirion_generate')).toBe('spirion_screens');
+    expect(classifyToolFamily('dig_compose_brief')).toBe('spirion_references');
+    expect(classifyToolFamily('dig_generate')).toBe('spirion_screens');
+    expect(classifyToolFamily('videon_brand_check_run')).toBe('videon_analysis');
+    expect(classifyToolFamily('videon_generate_edit_run')).toBe('videon_reframe');
+    expect(classifyToolFamily('videon_generate_create_run')).toBe('videon_reframe');
   });
 
   it('flags destructive and write tools', () => {
