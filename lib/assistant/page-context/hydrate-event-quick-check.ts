@@ -211,7 +211,9 @@ export async function buildAssistantPageContextBlock(
     )
   }
 
-  if (isEqc || pageContext.capability || pageContext.entityId) {
+  // Suite hosts (Checkion/Audion/Brandion/…): thin entity + Collection hint is enough;
+  // MCP tools remain SSOT for full payloads (Wave 3 inject fills scan/persona/guideline ids).
+  if (pageContext.platformProjectId || pageContext.entityId || pageContext.capability) {
     return truncateAssistantText(
       buildPageContextRouteHint(pageContext),
       ASSISTANT_MAX_PAGE_CONTEXT_CHARS,

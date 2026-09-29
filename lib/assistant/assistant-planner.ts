@@ -957,10 +957,121 @@ export async function planAssistantTurn(
   }
 
   if (!apiKey || !shouldRefinePlanWithLlm(plan, input)) {
-    return preferPersonaLookupPlan(plan, input);
+    return preferPageEntityPlan(preferPersonaLookupPlan(plan, input), input);
   }
   const refined = await planAssistantTurnWithLlm(apiKey, input, plan);
-  return preferPersonaLookupPlan(refined, input);
+  return preferPageEntityPlan(preferPersonaLookupPlan(refined, input), input);
+}
+
+const DEIXIS_PATTERNS = [
+  /\bdieser\b/i,
+  /\bdiese\b/i,
+  /\bdieses\b/i,
+  /\bdazu\b/i,
+  /\bhier\b/i,
+  /\bthis\b/i,
+  /\bcurrent\b/i,
+  /\bfasse\b/i,
+  /\bzusammen\b/i,
+  /\binsights?\b/i,
+  /\büberblick\b/i,
+  /\boverview\b/i,
+];
+
+/**
+ * When the host publishes an entity and the user uses deixis / soft ask phrases,
+ * prefer that entity's tool family so “dieser Scan” / “diese Persona” resolve.
+ */
+export function preferPageEntityPlan(plan: AssistantPlan, input: PlannerInput): AssistantPlan {
+  const ctx = input.pageContext;
+  const entityType = ctx?.entityType?.trim() || '';
+  const entityId = ctx?.entityId?.trim() || '';
+  if (!entityType || !entityId) return plan;
+
+  const text = (input.planningPrompt ?? input.prompt).trim();
+  const deixis = DEIXIS_PATTERNS.some((p) => p.test(text)) || text.length < 80;
+
+  if (
+    (entityType === 'page_scan' || entityType === 'domain_scan' || entityType === 'geo_job') &&
+    input.hasCheckionMcp &&
+    (deixis || SCAN_PATTERNS.some((p) => p.test(text)) || GEO_PATTERNS.some((p) => p.test(text)))
+  ) {
+    if (plan.intent === 'checkion_scan' || plan.intent === 'checkion_seo_geo') return plan;
+    return buildPlan({
+      intent: entityType === 'geo_job' ? 'checkion_seo_geo' : 'checkion_scan',
+      mode: 'tools',
+      toolFamilies: entityType === 'geo_job' ? GEO_FAMILIES : SCAN_FAMILIES,
+      allowWriteTools: false,
+      maxToolRounds: Math.max(plan.maxToolRounds, 5),
+      skipTools: false,
+      reasoning: `${plan.reasoning} → override: Seiten-Entity ${entityType} (${entityId}).`,
+      plannerSource: plan.plannerSource,
+    });
+  }
+
+  if (
+    (entityType === 'persona' || entityType === 'target_group' || entityType === 'journey') &&
+    input.hasAudionMcp &&
+    (deixis || PERSONA_PATTERNS.some((p) => p.test(text)))
+  ) {
+    if (
+      plan.intent === 'audion_persona' ||
+      plan.intent === 'audion_journey' ||
+      plan.intent === 'audion_chat'
+    ) {
+      return plan;
+    }
+    const intent =
+      entityType === 'journey' ? 'audion_journey' : ('audion_persona' as AssistantPlanIntent);
+    return buildPlan({
+      intent,
+      mode: 'tools',
+      toolFamilies: entityType === 'journey' ? [...AUDION_JOURNEY_FAMILIES] : [...PERSONA_FAMILIES],
+      allowWriteTools: false,
+      maxToolRounds: Math.max(plan.maxToolRounds, 5),
+      skipTools: false,
+      reasoning: `${plan.reasoning} → override: Seiten-Entity ${entityType} (${entityId}).`,
+      plannerSource: plan.plannerSource,
+    });
+  }
+
+  if (
+    (entityType === 'guideline' || entityType === 'token_set') &&
+    input.hasBrandionMcp &&
+    deixis
+  ) {
+    if (plan.intent === 'brandion_brand') return plan;
+    return buildPlan({
+      intent: 'brandion_brand',
+      mode: 'tools',
+      toolFamilies: [...BRANDION_BRAND_FAMILIES],
+      allowWriteTools: false,
+      maxToolRounds: Math.max(plan.maxToolRounds, 4),
+      skipTools: false,
+      reasoning: `${plan.reasoning} → override: Seiten-Entity ${entityType} (${entityId}).`,
+      plannerSource: plan.plannerSource,
+    });
+  }
+
+  if (
+    (entityType === 'media' || entityType === 'cut' || entityType === 'analysis') &&
+    input.hasVideonMcp &&
+    deixis
+  ) {
+    if (plan.intent === 'videon_media') return plan;
+    return buildPlan({
+      intent: 'videon_media',
+      mode: 'tools',
+      toolFamilies: [...VIDEON_MEDIA_FAMILIES],
+      allowWriteTools: false,
+      maxToolRounds: Math.max(plan.maxToolRounds, 4),
+      skipTools: false,
+      reasoning: `${plan.reasoning} → override: Seiten-Entity ${entityType} (${entityId}).`,
+      plannerSource: plan.plannerSource,
+    });
+  }
+
+  return plan;
 }
 
 /** Keep Audion persona tools when the user is clearly looking up a person by name. */

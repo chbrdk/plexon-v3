@@ -25,6 +25,26 @@ export const ASSISTANT_ENTITY_METRON_DASHBOARD = 'dashboard' as const
 export const ASSISTANT_ENTITY_METRON_KPI = 'kpi' as const
 export const ASSISTANT_ENTITY_METRON_DATASET = 'dataset' as const
 
+/** CHECKION scan / GEO entities (suite page context Wave 2). */
+export const ASSISTANT_ENTITY_PAGE_SCAN = 'page_scan' as const
+export const ASSISTANT_ENTITY_DOMAIN_SCAN = 'domain_scan' as const
+export const ASSISTANT_ENTITY_GEO_JOB = 'geo_job' as const
+
+/** AUDION detail entities. */
+export const ASSISTANT_ENTITY_PERSONA = 'persona' as const
+export const ASSISTANT_ENTITY_TARGET_GROUP = 'target_group' as const
+export const ASSISTANT_ENTITY_JOURNEY = 'journey' as const
+export const ASSISTANT_ENTITY_STUDY = 'study' as const
+
+/** BRANDION guideline / token set. */
+export const ASSISTANT_ENTITY_GUIDELINE = 'guideline' as const
+export const ASSISTANT_ENTITY_TOKEN_SET = 'token_set' as const
+
+/** VIDEON media / cut / analysis. */
+export const ASSISTANT_ENTITY_VIDEON_MEDIA = 'media' as const
+export const ASSISTANT_ENTITY_VIDEON_CUT = 'cut' as const
+export const ASSISTANT_ENTITY_VIDEON_ANALYSIS = 'analysis' as const
+
 /** Compact page-context block budget in the system prompt. */
 export const ASSISTANT_MAX_PAGE_CONTEXT_CHARS = 6_000
 
@@ -41,6 +61,11 @@ export type AssistantPageContext = {
   entityId?: string
   /** Optimistic-lock token for scene_apply_ops (CREATION editor). */
   entityUpdatedAt?: string
+  /**
+   * Product-local hints for tool-arg inject only — never dumped into the system prompt.
+   * Keys/values are short non-empty strings (max 64 / 128 chars).
+   */
+  entityMeta?: Record<string, string>
 }
 
 export function isAssistantPageContextProduct(
@@ -91,6 +116,19 @@ export function parseAssistantPageContext(raw: unknown): AssistantPageContext | 
   if (typeof row.entityUpdatedAt === 'string' && row.entityUpdatedAt.trim()) {
     out.entityUpdatedAt = row.entityUpdatedAt.trim()
   }
+  if (row.entityMeta && typeof row.entityMeta === 'object' && !Array.isArray(row.entityMeta)) {
+    const meta: Record<string, string> = {}
+    let count = 0
+    for (const [k, v] of Object.entries(row.entityMeta as Record<string, unknown>)) {
+      if (count >= 16) break
+      const key = typeof k === 'string' ? k.trim().slice(0, 64) : ''
+      const val = typeof v === 'string' ? v.trim().slice(0, 128) : ''
+      if (!key || !val) continue
+      meta[key] = val
+      count += 1
+    }
+    if (count > 0) out.entityMeta = meta
+  }
   return out
 }
 
@@ -106,9 +144,11 @@ export function mergeAssistantPageContext(
     pathname: overlay.pathname || base.pathname,
     capability: overlay.capability ?? base.capability,
     platformProjectId: overlay.platformProjectId ?? base.platformProjectId,
+    platformCompanyId: overlay.platformCompanyId ?? base.platformCompanyId,
     entityType: overlay.entityType ?? base.entityType,
     entityId: overlay.entityId ?? base.entityId,
     entityUpdatedAt: overlay.entityUpdatedAt ?? base.entityUpdatedAt,
+    entityMeta: overlay.entityMeta ?? base.entityMeta,
   }
 }
 

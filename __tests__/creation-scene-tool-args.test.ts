@@ -305,4 +305,57 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
     expect(out.project_id).toBe('explicit-aud')
     expect(out.platformProjectId).toBe('explicit-pp')
   })
+
+  it('injects page-scan / persona / guideline entity ids from pageContext', () => {
+    const scan = injectCheckionToolArgs(
+      'checkion_v3_scan_overview',
+      {},
+      {
+        actorUserId: 'session-user',
+        pageContext: {
+          product: 'checkion',
+          pathname: '/results/scan-1/overview',
+          entityType: 'page_scan',
+          entityId: 'scan-1',
+          platformProjectId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        },
+      },
+    )
+    expect(scan.scanId).toBe('scan-1')
+    expect(scan.id).toBe('scan-1')
+
+    const persona = injectAudionToolArgs(
+      'audion_persona_get',
+      {},
+      {
+        actorUserId: 'session-user',
+        audionProjectId: 'aud-42',
+        pageContext: {
+          product: 'audion',
+          pathname: '/personas/p1',
+          entityType: 'persona',
+          entityId: 'persona-9',
+        },
+      },
+    )
+    expect(persona.personaId).toBe('persona-9')
+    expect(persona.id).toBe('persona-9')
+
+    const guideline = injectBrandionToolArgs(
+      'brandion_guideline_get',
+      {},
+      {
+        actorUserId: 'session-user',
+        pageContext: {
+          product: 'brandion',
+          pathname: '/guidelines/gl-1',
+          entityType: 'guideline',
+          entityId: 'gl-1',
+          platformProjectId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        },
+      },
+    )
+    expect(guideline.guidelineId).toBe('gl-1')
+    expect(guideline.platformProjectId).toBe('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee')
+  })
 })

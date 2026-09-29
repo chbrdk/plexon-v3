@@ -153,11 +153,17 @@ export function injectAssistantMcpToolArgs(
 /**
  * Inject authenticated session user into CHECKION MCP tools (Access Model B).
  * Spec: specs/domain/assistant-actor-identity.md
+ * Also injects scan/GEO entity ids from pageContext when the model omitted them.
  */
 export function injectCheckionToolArgs(
   toolName: string,
   input: Record<string, unknown>,
-  ctx: { actorUserId: string; checkionProjectId?: string | null; platformProjectId?: string | null },
+  ctx: {
+    actorUserId: string
+    checkionProjectId?: string | null
+    platformProjectId?: string | null
+    pageContext?: AssistantPageContext | null
+  },
 ): Record<string, unknown> {
   if (!/^checkion([._]|$)/i.test(toolName)) return input;
   if (/health$/i.test(toolName)) return input;
@@ -176,6 +182,45 @@ export function injectCheckionToolArgs(
     out.projectId = fromCtx;
     out.checkionProjectId = fromCtx;
   }
+
+  const entityType = ctx.pageContext?.entityType?.trim() || '';
+  const entityId = ctx.pageContext?.entityId?.trim() || '';
+  if (entityId) {
+    if (
+      entityType === 'page_scan' &&
+      /scan_(overview|get|issues|detail)/i.test(toolName) &&
+      !(typeof out.scanId === 'string' && out.scanId.trim()) &&
+      !(typeof out.scan_id === 'string' && out.scan_id.trim()) &&
+      !(typeof out.id === 'string' && out.id.trim())
+    ) {
+      out.scanId = entityId;
+      out.scan_id = entityId;
+      out.id = entityId;
+    }
+    if (
+      entityType === 'domain_scan' &&
+      /domain_scan_/i.test(toolName) &&
+      !(typeof out.domainScanId === 'string' && out.domainScanId.trim()) &&
+      !(typeof out.domain_scan_id === 'string' && out.domain_scan_id.trim()) &&
+      !(typeof out.id === 'string' && out.id.trim())
+    ) {
+      out.domainScanId = entityId;
+      out.domain_scan_id = entityId;
+      out.id = entityId;
+    }
+    if (
+      entityType === 'geo_job' &&
+      /geo_/i.test(toolName) &&
+      !(typeof out.geoJobId === 'string' && out.geoJobId.trim()) &&
+      !(typeof out.jobId === 'string' && out.jobId.trim()) &&
+      !(typeof out.id === 'string' && out.id.trim())
+    ) {
+      out.geoJobId = entityId;
+      out.jobId = entityId;
+      out.id = entityId;
+    }
+  }
+
   return out;
 }
 
@@ -183,6 +228,7 @@ export function injectCheckionToolArgs(
  * Inject authenticated session user into AUDION MCP tools (Access Model B).
  * Also injects conversation Audion + Collection ids when the model omitted them
  * (prevents blind create / empty list under Access Model B).
+ * On persona/TG/journey detail pages, injects the entity id for get tools.
  */
 export function injectAudionToolArgs(
   toolName: string,
@@ -191,6 +237,7 @@ export function injectAudionToolArgs(
     actorUserId: string;
     audionProjectId?: string | null;
     platformProjectId?: string | null;
+    pageContext?: AssistantPageContext | null;
   },
 ): Record<string, unknown> {
   if (!/^audion([._]|$)/i.test(toolName)) return input;
@@ -228,22 +275,77 @@ export function injectAudionToolArgs(
     out.platformProjectId = fromCtxPlatform;
   }
 
+  const entityType = ctx.pageContext?.entityType?.trim() || '';
+  const entityId = ctx.pageContext?.entityId?.trim() || '';
+  if (entityId) {
+    const hasId =
+      (typeof out.id === 'string' && out.id.trim()) ||
+      (typeof out.personaId === 'string' && out.personaId.trim()) ||
+      (typeof out.persona_id === 'string' && out.persona_id.trim()) ||
+      (typeof out.targetGroupId === 'string' && out.targetGroupId.trim()) ||
+      (typeof out.journeyId === 'string' && out.journeyId.trim());
+    if (!hasId) {
+      if (entityType === 'persona' && /persona/i.test(toolName) && !/personas_list/i.test(toolName)) {
+        out.id = entityId;
+        out.personaId = entityId;
+        out.persona_id = entityId;
+      }
+      if (
+        entityType === 'target_group' &&
+        /target_group/i.test(toolName) &&
+        !/target_groups_list/i.test(toolName)
+      ) {
+        out.id = entityId;
+        out.targetGroupId = entityId;
+      }
+      if (entityType === 'journey' && /journey/i.test(toolName) && !/journeys_list/i.test(toolName)) {
+        out.id = entityId;
+        out.journeyId = entityId;
+      }
+    }
+  }
+
   return out;
 }
 
 /**
  * Inject authenticated session user into BRANDION MCP tools (Access Model B).
+ * Also injects Collection + guideline entity from pageContext when omitted.
  */
 export function injectBrandionToolArgs(
   toolName: string,
   input: Record<string, unknown>,
-  ctx: { actorUserId: string },
+  ctx: {
+    actorUserId: string
+    platformProjectId?: string | null
+    pageContext?: AssistantPageContext | null
+  },
 ): Record<string, unknown> {
   if (!/^brandion([._]|$)/i.test(toolName)) return input;
   if (/health$/i.test(toolName)) return input;
   const out = { ...input };
   if (ctx.actorUserId.trim()) {
     out.actorUserId = ctx.actorUserId.trim();
+  }
+  const fromPlatform =
+    ctx.pageContext?.platformProjectId?.trim() || ctx.platformProjectId?.trim() || '';
+  if (
+    fromPlatform &&
+    !(typeof out.platformProjectId === 'string' && out.platformProjectId.trim())
+  ) {
+    out.platformProjectId = fromPlatform;
+  }
+  const entityType = ctx.pageContext?.entityType?.trim() || '';
+  const entityId = ctx.pageContext?.entityId?.trim() || '';
+  if (
+    entityId &&
+    (entityType === 'guideline' || entityType === 'token_set') &&
+    /guideline/i.test(toolName) &&
+    !(typeof out.guidelineId === 'string' && out.guidelineId.trim()) &&
+    !(typeof out.id === 'string' && out.id.trim())
+  ) {
+    out.guidelineId = entityId;
+    out.id = entityId;
   }
   return out;
 }
@@ -282,6 +384,43 @@ export function injectVideonToolArgs(
       const id = fromPage || fromConv;
       if (id) out.platformProjectId = id;
     }
+  }
+
+  const entityType = ctx.pageContext?.entityType?.trim() || '';
+  const entityId = ctx.pageContext?.entityId?.trim() || '';
+  if (entityId) {
+    if (
+      entityType === 'media' &&
+      /media/i.test(toolName) &&
+      !/media_search/i.test(toolName) &&
+      !(typeof out.mediaAssetId === 'string' && out.mediaAssetId.trim()) &&
+      !(typeof out.media_id === 'string' && out.media_id.trim()) &&
+      !(typeof out.id === 'string' && out.id.trim())
+    ) {
+      out.mediaAssetId = entityId;
+      out.media_id = entityId;
+      out.id = entityId;
+    }
+    if (
+      entityType === 'cut' &&
+      /cut/i.test(toolName) &&
+      !(typeof out.cutId === 'string' && out.cutId.trim()) &&
+      !(typeof out.cut_id === 'string' && out.cut_id.trim()) &&
+      !(typeof out.id === 'string' && out.id.trim())
+    ) {
+      out.cutId = entityId;
+      out.cut_id = entityId;
+      out.id = entityId;
+    }
+  }
+
+  const fromPlatform =
+    ctx.pageContext?.platformProjectId?.trim() || ctx.platformProjectId?.trim() || '';
+  if (
+    fromPlatform &&
+    !(typeof out.platformProjectId === 'string' && out.platformProjectId.trim())
+  ) {
+    out.platformProjectId = fromPlatform;
   }
 
   return out;

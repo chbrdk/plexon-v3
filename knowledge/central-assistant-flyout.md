@@ -120,8 +120,8 @@ Staging signals for residual remount / empty-done regressions:
 
 Block chrome in the flyout/expand turns uses `@msqdx/ui` only: `UiBlockSurface` → `Panel`, `step_list` → `.plexon-assistant-steps` + `Spinner`, pin shell → `.plexon-assistant-block`. Spec: `specs/domain/ui-migrate-assistant.md`.
 
-### Page context (2026-08-10)
+### Page context (2026-08-10 · suite extension 2026-09-29)
 
-EQC pages publish `AssistantPageContext` (capability + `workflowRunId`) into the flyout; complete hydrates an authorized run into the system prompt. Spec: `specs/domain/assistant-page-context.md`.
+EQC pages publish `AssistantPageContext` (capability + `workflowRunId`) into the flyout; complete hydrates an authorized run into the system prompt. CREATION editor is the gold embed pattern (Provider + live `assistant:context`). Suite-wide Collection + entity registry, host duties, and rollout waves: `specs/domain/assistant-page-context.md` · checklist `knowledge/assistant-page-context-rollout.md`. Wave 4 harden: regression matrix `__tests__/assistant-page-context-regression.test.ts`; Collection cross-ask keeps Audion MCP on Brandion/Checkion intents (and Brandion on Audion) via `mcp-flags-for-plan`.
 
 System prompt includes a compact **Plattform-Navigation** block from `lib/assistant/platform-navigation.ts` (constants only; no invented links). Spec: `specs/domain/assistant-platform-navigation.md`.

@@ -5,7 +5,7 @@
 **DS:** `@msqdx/ui` `ChatOverlay` · `chat.css` (`.chat-overlay`, `.chat-overlay-sheet`, `.chat-panel-compact`, dock-end resizable)  
 **API:** `specs/api/assistant-embed.md`  
 **Knowledge:** `knowledge/central-assistant-flyout.md` · `knowledge/paths.md`  
-**Page context:** `specs/domain/assistant-page-context.md` — host publishes structured page/entity context (EQC first)  
+**Page context:** `specs/domain/assistant-page-context.md` — suite-wide Collection + entity context (EQC / CREATION gold; product hosts Wave 1+) · rollout `knowledge/assistant-page-context-rollout.md`  
 **Capability Catalog (planned):** `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md` — shared Agent↔Flow executors; not “all nodes as tools”
 
 ## Goals
@@ -28,7 +28,7 @@
 | Sheet width | Dock-end default `min(32rem, 100%)`, drag-resizable (persisted); token surfaces (`--panel` / `--bg1` / `--ink` / `--line`) |
 | Chrome | **Single header:** `ChatOverlay` owns title / expand / close; overlay `AssistantChat` keeps compact toolbar (history + project) only |
 | Theme | Host `data-theme` → embed query `theme` + postMessage `assistant:theme` |
-| Page context | Host publishes `AssistantPageContext` (pathname + capability + entity ids); complete hydrates EQC runs into system prompt (`assistant-page-context.md`) |
+| Page context | Host publishes `AssistantPageContext` (Collection + pathname + capability + entity); complete hydrates / injects tools (`assistant-page-context.md`). Product hosts MUST pass `platformProjectId` and live `assistant:context` — not theme-only. |
 | Audion `/chat` | Remains product-local persona/TG chat — **not** merged |
 | EQC → persona talk | Overlay iframe Audion `/chat/embed` (+ deep-link fallback); Assistant may short-turn via MCP `audion_chat` then hand off |
 

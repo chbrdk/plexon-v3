@@ -368,3 +368,70 @@ describe('assistant-planner heuristic', () => {
     expect(toolAllowedByPlan('brandion_guideline_import_dtcg', plan)).toBe(true);
   });
 });
+
+describe('preferPageEntityPlan (deixis)', () => {
+  it('routes “dieser Scan” to checkion when page_scan entity is published', async () => {
+    const { preferPageEntityPlan, planAssistantTurnHeuristic } = await import(
+      '@/lib/assistant/assistant-planner'
+    );
+    const baseline = planAssistantTurnHeuristic({
+      prompt: 'Insights zu diesem Scan?',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      compactContextLoaded: false,
+      pageContext: {
+        product: 'checkion',
+        pathname: '/results/scan-1/overview',
+        entityType: 'page_scan',
+        entityId: 'scan-1',
+        platformProjectId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      },
+    });
+    const plan = preferPageEntityPlan(baseline, {
+      prompt: 'Insights zu diesem Scan?',
+      hasProjectContext: true,
+      hasCheckionMcp: true,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      compactContextLoaded: false,
+      pageContext: {
+        product: 'checkion',
+        pathname: '/results/scan-1/overview',
+        entityType: 'page_scan',
+        entityId: 'scan-1',
+        platformProjectId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      },
+    });
+    expect(plan.intent).toBe('checkion_scan');
+  });
+
+  it('routes “fasse sie zusammen” on persona detail to audion_persona', async () => {
+    const { preferPageEntityPlan, planAssistantTurnHeuristic } = await import(
+      '@/lib/assistant/assistant-planner'
+    );
+    const input = {
+      prompt: 'Fasse sie zusammen.',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: false,
+      compactContextLoaded: false,
+      pageContext: {
+        product: 'audion' as const,
+        pathname: '/personas/p1',
+        entityType: 'persona',
+        entityId: 'persona-9',
+      },
+    };
+    const plan = preferPageEntityPlan(planAssistantTurnHeuristic(input), input);
+    expect(plan.intent).toBe('audion_persona');
+  });
+});

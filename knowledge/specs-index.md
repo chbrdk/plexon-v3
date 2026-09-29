@@ -26,7 +26,7 @@
 | Assistant actor identity (Access Model B) | `specs/domain/assistant-actor-identity.md` |
 | Assistant ↔ CREATION domain autonomy (“AGI-lite”) | `specs/domain/assistant-creation-agi-lite.md` |
 | Assistant domain specialists (internal) | `specs/domain/assistant-domain-specialists.md` |
-| Assistant page context | `specs/domain/assistant-page-context.md` |
+| Assistant page context (suite Collection + entity) | `specs/domain/assistant-page-context.md` · rollout `knowledge/assistant-page-context-rollout.md` |
 | Assistant platform navigation | `specs/domain/assistant-platform-navigation.md` |
 | Assistant journey outline | `specs/domain/assistant-journey-outline.md` |
 | Assistant journey generate | `specs/domain/assistant-journey-generate.md` |

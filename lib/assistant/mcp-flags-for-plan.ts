@@ -73,7 +73,8 @@ function resolveMcpFlagsForPlanCore(
     case 'brandion_brand':
       return {
         useCheckionMcp: false,
-        useAudionMcp: false,
+        // Collection cross-ask from Brandion shell (e.g. “Welche Personas passen?”).
+        useAudionMcp: flags.useAudionMcp,
         useEchonMcp: false,
         useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: false,
@@ -135,7 +136,8 @@ function resolveMcpFlagsForPlanCore(
         useCheckionMcp: false,
         useAudionMcp: flags.useAudionMcp,
         useEchonMcp: false,
-        useBrandionMcp: false,
+        // Collection cross-ask from Audion shell (e.g. brand tokens / guideline).
+        useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: false,
         useSpirionMcp: false,
         useVideonMcp: false,
@@ -149,7 +151,8 @@ function resolveMcpFlagsForPlanCore(
         // Collection cross-ask from CHECKION shell (e.g. “finde Persona Markus …”).
         useAudionMcp: flags.useAudionMcp,
         useEchonMcp: false,
-        useBrandionMcp: false,
+        // Brand questions from a scan surface stay in the same Collection.
+        useBrandionMcp: flags.useBrandionMcp,
         useCreationMcp: false,
         useSpirionMcp: false,
         useVideonMcp: false,

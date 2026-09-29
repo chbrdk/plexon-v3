@@ -87,9 +87,20 @@ describe('resolveMcpFlagsForPlan', () => {
     expect(resolveMcpFlagsForPlan(plan('general_chat'), baseFlags)).toEqual(baseFlags)
   })
 
-  it('keeps Audion MCP on for checkion intents (Collection cross-ask)', () => {
+  it('keeps Audion (+ Brandion) MCP on for checkion intents (Collection cross-ask)', () => {
     expect(resolveMcpFlagsForPlan(plan('checkion_scan'), baseFlags).useAudionMcp).toBe(true)
     expect(resolveMcpFlagsForPlan(plan('checkion_seo_geo'), baseFlags).useAudionMcp).toBe(true)
+    expect(resolveMcpFlagsForPlan(plan('checkion_scan'), baseFlags).useBrandionMcp).toBe(true)
+  })
+
+  it('keeps Audion MCP on for brandion intents (Collection cross-ask personas)', () => {
+    expect(resolveMcpFlagsForPlan(plan('brandion_brand'), baseFlags).useAudionMcp).toBe(true)
+    expect(resolveMcpFlagsForPlan(plan('brandion_brand'), baseFlags).useBrandionMcp).toBe(true)
+  })
+
+  it('keeps Brandion MCP on for audion intents (Collection cross-ask brand)', () => {
+    expect(resolveMcpFlagsForPlan(plan('audion_persona'), baseFlags).useBrandionMcp).toBe(true)
+    expect(resolveMcpFlagsForPlan(plan('audion_persona'), baseFlags).useAudionMcp).toBe(true)
   })
 
   it('keeps Echon + Audion (+ Checkion) for echon_audience', () => {

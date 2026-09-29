@@ -58,7 +58,7 @@ Channel marker: every message is a JSON-serializable object with `source: 'plexo
 
 | `type` | Payload | When |
 |--------|---------|------|
-| `assistant:ready` | `{ conversationId?: string }` | Embed chat mounted — host SHOULD re-post `assistant:context` (iframe listener may miss the first post) |
+| `assistant:ready` | `{ conversationId?: string }` | Embed chat mounted — host **MUST** re-post `assistant:context` (iframe listener may miss the first post) |
 | `assistant:close` | `{}` | User closed from inside embed |
 | `assistant:expand` | `{ conversationId?: string; project?: string }` | “Open workspace” — host should navigate or `window.open` expand URL |
 | `assistant:auth-required` | `{ loginPath: string }` | Session missing |
@@ -68,11 +68,13 @@ Channel marker: every message is a JSON-serializable object with `source: 'plexo
 
 | `type` | Payload | When |
 |--------|---------|------|
-| `assistant:context` | `{ product; platformProjectId?; capability?; pathname?; entityType?; entityId?; entityUpdatedAt? }` | Host context changed while open |
+| `assistant:context` | `{ product; platformProjectId?; capability?; pathname?; entityType?; entityId?; entityUpdatedAt?; entityMeta? }` | Host context changed while open — **MUST** also re-post on `assistant:ready` and whenever Collection/entity changes (see `assistant-page-context.md`) |
 | `assistant:theme` | `{ themeId: string }` | Host theme changed / initial sync |
 | `assistant:close` | `{}` | Host requests embed to shut down UI (optional) |
 
-`pageContext` on `POST /api/assistant/complete` (and stream) mirrors the same fields — see `specs/domain/assistant-page-context.md`.
+`pageContext` on `POST /api/assistant/complete` (and stream) mirrors the same fields — see `specs/domain/assistant-page-context.md` (suite-wide Collection + entity registry + host duties).
+
+Hosts MUST publish Collection (`platformProjectId`) on Collection-bound surfaces and entity ids on detail surfaces; theme-only hosts are incomplete.
 
 `targetOrigin` MUST be the configured Plexon origin (embed) / host origin (host) — never `*`.
 
