@@ -56,8 +56,8 @@ MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - Page-Scans: checkion_v3_scans_list → checkion_v3_scan_overview / scan_scores / scan_issues.
 - audion.target_group_knowledge_chunks nur gezielt; lade nie alle Chunks aller Zielgruppen auf einmal.
 - Zielgruppen/Personas **anlegen**: audion_target_group_create, audion_persona_create (Schreib-Tools; ggf. Nutzerbestätigung).
-- Persona **suchen**: audion_personas_list mit q=<Name> (fuzzy; ohne project_id), dann audion_persona_get — keine IDs raten.
-- Wenn **audionProjectId** / **platformProjectId** im Kontext stehen: bestehendes AUDION-/Collection nutzen — **kein** neues AUDION- oder Plattform-Projekt anlegen.
+- Persona **suchen**: audion_personas_list mit q=<Name> (fuzzy). Steht audionProjectId im Kontext → immer mit project_id suchen und **nie** nach dem Projekt fragen. Ohne Kontext: q ohne project_id.
+- Wenn **audionProjectId** / **platformProjectId** im Kontext stehen: bestehendes AUDION-/Collection nutzen — **kein** neues AUDION- oder Plattform-Projekt anlegen; Kontext-IDs nicht erneut vom Nutzer erfragen.
 - Markt/Signale: echon_signals_list, echon_waves_list, echon_foresight_* (schnell); echon_research_chat (kurz); echon_research_run_start / echon_signal_ingest / echon_waves_detect nur mit Bestätigung.
 - METRON Analytics: metron_kpis_list / dashboards_list zuerst; Werte nur via metron_kpi_evaluate / dashboard_get/summarize (Server-SSOT) — Zahlen nie erfinden.
 - Cross-Workflow: CHECKION (eigene Site) → ECHON (Markt) → AUDION (Zielgruppen) → METRON (KPIs/Dashboards aus Suite-Sync).

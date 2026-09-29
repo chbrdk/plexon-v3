@@ -271,11 +271,12 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
       },
     )
     expect(out.q).toBe('Markus Reinhardt')
-    expect(out.projectId).toBeUndefined()
-    expect(out.project_id).toBeUndefined()
+    // Collection context still scopes the search — do not ask the user for a project.
+    expect(out.project_id).toBe('aud-42')
+    expect(out.projectId).toBe('aud-42')
   })
 
-  it('never auto-scopes personas_list to conversation project (discovery)', () => {
+  it('scopes personas_list to conversation Audion project from URL/binding', () => {
     const out = injectAudionToolArgs(
       'audion.personas_list',
       {},
@@ -285,8 +286,8 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
         platformProjectId: 'pp-99',
       },
     )
-    expect(out.projectId).toBeUndefined()
-    expect(out.project_id).toBeUndefined()
+    expect(out.projectId).toBe('aud-42')
+    expect(out.project_id).toBe('aud-42')
     expect(out.actorUserId).toBe('session-user')
   })
 

@@ -114,7 +114,8 @@ export function mergeAssistantPageContext(
 
 /**
  * URL fallback when a page has not published React context yet.
- * EQC: `/event-quick-check` + optional `?run=`.
+ * - EQC: `/event-quick-check` + optional `?run=`
+ * - Collection: `/projects/{platformProjectId}/…` or `?platformProjectId=`
  */
 export function derivePageContextFromLocation(input: {
   product: AssistantPageContextProduct
@@ -122,10 +123,31 @@ export function derivePageContextFromLocation(input: {
   search?: string | null | undefined
 }): AssistantPageContext | null {
   const pathname = (input.pathname ?? '').trim() || '/'
+
+  let platformProjectId: string | undefined
+  try {
+    const params = new URLSearchParams(input.search ?? '')
+    const fromQuery = params.get('platformProjectId')?.trim()
+    if (fromQuery) platformProjectId = fromQuery
+  } catch {
+    /* ignore */
+  }
+  if (!platformProjectId) {
+    const m = pathname.match(/^\/projects\/([^/]+)(?:\/|$)/)
+    if (m?.[1]) {
+      try {
+        platformProjectId = decodeURIComponent(m[1]).trim() || undefined
+      } catch {
+        platformProjectId = m[1].trim() || undefined
+      }
+    }
+  }
+
   if (!pathname.startsWith(PATH_EVENT_QUICK_CHECK)) {
     return {
       product: input.product,
       pathname,
+      ...(platformProjectId ? { platformProjectId } : {}),
     }
   }
 
@@ -144,6 +166,7 @@ export function derivePageContextFromLocation(input: {
     capability: ASSISTANT_CAPABILITY_EVENT_QUICK_CHECK,
     entityType: runId ? ASSISTANT_ENTITY_EVENT_QUICK_CHECK_RUN : undefined,
     entityId: runId,
+    ...(platformProjectId ? { platformProjectId } : {}),
   }
 }
 
@@ -163,7 +186,12 @@ export function buildPageContextRouteHint(ctx: AssistantPageContext): string {
     lines.push(`- entityUpdatedAt: ${ctx.entityUpdatedAt}`)
   }
   lines.push(
-    'Der Nutzer betrachtet diese Seite. Beziehe dich darauf, wenn die Frage den aktuellen Kontext meint (z. B. „dieser Scan“, „dieser Quick Check“).'
+    'Der Nutzer betrachtet diese Seite. Beziehe dich darauf, wenn die Frage den aktuellen Kontext meint (z. B. „dieser Scan“, „dieser Quick Check“, „diese Persona“).',
   )
+  if (ctx.platformProjectId) {
+    lines.push(
+      'Collection/platformProjectId ist aus der URL bekannt — nicht nach dem Projekt fragen; Tools im Kontext dieser Collection ausführen.',
+    )
+  }
   return lines.join('\n')
 }

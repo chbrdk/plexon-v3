@@ -212,10 +212,9 @@ export function injectAudionToolArgs(
           ? out.project_id.trim()
           : '';
 
-  /** Name search / discovery must not be clipped to the Collection’s Audion project. */
-  const skipProjectInject = /personas_list$/i.test(toolName);
-
-  if (!existingAudion && fromCtxAudion && !skipProjectInject) {
+  // Scope personas_list to Collection Audion project when known (URL / binding).
+  // Model may still pass an explicit project_id to override.
+  if (!existingAudion && fromCtxAudion) {
     out.projectId = fromCtxAudion;
     out.audionProjectId = fromCtxAudion;
     out.project_id = fromCtxAudion;

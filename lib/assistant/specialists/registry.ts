@@ -166,8 +166,9 @@ const AUDION_PERSONA_SPECIALIST: AssistantSpecialist = {
         await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
         [
           'Persona-Lookup:',
-          '- Bei Namen (z. B. „Markus Reinhardt“): `audion_personas_list` mit `q=<Name>` — **ohne** project_id, damit cross-Project-Suche greift.',
-          '- Fuzzy: Tippfehler wie „Reinhard“ finden „Reinhardt“. Nicht raten / keine IDs erfinden.',
+          '- Bei Namen (z. B. „Markus Reinhardt“): `audion_personas_list` mit `q=<Name>` (fuzzy; Reinhard→Reinhardt). Keine IDs erfinden.',
+          '- Steht **audionProjectId** / Collection im Kontext: **sofort** mit diesem `project_id` suchen — **nie** nach dem Projekt fragen.',
+          '- Ohne Kontext-Projekt: `q` ohne project_id (Access Model B über zugängliche Projekte).',
           '- Treffer → `audion_persona_get` mit der zurückgegebenen `id`.',
         ].join('\n'),
       ].join('\n\n'),

@@ -30,9 +30,13 @@ Constants: `lib/assistant/page-context.ts` (capability / entityType ids). Never 
 
 1. React context provider wraps AppShell content.
 2. Pages publish via `useSetAssistantPageContext` (EQC publishes `workflowRunId` + `platformProjectId`).
-3. `PlatformAssistantHost` merges React context with URL fallback (`/event-quick-check?run=`).
+3. `PlatformAssistantHost` merges React context with URL fallback (`/event-quick-check?run=`, **`/projects/{platformProjectId}/…`**, `?platformProjectId=`).
 4. Native `AssistantChat` receives `pageContext` and sends it on every complete/stream request.
 5. When `platformProjectId` is set and the conversation has no project yet, seed the Collection picker.
+
+## Acceptance
+
+1. On `/projects/{platformProjectId}` (dashboard/flows/…) with open flyout, complete requests include `pageContext.platformProjectId` from the path — assistant MUST NOT ask which Collection/project to use for persona lookup.
 
 ## Embed / products
 

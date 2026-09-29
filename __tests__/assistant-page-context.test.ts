@@ -96,6 +96,24 @@ describe('assistant page context', () => {
       entityId: 'abc',
     })
 
+    expect(
+      derivePageContextFromLocation({
+        product: 'plexon',
+        pathname: '/projects/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee/flows',
+      }),
+    ).toMatchObject({
+      product: 'plexon',
+      platformProjectId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+    })
+
+    expect(
+      derivePageContextFromLocation({
+        product: 'plexon',
+        pathname: '/assistant',
+        search: '?platformProjectId=pp-from-query',
+      })?.platformProjectId,
+    ).toBe('pp-from-query')
+
     const merged = mergeAssistantPageContext(derived, {
       product: 'plexon',
       pathname: '/event-quick-check',
