@@ -37,6 +37,7 @@ export const JEV_USE_CASES = {
   eqcDashboardBands: 'eqc.dashboard_bands',
   audionFrictionSeverity: 'audion.friction_severity',
   audionInsightTriage: 'audion.insight_triage',
+  audionPersonaChatModelTier: 'audion.persona_chat_model_tier',
   uiScoreTone: 'ui.score_tone',
   eqcEeatReadingVariant: 'eqc.eeat_reading_variant',
   assistantCompanyBriefUseLlm: 'assistant.company_brief_use_llm',

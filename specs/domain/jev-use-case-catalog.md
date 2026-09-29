@@ -40,6 +40,7 @@ Shadow-first. Env suffix = uppercase id with dots → underscores (`assistant.in
 | `eqc.dashboard_bands` | layout resolvers | Choice band set |
 | `audion.friction_severity` | `frictionSeverity` / journey validate friction | Choice high/medium/low |
 | `audion.insight_triage` | UX-study / validate finding severity → triage | Choice act_now/watch/noise |
+| `audion.persona_chat_model_tier` | Greeting→low / elicitation→high / else mid · AUDION chat stream | Choice low/mid/high → env model allowlist |
 
 ## P2 — small maps
 
