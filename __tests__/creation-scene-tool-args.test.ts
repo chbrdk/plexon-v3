@@ -254,9 +254,25 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
     expect(out).toMatchObject({
       actorUserId: 'session-user',
       projectId: 'aud-42',
+      project_id: 'aud-42',
       audionProjectId: 'aud-42',
       platformProjectId: 'pp-99',
     })
+  })
+
+  it('does not scope personas_list by project when q name search is set', () => {
+    const out = injectAudionToolArgs(
+      'audion_personas_list',
+      { q: 'Markus Reinhardt' },
+      {
+        actorUserId: 'session-user',
+        audionProjectId: 'aud-42',
+        platformProjectId: 'pp-99',
+      },
+    )
+    expect(out.q).toBe('Markus Reinhardt')
+    expect(out.projectId).toBeUndefined()
+    expect(out.project_id).toBeUndefined()
   })
 
   it('does not overwrite explicit audion project ids from the model', () => {
@@ -270,6 +286,7 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
       },
     )
     expect(out.projectId).toBe('explicit-aud')
+    expect(out.project_id).toBe('explicit-aud')
     expect(out.platformProjectId).toBe('explicit-pp')
   })
 })

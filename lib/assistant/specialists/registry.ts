@@ -162,7 +162,15 @@ const AUDION_PERSONA_SPECIALIST: AssistantSpecialist = {
   buildSystemAddendum: async (ctx) =>
     withSpecialistHeader(
       'Audion Persona',
-      await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+      [
+        await buildAudionIntegrationContextBlock({ useAudionMcp: ctx.useAudionMcp }),
+        [
+          'Persona-Lookup:',
+          '- Bei Namen (z. B. „Markus Reinhardt“): `audion_personas_list` mit `q=<Name>` — **ohne** project_id, damit cross-Project-Suche greift.',
+          '- Fuzzy: Tippfehler wie „Reinhard“ finden „Reinhardt“. Nicht raten / keine IDs erfinden.',
+          '- Treffer → `audion_persona_get` mit der zurückgegebenen `id`.',
+        ].join('\n'),
+      ].join('\n\n'),
     ),
 };
 

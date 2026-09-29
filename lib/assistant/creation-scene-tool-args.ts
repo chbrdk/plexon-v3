@@ -208,10 +208,23 @@ export function injectAudionToolArgs(
       ? out.projectId.trim()
       : typeof out.audionProjectId === 'string'
         ? out.audionProjectId.trim()
-        : '';
-  if (!existingAudion && fromCtxAudion) {
+        : typeof out.project_id === 'string'
+          ? out.project_id.trim()
+          : '';
+
+  const hasNameQuery =
+    (typeof out.q === 'string' && out.q.trim().length > 0) ||
+    (typeof out.search === 'string' && out.search.trim().length > 0) ||
+    (typeof out.name === 'string' && out.name.trim().length > 0);
+  /** Name search must not be clipped to the Collection’s Audion project. */
+  const skipProjectInject = /personas_list$/i.test(toolName) && hasNameQuery;
+
+  if (!existingAudion && fromCtxAudion && !skipProjectInject) {
     out.projectId = fromCtxAudion;
     out.audionProjectId = fromCtxAudion;
+    out.project_id = fromCtxAudion;
+  } else if (existingAudion && !out.project_id) {
+    out.project_id = existingAudion;
   }
 
   const existingPlatform =
