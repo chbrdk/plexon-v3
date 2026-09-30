@@ -259,14 +259,26 @@ export function injectAudionToolArgs(
           ? out.project_id.trim()
           : '';
 
-  // Scope personas_list to Collection Audion project when known (URL / binding).
-  // Model may still pass an explicit project_id to override.
-  if (!existingAudion && fromCtxAudion) {
+  const hasNameQuery =
+    (typeof out.q === 'string' && out.q.trim()) ||
+    (typeof out.search === 'string' && out.search.trim()) ||
+    (typeof out.name === 'string' && out.name.trim());
+
+  // Browse without a name: scope to Collection Audion project when known.
+  // Name search (q): do NOT force project_id — stale conversation bindings
+  // (e.g. accidental persona_bootstrap “Neues Projekt”) otherwise hide hits.
+  // Access Model B: Audion lists across projects the viewer can access.
+  if (!existingAudion && fromCtxAudion && !hasNameQuery) {
     out.projectId = fromCtxAudion;
     out.audionProjectId = fromCtxAudion;
     out.project_id = fromCtxAudion;
-  } else if (existingAudion && !out.project_id) {
+  } else if (existingAudion && !out.project_id && !hasNameQuery) {
     out.project_id = existingAudion;
+  } else if (hasNameQuery && /personas_list/i.test(toolName)) {
+    // Strip injected/stale project scope so fuzzy name search is suite-wide (viewer ACL).
+    delete out.projectId;
+    delete out.project_id;
+    delete out.audionProjectId;
   }
 
   const existingPlatform =

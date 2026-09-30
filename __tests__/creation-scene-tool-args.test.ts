@@ -263,7 +263,7 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
   it('does not scope personas_list by project when q name search is set', () => {
     const out = injectAudionToolArgs(
       'audion_personas_list',
-      { q: 'Markus Reinhardt' },
+      { q: 'Markus Reinhardt', project_id: 'stale-bootstrap' },
       {
         actorUserId: 'session-user',
         audionProjectId: 'aud-42',
@@ -271,9 +271,11 @@ describe('injectCheckionToolArgs / injectAudionToolArgs / injectBrandionToolArgs
       },
     )
     expect(out.q).toBe('Markus Reinhardt')
-    // Collection context still scopes the search — do not ask the user for a project.
-    expect(out.project_id).toBe('aud-42')
-    expect(out.projectId).toBe('aud-42')
+    // Name search must not stay pinned to a stale conversation binding.
+    expect(out.project_id).toBeUndefined()
+    expect(out.projectId).toBeUndefined()
+    expect(out.audionProjectId).toBeUndefined()
+    expect(out.platformProjectId).toBe('pp-99')
   })
 
   it('scopes personas_list to conversation Audion project from URL/binding', () => {
