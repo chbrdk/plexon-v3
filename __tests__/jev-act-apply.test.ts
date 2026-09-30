@@ -28,6 +28,31 @@ describe('jev act-apply intent', () => {
     expect(applyAssistantIntentAct('x', baseline, 'geo_analysis').applied).toBe(false)
   })
 
+  it('refuses persona_bootstrap Act on duplicate/copy of a named persona', () => {
+    const baseline = { type: 'free_chat' as const }
+    const prompts = [
+      'kannst du julia wendt duplizieren?',
+      'Julia Wendt kopieren',
+      'clone persona Markus Reinhardt',
+    ]
+    for (const prompt of prompts) {
+      const out = applyAssistantIntentAct(prompt, baseline, 'persona_bootstrap')
+      expect(out.applied).toBe(false)
+      expect(out.intent).toEqual(baseline)
+    }
+  })
+
+  it('still applies persona_bootstrap Act for genuine create prompts', () => {
+    const baseline = { type: 'free_chat' as const }
+    const out = applyAssistantIntentAct(
+      'Generiere Persona für Zielgruppe Eltern',
+      baseline,
+      'persona_bootstrap',
+    )
+    expect(out.applied).toBe(true)
+    expect(out.intent.type).toBe('persona_bootstrap')
+  })
+
   it('parses planner buckets', () => {
     expect(parsePlannerJevBucket('creation_scene_edit')).toBe('creation_scene_edit')
     expect(parsePlannerJevBucket('nope')).toBeNull()

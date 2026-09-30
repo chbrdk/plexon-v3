@@ -150,16 +150,25 @@ const PERSONA_PATTERNS = [
   /\btarget\s*group/i,
   /\bcustomer\s*journey/i,
   /\bkundenreise/i,
-  /** “Finde Markus Reinhardt” / “Zeig mir Anna Schmidt” without saying Persona */
-  /\b(finde|such\w*|zeig\w*|wo\s+ist)\b[^.?!\n]{0,48}\b[A-ZÄÖÜ][a-zäöüß'-]+\s+[A-ZÄÖÜ][a-zäöüß'-]+/iu,
-  /\baudion\b[^.?!\n]{0,40}\b(persona|zielgruppe|finde|such\w*|zeig\w*)/i,
+  /** “Finde Markus Reinhardt” / “julia wendt duplizieren” (chat often lowercase) */
+  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
+  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,32}\b(duplizier\w*|kopier\w*|finde|zeig\w*|such\w*)/iu,
+  /\baudion\b[^.?!\n]{0,40}\b(persona|zielgruppe|finde|such\w*|zeig\w*|duplizier\w*|kopier\w*)/i,
   /** Bare full name as the whole prompt */
-  /^\s*[A-ZÄÖÜ][a-zäöüß'-]+\s+[A-ZÄÖÜ][a-zäöüß'-]+\s*[.?!]?\s*$/u,
+  /^\s*[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s*[.?!]?\s*$/u,
+];
+
+/** Subset: named person lookup/duplicate — must beat generic action_write. */
+const PERSONA_NAME_LOOKUP_PATTERNS = [
+  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
+  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,32}\b(duplizier\w*|kopier\w*|finde|zeig\w*|such\w*)/iu,
+  /^\s*[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s*[.?!]?\s*$/u,
 ];
 
 const WRITE_PATTERNS = [
   /\b(starte|start|erstelle|create|generiere|generate|lösche|delete|anleg\w*|ableit\w*)\b/i,
   /\b(upsert|import|aktualisier\w*|update|ersetz\w*|replace|archiv\w*|evaluate|publish)\b/i,
+  /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i,
   /\bscanne\s+https?:\/\//i,
 ];
 
@@ -537,6 +546,27 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       maxToolRounds: 5,
       skipTools: false,
       reasoning: 'Markt/Signal/Trend-Intent – ECHON Research + Signals/Waves (read-only bevorzugt).',
+    });
+  }
+
+  // Named-person lookup / duplicate before generic action_write (lowercase “julia wendt
+  // duplizieren”). Broad persona/zielgruppe create stays after writeIntent so
+  // “Target Group + DTCG tokens” can still be cross-app action_write.
+  const namedPersonaLookup = PERSONA_NAME_LOOKUP_PATTERNS.some((p) => p.test(text));
+  if (namedPersonaLookup && input.hasAudionMcp) {
+    const duplicate = /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i.test(text);
+    return buildPlan({
+      intent: 'audion_persona',
+      mode: 'hybrid',
+      toolFamilies: duplicate
+        ? [...new Set([...PERSONA_FAMILIES, 'audion_audience_write'])]
+        : [...PERSONA_FAMILIES],
+      allowWriteTools: duplicate,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning: duplicate
+        ? 'Persona duplizieren/kopieren – AUDION list/get/create (kein neues Projekt).'
+        : 'Persona-Namenslookup – AUDION Persona & Knowledge (read-only).',
     });
   }
 
@@ -1085,19 +1115,20 @@ function preferPersonaLookupPlan(plan: AssistantPlan, input: PlannerInput): Assi
     plan.intent === 'audion_knowledge' ||
     plan.intent === 'audion_journey' ||
     plan.intent === 'audion_ux_journey' ||
-    plan.intent === 'audion_documents' ||
-    plan.intent === 'action_write'
+    plan.intent === 'audion_documents'
   ) {
     return plan;
   }
+  // Override general_chat / action_write / etc. → audion_persona when name/duplicate patterns hit.
+  const duplicate = /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i.test(text);
   return buildPlan({
     intent: 'audion_persona',
     mode: 'hybrid',
-    toolFamilies: [...PERSONA_FAMILIES],
-    allowWriteTools: false,
+    toolFamilies: duplicate ? [...AUDION_WRITE_FAMILIES] : [...PERSONA_FAMILIES],
+    allowWriteTools: duplicate || plan.allowWriteTools,
     maxToolRounds: Math.max(plan.maxToolRounds, 5),
     skipTools: false,
-    reasoning: `${plan.reasoning} → override: Persona-Namenslookup (AUDION).`,
+    reasoning: `${plan.reasoning} → override: Persona-Namenslookup${duplicate ? ' + Duplikat' : ''} (AUDION).`,
     plannerSource: plan.plannerSource,
   });
 }

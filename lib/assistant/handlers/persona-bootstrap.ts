@@ -13,6 +13,7 @@ import {
 import { executeAudionPersonaBootstrapCapability } from '@/lib/capabilities/executors/audion-persona-bootstrap';
 import { isCapabilityCatalogRuntimeEnabled } from '@/lib/capabilities/runtime-flag';
 import { runPersonaBootstrap } from '@/lib/integrations/audion-persona-bootstrap-client';
+import { shouldRejectPersonaBootstrapAct } from '@/lib/assistant/persona-duplicate-intent';
 import { recordAssistantUsageEvent } from '@/lib/assistant/usage';
 import {
   emitPhase,
@@ -21,6 +22,15 @@ import {
 } from '@/lib/assistant/handlers/context';
 
 export const handlePersonaBootstrapIntent: IntentHandler<'persona_bootstrap'> = async (ctx, intent) => {
+  // Defense in depth: never Bootstrap when the user asked to copy an existing persona.
+  if (shouldRejectPersonaBootstrapAct(ctx.prompt)) {
+    return {
+      assistantText:
+        'Das klingt nach **Duplizieren oder Suchen einer bestehenden Persona**, nicht nach einem neuen Persona-Bootstrap.\n\nBitte nochmal so formulieren — ich suche die Persona im aktuellen AUDION-Projekt und lege bei Bedarf eine Kopie an (ohne neues Projekt).',
+      metadata: { contentType: ASSISTANT_MESSAGE_CONTENT_TYPE.MARKDOWN },
+    };
+  }
+
   emitPhase(ctx.emit, 'workflow', 'persona_bootstrap');
   const workflowRun = await createAssistantWorkflowRun({
     id: randomUUID(),

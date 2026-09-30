@@ -128,6 +128,21 @@ describe('assistant-planner heuristic', () => {
     }
   });
 
+  it('routes lowercase persona duplicate to audion_persona with write tools', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'kannst du julia wendt duplizieren?',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      compactContextLoaded: true,
+    });
+    expect(plan.intent).toBe('audion_persona');
+    expect(plan.allowWriteTools).toBe(true);
+    expect(plan.toolFamilies.some((f) => f.startsWith('audion_'))).toBe(true);
+  });
+
   it('uses embedded context for project knowledge questions', () => {
     const plan = planAssistantTurnHeuristic({
       prompt: 'was hast du zur Haftpflichtkasse',

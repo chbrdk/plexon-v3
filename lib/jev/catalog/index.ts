@@ -81,7 +81,7 @@ export const ASSISTANT_INTENT_OPTIONS = [
 export function questionsAssistantIntent(): JevQuestions {
   return {
     intent: choiceQuestion(
-      'Primary assistant intent for this user prompt',
+      'Primary assistant intent. Use persona_bootstrap ONLY to create/generate a NEW persona or easy-setup audience from scratch. NEVER for duplicate/copy/clone or find of an existing named person (those are free_chat).',
       ASSISTANT_INTENT_OPTIONS,
     ),
   }

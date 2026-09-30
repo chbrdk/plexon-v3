@@ -43,8 +43,9 @@ When `JEV_ACT_<USE_CASE>=1`:
 1. **Await** the Decisions call on the request path (same timeout / fail-open as shadow).
 2. On success, **override** the heuristic baseline with the extracted Jev value (Choice key / Noul boolean).
 3. On error, timeout, or unmappable value → keep heuristic (fail-open).
-4. Log `[jev-act]` with `useCaseId`, `baseline`, `jev`, `applied` (boolean), `latencyMs`.
-5. Shadow-only (`JEV_SHADOW_*` without Act) stays fire-and-forget and must **not** change SoT.
+4. **Hard veto:** never apply `persona_bootstrap` when the prompt is a duplicate/copy/clone or a named-person lookup without create verbs (`lib/assistant/persona-duplicate-intent.ts`) — keeps “dupliziere Julia Wendt” as `free_chat`.
+5. Log `[jev-act]` with `useCaseId`, `baseline`, `jev`, `applied` (boolean), `latencyMs`.
+6. Shadow-only (`JEV_SHADOW_*` without Act) stays fire-and-forget and must **not** change SoT.
 
 P0 apply surfaces:
 

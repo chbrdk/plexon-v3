@@ -57,6 +57,7 @@ MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - audion.target_group_knowledge_chunks nur gezielt; lade nie alle Chunks aller Zielgruppen auf einmal.
 - Zielgruppen/Personas **anlegen**: audion_target_group_create, audion_persona_create (Schreib-Tools; ggf. Nutzerbestätigung).
 - Persona **suchen**: audion_personas_list mit q=<Name> (fuzzy). Steht audionProjectId im Kontext → immer mit project_id suchen und **nie** nach dem Projekt fragen. Ohne Kontext: q ohne project_id.
+- Persona **duplizieren/kopieren** („kannst du Julia Wendt duplizieren?“): (1) audion_personas_list q=<Name> im aktuellen Projekt, (2) audion_persona_get, (3) audion_persona_create mit denselben Kerndaten und neuem Namen z. B. „Julia Wendt (Kopie)“. **Niemals** ein neues AUDION-/Plattform-Projekt oder Persona-Bootstrap starten.
 - Wenn **audionProjectId** / **platformProjectId** im Kontext stehen: bestehendes AUDION-/Collection nutzen — **kein** neues AUDION- oder Plattform-Projekt anlegen; Kontext-IDs nicht erneut vom Nutzer erfragen.
 - Markt/Signale: echon_signals_list, echon_waves_list, echon_foresight_* (schnell); echon_research_chat (kurz); echon_research_run_start / echon_signal_ingest / echon_waves_detect nur mit Bestätigung.
 - METRON Analytics: metron_kpis_list / dashboards_list zuerst; Werte nur via metron_kpi_evaluate / dashboard_get/summarize (Server-SSOT) — Zahlen nie erfinden.

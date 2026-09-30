@@ -8,6 +8,7 @@ import {
   extractScanIdFromText,
   extractUrlFromText,
 } from '@/lib/assistant/conversation-context'
+import { shouldRejectPersonaBootstrapAct } from '@/lib/assistant/persona-duplicate-intent'
 import { ASSISTANT_INTENT_OPTIONS } from '@/lib/jev/catalog'
 import { extractScopedProjectName } from '@/lib/assistant/create-project-scope'
 import { EVENT_QUICK_CHECK_PLAYBOOK_ID } from '@/lib/paths/assistant-workflows'
@@ -134,6 +135,11 @@ export function applyAssistantIntentAct(
     return { intent: baseline, applied: false }
   }
   if (jevKey === baseline.type) {
+    return { intent: baseline, applied: false }
+  }
+  // Jev often mislabels “dupliziere Julia Wendt” / named lookups as persona_bootstrap
+  // → would create “Neues Projekt”. Keep heuristic free_chat (or other baseline).
+  if (jevKey === 'persona_bootstrap' && shouldRejectPersonaBootstrapAct(prompt)) {
     return { intent: baseline, applied: false }
   }
   const built = materializeAssistantIntent(prompt, jevKey)
