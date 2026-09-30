@@ -228,6 +228,7 @@ Owner `metron`. Agent-only (no Collection Flow nodes in Wave 9). Free-chat uses 
 | `metron.kpi.summarize` | metron | — | `metron_kpi_summarize` | read | `metron.kpis` | Bounded text + Auto UI |
 | `metron.dashboards.list` | metron | — | `metron_dashboards_list` | read | `metron.dashboards` | Auto `link_list` UI |
 | `metron.dashboard.get` | metron | — | `metron_dashboard_get` | read | `metron.dashboards` | Auto `metric_grid` + charts + `link_list` |
+| `metron.dashboard.evaluate` | metron | — | `metron_dashboard_evaluate` | read | `metron.dashboards` | SSOT eval + optional `filters`/`period`/`breakdownColumn`; same Auto UI as get |
 | `metron.dashboard.summarize` | metron | — | `metron_dashboard_summarize` | read | `metron.dashboards` | Auto `metric_grid` + `link_list` |
 | `metron.dashboard.create` | metron | — | `metron_dashboard_create` | write | `metron.dashboards` | `human_gate` |
 | `metron.kpi.create` | metron | — | `metron_kpi_create` | write | `metron.kpis` | `human_gate`; prefer draft |

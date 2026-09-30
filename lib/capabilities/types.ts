@@ -50,6 +50,7 @@ export type CapabilityId =
   | 'metron.kpi.summarize'
   | 'metron.dashboards.list'
   | 'metron.dashboard.get'
+  | 'metron.dashboard.evaluate'
   | 'metron.dashboard.summarize'
   | 'metron.dashboard.create'
   | 'metron.kpi.create'

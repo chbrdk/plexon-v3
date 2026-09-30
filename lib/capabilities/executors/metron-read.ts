@@ -21,6 +21,23 @@ export const executeMetronRead: CapabilityExecutor = async (input, ctx) => {
   return executeMetronReadCapability(input, ctx);
 };
 
+function dashboardEvaluateQuery(input: Record<string, unknown>): string {
+  const params = new URLSearchParams()
+  const filters = typeof input.filters === 'string' ? input.filters.trim() : ''
+  if (filters) params.set('filters', filters)
+  const filterColumn = typeof input.filterColumn === 'string' ? input.filterColumn.trim() : ''
+  const filterValue = typeof input.filterValue === 'string' ? input.filterValue.trim() : ''
+  if (filterColumn) params.set('filterColumn', filterColumn)
+  if (filterValue) params.set('filterValue', filterValue)
+  const breakdownColumn =
+    typeof input.breakdownColumn === 'string' ? input.breakdownColumn.trim() : ''
+  if (breakdownColumn) params.set('breakdownColumn', breakdownColumn)
+  const period = typeof input.period === 'string' ? input.period.trim() : ''
+  if (period) params.set('period', period)
+  const q = params.toString()
+  return q ? `?${q}` : ''
+}
+
 export async function executeMetronReadCapability(
   input: Record<string, unknown>,
   ctx: CapabilityExecuteContext,
@@ -70,6 +87,13 @@ export async function executeMetronReadCapability(
       const id = typeof input.id === 'string' ? input.id.trim() : '';
       if (!id) return { ok: false, error: 'id fehlt', catalogRoot: 'metron.dashboards' };
       path = `/api/dashboards/${encodeURIComponent(id)}`;
+      catalogRoot = 'metron.dashboards';
+      break;
+    }
+    case 'dashboard_evaluate': {
+      const id = typeof input.id === 'string' ? input.id.trim() : '';
+      if (!id) return { ok: false, error: 'id fehlt', catalogRoot: 'metron.dashboards' };
+      path = `/api/dashboards/${encodeURIComponent(id)}${dashboardEvaluateQuery(input)}`;
       catalogRoot = 'metron.dashboards';
       break;
     }

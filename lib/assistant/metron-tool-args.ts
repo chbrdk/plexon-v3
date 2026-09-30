@@ -15,7 +15,7 @@ function needsPlatformCompanyId(toolName: string): boolean {
 }
 
 function needsEntityId(toolName: string): boolean {
-  return /metron[._](dashboard_get|dashboard_summarize|kpi_get|kpi_evaluate|kpi_summarize|dataset_get|external_connection_sync|company_kpi_library_bind)$/i.test(
+  return /metron[._](dashboard_get|dashboard_evaluate|dashboard_summarize|kpi_get|kpi_evaluate|kpi_summarize|dataset_get|external_connection_sync|company_kpi_library_bind)$/i.test(
     toolName,
   );
 }

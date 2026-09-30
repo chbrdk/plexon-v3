@@ -41,6 +41,7 @@ describe('METRON Wave 9 capability catalog', () => {
         'metron.kpi.summarize',
         'metron.dashboards.list',
         'metron.dashboard.get',
+        'metron.dashboard.evaluate',
         'metron.dashboard.summarize',
         'metron.dashboard.create',
         'metron.kpi.create',
@@ -65,6 +66,7 @@ describe('METRON Wave 9 capability catalog', () => {
 
   it('maps MCP tool names to metron capabilities', () => {
     expect(capabilityIdFromAgentTool('metron_dashboards_list')).toBe('metron.dashboards.list')
+    expect(capabilityIdFromAgentTool('metron_dashboard_evaluate')).toBe('metron.dashboard.evaluate')
     expect(capabilityIdFromAgentTool('metron_dashboard_create')).toBe('metron.dashboard.create')
     expect(capabilityIdFromAgentTool('metron_kpi_create')).toBe('metron.kpi.create')
     expect(capabilityIdFromAgentTool('metron_kpi_evaluate')).toBe('metron.kpi.evaluate')

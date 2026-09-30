@@ -601,6 +601,28 @@ const PILOT: CapabilityRecord[] = [
     executorId: 'metron-read',
   },
   {
+    id: 'metron.dashboard.evaluate',
+    owner: 'metron',
+    title: 'Evaluate METRON dashboard',
+    description:
+      'Server SSOT dashboard evaluations with optional slicers (filters, period, breakdown).',
+    inputFields: [
+      { name: 'id', required: true },
+      { name: 'filters', required: false },
+      { name: 'filterColumn', required: false },
+      { name: 'filterValue', required: false },
+      { name: 'breakdownColumn', required: false },
+      { name: 'period', required: false },
+    ],
+    outputCatalogRoot: 'metron.dashboards',
+    sideEffect: 'read',
+    confirmation: 'none',
+    surfaces: { agent: true, flow: false },
+    agent: { toolNames: ['metron_dashboard_evaluate'], intentTypes: [] },
+    flow: null,
+    executorId: 'metron-read',
+  },
+  {
     id: 'metron.dashboard.summarize',
     owner: 'metron',
     title: 'Summarize METRON dashboard',

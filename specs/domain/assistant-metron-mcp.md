@@ -57,6 +57,7 @@ Metron host publishes `entityType` + `entityId` on `/dashboards/:id` (`dashboard
 |--------|-----------------|
 | `metron.dashboards.list` | `metron_dashboards_list` |
 | `metron.dashboard.summarize` | `metron_dashboard_summarize` |
+| `metron.dashboard.evaluate` | `metron_dashboard_evaluate` |
 | `metron.dashboard.create` | `metron_dashboard_create` |
 | … | see `capability-catalog.md` METRON set |
 
@@ -69,7 +70,7 @@ MCP fetch branch beside Videon using `fetchCheckionMcpTools` against `getMetronM
 | Tool | Block |
 |------|-------|
 | `metron_dashboards_list` | `link_list` — dashboard titles + absolute METRON deep links |
-| `metron_dashboard_get` | `metric_grid` (kpi_tile/gauge) + up to `UI_BLOCK_LIMITS.maxChartSeries` `chart` widgets with `chartPoints` + `link_list` |
+| `metron_dashboard_get` / `metron_dashboard_evaluate` | `metric_grid` (kpi_tile/gauge) + up to `UI_BLOCK_LIMITS.maxChartSeries` `chart` widgets with `chartPoints` + `link_list` |
 | `metron_dashboard_summarize` | `metric_grid` from KPI/gauge lines + `link_list` deep link |
 | `metron_kpis_list` / `metron_kpi_evaluate` / `metron_kpi_summarize` | `metric_grid` (+ period label from provenance when present) + deep link |
 | `metron_datasets_list` / `metron_dataset_get` | `link_list` + honesty hint when sample-evaluated |

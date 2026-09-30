@@ -401,7 +401,7 @@ export function isMetronDashboardSummarizeToolName(toolName: string): boolean {
 
 export function isMetronDashboardGetToolName(toolName: string): boolean {
   const n = toolName.replace(/\./g, '_');
-  return n === 'metron_dashboard_get';
+  return n === 'metron_dashboard_get' || n === 'metron_dashboard_evaluate';
 }
 
 export type MetronKpiListItem = {
