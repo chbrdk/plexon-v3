@@ -63,10 +63,12 @@ describe('resolveAssistantIntent Act', () => {
   beforeEach(() => {
     process.env.OPENROUTER_API_KEY = 'sk-test'
     process.env.OPENROUTER_API_BASE_URL = 'https://openrouter.test'
+    process.env.JEV_ACT_ROUTING = '1'
     process.env.JEV_ACT_ASSISTANT_INTENT = '1'
     delete process.env.JEV_SHADOW_ENABLED
   })
   afterEach(() => {
+    delete process.env.JEV_ACT_ROUTING
     delete process.env.JEV_ACT_ASSISTANT_INTENT
     delete process.env.OPENROUTER_API_KEY
   })
@@ -97,15 +99,39 @@ describe('resolveAssistantIntent Act', () => {
     const intent = await resolveAssistantIntent('Was kannst du?', { fetchImpl })
     expect(intent.type).toBe('capabilities')
   })
+
+  it('keeps heuristic when JEV_ACT_ROUTING is off (routing Act pause)', async () => {
+    delete process.env.JEV_ACT_ROUTING
+    process.env.JEV_ACT_ASSISTANT_INTENT = '1'
+    const fetchImpl = vi.fn(async () => {
+      return new Response(
+        JSON.stringify({
+          model: 'typesafe/jev-1.13',
+          answers: {
+            intent: { type: 'choice', key: 'persona_bootstrap' },
+          },
+        }),
+        { status: 200 },
+      )
+    }) as unknown as typeof fetch
+
+    const intent = await resolveAssistantIntent('kannst du julia wendt duplizieren?', {
+      fetchImpl,
+    })
+    expect(intent.type).toBe('free_chat')
+    expect(fetchImpl).not.toHaveBeenCalled()
+  })
 })
 
 describe('planAssistantTurn Act', () => {
   beforeEach(() => {
     process.env.OPENROUTER_API_KEY = 'sk-test'
     process.env.OPENROUTER_API_BASE_URL = 'https://openrouter.test'
+    process.env.JEV_ACT_ROUTING = '1'
     process.env.JEV_ACT_ASSISTANT_PLANNER = '1'
   })
   afterEach(() => {
+    delete process.env.JEV_ACT_ROUTING
     delete process.env.JEV_ACT_ASSISTANT_PLANNER
     delete process.env.OPENROUTER_API_KEY
   })

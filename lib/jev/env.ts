@@ -51,7 +51,22 @@ export function isJevShadowEnabled(useCaseId: string): boolean {
   return true
 }
 
+/**
+ * Master switch for assistant **routing** Act (intent + planner).
+ * Default OFF — heuristics are SoT. Opt-in only with `JEV_ACT_ROUTING=1`
+ * plus the per-case `JEV_ACT_ASSISTANT_*` flags.
+ * Spec: specs/domain/jev-decisions.md § Routing Act pause
+ */
+export function isJevRoutingActEnabled(): boolean {
+  return envTruthy(runtimeEnv('JEV_ACT_ROUTING'))
+}
+
+const ROUTING_ACT_USE_CASES = new Set(['assistant.intent', 'assistant.planner'])
+
 export function isJevActEnabled(useCaseId: string): boolean {
   if (!openRouterApiKey()) return false
+  if (ROUTING_ACT_USE_CASES.has(useCaseId) && !isJevRoutingActEnabled()) {
+    return false
+  }
   return envTruthy(runtimeEnv(`JEV_ACT_${useCaseEnvSuffix(useCaseId)}`))
 }

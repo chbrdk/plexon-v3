@@ -36,9 +36,18 @@ Response: flat `answers` map (`type: choice|noul|score`) plus `usage.cost` / `us
 
 Enable `JEV_ACT_<USE_CASE>` only after shadow window meets criteria in `knowledge/jev-flip-runbook.md` (agreement, p95 latency, cost/1k, tests green).
 
+### Routing Act pause (2026-09-30)
+
+**`assistant.intent` and `assistant.planner` Act are OFF by default.** Heuristics are SoT for routing. Re-enable only with **both**:
+
+1. `JEV_ACT_ROUTING=1` (master switch)
+2. `JEV_ACT_ASSISTANT_INTENT=1` / `JEV_ACT_ASSISTANT_PLANNER=1`
+
+Shadow (`JEV_SHADOW_*`) may still run fire-and-forget and must **not** change SoT.
+
 ### Act-apply (SoT)
 
-When `JEV_ACT_<USE_CASE>=1`:
+When Act is enabled for a use case:
 
 1. **Await** the Decisions call on the request path (same timeout / fail-open as shadow).
 2. On success, **override** the heuristic baseline with the extracted Jev value (Choice key / Noul boolean).
@@ -47,7 +56,7 @@ When `JEV_ACT_<USE_CASE>=1`:
 5. Log `[jev-act]` with `useCaseId`, `baseline`, `jev`, `applied` (boolean), `latencyMs`.
 6. Shadow-only (`JEV_SHADOW_*` without Act) stays fire-and-forget and must **not** change SoT.
 
-P0 apply surfaces:
+P0 apply surfaces (gated by `JEV_ACT_ROUTING` for routing):
 
 - `assistant.intent` → `resolveAssistantIntent` (async); sync `routeAssistantIntent` remains heuristic + shadow schedule for unit tests.
 - `assistant.planner` → `planAssistantTurn` awaits Act and may rematerialize coarse buckets (`general_chat` / `creation_scene_edit` / `geo_analysis`) plus `allow_write` Noul.
@@ -70,7 +79,8 @@ Deterministic gates stay code-only:
 | `JEV_MODEL_ID` | Default `typesafe/jev-1.13` |
 | `JEV_SHADOW_ENABLED` | Global shadow (`1`/`true`) |
 | `JEV_SHADOW_<USE_CASE>` | Per-case override (`0` off, `1` on) |
-| `JEV_ACT_<USE_CASE>` | Per-case act (default off) |
+| `JEV_ACT_ROUTING` | Master switch for `assistant.intent` / `assistant.planner` Act (default off) |
+| `JEV_ACT_<USE_CASE>` | Per-case act (default off; routing cases also need `JEV_ACT_ROUTING`) |
 | `JEV_TIMEOUT_MS` | Default `800` |
 
 Use-case IDs: `specs/domain/jev-use-case-catalog.md`.  

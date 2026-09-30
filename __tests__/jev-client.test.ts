@@ -18,6 +18,7 @@ describe('jev env', () => {
     delete process.env.JEV_SHADOW_ENABLED
     delete process.env.JEV_SHADOW_ASSISTANT_INTENT
     delete process.env.JEV_ACT_ASSISTANT_INTENT
+    delete process.env.JEV_ACT_ROUTING
   })
 
   it('maps use case ids to env suffixes', () => {
@@ -33,10 +34,13 @@ describe('jev env', () => {
     expect(isJevShadowEnabled(JEV_USE_CASES.assistantIntent)).toBe(false)
   })
 
-  it('act defaults off', () => {
+  it('act defaults off; routing Act needs JEV_ACT_ROUTING', () => {
     process.env.OPENROUTER_API_KEY = 'sk-test'
     expect(isJevActEnabled(JEV_USE_CASES.assistantIntent)).toBe(false)
     process.env.JEV_ACT_ASSISTANT_INTENT = '1'
+    // Per-case alone is not enough for routing use cases
+    expect(isJevActEnabled(JEV_USE_CASES.assistantIntent)).toBe(false)
+    process.env.JEV_ACT_ROUTING = '1'
     expect(isJevActEnabled(JEV_USE_CASES.assistantIntent)).toBe(true)
   })
 })

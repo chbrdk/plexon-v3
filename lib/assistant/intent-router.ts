@@ -443,7 +443,8 @@ export function routeAssistantIntent(prompt: string): AssistantIntent {
 }
 
 /**
- * Request path: when `JEV_ACT_ASSISTANT_INTENT=1`, await Jev and apply Choice as SoT.
+ * Request path: Act only when `JEV_ACT_ROUTING=1` **and** `JEV_ACT_ASSISTANT_INTENT=1`.
+ * Otherwise heuristic SoT (+ optional fire-and-forget shadow).
  * Spec: specs/domain/jev-decisions.md § Act-apply
  */
 export async function resolveAssistantIntent(
