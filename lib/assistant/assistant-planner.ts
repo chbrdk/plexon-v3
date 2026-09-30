@@ -559,7 +559,7 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
       intent: 'audion_persona',
       mode: 'hybrid',
       toolFamilies: duplicate
-        ? [...new Set([...PERSONA_FAMILIES, 'audion_audience_write'])]
+        ? ([...new Set([...PERSONA_FAMILIES, 'audion_audience_write'])] as ToolFamily[])
         : [...PERSONA_FAMILIES],
       allowWriteTools: duplicate,
       maxToolRounds: 5,
