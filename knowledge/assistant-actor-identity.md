@@ -39,3 +39,4 @@ Chat / EQC / summarize use `userCanViewPlatformProjectMembership` — **no** glo
 - Paths: machine tokens stay in Coolify env; no per-user redeploy
 - Staging two-user smoke: `knowledge/assistant-access-model-b-smoke.md`
 - Canonical AUDION assistant API: `AUDION_API_URL=https://audion-v3.projects-a.plygrnd.tech/api` (not FastAPI)
+- Same URL/token (+ `PLEXON_SERVICE_SECRET`) on Coolify **audion-mcp** — otherwise `audion.personas_list` misses live personas (e.g. Julia Wendt) while the Audion UI still shows them
