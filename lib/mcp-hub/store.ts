@@ -314,6 +314,54 @@ export async function ensureAudionEnvBootstrapServer(): Promise<McpServerRow | n
   }
 }
 
+/** Idempotent Canva Hub server pointing at Plexon thin MCP (Wave H3). */
+export async function ensureCanvaHubBootstrapServer(): Promise<McpServerRow | null> {
+  const existing = await getMcpServerBySlug('canva');
+  if (existing) return existing;
+  const appBase = (
+    process.env.NEXTAUTH_URL?.trim() ||
+    process.env.PUBLIC_APP_URL?.trim() ||
+    ''
+  ).replace(/\/$/, '');
+  if (!appBase) return null;
+  try {
+    return await createMcpServer({
+      slug: 'canva',
+      displayName: 'Canva Connect',
+      baseUrl: `${appBase}/api/platform/mcp-hub/canva`,
+      authKind: 'oauth_user',
+      authConfig: {
+        oauthClientIdEnvKey: 'CANVA_CLIENT_ID',
+        oauthClientSecretEnvKey: 'CANVA_CLIENT_SECRET',
+        oauthScopes: [
+          'design:meta:read',
+          'design:content:read',
+          'design:content:write',
+          'brandtemplate:meta:read',
+          'brandtemplate:content:read',
+          'asset:read',
+          'asset:write',
+        ],
+      },
+      status: 'draft',
+      source: 'env_bootstrap',
+      productId: null,
+      routingHints: [
+        'canva',
+        'instagram',
+        'linkedin',
+        'carousel',
+        'social',
+        'story',
+        'reel',
+        'story post',
+      ],
+    });
+  } catch {
+    return getMcpServerBySlug('canva');
+  }
+}
+
 
 export async function upsertDiscoveredTools(
   server: McpServerRow,

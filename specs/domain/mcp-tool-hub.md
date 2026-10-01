@@ -1,6 +1,6 @@
 # MCP Tool Hub (Plexon)
 
-**Status:** Wave H2 landed (policy + write confirm + routing hints + AUDION env bootstrap) — 2026-10-01  
+**Status:** Wave H3 landed (OAuth user + thin Canva MCP pilot) — 2026-10-01  
 **Owner:** PLEXON v3  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -220,10 +220,9 @@ All Admin routes: platform admin (or company admin — wave decision in implemen
 
 ### Wave H3 — OAuth user + Canva pilot
 
-- OAuth bindings UI.
-- Canva: register server, connect account, tools for template list / autofill / export / open design URL.
-- Planner: social-post prompts → Canva Hub tools; CREATION remains editor/site/print.
-- Brandion stays guideline SSOT; Canva Brand Templates are execution templates (IDs in Hub config / Collection binding Later).
+- OAuth bindings UI + PKCE start/callback — **done**.
+- Thin Plexon Canva MCP (`/api/platform/mcp-hub/canva`) with template list / open URL / export / autofill — **done**.
+- Planner: social → Canva hints; CREATION scene/design never prefers Canva solely because Hub is on.
 
 ### Wave H4 — Catalog bridge + Collection scope
 
@@ -282,4 +281,4 @@ Bot phrases:
 1. Company admin vs platform admin for server CRUD?
 2. Should Collection owners enable Hub servers without org admin?
 3. Keep Anthropic tool cap — dynamic prioritization algorithm?
-4. First-party Canva MCP wrapper repo vs commercial MCP vs thin Plexon proxy?
+4. First-party Canva MCP wrapper repo vs commercial MCP vs thin Plexon proxy? → **H3: thin Plexon proxy** (`specs/domain/mcp-hub-canva.md`).

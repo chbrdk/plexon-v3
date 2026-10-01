@@ -934,6 +934,12 @@ export type McpServerAuthConfig = {
   bearerEnvKey?: string;
   /** Extra header name → env key holding the value */
   headerEnvKeys?: Record<string, string>;
+  /** oauth_user — client credentials via env refs */
+  oauthClientIdEnvKey?: string;
+  oauthClientSecretEnvKey?: string;
+  oauthAuthorizeUrl?: string;
+  oauthTokenUrl?: string;
+  oauthScopes?: string[];
 };
 
 export const mcpServers = pgTable(
@@ -1014,3 +1020,42 @@ export const mcpToolPolicies = pgTable(
     serverIdx: index('mcp_tool_policies_server_idx').on(t.serverId),
   })
 );
+
+/**
+ * Per-user OAuth tokens for Hub servers (Wave H3).
+ * Tokens stored encrypted — never returned by Admin/API GET.
+ */
+export const mcpOauthBindings = pgTable(
+  'mcp_oauth_bindings',
+  {
+    id: text('id').primaryKey(),
+    serverId: text('server_id')
+      .notNull()
+      .references(() => mcpServers.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull(),
+    companyId: text('company_id'),
+    accessTokenEnc: text('access_token_enc').notNull(),
+    refreshTokenEnc: text('refresh_token_enc'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    scopes: jsonb('scopes').$type<string[]>().notNull().default([]),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    serverUserUq: uniqueIndex('mcp_oauth_bindings_server_user_uq').on(t.serverId, t.userId),
+    userIdx: index('mcp_oauth_bindings_user_idx').on(t.userId),
+  })
+);
+
+/** Short-lived PKCE state for OAuth start → callback. */
+export const mcpOauthPending = pgTable('mcp_oauth_pending', {
+  state: text('state').primaryKey(),
+  serverId: text('server_id')
+    .notNull()
+    .references(() => mcpServers.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull(),
+  codeVerifier: text('code_verifier').notNull(),
+  returnPath: text('return_path'),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});

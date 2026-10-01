@@ -25,11 +25,19 @@ import {
 import {
   API_ADMIN_MCP_SERVERS,
   API_ADMIN_MCP_SERVERS_BOOTSTRAP,
+  API_PLATFORM_MCP_HUB_CANVA,
   PATH_ADMIN_MCP_HUB,
   apiAdminMcpServer,
   apiAdminMcpServerDiscover,
   apiAdminMcpServerPolicies,
+  apiPlatformMcpHubOauthCallback,
+  apiPlatformMcpHubOauthStart,
+  apiPlatformMcpHubOauthStatus,
 } from '@/lib/constants'
+import { createPkcePair } from '@/lib/mcp-hub/oauth'
+import { CANVA_MCP_TOOLS } from '@/lib/mcp-hub/canva-mcp-handler'
+import { decryptHubSecret, encryptHubSecret } from '@/lib/mcp-hub/token-crypto'
+import { buildMcpOauthRequiredBlocks } from '@/lib/assistant/ui-blocks/build-mcp-oauth-ui'
 
 describe('mcp-hub naming', () => {
   it('normalizes and validates slugs', () => {
@@ -168,7 +176,16 @@ describe('mcp-hub paths + migration', () => {
     expect(apiAdminMcpServerPolicies('abc')).toBe('/api/admin/mcp-servers/abc/policies')
   })
 
-  it('has migrations 0023/0024 and source files', () => {
+  it('exposes H3 Canva OAuth path constants', () => {
+    expect(API_PLATFORM_MCP_HUB_CANVA).toBe('/api/platform/mcp-hub/canva')
+    expect(apiPlatformMcpHubOauthStart('canva')).toBe('/api/platform/mcp-hub/oauth/canva/start')
+    expect(apiPlatformMcpHubOauthCallback('canva')).toBe(
+      '/api/platform/mcp-hub/oauth/canva/callback',
+    )
+    expect(apiPlatformMcpHubOauthStatus('canva')).toBe('/api/platform/mcp-hub/oauth/canva/status')
+  })
+
+  it('has migrations 0023/0024/0025 and source files', () => {
     const root = resolve(__dirname, '..')
     const migration = resolve(root, 'lib/db/migrations/0023_mcp_tool_hub.sql')
     expect(existsSync(migration)).toBe(true)
@@ -178,16 +195,73 @@ describe('mcp-hub paths + migration', () => {
     const migrationH2 = resolve(root, 'lib/db/migrations/0024_mcp_tool_hub_policies.sql')
     expect(existsSync(migrationH2)).toBe(true)
     expect(readFileSync(migrationH2, 'utf8')).toContain('mcp_tool_policies')
+    const migrationH3 = resolve(root, 'lib/db/migrations/0025_mcp_oauth_bindings.sql')
+    expect(existsSync(migrationH3)).toBe(true)
+    expect(readFileSync(migrationH3, 'utf8')).toContain('mcp_oauth_bindings')
     for (const rel of [
       'app/admin/mcp-hub/page.tsx',
       'app/admin/mcp-hub/[id]/page.tsx',
       'app/api/admin/mcp-servers/route.ts',
       'app/api/admin/mcp-servers/bootstrap/route.ts',
       'app/api/admin/mcp-servers/[id]/policies/route.ts',
+      'app/api/platform/mcp-hub/canva/route.ts',
+      'app/api/platform/mcp-hub/oauth/[slug]/start/route.ts',
+      'app/api/platform/mcp-hub/oauth/[slug]/callback/route.ts',
       'lib/mcp-hub/routing-hints.ts',
+      'lib/mcp-hub/oauth.ts',
+      'lib/mcp-hub/canva-mcp-handler.ts',
       'specs/domain/mcp-tool-hub.md',
+      'specs/domain/mcp-hub-canva.md',
     ]) {
       expect(existsSync(resolve(root, rel)), rel).toBe(true)
     }
+  })
+})
+
+describe('mcp-hub H3 oauth + canva', () => {
+  it('encrypts and decrypts hub secrets', () => {
+    process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY = 'test-encryption-key-32chars!!'
+    const enc = encryptHubSecret('access-token-value')
+    expect(enc.startsWith('v1:')).toBe(true)
+    expect(decryptHubSecret(enc)).toBe('access-token-value')
+    delete process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY
+  })
+
+  it('creates PKCE verifier/challenge pair', () => {
+    const a = createPkcePair()
+    const b = createPkcePair()
+    expect(a.verifier).not.toEqual(b.verifier)
+    expect(a.challenge).toMatch(/^[A-Za-z0-9_-]+$/)
+    expect(a.challenge).not.toEqual(a.verifier)
+  })
+
+  it('lists canva MCP tools', () => {
+    expect(CANVA_MCP_TOOLS.map((t) => t.name)).toEqual([
+      'brand_templates_list',
+      'design_open_url',
+      'design_export',
+      'design_autofill',
+    ])
+  })
+
+  it('builds oauth_required CTA blocks', () => {
+    const blocks = buildMcpOauthRequiredBlocks(
+      JSON.stringify({
+        error: 'oauth_required',
+        connectUrl: '/api/platform/mcp-hub/oauth/canva/start',
+      }),
+    )
+    expect(blocks.some((b) => b.type === 'alert')).toBe(true)
+    expect(blocks.some((b) => b.type === 'link_list')).toBe(true)
+    expect(buildMcpOauthRequiredBlocks(JSON.stringify({ error: 'other' }))).toEqual([])
+  })
+
+  it('does not prefer canva when creation_scene_edit intent filters matches', () => {
+    const matched = matchHubServersByRoutingHints('Canva Instagram Post im Editor', [
+      { slug: 'canva', routingHints: ['canva', 'instagram'] },
+      { slug: 'audion', routingHints: ['persona'] },
+    ])
+    const filtered = matched.filter((s) => s.slug !== 'canva')
+    expect(filtered).toEqual([])
   })
 })

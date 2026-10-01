@@ -28,7 +28,7 @@
     "navUsers": "Nutzer",
     "navMcpHub": "MCP Hub",
     "mcpHubTitle": "MCP Tool Hub",
-    "mcpHubIntro": "MCP-Server registrieren, Tools entdecken, Policies und Write-Confirm setzen (Wave H2).",
+    "mcpHubIntro": "MCP-Server registrieren, Tools entdecken, Policies, OAuth und Canva (Wave H3).",
     "mcpHubEmpty": "Noch keine Server. Lege unten den ersten an.",
     "mcpHubColName": "Name",
     "mcpHubColSlug": "Slug",
@@ -61,6 +61,7 @@
     "mcpHubPolicyAllowWrite": "Writes erlauben",
     "mcpHubPolicyCurrent": "Aktuell",
     "mcpHubBootstrap": "AUDION aus Env bootstrappen",
+    "mcpHubBootstrapCanva": "Canva Hub bootstrappen",
     "mcpHubBootstrapError": "Bootstrap fehlgeschlagen.",
     "lastVisitedPrefix": "Zuletzt:",
     "forbidden": "Keine Berechtigung. Nur Administratoren.",
@@ -744,6 +745,17 @@
       "confirm": "Neues Passwort bestätigen",
       "cta": "Passwort ändern",
       "ctaSaving": "Wird geändert…"
+    },
+    "integrations": {
+      "title": "Integrationen",
+      "canvaHint": "Canva Connect für Social-Templates, Export und Autofill im Assistenten.",
+      "canvaConnect": "Canva verbinden",
+      "canvaDisconnect": "Canva trennen",
+      "canvaStatusOn": "Verbunden",
+      "canvaStatusOff": "Nicht verbunden",
+      "canvaConnected": "Canva erfolgreich verbunden.",
+      "canvaDisconnected": "Canva-Verbindung getrennt.",
+      "canvaError": "Canva-Verbindung fehlgeschlagen."
     },
     "apiTokens": {
       "title": "API-Zugang",

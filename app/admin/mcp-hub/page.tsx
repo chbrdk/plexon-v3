@@ -90,13 +90,15 @@ export default function AdminMcpHubPage() {
     }
   }
 
-  const onBootstrap = async () => {
+  const onBootstrap = async (kind: 'audion' | 'canva' | 'all' = 'all') => {
     setBusy(true)
     setError(null)
     try {
       const res = await fetch(API_ADMIN_MCP_SERVERS_BOOTSTRAP, {
         method: 'POST',
         credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -124,8 +126,19 @@ export default function AdminMcpHubPage() {
           </Text>
         ) : null}
         <div className="plexon-settings-actions">
-          <Button variant="ghost" disabled={busy} onClick={() => void onBootstrap()}>
+          <Button
+            variant="ghost"
+            disabled={busy}
+            onClick={() => void onBootstrap('audion')}
+          >
             {t('admin.mcpHubBootstrap')}
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={busy}
+            onClick={() => void onBootstrap('canva')}
+          >
+            {t('admin.mcpHubBootstrapCanva')}
           </Button>
         </div>
         <table className="plexon-admin-table">

@@ -32,6 +32,7 @@
 | Assistant journey generate | `specs/domain/assistant-journey-generate.md` |
 | Capability Catalog (Agent ↔ Flow) | `specs/domain/capability-catalog.md` |
 | MCP Tool Hub (registry + external MCPs) | `specs/domain/mcp-tool-hub.md` |
+| MCP Hub Canva pilot (OAuth + thin MCP) | `specs/domain/mcp-hub-canva.md` |
 | EQC as Collection Flow | `specs/domain/eqc-as-collection-flow.md` |
 | Creation MagazineTemplate consume (EQC Mag PDF) | `specs/domain/creation-magazine-template-consume.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |

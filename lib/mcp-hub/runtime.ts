@@ -1,6 +1,6 @@
 /**
  * MCP Tool Hub — discover / test / free-chat tool injection.
- * Spec: specs/domain/mcp-tool-hub.md Waves H1–H2
+ * Spec: specs/domain/mcp-tool-hub.md Waves H1–H3
  */
 
 import type { AnthropicTool } from '@/lib/checkion-mcp-client';
@@ -19,6 +19,7 @@ import {
   upsertDiscoveredTools,
   type McpServerRow,
 } from '@/lib/mcp-hub/store';
+import { runtimeEnv } from '@/lib/runtime-env';
 
 export type HubToolCallTarget = {
   baseUrl: string;
@@ -26,6 +27,8 @@ export type HubToolCallTarget = {
   extraHeaders: Record<string, string>;
   sideEffect: string;
   requireConfirm: boolean;
+  authKind: string;
+  serverSlug: string;
 };
 
 const hubAllowlist = new Set<string>();
@@ -96,11 +99,38 @@ export async function getCachedHubRoutingServers(): Promise<HubRoutingHintServer
   }
 }
 
-function authHeadersForServer(server: McpServerRow): {
+function authHeadersForServer(
+  server: McpServerRow,
+  actorUserId?: string | null
+): {
   headers: Record<string, string>;
   error?: string;
 } {
-  return resolveMcpHubAuthHeaders(server.authKind, server.authConfig);
+  const base = resolveMcpHubAuthHeaders(server.authKind, server.authConfig);
+  if (base.error) return base;
+  if (server.authKind === 'oauth_user') {
+    const secret = runtimeEnv('PLEXON_SERVICE_SECRET');
+    if (!secret) {
+      return { headers: {}, error: 'PLEXON_SERVICE_SECRET required for oauth_user Hub calls' };
+    }
+    if (!actorUserId?.trim()) {
+      // Discover/Admin may omit actor — tools/list still works on Canva MCP.
+      return {
+        headers: {
+          ...base.headers,
+          'X-Plexon-Service-Secret': secret,
+        },
+      };
+    }
+    return {
+      headers: {
+        ...base.headers,
+        'X-Plexon-Service-Secret': secret,
+        'X-Plexon-User-Id': actorUserId.trim(),
+      },
+    };
+  }
+  return base;
 }
 
 export async function testMcpHubServer(serverId: string): Promise<{
@@ -163,7 +193,10 @@ export async function discoverMcpHubServer(serverId: string): Promise<{
  * Load enabled Hub tools for a free-chat turn.
  * Reads always; write/destructive only when allowWriteTools.
  */
-export async function loadHubToolsForTurn(options?: { allowWriteTools?: boolean }): Promise<{
+export async function loadHubToolsForTurn(options?: {
+  allowWriteTools?: boolean;
+  actorUserId?: string | null;
+}): Promise<{
   tools: AnthropicTool[];
   mcpNameByAnthropicName: Record<string, string>;
   toolSourceByAnthropicName: Record<string, string>;
@@ -181,8 +214,9 @@ export async function loadHubToolsForTurn(options?: { allowWriteTools?: boolean 
   const exposedNames: string[] = [];
 
   for (const row of rows) {
-    const auth = authHeadersForServer(row.server);
-    if (auth.error) continue;
+    const auth = authHeadersForServer(row.server, options?.actorUserId);
+    if (auth.error && row.server.authKind !== 'oauth_user') continue;
+    if (auth.error && row.server.authKind === 'oauth_user') continue;
 
     const schema = row.inputSchema ?? {};
     const properties =
@@ -217,6 +251,8 @@ export async function loadHubToolsForTurn(options?: { allowWriteTools?: boolean 
       extraHeaders: auth.headers,
       sideEffect: row.sideEffect,
       requireConfirm: row.requireConfirm,
+      authKind: row.server.authKind,
+      serverSlug: row.server.slug,
     });
     exposedNames.push(row.exposedName);
   }

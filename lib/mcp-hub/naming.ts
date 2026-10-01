@@ -57,10 +57,8 @@ export function resolveMcpHubAuthHeaders(
   }
 
   if (authKind === 'oauth_user') {
-    return {
-      headers: {},
-      error: 'oauth_user not available in Wave H1 — use service_bearer or connect in H3',
-    };
+    // Actor + service secret are injected by Hub runtime (Wave H3).
+    return { headers: {} };
   }
 
   const headers: Record<string, string> = {};
@@ -103,5 +101,12 @@ export function redactMcpServerAuthConfig(
   return {
     ...(cfg.bearerEnvKey ? { bearerEnvKey: cfg.bearerEnvKey } : {}),
     ...(cfg.headerEnvKeys ? { headerEnvKeys: { ...cfg.headerEnvKeys } } : {}),
+    ...(cfg.oauthClientIdEnvKey ? { oauthClientIdEnvKey: cfg.oauthClientIdEnvKey } : {}),
+    ...(cfg.oauthClientSecretEnvKey
+      ? { oauthClientSecretEnvKey: cfg.oauthClientSecretEnvKey }
+      : {}),
+    ...(cfg.oauthAuthorizeUrl ? { oauthAuthorizeUrl: cfg.oauthAuthorizeUrl } : {}),
+    ...(cfg.oauthTokenUrl ? { oauthTokenUrl: cfg.oauthTokenUrl } : {}),
+    ...(cfg.oauthScopes ? { oauthScopes: [...cfg.oauthScopes] } : {}),
   };
 }

@@ -1333,7 +1333,11 @@ export async function enrichPlanWithHubRouting(
     const servers = await getCachedHubRoutingServers();
     if (!servers.length) return plan;
     const text = (input.planningPrompt ?? input.prompt).trim();
-    const matched = matchHubServersByRoutingHints(text, servers);
+    let matched = matchHubServersByRoutingHints(text, servers);
+    // H3: CREATION scene/design prompts must not prefer Canva solely because Hub is on.
+    if (plan.intent === 'creation_scene_edit' || plan.intent === 'creation_design') {
+      matched = matched.filter((s) => s.slug !== 'canva');
+    }
     if (!matched.length) return plan;
     const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
     const boost = applyHubRoutingWriteBoost({

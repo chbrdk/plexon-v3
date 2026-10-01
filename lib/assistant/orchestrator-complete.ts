@@ -64,6 +64,7 @@ import {
   isBrandionTokensListToolName,
   parseBrandionTokensListPayload,
 } from '@/lib/assistant/ui-blocks/build-brandion-token-ui';
+import { buildMcpOauthRequiredBlocks } from '@/lib/assistant/ui-blocks/build-mcp-oauth-ui';
 import {
   buildVideonMediaSearchBlocks,
   isVideonMediaSearchToolName,
@@ -437,7 +438,10 @@ export async function runOrchestratorComplete(
   }
 
   try {
-    const hub = await loadHubToolsForTurn({ allowWriteTools });
+    const hub = await loadHubToolsForTurn({
+      allowWriteTools,
+      actorUserId,
+    });
     if (hub.tools.length) {
       tools = [...tools, ...hub.tools];
       Object.assign(mcpNameByAnthropicName, hub.mcpNameByAnthropicName);
@@ -768,6 +772,16 @@ export async function runOrchestratorComplete(
         const result = await callHubMcpTool(block.name, toolInput);
         const preview = truncateAssistantText(result, 240);
         onToolEnd?.(block.name, preview);
+        const oauthBlocks = buildMcpOauthRequiredBlocks(result, {
+          source: 'plexon_ui',
+          toolCallId: block.id,
+        });
+        for (const auto of oauthBlocks) {
+          const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+          if (appended.ok) {
+            onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+          }
+        }
         return {
           id: block.id,
           name: block.name,

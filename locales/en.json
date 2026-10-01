@@ -28,7 +28,7 @@
     "navUsers": "Users",
     "navMcpHub": "MCP Hub",
     "mcpHubTitle": "MCP Tool Hub",
-    "mcpHubIntro": "Register MCP servers, discover tools, set policies and write confirm (Wave H2).",
+    "mcpHubIntro": "Register MCP servers, discover tools, policies, OAuth and Canva (Wave H3).",
     "mcpHubEmpty": "No servers yet. Create the first one below.",
     "mcpHubColName": "Name",
     "mcpHubColSlug": "Slug",
@@ -61,6 +61,7 @@
     "mcpHubPolicyAllowWrite": "Allow writes",
     "mcpHubPolicyCurrent": "Current",
     "mcpHubBootstrap": "Bootstrap AUDION from env",
+    "mcpHubBootstrapCanva": "Bootstrap Canva Hub",
     "mcpHubBootstrapError": "Bootstrap failed.",
     "lastVisitedPrefix": "Last:",
     "forbidden": "No permission. Administrators only.",
@@ -744,6 +745,17 @@
       "confirm": "Confirm new password",
       "cta": "Change password",
       "ctaSaving": "Changing…"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "canvaHint": "Canva Connect for social templates, export, and autofill in the assistant.",
+      "canvaConnect": "Connect Canva",
+      "canvaDisconnect": "Disconnect Canva",
+      "canvaStatusOn": "Connected",
+      "canvaStatusOff": "Not connected",
+      "canvaConnected": "Canva connected successfully.",
+      "canvaDisconnected": "Canva disconnected.",
+      "canvaError": "Canva connection failed."
     },
     "apiTokens": {
       "title": "API access",

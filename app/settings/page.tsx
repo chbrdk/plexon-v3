@@ -30,6 +30,8 @@ import {
   API_AUTH_PROFILE,
   API_AUTH_TOKENS,
   apiAuthTokenRevoke,
+  apiPlatformMcpHubOauthStart,
+  apiPlatformMcpHubOauthStatus,
   PATH_LOGIN,
 } from '@/lib/constants'
 import { shellPaths } from '@/lib/shell-paths'
@@ -78,6 +80,9 @@ export default function SettingsPage() {
   const [savingPassword, setSavingPassword] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [canvaConnected, setCanvaConnected] = useState<boolean | null>(null)
+  const [canvaBusy, setCanvaBusy] = useState(false)
+  const [canvaMsg, setCanvaMsg] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
   const [apiTokens, setApiTokens] = useState<ApiTokenRow[]>([])
@@ -124,6 +129,60 @@ export default function SettingsPage() {
       .catch(() => setApiTokens([]))
       .finally(() => setLoadingTokens(false))
   }, [])
+
+  const fetchCanvaStatus = useCallback(() => {
+    fetch(apiPlatformMcpHubOauthStatus('canva'), { credentials: 'same-origin' })
+      .then(async (res) => {
+        if (!res.ok) {
+          setCanvaConnected(false)
+          return
+        }
+        const data = await res.json().catch(() => ({}))
+        setCanvaConnected(Boolean(data.connected))
+      })
+      .catch(() => setCanvaConnected(false))
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const oauth = params.get('mcp_oauth')
+    if (oauth === 'connected') {
+      setCanvaMsg(t('settings.integrations.canvaConnected'))
+      setCanvaConnected(true)
+    } else if (oauth === 'error' || oauth === 'invalid_state' || oauth === 'server_mismatch') {
+      setCanvaMsg(t('settings.integrations.canvaError'))
+    }
+  }, [t])
+
+  useEffect(() => {
+    if (status === 'authenticated') fetchCanvaStatus()
+  }, [status, fetchCanvaStatus])
+
+  const handleCanvaConnect = () => {
+    window.location.href = `${apiPlatformMcpHubOauthStart('canva')}?return=/settings`
+  }
+
+  const handleCanvaDisconnect = async () => {
+    setCanvaBusy(true)
+    setCanvaMsg(null)
+    try {
+      const res = await fetch(apiPlatformMcpHubOauthStatus('canva'), {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      })
+      if (!res.ok) {
+        setCanvaMsg(t('settings.integrations.canvaError'))
+        return
+      }
+      setCanvaConnected(false)
+      setCanvaMsg(t('settings.integrations.canvaDisconnected'))
+    } catch {
+      setCanvaMsg(t('settings.integrations.canvaError'))
+    } finally {
+      setCanvaBusy(false)
+    }
+  }
 
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user?.id) return
@@ -440,6 +499,41 @@ export default function SettingsPage() {
         }
         extras={
           <>
+            <SettingsBand title={t('settings.integrations.title')}>
+              <div className="plexon-settings-fields">
+                <Text role="body">{t('settings.integrations.canvaHint')}</Text>
+                {canvaMsg ? <Text role="meta">{canvaMsg}</Text> : null}
+                <Text role="meta">
+                  {canvaConnected == null
+                    ? t('common.loading')
+                    : canvaConnected
+                      ? t('settings.integrations.canvaStatusOn')
+                      : t('settings.integrations.canvaStatusOff')}
+                </Text>
+                <div className="plexon-settings-actions">
+                  {canvaConnected ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={canvaBusy}
+                      onClick={() => void handleCanvaDisconnect()}
+                    >
+                      {t('settings.integrations.canvaDisconnect')}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      disabled={canvaBusy}
+                      onClick={handleCanvaConnect}
+                    >
+                      {t('settings.integrations.canvaConnect')}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </SettingsBand>
+
             <SettingsBand title={t('settings.password.title')}>
               <div className="plexon-settings-fields">
                 <Field label={t('settings.password.current')} size="md">
