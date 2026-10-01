@@ -1,5 +1,5 @@
 /**
- * Apply idempotent SQL migration files (Enterprise).
+ * Apply idempotent SQL migration files (Enterprise + MCP Hub).
  * Used when drizzle-kit push is interactive / ambiguous on new tables.
  */
 import { readFileSync } from 'fs'
@@ -14,6 +14,10 @@ const FILES = [
   '0020_suite_enterprise_client_room_audit.sql',
   '0021_suite_enterprise_activity_brief_directory.sql',
   '0022_collection_share_links.sql',
+  '0023_mcp_tool_hub.sql',
+  '0024_mcp_tool_hub_policies.sql',
+  '0025_mcp_oauth_bindings.sql',
+  '0026_mcp_collection_servers.sql',
 ]
 
 async function main() {

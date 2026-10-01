@@ -18,11 +18,11 @@ if [ -n "$DATABASE_URL" ]; then
     exit 1
   fi
 
-  echo "[PLEXON] Applying enterprise SQL migrations (idempotent)..."
+  echo "[PLEXON] Applying SQL migrations (enterprise + MCP Hub, idempotent)..."
   if node ./scripts/apply-enterprise-sql-migrations.mjs; then
-    echo "[PLEXON] Enterprise SQL migrations applied."
+    echo "[PLEXON] SQL migrations applied."
   else
-    echo "[PLEXON] Enterprise SQL migrations failed. Refusing to start."
+    echo "[PLEXON] SQL migrations failed. Refusing to start."
     exit 1
   fi
 

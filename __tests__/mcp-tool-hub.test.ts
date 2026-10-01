@@ -216,6 +216,12 @@ describe('mcp-hub paths + migration', () => {
     const migrationH4 = resolve(root, 'lib/db/migrations/0026_mcp_collection_servers.sql')
     expect(existsSync(migrationH4)).toBe(true)
     expect(readFileSync(migrationH4, 'utf8')).toContain('mcp_collection_servers')
+    const applyScript = readFileSync(
+      resolve(root, 'scripts/apply-enterprise-sql-migrations.mjs'),
+      'utf8',
+    )
+    expect(applyScript).toContain('0023_mcp_tool_hub.sql')
+    expect(applyScript).toContain('0026_mcp_collection_servers.sql')
     for (const rel of [
       'app/admin/mcp-hub/page.tsx',
       'app/admin/mcp-hub/[id]/page.tsx',
