@@ -48,6 +48,6 @@ describe('MAGCLOUD Collection home chip', () => {
       buildMagcloudProjectLaunchUrl('https://magcloud.example', {
         platformProjectId: 'pp-1',
       }),
-    ).toBe('https://magcloud.example/boards?platformProjectId=pp-1')
+    ).toBe('https://magcloud.example/projects/pp-1')
   })
 })

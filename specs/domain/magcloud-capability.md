@@ -25,8 +25,8 @@ MAGCLOUD is the **spatial pitch / constellation** capability of a Collection: re
 - Origin: `POST /api/platform/provisioning/magcloud-project-origin`
 - Upsert: `PUT {MAGCLOUD}/api/platform/provisioning/projects/{platformProjectId}`
 - Summary GET: same path with `X-Plexon-User-Id` → Collection dashboard `magcloud` summary
-- Launch: `{MAGCLOUD}/boards?platformProjectId={id}` (`lib/magcloud-launch-url.ts`)
-- Audience share: `{MAGCLOUD}/viewer?platformProjectId={id}` (island forces `pres=1`)
+- Launch: `{MAGCLOUD}/projects/{platformProjectId}` Collection workspace (`lib/magcloud-launch-url.ts`) — N boards per Collection
+- Audience share: `{MAGCLOUD}/viewer?platformProjectId={id}&boardId={boardId}` (island forces `pres=1`)
 - Assistant embed product: `magcloud` (`lib/paths/assistant-embed.ts`)
 
 ## Collection home
