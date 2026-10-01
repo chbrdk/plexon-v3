@@ -228,6 +228,44 @@ NEXT_PUBLIC_CREATION_URL={{environment.V3_CREATION_PUBLIC_URL}}
 
 ---
 
+## 4g. Wave G — MAGCLOUD Registry deep-link
+
+Sobald **magcloud** Staging-Smoke grün ist (`https://magcloud.projects-a.plygrnd.tech/api/health` mit `federationMode: live`), auf **plexon-v3** setzen:
+
+```bash
+NEXT_PUBLIC_MAGCLOUD_URL=https://magcloud.projects-a.plygrnd.tech
+MAGCLOUD_API_URL=https://magcloud.projects-a.plygrnd.tech
+```
+
+Dann Redeploy plexon-v3. Wirkung:
+
+- `getMagcloudUrl()` / `getMagcloudServiceApiUrl()` → Staging-FQDN
+- Products Registry: MAGCLOUD `lifecycle: active` (sonst `planned`)
+- Collection binding / upsert + origin `magcloud-project-origin`
+- Launch `{MAGCLOUD}/boards?platformProjectId=`
+
+Auf **magcloud:main-app** für Auth + Federation:
+
+```bash
+MAGCLOUD_FEDERATION_MODE=live
+NEXT_PUBLIC_MAGCLOUD_URL=https://magcloud.projects-a.plygrnd.tech
+NEXT_PUBLIC_SLIDE_UNIVERSE_URL=https://magcloud-universe.projects-a.plygrnd.tech
+NEXT_PUBLIC_SLIDE_UNIVERSE_WS_URL=wss://magcloud-universe.projects-a.plygrnd.tech
+NEXT_PUBLIC_PLEXON_URL=https://plexon-v3.projects-a.plygrnd.tech
+NEXT_PLEXON_BASE_URL=https://plexon-v3.projects-a.plygrnd.tech
+PLEXON_AUTH_URL=https://plexon-v3.projects-a.plygrnd.tech
+PLEXON_SERVICE_SECRET=<shared with plexon-v3 / siblings>
+MAGCLOUD_WRITE_SECRET=<same shared secret>
+AUTH_SECRET=<≥32>
+NEXTAUTH_URL=https://magcloud.projects-a.plygrnd.tech
+MAGCLOUD_DATA_DIR=/data/magcloud
+PORT=3025
+```
+
+Coolify: project `hrk8ntthsbob4sr8ygq4kjif` · shell `dmlwuxtf5viyj3csk3ukumsx` · island `qaooqlf3xq0ynkqrz8t6kide`. Ops: `magcloud/knowledge/staging-coolify.md`.
+
+---
+
 ## 4f. Wave F — METRON v3 Registry deep-link
 
 Sobald **metron-v3** Staging-Smoke grün ist (`https://metron-v3.projects-a.plygrnd.tech/api/health`), auf **plexon-v3** setzen:
