@@ -50,10 +50,12 @@ Exposed Anthropic names: `canva_*`.
 
 ## Operator setup
 
-1. Canva Developer Portal → integration → scopes above → redirect URL.
+1. Canva Developer Portal → integration → enable **exactly** these scopes (Scopes tab) → redirect URL.
 2. Coolify env: `CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`, `MCP_HUB_TOKEN_ENCRYPTION_KEY` (32+ chars).
 3. Admin MCP Hub → **Bootstrap Canva** (or create server) → Discover → status `active`.
 4. User: Settings → Connect Canva (or CTA from chat).
+
+`invalid_scope` from Canva means the integration has not enabled one of the requested scopes — enable them in the Portal, then retry Connect.
 
 ## Acceptance
 

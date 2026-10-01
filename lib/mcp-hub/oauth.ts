@@ -348,6 +348,6 @@ export function buildAuthorizeUrl(input: {
   u.searchParams.set('scope', input.scopes.join(' '));
   u.searchParams.set('state', input.state);
   u.searchParams.set('code_challenge', input.codeChallenge);
-  u.searchParams.set('code_challenge_method', 's256');
+  u.searchParams.set('code_challenge_method', 'S256');
   return u.toString();
 }

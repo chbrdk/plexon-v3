@@ -6,6 +6,7 @@ import {
   consumeOauthPending,
   exchangeAuthorizationCode,
   mcpHubOauthCallbackUrl,
+  publicAppBaseUrl,
   resolveOauthAppConfig,
   upsertOauthBinding,
 } from '@/lib/mcp-hub/oauth';
@@ -14,6 +15,11 @@ function safeReturnPath(raw: string | null | undefined): string {
   if (!raw) return '/settings';
   if (!raw.startsWith('/') || raw.startsWith('//')) return '/settings';
   return raw.slice(0, 200);
+}
+
+/** Prefer public app URL — request.url.origin is often localhost behind Coolify. */
+function appOrigin(requestUrl: URL): string {
+  return publicAppBaseUrl() || requestUrl.origin;
 }
 
 type Ctx = { params: Promise<{ slug: string }> };
@@ -27,10 +33,11 @@ export async function GET(request: Request, ctx: Ctx) {
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
   const oauthError = url.searchParams.get('error');
+  const origin = appOrigin(url);
 
   if (oauthError) {
     return NextResponse.redirect(
-      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(oauthError)}`, url.origin)
+      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(oauthError)}`, origin)
     );
   }
   if (!code || !state) {
@@ -39,19 +46,19 @@ export async function GET(request: Request, ctx: Ctx) {
 
   const pending = await consumeOauthPending(state);
   if (!pending || pending.userId !== user.id) {
-    return NextResponse.redirect(new URL('/settings?mcp_oauth=invalid_state', url.origin));
+    return NextResponse.redirect(new URL('/settings?mcp_oauth=invalid_state', origin));
   }
 
   const server =
     (await getMcpServerById(pending.serverId)) || (await getMcpServerBySlug(slug));
   if (!server || server.slug !== slug) {
-    return NextResponse.redirect(new URL('/settings?mcp_oauth=server_mismatch', url.origin));
+    return NextResponse.redirect(new URL('/settings?mcp_oauth=server_mismatch', origin));
   }
 
   const app = resolveOauthAppConfig(server);
   if (app.error) {
     return NextResponse.redirect(
-      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(app.error)}`, url.origin)
+      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(app.error)}`, origin)
     );
   }
 
@@ -78,11 +85,11 @@ export async function GET(request: Request, ctx: Ctx) {
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'token_failed';
     return NextResponse.redirect(
-      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(msg)}`, url.origin)
+      new URL(`/settings?mcp_oauth=error&reason=${encodeURIComponent(msg)}`, origin)
     );
   }
 
   const dest = safeReturnPath(pending.returnPath);
   const sep = dest.includes('?') ? '&' : '?';
-  return NextResponse.redirect(new URL(`${dest}${sep}mcp_oauth=connected&slug=${slug}`, url.origin));
+  return NextResponse.redirect(new URL(`${dest}${sep}mcp_oauth=connected&slug=${slug}`, origin));
 }
