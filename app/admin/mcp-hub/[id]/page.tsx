@@ -22,6 +22,7 @@ type HubTool = {
   sideEffect: string
   enabled: boolean
   requireConfirm: boolean
+  capabilityId: string | null
 }
 
 type HubServer = {
@@ -317,13 +318,14 @@ export default function AdminMcpHubServerPage() {
               <th>mcpName</th>
               <th>sideEffect</th>
               <th>{t('admin.mcpHubColConfirm')}</th>
+              <th>{t('admin.mcpHubColCapability')}</th>
               <th>{t('admin.mcpHubColDescription')}</th>
             </tr>
           </thead>
           <tbody>
             {tools.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={7}>
                   <Text role="meta">{t('admin.mcpHubToolsEmpty')}</Text>
                 </td>
               </tr>
@@ -365,6 +367,19 @@ export default function AdminMcpHubServerPage() {
                       onChange={() =>
                         void patchTool(tool, { requireConfirm: !tool.requireConfirm })
                       }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      defaultValue={tool.capabilityId ?? ''}
+                      disabled={busy}
+                      placeholder="hub.canva.templates"
+                      onBlur={(e) => {
+                        const next = e.target.value.trim() || null
+                        if (next === (tool.capabilityId ?? null)) return
+                        void patchTool(tool, { capabilityId: next })
+                      }}
                     />
                   </td>
                   <td>

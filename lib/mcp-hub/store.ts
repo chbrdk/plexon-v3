@@ -10,6 +10,7 @@ import {
   mcpServerTools,
   mcpServers,
   mcpToolPolicies,
+  mcpCollectionServers,
   type McpServerAuthConfig,
   type McpServerAuthKind,
   type McpServerSource,
@@ -180,6 +181,7 @@ export async function listEnabledReadHubTools(): Promise<
 
 export async function listEnabledHubTools(options?: {
   sideEffects?: Array<McpToolSideEffect | string>;
+  platformProjectId?: string | null;
 }): Promise<Array<McpServerToolRow & { server: McpServerRow }>> {
   const servers = await listActiveMcpServers();
   if (!servers.length) return [];
@@ -202,9 +204,22 @@ export async function listEnabledHubTools(options?: {
     policies.filter((p) => !p.allowWrite && p.toolId).map((p) => p.toolId as string)
   );
 
+  const collectionDisabled = new Set<string>();
+  const platformProjectId = options?.platformProjectId?.trim();
+  if (platformProjectId) {
+    const rows = await db
+      .select()
+      .from(mcpCollectionServers)
+      .where(eq(mcpCollectionServers.platformProjectId, platformProjectId));
+    for (const row of rows) {
+      if (!row.enabled) collectionDisabled.add(row.serverId);
+    }
+  }
+
   const out: Array<McpServerToolRow & { server: McpServerRow }> = [];
   for (const server of servers) {
     if (deniedServers.has(server.id)) continue;
+    if (collectionDisabled.has(server.id)) continue;
     const tools = await db
       .select()
       .from(mcpServerTools)
@@ -222,6 +237,103 @@ export async function listEnabledHubTools(options?: {
     }
   }
   return out;
+}
+
+export type McpCollectionServerRow = typeof mcpCollectionServers.$inferSelect;
+
+export async function listCollectionHubServers(
+  platformProjectId: string
+): Promise<
+  Array<{
+    serverId: string;
+    slug: string;
+    displayName: string;
+    status: string;
+    authKind: string;
+    enabled: boolean;
+    overridden: boolean;
+  }>
+> {
+  const servers = await listActiveMcpServers();
+  const db = getDb();
+  const settings = await db
+    .select()
+    .from(mcpCollectionServers)
+    .where(eq(mcpCollectionServers.platformProjectId, platformProjectId));
+  const byServer = new Map(settings.map((s) => [s.serverId, s]));
+  return servers.map((s) => {
+    const row = byServer.get(s.id);
+    return {
+      serverId: s.id,
+      slug: s.slug,
+      displayName: s.displayName,
+      status: s.status,
+      authKind: s.authKind,
+      enabled: row ? row.enabled : true,
+      overridden: Boolean(row),
+    };
+  });
+}
+
+export async function upsertCollectionHubServer(input: {
+  platformProjectId: string;
+  serverId: string;
+  enabled: boolean;
+}): Promise<McpCollectionServerRow> {
+  const db = getDb();
+  const existing = await db
+    .select()
+    .from(mcpCollectionServers)
+    .where(
+      and(
+        eq(mcpCollectionServers.platformProjectId, input.platformProjectId),
+        eq(mcpCollectionServers.serverId, input.serverId)
+      )
+    )
+    .limit(1);
+  const now = new Date();
+  if (existing[0]) {
+    await db
+      .update(mcpCollectionServers)
+      .set({ enabled: input.enabled, updatedAt: now })
+      .where(eq(mcpCollectionServers.id, existing[0].id));
+    const [row] = await db
+      .select()
+      .from(mcpCollectionServers)
+      .where(eq(mcpCollectionServers.id, existing[0].id))
+      .limit(1);
+    return row!;
+  }
+  const row: McpCollectionServerRow = {
+    id: randomUUID(),
+    platformProjectId: input.platformProjectId,
+    serverId: input.serverId,
+    enabled: input.enabled,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.insert(mcpCollectionServers).values(row);
+  return row;
+}
+
+/** ExposedName → capabilityId for Agent adapter (H4). */
+export async function listHubCapabilityMappings(): Promise<
+  Array<{ exposedName: string; capabilityId: string }>
+> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      exposedName: mcpServerTools.exposedName,
+      capabilityId: mcpServerTools.capabilityId,
+    })
+    .from(mcpServerTools)
+    .where(eq(mcpServerTools.enabled, true));
+  return rows
+    .filter((r) => typeof r.capabilityId === 'string' && r.capabilityId.trim())
+    .map((r) => ({
+      exposedName: r.exposedName,
+      capabilityId: String(r.capabilityId).trim(),
+    }));
 }
 
 export type McpPolicyRow = typeof mcpToolPolicies.$inferSelect;
@@ -422,6 +534,7 @@ export async function patchMcpServerTool(
     sideEffect: McpToolSideEffect | string;
     requireConfirm: boolean;
     description: string | null;
+    capabilityId: string | null;
   }>
 ): Promise<McpServerToolRow | null> {
   const db = getDb();
@@ -436,6 +549,9 @@ export async function patchMcpServerTool(
   if (patch.sideEffect != null) next.sideEffect = patch.sideEffect;
   if (patch.requireConfirm != null) next.requireConfirm = patch.requireConfirm;
   if (patch.description !== undefined) next.description = patch.description;
+  if (patch.capabilityId !== undefined) {
+    next.capabilityId = patch.capabilityId?.trim() || null;
+  }
   await db.update(mcpServerTools).set(next).where(eq(mcpServerTools.id, toolId));
   const [row] = await db.select().from(mcpServerTools).where(eq(mcpServerTools.id, toolId)).limit(1);
   return row ?? null;

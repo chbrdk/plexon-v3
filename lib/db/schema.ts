@@ -1059,3 +1059,28 @@ export const mcpOauthPending = pgTable('mcp_oauth_pending', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Collection-level Hub server enable (Wave H4 opt-out).
+ * Missing row ⇒ enabled when server is org-active.
+ */
+export const mcpCollectionServers = pgTable(
+  'mcp_collection_servers',
+  {
+    id: text('id').primaryKey(),
+    platformProjectId: text('platform_project_id').notNull(),
+    serverId: text('server_id')
+      .notNull()
+      .references(() => mcpServers.id, { onDelete: 'cascade' }),
+    enabled: boolean('enabled').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectServerUq: uniqueIndex('mcp_collection_servers_project_server_uq').on(
+      t.platformProjectId,
+      t.serverId
+    ),
+    projectIdx: index('mcp_collection_servers_project_idx').on(t.platformProjectId),
+  })
+);

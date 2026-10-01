@@ -59,7 +59,12 @@ export type CapabilityId =
   | 'metron.external_connections.list'
   | 'metron.external_connection.sync'
   | 'metron.company_kpi_library.list'
-  | 'metron.company_kpi_library.bind';
+  | 'metron.company_kpi_library.bind'
+  /** Hub pilot (H4) — Agent-only; Flow needs surfaces.flow later */
+  | 'hub.canva.templates'
+  | 'hub.canva.open'
+  | 'hub.canva.export'
+  | 'hub.canva.autofill';
 
 export type CapabilitySurfaces = {
   agent: boolean;

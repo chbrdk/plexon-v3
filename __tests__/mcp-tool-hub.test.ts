@@ -33,11 +33,17 @@ import {
   apiPlatformMcpHubOauthCallback,
   apiPlatformMcpHubOauthStart,
   apiPlatformMcpHubOauthStatus,
+  apiPlatformProjectMcpHubServers,
 } from '@/lib/constants'
 import { createPkcePair } from '@/lib/mcp-hub/oauth'
 import { CANVA_MCP_TOOLS } from '@/lib/mcp-hub/canva-mcp-handler'
 import { decryptHubSecret, encryptHubSecret } from '@/lib/mcp-hub/token-crypto'
 import { buildMcpOauthRequiredBlocks } from '@/lib/assistant/ui-blocks/build-mcp-oauth-ui'
+import {
+  DEFAULT_HUB_CAPABILITY_BY_EXPOSED,
+  capabilityIdFromHubToolSync,
+} from '@/lib/mcp-hub/catalog-bridge'
+import { capabilityIdFromAgentTool } from '@/lib/capabilities/adapters/agent'
 
 describe('mcp-hub naming', () => {
   it('normalizes and validates slugs', () => {
@@ -185,7 +191,13 @@ describe('mcp-hub paths + migration', () => {
     expect(apiPlatformMcpHubOauthStatus('canva')).toBe('/api/platform/mcp-hub/oauth/canva/status')
   })
 
-  it('has migrations 0023/0024/0025 and source files', () => {
+  it('exposes H4 collection Hub path constant', () => {
+    expect(apiPlatformProjectMcpHubServers('proj-1')).toBe(
+      '/api/platform/projects/proj-1/mcp-hub-servers',
+    )
+  })
+
+  it('has migrations 0023–0026 and source files', () => {
     const root = resolve(__dirname, '..')
     const migration = resolve(root, 'lib/db/migrations/0023_mcp_tool_hub.sql')
     expect(existsSync(migration)).toBe(true)
@@ -198,6 +210,9 @@ describe('mcp-hub paths + migration', () => {
     const migrationH3 = resolve(root, 'lib/db/migrations/0025_mcp_oauth_bindings.sql')
     expect(existsSync(migrationH3)).toBe(true)
     expect(readFileSync(migrationH3, 'utf8')).toContain('mcp_oauth_bindings')
+    const migrationH4 = resolve(root, 'lib/db/migrations/0026_mcp_collection_servers.sql')
+    expect(existsSync(migrationH4)).toBe(true)
+    expect(readFileSync(migrationH4, 'utf8')).toContain('mcp_collection_servers')
     for (const rel of [
       'app/admin/mcp-hub/page.tsx',
       'app/admin/mcp-hub/[id]/page.tsx',
@@ -207,11 +222,15 @@ describe('mcp-hub paths + migration', () => {
       'app/api/platform/mcp-hub/canva/route.ts',
       'app/api/platform/mcp-hub/oauth/[slug]/start/route.ts',
       'app/api/platform/mcp-hub/oauth/[slug]/callback/route.ts',
+      'app/api/platform/projects/[platformProjectId]/mcp-hub-servers/route.ts',
+      'components/products/CollectionMcpHubPanel.tsx',
       'lib/mcp-hub/routing-hints.ts',
       'lib/mcp-hub/oauth.ts',
       'lib/mcp-hub/canva-mcp-handler.ts',
+      'lib/mcp-hub/catalog-bridge.ts',
       'specs/domain/mcp-tool-hub.md',
       'specs/domain/mcp-hub-canva.md',
+      'specs/domain/mcp-hub-collection-scope.md',
     ]) {
       expect(existsSync(resolve(root, rel)), rel).toBe(true)
     }
@@ -263,5 +282,16 @@ describe('mcp-hub H3 oauth + canva', () => {
     ])
     const filtered = matched.filter((s) => s.slug !== 'canva')
     expect(filtered).toEqual([])
+  })
+})
+
+describe('mcp-hub H4 catalog bridge', () => {
+  it('maps default canva exposed names to hub.canva.* capabilities', () => {
+    expect(DEFAULT_HUB_CAPABILITY_BY_EXPOSED.canva_brand_templates_list).toBe(
+      'hub.canva.templates',
+    )
+    expect(capabilityIdFromHubToolSync('canva_brand_templates_list')).toBe('hub.canva.templates')
+    expect(capabilityIdFromAgentTool('canva_brand_templates_list')).toBe('hub.canva.templates')
+    expect(capabilityIdFromAgentTool('canva_design_export')).toBe('hub.canva.export')
   })
 })

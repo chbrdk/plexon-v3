@@ -516,6 +516,8 @@ export const apiAdminPlatformProjectSync = (id: string) =>
 /** Aggregated dashboard for one platform project (requires session). */
 export const apiPlatformProjectDashboard = (platformProjectId: string) =>
   `/api/platform/projects/${encodeURIComponent(platformProjectId)}/dashboard`;
+export const apiPlatformProjectMcpHubServers = (platformProjectId: string) =>
+  `/api/platform/projects/${encodeURIComponent(platformProjectId)}/mcp-hub-servers`;
 
 /** Collection Knowledge Pack (session or service secret). Spec: collection-knowledge-pack. */
 export const apiPlatformProjectKnowledge = (platformProjectId: string) =>

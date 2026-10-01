@@ -1,16 +1,21 @@
 /**
  * Agent surface adapter — map MCP tool / intent → capability id.
- * @see specs/domain/capability-catalog.md
+ * @see specs/domain/capability-catalog.md · Hub bridge H4: specs/domain/mcp-hub-collection-scope.md
  */
 
-import { listAgentCapabilities } from '@/lib/capabilities/catalog';
+import { listAgentCapabilities, getCapability } from '@/lib/capabilities/catalog';
 import type { CapabilityId, CapabilityRecord } from '@/lib/capabilities/types';
+import { capabilityIdFromHubToolSync } from '@/lib/mcp-hub/catalog-bridge';
 
 export function capabilityIdFromAgentTool(toolName: string): CapabilityId | null {
   const name = toolName.trim();
   if (!name) return null;
   for (const c of listAgentCapabilities()) {
     if (c.agent?.toolNames.includes(name)) return c.id;
+  }
+  const hubId = capabilityIdFromHubToolSync(name);
+  if (hubId && getCapability(hubId as CapabilityId)) {
+    return hubId as CapabilityId;
   }
   return null;
 }

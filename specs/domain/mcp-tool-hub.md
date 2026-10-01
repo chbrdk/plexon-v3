@@ -1,6 +1,6 @@
 # MCP Tool Hub (Plexon)
 
-**Status:** Wave H3 landed (OAuth user + thin Canva MCP pilot) — 2026-10-01  
+**Status:** Wave H4 landed (catalog bridge + Collection Hub enable) — 2026-10-01  
 **Owner:** PLEXON v3  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -226,8 +226,8 @@ All Admin routes: platform admin (or company admin — wave decision in implemen
 
 ### Wave H4 — Catalog bridge + Collection scope
 
-- Optional `capabilityId` mapping; Collection-level enable.
-- Deprecate redundant hard-coded gates only when parity proven.
+- Optional `capabilityId` mapping; Collection-level enable — **done** (`specs/domain/mcp-hub-collection-scope.md`).
+- Deprecate redundant hard-coded gates only when parity proven — **not in H4** (dual-run kept).
 
 ## Canva pilot (H3) — product split
 
@@ -266,6 +266,12 @@ Bot phrases:
 2. Connected user can autofill or export via Hub tool in staging.
 3. CREATION scene prompts do not prefer Canva solely because Hub is on.
 
+### H4
+
+1. Collection can disable an active Hub server → tools absent for that Collection chat context.
+2. Hub `capabilityId` / default Canva map resolves via `capabilityIdFromAgentTool`.
+3. Product MCP env gates still dual-run (no deprecation).
+
 ## Risks
 
 | Risk | Mitigation |
@@ -279,6 +285,6 @@ Bot phrases:
 ## Open questions (resolve in H1–H2)
 
 1. Company admin vs platform admin for server CRUD?
-2. Should Collection owners enable Hub servers without org admin?
+2. Should Collection owners enable Hub servers without org admin? → **H4: yes** (company managers, opt-out).
 3. Keep Anthropic tool cap — dynamic prioritization algorithm?
 4. First-party Canva MCP wrapper repo vs commercial MCP vs thin Plexon proxy? → **H3: thin Plexon proxy** (`specs/domain/mcp-hub-canva.md`).

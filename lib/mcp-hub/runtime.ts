@@ -196,6 +196,7 @@ export async function discoverMcpHubServer(serverId: string): Promise<{
 export async function loadHubToolsForTurn(options?: {
   allowWriteTools?: boolean;
   actorUserId?: string | null;
+  platformProjectId?: string | null;
 }): Promise<{
   tools: AnthropicTool[];
   mcpNameByAnthropicName: Record<string, string>;
@@ -207,7 +208,12 @@ export async function loadHubToolsForTurn(options?: {
   const sideEffects = allowWrite
     ? (['read', 'write', 'destructive'] as const)
     : (['read'] as const);
-  const rows = await listEnabledHubTools({ sideEffects: [...sideEffects] });
+  const rows = await listEnabledHubTools({
+    sideEffects: [...sideEffects],
+    platformProjectId: options?.platformProjectId,
+  });
+  // Warm Hub→catalog bridge cache for Agent adapter.
+  void import('@/lib/mcp-hub/catalog-bridge').then((m) => m.getHubExposedCapabilityMap());
   const tools: AnthropicTool[] = [];
   const mcpNameByAnthropicName: Record<string, string> = {};
   const toolSourceByAnthropicName: Record<string, string> = {};

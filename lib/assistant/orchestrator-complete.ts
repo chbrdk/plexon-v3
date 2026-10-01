@@ -441,6 +441,7 @@ export async function runOrchestratorComplete(
     const hub = await loadHubToolsForTurn({
       allowWriteTools,
       actorUserId,
+      platformProjectId,
     });
     if (hub.tools.length) {
       tools = [...tools, ...hub.tools];

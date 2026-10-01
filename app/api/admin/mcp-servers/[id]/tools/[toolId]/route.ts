@@ -21,7 +21,15 @@ export async function PATCH(request: Request, ctx: Ctx) {
     sideEffect: typeof body.sideEffect === 'string' ? body.sideEffect : undefined,
     requireConfirm: typeof body.requireConfirm === 'boolean' ? body.requireConfirm : undefined,
     description: typeof body.description === 'string' ? body.description : undefined,
+    capabilityId:
+      body.capabilityId === null
+        ? null
+        : typeof body.capabilityId === 'string'
+          ? body.capabilityId
+          : undefined,
   });
   if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
+  const { invalidateHubCapabilityMapCache } = await import('@/lib/mcp-hub/catalog-bridge');
+  invalidateHubCapabilityMapCache();
   return NextResponse.json({ item: row });
 }

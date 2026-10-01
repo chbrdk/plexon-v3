@@ -19,6 +19,7 @@ import { CollectionShareLinksPanel } from '@/components/projects/CollectionShare
 import { CollectionTeamPanel } from '@/components/projects/CollectionTeamPanel'
 import { CollectionActivityBand } from '@/components/projects/CollectionActivityBand'
 import { CollectionCompetitiveSpaceBand } from '@/components/projects/CollectionCompetitiveSpaceBand'
+import { CollectionMcpHubPanel } from '@/components/products/CollectionMcpHubPanel'
 import type {
   AudionProjectSummary,
   BrandionProjectSummary,
@@ -188,6 +189,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             onOpenWork={openWork}
           />
           <CollectionTeamPanel platformProjectId={platformProjectId} />
+          <CollectionMcpHubPanel platformProjectId={platformProjectId} />
           <CollectionShareLinksPanel platformProjectId={platformProjectId} />
           <CollectionKnowledgeBand
             platformProjectId={platformProjectId}

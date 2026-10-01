@@ -37,6 +37,7 @@
     "mcpHubColUrl": "URL",
     "mcpHubColEnabled": "An",
     "mcpHubColConfirm": "Confirm",
+    "mcpHubColCapability": "capabilityId",
     "mcpHubColDescription": "Beschreibung",
     "mcpHubCreateTitle": "Server anlegen",
     "mcpHubCreate": "Anlegen",
@@ -428,6 +429,14 @@
       "hideArchived": "Archivierte ausblenden",
       "archivedEmpty": "Keine archivierten Projekte."
     },
+    "mcpHubTitle": "MCP Tool Hub",
+    "mcpHubHint": "Aktive Hub-Server für diese Collection (Opt-out). Deaktiviert = Tools fehlen im Assistenten-Kontext.",
+    "mcpHubEmpty": "Keine aktiven Hub-Server.",
+    "mcpHubColEnabled": "An",
+    "mcpHubOverridden": "Override",
+    "mcpHubLoadError": "Hub-Server konnten nicht geladen werden.",
+    "mcpHubSaveError": "Speichern fehlgeschlagen.",
+    "mcpHubReload": "Neu laden",
     "detail": {
       "title": "Projekt",
       "subtitle": "Collection mit CHECKION- und AUDION-Fähigkeiten.",
