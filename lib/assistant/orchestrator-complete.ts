@@ -7,6 +7,7 @@ import {
   getSpirionMcpUrl,
   getVideonMcpUrl,
   getMetronMcpUrl,
+  getMagcloudMcpUrl,
   getBoardCompletionModel,
   getBoardCompletionModelWithMcp,
   getAssistantCompletionModel,
@@ -133,6 +134,7 @@ export type OrchestratorCompleteOptions = {
   useSpirionMcp?: boolean;
   useVideonMcp?: boolean;
   useMetronMcp?: boolean;
+  useMagcloudMcp?: boolean;
   pageContext?: import('@/lib/assistant/page-context').AssistantPageContext | null;
   /** Collection id for Spirion live search injection when pageContext lacks it. */
   platformProjectId?: string | null;
@@ -350,6 +352,7 @@ export async function runOrchestratorComplete(
     useSpirionMcp = false,
     useVideonMcp = false,
     useMetronMcp = false,
+    useMagcloudMcp = false,
     pageContext = null,
     platformProjectId = null,
     audionProjectId = null,
@@ -393,6 +396,7 @@ export async function runOrchestratorComplete(
   const spirionMcpUrl = useSpirionMcp ? getSpirionMcpUrl() : undefined;
   const videonMcpUrl = useVideonMcp ? getVideonMcpUrl() : undefined;
   const metronMcpUrl = useMetronMcp ? getMetronMcpUrl() : undefined;
+  const magcloudMcpUrl = useMagcloudMcp ? getMagcloudMcpUrl() : undefined;
   let tools: AnthropicTool[] = [];
   let mcpNameByAnthropicName: Record<string, string> = {};
   const toolSourceByAnthropicName: Record<string, string> = {};
@@ -425,6 +429,7 @@ export async function runOrchestratorComplete(
   if (spirionMcpUrl) mcpFetches.push(loadMcpTools('SPIRION', spirionMcpUrl));
   if (videonMcpUrl) mcpFetches.push(loadMcpTools('VIDEON', videonMcpUrl));
   if (metronMcpUrl) mcpFetches.push(loadMcpTools('METRON', metronMcpUrl));
+  if (magcloudMcpUrl) mcpFetches.push(loadMcpTools('MAGCLOUD', magcloudMcpUrl));
   if (mcpFetches.length) {
     const loaded = await Promise.all(mcpFetches);
     for (const fetched of loaded) {
@@ -473,6 +478,7 @@ export async function runOrchestratorComplete(
       (useSpirionMcp && spirionMcpUrl) ||
       (useVideonMcp && videonMcpUrl) ||
       (useMetronMcp && metronMcpUrl) ||
+      (useMagcloudMcp && magcloudMcpUrl) ||
       Object.keys(mcpNameByAnthropicName).some((n) => getHubToolCallTarget(n))) &&
       tools.length > 0);
   const model =

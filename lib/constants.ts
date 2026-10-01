@@ -923,3 +923,10 @@ export const getMetronMcpUrl = (): string | undefined => {
   const url = process.env.METRON_MCP_URL?.trim();
   return url || undefined;
 };
+
+/** MCP server URL for MAGCLOUD board/slide tools. Reads MAGCLOUD_MCP_URL (e.g. http://magcloud-mcp:3105). */
+export const getMagcloudMcpUrl = (): string | undefined => {
+  if (typeof process === 'undefined') return undefined;
+  const url = process.env.MAGCLOUD_MCP_URL?.trim();
+  return url || undefined;
+};

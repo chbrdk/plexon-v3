@@ -32,6 +32,7 @@ import {
   VIDEON_WRITE_FAMILIES,
   METRON_ANALYTICS_FAMILIES,
   METRON_WRITE_FAMILIES,
+  MAGCLOUD_PITCH_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -83,6 +84,7 @@ export type AssistantPlanIntent =
   | 'spirion_research'
   | 'videon_media'
   | 'metron_analytics'
+  | 'magcloud_pitch'
   | 'action_write'
   | 'general_chat';
 
@@ -118,6 +120,7 @@ export type PlannerInput = {
   hasSpirionMcp?: boolean;
   hasVideonMcp?: boolean;
   hasMetronMcp?: boolean;
+  hasMagcloudMcp?: boolean;
   compactContextLoaded: boolean;
   pageContext?: AssistantPageContext | null;
 };
@@ -345,6 +348,21 @@ const METRON_SOFT_PATTERNS = [
   /\bdataset(s)?\b/i,
 ];
 
+
+const MAGCLOUD_PATTERNS = [
+  /\bmagcloud\b/i,
+  /\bslide\s*universe\b/i,
+  /\bpitch[- ]?board\b/i,
+  /\bpitch[- ]?deck\b/i,
+  /\bfolien?\b/i,
+  /\bdeck[- ]?ingest\b/i,
+];
+
+function matchesMagcloudPitch(text: string, hasMagcloudMcp: boolean): boolean {
+  if (!hasMagcloudMcp) return false;
+  return MAGCLOUD_PATTERNS.some((p) => p.test(text));
+}
+
 function matchesMetronAnalytics(text: string, hasMetronMcp: boolean): boolean {
   if (!hasMetronMcp) return false;
   if (METRON_PATTERNS.some((p) => p.test(text))) return true;
@@ -473,7 +491,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     });
   }
 
-  if (matchesMetronAnalytics(text, input.hasMetronMcp ?? false)) {
+    if (matchesMagcloudPitch(text, input.hasMagcloudMcp ?? false)) {
+    return buildPlan({
+      intent: 'magcloud_pitch',
+      mode: 'tools',
+      toolFamilies: [...MAGCLOUD_PITCH_FAMILIES, 'plexon_ui'],
+      allowWriteTools: false,
+      maxToolRounds: 5,
+      skipTools: false,
+      reasoning: 'Magcloud Pitch/Board/Folien-Intent – boards + slides_search (live).',
+    });
+  }
+
+if (matchesMetronAnalytics(text, input.hasMetronMcp ?? false)) {
     return buildPlan({
       intent: 'metron_analytics',
       mode: 'tools',
@@ -786,6 +816,7 @@ const VALID_INTENTS = new Set<AssistantPlanIntent>([
   'spirion_research',
   'videon_media',
   'metron_analytics',
+  'magcloud_pitch',
   'action_write',
   'general_chat',
 ]);
@@ -834,6 +865,10 @@ const VALID_FAMILIES = new Set<ToolFamily>([
   'metron_kpis',
   'metron_dashboards',
   'metron_write',
+  'magcloud_ops',
+  'magcloud_boards',
+  'magcloud_slides',
+  'magcloud_ingest',
   'plexon_ui',
 ]);
 
@@ -908,7 +943,7 @@ Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten/duplizieren/nachpflegen/patch).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, plexon_ui.${hubServersLine}`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, magcloud_ops, magcloud_boards, magcloud_slides, magcloud_ingest, plexon_ui.${hubServersLine}`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -921,6 +956,7 @@ Regeln:
     hasSpirionMcp: Boolean(input.hasSpirionMcp),
     hasVideonMcp: Boolean(input.hasVideonMcp),
     hasMetronMcp: Boolean(input.hasMetronMcp),
+    hasMagcloudMcp: Boolean(input.hasMagcloudMcp),
     compactContextLoaded: input.compactContextLoaded,
     heuristicSuggestion: {
       intent: heuristic.intent,
@@ -969,7 +1005,8 @@ export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: Planner
     input.hasCreationMcp ||
     input.hasSpirionMcp ||
     input.hasVideonMcp ||
-    input.hasMetronMcp
+    input.hasMetronMcp,
+    input.hasMagcloudMcp
   ) {
     if (heuristic.intent === 'general_chat') {
       result = input.hasProjectContext || input.prompt.trim().length > 120

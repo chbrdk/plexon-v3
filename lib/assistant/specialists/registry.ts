@@ -21,6 +21,7 @@ import {
   ECHON_TO_AUDIENCE_FAMILIES,
   GEO_FAMILIES,
   METRON_ANALYTICS_FAMILIES,
+  MAGCLOUD_PITCH_FAMILIES,
   PERSONA_FAMILIES,
   SCAN_FAMILIES,
   SPIRION_RESEARCH_FAMILIES,
@@ -32,6 +33,7 @@ import { buildBrandionIntegrationContextBlock } from '@/lib/integrations/brandio
 import { buildCreationIntegrationContextBlock } from '@/lib/integrations/creation-connectivity';
 import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
+import { buildMagcloudIntegrationContextBlock } from '@/lib/integrations/magcloud-connectivity';
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildCheckionGeoSpecialistAddendum } from '@/lib/assistant/specialists/checkion-geo';
@@ -48,6 +50,19 @@ function withSpecialistHeader(label: string, body: string): string {
   if (trimmed.startsWith(`## Specialist:`)) return trimmed;
   return `## Specialist: ${label}\n\n${trimmed}`;
 }
+
+
+const MAGCLOUD_SPECIALIST: AssistantSpecialist = {
+  id: 'magcloud_pitch',
+  label: 'Magcloud',
+  toolFamilies: [...MAGCLOUD_PITCH_FAMILIES],
+  maxToolRounds: 5,
+  buildSystemAddendum: (ctx) =>
+    withSpecialistHeader(
+      'Magcloud',
+      buildMagcloudIntegrationContextBlock({ useMagcloudMcp: ctx.useMagcloudMcp }),
+    ),
+};
 
 const METRON_SPECIALIST: AssistantSpecialist = {
   id: 'metron_analytics',
@@ -259,6 +274,7 @@ const SPIRION_SPECIALIST: AssistantSpecialist = {
 
 const REGISTRY: Record<AssistantSpecialistId, AssistantSpecialist> = {
   metron_analytics: METRON_SPECIALIST,
+  magcloud_pitch: MAGCLOUD_SPECIALIST,
   checkion_scan: CHECKION_SCAN_SPECIALIST,
   creation_scene_edit: CREATION_SCENE_SPECIALIST,
   videon_media: VIDEON_SPECIALIST,

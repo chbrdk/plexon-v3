@@ -4,6 +4,7 @@ import {
   getCheckionMcpUrl,
   getCreationMcpUrl,
   getEchonMcpUrl,
+  getMagcloudMcpUrl,
   getMetronMcpUrl,
   getSpirionMcpUrl,
   getVideonMcpUrl,
@@ -23,7 +24,8 @@ export type AssistantProductMcpId =
   | 'echon'
   | 'spirion'
   | 'videon'
-  | 'metron';
+  | 'metron'
+  | 'magcloud';
 
 const PLATFORM_SHELL_HOSTS = new Set([
   'plexon',
@@ -35,6 +37,7 @@ const PLATFORM_SHELL_HOSTS = new Set([
   'spirion',
   'videon',
   'metron',
+  'magcloud',
 ]);
 
 /**
@@ -175,6 +178,21 @@ export function resolveUseMetronMcp(input: {
     product: 'metron',
     mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getMetronMcpUrl(),
     productEntitlement: input.metronEntitlement,
+    pageContext: input.pageContext,
+    hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
+  });
+}
+
+export function resolveUseMagcloudMcp(input: {
+  magcloudEntitlement?: ProductMcpEntitlementRow;
+  pageContext?: Pick<AssistantPageContext, 'product'> | null;
+  hasAnyActiveEntitlement?: boolean;
+  mcpUrl?: string | undefined;
+}): boolean {
+  return resolveUseProductMcp({
+    product: 'magcloud',
+    mcpUrl: input.mcpUrl !== undefined ? input.mcpUrl : getMagcloudMcpUrl(),
+    productEntitlement: input.magcloudEntitlement,
     pageContext: input.pageContext,
     hasAnyActiveEntitlement: input.hasAnyActiveEntitlement,
   });

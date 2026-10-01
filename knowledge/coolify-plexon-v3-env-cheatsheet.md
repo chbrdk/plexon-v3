@@ -262,7 +262,13 @@ MAGCLOUD_DATA_DIR=/data/magcloud
 PORT=3025
 ```
 
-Coolify: project `hrk8ntthsbob4sr8ygq4kjif` · shell `dmlwuxtf5viyj3csk3ukumsx` · island `qaooqlf3xq0ynkqrz8t6kide`. Ops: `magcloud/knowledge/staging-coolify.md`.
+Auf **plexon-v3:main-app** (Assistant MCP):
+
+```bash
+MAGCLOUD_MCP_URL=https://kqqn127a3uscujl2m5nvrj8d.projects-a.plygrnd.tech
+```
+
+Coolify: project `hrk8ntthsbob4sr8ygq4kjif` · shell `dmlwuxtf5viyj3csk3ukumsx` · island `qaooqlf3xq0ynkqrz8t6kide` · MCP `magcloud-mcp` `kqqn127a3uscujl2m5nvrj8d` (port **3105**). Ops: `magcloud/knowledge/staging-coolify.md`.
 
 ---
 

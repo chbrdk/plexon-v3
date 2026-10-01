@@ -4,6 +4,7 @@ import {
 import type { AssistantPageContext } from '@/lib/assistant/page-context';
 import { injectSpirionToolArgs } from '@/lib/assistant/spirion-tool-args';
 import { injectMetronToolArgs } from '@/lib/assistant/metron-tool-args';
+import { injectMagcloudToolArgs } from '@/lib/assistant/magcloud-tool-args';
 
 function isCreationSceneFamilyTool(toolName: string): boolean {
   return (
@@ -145,7 +146,8 @@ export function injectAssistantMcpToolArgs(
   const withSpirion = injectSpirionToolArgs(toolName, withCreation, ctx);
   const withVideon = injectVideonToolArgs(toolName, withSpirion, ctx);
   const withMetron = injectMetronToolArgs(toolName, withVideon, ctx);
-  const withCheckion = injectCheckionToolArgs(toolName, withMetron, ctx);
+  const withMagcloud = injectMagcloudToolArgs(toolName, withMetron, ctx);
+  const withCheckion = injectCheckionToolArgs(toolName, withMagcloud, ctx);
   const withAudion = injectAudionToolArgs(toolName, withCheckion, ctx);
   return injectBrandionToolArgs(toolName, withAudion, ctx);
 }

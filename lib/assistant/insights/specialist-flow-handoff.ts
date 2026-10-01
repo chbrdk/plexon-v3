@@ -17,6 +17,7 @@ export const FLOW_HANDOFF_SPECIALIST_INTENTS = [
   'videon_media',
   'audion_ux_journey',
   'metron_analytics',
+  'magcloud_pitch',
 ] as const;
 
 export type FlowHandoffSpecialistIntent = (typeof FLOW_HANDOFF_SPECIALIST_INTENTS)[number];
@@ -31,6 +32,7 @@ export const SPECIALIST_FLOW_NAME_HINTS: Record<FlowHandoffSpecialistIntent, str
   videon_media: ['video', 'videon', 'media', 'export', 'cut', 'clip', 'reframe'],
   audion_ux_journey: ['journey', 'ux', 'audion', 'persona', 'path'],
   metron_analytics: ['metron', 'kpi', 'dashboard', 'analytics', 'metric'],
+  magcloud_pitch: ['magcloud', 'pitch', 'board', 'folie', 'deck'],
 };
 
 const LONG_JOB_PROMPT_PATTERNS = [

@@ -8,6 +8,7 @@ import type { ToolFamily } from '@/lib/assistant/tool-catalog';
 
 export type AssistantSpecialistId =
   | 'metron_analytics'
+  | 'magcloud_pitch'
   | 'checkion_scan'
   | 'creation_scene_edit'
   | 'videon_media'
@@ -34,6 +35,7 @@ export type SpecialistContext = {
   useSpirionMcp: boolean;
   useVideonMcp: boolean;
   useMetronMcp: boolean;
+  useMagcloudMcp: boolean;
 };
 
 export type AssistantSpecialist = {
@@ -47,6 +49,7 @@ export type AssistantSpecialist = {
 
 const SPECIALIST_IDS: readonly AssistantSpecialistId[] = [
   'metron_analytics',
+  'magcloud_pitch',
   'checkion_scan',
   'creation_scene_edit',
   'videon_media',

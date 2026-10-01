@@ -16,6 +16,7 @@ import { buildEchonIntegrationContextBlock } from '@/lib/integrations/echon-conn
 import { buildSpirionIntegrationContextBlock } from '@/lib/integrations/spirion-connectivity';
 import { buildVideonIntegrationContextBlock } from '@/lib/integrations/videon-connectivity';
 import { buildMetronIntegrationContextBlock } from '@/lib/integrations/metron-connectivity';
+import { buildMagcloudIntegrationContextBlock } from '@/lib/integrations/magcloud-connectivity';
 import { resolveSpecialist, resolveSpecialistToolRoundBudget } from '@/lib/assistant/specialists';
 import {
   buildFlowHandoffSystemHint,
@@ -66,6 +67,7 @@ export type RunAssistantAgentInput = {
   useSpirionMcp: boolean;
   useVideonMcp: boolean;
   useMetronMcp: boolean;
+  useMagcloudMcp: boolean;
   beforeToolCall?: OrchestratorCompleteOptions['beforeToolCall'];
   onProgress?: AgentProgressCallback;
   onPlan?: (plan: AssistantPlan) => void;
@@ -132,6 +134,7 @@ export async function runAssistantAgent(
     hasSpirionMcp: input.useSpirionMcp,
     hasVideonMcp: input.useVideonMcp,
     hasMetronMcp: input.useMetronMcp,
+    hasMagcloudMcp: input.useMagcloudMcp,
     compactContextLoaded,
     pageContext: input.pageContext,
   });
@@ -155,6 +158,7 @@ export async function runAssistantAgent(
     useSpirionMcp: input.useSpirionMcp,
     useVideonMcp: input.useVideonMcp,
     useMetronMcp: input.useMetronMcp,
+    useMagcloudMcp: input.useMagcloudMcp,
   });
 
   const specialistCtx = {
@@ -166,6 +170,7 @@ export async function runAssistantAgent(
     useSpirionMcp: mcpFlags.useSpirionMcp,
     useVideonMcp: mcpFlags.useVideonMcp,
     useMetronMcp: mcpFlags.useMetronMcp,
+    useMagcloudMcp: mcpFlags.useMagcloudMcp,
   };
 
   // Connectivity only after plan: specialist → one addendum; else full product stack.
@@ -192,6 +197,9 @@ export async function runAssistantAgent(
         }),
         buildMetronIntegrationContextBlock({
           useMetronMcp: mcpFlags.useMetronMcp,
+        }),
+        buildMagcloudIntegrationContextBlock({
+          useMagcloudMcp: mcpFlags.useMagcloudMcp,
         }),
       ].join('\n\n');
 
@@ -272,6 +280,7 @@ export async function runAssistantAgent(
     useSpirionMcp: mcpFlags.useSpirionMcp,
     useVideonMcp: mcpFlags.useVideonMcp,
     useMetronMcp: mcpFlags.useMetronMcp,
+    useMagcloudMcp: mcpFlags.useMagcloudMcp,
     pageContext: input.pageContext,
     platformProjectId: input.platformProjectId,
     audionProjectId: input.audionProjectId,

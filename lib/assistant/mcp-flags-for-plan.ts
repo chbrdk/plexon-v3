@@ -11,6 +11,7 @@ export type AssistantMcpFlags = {
   useSpirionMcp: boolean;
   useVideonMcp: boolean;
   useMetronMcp: boolean;
+  useMagcloudMcp: boolean;
 };
 
 /**
@@ -34,6 +35,7 @@ export function resolveMcpFlagsForPlan(
       use_brandion: resolved.useBrandionMcp,
       use_videon: resolved.useVideonMcp,
       use_metron: resolved.useMetronMcp,
+      use_magcloud: resolved.useMagcloudMcp,
     },
     extractNoulKey: 'use_creation',
   })
@@ -58,6 +60,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: flags.useSpirionMcp,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'spirion_research':
       return {
@@ -69,6 +72,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: flags.useSpirionMcp,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'brandion_brand':
       return {
@@ -81,6 +85,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'videon_media':
       return {
@@ -92,6 +97,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: flags.useVideonMcp,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'metron_analytics':
       return {
@@ -103,7 +109,21 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: flags.useMetronMcp,
+        useMagcloudMcp: false,
       };
+    case 'magcloud_pitch':
+      return {
+        useCheckionMcp: false,
+        useAudionMcp: false,
+        useEchonMcp: false,
+        useBrandionMcp: false,
+        useCreationMcp: false,
+        useSpirionMcp: false,
+        useVideonMcp: false,
+        useMetronMcp: false,
+        useMagcloudMcp: flags.useMagcloudMcp,
+      };
+
     case 'echon_market':
       return {
         useCheckionMcp: false,
@@ -114,6 +134,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'echon_audience':
       return {
@@ -125,6 +146,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'audion_persona':
     case 'audion_knowledge':
@@ -142,6 +164,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     case 'checkion_scan':
     case 'checkion_seo_geo':
@@ -157,6 +180,7 @@ function resolveMcpFlagsForPlanCore(
         useSpirionMcp: false,
         useVideonMcp: false,
         useMetronMcp: false,
+        useMagcloudMcp: false,
       };
     default:
       return flags;

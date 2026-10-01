@@ -52,6 +52,10 @@ export type ToolFamily =
   | 'metron_external'
   | 'metron_library'
   | 'metron_write'
+  | 'magcloud_ops'
+  | 'magcloud_boards'
+  | 'magcloud_slides'
+  | 'magcloud_ingest'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -216,6 +220,10 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^metron_external_connection_sync$/,
     /^metron_company_kpi_library_bind$/,
   ],
+  magcloud_ops: [/^magcloud_health$/, /^magcloud_ingest_health$/],
+  magcloud_boards: [/^magcloud_boards_/, /^magcloud_board_(get|summarize)$/],
+  magcloud_slides: [/^magcloud_slides_search$/],
+  magcloud_ingest: [/^magcloud_ingest_jobs_/, /^magcloud_ingest_job_get$/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -396,6 +404,13 @@ export const METRON_ANALYTICS_FAMILIES: ToolFamily[] = [
 
 /** METRON Phase 2 writes — gated by allowWriteTools + confirm. */
 export const METRON_WRITE_FAMILIES: ToolFamily[] = ['metron_write'];
+
+export const MAGCLOUD_PITCH_FAMILIES: ToolFamily[] = [
+  'magcloud_ops',
+  'magcloud_boards',
+  'magcloud_slides',
+  'magcloud_ingest',
+];
 
 /** Write/job families — still gated by allowWriteTools on the plan. */
 export const VIDEON_WRITE_FAMILIES: ToolFamily[] = [
