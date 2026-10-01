@@ -143,6 +143,21 @@ describe('assistant-planner heuristic', () => {
     expect(plan.toolFamilies.some((f) => f.startsWith('audion_'))).toBe(true);
   });
 
+  it('routes Tiefenfelder nachpflegen to audion_persona with write tools', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'pflege die Tiefenfelder bei Julia Wendt (Kopie) nach',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      compactContextLoaded: true,
+    });
+    expect(plan.intent).toBe('audion_persona');
+    expect(plan.allowWriteTools).toBe(true);
+    expect(plan.toolFamilies).toContain('audion_audience_write');
+  });
+
   it('uses embedded context for project knowledge questions', () => {
     const plan = planAssistantTurnHeuristic({
       prompt: 'was hast du zur Haftpflichtkasse',

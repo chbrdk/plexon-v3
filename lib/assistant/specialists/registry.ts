@@ -169,7 +169,9 @@ const AUDION_PERSONA_SPECIALIST: AssistantSpecialist = {
           '- Bei Namen (z. B. „Markus Reinhardt“ / „Julia Wendt“): `audion_personas_list` mit `q=<Name>` (fuzzy) **ohne** `project_id` — Access Model B über zugängliche Projekte. Keine IDs erfinden.',
           '- Treffer → `audion_persona_get` mit der zurückgegebenen `id`.',
           '- Duplizieren: nach get → `audion_persona_create` im **Kontext**-`audionProjectId` mit **Tiefenfeldern** aus dem Get (goals, frustrations, motivations, stressTriggers, emotionalBaseline, techLiteracy, …) und Name „… (Kopie)“. Rest → `audion_persona_patch`. Nie `persona_ai_*`, nie persona_bootstrap / neues Projekt.',
-          '- Browse ohne Namen und mit bekanntem Collection-Kontext: `project_id` = audionProjectId.',        ].join('\n'),
+          '- Nachpflegen/Patch („Tiefenfelder nachpflegen“): get Original + Kopie → sofort `audion_persona_patch` (nicht nur Diff, nicht auf Extra-Bestätigung warten).',
+          '- Browse ohne Namen und mit bekanntem Collection-Kontext: `project_id` = audionProjectId.',
+        ].join('\n'),
       ].join('\n\n'),
     ),
 };

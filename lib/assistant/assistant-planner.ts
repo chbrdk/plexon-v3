@@ -37,6 +37,7 @@ import {
   type ToolFamily,
 } from '@/lib/assistant/tool-catalog';
 import { hasAudienceWriteIntent } from '@/lib/assistant/audience-write-intent';
+import { isPersonaAudienceWriteIntent } from '@/lib/assistant/persona-duplicate-intent';
 import { hasSceneWriteIntent, hasCreationEditorSceneContext } from '@/lib/assistant/scene-write-intent';
 import {
   buildCreationSceneDepthPromptBlock,
@@ -150,25 +151,28 @@ const PERSONA_PATTERNS = [
   /\btarget\s*group/i,
   /\bcustomer\s*journey/i,
   /\bkundenreise/i,
+  /\btiefenfeld/i,
   /** “Finde Markus Reinhardt” / “julia wendt duplizieren” (chat often lowercase) */
-  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
-  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,32}\b(duplizier\w*|kopier\w*|finde|zeig\w*|such\w*)/iu,
-  /\baudion\b[^.?!\n]{0,40}\b(persona|zielgruppe|finde|such\w*|zeig\w*|duplizier\w*|kopier\w*)/i,
+  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|nachpfleg\w*|pfleg\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
+  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,48}\b(duplizier\w*|kopier\w*|nachpfleg\w*|finde|zeig\w*|such\w*)/iu,
+  /\baudion\b[^.?!\n]{0,40}\b(persona|zielgruppe|finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|nachpfleg\w*)/i,
   /** Bare full name as the whole prompt */
   /^\s*[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s*[.?!]?\s*$/u,
 ];
 
-/** Subset: named person lookup/duplicate — must beat generic action_write. */
+/** Subset: named person lookup/duplicate/enrich — must beat generic action_write. */
 const PERSONA_NAME_LOOKUP_PATTERNS = [
-  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
-  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,32}\b(duplizier\w*|kopier\w*|finde|zeig\w*|such\w*)/iu,
+  /\b(finde|such\w*|zeig\w*|duplizier\w*|kopier\w*|nachpfleg\w*|pfleg\w*|wo\s+ist)\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
+  /\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+[^.?!\n]{0,48}\b(duplizier\w*|kopier\w*|nachpfleg\w*|finde|zeig\w*|such\w*)/iu,
+  /\btiefenfeld\w*\b[^.?!\n]{0,64}\b[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+/iu,
   /^\s*[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s+[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß'-]+\s*[.?!]?\s*$/u,
 ];
 
 const WRITE_PATTERNS = [
   /\b(starte|start|erstelle|create|generiere|generate|lösche|delete|anleg\w*|ableit\w*)\b/i,
   /\b(upsert|import|aktualisier\w*|update|ersetz\w*|replace|archiv\w*|evaluate|publish)\b/i,
-  /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i,
+  /\b(duplizier\w*|kopier\w*|clone|klon\w*|nachpfleg\w*|ergänz\w*|übertrag\w*|uebertrag\w*|angleich\w*|patch(en|e|t)?)\b/i,
+  /\bpfleg\w*\b[\s\S]{0,80}\bnach\b/i,
   /\bscanne\s+https?:\/\//i,
 ];
 
@@ -549,23 +553,24 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     });
   }
 
-  // Named-person lookup / duplicate before generic action_write (lowercase “julia wendt
-  // duplizieren”). Broad persona/zielgruppe create stays after writeIntent so
-  // “Target Group + DTCG tokens” can still be cross-app action_write.
+  // Named-person lookup / duplicate / enrich before generic action_write (lowercase
+  // “julia wendt duplizieren” / “Tiefenfelder … nachpflegen”). Broad persona/zielgruppe
+  // create stays after writeIntent so “Target Group + DTCG tokens” can still be
+  // cross-app action_write.
   const namedPersonaLookup = PERSONA_NAME_LOOKUP_PATTERNS.some((p) => p.test(text));
   if (namedPersonaLookup && input.hasAudionMcp) {
-    const duplicate = /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i.test(text);
+    const personaWrite = isPersonaAudienceWriteIntent(text) || writeIntent;
     return buildPlan({
       intent: 'audion_persona',
       mode: 'hybrid',
-      toolFamilies: duplicate
+      toolFamilies: personaWrite
         ? ([...new Set([...PERSONA_FAMILIES, 'audion_audience_write'])] as ToolFamily[])
         : [...PERSONA_FAMILIES],
-      allowWriteTools: duplicate,
+      allowWriteTools: personaWrite,
       maxToolRounds: 5,
       skipTools: false,
-      reasoning: duplicate
-        ? 'Persona duplizieren/kopieren – AUDION list/get/create (kein neues Projekt).'
+      reasoning: personaWrite
+        ? 'Persona duplizieren/nachpflegen – AUDION list/get/create/patch (kein neues Projekt).'
         : 'Persona-Namenslookup – AUDION Persona & Knowledge (read-only).',
     });
   }
@@ -880,7 +885,7 @@ Antworte NUR mit einem JSON-Objekt (kein Markdown):
 }
 Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
-- Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten).
+- Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten/duplizieren/nachpflegen/patch).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
 - toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, plexon_ui.`;
 
@@ -1119,16 +1124,16 @@ function preferPersonaLookupPlan(plan: AssistantPlan, input: PlannerInput): Assi
   ) {
     return plan;
   }
-  // Override general_chat / action_write / etc. → audion_persona when name/duplicate patterns hit.
-  const duplicate = /\b(duplizier\w*|kopier\w*|clone|klon\w*)\b/i.test(text);
+  // Override general_chat / action_write / etc. → audion_persona when name/duplicate/enrich patterns hit.
+  const personaWrite = isPersonaAudienceWriteIntent(text) || plan.allowWriteTools;
   return buildPlan({
     intent: 'audion_persona',
     mode: 'hybrid',
-    toolFamilies: duplicate ? [...AUDION_WRITE_FAMILIES] : [...PERSONA_FAMILIES],
-    allowWriteTools: duplicate || plan.allowWriteTools,
+    toolFamilies: personaWrite ? [...AUDION_WRITE_FAMILIES] : [...PERSONA_FAMILIES],
+    allowWriteTools: personaWrite,
     maxToolRounds: Math.max(plan.maxToolRounds, 5),
     skipTools: false,
-    reasoning: `${plan.reasoning} → override: Persona-Namenslookup${duplicate ? ' + Duplikat' : ''} (AUDION).`,
+    reasoning: `${plan.reasoning} → override: Persona-Namenslookup${personaWrite ? ' + Write' : ''} (AUDION).`,
     plannerSource: plan.plannerSource,
   });
 }
