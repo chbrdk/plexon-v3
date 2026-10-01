@@ -1,6 +1,6 @@
 # MCP Tool Hub (Plexon)
 
-**Status:** Wave H1 landed (registry + discover + Admin + free-chat read injection) — 2026-10-01  
+**Status:** Wave H2 landed (policy + write confirm + routing hints + AUDION env bootstrap) — 2026-10-01  
 **Owner:** PLEXON v3  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -215,8 +215,8 @@ All Admin routes: platform admin (or company admin — wave decision in implemen
 
 ### Wave H2 — Policy + write confirm + planner hints
 
-- Policies; write gating; `routingHints` in planner.
-- Migrate one suite MCP to `env_bootstrap` Hub row (still env secrets).
+- Policies; write gating; `routingHints` in planner — **done**.
+- Migrate one suite MCP to `env_bootstrap` Hub row (still env secrets) — AUDION via Admin bootstrap.
 
 ### Wave H3 — OAuth user + Canva pilot
 

@@ -8,6 +8,7 @@ import {
   patchMcpServer,
   toPublicMcpServer,
 } from '@/lib/mcp-hub/store';
+import { invalidateHubRoutingHintsCache } from '@/lib/mcp-hub/runtime';
 import type { McpServerAuthConfig } from '@/lib/db/schema';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -58,6 +59,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
         : undefined,
     });
     if (!row) return apiError('Not found', API_STATUS.NOT_FOUND);
+    invalidateHubRoutingHintsCache();
     const tools = await listMcpServerTools(id);
     return NextResponse.json({ item: toPublicMcpServer(row, tools.length), tools });
   } catch (e) {
@@ -72,5 +74,6 @@ export async function DELETE(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const ok = await deleteMcpServer(id);
   if (!ok) return apiError('Not found', API_STATUS.NOT_FOUND);
+  invalidateHubRoutingHintsCache();
   return NextResponse.json({ ok: true });
 }

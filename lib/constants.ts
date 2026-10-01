@@ -493,6 +493,9 @@ export const apiAdminMcpServerDiscover = (id: string) =>
 export const apiAdminMcpServerTest = (id: string) => `${apiAdminMcpServer(id)}/test`;
 export const apiAdminMcpServerTool = (serverId: string, toolId: string) =>
   `${apiAdminMcpServer(serverId)}/tools/${encodeURIComponent(toolId)}`;
+export const apiAdminMcpServerPolicies = (id: string) =>
+  `${apiAdminMcpServer(id)}/policies`;
+export const API_ADMIN_MCP_SERVERS_BOOTSTRAP = `${API_ADMIN_MCP_SERVERS}/bootstrap`;
 export const apiAdminCompanyMembers = (id: string) => `${apiAdminCompany(id)}/members`;
 export const apiAdminCompanyPlatformProjects = (id: string) =>
   `${apiAdminCompany(id)}/platform-projects`;

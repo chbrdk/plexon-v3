@@ -984,3 +984,33 @@ export const mcpServerTools = pgTable(
     serverIdx: index('mcp_server_tools_server_idx').on(t.serverId),
   })
 );
+
+/**
+ * MCP Tool Hub policies (Wave H2).
+ * effect=deny blocks the server/tool; allow_write=false blocks write/destructive Hub tools.
+ */
+export const MCP_POLICY_SCOPES = ['org', 'company', 'collection', 'role'] as const;
+export type McpPolicyScope = (typeof MCP_POLICY_SCOPES)[number];
+
+export const MCP_POLICY_EFFECTS = ['allow', 'deny'] as const;
+export type McpPolicyEffect = (typeof MCP_POLICY_EFFECTS)[number];
+
+export const mcpToolPolicies = pgTable(
+  'mcp_tool_policies',
+  {
+    id: text('id').primaryKey(),
+    scope: text('scope').notNull().default('org'),
+    scopeId: text('scope_id'),
+    serverId: text('server_id')
+      .notNull()
+      .references(() => mcpServers.id, { onDelete: 'cascade' }),
+    toolId: text('tool_id').references(() => mcpServerTools.id, { onDelete: 'cascade' }),
+    effect: text('effect').notNull().default('allow'),
+    allowWrite: boolean('allow_write').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    serverIdx: index('mcp_tool_policies_server_idx').on(t.serverId),
+  })
+);

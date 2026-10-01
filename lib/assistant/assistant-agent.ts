@@ -280,6 +280,7 @@ export async function runAssistantAgent(
     maxToolRounds,
     thinkingBudgetTokens: creationBudget.thinkingBudgetTokens,
     skipTools: plan.skipTools,
+    allowWriteTools: plan.allowWriteTools,
     modelProfile: 'assistant',
     modelOverride: creationBudget.tier === 'high' ? creationBudget.model : undefined,
     beforeToolCall: input.beforeToolCall,

@@ -39,7 +39,15 @@ import {
 import { hasAudienceWriteIntent } from '@/lib/assistant/audience-write-intent';
 import { isPersonaAudienceWriteIntent } from '@/lib/assistant/persona-duplicate-intent';
 import { hasSceneWriteIntent, hasCreationEditorSceneContext } from '@/lib/assistant/scene-write-intent';
-import { isHubAllowlistedTool } from '@/lib/mcp-hub/runtime';
+import {
+  applyHubRoutingWriteBoost,
+  matchHubServersByRoutingHints,
+} from '@/lib/mcp-hub/routing-hints';
+import {
+  getCachedHubRoutingServers,
+  isHubAllowlistedTool,
+  isHubWriteTool,
+} from '@/lib/mcp-hub/runtime';
 import {
   buildCreationSceneDepthPromptBlock,
   getCreationSceneMaxToolRounds,
@@ -873,6 +881,18 @@ export async function planAssistantTurnWithLlm(
   input: PlannerInput,
   heuristic: AssistantPlan
 ): Promise<AssistantPlan> {
+  let hubServersLine = '';
+  try {
+    const hubServers = await getCachedHubRoutingServers();
+    if (hubServers.length) {
+      hubServersLine = `\nAktive MCP-Hub-Server (zusätzliche Tools mit Prefix {slug}_): ${hubServers
+        .map((s) => `${s.slug}${s.routingHints.length ? ` [${s.routingHints.slice(0, 6).join(', ')}]` : ''}`)
+        .join('; ')}. Bei passenden routingHints allowWriteTools nur mit Schreib-Auftrag.`;
+    }
+  } catch {
+    /* ignore */
+  }
+
   const system = `Du bist der Planer für den PLEXON-Assistenten. Analysiere die Nutzeranfrage und wähle Strategie + Tool-Familien.
 Antworte NUR mit einem JSON-Objekt (kein Markdown):
 {
@@ -888,7 +908,7 @@ Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten/duplizieren/nachpflegen/patch).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, plexon_ui.`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, plexon_ui.${hubServersLine}`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,
@@ -993,10 +1013,16 @@ export async function planAssistantTurn(
   }
 
   if (!apiKey || !shouldRefinePlanWithLlm(plan, input)) {
-    return preferPageEntityPlan(preferPersonaLookupPlan(plan, input), input);
+    return enrichPlanWithHubRouting(
+      preferPageEntityPlan(preferPersonaLookupPlan(plan, input), input),
+      input
+    );
   }
   const refined = await planAssistantTurnWithLlm(apiKey, input, plan);
-  return preferPageEntityPlan(preferPersonaLookupPlan(refined, input), input);
+  return enrichPlanWithHubRouting(
+    preferPageEntityPlan(preferPersonaLookupPlan(refined, input), input),
+    input
+  );
 }
 
 const DEIXIS_PATTERNS = [
@@ -1298,11 +1324,41 @@ ${creationDepth}
 Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/hybrid: antworte zuerst aus der Projektkurzinfo oben.`;
 }
 
+/** Apply active Hub routingHints: annotate reasoning; enable writes when write verbs match. */
+export async function enrichPlanWithHubRouting(
+  plan: AssistantPlan,
+  input: PlannerInput
+): Promise<AssistantPlan> {
+  try {
+    const servers = await getCachedHubRoutingServers();
+    if (!servers.length) return plan;
+    const text = (input.planningPrompt ?? input.prompt).trim();
+    const matched = matchHubServersByRoutingHints(text, servers);
+    if (!matched.length) return plan;
+    const writeIntent = WRITE_PATTERNS.some((p) => p.test(text));
+    const boost = applyHubRoutingWriteBoost({
+      prompt: text,
+      writeIntent,
+      allowWriteTools: plan.allowWriteTools,
+      reasoning: plan.reasoning,
+      matchedServers: matched,
+    });
+    return {
+      ...plan,
+      allowWriteTools: boost.allowWriteTools,
+      reasoning: boost.reasoning,
+    };
+  } catch {
+    return plan;
+  }
+}
+
 export function toolAllowedByPlan(toolName: string, plan: AssistantPlan): boolean {
   if (isPlexonUiTool(toolName)) return true;
   if (isHubAllowlistedTool(toolName)) {
-    // H1 injects read-only Hub tools only; still respect skipTools.
     if (plan.skipTools) return false;
+    // Hub write/destructive require allowWriteTools (H2).
+    if (isHubWriteTool(toolName) && !plan.allowWriteTools) return false;
     return true;
   }
   if (plan.skipTools || plan.toolFamilies.length === 0) return false;

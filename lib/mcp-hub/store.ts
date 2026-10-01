@@ -9,6 +9,7 @@ import { getDb } from '@/lib/db';
 import {
   mcpServerTools,
   mcpServers,
+  mcpToolPolicies,
   type McpServerAuthConfig,
   type McpServerAuthKind,
   type McpServerSource,
@@ -174,27 +175,145 @@ export async function listMcpServerTools(serverId: string): Promise<McpServerToo
 export async function listEnabledReadHubTools(): Promise<
   Array<McpServerToolRow & { server: McpServerRow }>
 > {
+  return listEnabledHubTools({ sideEffects: ['read'] });
+}
+
+export async function listEnabledHubTools(options?: {
+  sideEffects?: Array<McpToolSideEffect | string>;
+}): Promise<Array<McpServerToolRow & { server: McpServerRow }>> {
   const servers = await listActiveMcpServers();
   if (!servers.length) return [];
+  const allowedSide =
+    options?.sideEffects && options.sideEffects.length
+      ? new Set(options.sideEffects)
+      : null;
   const db = getDb();
+  const policies = await db.select().from(mcpToolPolicies);
+  const deniedServers = new Set(
+    policies.filter((p) => p.effect === 'deny' && !p.toolId).map((p) => p.serverId)
+  );
+  const deniedTools = new Set(
+    policies.filter((p) => p.effect === 'deny' && p.toolId).map((p) => p.toolId as string)
+  );
+  const writeBlockedServers = new Set(
+    policies.filter((p) => !p.allowWrite && !p.toolId).map((p) => p.serverId)
+  );
+  const writeBlockedTools = new Set(
+    policies.filter((p) => !p.allowWrite && p.toolId).map((p) => p.toolId as string)
+  );
+
   const out: Array<McpServerToolRow & { server: McpServerRow }> = [];
   for (const server of servers) {
+    if (deniedServers.has(server.id)) continue;
     const tools = await db
       .select()
       .from(mcpServerTools)
-      .where(
-        and(
-          eq(mcpServerTools.serverId, server.id),
-          eq(mcpServerTools.enabled, true),
-          eq(mcpServerTools.sideEffect, 'read')
-        )
-      );
+      .where(and(eq(mcpServerTools.serverId, server.id), eq(mcpServerTools.enabled, true)));
     for (const tool of tools) {
+      if (deniedTools.has(tool.id)) continue;
+      if (allowedSide && !allowedSide.has(tool.sideEffect)) continue;
+      if (
+        (tool.sideEffect === 'write' || tool.sideEffect === 'destructive') &&
+        (writeBlockedServers.has(server.id) || writeBlockedTools.has(tool.id))
+      ) {
+        continue;
+      }
       out.push({ ...tool, server });
     }
   }
   return out;
 }
+
+export type McpPolicyRow = typeof mcpToolPolicies.$inferSelect;
+
+export async function listMcpPoliciesForServer(serverId: string): Promise<McpPolicyRow[]> {
+  const db = getDb();
+  return db.select().from(mcpToolPolicies).where(eq(mcpToolPolicies.serverId, serverId));
+}
+
+/** Org-scope server-wide policy upsert (toolId null). */
+export async function upsertOrgServerPolicy(input: {
+  serverId: string;
+  effect: 'allow' | 'deny';
+  allowWrite: boolean;
+}): Promise<McpPolicyRow> {
+  const db = getDb();
+  const existing = await db
+    .select()
+    .from(mcpToolPolicies)
+    .where(
+      and(
+        eq(mcpToolPolicies.serverId, input.serverId),
+        eq(mcpToolPolicies.scope, 'org')
+      )
+    );
+  const serverWide = existing.find((p) => !p.toolId);
+  const now = new Date();
+  if (serverWide) {
+    await db
+      .update(mcpToolPolicies)
+      .set({
+        effect: input.effect,
+        allowWrite: input.allowWrite,
+        updatedAt: now,
+      })
+      .where(eq(mcpToolPolicies.id, serverWide.id));
+    const [row] = await db
+      .select()
+      .from(mcpToolPolicies)
+      .where(eq(mcpToolPolicies.id, serverWide.id))
+      .limit(1);
+    return row!;
+  }
+  const row: McpPolicyRow = {
+    id: randomUUID(),
+    scope: 'org',
+    scopeId: null,
+    serverId: input.serverId,
+    toolId: null,
+    effect: input.effect,
+    allowWrite: input.allowWrite,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.insert(mcpToolPolicies).values(row);
+  return row;
+}
+
+export async function listActiveHubRoutingServers(): Promise<
+  Array<{ slug: string; displayName: string; routingHints: string[] }>
+> {
+  const servers = await listActiveMcpServers();
+  return servers.map((s) => ({
+    slug: s.slug,
+    displayName: s.displayName,
+    routingHints: Array.isArray(s.routingHints) ? s.routingHints : [],
+  }));
+}
+
+/** Idempotent env bootstrap for AUDION MCP (Wave H2). */
+export async function ensureAudionEnvBootstrapServer(): Promise<McpServerRow | null> {
+  const baseUrl = process.env.AUDION_MCP_URL?.trim().replace(/\/$/, '');
+  if (!baseUrl) return null;
+  const existing = await getMcpServerBySlug('audion');
+  if (existing) return existing;
+  try {
+    return await createMcpServer({
+      slug: 'audion',
+      displayName: 'AUDION MCP',
+      baseUrl,
+      authKind: 'none',
+      authConfig: {},
+      status: 'draft',
+      source: 'env_bootstrap',
+      productId: 'audion',
+      routingHints: ['persona', 'zielgruppe', 'audion', 'journey'],
+    });
+  } catch {
+    return getMcpServerBySlug('audion');
+  }
+}
+
 
 export async function upsertDiscoveredTools(
   server: McpServerRow,

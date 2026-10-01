@@ -6,6 +6,7 @@ import { Button, SectionChrome, Text } from '@msqdx/ui'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_ADMIN_MCP_SERVERS,
+  API_ADMIN_MCP_SERVERS_BOOTSTRAP,
   PATH_ADMIN_MCP_HUB,
   pathAdminMcpHubServer,
 } from '@/lib/constants'
@@ -89,6 +90,27 @@ export default function AdminMcpHubPage() {
     }
   }
 
+  const onBootstrap = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(API_ADMIN_MCP_SERVERS_BOOTSTRAP, {
+        method: 'POST',
+        credentials: 'same-origin',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(typeof data.error === 'string' ? data.error : t('admin.mcpHubBootstrapError'))
+        return
+      }
+      await load()
+    } catch {
+      setError(t('admin.mcpHubBootstrapError'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="plexon-admin-stack">
       <section className="plexon-settings-section" aria-label={t('admin.mcpHubTitle')}>
@@ -101,6 +123,11 @@ export default function AdminMcpHubPage() {
             {error}
           </Text>
         ) : null}
+        <div className="plexon-settings-actions">
+          <Button variant="ghost" disabled={busy} onClick={() => void onBootstrap()}>
+            {t('admin.mcpHubBootstrap')}
+          </Button>
+        </div>
         <table className="plexon-admin-table">
           <thead>
             <tr>

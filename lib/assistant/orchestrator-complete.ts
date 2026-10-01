@@ -22,7 +22,8 @@ import {
   callHubMcpTool,
   clearHubToolRuntimeState,
   getHubToolCallTarget,
-  loadHubReadToolsForTurn,
+  isHubConfirmRequiredTool,
+  loadHubToolsForTurn,
 } from '@/lib/mcp-hub/runtime';
 import {
   ASSISTANT_MAX_PROMPT_CHARS,
@@ -145,6 +146,8 @@ export type OrchestratorCompleteOptions = {
   /** Optional Anthropic model override (Wave D high tier). */
   modelOverride?: string;
   skipTools?: boolean;
+  /** When true, Hub injects write/destructive tools (still confirm-gated). */
+  allowWriteTools?: boolean;
   toolsFilter?: (toolName: string) => boolean;
   beforeToolCall?: (toolName: string, input: Record<string, unknown>) => Promise<{
     allow: boolean;
@@ -212,16 +215,17 @@ export function isDestructiveToolName(toolName: string): boolean {
 
 export function isConfirmationRequiredToolName(toolName: string): boolean {
   const result =
+    isHubConfirmRequiredTool(toolName) ||
     isDestructiveToolName(toolName) ||
-    WRITE_CONFIRM_TOOL_PATTERNS.some((p) => p.test(toolName))
+    WRITE_CONFIRM_TOOL_PATTERNS.some((p) => p.test(toolName));
   scheduleJevShadow({
     useCaseId: JEV_USE_CASES.assistantToolConfirmRequired,
     state: { toolName },
     questions: questionsToolConfirm(),
     baseline: result,
     extractNoulKey: 'confirm_required',
-  })
-  return result
+  });
+  return result;
 }
 
 export function normalizeMessageHistory(rawMessages: unknown[], maxHistory = 50): OrchestratorMessage[] {
@@ -355,6 +359,7 @@ export async function runOrchestratorComplete(
     modelProfile = 'board',
     modelOverride,
     skipTools = false,
+    allowWriteTools = false,
     toolsFilter,
     beforeToolCall,
     onTextDelta,
@@ -432,7 +437,7 @@ export async function runOrchestratorComplete(
   }
 
   try {
-    const hub = await loadHubReadToolsForTurn();
+    const hub = await loadHubToolsForTurn({ allowWriteTools });
     if (hub.tools.length) {
       tools = [...tools, ...hub.tools];
       Object.assign(mcpNameByAnthropicName, hub.mcpNameByAnthropicName);

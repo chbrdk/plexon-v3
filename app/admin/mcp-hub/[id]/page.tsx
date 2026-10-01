@@ -9,6 +9,7 @@ import {
   PATH_ADMIN_MCP_HUB,
   apiAdminMcpServer,
   apiAdminMcpServerDiscover,
+  apiAdminMcpServerPolicies,
   apiAdminMcpServerTest,
   apiAdminMcpServerTool,
 } from '@/lib/constants'
@@ -35,30 +36,58 @@ type HubServer = {
   routingHints?: string[]
 }
 
+type HubPolicy = {
+  id: string
+  effect: string
+  allowWrite: boolean
+  toolId: string | null
+}
+
 export default function AdminMcpHubServerPage() {
   const { t } = useI18n()
   const params = useParams()
   const id = typeof params?.id === 'string' ? params.id : ''
   const [item, setItem] = useState<HubServer | null>(null)
   const [tools, setTools] = useState<HubTool[]>([])
+  const [policy, setPolicy] = useState<HubPolicy | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('draft')
+  const [routingHintsText, setRoutingHintsText] = useState('')
+  const [orgEffect, setOrgEffect] = useState<'allow' | 'deny'>('allow')
+  const [orgAllowWrite, setOrgAllowWrite] = useState(true)
 
   const load = useCallback(async () => {
     if (!id) return
     setError(null)
     try {
-      const res = await fetch(apiAdminMcpServer(id), { credentials: 'same-origin' })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
+      const [serverRes, policyRes] = await Promise.all([
+        fetch(apiAdminMcpServer(id), { credentials: 'same-origin' }),
+        fetch(apiAdminMcpServerPolicies(id), { credentials: 'same-origin' }),
+      ])
+      const data = await serverRes.json().catch(() => ({}))
+      if (!serverRes.ok) {
         setError(typeof data.error === 'string' ? data.error : t('admin.mcpHubLoadError'))
         return
       }
       setItem(data.item ?? null)
       setStatus(data.item?.status ?? 'draft')
+      setRoutingHintsText(
+        Array.isArray(data.item?.routingHints) ? data.item.routingHints.join(', ') : '',
+      )
       setTools(Array.isArray(data.tools) ? data.tools : [])
+
+      if (policyRes.ok) {
+        const pdata = await policyRes.json().catch(() => ({}))
+        const items = Array.isArray(pdata.items) ? (pdata.items as HubPolicy[]) : []
+        const serverWide = items.find((p) => !p.toolId) ?? null
+        setPolicy(serverWide)
+        if (serverWide) {
+          setOrgEffect(serverWide.effect === 'deny' ? 'deny' : 'allow')
+          setOrgAllowWrite(serverWide.allowWrite !== false)
+        }
+      }
     } catch {
       setError(t('admin.mcpHubLoadError'))
     }
@@ -88,15 +117,30 @@ export default function AdminMcpHubServerPage() {
         return
       }
       if (kind === 'save') {
+        const routingHints = routingHintsText
+          .split(/[,;\n]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
         const res = await fetch(apiAdminMcpServer(id), {
           method: 'PATCH',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({ status, routingHints }),
         })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
           setError(typeof data.error === 'string' ? data.error : t('admin.mcpHubActionError'))
+          return
+        }
+        const policyRes = await fetch(apiAdminMcpServerPolicies(id), {
+          method: 'PUT',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ effect: orgEffect, allowWrite: orgAllowWrite }),
+        })
+        if (!policyRes.ok) {
+          const pdata = await policyRes.json().catch(() => ({}))
+          setError(typeof pdata.error === 'string' ? pdata.error : t('admin.mcpHubActionError'))
           return
         }
         setMsg(t('admin.mcpHubSaved'))
@@ -123,7 +167,7 @@ export default function AdminMcpHubServerPage() {
     }
   }
 
-  const toggleTool = async (tool: HubTool) => {
+  const patchTool = async (tool: HubTool, patch: Partial<HubTool>) => {
     if (!id) return
     setBusy(true)
     setError(null)
@@ -132,7 +176,7 @@ export default function AdminMcpHubServerPage() {
         method: 'PATCH',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !tool.enabled }),
+        body: JSON.stringify(patch),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
@@ -193,6 +237,15 @@ export default function AdminMcpHubServerPage() {
               <option value="error">error</option>
             </select>
           </label>
+          <label className="plexon-admin-field-wide">
+            <Text role="meta">{t('admin.mcpHubRoutingHints')}</Text>
+            <input
+              type="text"
+              value={routingHintsText}
+              onChange={(e) => setRoutingHintsText(e.target.value)}
+              placeholder={t('admin.mcpHubRoutingHintsPlaceholder')}
+            />
+          </label>
           <Button variant="primary" disabled={busy} onClick={() => void run('save')}>
             {t('common.save')}
           </Button>
@@ -208,6 +261,39 @@ export default function AdminMcpHubServerPage() {
           <NextLink href={PATH_ADMIN_MCP_HUB}>
             <Button variant="ghost">{t('admin.mcpHubBack')}</Button>
           </NextLink>
+        </div>
+      </section>
+
+      <section className="plexon-settings-section">
+        <SectionChrome
+          title={t('admin.mcpHubPolicyTitle')}
+          meta={<Text role="meta">{t('admin.mcpHubPolicyHint')}</Text>}
+        />
+        <div className="plexon-settings-actions">
+          <label>
+            <Text role="meta">{t('admin.mcpHubPolicyEffect')}</Text>
+            <select
+              value={orgEffect}
+              onChange={(e) => setOrgEffect(e.target.value === 'deny' ? 'deny' : 'allow')}
+            >
+              <option value="allow">allow</option>
+              <option value="deny">deny</option>
+            </select>
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={orgAllowWrite}
+              onChange={(e) => setOrgAllowWrite(e.target.checked)}
+            />
+            <Text role="meta">{t('admin.mcpHubPolicyAllowWrite')}</Text>
+          </label>
+          {policy ? (
+            <Text role="meta">
+              {t('admin.mcpHubPolicyCurrent')}: {policy.effect}
+              {policy.allowWrite ? ' · write' : ' · read-only'}
+            </Text>
+          ) : null}
         </div>
       </section>
 
@@ -230,13 +316,14 @@ export default function AdminMcpHubServerPage() {
               <th>exposedName</th>
               <th>mcpName</th>
               <th>sideEffect</th>
+              <th>{t('admin.mcpHubColConfirm')}</th>
               <th>{t('admin.mcpHubColDescription')}</th>
             </tr>
           </thead>
           <tbody>
             {tools.length === 0 ? (
               <tr>
-                <td colSpan={5}>
+                <td colSpan={6}>
                   <Text role="meta">{t('admin.mcpHubToolsEmpty')}</Text>
                 </td>
               </tr>
@@ -248,7 +335,7 @@ export default function AdminMcpHubServerPage() {
                       type="checkbox"
                       checked={tool.enabled}
                       disabled={busy}
-                      onChange={() => void toggleTool(tool)}
+                      onChange={() => void patchTool(tool, { enabled: !tool.enabled })}
                     />
                   </td>
                   <td>
@@ -257,7 +344,29 @@ export default function AdminMcpHubServerPage() {
                   <td>
                     <code>{tool.mcpName}</code>
                   </td>
-                  <td>{tool.sideEffect}</td>
+                  <td>
+                    <select
+                      value={tool.sideEffect}
+                      disabled={busy}
+                      onChange={(e) =>
+                        void patchTool(tool, { sideEffect: e.target.value })
+                      }
+                    >
+                      <option value="read">read</option>
+                      <option value="write">write</option>
+                      <option value="destructive">destructive</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={tool.requireConfirm}
+                      disabled={busy}
+                      onChange={() =>
+                        void patchTool(tool, { requireConfirm: !tool.requireConfirm })
+                      }
+                    />
+                  </td>
                   <td>
                     <Text role="meta">{tool.description ?? '—'}</Text>
                   </td>
