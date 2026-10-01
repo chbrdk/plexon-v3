@@ -115,7 +115,8 @@ async function mcpRequest<T>(
   baseUrl: string,
   method: string,
   params: Record<string, unknown>,
-  sessionId?: string | null
+  sessionId?: string | null,
+  extraHeaders?: Record<string, string>
 ): Promise<{ result: T; sessionId?: string | null }> {
   const url = baseUrl.replace(/\/$/, '');
   const id = Math.floor(Math.random() * 1e9);
@@ -129,6 +130,7 @@ async function mcpRequest<T>(
     ...buildMcpHeaders(url),
     'Content-Type': 'application/json',
     Accept: 'application/json, text/event-stream',
+    ...(extraHeaders ?? {}),
   };
   if (sessionId) {
     headers[MCP_SESSION_HEADER] = sessionId;
@@ -200,7 +202,10 @@ function buildMcpHeaders(url: string): Record<string, string> {
   return headers;
 }
 
-async function mcpInitializeAndGetSession(baseUrl: string): Promise<string | null> {
+async function mcpInitializeAndGetSession(
+  baseUrl: string,
+  extraHeaders?: Record<string, string>
+): Promise<string | null> {
   const url = baseUrl.replace(/\/$/, '');
   const body = JSON.stringify({
     jsonrpc: '2.0',
@@ -211,7 +216,7 @@ async function mcpInitializeAndGetSession(baseUrl: string): Promise<string | nul
   console.log('[checkion-mcp] request initialize', url);
   const res = await fetch(url, {
     method: 'POST',
-    headers: buildMcpHeaders(url),
+    headers: { ...buildMcpHeaders(url), ...(extraHeaders ?? {}) },
     body,
   });
   const sessionId =
@@ -252,39 +257,62 @@ async function mcpInitializeAndGetSession(baseUrl: string): Promise<string | nul
   throw new Error(`MCP HTTP ${res.status}: ${detail}`);
 }
 
+function mcpCacheKey(baseUrl: string, extraHeaders?: Record<string, string>): string {
+  const url = baseUrl.replace(/\/$/, '');
+  if (!extraHeaders || Object.keys(extraHeaders).length === 0) return url;
+  const fingerprint = Object.keys(extraHeaders)
+    .sort()
+    .map((k) => `${k}=${extraHeaders[k]?.length ?? 0}`)
+    .join('|');
+  return `${url}::${fingerprint}`;
+}
+
 /**
- * Get session ID for MCP (cached per baseUrl). Calls initialize only once per server;
- * if server returns 400 "already initialized", we use the session ID from that response when present.
+ * Get session ID for MCP (cached per baseUrl + auth fingerprint).
  */
-async function getSessionIdOrNull(baseUrl: string): Promise<string | null> {
-  const key = baseUrl.replace(/\/$/, '');
+async function getSessionIdOrNull(
+  baseUrl: string,
+  extraHeaders?: Record<string, string>
+): Promise<string | null> {
+  const key = mcpCacheKey(baseUrl, extraHeaders);
   const cached = sessionCache.get(key);
   if (cached !== undefined) {
     return cached;
   }
-  const sessionId = await mcpInitializeAndGetSession(baseUrl);
+  const sessionId = await mcpInitializeAndGetSession(baseUrl, extraHeaders);
   sessionCache.set(key, sessionId);
   return sessionId;
 }
 
 /**
- * Fetch CHECKION MCP tools (tools/list) and return Anthropic-format tools plus name map.
+ * Fetch MCP tools (tools/list) and return Anthropic-format tools plus name map.
  * Tool names are sanitized for Anthropic (dots -> underscores); use mcpNameByAnthropicName when calling tools/call.
  */
-export async function fetchCheckionMcpTools(baseUrl: string): Promise<{
+export async function fetchCheckionMcpTools(
+  baseUrl: string,
+  options?: { extraHeaders?: Record<string, string>; bypassCache?: boolean }
+): Promise<{
   tools: AnthropicTool[];
   mcpNameByAnthropicName: Record<string, string>;
 }> {
-  const cached = toolsListCache.get(baseUrl);
-  if (cached && cached.expiresAt > Date.now()) {
+  const extraHeaders = options?.extraHeaders;
+  const cacheKey = mcpCacheKey(baseUrl, extraHeaders);
+  const cached = toolsListCache.get(cacheKey);
+  if (!options?.bypassCache && cached && cached.expiresAt > Date.now()) {
     return cached.value;
   }
   try {
-    const sessionId = await getSessionIdOrNull(baseUrl);
-    const { result } = await mcpRequest<{ tools?: McpTool[] }>(baseUrl, 'tools/list', {}, sessionId);
+    const sessionId = await getSessionIdOrNull(baseUrl, extraHeaders);
+    const { result } = await mcpRequest<{ tools?: McpTool[] }>(
+      baseUrl,
+      'tools/list',
+      {},
+      sessionId,
+      extraHeaders
+    );
     const rawTools = result?.tools ?? [];
     const value = mcpToolsToAnthropic(rawTools);
-    toolsListCache.set(baseUrl, { expiresAt: Date.now() + TOOLS_LIST_TTL_MS, value });
+    toolsListCache.set(cacheKey, { expiresAt: Date.now() + TOOLS_LIST_TTL_MS, value });
     return value;
   } catch (err) {
     const msg = formatMcpError(err);
@@ -303,21 +331,23 @@ function formatMcpError(err: unknown): string {
 }
 
 /**
- * Call a single CHECKION MCP tool (tools/call) and return its text content for tool_result.
- * Sends initialize first (or skips if server says "already initialized"), then tools/call.
+ * Call a single MCP tool (tools/call) and return its text content for tool_result.
  */
 export async function callCheckionMcpTool(
   baseUrl: string,
   name: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  options?: { extraHeaders?: Record<string, string> }
 ): Promise<string> {
   try {
-    const sessionId = await getSessionIdOrNull(baseUrl);
+    const extraHeaders = options?.extraHeaders;
+    const sessionId = await getSessionIdOrNull(baseUrl, extraHeaders);
     const { result } = await mcpRequest<{ content?: Array<{ type?: string; text?: string }> }>(
       baseUrl,
       'tools/call',
       { name, arguments: args },
-      sessionId
+      sessionId,
+      extraHeaders
     );
     const content = result?.content ?? [];
     const parts: string[] = [];
@@ -330,5 +360,35 @@ export async function callCheckionMcpTool(
   } catch (err) {
     console.error('[checkion-mcp] callTool failed', name, formatMcpError(err));
     return JSON.stringify({ error: formatMcpError(err) });
+  }
+}
+
+/** Raw tools/list for Hub discover (throws on failure). */
+export async function listMcpToolsRaw(
+  baseUrl: string,
+  options?: { extraHeaders?: Record<string, string> }
+): Promise<McpTool[]> {
+  const extraHeaders = options?.extraHeaders;
+  const sessionId = await getSessionIdOrNull(baseUrl, extraHeaders);
+  const { result } = await mcpRequest<{ tools?: McpTool[] }>(
+    baseUrl,
+    'tools/list',
+    {},
+    sessionId,
+    extraHeaders
+  );
+  return result?.tools ?? [];
+}
+
+/** Initialize-only connectivity probe for Hub Admin test. */
+export async function probeMcpServer(
+  baseUrl: string,
+  options?: { extraHeaders?: Record<string, string> }
+): Promise<{ ok: true; sessionId: string | null } | { ok: false; error: string }> {
+  try {
+    const sessionId = await mcpInitializeAndGetSession(baseUrl, options?.extraHeaders);
+    return { ok: true, sessionId };
+  } catch (err) {
+    return { ok: false, error: formatMcpError(err) };
   }
 }

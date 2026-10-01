@@ -3,7 +3,7 @@
 **Spec SoT:** `specs/domain/capability-catalog.md`  
 **Status:** Wave C4 complete — EQC + Agent overlaps on catalog executors behind `CAPABILITY_CATALOG_RUNTIME` (code default **off**; **staging Coolify = on** / `1`).  
 **Health:** `GET /api/health` → `capabilityCatalogRuntime: boolean`  
-**Related:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/collection-test-flow-smoke.md` · `specs/domain/eqc-as-collection-flow.md`
+**Related:** `knowledge/plexon-assistant-orchestrator.md` · `knowledge/collection-test-flow-smoke.md` · `specs/domain/eqc-as-collection-flow.md` · MCP registry (external + suite): `specs/domain/mcp-tool-hub.md` · `knowledge/mcp-tool-hub.md`
 
 ## Locked product decisions (C0→C1)
 

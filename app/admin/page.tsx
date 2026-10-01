@@ -8,6 +8,7 @@ import {
   API_ADMIN_COMPANIES,
   API_ADMIN_USERS,
   PATH_ADMIN_COMPANIES,
+  PATH_ADMIN_MCP_HUB,
   PATH_ADMIN_USERS,
   PATH_HOME,
 } from '@/lib/constants'
@@ -66,6 +67,9 @@ export default function AdminOverviewPage() {
           </NextLink>
           <NextLink href={PATH_ADMIN_USERS}>
             <Button variant="ghost">{t('admin.goUsers')}</Button>
+          </NextLink>
+          <NextLink href={PATH_ADMIN_MCP_HUB}>
+            <Button variant="ghost">{t('admin.navMcpHub')}</Button>
           </NextLink>
           <NextLink href={PATH_HOME}>
             <Button variant="ghost">{t('admin.goDashboard')}</Button>

@@ -31,6 +31,7 @@
 | Assistant journey outline | `specs/domain/assistant-journey-outline.md` |
 | Assistant journey generate | `specs/domain/assistant-journey-generate.md` |
 | Capability Catalog (Agent ↔ Flow) | `specs/domain/capability-catalog.md` |
+| MCP Tool Hub (registry + external MCPs) | `specs/domain/mcp-tool-hub.md` |
 | EQC as Collection Flow | `specs/domain/eqc-as-collection-flow.md` |
 | Creation MagazineTemplate consume (EQC Mag PDF) | `specs/domain/creation-magazine-template-consume.md` |
 | UI migrate — board | `specs/domain/ui-migrate-board.md` |
@@ -59,6 +60,7 @@
 | CREATION craft playbooks (web/newsletter/print) | `knowledge/creation-craft-playbooks.md` |
 | CREATION craft eval + model tiers (Wave D) | `knowledge/creation-craft-eval.md` |
 | Capability Catalog | `knowledge/capability-catalog.md` |
+| MCP Tool Hub | `knowledge/mcp-tool-hub.md` |
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |
 | EQC Magazin-PDF (Creation SSOT + legacy fallback) | `knowledge/eqc-magazine-pdf.md` |

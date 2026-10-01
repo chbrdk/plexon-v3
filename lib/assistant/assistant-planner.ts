@@ -39,6 +39,7 @@ import {
 import { hasAudienceWriteIntent } from '@/lib/assistant/audience-write-intent';
 import { isPersonaAudienceWriteIntent } from '@/lib/assistant/persona-duplicate-intent';
 import { hasSceneWriteIntent, hasCreationEditorSceneContext } from '@/lib/assistant/scene-write-intent';
+import { isHubAllowlistedTool } from '@/lib/mcp-hub/runtime';
 import {
   buildCreationSceneDepthPromptBlock,
   getCreationSceneMaxToolRounds,
@@ -1299,6 +1300,11 @@ Halte dich an diesen Plan. Lade keine unnötigen Rohdaten. Bei embedded_context/
 
 export function toolAllowedByPlan(toolName: string, plan: AssistantPlan): boolean {
   if (isPlexonUiTool(toolName)) return true;
+  if (isHubAllowlistedTool(toolName)) {
+    // H1 injects read-only Hub tools only; still respect skipTools.
+    if (plan.skipTools) return false;
+    return true;
+  }
   if (plan.skipTools || plan.toolFamilies.length === 0) return false;
 
   const catalogOverride = catalogPlannerToolOverride(toolName, plan.intent);

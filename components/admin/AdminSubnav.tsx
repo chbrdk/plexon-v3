@@ -9,13 +9,18 @@ import {
   ADMIN_NAV_STORAGE_KEY,
   PATH_ADMIN,
   PATH_ADMIN_COMPANIES,
+  PATH_ADMIN_MCP_HUB,
   PATH_ADMIN_USERS,
 } from '@/lib/constants'
 
-const links: { href: string; labelKey: 'admin.navOverview' | 'admin.navCompanies' | 'admin.navUsers' }[] = [
+const links: {
+  href: string
+  labelKey: 'admin.navOverview' | 'admin.navCompanies' | 'admin.navUsers' | 'admin.navMcpHub'
+}[] = [
   { href: PATH_ADMIN, labelKey: 'admin.navOverview' },
   { href: PATH_ADMIN_COMPANIES, labelKey: 'admin.navCompanies' },
   { href: PATH_ADMIN_USERS, labelKey: 'admin.navUsers' },
+  { href: PATH_ADMIN_MCP_HUB, labelKey: 'admin.navMcpHub' },
 ]
 
 function labelForAdminPath(path: string, t: (key: string) => string) {
@@ -23,6 +28,7 @@ function labelForAdminPath(path: string, t: (key: string) => string) {
   if (path.startsWith(`${PATH_ADMIN_COMPANIES}/`)) return t('admin.navCompanyDetail')
   if (path === PATH_ADMIN_COMPANIES) return t('admin.navCompanies')
   if (path === PATH_ADMIN_USERS) return t('admin.navUsers')
+  if (path.startsWith(PATH_ADMIN_MCP_HUB)) return t('admin.navMcpHub')
   if (path.startsWith('/admin')) return t('admin.title')
   return path
 }

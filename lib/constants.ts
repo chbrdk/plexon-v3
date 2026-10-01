@@ -251,6 +251,9 @@ export const pathShareRoom = (token: string) =>
 export const PATH_ADMIN = '/admin';
 export const PATH_ADMIN_COMPANIES = `${PATH_ADMIN}/companies`;
 export const PATH_ADMIN_USERS = `${PATH_ADMIN}/users`;
+export const PATH_ADMIN_MCP_HUB = `${PATH_ADMIN}/mcp-hub`;
+export const pathAdminMcpHubServer = (id: string) =>
+  `${PATH_ADMIN_MCP_HUB}/${encodeURIComponent(id)}`;
 export const pathAdminCompany = (id: string) =>
   `${PATH_ADMIN_COMPANIES}/${encodeURIComponent(id)}`;
 export const pathAdminUser = (id: string) =>
@@ -480,6 +483,16 @@ export const API_ADMIN_COMPANIES = '/api/admin/companies';
 export const API_ADMIN_COMPANIES_BULK = `${API_ADMIN_COMPANIES}/bulk`;
 export const apiAdminCompany = (id: string) =>
   `${API_ADMIN_COMPANIES}/${encodeURIComponent(id)}`;
+
+/** MCP Tool Hub Admin API — Spec: specs/domain/mcp-tool-hub.md */
+export const API_ADMIN_MCP_SERVERS = '/api/admin/mcp-servers';
+export const apiAdminMcpServer = (id: string) =>
+  `${API_ADMIN_MCP_SERVERS}/${encodeURIComponent(id)}`;
+export const apiAdminMcpServerDiscover = (id: string) =>
+  `${apiAdminMcpServer(id)}/discover`;
+export const apiAdminMcpServerTest = (id: string) => `${apiAdminMcpServer(id)}/test`;
+export const apiAdminMcpServerTool = (serverId: string, toolId: string) =>
+  `${apiAdminMcpServer(serverId)}/tools/${encodeURIComponent(toolId)}`;
 export const apiAdminCompanyMembers = (id: string) => `${apiAdminCompany(id)}/members`;
 export const apiAdminCompanyPlatformProjects = (id: string) =>
   `${apiAdminCompany(id)}/platform-projects`;

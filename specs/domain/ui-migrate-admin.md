@@ -1,8 +1,8 @@
 # UI rebuild — Admin console
 
 **Status:** Accepted — Wave 4 done — 2026-07-31 (challenge + reuse)  
-**Routes:** `/admin` · `/admin/users` · `/admin/companies` · `/admin/companies/[companyId]`  
-**Implements:** `app/admin/**` · `components/admin/**`  
+**Routes:** `/admin` · `/admin/users` · `/admin/companies` · `/admin/companies/[companyId]` · `/admin/mcp-hub` · `/admin/mcp-hub/[id]`
+**Implements:** `app/admin/**` · `components/admin/**`
 **DS:** `SectionChrome`, `Field`, `Input`, `Select`, `Button`, `Chip`, `Alert`, `Spinner`, `StatLede`, `Text`, `Checkbox`
 
 ## Challenge — keep / reshape / drop

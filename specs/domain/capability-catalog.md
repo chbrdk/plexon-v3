@@ -9,6 +9,7 @@
 - EQC bridge: [`eqc-as-collection-flow.md`](./eqc-as-collection-flow.md)
 - Assistant flyout: [`central-assistant-flyout.md`](./central-assistant-flyout.md)
 - Brandion MCP: [`assistant-brandion-mcp.md`](./assistant-brandion-mcp.md)
+- MCP Tool Hub (dynamic MCP registry): [`mcp-tool-hub.md`](./mcp-tool-hub.md)
 - Knowledge: `knowledge/capability-catalog.md` · `knowledge/plexon-assistant-orchestrator.md`
 
 ## Purpose

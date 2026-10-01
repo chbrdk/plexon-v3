@@ -19,6 +19,12 @@ import {
   type AnthropicTool,
 } from '@/lib/checkion-mcp-client';
 import {
+  callHubMcpTool,
+  clearHubToolRuntimeState,
+  getHubToolCallTarget,
+  loadHubReadToolsForTurn,
+} from '@/lib/mcp-hub/runtime';
+import {
   ASSISTANT_MAX_PROMPT_CHARS,
   ASSISTANT_MAX_TOOL_RESULT_CHARS,
   truncateAssistantText,
@@ -425,6 +431,18 @@ export async function runOrchestratorComplete(
     }
   }
 
+  try {
+    const hub = await loadHubReadToolsForTurn();
+    if (hub.tools.length) {
+      tools = [...tools, ...hub.tools];
+      Object.assign(mcpNameByAnthropicName, hub.mcpNameByAnthropicName);
+      Object.assign(toolSourceByAnthropicName, hub.toolSourceByAnthropicName);
+    }
+  } catch (e) {
+    console.warn('[orchestrator] MCP Hub tools load failed', e);
+    clearHubToolRuntimeState();
+  }
+
   if (toolsFilter) {
     tools = tools.filter((t) => toolsFilter(t.name));
   }
@@ -437,15 +455,16 @@ export async function runOrchestratorComplete(
   const toolsOffered = tools.length;
   const useMcp =
     !skipTools &&
-    ((useCheckionMcp && checkionMcpUrl) ||
+    (((useCheckionMcp && checkionMcpUrl) ||
       (useAudionMcp && audionMcpUrl) ||
       (useEchonMcp && echonMcpUrl) ||
       (useBrandionMcp && brandionMcpUrl) ||
       (useCreationMcp && creationMcpUrl) ||
       (useSpirionMcp && spirionMcpUrl) ||
       (useVideonMcp && videonMcpUrl) ||
-      (useMetronMcp && metronMcpUrl)) &&
-    tools.length > 0;
+      (useMetronMcp && metronMcpUrl) ||
+      Object.keys(mcpNameByAnthropicName).some((n) => getHubToolCallTarget(n))) &&
+      tools.length > 0);
   const model =
     (modelOverride && modelOverride.trim()) ||
     (useMcp
@@ -597,6 +616,7 @@ export async function runOrchestratorComplete(
         }
       }
       publishCraftMemoryIfReady();
+      clearHubToolRuntimeState();
       return {
         text: lastText,
         toolsOffered,
@@ -620,6 +640,7 @@ export async function runOrchestratorComplete(
         }
       }
       publishCraftMemoryIfReady();
+      clearHubToolRuntimeState();
       return {
         text: lastText,
         toolsOffered,
@@ -641,6 +662,7 @@ export async function runOrchestratorComplete(
         const gate = await beforeToolCall(block.name, block.input ?? {});
         if (!gate.allow) {
           if (gate.requiresConfirmation) {
+            clearHubToolRuntimeState();
             return {
               text: lastText,
               toolsOffered,
@@ -662,6 +684,7 @@ export async function runOrchestratorComplete(
           continue;
         }
       } else if (isConfirmationRequiredToolName(block.name)) {
+        clearHubToolRuntimeState();
         return {
           text: lastText,
           toolsOffered,
@@ -723,6 +746,27 @@ export async function runOrchestratorComplete(
             cleared: uiResult.cleared,
             error: uiResult.error,
           }),
+          preview,
+        };
+      }
+
+      if (getHubToolCallTarget(block.name)) {
+        onToolStart?.(block.name, block.input ?? {});
+        const toolInput = injectAssistantMcpToolArgs(block.name, block.input ?? {}, {
+          pageContext,
+          actorUserId,
+          platformProjectId,
+          audionProjectId,
+          checkionProjectId,
+          sceneLockUpdatedAt: turnSceneUpdatedAt,
+        });
+        const result = await callHubMcpTool(block.name, toolInput);
+        const preview = truncateAssistantText(result, 240);
+        onToolEnd?.(block.name, preview);
+        return {
+          id: block.id,
+          name: block.name,
+          content: result,
           preview,
         };
       }
@@ -1007,6 +1051,7 @@ export async function runOrchestratorComplete(
   }
 
   publishCraftMemoryIfReady();
+  clearHubToolRuntimeState();
   return {
         text: lastText,
         toolsOffered,

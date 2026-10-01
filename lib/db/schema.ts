@@ -907,3 +907,80 @@ export const companyDirectorySettings = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   }
 );
+
+/**
+ * MCP Tool Hub — registered MCP servers (suite + external).
+ * Spec: specs/domain/mcp-tool-hub.md
+ */
+export const MCP_SERVER_STATUSES = ['draft', 'active', 'disabled', 'error'] as const;
+export type McpServerStatus = (typeof MCP_SERVER_STATUSES)[number];
+
+export const MCP_SERVER_AUTH_KINDS = [
+  'none',
+  'service_bearer',
+  'service_secret_headers',
+  'oauth_user',
+] as const;
+export type McpServerAuthKind = (typeof MCP_SERVER_AUTH_KINDS)[number];
+
+export const MCP_SERVER_SOURCES = ['manual', 'env_bootstrap'] as const;
+export type McpServerSource = (typeof MCP_SERVER_SOURCES)[number];
+
+export const MCP_TOOL_SIDE_EFFECTS = ['read', 'write', 'destructive'] as const;
+export type McpToolSideEffect = (typeof MCP_TOOL_SIDE_EFFECTS)[number];
+
+/** Auth config stores env key refs — never plaintext secrets in Admin GET. */
+export type McpServerAuthConfig = {
+  bearerEnvKey?: string;
+  /** Extra header name → env key holding the value */
+  headerEnvKeys?: Record<string, string>;
+};
+
+export const mcpServers = pgTable(
+  'mcp_servers',
+  {
+    id: text('id').primaryKey(),
+    slug: text('slug').notNull(),
+    displayName: text('display_name').notNull(),
+    baseUrl: text('base_url').notNull(),
+    transport: text('transport').notNull().default('streamable_http'),
+    authKind: text('auth_kind').notNull().default('none'),
+    authConfig: jsonb('auth_config').$type<McpServerAuthConfig>().notNull().default({}),
+    status: text('status').notNull().default('draft'),
+    source: text('source').notNull().default('manual'),
+    productId: text('product_id'),
+    routingHints: jsonb('routing_hints').$type<string[]>().notNull().default([]),
+    lastDiscoveryAt: timestamp('last_discovery_at', { withTimezone: true }),
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    slugUq: uniqueIndex('mcp_servers_slug_uq').on(t.slug),
+    statusIdx: index('mcp_servers_status_idx').on(t.status),
+  })
+);
+
+export const mcpServerTools = pgTable(
+  'mcp_server_tools',
+  {
+    id: text('id').primaryKey(),
+    serverId: text('server_id')
+      .notNull()
+      .references(() => mcpServers.id, { onDelete: 'cascade' }),
+    mcpName: text('mcp_name').notNull(),
+    exposedName: text('exposed_name').notNull(),
+    description: text('description'),
+    inputSchema: jsonb('input_schema').$type<Record<string, unknown>>().notNull().default({}),
+    sideEffect: text('side_effect').notNull().default('read'),
+    requireConfirm: boolean('require_confirm').notNull().default(false),
+    capabilityId: text('capability_id'),
+    enabled: boolean('enabled').notNull().default(true),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    serverMcpUq: uniqueIndex('mcp_server_tools_server_mcp_uq').on(t.serverId, t.mcpName),
+    exposedUq: uniqueIndex('mcp_server_tools_exposed_uq').on(t.exposedName),
+    serverIdx: index('mcp_server_tools_server_idx').on(t.serverId),
+  })
+);
