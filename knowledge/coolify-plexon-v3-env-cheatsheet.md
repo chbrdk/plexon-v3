@@ -74,6 +74,14 @@ PLEXON_ADMIN_EMAIL=<deine-admin@firma.tld>
 # Deep Links + Collection-Sync Ziel (Federation nutzt diese Origin, nicht AUDION_API_URL)
 NEXT_PUBLIC_AUDION_ADMIN_URL=https://audion-v3.projects-a.plygrnd.tech/
 
+# --- MCP Tool Hub / Canva pilot (Wave H5) — Spec: specs/domain/mcp-hub-staging-readiness.md ---
+# CANVA_CLIENT_ID=<from Canva Developer Portal>
+# CANVA_CLIENT_SECRET=<from Canva Developer Portal>
+# MCP_HUB_TOKEN_ENCRYPTION_KEY=<openssl rand -hex 24>
+# Redirect in Canva Portal:
+#   https://plexon-v3.projects-a.plygrnd.tech/api/platform/mcp-hub/oauth/canva/callback
+# Admin: /admin/mcp-hub → readiness strip → „Canva aktivieren“
+
 # --- Enterprise Suite (E3 Schedule / Outbox) — Staging 2026-09-25 gesetzt ---
 PLEXON_FLOW_SCHEDULE_ENABLED=1
 PLEXON_FLOW_SCHEDULE_INTERVAL_MS=60000

@@ -7,6 +7,7 @@ import { useI18n } from '@/components/i18n/I18nProvider'
 import {
   API_ADMIN_MCP_SERVERS,
   API_ADMIN_MCP_SERVERS_BOOTSTRAP,
+  API_ADMIN_MCP_SERVERS_READINESS,
   PATH_ADMIN_MCP_HUB,
   pathAdminMcpHubServer,
 } from '@/lib/constants'
@@ -22,16 +23,35 @@ type HubServer = {
   lastError?: string | null
 }
 
+type HubReadiness = {
+  ok: boolean
+  checks: Array<{ id: string; ok: boolean; detail: string }>
+  canvaRedirectUrl: string
+}
+
 export default function AdminMcpHubPage() {
   const { t } = useI18n()
   const [items, setItems] = useState<HubServer[]>([])
+  const [readiness, setReadiness] = useState<HubReadiness | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [slug, setSlug] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
   const [authKind, setAuthKind] = useState('none')
   const [bearerEnvKey, setBearerEnvKey] = useState('')
+
+  const loadReadiness = useCallback(async () => {
+    try {
+      const res = await fetch(API_ADMIN_MCP_SERVERS_READINESS, { credentials: 'same-origin' })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) return
+      setReadiness(data as HubReadiness)
+    } catch {
+      /* non-blocking */
+    }
+  }, [])
 
   const load = useCallback(async () => {
     setError(null)
@@ -50,12 +70,14 @@ export default function AdminMcpHubPage() {
 
   useEffect(() => {
     void load()
-  }, [load])
+    void loadReadiness()
+  }, [load, loadReadiness])
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     setBusy(true)
     setError(null)
+    setInfo(null)
     try {
       const res = await fetch(API_ADMIN_MCP_SERVERS, {
         method: 'POST',
@@ -83,6 +105,7 @@ export default function AdminMcpHubPage() {
       setBaseUrl('')
       setBearerEnvKey('')
       await load()
+      await loadReadiness()
     } catch {
       setError(t('admin.mcpHubCreateError'))
     } finally {
@@ -90,22 +113,32 @@ export default function AdminMcpHubPage() {
     }
   }
 
-  const onBootstrap = async (kind: 'audion' | 'canva' | 'all' = 'all') => {
+  const onBootstrap = async (kind: 'audion' | 'canva' | 'all' = 'all', activate = false) => {
     setBusy(true)
     setError(null)
+    setInfo(null)
     try {
       const res = await fetch(API_ADMIN_MCP_SERVERS_BOOTSTRAP, {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind }),
+        body: JSON.stringify({ kind, activate }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setError(typeof data.error === 'string' ? data.error : t('admin.mcpHubBootstrapError'))
         return
       }
+      if (activate && data.canva) {
+        const meta = data.canva as { activated?: boolean; upserted?: number; error?: string | null }
+        if (meta.activated) {
+          setInfo(t('admin.mcpHubActivateOk', { n: String(meta.upserted ?? 0) }))
+        } else if (meta.error) {
+          setInfo(meta.error)
+        }
+      }
       await load()
+      await loadReadiness()
     } catch {
       setError(t('admin.mcpHubBootstrapError'))
     } finally {
@@ -115,6 +148,43 @@ export default function AdminMcpHubPage() {
 
   return (
     <div className="plexon-admin-stack">
+      <section className="plexon-settings-section" aria-label={t('admin.mcpHubReadinessTitle')}>
+        <SectionChrome
+          title={t('admin.mcpHubReadinessTitle')}
+          meta={<Text role="meta">{t('admin.mcpHubReadinessIntro')}</Text>}
+        />
+        {readiness ? (
+          <>
+            <ul className="plexon-admin-checklist">
+              {readiness.checks.map((check) => (
+                <li key={check.id}>
+                  <Text role="meta">
+                    {check.ok ? '✓' : '○'} {check.detail}
+                  </Text>
+                </li>
+              ))}
+            </ul>
+            <Text role="meta" className="plexon-admin-mono">
+              {t('admin.mcpHubCanvaRedirect')}: {readiness.canvaRedirectUrl}
+            </Text>
+          </>
+        ) : (
+          <Text role="meta">{t('admin.mcpHubReadinessLoading')}</Text>
+        )}
+        <div className="plexon-settings-actions">
+          <Button
+            variant="primary"
+            disabled={busy}
+            onClick={() => void onBootstrap('canva', true)}
+          >
+            {t('admin.mcpHubActivateCanva')}
+          </Button>
+          <Button variant="ghost" disabled={busy} onClick={() => void loadReadiness()}>
+            {t('admin.mcpHubReadinessRefresh')}
+          </Button>
+        </div>
+      </section>
+
       <section className="plexon-settings-section" aria-label={t('admin.mcpHubTitle')}>
         <SectionChrome
           title={t('admin.mcpHubTitle')}
@@ -124,6 +194,9 @@ export default function AdminMcpHubPage() {
           <Text role="meta" className="plexon-admin-error">
             {error}
           </Text>
+        ) : null}
+        {info ? (
+          <Text role="meta">{info}</Text>
         ) : null}
         <div className="plexon-settings-actions">
           <Button

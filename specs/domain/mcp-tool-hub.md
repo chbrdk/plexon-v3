@@ -1,6 +1,6 @@
 # MCP Tool Hub (Plexon)
 
-**Status:** Wave H4 landed (catalog bridge + Collection Hub enable) — 2026-10-01  
+**Status:** Wave H5 landed (Canva staging readiness) — 2026-10-01  
 **Owner:** PLEXON v3  
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions:**
@@ -227,6 +227,12 @@ All Admin routes: platform admin (or company admin — wave decision in implemen
 ### Wave H4 — Catalog bridge + Collection scope
 
 - Optional `capabilityId` mapping; Collection-level enable — **done** (`specs/domain/mcp-hub-collection-scope.md`).
+
+### Wave H5 — Canva staging readiness
+
+- Env checklist + Admin readiness strip — **done** (`specs/domain/mcp-hub-staging-readiness.md`).
+- Bootstrap `{ kind: "canva", activate: true }` → discover + seed `hub.canva.*` capabilityIds + `active` when Coolify keys present.
+- Operator still sets `CANVA_CLIENT_*` + `MCP_HUB_TOKEN_ENCRYPTION_KEY` + Portal redirect.
 - Deprecate redundant hard-coded gates only when parity proven — **not in H4** (dual-run kept).
 
 ## Canva pilot (H3) — product split

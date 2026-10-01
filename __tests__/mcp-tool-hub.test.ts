@@ -25,6 +25,7 @@ import {
 import {
   API_ADMIN_MCP_SERVERS,
   API_ADMIN_MCP_SERVERS_BOOTSTRAP,
+  API_ADMIN_MCP_SERVERS_READINESS,
   API_PLATFORM_MCP_HUB_CANVA,
   PATH_ADMIN_MCP_HUB,
   apiAdminMcpServer,
@@ -37,13 +38,14 @@ import {
 } from '@/lib/constants'
 import { createPkcePair } from '@/lib/mcp-hub/oauth'
 import { CANVA_MCP_TOOLS } from '@/lib/mcp-hub/canva-mcp-handler'
-import { decryptHubSecret, encryptHubSecret } from '@/lib/mcp-hub/token-crypto'
+import { decryptHubSecret, encryptHubSecret, hubTokenEncryptionConfigured } from '@/lib/mcp-hub/token-crypto'
 import { buildMcpOauthRequiredBlocks } from '@/lib/assistant/ui-blocks/build-mcp-oauth-ui'
 import {
   DEFAULT_HUB_CAPABILITY_BY_EXPOSED,
   capabilityIdFromHubToolSync,
 } from '@/lib/mcp-hub/catalog-bridge'
 import { capabilityIdFromAgentTool } from '@/lib/capabilities/adapters/agent'
+import { canvaEnvReady } from '@/lib/mcp-hub/readiness'
 
 describe('mcp-hub naming', () => {
   it('normalizes and validates slugs', () => {
@@ -177,6 +179,7 @@ describe('mcp-hub paths + migration', () => {
     expect(PATH_ADMIN_MCP_HUB).toBe('/admin/mcp-hub')
     expect(API_ADMIN_MCP_SERVERS).toBe('/api/admin/mcp-servers')
     expect(API_ADMIN_MCP_SERVERS_BOOTSTRAP).toBe('/api/admin/mcp-servers/bootstrap')
+    expect(API_ADMIN_MCP_SERVERS_READINESS).toBe('/api/admin/mcp-servers/readiness')
     expect(apiAdminMcpServer('abc')).toBe('/api/admin/mcp-servers/abc')
     expect(apiAdminMcpServerDiscover('abc')).toBe('/api/admin/mcp-servers/abc/discover')
     expect(apiAdminMcpServerPolicies('abc')).toBe('/api/admin/mcp-servers/abc/policies')
@@ -218,6 +221,7 @@ describe('mcp-hub paths + migration', () => {
       'app/admin/mcp-hub/[id]/page.tsx',
       'app/api/admin/mcp-servers/route.ts',
       'app/api/admin/mcp-servers/bootstrap/route.ts',
+      'app/api/admin/mcp-servers/readiness/route.ts',
       'app/api/admin/mcp-servers/[id]/policies/route.ts',
       'app/api/platform/mcp-hub/canva/route.ts',
       'app/api/platform/mcp-hub/oauth/[slug]/start/route.ts',
@@ -228,12 +232,44 @@ describe('mcp-hub paths + migration', () => {
       'lib/mcp-hub/oauth.ts',
       'lib/mcp-hub/canva-mcp-handler.ts',
       'lib/mcp-hub/catalog-bridge.ts',
+      'lib/mcp-hub/readiness.ts',
+      'lib/mcp-hub/activate-canva.ts',
       'specs/domain/mcp-tool-hub.md',
       'specs/domain/mcp-hub-canva.md',
       'specs/domain/mcp-hub-collection-scope.md',
+      'specs/domain/mcp-hub-staging-readiness.md',
     ]) {
       expect(existsSync(resolve(root, rel)), rel).toBe(true)
     }
+  })
+})
+
+describe('mcp-hub H5 staging readiness', () => {
+  afterEach(() => {
+    delete process.env.CANVA_CLIENT_ID
+    delete process.env.CANVA_CLIENT_SECRET
+    delete process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY
+    delete process.env.PLEXON_SERVICE_SECRET
+    delete process.env.NEXTAUTH_URL
+    delete process.env.PUBLIC_APP_URL
+  })
+
+  it('reports encryption configured only when key is long enough', () => {
+    expect(hubTokenEncryptionConfigured()).toBe(false)
+    process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY = 'short'
+    expect(hubTokenEncryptionConfigured()).toBe(false)
+    process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY = 'test-encryption-key-32chars!!'
+    expect(hubTokenEncryptionConfigured()).toBe(true)
+  })
+
+  it('canvaEnvReady requires all Canva Coolify keys', () => {
+    expect(canvaEnvReady()).toBe(false)
+    process.env.CANVA_CLIENT_ID = 'cid'
+    process.env.CANVA_CLIENT_SECRET = 'csecret'
+    process.env.MCP_HUB_TOKEN_ENCRYPTION_KEY = 'test-encryption-key-32chars!!'
+    process.env.PLEXON_SERVICE_SECRET = 'svc'
+    process.env.NEXTAUTH_URL = 'https://plexon-v3.projects-a.plygrnd.tech'
+    expect(canvaEnvReady()).toBe(true)
   })
 })
 

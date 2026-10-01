@@ -24,6 +24,7 @@ import {
   normalizeMcpServerSlug,
   redactMcpServerAuthConfig,
 } from '@/lib/mcp-hub/naming';
+import { DEFAULT_HUB_CAPABILITY_BY_EXPOSED } from '@/lib/mcp-hub/catalog-bridge';
 import type { McpTool } from '@/lib/checkion-mcp-client';
 
 export type McpServerRow = typeof mcpServers.$inferSelect;
@@ -508,6 +509,7 @@ export async function upsertDiscoveredTools(
         })
         .where(eq(mcpServerTools.id, existing[0].id));
     } else {
+      const defaultCap = DEFAULT_HUB_CAPABILITY_BY_EXPOSED[exposedName] ?? null;
       await db.insert(mcpServerTools).values({
         id: randomUUID(),
         serverId: server.id,
@@ -517,7 +519,7 @@ export async function upsertDiscoveredTools(
         inputSchema,
         sideEffect,
         requireConfirm: sideEffect !== 'read',
-        capabilityId: null,
+        capabilityId: defaultCap,
         enabled: true,
         updatedAt: now,
       });

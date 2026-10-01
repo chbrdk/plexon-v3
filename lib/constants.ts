@@ -496,6 +496,7 @@ export const apiAdminMcpServerTool = (serverId: string, toolId: string) =>
 export const apiAdminMcpServerPolicies = (id: string) =>
   `${apiAdminMcpServer(id)}/policies`;
 export const API_ADMIN_MCP_SERVERS_BOOTSTRAP = `${API_ADMIN_MCP_SERVERS}/bootstrap`;
+export const API_ADMIN_MCP_SERVERS_READINESS = `${API_ADMIN_MCP_SERVERS}/readiness`;
 export const API_PLATFORM_MCP_HUB_CANVA = '/api/platform/mcp-hub/canva';
 export const apiPlatformMcpHubOauthStart = (slug: string) =>
   `/api/platform/mcp-hub/oauth/${encodeURIComponent(slug)}/start`;
