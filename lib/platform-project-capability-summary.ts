@@ -3,6 +3,7 @@ import type {
   BrandionProjectSummary,
   CheckionProjectSummary,
   CreationProjectSummary,
+  MagcloudProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 
@@ -96,5 +97,18 @@ export function resolveMetronCapability(
     datasetCount: 0,
     kpiCount: 0,
     dashboardCount: 0,
+  };
+}
+
+export function resolveMagcloudCapability(
+  live: MagcloudProjectSummary | null,
+  bindings: BindingLike[]
+): MagcloudProjectSummary | null {
+  if (live?.externalProjectId) return live;
+  const binding = bindings.find((b) => b.productId === 'magcloud');
+  const id = binding?.externalProjectId?.trim();
+  if (!id) return null;
+  return {
+    externalProjectId: id,
   };
 }

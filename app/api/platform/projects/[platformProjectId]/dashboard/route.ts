@@ -18,6 +18,7 @@ import {
   fetchBrandionPlatformProjectSummary,
   fetchCheckionPlatformProjectSummary,
   fetchCreationPlatformProjectSummary,
+  fetchMagcloudPlatformProjectSummary,
   fetchMetronPlatformProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch';
 import {
@@ -25,6 +26,7 @@ import {
   resolveBrandionCapability,
   resolveCheckionCapability,
   resolveCreationCapability,
+  resolveMagcloudCapability,
   resolveMetronCapability,
 } from '@/lib/platform-project-capability-summary';
 import { getCollectionProjection } from '@/lib/collection-projection';
@@ -33,7 +35,8 @@ import { buildAudionAdminLaunchUrl } from '@/lib/audion-admin-launch-url';
 import { buildBrandionProjectLaunchUrl } from '@/lib/brandion-launch-url';
 import { buildCreationProjectLaunchUrl } from '@/lib/creation-launch-url';
 import { buildMetronProjectLaunchUrl } from '@/lib/metron-launch-url';
-import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl, getEchonUrl, getMetronUrl, getSpirionUrl, getVideonUrl } from '@/lib/constants';
+import { buildMagcloudProjectLaunchUrl } from '@/lib/magcloud-launch-url';
+import { getAudionAdminUrl, getBrandionUrl, getCheckionUrl, getCreationUrl, getEchonUrl, getMagcloudUrl, getMetronUrl, getSpirionUrl, getVideonUrl } from '@/lib/constants';
 import { ensureFlowDocument } from '@/lib/collection-test-flow';
 import { listCollectionActivity } from '@/lib/collection-activity';
 
@@ -65,13 +68,14 @@ export async function GET(
   const ppid = platformProjectId.trim();
   const bindings = await getBindingsForPlatformProject(ppid);
 
-  const [checkionLive, audionLive, brandionLive, creationLive, metronLive, packRow, flowRows, projection, activity] =
+  const [checkionLive, audionLive, brandionLive, creationLive, metronLive, magcloudLive, packRow, flowRows, projection, activity] =
     await Promise.all([
       fetchCheckionPlatformProjectSummary(ppid, user.id),
       fetchAudionPlatformProjectSummary(ppid, user.id),
       fetchBrandionPlatformProjectSummary(ppid, user.id),
       fetchCreationPlatformProjectSummary(ppid, user.id),
       fetchMetronPlatformProjectSummary(ppid, user.id),
+      fetchMagcloudPlatformProjectSummary(ppid, user.id),
       getOrCreateKnowledgePack(ppid),
       listCollectionTestFlows(ppid),
       getCollectionProjection(ppid, { rebuildIfMissing: true }),
@@ -82,6 +86,7 @@ export async function GET(
   const brandion = resolveBrandionCapability(brandionLive, bindings);
   const creation = resolveCreationCapability(creationLive, bindings);
   const metron = resolveMetronCapability(metronLive, bindings);
+  const magcloud = resolveMagcloudCapability(magcloudLive, bindings);
 
   const facets = ensureFacetsShape(packRow.facets, packRow.updatedAt.toISOString());
   const readinessFromPack = buildKnowledgeFacetReadiness(facets);
@@ -118,6 +123,7 @@ export async function GET(
   const brandionBase = (getBrandionUrl() ?? '').replace(/\/+$/, '');
   const creationBase = (getCreationUrl() ?? '').replace(/\/+$/, '');
   const metronBase = (getMetronUrl() ?? '').replace(/\/+$/, '');
+  const magcloudBase = (getMagcloudUrl() ?? '').replace(/\/+$/, '');
   const videonBase = (getVideonUrl() ?? '').replace(/\/+$/, '');
   const spirionBase = (getSpirionUrl() ?? '').replace(/\/+$/, '');
   const echonBase = (getEchonUrl() ?? '').replace(/\/+$/, '');
@@ -137,6 +143,7 @@ export async function GET(
     brandion,
     creation,
     metron,
+    magcloud,
     knowledge,
     /** Rebuildable Collection read model (Wave B) — magazine/Assistant prefer this. */
     projection: projection
@@ -171,6 +178,9 @@ export async function GET(
         : metronBase
           ? `${metronBase}/projects`
           : '',
+      magcloudProject: magcloudBase
+        ? buildMagcloudProjectLaunchUrl(magcloudBase, { platformProjectId: ppid })
+        : '',
       videonProject: videonBase ? withProjectQuery(videonBase, '/projects') : '',
       spirionProject: spirionBase || '',
       echonProject: echonBase || '',

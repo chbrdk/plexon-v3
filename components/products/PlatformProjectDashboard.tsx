@@ -25,6 +25,7 @@ import type {
   BrandionProjectSummary,
   CheckionProjectSummary,
   CreationProjectSummary,
+  MagcloudProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -47,6 +48,7 @@ type DashboardPayload = {
   brandion: BrandionProjectSummary | null
   creation: CreationProjectSummary | null
   metron: MetronProjectSummary | null
+  magcloud: MagcloudProjectSummary | null
   knowledge?: DashboardKnowledgeSummary | null
   flows?: DashboardFlowsSummary | null
   activity?: { items: Array<{
@@ -65,6 +67,7 @@ type DashboardPayload = {
     brandionProject: string
     creationProject: string
     metronProject: string
+    magcloudProject?: string
     videonProject?: string
     spirionProject?: string
     echonProject?: string
@@ -171,6 +174,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             audion={data.audion}
             brandion={data.brandion}
             metron={data.metron ?? null}
+            magcloud={data.magcloud ?? null}
             bindings={data.bindings}
             knowledge={data.knowledge ?? null}
             flows={data.flows ?? null}
@@ -198,6 +202,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             brandionHref={data.links.brandionProject}
             creationHref={data.links.creationProject ?? ''}
             metronHref={data.links.metronProject ?? ''}
+            magcloudHref={data.links.magcloudProject ?? ''}
             videonHref={data.links.videonProject ?? ''}
             spirionHref={data.links.spirionProject ?? ''}
             echonHref={data.links.echonProject ?? ''}
@@ -206,6 +211,7 @@ export function PlatformProjectDashboard({ platformProjectId }: { platformProjec
             brandion={data.brandion}
             creation={data.creation ?? null}
             metron={data.metron ?? null}
+            magcloud={data.magcloud ?? null}
             bindings={data.bindings}
             openNav={workNav}
             onOpenNav={setWorkNav}

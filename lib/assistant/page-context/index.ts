@@ -80,7 +80,8 @@ export function isAssistantPageContextProduct(
     value === 'echon' ||
     value === 'spirion' ||
     value === 'metron' ||
-    value === 'videon'
+    value === 'videon' ||
+    value === 'magcloud'
   )
 }
 

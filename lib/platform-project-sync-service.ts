@@ -7,6 +7,7 @@ import type { PlatformProductId } from '@/lib/platform-entitlements';
 import {
   getBrandionServiceApiUrl,
   getCreationServiceApiUrl,
+  getMagcloudServiceApiUrl,
   getMetronServiceApiUrl,
   getSpirionServiceApiUrl,
 } from '@/lib/constants';
@@ -17,7 +18,7 @@ import {
 import { getPlatformProjectById } from '@/lib/db/platform-projects';
 import { pushPlatformProjectUpsert } from '@/lib/platform-project-upsert';
 
-const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion', 'metron'];
+const PRODUCTS: PlatformProductId[] = ['checkion', 'audion', 'brandion', 'creation', 'spirion', 'metron', 'magcloud'];
 
 /** Skip upsert when product API base is unset — leave binding `pending`. */
 function isProductUpsertConfigured(productId: PlatformProductId): boolean {
@@ -25,6 +26,7 @@ function isProductUpsertConfigured(productId: PlatformProductId): boolean {
   if (productId === 'creation') return Boolean(getCreationServiceApiUrl());
   if (productId === 'spirion') return Boolean(getSpirionServiceApiUrl());
   if (productId === 'metron') return Boolean(getMetronServiceApiUrl());
+  if (productId === 'magcloud') return Boolean(getMagcloudServiceApiUrl());
   return true;
 }
 

@@ -3,6 +3,7 @@ import {
   getBrandionServiceApiUrl,
   getCheckionServiceApiUrl,
   getCreationServiceApiUrl,
+  getMagcloudServiceApiUrl,
   getMetronServiceApiUrl,
 } from '@/lib/constants';
 import {
@@ -323,4 +324,47 @@ export async function fetchMetronPlatformProjectSummary(
   if (!response.ok) return null;
   const data = await readJson<MetronProjectSummary>(response);
   return data ? normalizeMetronSummary(data) : null;
+}
+
+export type MagcloudProjectSummary = {
+  externalProjectId: string;
+  platformProjectId?: string;
+  name?: string;
+  status?: 'active' | 'archived';
+  updatedAt?: string;
+};
+
+function normalizeMagcloudSummary(data: MagcloudProjectSummary): MagcloudProjectSummary | null {
+  if (!data?.externalProjectId) return null;
+  const status =
+    data.status === 'archived' || data.status === 'active' ? data.status : undefined;
+  return {
+    externalProjectId: data.externalProjectId,
+    platformProjectId: data.platformProjectId,
+    name: typeof data.name === 'string' ? data.name.trim() || undefined : undefined,
+    status,
+    updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt.trim() || undefined : undefined,
+  };
+}
+
+export async function fetchMagcloudPlatformProjectSummary(
+  platformProjectId: string,
+  plexonUserId: string
+): Promise<MagcloudProjectSummary | null> {
+  const base = getMagcloudServiceApiUrl();
+  const secret = process.env.PLEXON_SERVICE_SECRET?.trim();
+  if (!base?.trim() || !secret) return null;
+  const url = `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encodeURIComponent(platformProjectId)}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      [PLEXON_SERVICE_SECRET_HEADER]: secret,
+      [PLEXON_CONTRACT_VERSION_HEADER]: PLEXON_FEDERATION_CONTRACT_VERSION,
+      'X-Plexon-User-Id': plexonUserId,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return null;
+  const data = await readJson<MagcloudProjectSummary>(response);
+  return data ? normalizeMagcloudSummary(data) : null;
 }

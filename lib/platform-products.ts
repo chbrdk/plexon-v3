@@ -4,6 +4,7 @@ import {
   getCheckionUrl,
   getCreationUrl,
   getEchonUrl,
+  getMagcloudUrl,
   getMetronUrl,
   getSpirionUrl,
   getVideonUrl,
@@ -127,6 +128,7 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
   const creationUrl = getCreationUrl();
   const spirionUrl = getSpirionUrl();
   const metronUrl = getMetronUrl();
+  const magcloudUrl = getMagcloudUrl();
   const echonUrl = getEchonUrl();
 
   return [
@@ -366,6 +368,33 @@ export function getPlatformProductDefinitions(): PlatformProductDefinition[] {
           id: 'metron-projects',
           labelKey: 'dashboard.entry.projects',
           href: joinUrl(metronUrl, '/projects') ?? metronUrl ?? '#',
+          openInNewTab: true,
+        },
+      ],
+      defaultAccess: 'hidden',
+    },
+    {
+      id: 'magcloud',
+      name: 'MAGCLOUD',
+      descriptionKey: 'dashboard.productMagcloudDescription',
+      lifecycle: magcloudUrl ? 'active' : 'planned',
+      surface: 'federated',
+      promoted: true,
+      primaryActionKey: 'dashboard.openMagcloud',
+      homeUrl: magcloudUrl,
+      loginUrl: joinUrl(magcloudUrl, '/login'),
+      healthUrl: joinUrl(magcloudUrl, '/api/health'),
+      capabilities: [
+        'dashboard.capabilityCentralIdentity',
+        'dashboard.capabilityUsage',
+        'dashboard.capabilityFutureRegistry',
+      ],
+      entryPoints: [
+        { id: 'magcloud-home', labelKey: 'dashboard.entry.home', href: magcloudUrl ?? '#', openInNewTab: true },
+        {
+          id: 'magcloud-boards',
+          labelKey: 'dashboard.entry.projects',
+          href: joinUrl(magcloudUrl, '/boards') ?? magcloudUrl ?? '#',
           openInNewTab: true,
         },
       ],

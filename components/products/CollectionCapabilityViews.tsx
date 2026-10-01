@@ -17,6 +17,7 @@ import type {
   BrandionProjectSummary,
   CheckionProjectSummary,
   CreationProjectSummary,
+  MagcloudProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -38,6 +39,7 @@ function productLabel(productId: string): string {
   if (productId === 'audion') return 'AUDION'
   if (productId === 'brandion') return 'BRANDION'
   if (productId === 'metron') return 'METRON'
+  if (productId === 'magcloud') return 'MAGCLOUD'
   if (productId === 'creation') return 'CREATION'
   if (productId === 'videon') return 'VIDEON'
   if (productId === 'spirion') return 'SPIRION'
@@ -613,6 +615,68 @@ export function MetronCapabilityView({
           <a href={askHref} data-testid="metron-ask-assistant">
             <Button variant="ghost" size="md">
               {t('projects.detail.askMetron')}
+            </Button>
+          </a>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function MagcloudCapabilityView({
+  magcloud,
+  href,
+  platformProjectId,
+}: {
+  magcloud: MagcloudProjectSummary | null
+  href: string
+  platformProjectId: string
+}) {
+  const { t } = useI18n()
+  const askHref = pathAssistantWithProjectAndDraft(
+    platformProjectId,
+    t('projects.detail.askMagcloudDraft'),
+  )
+
+  return (
+    <div className="plexon-capability-pane" data-testid="magcloud-capability-view">
+      <header className="plexon-knowledge-facet-tile-head">
+        <div>
+          <Text role="meta" as="p" className="plexon-collection-card-kicker">
+            {t('projects.detail.capabilityLocalBadge')}
+          </Text>
+          <Text role="headline" as="h3" className="plexon-knowledge-facet-title">
+            MAGCLOUD
+          </Text>
+          <Text role="meta" as="p">
+            {t('projects.detail.magcloudCatalogSubtitle')}
+          </Text>
+        </div>
+        <Chip static size="sm">
+          {magcloud ? t('projects.detail.linked') : t('projects.detail.notLinked')}
+        </Chip>
+      </header>
+
+      {!magcloud ? (
+        <Text role="meta">{t('projects.detail.magcloudEmpty')}</Text>
+      ) : (
+        <Text role="meta">
+          {magcloud.name?.trim() || t('projects.detail.magcloudBoardUntitled')}
+          {magcloud.status ? ` · ${magcloud.status}` : ''}
+          {magcloud.externalProjectId
+            ? ` · ${t('projects.detail.localId')}: ${magcloud.externalProjectId}`
+            : ''}
+        </Text>
+      )}
+
+      <div className="plexon-knowledge-facet-tile-actions">
+        <Button variant="ghost" size="md" onClick={() => openExternal(href)}>
+          {t('projects.detail.openMagcloud')}
+        </Button>
+        {platformProjectId ? (
+          <a href={askHref} data-testid="magcloud-ask-assistant">
+            <Button variant="ghost" size="md">
+              {t('projects.detail.askMagcloud')}
             </Button>
           </a>
         ) : null}

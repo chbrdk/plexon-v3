@@ -418,6 +418,17 @@ export const getMetronServiceApiUrl = (): string | null => {
   return process.env.METRON_API_URL?.trim() || getMetronUrl();
 };
 
+export const getMagcloudUrl = (): string | null => {
+  if (typeof process === 'undefined') return null;
+  return process.env.NEXT_PUBLIC_MAGCLOUD_URL?.trim() || null;
+};
+
+/** Service base for MAGCLOUD project upsert (defaults to public web origin). */
+export const getMagcloudServiceApiUrl = (): string | null => {
+  if (typeof process === 'undefined') return getMagcloudUrl();
+  return process.env.MAGCLOUD_API_URL?.trim() || getMagcloudUrl();
+};
+
 /** Public SPIRION web origin. Prefer `NEXT_PUBLIC_SPIRION_URL`, fall back to legacy `NEXT_PUBLIC_DIG_URL`. */
 export const getSpirionUrl = (): string | null => {
   if (typeof process === 'undefined') return null;
@@ -620,6 +631,10 @@ export const API_PLATFORM_PROVISIONING_CREATION_PROJECT_ORIGIN =
 /** Service-authenticated: METRON created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_METRON_PROJECT_ORIGIN =
   '/api/platform/provisioning/metron-project-origin';
+
+/** Service-authenticated: MAGCLOUD created a board/workspace first; PLEXON registers platform row + sibling mirrors. */
+export const API_PLATFORM_PROVISIONING_MAGCLOUD_PROJECT_ORIGIN =
+  '/api/platform/provisioning/magcloud-project-origin';
 
 /** Service-authenticated: SPIRION created a project first; PLEXON registers platform row + sibling mirrors. */
 export const API_PLATFORM_PROVISIONING_SPIRION_PROJECT_ORIGIN =

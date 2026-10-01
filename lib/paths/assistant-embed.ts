@@ -27,6 +27,7 @@ export type AssistantEmbedProduct =
   | 'spirion'
   | 'metron'
   | 'videon'
+  | 'magcloud'
   | 'unknown'
 
 export type AssistantEmbedQuery = {
@@ -53,7 +54,8 @@ export function normalizeAssistantEmbedProduct(raw: string | null | undefined): 
     value === 'echon' ||
     value === 'spirion' ||
     value === 'metron' ||
-    value === 'videon'
+    value === 'videon' ||
+    value === 'magcloud'
   ) {
     return value
   }

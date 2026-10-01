@@ -14,6 +14,7 @@ import type {
   AudionProjectSummary,
   BrandionProjectSummary,
   CheckionProjectSummary,
+  MagcloudProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 
@@ -39,6 +40,7 @@ type Props = {
   audion: AudionProjectSummary | null
   brandion: BrandionProjectSummary | null
   metron: MetronProjectSummary | null
+  magcloud: MagcloudProjectSummary | null
   bindings: CollectionBinding[]
   knowledge: DashboardKnowledgeSummary | null
   flows: DashboardFlowsSummary | null
@@ -86,6 +88,7 @@ function productLabel(productId: string): string {
   if (productId === 'audion') return 'AUDION'
   if (productId === 'brandion') return 'BRANDION'
   if (productId === 'metron') return 'METRON'
+  if (productId === 'magcloud') return 'MAGCLOUD'
   return productId
 }
 
@@ -113,6 +116,7 @@ export function CollectionOverviewBand({
   audion,
   brandion,
   metron,
+  magcloud,
   bindings,
   knowledge,
   flows,
@@ -319,6 +323,44 @@ export function CollectionOverviewBand({
                 {metron.dashboardCount} {t('projects.detail.dashboards')} ·{' '}
                 {metron.kpiCount} {t('projects.detail.kpis')} ·{' '}
                 {metron.datasetCount} {t('projects.detail.datasets')}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="plexon-collection-overview-chapter-block" data-chapter="magcloud">
+            <header className="plexon-collection-overview-chapter-head">
+              <Text role="meta" as="p" className="plexon-collection-overview-kicker">
+                MAGCLOUD
+              </Text>
+              <Button variant="link" size="sm" onClick={() => onOpenWork('magcloud')}>
+                {t('projects.detail.overviewOpenCatalog')}
+              </Button>
+            </header>
+            {!magcloud ? (
+              <Text role="meta">{t('projects.detail.overviewMagcloudEmpty')}</Text>
+            ) : (
+              <ul className="plexon-collection-overview-ledger">
+                <li>
+                  <span className="plexon-collection-overview-ledger-label">
+                    {t('projects.detail.magcloudBoardLabel')}
+                  </span>
+                  <span className="plexon-collection-overview-ledger-mark">
+                    {magcloud.name?.trim() || t('projects.detail.magcloudBoardUntitled')}
+                  </span>
+                </li>
+                {magcloud.status ? (
+                  <li>
+                    <span className="plexon-collection-overview-ledger-label">
+                      {t('projects.detail.magcloudBoardStatus')}
+                    </span>
+                    <span className="plexon-collection-overview-ledger-mark">{magcloud.status}</span>
+                  </li>
+                ) : null}
+              </ul>
+            )}
+            {magcloud ? (
+              <Text role="meta" as="p" className="plexon-collection-overview-aside">
+                {t('projects.detail.overviewMagcloudReady')}
               </Text>
             ) : null}
           </div>

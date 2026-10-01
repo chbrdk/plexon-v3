@@ -41,6 +41,7 @@ import type {
   BrandionProjectSummary,
   CheckionProjectSummary,
   CreationProjectSummary,
+  MagcloudProjectSummary,
   MetronProjectSummary,
 } from '@/lib/platform-project-dashboard-fetch'
 import {
@@ -50,6 +51,7 @@ import {
   BrandionCapabilityView,
   CheckionCapabilityView,
   CreationCapabilityView,
+  MagcloudCapabilityView,
   MetronCapabilityView,
   type CollectionBinding,
 } from '@/components/products/CollectionCapabilityViews'
@@ -68,6 +70,7 @@ type CapabilityNavId =
   | 'brandion'
   | 'creation'
   | 'metron'
+  | 'magcloud'
   | 'videon'
   | 'spirion'
   | 'echon'
@@ -80,6 +83,7 @@ const CAPABILITY_NAV_IDS: CapabilityNavId[] = [
   'brandion',
   'creation',
   'metron',
+  'magcloud',
   'videon',
   'spirion',
   'echon',
@@ -97,6 +101,7 @@ type Props = {
   brandionHref?: string | null
   creationHref?: string | null
   metronHref?: string | null
+  magcloudHref?: string | null
   videonHref?: string | null
   spirionHref?: string | null
   echonHref?: string | null
@@ -105,6 +110,7 @@ type Props = {
   brandion?: BrandionProjectSummary | null
   creation?: CreationProjectSummary | null
   metron?: MetronProjectSummary | null
+  magcloud?: MagcloudProjectSummary | null
   bindings?: CollectionBinding[]
   /** Controlled work-band TOC selection (Overview teasers jump here). */
   openNav?: CollectionWorkNavId
@@ -424,6 +430,8 @@ function capabilityLabelKey(id: CapabilityNavId): string {
       return 'projects.detail.navCreation'
     case 'metron':
       return 'projects.detail.navMetron'
+    case 'magcloud':
+      return 'projects.detail.navMagcloud'
     case 'videon':
       return 'projects.detail.navVideon'
     case 'spirion':
@@ -442,6 +450,7 @@ export function CollectionKnowledgeBand({
   brandionHref,
   creationHref,
   metronHref,
+  magcloudHref,
   videonHref,
   spirionHref,
   echonHref,
@@ -450,6 +459,7 @@ export function CollectionKnowledgeBand({
   brandion = null,
   creation = null,
   metron = null,
+  magcloud = null,
   bindings = [],
   openNav: openNavProp,
   onOpenNav,
@@ -759,16 +769,18 @@ export function CollectionKnowledgeBand({
                   ? !creation
                   : id === 'metron'
                     ? !metron
-                    : id === 'videon'
-                      ? !bindingFor('videon')
-                      : id === 'spirion'
-                        ? !bindingFor('spirion')
-                        : id === 'echon'
-                          ? !bindingFor('echon')
-                          : bindings.length === 0
+                    : id === 'magcloud'
+                      ? !magcloud
+                      : id === 'videon'
+                        ? !bindingFor('videon')
+                        : id === 'spirion'
+                          ? !bindingFor('spirion')
+                          : id === 'echon'
+                            ? !bindingFor('echon')
+                            : bindings.length === 0
         return { id: id as CollectionWorkNavId, empty, group: 'capability' as const }
       }),
-    [audion, bindings, brandion, checkion, creation, metron],
+    [audion, bindings, brandion, checkion, creation, magcloud, metron],
   )
 
   const renderFacetBody = (id: KnowledgeFacetId): ReactNode => {
@@ -1062,6 +1074,19 @@ export function CollectionKnowledgeBand({
               <MetronCapabilityView
                 metron={metron}
                 href={metronHref ?? ''}
+                platformProjectId={platformProjectId}
+              />
+            </article>
+
+            <article
+              className="plexon-knowledge-facet-tile"
+              data-active={openNav === 'magcloud' ? 'true' : 'false'}
+              data-empty={!magcloud ? 'true' : 'false'}
+              hidden={openNav !== 'magcloud'}
+            >
+              <MagcloudCapabilityView
+                magcloud={magcloud}
+                href={magcloudHref ?? ''}
                 platformProjectId={platformProjectId}
               />
             </article>

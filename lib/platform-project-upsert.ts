@@ -9,6 +9,7 @@ import {
   getBrandionServiceApiUrl,
   getCreationServiceApiUrl,
   getCheckionServiceApiUrl,
+  getMagcloudServiceApiUrl,
   getMetronServiceApiUrl,
   getSpirionServiceApiUrl,
 } from '@/lib/constants';
@@ -62,6 +63,11 @@ function projectUpsertUrl(productId: PlatformProductId, platformProjectId: strin
   }
   if (productId === 'metron') {
     const base = getMetronServiceApiUrl();
+    if (!base) return null;
+    return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
+  }
+  if (productId === 'magcloud') {
+    const base = getMagcloudServiceApiUrl();
     if (!base) return null;
     return `${base.replace(/\/+$/, '')}/api/platform/provisioning/projects/${encoded}`;
   }

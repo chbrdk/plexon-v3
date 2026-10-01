@@ -101,6 +101,7 @@ export async function ensureBindingPlaceholders(platformProjectId: string) {
     'creation',
     'spirion',
     'metron',
+    'magcloud',
     'echon',
   ];
   const db = getDb();
