@@ -20,6 +20,8 @@ import {
   type McpServerRow,
 } from '@/lib/mcp-hub/store';
 import { runtimeEnv } from '@/lib/runtime-env';
+import { publicAppBaseUrl } from '@/lib/mcp-hub/oauth';
+import { callCanvaMcpToolInProcess } from '@/lib/mcp-hub/canva-mcp-handler';
 
 export type HubToolCallTarget = {
   baseUrl: string;
@@ -38,6 +40,31 @@ const hubCallTargets = new Map<string, HubToolCallTarget>();
 
 let routingHintsCache: { expiresAt: number; servers: HubRoutingHintServer[] } | null = null;
 const ROUTING_HINTS_TTL_MS = 60_000;
+
+/**
+ * Same-app Canva MCP must not be fetched via public FQDN (Coolify hairpin → network error).
+ * Prefer loopback for discover/test; tools/call uses in-process path.
+ */
+export function resolveHubFetchBaseUrl(server: Pick<McpServerRow, 'slug' | 'baseUrl'>): string {
+  const base = server.baseUrl.replace(/\/$/, '');
+  const isCanvaPath =
+    server.slug === 'canva' || /\/api\/platform\/mcp-hub\/canva$/i.test(base);
+  if (!isCanvaPath) return server.baseUrl;
+  const app = publicAppBaseUrl().replace(/\/$/, '');
+  if (app && (base === `${app}/api/platform/mcp-hub/canva` || base.startsWith(app))) {
+    const port = runtimeEnv('PORT') || '3000';
+    return `http://127.0.0.1:${port}/api/platform/mcp-hub/canva`;
+  }
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(base)) {
+    return base;
+  }
+  // Registered as public staging URL without matching NEXTAUTH_URL — still loopback.
+  if (server.slug === 'canva') {
+    const port = runtimeEnv('PORT') || '3000';
+    return `http://127.0.0.1:${port}/api/platform/mcp-hub/canva`;
+  }
+  return server.baseUrl;
+}
 
 export function isHubAllowlistedTool(name: string): boolean {
   return hubAllowlist.has(name);
@@ -148,7 +175,9 @@ export async function testMcpHubServer(serverId: string): Promise<{
     });
     return { ok: false, error: auth.error };
   }
-  const probe = await probeMcpServer(server.baseUrl, { extraHeaders: auth.headers });
+  const probe = await probeMcpServer(resolveHubFetchBaseUrl(server), {
+    extraHeaders: auth.headers,
+  });
   if (!probe.ok) {
     await patchMcpServer(serverId, {
       lastError: probe.error,
@@ -173,7 +202,9 @@ export async function discoverMcpHubServer(serverId: string): Promise<{
     return { ok: false, error: auth.error };
   }
   try {
-    const tools = await listMcpToolsRaw(server.baseUrl, { extraHeaders: auth.headers });
+    const tools = await listMcpToolsRaw(resolveHubFetchBaseUrl(server), {
+      extraHeaders: auth.headers,
+    });
     const { upserted } = await upsertDiscoveredTools(server, tools);
     await patchMcpServer(serverId, {
       lastDiscoveryAt: new Date(),
@@ -252,7 +283,7 @@ export async function loadHubToolsForTurn(options?: {
       hubConfirmTools.add(row.exposedName);
     }
     hubCallTargets.set(row.exposedName, {
-      baseUrl: row.server.baseUrl,
+      baseUrl: resolveHubFetchBaseUrl(row.server),
       mcpName: row.mcpName,
       extraHeaders: auth.headers,
       sideEffect: row.sideEffect,
@@ -283,6 +314,9 @@ export async function callHubMcpTool(
   const target = getHubToolCallTarget(exposedName);
   if (!target) {
     return JSON.stringify({ error: `Unknown Hub tool ${exposedName}` });
+  }
+  if (target.serverSlug === 'canva') {
+    return callCanvaMcpToolInProcess(target.mcpName, args, target.extraHeaders);
   }
   return callCheckionMcpTool(target.baseUrl, target.mcpName, args, {
     extraHeaders: target.extraHeaders,

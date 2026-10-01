@@ -81,6 +81,50 @@ function jsonResult(payload: unknown): { content: Array<{ type: 'text'; text: st
   return { content: [{ type: 'text', text: JSON.stringify(payload) }] };
 }
 
+/**
+ * In-process tools/call for the thin Canva MCP (avoids Coolify hairpin to public baseUrl).
+ * Headers must include X-Plexon-User-Id (and service secret is assumed for Hub trust).
+ */
+export async function callCanvaMcpToolInProcess(
+  mcpName: string,
+  args: Record<string, unknown>,
+  headers: Record<string, string>
+): Promise<string> {
+  const req = new Request('http://127.0.0.1/api/platform/mcp-hub/canva', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+  });
+  try {
+    const res = await handleCanvaMcpRpc(req, {
+      method: 'tools/call',
+      id: 1,
+      params: { name: mcpName, arguments: args },
+    });
+    const json = (await res.json()) as {
+      result?: { content?: Array<{ type?: string; text?: string }> };
+      error?: { message?: string };
+    };
+    if (json.error?.message) {
+      return JSON.stringify({ error: json.error.message });
+    }
+    const content = json.result?.content ?? [];
+    const parts: string[] = [];
+    for (const c of content) {
+      if (c && typeof c === 'object' && c.type === 'text' && typeof c.text === 'string') {
+        parts.push(c.text);
+      }
+    }
+    return parts.length > 0 ? parts.join('\n\n') : JSON.stringify(json.result ?? json);
+  } catch (e) {
+    return JSON.stringify({
+      error: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
+
 export function verifyCanvaMcpServiceAuth(request: Request): boolean {
   const expected = runtimeEnv('PLEXON_SERVICE_SECRET');
   if (!expected) return false;

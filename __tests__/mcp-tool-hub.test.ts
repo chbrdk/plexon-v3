@@ -21,6 +21,7 @@ import {
   clearHubToolRuntimeState,
   isHubAllowlistedTool,
   isHubWriteTool,
+  resolveHubFetchBaseUrl,
 } from '@/lib/mcp-hub/runtime'
 import {
   API_ADMIN_MCP_SERVERS,
@@ -276,6 +277,17 @@ describe('mcp-hub H5 staging readiness', () => {
     process.env.PLEXON_SERVICE_SECRET = 'svc'
     process.env.NEXTAUTH_URL = 'https://plexon-v3.projects-a.plygrnd.tech'
     expect(canvaEnvReady()).toBe(true)
+  })
+
+  it('resolves Canva Hub fetch URL to loopback (no public hairpin)', () => {
+    process.env.NEXTAUTH_URL = 'https://plexon-v3.projects-a.plygrnd.tech'
+    process.env.PORT = '3000'
+    expect(
+      resolveHubFetchBaseUrl({
+        slug: 'canva',
+        baseUrl: 'https://plexon-v3.projects-a.plygrnd.tech/api/platform/mcp-hub/canva',
+      }),
+    ).toBe('http://127.0.0.1:3000/api/platform/mcp-hub/canva')
   })
 })
 

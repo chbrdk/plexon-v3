@@ -43,10 +43,11 @@ Exposed Anthropic names: `canva_*`.
 
 ## Runtime
 
-1. Hub server `slug=canva`, `authKind=oauth_user`, `baseUrl` → Plexon Canva MCP.
-2. Hub calls MCP with `X-Plexon-Service-Secret` + `X-Plexon-User-Id`.
-3. Unbound user → tool result `{ error: "oauth_required", connectUrl }` → Assistant `alert` + `link_list` CTA.
-4. Planner: Canva `routingHints` boost social prompts; **never** prefer Canva when intent is `creation_scene_edit` / `creation_design`.
+1. Hub server `slug=canva`, `authKind=oauth_user`, `baseUrl` → Plexon Canva MCP (public URL stored for Admin).
+2. Hub **calls** Canva MCP in-process (or loopback `127.0.0.1:$PORT`) — never via public FQDN (Coolify hairpin).
+3. Hub forwards `X-Plexon-Service-Secret` + `X-Plexon-User-Id`.
+4. Unbound user → tool result `{ error: "oauth_required", connectUrl }` → Assistant `alert` + `link_list` CTA.
+5. Planner: Canva `routingHints` boost social prompts; **never** prefer Canva when intent is `creation_scene_edit` / `creation_design`.
 
 ## Operator setup
 
