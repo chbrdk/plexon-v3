@@ -23,6 +23,12 @@ describe('magcloud write confirm', () => {
     expect(isConfirmationRequiredToolName('magcloud_boards_list')).toBe(false)
     expect(isConfirmationRequiredToolName('magcloud_meta_conflicts_list')).toBe(false)
   })
+
+  it('requires confirm for creation scene publish to Magcloud and persona_create', () => {
+    expect(isConfirmationRequiredToolName('creation_scene_publish_magcloud')).toBe(true)
+    expect(isConfirmationRequiredToolName('audion_persona_create')).toBe(true)
+    expect(classifyToolFamily('creation_scene_publish_magcloud')).toBe('creation_scene_write')
+  })
 })
 
 describe('magcloud tool families', () => {

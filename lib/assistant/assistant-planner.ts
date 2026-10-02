@@ -614,7 +614,8 @@ if (matchesMetronAnalytics(text, input.hasMetronMcp ?? false)) {
   // cross-app action_write.
   const namedPersonaLookup = PERSONA_NAME_LOOKUP_PATTERNS.some((p) => p.test(text));
   if (namedPersonaLookup && input.hasAudionMcp) {
-    const personaWrite = isPersonaAudienceWriteIntent(text) || writeIntent;
+    // Do not OR with generic writeIntent — “anlegen” on a slide prompt must not open persona_create.
+    const personaWrite = isPersonaAudienceWriteIntent(text);
     return buildPlan({
       intent: 'audion_persona',
       mode: 'hybrid',
@@ -1232,7 +1233,9 @@ function preferPersonaLookupPlan(plan: AssistantPlan, input: PlannerInput): Assi
     return plan;
   }
   // Override general_chat / action_write / etc. → audion_persona when name/duplicate/enrich patterns hit.
-  const personaWrite = isPersonaAudienceWriteIntent(text) || plan.allowWriteTools;
+  // Never inherit allowWriteTools from an unrelated craft plan (e.g. creation slide) — that enabled
+  // silent persona_create. Writes only for explicit duplicate/enrich/create audience verbs.
+  const personaWrite = isPersonaAudienceWriteIntent(text);
   return buildPlan({
     intent: 'audion_persona',
     mode: 'hybrid',
@@ -1368,8 +1371,8 @@ export function buildPlanSystemPromptBlock(
 ): string {
   const writeToolsNote = plan.allowWriteTools
     ? plan.intent === 'creation_scene_edit'
-      ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops, creation_scene_import_html und creation_site_kit_page_save (baseUpdatedAt aus Seitenkontext / vorherigem Tool-Result!). creation_scene_apply_ops: ops als natives JSON-Array von Objekten — niemals als JSON-String wrappen. Neue Seite → add_page {name?} zuerst, dann unter neuem root.id. Insert: bevorzugt insert_child MIT props (echte CTAs/Options/Texte). insert_instance nur mit props oder set_prop im selben Batch — nie nackte Instances mit Seed-Copy (Get started / Option A / Text). Niemals insert_node/add_instance/append_child. Bei op-rejected/stale-scene die Server-Felder reason, failedIndex und scene.updatedAt zitieren und Retry mit frischem baseUpdatedAt — nicht raten. Vor Abschluss: content_audit + craft_debug + preview. Nur Spezifikation ohne apply_ops = Fail.'
-      : '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create, echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein).'
+      ? '\n- Schreib-Tools aktiv: creation_scene_apply_ops, creation_scene_import_html, creation_scene_publish_magcloud und creation_site_kit_page_save (baseUpdatedAt aus Seitenkontext / vorherigem Tool-Result!). creation_scene_apply_ops: ops als natives JSON-Array von Objekten — niemals als JSON-String wrappen. Neue Seite → add_page {name?} zuerst, dann unter neuem root.id. Insert: bevorzugt insert_child MIT props (echte CTAs/Options/Texte). insert_instance nur mit props oder set_prop im selben Batch — nie nackte Instances mit Seed-Copy (Get started / Option A / Text). Niemals insert_node/add_instance/append_child. Bei op-rejected/stale-scene die Server-Felder reason, failedIndex und scene.updatedAt zitieren und Retry mit frischem baseUpdatedAt — nicht raten. Vor Abschluss: content_audit + craft_debug + preview. Magcloud nur via creation_scene_publish_magcloud (boardName + Confirm). Nur Spezifikation ohne apply_ops = Fail.'
+      : '\n- Schreib-Tools aktiv: audion_target_group_create, audion_persona_create (Confirm), echon_research_run_start, echon_signal_ingest, echon_waves_detect (Bestätigung kann nötig sein). Keine spekulativen Persona-Creates — bei Unklarheit nachfragen.'
     : plan.intent === 'creation_scene_edit'
       ? '\n- Schreib-Tools derzeit aus: Nutzer muss explizit bitten (z. B. „füge … ein“, „ändere …“, „baue …“). Kein Hinweis auf nicht existierende Einstellungen.'
       : '';

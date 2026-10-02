@@ -169,7 +169,7 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^creation_brand_tokens_get$/,
   ],
   creation_scene_write: [
-    /^creation_scene_(apply_ops|import_html)$/,
+    /^creation_scene_(apply_ops|import_html|publish_magcloud)$/,
     /^creation_site_kit_(composition_save|page_save)$/,
   ],
   spirion_references: [

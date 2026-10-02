@@ -31,4 +31,9 @@ describe('audience-write-intent', () => {
     expect(classifyToolFamily('audion_target_group_create')).toBe('audion_audience_write');
     expect(classifyToolFamily('audion_target_groups_list')).toBe('audion_knowledge');
   });
+
+  it('does not treat slide anlegen as audience write', () => {
+    expect(hasAudienceWriteIntent('kannst du mir einen slide anlegen')).toBe(false);
+    expect(hasAudienceWriteIntent('Lege einen Slide für Persona Alex an')).toBe(false);
+  });
 });

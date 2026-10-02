@@ -8,10 +8,14 @@ const WRITE_VERB_PATTERN =
 
 const AUDIENCE_ENTITY_PATTERN = /\b(zielgruppe|zielgruppen|target\s*groups?|personas?)\b/i;
 
+/** Slide/layout craft — “slide anlegen” must not open persona_create. */
+const CREATION_LAYOUT_OVERRIDE =
+  /\b(slide|slides|folie|folien|powerpoint|pptx?|landing|newsletter|print\s*page|magazin|scene_apply)\b/i;
+
 export function hasAudienceWriteIntent(text: string): boolean {
   const trimmed = text.trim();
   let result = false
-  if (trimmed) {
+  if (trimmed && !CREATION_LAYOUT_OVERRIDE.test(trimmed)) {
     if (AUDIENCE_ENTITY_PATTERN.test(trimmed) || /\baudion\b/i.test(trimmed)) {
       result =
         WRITE_VERB_PATTERN.test(trimmed) ||

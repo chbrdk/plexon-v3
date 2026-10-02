@@ -119,6 +119,8 @@ Collection ACL for service writes is **enforced fail-closed** in CREATION (`requ
 1. Unit: catalog classifies `creation_scene_tree_index` / `creation_scene_craft_debug` → `creation_scene`, `creation_scene_apply_ops` / `creation_scene_import_html` / `creation_site_kit_page_save` → `creation_scene_write`.
 2. Gate: `resolveUseCreationMcp` mirrors Brandion rules.
 3. Planner: layout prompts → `creation_scene_edit` with write tools only when user asks to change/build.
+3b. Magcloud publish: `creation_scene_publish_magcloud` is `creation_scene_write` + confirm; playbook may call it when user asks to send/publish a slide to Magcloud (never invent board content).
+3c. Ambiguous intent: ask one clarifying question instead of inventing personas / audience writes; `audion_persona_create` requires confirm; creation-slide phrasing must not enable audience write.
 4. Staging: set `CREATION_MCP_URL` after Coolify `creation-mcp` is live.
 5. Unit: `creation_scene_edit` plans ≥14 tool rounds; thinking budget for that intent is ≥8192 when base thinking is on; Checkion/other intents keep default rounds/budget.
 6. Unit: all-read tool rounds are parallel-safe; write rounds are not. Quality gate requires audit + craft-debug + preview after writes.

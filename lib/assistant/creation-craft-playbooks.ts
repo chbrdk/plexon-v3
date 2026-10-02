@@ -251,9 +251,10 @@ Ziel: **eine PowerPoint-ähnliche Folie** (1920×1080) in CREATION — für Magc
 - Farben: eigene Hex oder Brandion **digital** Channel (\`creation_brand_tokens_get\`) — nicht print-mm als Folien-Default.
 - Media: groes Bild / Hintergrund ok; Masse auf der Fläche, keine Tiny-Thumbnails.
 
-### Magcloud (Wave 1)
-- Nach fertiger Folie: Nutzer in CREATION **„An Magcloud veröffentlichen“** (Export-Menü) — PNG + Provenance. Agent **erfindet keine** Magcloud-Board-Inhalte und ruft **kein** SharePoint-Bridge-Secret.
-- Abschlussantwort: kurz bestätigen (1920×1080, Page-Name) + Publish-Hinweis wenn Pitch/Magcloud gemeint war.
+### Magcloud
+- Nach fertiger Folie: Nutzer will Magcloud → Tool creation_scene_publish_magcloud mit boardName (Confirm). Alternativ CREATION UI „An Magcloud veröffentlichen“.
+- Agent **erfindet keine** Magcloud-Board-Inhalte und ruft **kein** SharePoint-Bridge-Secret.
+- Abschlussantwort: 1920×1080 + Page-Name; bei Publish-Wunsch Tool nutzen oder boardName erfragen.
 
 Phasen:
 0. Brief: Folientitel, Kernaussage, 3 Bullets max oder 1 KPI-Fokus, optional Bildthema.
@@ -262,10 +263,10 @@ Phasen:
 3. \`set_page_frame\` { pageId, width: 1920, height: 1080 }.
 4. \`creation_scene_import_html\` **oder** \`insert_child\` — Inhalt für **eine** Folie (kein Scroll-Roman).
 5. Polish: Display/CTA/Media Masse; Audit → craft_debug → preview.
-6. Abschluss: Frame 1920×1080 bestätigt; Magcloud-Publish-Hinweis wenn relevant.
+6. Wenn Nutzer Magcloud will: boardName klären → \`creation_scene_publish_magcloud\` (Confirm). Sonst Publish-Hinweis.
 
 **Muss:** Frame 1920×1080; echte Pitch-Copy; keine Seed-Chrome.
-**Verboten:** DIN-A4 Magazin als „Slide“; Desktop-Landing ohne Frame-Lock; Magcloud-Inhalte erfinden.
+**Verboten:** DIN-A4 Magazin als „Slide“; Desktop-Landing ohne Frame-Lock; Magcloud-Inhalte erfinden; Personas anlegen statt Folie.
 ${SHARED_STYLING}
 ${SHARED_FINISH}
 `.trim();

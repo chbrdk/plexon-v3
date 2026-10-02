@@ -223,6 +223,7 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /scan_domain_journey_start$/,
   /geo_eeat_rerun_competitive$/,
   /persona_generate$/,
+  /persona_create$/,
   /geo_eeat_start$/,
   /target_group_create$/,
   /research_run_start$/,
@@ -237,6 +238,7 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /metron_company_kpi_library_bind$/,
   /magcloud_ingest_start$/,
   /magcloud_meta_conflict_resolve$/,
+  /creation_scene_publish_magcloud$/,
 ];
 
 export function isDestructiveToolName(toolName: string): boolean {
