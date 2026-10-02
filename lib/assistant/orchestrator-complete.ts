@@ -102,6 +102,31 @@ import {
   parseMetronKpiEvaluatePayload,
   parseMetronKpisListPayload,
 } from '@/lib/assistant/ui-blocks/build-metron-dashboard-ui';
+import {
+  buildMagcloudBoardSummarizeBlocks,
+  buildMagcloudBoardsListBlocks,
+  buildMagcloudIngestJobGetBlocks,
+  buildMagcloudIngestJobsBlocks,
+  buildMagcloudMetaConflictResolveBlocks,
+  buildMagcloudMetaConflictsBlocks,
+  buildMagcloudSlidesSearchBlocks,
+  isMagcloudBoardSummarizeToolName,
+  isMagcloudBoardsListToolName,
+  isMagcloudIngestJobGetToolName,
+  isMagcloudIngestJobsListToolName,
+  isMagcloudIngestStartToolName,
+  isMagcloudMetaConflictResolveToolName,
+  isMagcloudMetaConflictsListToolName,
+  isMagcloudSlidesSearchToolName,
+  parseMagcloudBoardSummarizePayload,
+  parseMagcloudBoardsListPayload,
+  parseMagcloudIngestJobGetPayload,
+  parseMagcloudIngestJobsListPayload,
+  parseMagcloudMetaConflictResolvePayload,
+  parseMagcloudMetaConflictsPayload,
+  parseMagcloudSlidesSearchPayload,
+} from '@/lib/assistant/ui-blocks/build-magcloud-board-ui';
+
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -210,6 +235,8 @@ const WRITE_CONFIRM_TOOL_PATTERNS = [
   /metron_suite_connectors_sync$/,
   /metron_external_connection_sync$/,
   /metron_company_kpi_library_bind$/,
+  /magcloud_ingest_start$/,
+  /magcloud_meta_conflict_resolve$/,
 ];
 
 export function isDestructiveToolName(toolName: string): boolean {
@@ -1026,6 +1053,149 @@ export async function runOrchestratorComplete(
         );
         if (item) {
           const autoBlocks = buildMetronDatasetGetBlocks(item, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMagcloudBoardsListToolName(mcpName) || isMagcloudBoardsListToolName(block.name)) {
+        const items = parseMagcloudBoardsListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (items?.length) {
+          const autoBlocks = buildMagcloudBoardsListBlocks(items, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMagcloudBoardSummarizeToolName(mcpName) ||
+        isMagcloudBoardSummarizeToolName(block.name)
+      ) {
+        const summary = parseMagcloudBoardSummarizePayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (summary) {
+          const autoBlocks = buildMagcloudBoardSummarizeBlocks(summary, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (isMagcloudSlidesSearchToolName(mcpName) || isMagcloudSlidesSearchToolName(block.name)) {
+        const hits = parseMagcloudSlidesSearchPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (hits?.length) {
+          const autoBlocks = buildMagcloudSlidesSearchBlocks(hits, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMagcloudIngestJobsListToolName(mcpName) ||
+        isMagcloudIngestJobsListToolName(block.name)
+      ) {
+        const jobs = parseMagcloudIngestJobsListPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (jobs?.length) {
+          const autoBlocks = buildMagcloudIngestJobsBlocks(jobs, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMagcloudIngestJobGetToolName(mcpName) ||
+        isMagcloudIngestJobGetToolName(block.name) ||
+        isMagcloudIngestStartToolName(mcpName) ||
+        isMagcloudIngestStartToolName(block.name)
+      ) {
+        const job = parseMagcloudIngestJobGetPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (job) {
+          const autoBlocks = buildMagcloudIngestJobGetBlocks(job, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMagcloudMetaConflictsListToolName(mcpName) ||
+        isMagcloudMetaConflictsListToolName(block.name)
+      ) {
+        const payload = parseMagcloudMetaConflictsPayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildMagcloudMetaConflictsBlocks(payload, {
+            source: 'plexon_ui',
+            toolCallId: block.id,
+          });
+          for (const auto of autoBlocks) {
+            const appended = uiAccumulator.appendBlock(auto.type, auto.props, auto.meta);
+            if (appended.ok) {
+              onUiBlock?.(appended.block, uiAccumulator.blockCount - 1);
+            }
+          }
+        }
+      }
+
+      if (
+        isMagcloudMetaConflictResolveToolName(mcpName) ||
+        isMagcloudMetaConflictResolveToolName(block.name)
+      ) {
+        const payload = parseMagcloudMetaConflictResolvePayload(
+          typeof multimodal === 'string' ? multimodal : compacted,
+        );
+        if (payload) {
+          const autoBlocks = buildMagcloudMetaConflictResolveBlocks(payload, {
             source: 'plexon_ui',
             toolCallId: block.id,
           });

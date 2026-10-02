@@ -56,6 +56,7 @@ export type ToolFamily =
   | 'magcloud_boards'
   | 'magcloud_slides'
   | 'magcloud_ingest'
+  | 'magcloud_write'
   | 'plexon_ui';
 
 const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
@@ -221,9 +222,14 @@ const FAMILY_PATTERNS: Record<ToolFamily, RegExp[]> = {
     /^metron_company_kpi_library_bind$/,
   ],
   magcloud_ops: [/^magcloud_health$/, /^magcloud_ingest_health$/],
-  magcloud_boards: [/^magcloud_boards_/, /^magcloud_board_(get|summarize)$/],
+  magcloud_boards: [
+    /^magcloud_boards_/,
+    /^magcloud_board_(get|summarize)$/,
+    /^magcloud_meta_conflicts_list$/,
+  ],
   magcloud_slides: [/^magcloud_slides_search$/],
   magcloud_ingest: [/^magcloud_ingest_jobs_/, /^magcloud_ingest_job_get$/],
+  magcloud_write: [/^magcloud_ingest_start$/, /^magcloud_meta_conflict_resolve$/],
   plexon_ui: [/^plexon_ui_/],
 };
 
@@ -411,6 +417,9 @@ export const MAGCLOUD_PITCH_FAMILIES: ToolFamily[] = [
   'magcloud_slides',
   'magcloud_ingest',
 ];
+
+/** MAGCLOUD writes — gated by allowWriteTools + confirm. */
+export const MAGCLOUD_WRITE_FAMILIES: ToolFamily[] = ['magcloud_write'];
 
 /** Write/job families — still gated by allowWriteTools on the plan. */
 export const VIDEON_WRITE_FAMILIES: ToolFamily[] = [

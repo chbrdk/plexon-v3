@@ -16,8 +16,8 @@ export function buildMagcloudIntegrationContextBlock(input: {
   }
   return [
     '## Magcloud',
-    '- MCP-Tools **aktiv** (boards_list, board_summarize, slides_search, ingest_jobs).',
-    '- Nur API-Ergebnisse verwenden; keine Pitch-Fakten erfinden.',
+    '- MCP-Tools **aktiv** (boards_list, board_summarize, slides_search, ingest_jobs, meta_conflicts; Write: ingest_start / meta_conflict_resolve mit Confirm).',
+    '- Nur API-Ergebnisse verwenden; keine Pitch-Fakten erfinden. SharePoint-Sync erst nach Graph-Secrets.',
     '- Boards = Slide-Universe Insel; Shell = Collection binding.',
   ].join('\n');
 }

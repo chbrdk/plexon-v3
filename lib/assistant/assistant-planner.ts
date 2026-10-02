@@ -33,6 +33,7 @@ import {
   METRON_ANALYTICS_FAMILIES,
   METRON_WRITE_FAMILIES,
   MAGCLOUD_PITCH_FAMILIES,
+  MAGCLOUD_WRITE_FAMILIES,
   isDestructiveOrWriteTool,
   toolMatchesFamilies,
   type ToolFamily,
@@ -491,15 +492,19 @@ export function planAssistantTurnHeuristic(input: PlannerInput): AssistantPlan {
     });
   }
 
-    if (matchesMagcloudPitch(text, input.hasMagcloudMcp ?? false)) {
+  if (matchesMagcloudPitch(text, input.hasMagcloudMcp ?? false)) {
     return buildPlan({
       intent: 'magcloud_pitch',
       mode: 'tools',
-      toolFamilies: [...MAGCLOUD_PITCH_FAMILIES, 'plexon_ui'],
-      allowWriteTools: false,
+      toolFamilies: writeIntent
+        ? [...MAGCLOUD_PITCH_FAMILIES, ...MAGCLOUD_WRITE_FAMILIES, 'plexon_ui']
+        : [...MAGCLOUD_PITCH_FAMILIES, 'plexon_ui'],
+      allowWriteTools: writeIntent,
       maxToolRounds: 5,
       skipTools: false,
-      reasoning: 'Magcloud Pitch/Board/Folien-Intent – boards + slides_search (live).',
+      reasoning: writeIntent
+        ? 'Magcloud Pitch — Boards/Folien inkl. Ingest/Resolve (Confirm).'
+        : 'Magcloud Pitch/Board/Folien-Intent – boards + slides_search (live).',
     });
   }
 
@@ -943,7 +948,7 @@ Regeln:
 - Bei Wissensfragen zum Projekt: mode embedded_context oder hybrid, max 2-3 Tool-Runden, nur Knowledge/Projekt-Familien.
 - Keine Write/Delete-Tools ohne expliziten Nutzer-Auftrag (erstelle/anlegen/import/upsert/löschen/scan starten/duplizieren/nachpflegen/patch).
 - Cross-app: host product (audion/checkion/brandion/…) darf BRANDION/CHECKION/AUDION Write-Tools nutzen wenn allowWriteTools true.
-- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, magcloud_ops, magcloud_boards, magcloud_slides, magcloud_ingest, plexon_ui.${hubServersLine}`;
+- toolFamilies nur aus: checkion_project, checkion_scan_read, checkion_scan_write, checkion_geo, checkion_tools, checkion_journey, audion_project, audion_knowledge, audion_persona, audion_journey, audion_ux_journey, audion_chat, audion_documents, echon_ops, echon_research, echon_signals, echon_waves, echon_foresight, echon_corpus, brandion_guidelines, brandion_tokens, creation_library, creation_compositions, creation_projects, creation_scene, creation_scene_write, spirion_references, spirion_screens, videon_ops, videon_projects, videon_media, videon_analysis, videon_cuts, videon_export, videon_reframe, metron_ops, metron_projects, metron_datasets, metron_kpis, metron_dashboards, metron_write, magcloud_ops, magcloud_boards, magcloud_slides, magcloud_ingest, magcloud_write, plexon_ui.${hubServersLine}`;
 
   const userContent = JSON.stringify({
     prompt: input.prompt,

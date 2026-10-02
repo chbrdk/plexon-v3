@@ -68,6 +68,7 @@ Nutze **plexon_ui_append_block** für strukturierte Darstellung. Daten zuerst pe
 | VIDEON Szenen-Suche | MCP \`videon_media_search\` → Auto \`video_hit_strip\` (actions / filmstrip / preview) |
 | VIDEON Status | MCP \`videon_media_get\` / \`videon_analysis_get\` → Auto \`video_status_card\` |
 | METRON Dashboards | MCP \`metron_dashboard_get\` → Auto \`metric_grid\` + \`chart\` + \`link_list\`; list → \`link_list\`; summarize → \`metric_grid\` + \`link_list\` |
+| MAGCLOUD Boards/Folien | MCP \`magcloud_boards_list\` → Auto \`link_list\`; summarize → \`metric_grid\` + \`link_list\`; slides_search → \`link_list\`; ingest → \`step_list\`; meta_conflicts → \`key_value_list\` |
 | Persona × Markenfarben | \`persona_card\` + \`finding_list\` (pro Fit \`hex\`/\`swatches\` + \`severity\`) — **kein** \`data_table\` |`;
 }
 
