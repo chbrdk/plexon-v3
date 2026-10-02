@@ -148,7 +148,7 @@ Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order … cont
 2. Unit: newsletter/email phrasing → `creation_newsletter_v1`.
 3. Unit: Magazin/PrintPage/Broschüre → `creation_print_magazine_v1`; EQC Mag / report deck → `creation_print_report_v1`.
 4. Unit: „Seite als Pattern“ → `creation_page_as_pattern_v1`.
-5. Unit: „erstell mir einen Slide/Folie“ / PowerPoint / 16:9 → `creation_slide_16_9_v1` (job `generic`); create-slide heuristic → `creation_scene_edit` even when Magcloud MCP is on.
+5. Unit: „erstell mir einen Slide/Folie“ / PowerPoint / 16:9 → `creation_slide_16_9_v1` (job `generic`); create-slide heuristic → `creation_scene_edit` even when Magcloud MCP is on. Short create-slide on an Audion persona page MUST keep `creation_scene_edit` + write tools (page-entity deixis must not demote to read-only `audion_persona`).
 6. Unit: gate job `newsletter` fails on Print* in tree and missing CTA; `print` fails without `PrintPage` after writes.
 7. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
 8. Knowledge documents format table + paths (no hardcoded FQDNs in code).

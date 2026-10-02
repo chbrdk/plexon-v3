@@ -9,7 +9,9 @@ import { scheduleJevShadow } from '@/lib/jev/schedule';
 const SCENE_WRITE_VERB_PATTERNS = [
   /\b(füge|einfüg\w*|hinzufüg\w*|insert|add|append)\b/i,
   /\b(ändere|änder\w*|bearbeit\w*|anpass\w*|edit|update|setze|setz\w*|ergänz\w*)\b/i,
-  /\b(baue|bau\w*|build|erstell\w*|create|generier\w*|generate)\b/i,
+  /\b(baue|bau\w*|build|erstell\w*|create|generier\w*|generate|anleg\w*)\b/i,
+  /** German separable: „lege … an“ / „leg einen Slide an“ */
+  /\bleg\w*\b[\s\S]{0,48}\ban\b/i,
   /\b(entfern\w*|lösch\w*|delete|remove|verschieb\w*|move)\b/i,
   /\b(wiederhol\w*|duplizier\w*|kopier\w*|replace)\b/i,
 ];

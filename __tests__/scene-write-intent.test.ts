@@ -24,6 +24,8 @@ describe('scene write intent', () => {
   it('detects German insert/edit verbs', () => {
     expect(hasSceneWriteIntent('Füge zwei Buttons in den Teaser ein')).toBe(true)
     expect(hasSceneWriteIntent('Bitte die Hero-Section anpassen')).toBe(true)
+    expect(hasSceneWriteIntent('kannst du mir einen slide anlegen')).toBe(true)
+    expect(hasSceneWriteIntent('Lege einen Slide für Alex an')).toBe(true)
   })
 
   it('detects short confirm in editor context', () => {

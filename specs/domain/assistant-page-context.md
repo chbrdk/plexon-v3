@@ -175,7 +175,7 @@ See `specs/api/assistant-embed.md` for query keys and iframe stability.
 | Prompt | Append `## Aktueller Seitenkontext` with product, Collection, entity, deep-link hint + rule: **do not ask which Collection/project** when `platformProjectId` is set |
 | Hydrate | Registry per `(capability \| entityType)` → optional compact block (EQC, CREATION editor, METRON entity hint today). Budget: `ASSISTANT_MAX_PAGE_CONTEXT_CHARS` |
 | Tool inject | Family-specific: e.g. Audion `personas_list` → `project_id` = Collection’s Audion mirror; Checkion scan tools → `domain_scan_id` / entity id; Brandion → guideline/Collection; CREATION scene ops → scene id + lock |
-| Planner / deixis | Phrases like “dieser/diese/hier” + present entity → prefer that entity’s tool family; keep sibling-product MCPs available for cross-ask within the same Collection |
+| Planner / deixis | Phrases like “dieser/diese/hier” + present entity → prefer that entity’s tool family; keep sibling-product MCPs available for cross-ask within the same Collection. **Exception:** CREATION scene craft (`creation_scene_edit` / Slide\|Folie\|Landing create phrasing) MUST NOT be demoted to the host page entity (e.g. short “kannst du mir einen slide anlegen” on a persona detail). Keep `creation_scene_write`; optional AUDION read families may be merged for persona/journey page data. |
 | Fail closed | Missing/forbidden hydrate → thin pathname + capability hint only |
 
 ### Example flows (acceptance scenarios)
@@ -189,6 +189,9 @@ See `specs/api/assistant-embed.md` for query keys and iframe stability.
 
 **C — Audion persona detail.** User: “Fasse sie zusammen.”  
 → `entityType=persona` → `persona_get(entityId)` — no name search.
+
+**C2 — Audion persona detail, create slide.** User: “kannst du mir einen slide anlegen”  
+→ Stay on `creation_scene_edit` with `allowWriteTools` + `creation_scene_write` (do **not** demote to read-only `audion_persona` via short-prompt deixis). AUDION persona read tools may stay available for page-entity content.
 
 **D — Plexon `/projects/{id}`.** Collection from path — persona lookup MUST NOT ask which project.
 

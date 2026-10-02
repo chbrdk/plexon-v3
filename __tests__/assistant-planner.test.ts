@@ -464,4 +464,52 @@ describe('preferPageEntityPlan (deixis)', () => {
     const plan = preferPageEntityPlan(planAssistantTurnHeuristic(input), input);
     expect(plan.intent).toBe('audion_persona');
   });
+
+  it('keeps creation_scene_edit + write when creating a slide from persona page', async () => {
+    const { preferPageEntityPlan, planAssistantTurnHeuristic, toolAllowedByPlan } = await import(
+      '@/lib/assistant/assistant-planner'
+    );
+    const input = {
+      prompt: 'kannst du mir einen slide anlegen',
+      hasProjectContext: true,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      compactContextLoaded: false,
+      pageContext: {
+        product: 'audion' as const,
+        pathname: '/personas/alex',
+        entityType: 'persona',
+        entityId: 'persona-alex-rivera',
+      },
+    };
+    const baseline = planAssistantTurnHeuristic(input);
+    expect(baseline.intent).toBe('creation_scene_edit');
+    expect(baseline.allowWriteTools).toBe(true);
+
+    const plan = preferPageEntityPlan(baseline, input);
+    expect(plan.intent).toBe('creation_scene_edit');
+    expect(plan.allowWriteTools).toBe(true);
+    expect(plan.toolFamilies).toContain('creation_scene_write');
+    expect(plan.toolFamilies).toContain('audion_persona');
+    expect(toolAllowedByPlan('creation_scene_apply_ops', plan)).toBe(true);
+  });
+
+  it('routes separable „Lege einen Slide … an“ to creation_scene_edit', async () => {
+    const { planAssistantTurnHeuristic } = await import('@/lib/assistant/assistant-planner');
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Lege einen Slide für Persona Alex Rivera an',
+      hasProjectContext: false,
+      hasCheckionMcp: false,
+      hasAudionMcp: true,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      compactContextLoaded: false,
+    });
+    expect(plan.intent).toBe('creation_scene_edit');
+    expect(plan.allowWriteTools).toBe(true);
+  });
 });

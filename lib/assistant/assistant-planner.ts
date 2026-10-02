@@ -183,6 +183,8 @@ const PERSONA_NAME_LOOKUP_PATTERNS = [
 
 const WRITE_PATTERNS = [
   /\b(starte|start|erstelle|create|generiere|generate|lösche|delete|anleg\w*|ableit\w*)\b/i,
+  /** German separable: „lege einen Slide an“ / „leg … an“ */
+  /\bleg\w*\b[\s\S]{0,48}\ban\b/i,
   /\b(upsert|import|aktualisier\w*|update|ersetz\w*|replace|archiv\w*|evaluate|publish)\b/i,
   /\b(duplizier\w*|kopier\w*|clone|klon\w*|nachpfleg\w*|ergänz\w*|übertrag\w*|uebertrag\w*|angleich\w*|patch(en|e|t)?)\b/i,
   /\bpfleg\w*\b[\s\S]{0,80}\bnach\b/i,
@@ -287,8 +289,10 @@ const CREATION_SCENE_PATTERNS = [
   /\bflyer\b/i,
   /\bdin\s*a4\b/i,
   /\bdruck(layout|daten)?\b/i,
-  /\b(bau|build|erstell|create|gestalt|design|mach|generier|anleg)\w*.*\b(slide|slides|folie|folien|powerpoint|pptx?)\b/i,
-  /\b(slide|slides|folie|folien|powerpoint|pptx?)\b.*\b(bau|build|erstell|create|gestalt|anleg)\w*/i,
+  /\b(bau|build|erstell|create|gestalt|design|mach|generier|anleg|leg)\w*.*\b(slide|slides|folie|folien|powerpoint|pptx?)\b/i,
+  /\b(slide|slides|folie|folien|powerpoint|pptx?)\b.*\b(bau|build|erstell|create|gestalt|anleg|leg)\w*/i,
+  /** Separable „lege … Slide … an“ / „leg einen Slide an“ */
+  /\bleg\w*\b[\s\S]{0,64}\b(slide|slides|folie|folien|powerpoint|pptx?)\b[\s\S]{0,24}\ban\b/i,
   /\b16\s*[:/zu]\s*9\b/i,
   /\b1920\s*[x×]\s*1080\b/i,
   /\bslide[\s_-]?16[\s_-]?9\b/i,
@@ -1017,7 +1021,7 @@ export function shouldRefinePlanWithLlm(heuristic: AssistantPlan, input: Planner
     input.hasCreationMcp ||
     input.hasSpirionMcp ||
     input.hasVideonMcp ||
-    input.hasMetronMcp,
+    input.hasMetronMcp ||
     input.hasMagcloudMcp
   ) {
     if (heuristic.intent === 'general_chat') {
@@ -1092,6 +1096,10 @@ const DEIXIS_PATTERNS = [
 /**
  * When the host publishes an entity and the user uses deixis / soft ask phrases,
  * prefer that entity's tool family so “dieser Scan” / “diese Persona” resolve.
+ *
+ * Cross-app CREATION scene craft must not be demoted: short prompts like
+ * “kannst du mir einen slide anlegen” (length < 80) on a persona page used to
+ * strip `creation_scene_write` and set allowWriteTools=false.
  */
 export function preferPageEntityPlan(plan: AssistantPlan, input: PlannerInput): AssistantPlan {
   const ctx = input.pageContext;
@@ -1101,6 +1109,29 @@ export function preferPageEntityPlan(plan: AssistantPlan, input: PlannerInput): 
 
   const text = (input.planningPrompt ?? input.prompt).trim();
   const deixis = DEIXIS_PATTERNS.some((p) => p.test(text)) || text.length < 80;
+
+  const creationSceneCraft =
+    plan.intent === 'creation_scene_edit' ||
+    (Boolean(input.hasCreationMcp) && CREATION_SCENE_PATTERNS.some((p) => p.test(text)));
+  if (creationSceneCraft) {
+    const needAudionRead =
+      (entityType === 'persona' ||
+        entityType === 'target_group' ||
+        entityType === 'journey') &&
+      Boolean(input.hasAudionMcp);
+    if (!needAudionRead) return plan;
+    const extra: ToolFamily[] =
+      entityType === 'journey'
+        ? [...AUDION_JOURNEY_FAMILIES]
+        : (['audion_persona', 'audion_knowledge'] as ToolFamily[]);
+    return buildPlan({
+      ...plan,
+      intent: 'creation_scene_edit',
+      toolFamilies: [...new Set([...plan.toolFamilies, ...extra])],
+      reasoning: `${plan.reasoning} → keep CREATION scene craft; +AUDION read from page ${entityType}.`,
+      plannerSource: plan.plannerSource,
+    });
+  }
 
   if (
     (entityType === 'page_scan' || entityType === 'domain_scan' || entityType === 'geo_job') &&
