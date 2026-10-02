@@ -1,12 +1,16 @@
 # CREATION Collection data bind
 
-**Date:** 2026-10-02 · **Status:** Wave 1  
+**Date:** 2026-10-02 · **Status:** Wave 1.2  
 **CREATION SSOT:** `creation-v3/specs/domain/collection-data-bind.md`  
 **Related:** Collection capability surfaces · Magcloud pitch handoff (layout in CREATION)
 
 ## Role
 
 Plexon Collections expose CHECKION / METRON (and later other) capability truth. CREATION magazines and slides **bind refs**, not copy numbers into scene JSON. Magcloud remains the pitch surface after PNG publish — live bind is editor/canvas time in CREATION.
+
+## Chart studio (Wave 1.2)
+
+SiteChart binds a **Collection source** (`metron.collection.kpis` / `checkion.scan.latest.facets`) once at the top of Chart studio, then maps source fields onto label / value / color. Per-row scalar bind is legacy.
 
 ## Operator note
 
