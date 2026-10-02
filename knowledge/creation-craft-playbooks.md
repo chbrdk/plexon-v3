@@ -13,20 +13,21 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 |----|-------------|------------------|
 | `creation_landing_v1` | `landing` | Landing, Startseite, Hero, PDP |
 | `creation_newsletter_v1` | `newsletter` | Newsletter, E-Mail, mailer, digest |
+| `creation_slide_16_9_v1` | `generic` | Slide, Folie, PowerPoint, Pitch-Folie, 16:9, 1920×1080, Magcloud-Stand bauen |
 | `creation_print_magazine_v1` | `print` | PrintPage, Magazin, Broschüre, DIN A4 |
 | `creation_print_report_v1` | `print` | EQC Mag, Magazin-PDF, dataSlot, Whitepaper |
 | `creation_page_as_pattern_v1` | `generic` | Seite als Pattern speichern |
 
 ## Format cheat sheet
 
-| | Web landing | Newsletter | Print |
-|--|-------------|------------|-------|
-| Nodes | Site* / HTML | Site* / HTML **only** | **Print*** under `PrintPage` |
-| Width | Fluid viewport | ~560–640px column | Paper / folio |
-| Tokens | Free Hex greenfield | Free Hex / digital | Brandion **print** channel |
-| Must | Hero mass = Display ≥48 **AND** full-bleed media (`backgroundImage` or large SiteImage) + CTA · text-only heroes fail gate | CTA; no Print* | ≥1 PrintPage |
-| PDF | — | — | Mag-PDF via Creation editor (`composition-magazine-pdf`) |
-| P92 report atoms | — | — | Chip `tone` · `PrintCallout` · Table `columnAlign` · `PrintSteps` (no SiteStack/SVG diagrams for Mag) |
+| | Web landing | Newsletter | Slide 16:9 | Print |
+|--|-------------|------------|------------|-------|
+| Nodes | Site* / HTML | Site* / HTML **only** | Site* / HTML (**not** Magazin `PrintPage`) | **Print*** under `PrintPage` |
+| Width | Fluid viewport | ~560–640px column | **1920×1080** (`set_page_frame`) | Paper / folio |
+| Tokens | Free Hex greenfield | Free Hex / digital | Free Hex / Brandion digital | Brandion **print** channel |
+| Must | Hero mass = Display ≥48 **AND** full-bleed media (`backgroundImage` or large SiteImage) + CTA · text-only heroes fail gate | CTA; no Print* | Fixed frame 1920×1080; one page = one slide; real pitch copy | ≥1 PrintPage |
+| Export | — | — | Magcloud **Publish to Magcloud** (CREATION BFF) · not Mag-PDF | Mag-PDF via Creation editor |
+| P92 report atoms | — | — | — | Chip `tone` · `PrintCallout` · Table `columnAlign` · `PrintSteps` |
 
 ## Related
 

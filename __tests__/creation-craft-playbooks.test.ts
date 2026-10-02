@@ -17,6 +17,7 @@ describe('creation craft playbooks (Wave B)', () => {
       expect.arrayContaining([
         'creation_landing_v1',
         'creation_newsletter_v1',
+        'creation_slide_16_9_v1',
         'creation_print_magazine_v1',
         'creation_print_report_v1',
         'creation_page_as_pattern_v1',
@@ -66,6 +67,24 @@ describe('creation craft playbooks (Wave B)', () => {
       'creation_newsletter_v1',
     )
     expect(qualityJobForCreationCraftPlaybook('creation_newsletter_v1')).toBe('newsletter')
+  })
+
+  it('resolves slide 16:9 / Folie / PowerPoint phrasing before print magazine', () => {
+    expect(resolveCreationCraftPlaybook('Erstell mir einen Slide für den Pitch')?.id).toBe(
+      'creation_slide_16_9_v1',
+    )
+    expect(resolveCreationCraftPlaybook('Baue eine Folie 16:9 mit Headline')?.id).toBe(
+      'creation_slide_16_9_v1',
+    )
+    expect(resolveCreationCraftPlaybook('PowerPoint slide 1920x1080')?.id).toBe(
+      'creation_slide_16_9_v1',
+    )
+    expect(qualityJobForCreationCraftPlaybook('creation_slide_16_9_v1')).toBe('generic')
+    const block = buildCreationCraftPlaybookPromptBlock('creation_slide_16_9_v1')
+    expect(block).toContain('1920')
+    expect(block).toContain('set_page_frame')
+    expect(block).toContain('Magcloud')
+    expect(block).toContain('VERBOTEN als Magazin-Ersatz')
   })
 
   it('resolves print magazine vs print report', () => {
@@ -130,6 +149,23 @@ describe('creation craft playbooks (Wave B)', () => {
     })
     expect(plan.intent).toBe('creation_scene_edit')
     expect(plan.creationCraftPlaybookId).toBe('creation_newsletter_v1')
+  })
+
+  it('routes create-slide to creation_scene_edit even when Magcloud MCP is on', () => {
+    const plan = planAssistantTurnHeuristic({
+      prompt: 'Erstell mir einen Slide für den Pitch',
+      hasProjectContext: false,
+      hasCheckionMcp: false,
+      hasAudionMcp: false,
+      hasEchonMcp: false,
+      hasBrandionMcp: false,
+      hasCreationMcp: true,
+      hasSpirionMcp: false,
+      hasMagcloudMcp: true,
+      compactContextLoaded: false,
+    })
+    expect(plan.intent).toBe('creation_scene_edit')
+    expect(plan.creationCraftPlaybookId).toBe('creation_slide_16_9_v1')
   })
 })
 

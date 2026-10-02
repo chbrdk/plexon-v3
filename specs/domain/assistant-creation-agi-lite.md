@@ -93,22 +93,25 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 | Newsletter | Site* / HTML only | **~560–640px** content column; stacked bands | Free Hex or digital; avoid print channel | Real CTA button/link; preheader; no PrintPage |
 | Print magazine | **Print*** under `PrintPage` | Paper / folio; `--print-*` / Brandion **print** | Prefer `creation_brand_tokens_get` + print channel | Cover/chapter hierarchy; KPI/lede; no web hero flex fetish |
 | Print report | Print* + tables/lists/persona | Multi-`PrintPage` deck | Print channel + optional `dataSlot` for bind | Ranked/table content density; Mag-PDF export path |
+| Slide 16:9 | Site* / HTML (not PrintPage magazine) | **1920×1080** via `set_page_frame` (+ Print lane `slide-16-9` when UI preset available) | Free Hex / Brandion digital | One page = one slide; Magcloud publish is user/BFF (Wave 1), not Mag-PDF |
 
 ### Behaviour
 
 - Planner / agent resolves playbook from user phrasing (DE/EN) when intent is `creation_scene_edit` **and** write tools are on.
 - Playbook injects a **phased system block** (ordered must-do tool sequence). It does **not** bypass the quality gate.
-- Quality gate job follows the playbook (`landing` / `newsletter` / `print` / `generic`).
+- Quality gate job follows the playbook (`landing` / `newsletter` / `print` / `generic`). Slide 16:9 uses **`generic`** (not `print` — Magazin `PrintPage` gate must not apply).
 - Implementation: `lib/assistant/creation-craft-playbooks.ts` (prompt recipes + resolver). Full `run_playbook` step-runner parity is optional later.
 - Shared depth block (`creation-scene-depth`) stays as fallback when **no** playbook matches; when a playbook matches, format-specific phases take priority and the web-only landing essay is not duplicated.
+- Planner: create-slide phrasing (`erstell … Folie/Slide`, PowerPoint, 16:9) MUST route to `creation_scene_edit` (Creation MCP) **before** bare Magcloud Folien browse intent.
 
 ### Resolver priority (first match wins)
 
 1. page-as-pattern / „Seite als Pattern“ / `site_kit_page_save`
 2. newsletter / email / newsletter / mailer / digest / „E-Mail“
-3. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
-4. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
-5. landing / homepage / Startseite / PDP / Hero / wireframe / Skizze / Bioframe (web)
+3. **slide 16:9** / Folie / PowerPoint / pptx / Pitch-Folie / 1920×1080 / „16:9“ (CREATION artboard — not Magazin-PDF)
+4. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
+5. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
+6. landing / homepage / Startseite / PDP / Hero / wireframe / Skizze / Bioframe (web)
 
 ### Wireframe / Skizze (2026-09-14)
 
@@ -144,11 +147,12 @@ Resolve via `resolveCreationCraftModules(prompt, playbookId)` — order … cont
 2. Unit: newsletter/email phrasing → `creation_newsletter_v1`.
 3. Unit: Magazin/PrintPage/Broschüre → `creation_print_magazine_v1`; EQC Mag / report deck → `creation_print_report_v1`.
 4. Unit: „Seite als Pattern“ → `creation_page_as_pattern_v1`.
-5. Unit: gate job `newsletter` fails on Print* in tree and missing CTA; `print` fails without `PrintPage` after writes.
-6. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
-7. Knowledge documents format table + paths (no hardcoded FQDNs in code).
-8. Unit: landing/newsletter always resolve `spirion_section_ref_v1`; gate fails landing/newsletter writes without `spirion_captures_list` or `spirion_capture_prompt_pack`.
-9. Unit: print magazine/report always resolve `print_chapter_rhythm_v1`; brandion bind resolves on explicit pack/bind phrasing.
+5. Unit: „erstell mir einen Slide/Folie“ / PowerPoint / 16:9 → `creation_slide_16_9_v1` (job `generic`); create-slide heuristic → `creation_scene_edit` even when Magcloud MCP is on.
+6. Unit: gate job `newsletter` fails on Print* in tree and missing CTA; `print` fails without `PrintPage` after writes.
+7. Gate still blocks finish if craft-thin / seed chrome after playbook steps.
+8. Knowledge documents format table + paths (no hardcoded FQDNs in code).
+9. Unit: landing/newsletter always resolve `spirion_section_ref_v1`; gate fails landing/newsletter writes without `spirion_captures_list` or `spirion_capture_prompt_pack`.
+10. Unit: print magazine/report always resolve `print_chapter_rhythm_v1`; brandion bind resolves on explicit pack/bind phrasing.
 
 ## Wave C — Collection craft memory (scoped)
 

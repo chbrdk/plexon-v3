@@ -27,6 +27,7 @@ export type CreationCraftEvalBrief = {
     | 'landing'
     | 'pdp'
     | 'newsletter'
+    | 'slide'
     | 'print'
     | 'pattern'
     | 'restyle'
@@ -76,6 +77,9 @@ export const CREATION_CRAFT_EVAL_BRIEFS: CreationCraftEvalBrief[] = [
   { id: 'de-newsletter-08', lang: 'de', prompt: 'Gestalte einen Newsletter für die Kampagne', category: 'newsletter', expectedPlaybookId: 'creation_newsletter_v1' },
   { id: 'en-newsletter-09', lang: 'en', prompt: 'HTML email template with primary CTA', category: 'newsletter', expectedPlaybookId: 'creation_newsletter_v1' },
   { id: 'de-newsletter-10', lang: 'de', prompt: 'E-Mail Digest Mailer einspaltig', category: 'newsletter', expectedPlaybookId: 'creation_newsletter_v1' },
+  { id: 'de-slide-55', lang: 'de', prompt: 'Erstell mir einen Slide für den Pitch', category: 'slide', expectedPlaybookId: 'creation_slide_16_9_v1' },
+  { id: 'en-slide-56', lang: 'en', prompt: 'Create a PowerPoint slide 16:9 with headline', category: 'slide', expectedPlaybookId: 'creation_slide_16_9_v1' },
+  { id: 'de-slide-57', lang: 'de', prompt: 'Baue eine Folie 1920x1080', category: 'slide', expectedPlaybookId: 'creation_slide_16_9_v1' },
   { id: 'de-print-11', lang: 'de', prompt: 'PrintPage Magazin Cover und Chapter', category: 'print', expectedPlaybookId: 'creation_print_magazine_v1' },
   { id: 'en-print-12', lang: 'en', prompt: 'DIN A4 brochure print layout', category: 'print', expectedPlaybookId: 'creation_print_magazine_v1' },
   { id: 'de-print-13', lang: 'de', prompt: 'Broschüre Drucklayout mit PrintCover', category: 'print', expectedPlaybookId: 'creation_print_magazine_v1' },

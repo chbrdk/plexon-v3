@@ -2,7 +2,7 @@
  * Creation craft playbooks — format-aware procedures for scene-edit turns.
  * Spec: specs/domain/assistant-creation-agi-lite.md § Wave B
  *
- * Formats are first-class: web landing, newsletter/email, print magazine, print report.
+ * Formats are first-class: web landing, newsletter/email, slide 16:9, print magazine, print report.
  * Prompt recipes only (no second scene writer). Quality gate still enforces finish rules.
  */
 
@@ -14,6 +14,7 @@ import { choiceQuestion, type JevQuestions } from '@/lib/jev/types';
 export type CreationCraftPlaybookId =
   | 'creation_landing_v1'
   | 'creation_newsletter_v1'
+  | 'creation_slide_16_9_v1'
   | 'creation_print_magazine_v1'
   | 'creation_print_report_v1'
   | 'creation_page_as_pattern_v1';
@@ -31,6 +32,10 @@ const PAGE_AS_PATTERN_RE =
 
 const NEWSLETTER_RE =
   /\b(newsletter|news\s*letter|e-?mail(\s*template)?|mailer|digest|mailing|kampagnen?\s*mail|html\s*mail)\b/i;
+
+/** Pitch / PowerPoint slide — before Magazin print (not PrintPage deck). */
+const SLIDE_16_9_RE =
+  /\b(16\s*[:/zu]\s*9|1920\s*[x×]\s*1080|slide[\s_-]?16[\s_-]?9|powerpoint|pptx?\b|pitch[\s_-]?(slide|folie|deck)|magcloud[\s_-]?(stand|folie|slide)|pr[aä]sentations?folie)\b|\b(bau|build|erstell|create|gestalt|design|mach|generier|anleg)\w*.*\b(slide|slides|folie|folien)\b|\b(slide|slides|folie|folien)\b.*\b(bau|build|erstell|create|gestalt|anleg)\w*/i;
 
 const PRINT_REPORT_RE =
   /\b(eqc\s*mag|magazin[\s_-]?pdf|magazine\s*template|magazineTemplate|quick[\s_-]?check\s*mag|print\s*report|report[\s_-]?deck|datenblatt|whitepaper|gesch[aä]ftsbericht|audit[\s_-]?magazin|dataSlot)\b/i;
@@ -199,6 +204,41 @@ ${SHARED_FINISH}
 `.trim();
 }
 
+function phasesSlide169(): string {
+  return `
+## Craft-Playbook: Slide 16:9 / Pitch-Folie (\`creation_slide_16_9_v1\`)
+Ziel: **eine PowerPoint-ähnliche Folie** (1920×1080) in CREATION — für Magcloud/Pitch, **nicht** Magazin-PDF und **nicht** Web-Landing.
+
+### Format-Regeln (hart)
+- Artboard: **\`set_page_frame\`** auf der aktiven Page mit \`width: 1920\`, \`height: 1080\` (CSS px). Ohne Frame-Override bleibt Desktop 1440 / Print A4 — **Fail**.
+- Optional Hinweis an Nutzer: Editor Breakpoint **Print** → Format **Folie 16:9 (1920×1080)** (Preset \`slide-16-9\`); Agent setzt Frame immer explizit.
+- **Eine Page = eine Folie.** Neue Folie → \`add_page\` { name } → Frame 1920×1080 → Inhalt. Nicht mehrere Slides in eine endlose Scroll-Page stopfen.
+- Nodes: **Site\\*** / HTML-Import. **VERBOTEN als Magazin-Ersatz:** \`PrintPage\` / \`PrintCover\` / \`PrintChapter\` (das ist \`creation_print_*\`).
+- Layout: Full-Bleed Folie — Display-Headline, knappe Lede, 1–2 Fokusblöcke (KPI / Bullet / Media), klare Hierarchie. Kein Website-Mega-Nav, kein Newsletter-560px.
+- Typo: Display ≥48px mit engem \`line-height\` (1.05–1.12); Body kürzer als Landing. Seed-Copy verboten.
+- Farben: eigene Hex oder Brandion **digital** Channel (\`creation_brand_tokens_get\`) — nicht print-mm als Folien-Default.
+- Media: groes Bild / Hintergrund ok; Masse auf der Fläche, keine Tiny-Thumbnails.
+
+### Magcloud (Wave 1)
+- Nach fertiger Folie: Nutzer in CREATION **„An Magcloud veröffentlichen“** (Export-Menü) — PNG + Provenance. Agent **erfindet keine** Magcloud-Board-Inhalte und ruft **kein** SharePoint-Bridge-Secret.
+- Abschlussantwort: kurz bestätigen (1920×1080, Page-Name) + Publish-Hinweis wenn Pitch/Magcloud gemeint war.
+
+Phasen:
+0. Brief: Folientitel, Kernaussage, 3 Bullets max oder 1 KPI-Fokus, optional Bildthema.
+1. \`creation_scene_tree_index\` — active pageId / updatedAt.
+2. Bei neuer Folie: \`add_page\` → response pageId/root. Sonst aktive Page nutzen.
+3. \`set_page_frame\` { pageId, width: 1920, height: 1080 }.
+4. \`creation_scene_import_html\` **oder** \`insert_child\` — Inhalt für **eine** Folie (kein Scroll-Roman).
+5. Polish: Display/CTA/Media Masse; Audit → craft_debug → preview.
+6. Abschluss: Frame 1920×1080 bestätigt; Magcloud-Publish-Hinweis wenn relevant.
+
+**Muss:** Frame 1920×1080; echte Pitch-Copy; keine Seed-Chrome.
+**Verboten:** DIN-A4 Magazin als „Slide“; Desktop-Landing ohne Frame-Lock; Magcloud-Inhalte erfinden.
+${SHARED_STYLING}
+${SHARED_FINISH}
+`.trim();
+}
+
 function phasesPageAsPattern(): string {
   return `
 ## Craft-Playbook: Seite als Pattern (\`creation_page_as_pattern_v1\`)
@@ -227,6 +267,13 @@ const CATALOG: Record<CreationCraftPlaybookId, CreationCraftPlaybook> = {
     label: 'Newsletter / E-Mail',
     qualityJob: 'newsletter',
     reasoning: 'Craft-Playbook Newsletter — Einspalte ~600px, keine Print*-Nodes, echte CTA.',
+  },
+  creation_slide_16_9_v1: {
+    id: 'creation_slide_16_9_v1',
+    label: 'Slide 16:9',
+    qualityJob: 'generic',
+    reasoning:
+      'Craft-Playbook Slide 16:9 — set_page_frame 1920×1080, Site* Pitch-Folie, Magcloud-Publish Hinweis.',
   },
   creation_print_magazine_v1: {
     id: 'creation_print_magazine_v1',
@@ -257,6 +304,7 @@ export function resolveCreationCraftPlaybook(
   if (text) {
     if (PAGE_AS_PATTERN_RE.test(text)) result = CATALOG.creation_page_as_pattern_v1;
     else if (NEWSLETTER_RE.test(text)) result = CATALOG.creation_newsletter_v1;
+    else if (SLIDE_16_9_RE.test(text)) result = CATALOG.creation_slide_16_9_v1;
     else if (PRINT_REPORT_RE.test(text)) result = CATALOG.creation_print_report_v1;
     else if (PRINT_MAGAZINE_RE.test(text)) result = CATALOG.creation_print_magazine_v1;
     else if (LANDING_RE.test(text)) result = CATALOG.creation_landing_v1;
@@ -266,6 +314,7 @@ export function resolveCreationCraftPlaybook(
       'none',
       'creation_landing_v1',
       'creation_newsletter_v1',
+      'creation_slide_16_9_v1',
       'creation_print_magazine_v1',
       'creation_print_report_v1',
       'creation_page_as_pattern_v1',
@@ -308,6 +357,8 @@ export function buildCreationCraftPlaybookPromptBlock(
       return phasesLanding();
     case 'creation_newsletter_v1':
       return phasesNewsletter();
+    case 'creation_slide_16_9_v1':
+      return phasesSlide169();
     case 'creation_print_magazine_v1':
       return phasesPrintMagazine();
     case 'creation_print_report_v1':
