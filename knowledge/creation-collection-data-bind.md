@@ -8,9 +8,9 @@
 
 Plexon Collections expose CHECKION / METRON (and later other) capability truth. CREATION magazines and slides **bind refs**, not copy numbers into scene JSON. Magcloud remains the pitch surface after PNG publish — live bind is editor/canvas time in CREATION.
 
-## Chart studio (Wave 1.3)
+## Chart studio (Wave 1.4)
 
-SiteChart binds a **Collection source** once at the top of Chart studio (`metron.collection.kpis`, `checkion.scan.latest.scores`, per-scan `checkion.scan.{id}.scores`, or `checkion.collection.scoreHistory`), then maps source fields onto label / value / color. Catalog lists completed scans for the **open Collection**. Per-row scalar bind is legacy.
+SiteChart picks any accessible **Collection**, then a source (`metron.collection.kpis`, scan scores, history, …). Cross-Collection refs use `collection.{uuid}.{localRef}`. Field map paints label / value / color.
 
 ## Operator note
 
