@@ -1,7 +1,8 @@
 # CREATION → Magcloud slide handoff
 
 ## Status
-**Accepted** — Wave 1 shipped 2026-10-02 (CREATION publish BFF + Magcloud deliver + Edit in Creation).
+**Accepted** — Wave 1 shipped 2026-10-02 (CREATION publish BFF + Magcloud deliver + Edit in Creation).  
+**Wave 1.1** — CREATION editor dialog: Collection + Magcloud Board catalog / create (`islandKey`); Assistant Magcloud board IA stays secondary.
 
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions (product twins):**  
@@ -36,10 +37,10 @@ Magcloud already ingests PPTX stands. Ecosystem apps (Checkion findings, Metron 
 
 | Actor | Role |
 |-------|------|
-| Designer / presenter | Authors or selects a CREATION scene page; chooses Magcloud `boardName`; publishes; later re-opens via **Edit in Creation** |
-| CREATION | Renders page(s) to PNG (or PDF); calls Magcloud ingest with service/user auth; hosts `/editor` deep-link |
+| Designer / presenter | Authors a CREATION scene; picks Collection + Magcloud Board (or creates one) in the editor dialog; publishes; later re-opens via **Edit in Creation** |
+| CREATION | Board catalog BFF + dialog; renders PNG; calls Magcloud deliver; hosts `/editor` deep-link |
 | Magcloud Universe | Creates/merges slide assets onto the board; shows **Edit in Creation** when provenance is present |
-| Plexon Assistant (later) | Optional intents `publish_creation_slide_to_magcloud` / open editor with Confirm |
+| Plexon Assistant | Optional MCP publish Confirm only — **does not** own Magcloud board picker IA (that lives in CREATION UI) |
 
 ## Product rules
 1. **Same Collection only** — `platformProjectId` on the CREATION scene MUST match the Magcloud board’s Collection binding. Cross-Collection publish is forbidden.
@@ -104,7 +105,8 @@ Rules:
 |------|-------------|
 | **0** | This spec + product twins + keep-drop pointers |
 | **1** | CREATION “Publish to Magcloud”; Magcloud image-slide ingest + provenance; Magcloud **Edit in Creation** deep-link; Collection-scoped auth |
-| **2** | Multi-page batch; `pageId` focus in editor launch; **Assistant Confirm** via CREATION MCP `creation.scene_publish_magcloud` (Plexon confirm gate); Magcloud board deep-link after publish; **EQC → CREATION pitch slides** (`eqc-pitch-slides.md`) |
+| **1.1** | CREATION dialog: Collection select + Magcloud Board list/create (`islandKey`); Magcloud shell boards API admits service+actor for CREATION BFF |
+| **2** | Multi-page batch; `pageId` focus in editor launch; **Assistant Confirm** via CREATION MCP `creation.scene_publish_magcloud` (secondary to editor dialog); Magcloud board deep-link after publish; **EQC → CREATION pitch slides** (`eqc-pitch-slides.md`) |
 | **3** | Optional live `sceneRef` (iframe/island) instead of pixels — only if presentation UX needs edit-in-place |
 
 ## Non-goals
