@@ -1,12 +1,12 @@
 # CREATION → Magcloud slide handoff
 
 ## Status
-**Proposed** — 2026-10-02 (spec only; no runtime yet).
+**Accepted** — Wave 1 shipped 2026-10-02 (CREATION publish BFF + Magcloud deliver + Edit in Creation).
 
 **Federation:** `2026-05-plexon-federation-v3`  
 **Companions (product twins):**  
-- CREATION: `creation-v3/specs/domain/magcloud-slide-handoff.md`  
-- Magcloud: `magcloud/slide-universe/specs/domain/creation-slide-consume.md`  
+- CREATION: `creation-v3/specs/domain/magcloud-slide-handoff.md` · `creation-v3/specs/api/magcloud-slide-handoff.md`  
+- Magcloud: `magcloud/slide-universe/specs/domain/creation-slide-consume.md` · `magcloud/slide-universe/specs/api/creation-deliver.md`  
 **Related:** `collection-projects.md` · `magcloud-capability.md` · CREATION `scene-surface-export.md` · `composition-magazine-pdf.md` · Magcloud `deck-ingest-pipeline.md` · `deck-sharepoint-bridge.md`
 
 ## Goal
