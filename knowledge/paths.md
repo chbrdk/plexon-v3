@@ -100,6 +100,7 @@
   - EQC Distributions band (Checkion corpus donuts): `knowledge/eqc-distributions-band.md` · overview via `checkionApiDomainScanOverview`
   - EQC E-E-A-T + GEO-Empfehlungen as own bands: `knowledge/eqc-magazine-eeat-recs-bands.md`
   - EQC Magazin-PDF: `knowledge/eqc-magazine-pdf.md` · **SSOT Creation MagazineTemplate** (`specs/domain/creation-magazine-template-consume.md` · paths `lib/paths/creation-magazine-templates.ts` · env `EQC_CREATION_MAGAZINE_TEMPLATE` · `CREATION_API_URL`) · legacy fallback `lib/assistant/reports/pdf/eqc-magazine-pdf.tsx` · Mag* SSOT `@msqdx/ui/mag` · packing `lib/assistant/reports/pdf/magazine/pack-magazine-pages.ts`
+  - EQC → CREATION pitch slides (16:9 → Magcloud): `specs/domain/eqc-pitch-slides.md` · `knowledge/eqc-pitch-slides.md` · `POST …/event-quick-check/runs/:runId/pitch-slides` · template role `quick-check-slides`
 - Collection Test Flow Wave 1 (quality path shipped):
   - UI: `/projects/[platformProjectId]/flows` · `/projects/[platformProjectId]/flows/[flowId]` — helpers `pathPlatformProjectFlows` / `pathPlatformProjectFlow`
   - API: `GET/POST /api/platform/projects/:id/flows` · `GET/PATCH …/flows/:flowId` · `POST …/flows/:flowId/run` — helpers `apiPlatformProjectFlows` / `apiPlatformProjectFlow` / `apiPlatformProjectFlowRun`

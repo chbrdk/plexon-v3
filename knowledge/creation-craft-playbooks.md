@@ -14,6 +14,7 @@ Agents defaulted to **web landing** craft. Real Collection work also needs **new
 | `creation_landing_v1` | `landing` | Landing, Startseite, Hero, PDP |
 | `creation_newsletter_v1` | `newsletter` | Newsletter, E-Mail, mailer, digest |
 | `creation_slide_16_9_v1` | `generic` | Slide, Folie, PowerPoint, Pitch-Folie, 16:9, 1920×1080, Magcloud-Stand bauen |
+| `creation_eqc_pitch_slides_v1` | `generic` | Quickscan/EQC + Folie/Pitch/Magcloud — materialize 16:9 from report |
 | `creation_print_magazine_v1` | `print` | PrintPage, Magazin, Broschüre, DIN A4 |
 | `creation_print_report_v1` | `print` | EQC Mag, Magazin-PDF, dataSlot, Whitepaper |
 | `creation_page_as_pattern_v1` | `generic` | Seite als Pattern speichern |

@@ -15,6 +15,7 @@ export type CreationCraftPlaybookId =
   | 'creation_landing_v1'
   | 'creation_newsletter_v1'
   | 'creation_slide_16_9_v1'
+  | 'creation_eqc_pitch_slides_v1'
   | 'creation_print_magazine_v1'
   | 'creation_print_report_v1'
   | 'creation_page_as_pattern_v1';
@@ -36,6 +37,10 @@ const NEWSLETTER_RE =
 /** Pitch / PowerPoint slide — before Magazin print (not PrintPage deck). */
 const SLIDE_16_9_RE =
   /\b(16\s*[:/zu]\s*9|1920\s*[x×]\s*1080|slide[\s_-]?16[\s_-]?9|powerpoint|pptx?\b|pitch[\s_-]?(slide|folie|deck)|magcloud[\s_-]?(stand|folie|slide)|pr[aä]sentations?folie)\b|\b(bau|build|erstell|create|gestalt|design|mach|generier|anleg)\w*.*\b(slide|slides|folie|folien)\b|\b(slide|slides|folie|folien)\b.*\b(bau|build|erstell|create|gestalt|anleg)\w*/i;
+
+/** EQC / Quickscan → CREATION pitch slides (before generic slide). */
+const EQC_PITCH_SLIDES_RE =
+  /\b(eqc|event\s*quick\s*check|quick[\s_-]?check|quickscan|quick\s*scan)\b.*\b(slide|slides|folie|folien|pitch|magcloud|16\s*[:/zu]\s*9|powerpoint)\b|\b(slide|slides|folie|folien|pitch)\b.*\b(eqc|quick[\s_-]?check|quickscan|quick\s*scan)\b|\b(pitch[\s_-]?slides?|eqc[\s_-]?pitch)\b/i;
 
 const PRINT_REPORT_RE =
   /\b(eqc\s*mag|magazin[\s_-]?pdf|magazine\s*template|magazineTemplate|quick[\s_-]?check\s*mag|print\s*report|report[\s_-]?deck|datenblatt|whitepaper|gesch[aä]ftsbericht|audit[\s_-]?magazin|dataSlot)\b/i;
@@ -204,6 +209,33 @@ ${SHARED_FINISH}
 `.trim();
 }
 
+function phasesEqcPitchSlides(): string {
+  return `
+## Craft-Playbook: EQC Pitch Slides (\`creation_eqc_pitch_slides_v1\`)
+Ziel: **Quickscan/EQC-Report → 16:9 CREATION-Folien** (editierbar) → optional Magcloud Publish.
+Spec: \`specs/domain/eqc-pitch-slides.md\`.
+
+### Format-Regeln (hart)
+- Truth kommt aus dem **EQC-Report** (CHECKION) — keine erfundenen Scores/Issues.
+- Layout in **CREATION**: \`activeBreakpoint=print\`, Preset/\`set_page_frame\` **1920×1080**, Site\\* (nicht Magazin-\`PrintPage\` als Folien-Ersatz).
+- Bevorzugt: Nutzer/Tool \`POST /api/assistant/event-quick-check/runs/:runId/pitch-slides\` → \`editorHref\` öffnen, dann polish.
+- Ohne Materialize-API: \`add_page\` + \`set_page_frame\` 1920×1080 pro Folie; Copy aus Report-Kontext (Cover / Issues / GEO / Personas).
+- Nach Polish: **An Magcloud veröffentlichen** (CREATION Export-Menü) — Agent erfindet keine Magcloud-Board-Daten.
+
+Phasen:
+0. Run-Id / Collection aus Kontext bestätigen; Report muss ready sein.
+1. Materialize pitch-slides (API) **oder** Scene mit 1920×1080 Pages bauen und Report-Copy einsetzen.
+2. Editor öffnen / Scene polish (Display, KPI-Zeile, Issue-Liste).
+3. Audit → craft_debug → preview.
+4. Abschluss: editorHref + Hinweis Magcloud-Publish.
+
+**Muss:** 1920×1080; Report-gebundene Fakten; keine Seed-Copy.
+**Verboten:** Magazin-A4 als Pitch; Magcloud-Direkt-Templates als Layout-SoT; erfundene Scan-Zahlen.
+${SHARED_STYLING}
+${SHARED_FINISH}
+`.trim();
+}
+
 function phasesSlide169(): string {
   return `
 ## Craft-Playbook: Slide 16:9 / Pitch-Folie (\`creation_slide_16_9_v1\`)
@@ -275,6 +307,13 @@ const CATALOG: Record<CreationCraftPlaybookId, CreationCraftPlaybook> = {
     reasoning:
       'Craft-Playbook Slide 16:9 — set_page_frame 1920×1080, Site* Pitch-Folie, Magcloud-Publish Hinweis.',
   },
+  creation_eqc_pitch_slides_v1: {
+    id: 'creation_eqc_pitch_slides_v1',
+    label: 'EQC Pitch Slides',
+    qualityJob: 'generic',
+    reasoning:
+      'Craft-Playbook EQC→CREATION Pitch Slides — materialize 16:9 from Quickscan, then Magcloud publish.',
+  },
   creation_print_magazine_v1: {
     id: 'creation_print_magazine_v1',
     label: 'Print Magazin',
@@ -304,6 +343,7 @@ export function resolveCreationCraftPlaybook(
   if (text) {
     if (PAGE_AS_PATTERN_RE.test(text)) result = CATALOG.creation_page_as_pattern_v1;
     else if (NEWSLETTER_RE.test(text)) result = CATALOG.creation_newsletter_v1;
+    else if (EQC_PITCH_SLIDES_RE.test(text)) result = CATALOG.creation_eqc_pitch_slides_v1;
     else if (SLIDE_16_9_RE.test(text)) result = CATALOG.creation_slide_16_9_v1;
     else if (PRINT_REPORT_RE.test(text)) result = CATALOG.creation_print_report_v1;
     else if (PRINT_MAGAZINE_RE.test(text)) result = CATALOG.creation_print_magazine_v1;
@@ -314,6 +354,7 @@ export function resolveCreationCraftPlaybook(
       'none',
       'creation_landing_v1',
       'creation_newsletter_v1',
+      'creation_eqc_pitch_slides_v1',
       'creation_slide_16_9_v1',
       'creation_print_magazine_v1',
       'creation_print_report_v1',
@@ -359,6 +400,8 @@ export function buildCreationCraftPlaybookPromptBlock(
       return phasesNewsletter();
     case 'creation_slide_16_9_v1':
       return phasesSlide169();
+    case 'creation_eqc_pitch_slides_v1':
+      return phasesEqcPitchSlides();
     case 'creation_print_magazine_v1':
       return phasesPrintMagazine();
     case 'creation_print_report_v1':

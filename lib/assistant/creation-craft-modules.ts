@@ -167,6 +167,7 @@ const MODULE_CATALOG: Record<CreationCraftModuleId, CreationCraftModule> = {
       'creation_landing_v1',
       'creation_newsletter_v1',
       'creation_slide_16_9_v1',
+      'creation_eqc_pitch_slides_v1',
       'creation_print_magazine_v1',
       'creation_print_report_v1',
     ],

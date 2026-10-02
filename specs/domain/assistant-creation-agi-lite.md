@@ -108,10 +108,11 @@ After `creation_scene_preview` succeeds, existing Vision pass **must** reject gr
 
 1. page-as-pattern / „Seite als Pattern“ / `site_kit_page_save`
 2. newsletter / email / newsletter / mailer / digest / „E-Mail“
-3. **slide 16:9** / Folie / PowerPoint / pptx / Pitch-Folie / 1920×1080 / „16:9“ (CREATION artboard — not Magazin-PDF)
-4. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
-5. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
-6. landing / homepage / Startseite / PDP / Hero / wireframe / Skizze / Bioframe (web)
+3. **EQC pitch slides** / Quickscan+Folie / EQC+Pitch / Magcloud-Stand aus Quick Check
+4. **slide 16:9** / Folie / PowerPoint / pptx / Pitch-Folie / 1920×1080 / „16:9“ (CREATION artboard — not Magazin-PDF)
+5. print report / Magazin-PDF / EQC Mag / MagazineTemplate / whitepaper / report deck / Datenblatt (print)
+6. print / PrintPage / PrintCover / Magazin / Broschüre / Flyer / DIN A4 / print channel
+7. landing / homepage / Startseite / PDP / Hero / wireframe / Skizze / Bioframe (web)
 
 ### Wireframe / Skizze (2026-09-14)
 

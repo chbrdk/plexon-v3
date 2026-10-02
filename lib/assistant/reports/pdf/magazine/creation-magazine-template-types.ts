@@ -24,6 +24,14 @@ export type CreationCompositionScene = {
   activeBreakpoint?: string;
   activePrintPreset?: string;
   root: CreationSceneNode;
+  /** Multi-page artboards (pitch slides / scene-pages). */
+  pages?: Array<{
+    id: string;
+    name: string;
+    frame?: { x?: number; y?: number; width?: number; height?: number };
+    root: CreationSceneNode;
+  }>;
+  activePageId?: string;
   updatedAt: string;
 };
 

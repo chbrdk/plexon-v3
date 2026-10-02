@@ -104,7 +104,7 @@ Rules:
 |------|-------------|
 | **0** | This spec + product twins + keep-drop pointers |
 | **1** | CREATION “Publish to Magcloud”; Magcloud image-slide ingest + provenance; Magcloud **Edit in Creation** deep-link; Collection-scoped auth |
-| **2** | Multi-page batch; `pageId` focus in editor launch; Assistant Confirm intents; Magcloud board deep-link after publish |
+| **2** | Multi-page batch; `pageId` focus in editor launch; Assistant Confirm intents; Magcloud board deep-link after publish; **EQC → CREATION pitch slides** (`eqc-pitch-slides.md`) |
 | **3** | Optional live `sceneRef` (iframe/island) instead of pixels — only if presentation UX needs edit-in-place |
 
 ## Non-goals

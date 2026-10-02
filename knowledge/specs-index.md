@@ -66,6 +66,7 @@
 | EQC → Persona chat (C5) | `knowledge/eqc-persona-chat.md` |
 | EQC Distributions band | `knowledge/eqc-distributions-band.md` |
 | EQC Magazin-PDF (Creation SSOT + legacy fallback) | `knowledge/eqc-magazine-pdf.md` |
+| EQC → CREATION pitch slides → Magcloud | `specs/domain/eqc-pitch-slides.md` · `knowledge/eqc-pitch-slides.md` |
 | Central creation | `knowledge/platform-projects-central-creation.md` |
 | CREATION product (v3 shell) | `knowledge/creation-v3-onboarding.md` · product id `creation` |
 | Federation contract | `knowledge/platform-federation-contract.md` |

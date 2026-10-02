@@ -293,6 +293,7 @@ const CREATION_SCENE_PATTERNS = [
   /\b1920\s*[x×]\s*1080\b/i,
   /\bslide[\s_-]?16[\s_-]?9\b/i,
   /\bpitch[\s_-]?(slide|folie)\b/i,
+  /\b(eqc|quick[\s_-]?check|quickscan).*\b(slide|folie|pitch)\b/i,
   /\bsite\s*kit\b/i,
   /\bmaster\b/i,
   /\binstanz/i,

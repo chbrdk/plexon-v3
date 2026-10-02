@@ -8,14 +8,20 @@ export const ENV_EQC_CREATION_MAGAZINE_TEMPLATE = 'EQC_CREATION_MAGAZINE_TEMPLAT
 /** Consumer role matching Creation `paths.magazineTemplateRoleQuickCheck`. */
 export const CREATION_MAGAZINE_TEMPLATE_ROLE_QUICK_CHECK = 'quick-check-magazine' as const;
 
+/** 16:9 pitch slides from EQC — specs/domain/eqc-pitch-slides.md */
+export const CREATION_MAGAZINE_TEMPLATE_ROLE_QUICK_CHECK_SLIDES =
+  'quick-check-slides' as const;
+
 /** Relative API paths on Creation (central). */
 export const CREATION_API_MAGAZINE_TEMPLATES = '/api/magazine-templates';
+export const CREATION_API_SCENES = '/api/scenes';
 export const creationApiMagazineTemplate = (templateId: string) =>
   `/api/magazine-templates/${encodeURIComponent(templateId)}`;
 export const creationApiMagazineTemplateVersion = (templateId: string, version: number) =>
   `/api/magazine-templates/${encodeURIComponent(templateId)}/versions/${encodeURIComponent(String(version))}`;
 export const creationApiScenePdf = (sceneId: string) =>
   `/api/scenes/${encodeURIComponent(sceneId)}/pdf`;
+export const creationApiScenes = () => CREATION_API_SCENES;
 
 function creationApiBase(): string | null {
   const base = getCreationServiceApiUrl()?.replace(/\/+$/, '');
