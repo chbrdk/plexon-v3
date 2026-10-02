@@ -46,6 +46,7 @@ MAGCLOUD is the **spatial pitch / constellation** capability of a Collection: re
 - `collection-projects.md` Phase 9
 - Product SoT: `magcloud/specs/domain/app-shell.md`, `magcloud/slide-universe/specs/domain/ui-msqdx-align.md`
 - Deck ingest: `magcloud/slide-universe/specs/domain/deck-ingest-pipeline.md` · `specs/api/deck-ingest.md`
+- CREATION slide handoff (proposed): `creation-magcloud-handoff.md`
 - Deploy rasterize deps: `magcloud/nixpacks.toml`, `magcloud/Dockerfile.universe`, ops `slide-universe/knowledge/deck-ingest-pipeline.md`
 - `magcloud/knowledge/shell-requirements.md`
 - Metron pattern: `metron-capability.md`
