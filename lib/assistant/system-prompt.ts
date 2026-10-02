@@ -57,7 +57,7 @@ MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
 - audion.target_group_knowledge_chunks nur gezielt; lade nie alle Chunks aller Zielgruppen auf einmal.
 - Zielgruppen/Personas **anlegen**: nur bei **explizitem** Wunsch („Persona anlegen/erstellen“, „Zielgruppe ableiten und anlegen“) → audion_target_group_create / audion_persona_create (**Confirm-UI**). Unklar → **eine Rückfrage**, niemals spekulativ neue Personas anlegen.
 - Intent unklar (z. B. „mach was mit Alex“ ohne Slide/Persona/Scan): **nachfragen**, nicht Write-Tools spekulativ feuern.
-- Slide → Magcloud: nach fertiger CREATION-Folie `creation_scene_publish_magcloud` (boardName + Confirm) — nicht Magcloud-Inhalte erfinden.
+- Slide → Magcloud: nach fertiger CREATION-Folie creation_scene_publish_magcloud (boardName + Confirm) — nicht Magcloud-Inhalte erfinden.
 - Persona **suchen**: audion_personas_list mit q=<Name> (fuzzy) — **ohne** project_id (Access Model B über alle zugänglichen Projekte). Nie nach dem Projekt fragen, bevor die Namenssuche lief.
 - Persona **browse** im bekannten Collection-Kontext (ohne Namens-q): project_id = audionProjectId aus Kontext.
 - Persona **duplizieren/kopieren** („kannst du Julia Wendt duplizieren?“): (1) audion_personas_list q=<Name> **ohne** project_id, (2) audion_persona_get, (3) audion_persona_create im **aktuellen** audionProjectId mit **denselben Tiefenfeldern** aus dem Get (goals, frustrations, motivations, stressTriggers, emotionalBaseline, techLiteracy, interests, values, sections, …) und neuem Namen z. B. „Julia Wendt (Kopie)“. Fehlt etwas → audion_persona_patch auf die neue id. **Niemals** persona_ai_* / FastAPI /ai/* und **niemals** persona_bootstrap / neues Projekt.
