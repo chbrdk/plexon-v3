@@ -36,3 +36,15 @@ Reihenfolge bei Aufnahme: oft **QS-02 vor QS-01**, wenn noch keine Active Guidel
 
 - `brandion-01-measured-evaluate-pdf.md`
 - `brandion-02-guideline-activate.md`
+
+## Nutzer-Help SSOT (Wave 5)
+
+Produkt-Hilfe (bilingual, in-app `/help` + public `/docs`) lebt in `content/help/`:
+
+| Tutorial | Help article id |
+|---|---|
+| Serie / erste zwei | `brandion.getting-started` |
+| BRN-QS-02 Activate | `brandion.guidelines.activate` |
+| BRN-QS-01 Measured evaluate | `brandion.analysis.measured-evaluate` |
+
+Produktionsskripte bleiben in diesem Ordner; Nutzer-How-to zuerst in `content/help/` und Manifest.

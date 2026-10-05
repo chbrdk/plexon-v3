@@ -119,6 +119,7 @@ COPY --from=builder /workspace/plexon-v3/.next ./.next
 COPY --from=builder /workspace/plexon-v3/node_modules ./node_modules
 COPY --from=builder /workspace/plexon-v3/package.json ./
 COPY --from=builder /workspace/plexon-v3/lib ./lib
+COPY --from=builder /workspace/plexon-v3/content ./content
 COPY --from=builder /workspace/plexon-v3/drizzle.config.ts ./
 COPY --from=builder /workspace/plexon-v3/tsconfig.json ./
 COPY --from=builder /workspace/plexon-v3/scripts/docker-entrypoint.sh ./scripts/docker-entrypoint.sh

@@ -49,3 +49,17 @@ Für Folgen 2–5 sollte vor der Aufnahme eine kontrollierbare Demo-Domain verwe
 - `checkion-03-domain-deep-scan.md`
 - `checkion-04-seo-crawl.md`
 - `checkion-05-geo-model-memory.md`
+
+## Nutzer-Help SSOT (Wave 4)
+
+Produkt-Hilfe (bilingual, in-app `/help` + public `/docs`) lebt in `content/help/`:
+
+| Tutorial | Help article id |
+|---|---|
+| Serie / Fünf Prüfungen | `checkion.getting-started` |
+| CHK-QS-02 WCAG Quick | `checkion.scan.wcag-quick` |
+| CHK-CORE-02 Deep | `checkion.scan.domain-deep` |
+| CHK-CORE-03 SEO | `checkion.scan.seo-crawl` |
+| CHK-CORE-04 GEO Model memory | `checkion.scan.geo-layers` |
+
+Produktionsskripte und Sprechertexte bleiben in diesem Ordner; Änderungen am Nutzer-How-to zuerst in `content/help/` und Manifest.

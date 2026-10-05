@@ -80,12 +80,15 @@ export function AssistantChat({
   presentation = 'expand',
   onConversationChange,
   pageContext = null,
+  composerSeed = null,
 }: {
   presentation?: 'overlay' | 'expand'
   /** Host flyout expand deep-link (native hybrid mount). */
   onConversationChange?: (conversationId: string | null) => void
   /** Host page/entity context — specs/domain/assistant-page-context.md */
   pageContext?: AssistantPageContext | null
+  /** One-shot composer text (Help Hub → Ask Assistant). */
+  composerSeed?: string | null
 }) {
   const { t } = useI18n();
   const router = useRouter();
@@ -278,6 +281,15 @@ export function AssistantChat({
     const qs = next.toString();
     router.replace(qs ? `${PATH_ASSISTANT}?${qs}` : PATH_ASSISTANT, { scroll: false });
   }, [presentation, router, searchParams]);
+
+  const composerSeedAppliedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const seed = composerSeed?.trim();
+    if (!seed) return;
+    if (composerSeedAppliedRef.current === seed) return;
+    composerSeedAppliedRef.current = seed;
+    setInput(seed);
+  }, [composerSeed]);
 
   useEffect(() => {
     void refreshConversations();

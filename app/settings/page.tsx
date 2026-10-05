@@ -33,6 +33,8 @@ import {
   apiPlatformMcpHubOauthStart,
   apiPlatformMcpHubOauthStatus,
   PATH_LOGIN,
+  PATH_DOCS_PUBLIC,
+  PATH_HELP,
 } from '@/lib/constants'
 import { shellPaths } from '@/lib/shell-paths'
 
@@ -622,6 +624,18 @@ export default function SettingsPage() {
                   ))}
                 </ul>
               )}
+            </SettingsBand>
+
+            <SettingsBand title={t('settings.helpDocs.title')}>
+              <Text role="meta">{t('settings.helpDocs.body')}</Text>
+              <div className="plexon-settings-help-links">
+                <Button variant="subtle" size="sm" href={PATH_HELP}>
+                  {t('settings.helpDocs.openHelp')}
+                </Button>
+                <Button variant="ghost" size="sm" href={PATH_DOCS_PUBLIC}>
+                  {t('settings.helpDocs.openDocs')}
+                </Button>
+              </div>
             </SettingsBand>
 
             <SettingsBand title={t('settings.about.title')}>

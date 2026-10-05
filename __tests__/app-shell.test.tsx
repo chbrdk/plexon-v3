@@ -27,6 +27,7 @@ vi.mock('@/components/i18n/I18nProvider', () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
         'nav.dashboard': 'Dashboard',
+        'nav.projects': 'Projects',
         'nav.assistant': 'Assistant',
         'nav.eventQuickCheck': 'Event Quick Check',
         'nav.products': 'Products',
@@ -47,6 +48,10 @@ vi.mock('@/components/settings/BrandColorInitializer', () => ({
 
 vi.mock('@/components/PlatformAssistantHost', () => ({
   PlatformAssistantHost: () => null,
+}))
+
+vi.mock('@/components/help/HelpHost', () => ({
+  HelpHost: () => <button type="button" data-testid="help-host-trigger">Help</button>,
 }))
 
 vi.mock('@msqdx/ui', () => ({

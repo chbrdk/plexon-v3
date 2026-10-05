@@ -8,6 +8,7 @@ import {
   ASSISTANT_REPORT_PPTX_DEBUG_PARAM,
   ASSISTANT_REPORT_PPTX_DEBUG_QUERY_PLAN,
 } from '@/lib/paths/assistant-report-export';
+import { isPublicDocsPath as helpIsPublicDocsPath } from '@/lib/paths/help';
 
 export const PATH_HOME = '/';
 export const PATH_LOGIN = '/login';
@@ -31,6 +32,32 @@ export const PATH_LOUDER_DEMO = '/louder.html';
 /** Public standalone monochrome CARO tribute HTML prototype. */
 export const PATH_CARO_DEMO = '/caro.html';
 
+export {
+  PATH_DOCS_PUBLIC,
+  PATH_HELP,
+  PATH_HELP_EMBED,
+  HELP_LANG_QUERY,
+  HELP_EMBED_PRODUCT_QUERY_PARAM,
+  HELP_EMBED_PATHNAME_QUERY_PARAM,
+  HELP_EMBED_CAPABILITY_QUERY_PARAM,
+  HELP_EMBED_ARTICLE_QUERY_PARAM,
+  HELP_EMBED_THEME_QUERY_PARAM,
+  API_HELP_INDEX,
+  API_HELP_ARTICLE,
+  API_HELP_CONTEXT,
+  API_HELP_EVENTS,
+  API_HELP_WALKTHROUGHS,
+  pathDocsArticle,
+  pathHelpArticle,
+  pathDocsPublic,
+  pathHelpEmbed,
+  buildHelpEmbedUrl,
+  apiHelpArticle,
+  isPublicDocsPath,
+  isHelpEmbedPath,
+} from '@/lib/paths/help';
+export type { HelpEmbedQuery } from '@/lib/paths/help';
+
 /** Unauthenticated standalone pages — skip session redirect and AppShell chrome. */
 export const PUBLIC_STANDALONE_PATHS = [
   PATH_SUITE_LANDING,
@@ -45,6 +72,7 @@ export const PUBLIC_STANDALONE_PATHS = [
 
 export function isPublicStandalonePath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
+  if (helpIsPublicDocsPath(pathname)) return true;
   return (PUBLIC_STANDALONE_PATHS as readonly string[]).includes(pathname);
 }
 

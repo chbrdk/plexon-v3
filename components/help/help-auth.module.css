@@ -1,0 +1,70 @@
+.root {
+  max-width: 42rem;
+  padding: 0.5rem 0 2rem;
+}
+
+.kicker {
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 0 0 1.5rem;
+  opacity: 0.72;
+  line-height: 1.45;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  text-decoration: none;
+  color: inherit;
+}
+
+.card span {
+  opacity: 0.68;
+  font-size: 0.95rem;
+}
+
+.foot,
+.back {
+  margin-top: 1.75rem;
+  font-size: 0.9rem;
+}
+
+.foot a,
+.back a {
+  color: inherit;
+}
+
+.related {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+}
+
+.related h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

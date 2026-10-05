@@ -6,7 +6,9 @@
 
 import {
   PATH_ASSISTANT,
+  PATH_DOCS_PUBLIC,
   PATH_EVENT_QUICK_CHECK,
+  PATH_HELP,
   PATH_HOME,
   PATH_PRODUCTS,
   PATH_PROJECTS,
@@ -16,6 +18,7 @@ import {
   getCheckionUrl,
   pathAssistantChat,
   pathEventQuickCheckRun,
+  pathHelpArticle,
   pathPlatformProjectDashboard,
   pathPlatformProjectFlows,
 } from '@/lib/constants'
@@ -50,6 +53,9 @@ export function buildPlatformNavigationPromptBlock(): string {
     `- Assistent (Expand): ${PATH_ASSISTANT}`,
     `- Assistent Conversation: ${pathAssistantChat(CONVERSATION_ID_PLACEHOLDER)}`,
     `- Einstellungen: ${PATH_SETTINGS}`,
+    `- Hilfe (auth): ${PATH_HELP}`,
+    `- Hilfe-Artikel: ${pathHelpArticle('{articleId}')}`,
+    `- Öffentliche Docs: ${PATH_DOCS_PUBLIC}`,
     `- Produkte: ${PATH_PRODUCTS}`,
   ]
 

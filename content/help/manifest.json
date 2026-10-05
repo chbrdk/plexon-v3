@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "locales": ["en", "de"],
+  "articles": [
+    {
+      "id": "plexon.collections.overview",
+      "visibility": "public",
+      "products": ["plexon"],
+      "routes": ["/projects", "capability:plexon"],
+      "audience": "user",
+      "title": {
+        "en": "Collections: your project workspace",
+        "de": "Collections: dein Projekt-Arbeitsraum"
+      },
+      "task": {
+        "en": "Understand what a Collection is",
+        "de": "Verstehen, was eine Collection ist"
+      },
+      "relatedArticles": [
+        "plexon.assistant.getting-started",
+        "plexon.help.using-help",
+        "checkion.getting-started",
+        "brandion.getting-started"
+      ],
+      "relatedTips": ["plexon.collection.binding"],
+      "assistantHints": [
+        "Collection is the only user-facing project",
+        "Capabilities bind under a Collection, not separate product projects"
+      ]
+    },
+    {
+      "id": "plexon.assistant.getting-started",
+      "visibility": "public",
+      "products": ["plexon"],
+      "routes": ["/assistant", "capability:assistant"],
+      "audience": "user",
+      "title": {
+        "en": "Platform Assistant: get help without leaving the app",
+        "de": "Platform Assistant: Hilfe ohne die App zu verlassen"
+      },
+      "task": {
+        "en": "Open and use the Assistant flyout",
+        "de": "Assistant-Flyout öffnen und nutzen"
+      },
+      "relatedArticles": ["plexon.help.using-help", "plexon.collections.overview"],
+      "relatedTips": [],
+      "assistantHints": [
+        "FAB opens ChatOverlay dock-end",
+        "Expand /assistant is the same conversation"
+      ]
+    },
+    {
+      "id": "checkion.getting-started",
+      "visibility": "public",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion"],
+      "audience": "user",
+      "title": {
+        "en": "CHECKION in five checks",
+        "de": "CHECKION in fünf Prüfungen"
+      },
+      "task": {
+        "en": "Go from first page scan to GEO presence",
+        "de": "Vom ersten Seitenscan zur GEO-Präsenz"
+      },
+      "relatedArticles": [
+        "checkion.scan.wcag-quick",
+        "checkion.scan.domain-deep",
+        "checkion.scan.seo-crawl",
+        "checkion.scan.geo-layers",
+        "plexon.collections.overview"
+      ],
+      "relatedTips": ["launch.wcag", "launch.seo", "launch.geo"],
+      "assistantHints": [
+        "Recommended order: WCAG quick → deep → SEO → GEO Model memory",
+        "Jobs are async; Collection is the shared workspace"
+      ]
+    },
+    {
+      "id": "checkion.scan.wcag-quick",
+      "visibility": "public",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion"],
+      "audience": "user",
+      "title": {
+        "en": "Run a WCAG quick scan",
+        "de": "WCAG-Quick-Scan starten"
+      },
+      "task": {
+        "en": "Check a single URL for accessibility basics",
+        "de": "Eine URL auf grundlegende Barrierefreiheit prüfen"
+      },
+      "relatedArticles": [
+        "checkion.getting-started",
+        "checkion.scan.domain-deep",
+        "checkion.scan.geo-layers"
+      ],
+      "relatedTips": ["checkion.score.accessibility", "checkion.launch.wcag", "launch.wcag", "launch.depth.single"],
+      "assistantHints": [
+        "Quick scan is async: start is not the result",
+        "Only crawl domains you are authorized to test",
+        "Read Overview weakest-first then Issues then Detail"
+      ]
+    },
+    {
+      "id": "checkion.scan.domain-deep",
+      "visibility": "public",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion"],
+      "audience": "user",
+      "title": {
+        "en": "Run a WCAG domain deep scan",
+        "de": "WCAG-Domain-Deep-Scan starten"
+      },
+      "task": {
+        "en": "Find systemic accessibility issues across a host",
+        "de": "Systemische Accessibility-Issues über einen Host finden"
+      },
+      "relatedArticles": [
+        "checkion.getting-started",
+        "checkion.scan.wcag-quick",
+        "checkion.scan.seo-crawl"
+      ],
+      "relatedTips": ["launch.wcag", "launch.depth.deep"],
+      "assistantHints": [
+        "Deep scan builds a light corpus from an entry URL",
+        "Prioritize systemic issue groups over one-offs",
+        "Incomplete crawl is not a full domain grade"
+      ]
+    },
+    {
+      "id": "checkion.scan.seo-crawl",
+      "visibility": "public",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion", "capability:seo"],
+      "audience": "user",
+      "title": {
+        "en": "Run an SEO coverage crawl",
+        "de": "SEO-Abdeckungs-Crawl starten"
+      },
+      "task": {
+        "en": "Check title/meta/heading coverage across a host",
+        "de": "Title-/Meta-/Überschriften-Abdeckung über einen Host prüfen"
+      },
+      "relatedArticles": [
+        "checkion.getting-started",
+        "checkion.scan.domain-deep",
+        "checkion.scan.geo-layers"
+      ],
+      "relatedTips": ["launch.seo"],
+      "assistantHints": [
+        "SEO launch is a host crawl with SEO coverage focus",
+        "Coverage is consistency, not ranking",
+        "Prefer recurring gaps with high page reach"
+      ]
+    },
+    {
+      "id": "checkion.scan.geo-layers",
+      "visibility": "authenticated",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion", "capability:geo"],
+      "audience": "user",
+      "title": {
+        "en": "GEO layers: Model memory vs Live search",
+        "de": "GEO-Schichten: Model memory vs Live search"
+      },
+      "task": {
+        "en": "Keep Model memory and Live search scores separate",
+        "de": "Model-memory- und Live-search-Werte getrennt halten"
+      },
+      "relatedArticles": [
+        "checkion.getting-started",
+        "checkion.scan.wcag-quick",
+        "checkion.scan.seo-crawl"
+      ],
+      "relatedTips": [
+        "checkion.geo.discoverability",
+        "checkion.geo.score",
+        "launch.geo",
+        "launch.geo.recall",
+        "launch.geo.live"
+      ],
+      "assistantHints": [
+        "Model memory and Live search are two GEO layers",
+        "Never merge hit rates across layers",
+        "Curate real user queries; Share of Voice is relative to the set"
+      ]
+    },
+    {
+      "id": "brandion.getting-started",
+      "visibility": "public",
+      "products": ["brandion"],
+      "routes": ["/analysis", "/guidelines", "capability:brandion"],
+      "audience": "user",
+      "title": {
+        "en": "BRANDION: first two checks",
+        "de": "BRANDION: die ersten zwei Prüfungen"
+      },
+      "task": {
+        "en": "Activate a pack then measure a demo PDF",
+        "de": "Pack aktivieren und Demo-PDF messen"
+      },
+      "relatedArticles": [
+        "brandion.guidelines.activate",
+        "brandion.analysis.measured-evaluate",
+        "plexon.collections.overview"
+      ],
+      "relatedTips": [],
+      "assistantHints": [
+        "Order: Activate Guideline then Measured evaluate",
+        "Detection Lab is a redirect to /analysis — not a product name",
+        "One Active guideline per Collection is pack truth"
+      ]
+    },
+    {
+      "id": "brandion.guidelines.activate",
+      "visibility": "public",
+      "products": ["brandion"],
+      "routes": ["/guidelines", "capability:brandion"],
+      "audience": "user",
+      "title": {
+        "en": "Activate a Guideline",
+        "de": "Guideline aktivieren"
+      },
+      "task": {
+        "en": "Set the Collection brand pack to Active",
+        "de": "Markenpack der Collection auf Active setzen"
+      },
+      "relatedArticles": [
+        "brandion.getting-started",
+        "brandion.analysis.measured-evaluate",
+        "plexon.collections.overview"
+      ],
+      "relatedTips": [],
+      "assistantHints": [
+        "Active demotes other guidelines on the same Collection",
+        "CREATION consumes active-pack; evaluate measures against Active"
+      ]
+    },
+    {
+      "id": "brandion.analysis.measured-evaluate",
+      "visibility": "public",
+      "products": ["brandion"],
+      "routes": ["/analysis", "capability:brandion"],
+      "audience": "user",
+      "title": {
+        "en": "Measured evaluate a PDF",
+        "de": "PDF im Measured evaluate prüfen"
+      },
+      "task": {
+        "en": "Compare a demo PDF to a Guideline and read findings",
+        "de": "Demo-PDF gegen Guideline messen und Findings lesen"
+      },
+      "relatedArticles": [
+        "brandion.getting-started",
+        "brandion.guidelines.activate"
+      ],
+      "relatedTips": [],
+      "assistantHints": [
+        "Analysis / Measured evaluate replaces Detection Lab",
+        "Primary evidence upload is the path; Lab evidence is secondary",
+        "Running is not the final verdict; read StatLede then Findings"
+      ]
+    },
+    {
+      "id": "plexon.help.using-help",
+      "visibility": "public",
+      "products": ["plexon", "checkion", "audion", "brandion", "creation", "metron", "videon"],
+      "routes": ["/help", "/docs", "capability:help"],
+      "audience": "user",
+      "title": {
+        "en": "How Docs & Help work in the suite",
+        "de": "So funktionieren Docs & Hilfe in der Suite"
+      },
+      "task": {
+        "en": "Find articles and hand off to the Assistant",
+        "de": "Artikel finden und an den Assistant übergeben"
+      },
+      "relatedArticles": [
+        "plexon.assistant.getting-started",
+        "plexon.collections.overview",
+        "checkion.getting-started",
+        "brandion.getting-started"
+      ],
+      "relatedTips": [],
+      "assistantHints": [
+        "Header ? opens Help Hub",
+        "Public /docs shows public articles only"
+      ]
+    }
+  ]
+}

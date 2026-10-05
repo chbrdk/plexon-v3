@@ -16,6 +16,7 @@
     "board": "Board",
     "designSystem": "Design System",
     "settings": "Einstellungen",
+    "help": "Hilfe",
     "adminConsole": "Administration",
     "back": "Zurück"
   },
@@ -811,6 +812,12 @@
       "title": "Über PLEXON",
       "body": "PLEXON basiert auf dem MSQDX Design System · v0.1.0"
     },
+    "helpDocs": {
+      "title": "Hilfe & Dokumentation",
+      "body": "In-App-Hilfe durchsuchen oder die öffentliche Docs-Site öffnen.",
+      "openHelp": "Hilfe öffnen",
+      "openDocs": "Öffentliche Docs"
+    },
     "messages": {
       "profileUpdated": "Profil aktualisiert.",
       "profileSaveFailed": "Profil konnte nicht gespeichert werden",
@@ -997,5 +1004,34 @@
       "summaryAudion": "AUDION: {{count}} Personas",
       "summaryEmpty": "—"
     }
+  },
+  "help": {
+    "triggerLabel": "Hilfe",
+    "openAria": "Hilfe öffnen",
+    "hubTitle": "Hilfe",
+    "searchLabel": "Hilfe durchsuchen",
+    "searchPlaceholder": "Artikel suchen…",
+    "contextTitle": "Zu diesem Screen",
+    "browseTitle": "Durchsuchen",
+    "loading": "Laden…",
+    "loadError": "Hilfe konnte nicht geladen werden.",
+    "articleError": "Artikel nicht gefunden.",
+    "emptyContext": "Keine kontextuellen Artikel für diesen Screen.",
+    "emptySearch": "Keine Artikel passen zur Suche.",
+    "back": "Zurück",
+    "askAssistant": "Assistant fragen",
+    "openFull": "Hilfe-Seite öffnen",
+    "openDocs": "Öffentliche Docs",
+    "close": "Schließen",
+    "walkthroughTitle": "Rundgänge",
+    "walkthroughSteps": "{count} Schritte",
+    "walkthroughProgress": "Schritt {current} von {total}",
+    "walkthroughLive": "Rundgang Schritt {current} von {total}",
+    "walkthroughSkip": "Überspringen",
+    "walkthroughBack": "Zurück",
+    "walkthroughNext": "Weiter",
+    "walkthroughDone": "Fertig",
+    "walkthroughArticle": "Artikel öffnen",
+    "walkthroughError": "Rundgang konnte nicht geladen werden."
   }
 }

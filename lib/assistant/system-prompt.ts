@@ -2,6 +2,9 @@ import type { RequestUser } from '@/lib/auth-request-user';
 import { listUserCompanies } from '@/lib/assistant/user-eligibility';
 import { buildCompactProjectContextBlock } from '@/lib/assistant/project-context';
 import { buildPlatformNavigationPromptBlock } from '@/lib/assistant/platform-navigation';
+import { buildHelpCorpusPromptBlock } from '@/lib/help/assistant-corpus';
+import { USER_ROLE } from '@/lib/db/schema';
+import type { HelpAccessLevel } from '@/lib/help/types';
 
 export type AssistantContext = {
   userName: string | null;
@@ -46,6 +49,9 @@ ${ctx.audionProjectId ? `- audionProjectId: ${ctx.audionProjectId}` : ''}
       : null;
 
   const platformNavigation = buildPlatformNavigationPromptBlock();
+  const helpAccess: HelpAccessLevel =
+    user.role === USER_ROLE.ADMIN ? 'admin' : 'authenticated';
+  const helpCorpus = buildHelpCorpusPromptBlock(helpAccess);
 
   const toolGuidance = `
 MCP-Tool-Richtlinien (wichtig – Kontext-Limit):
@@ -76,6 +82,7 @@ ${companyList}
 ${projectBlock}
 ${toolGuidance}
 ${platformNavigation}
+${helpCorpus}
 ${compactProjectContext ? `\n${compactProjectContext}\n` : ''}
 ${ctx.pageContextBlock ? `\n${ctx.pageContextBlock}\n` : ''}
 

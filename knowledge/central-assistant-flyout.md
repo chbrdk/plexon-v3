@@ -22,6 +22,7 @@ Chat chrome features (attachments, Stop, streaming plain text, markdown/tables, 
 - API / protocol: `specs/api/assistant-embed.md`
 - DS chrome: `msqdx-ui/specs/domain/msqdx-ui-chat-overlay.md`
 - Orchestrator: `knowledge/plexon-assistant-orchestrator.md`
+- **Docs & Help (hybrid meso layer):** `specs/domain/suite-help-docs.md` · `knowledge/suite-help-docs.md` — Help Hub is **not** a second FAB; Assistant remains chat; articles share corpus with tips
 
 ## Paths
 
@@ -32,6 +33,7 @@ Chat chrome features (attachments, Stop, streaming plain text, markdown/tables, 
 | `pathAssistantEmbed(...)` | embed + query (`product`, `project`, `c`, `capability`, `pathname`, **`theme`**) |
 | `pathAssistantChat(id)` | expand + `?c=` |
 | `ASSISTANT_EMBED_THEME_QUERY_PARAM` | `theme` |
+| `PATH_DOCS_PUBLIC` / `PATH_HELP` | `/docs` (public) · `/help` (auth) — see `lib/paths/help.ts` |
 
 See `knowledge/paths.md`.
 

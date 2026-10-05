@@ -7,6 +7,7 @@
 **Knowledge:** `knowledge/central-assistant-flyout.md` · `knowledge/paths.md`  
 **Page context:** `specs/domain/assistant-page-context.md` — suite-wide Collection + entity context (EQC / CREATION gold; product hosts Wave 1+) · rollout `knowledge/assistant-page-context-rollout.md`  
 **Capability Catalog (planned):** `specs/domain/capability-catalog.md` · `knowledge/capability-catalog.md` — shared Agent↔Flow executors; not “all nodes as tools”
+**Docs & Help (hybrid):** `specs/domain/suite-help-docs.md` — Help Hub / public docs are a **meso** layer beside this flyout. Do **not** add a second FAB; „Ask Assistant“ from Help opens this surface.
 
 ## Goals
 

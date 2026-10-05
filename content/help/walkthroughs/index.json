@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "walkthroughs": [
+    {
+      "id": "plexon.collections.first-collection",
+      "products": ["plexon"],
+      "routes": ["/projects", "capability:plexon"],
+      "relatedArticle": "plexon.collections.overview",
+      "title": {
+        "en": "Open your first Collection",
+        "de": "Erste Collection öffnen"
+      },
+      "task": {
+        "en": "Find Projects and open a Collection workspace",
+        "de": "Projekte finden und eine Collection öffnen"
+      },
+      "steps": [
+        {
+          "id": "nav-projects",
+          "anchor": "[data-help-anchor='nav-projects']",
+          "title": { "en": "Projects in the rail", "de": "Projekte in der Rail" },
+          "body": {
+            "en": "Collections live under Projects — the only user-facing project in the suite.",
+            "de": "Collections liegen unter Projekte — das einzige nutzerseitige Projekt der Suite."
+          }
+        },
+        {
+          "id": "open-collection",
+          "anchor": "[data-help-anchor='nav-projects']",
+          "title": { "en": "Open a Collection", "de": "Collection öffnen" },
+          "body": {
+            "en": "Pick a Collection to work with capabilities (CHECKION, AUDION, …) in one shared context.",
+            "de": "Wähle eine Collection, um Capabilities (CHECKION, AUDION, …) in einem gemeinsamen Kontext zu nutzen."
+          }
+        },
+        {
+          "id": "read-more",
+          "anchor": null,
+          "title": { "en": "Need more detail?", "de": "Mehr Details?" },
+          "body": {
+            "en": "Replay this tour anytime from Help. The related article explains Collection rules.",
+            "de": "Diesen Rundgang kannst du jederzeit erneut aus der Hilfe starten. Der Artikel erklärt die Collection-Regeln."
+          }
+        }
+      ]
+    },
+    {
+      "id": "plexon.assistant.first-ask",
+      "products": ["plexon"],
+      "routes": ["/assistant", "capability:assistant"],
+      "relatedArticle": "plexon.assistant.getting-started",
+      "title": {
+        "en": "Ask the Platform Assistant",
+        "de": "Platform Assistant fragen"
+      },
+      "task": {
+        "en": "Open the Assistant FAB and send a first question",
+        "de": "Assistant-FAB öffnen und erste Frage senden"
+      },
+      "steps": [
+        {
+          "id": "find-fab",
+          "anchor": ".plexon-assistant-fab",
+          "title": { "en": "Assistant FAB", "de": "Assistant-FAB" },
+          "body": {
+            "en": "The floating Assistant button opens chat without leaving the screen — Help stays a separate “?” control.",
+            "de": "Der schwebende Assistant-Button öffnet den Chat ohne den Screen zu verlassen — Hilfe bleibt ein separates „?“."
+          }
+        },
+        {
+          "id": "ask",
+          "anchor": ".plexon-assistant-fab",
+          "title": { "en": "Ask in context", "de": "Im Kontext fragen" },
+          "body": {
+            "en": "Ask about the current Collection or page. Expand `/assistant` only for long workflows.",
+            "de": "Frage zur aktuellen Collection oder Seite. `/assistant` nur für lange Workflows erweitern."
+          }
+        },
+        {
+          "id": "help-handoff",
+          "anchor": "[data-testid='help-host-trigger']",
+          "title": { "en": "Help vs Assistant", "de": "Hilfe vs Assistant" },
+          "body": {
+            "en": "Use Help for curated articles; Ask Assistant from an article when you need a tailored answer.",
+            "de": "Hilfe für kuratierte Artikel; Ask Assistant aus einem Artikel, wenn du eine passende Antwort brauchst."
+          }
+        }
+      ]
+    },
+    {
+      "id": "checkion.scan.first-wcag",
+      "products": ["checkion"],
+      "routes": ["/scans", "capability:checkion"],
+      "relatedArticle": "checkion.scan.wcag-quick",
+      "title": {
+        "en": "Run a WCAG quick scan",
+        "de": "WCAG-Quick-Scan starten"
+      },
+      "task": {
+        "en": "Understand that scans are async and Collection-bound",
+        "de": "Verstehen, dass Scans asynchron und Collection-gebunden sind"
+      },
+      "steps": [
+        {
+          "id": "collection-bound",
+          "anchor": null,
+          "title": { "en": "Collection context", "de": "Collection-Kontext" },
+          "body": {
+            "en": "CHECKION scans belong to a Collection — not a separate “CHECKION project”.",
+            "de": "CHECKION-Scans gehören zu einer Collection — kein eigenes „CHECKION-Projekt“."
+          }
+        },
+        {
+          "id": "async",
+          "anchor": null,
+          "title": { "en": "Start ≠ result", "de": "Start ≠ Ergebnis" },
+          "body": {
+            "en": "Launching a scan queues a job. Follow status until the magazine report is ready.",
+            "de": "Ein Scan startet einen Job. Status verfolgen, bis der Magazine-Report bereit ist."
+          }
+        },
+        {
+          "id": "permission",
+          "anchor": null,
+          "title": { "en": "Authorized domains only", "de": "Nur freigegebene Domains" },
+          "body": {
+            "en": "Only crawl URLs you are allowed to test. Open the related help article for the full checklist.",
+            "de": "Nur URLs crawlen, die du testen darfst. Der Hilfe-Artikel hat die volle Checkliste."
+          }
+        }
+      ]
+    },
+    {
+      "id": "checkion.getting-started.path",
+      "products": ["checkion"],
+      "routes": ["/scans", "/scan", "capability:checkion"],
+      "relatedArticle": "checkion.getting-started",
+      "title": {
+        "en": "CHECKION path: page → corpus → GEO",
+        "de": "CHECKION-Pfad: Seite → Corpus → GEO"
+      },
+      "task": {
+        "en": "Remember the recommended check order",
+        "de": "Die empfohlene Prüfreihenfolge merken"
+      },
+      "steps": [
+        {
+          "id": "order",
+          "anchor": null,
+          "title": { "en": "Start narrow", "de": "Eng starten" },
+          "body": {
+            "en": "WCAG quick on one page, then deep scan for systemic patterns, then SEO coverage, then GEO Model memory.",
+            "de": "WCAG Quick auf einer Seite, dann Deep Scan für systemische Muster, dann SEO-Abdeckung, dann GEO Model Memory."
+          }
+        },
+        {
+          "id": "jobs",
+          "anchor": null,
+          "title": { "en": "Jobs before scores", "de": "Jobs vor Scores" },
+          "body": {
+            "en": "Every launch is async. Interpret Overview only after Completed.",
+            "de": "Jeder Launch ist asynchron. Overview erst nach Completed interpretieren."
+          }
+        },
+        {
+          "id": "geo-split",
+          "anchor": null,
+          "title": { "en": "Keep GEO layers apart", "de": "GEO-Schichten trennen" },
+          "body": {
+            "en": "Model memory and Live search never share a merged hit rate. Open the getting-started article for the full chain.",
+            "de": "Model Memory und Live Search teilen nie eine gemischte Trefferquote. Der Einstiegsartikel erklärt die volle Kette."
+          }
+        }
+      ]
+    },
+    {
+      "id": "brandion.getting-started.path",
+      "products": ["brandion"],
+      "routes": ["/analysis", "/guidelines", "capability:brandion"],
+      "relatedArticle": "brandion.getting-started",
+      "title": {
+        "en": "BRANDION path: Active pack → measure",
+        "de": "BRANDION-Pfad: Active Pack → messen"
+      },
+      "task": {
+        "en": "Activate the Collection pack before evaluating",
+        "de": "Collection-Pack aktivieren, bevor du misst"
+      },
+      "steps": [
+        {
+          "id": "activate-first",
+          "anchor": null,
+          "title": { "en": "One Active guideline", "de": "Eine Active Guideline" },
+          "body": {
+            "en": "Guidelines → Activate. Only the Active pack is truth for evaluate and CREATION active-pack.",
+            "de": "Guidelines → Activate. Nur das Active Pack ist Wahrheit für Evaluate und CREATION active-pack."
+          }
+        },
+        {
+          "id": "measured-evaluate",
+          "anchor": null,
+          "title": { "en": "Analysis, not Detection Lab", "de": "Analysis, nicht Detection Lab" },
+          "body": {
+            "en": "Open Analysis → Measured evaluate. Upload a demo PDF as primary evidence and run evaluate.",
+            "de": "Analysis → Measured evaluate öffnen. Demo-PDF als Primary Evidence laden und Evaluate starten."
+          }
+        },
+        {
+          "id": "read-findings",
+          "anchor": null,
+          "title": { "en": "StatLede then Findings", "de": "StatLede, dann Findings" },
+          "body": {
+            "en": "Wait until Running finishes. Read Passed/Failed/Skipped, then findings as rule deviations — not brand doom.",
+            "de": "Warten, bis Running endet. Passed/Failed/Skipped lesen, Findings als Regelabweichungen — kein Markenuntergang."
+          }
+        }
+      ]
+    }
+  ]
+}

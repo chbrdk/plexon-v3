@@ -16,6 +16,7 @@
     "board": "Board",
     "designSystem": "Design System",
     "settings": "Settings",
+    "help": "Help",
     "adminConsole": "Admin",
     "back": "Back"
   },
@@ -811,6 +812,12 @@
       "title": "About PLEXON",
       "body": "PLEXON is based on the MSQDX Design System · v0.1.0"
     },
+    "helpDocs": {
+      "title": "Help & documentation",
+      "body": "Browse in-app help articles or open the public docs site.",
+      "openHelp": "Open help",
+      "openDocs": "Public docs"
+    },
     "messages": {
       "profileUpdated": "Profile updated.",
       "profileSaveFailed": "Profile could not be saved",
@@ -997,5 +1004,34 @@
       "summaryAudion": "AUDION: {{count}} personas",
       "summaryEmpty": "—"
     }
+  },
+  "help": {
+    "triggerLabel": "Help",
+    "openAria": "Open help",
+    "hubTitle": "Help",
+    "searchLabel": "Search help",
+    "searchPlaceholder": "Search articles…",
+    "contextTitle": "For this screen",
+    "browseTitle": "Browse",
+    "loading": "Loading…",
+    "loadError": "Help could not be loaded.",
+    "articleError": "Article not found.",
+    "emptyContext": "No contextual articles for this screen.",
+    "emptySearch": "No articles match your search.",
+    "back": "Back",
+    "askAssistant": "Ask Assistant",
+    "openFull": "Open help page",
+    "openDocs": "Public docs",
+    "close": "Close",
+    "walkthroughTitle": "Walkthroughs",
+    "walkthroughSteps": "{count} steps",
+    "walkthroughProgress": "Step {current} of {total}",
+    "walkthroughLive": "Walkthrough step {current} of {total}",
+    "walkthroughSkip": "Skip",
+    "walkthroughBack": "Back",
+    "walkthroughNext": "Next",
+    "walkthroughDone": "Done",
+    "walkthroughArticle": "Open article",
+    "walkthroughError": "Walkthrough could not be loaded."
   }
 }

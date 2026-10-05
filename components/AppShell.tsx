@@ -26,6 +26,7 @@ import {
 } from '@/components/nav-icons'
 import { BrandColorInitializer } from '@/components/settings/BrandColorInitializer'
 import { PlatformAssistantHost } from '@/components/PlatformAssistantHost'
+import { HelpHost } from '@/components/help/HelpHost'
 import { AssistantPageContextProvider } from '@/components/assistant/AssistantPageContext'
 import { shellPaths } from '@/lib/shell-paths'
 import {
@@ -36,6 +37,7 @@ import {
   PATH_BOARD,
   PATH_EVENT_QUICK_CHECK,
   PATH_FORGOT_PASSWORD,
+  PATH_HELP,
   PATH_HOME,
   PATH_LOGIN,
   PATH_PRODUCTS,
@@ -46,6 +48,7 @@ import {
   PATH_SHARE_METRON,
   PATH_SHARE_QUICK_CHECK,
   PATH_SHARE_REPORTS,
+  isHelpEmbedPath,
 } from '@/lib/constants'
 import { USER_ROLE } from '@/lib/db/schema'
 import { ShellBrandCorner } from '@/components/ShellBrandCorner'
@@ -76,6 +79,7 @@ const TITLE_BY_PREFIX: Array<{ prefix: string; titleKey: string }> = [
   { prefix: PATH_PROJECTS, titleKey: 'nav.projects' },
   { prefix: PATH_PRODUCTS, titleKey: 'nav.products' },
   { prefix: PATH_BOARD, titleKey: 'nav.board' },
+  { prefix: PATH_HELP, titleKey: 'nav.help' },
   { prefix: PATH_SETTINGS, titleKey: 'nav.settings' },
 ]
 
@@ -112,7 +116,7 @@ export function AppShell({
     shellPaths.defaultDisplayName
 
   const isAuthPage = AUTH_PATHS.some((p) => pathname === p || pathname?.startsWith(`${p}/`))
-  const isEmbedPage = isAssistantEmbedPath(pathname)
+  const isEmbedPage = isAssistantEmbedPath(pathname) || isHelpEmbedPath(pathname)
   const isSharePage = isPublicSharePath(pathname)
   const isStandalonePublicPage = isPublicStandalonePath(pathname)
 
@@ -162,6 +166,7 @@ export function AppShell({
       href: PATH_PROJECTS,
       label: t('nav.projects'),
       icon: <NavIconProjects />,
+      dataHelpAnchor: 'nav-projects',
     },
     {
       id: 'assistant',
@@ -254,6 +259,7 @@ export function AppShell({
             <div className="topbar-right">
               {status}
               {actions}
+              <HelpHost />
             </div>
           </>
         }

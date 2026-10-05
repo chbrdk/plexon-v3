@@ -26,6 +26,10 @@ import {
   mergeAssistantPageContext,
   type AssistantPageContext,
 } from '@/lib/assistant/page-context'
+import {
+  ASSISTANT_OPEN_FROM_HELP_EVENT,
+  type AssistantOpenFromHelpDetail,
+} from '@/lib/help/events'
 
 export type PlatformAssistantHostProps = {
   product: AssistantEmbedProduct
@@ -99,6 +103,7 @@ export function PlatformAssistantHost({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [themeId, setThemeId] = useState<string | null>(null)
+  const [composerSeed, setComposerSeed] = useState<string | null>(null)
   const useNative = useSameOriginNative(plexonPublicBase)
 
   const pageContext = useMemo((): AssistantPageContext | null => {
@@ -295,6 +300,17 @@ export function PlatformAssistantHost({
     postContextToEmbed()
   }, [postContextToEmbed])
 
+  useEffect(() => {
+    function onHelpAsk(event: Event) {
+      const detail = (event as CustomEvent<AssistantOpenFromHelpDetail>).detail
+      const draft = detail?.draft?.trim()
+      if (draft) setComposerSeed(draft)
+      setOpen(true)
+    }
+    window.addEventListener(ASSISTANT_OPEN_FROM_HELP_EVENT, onHelpAsk)
+    return () => window.removeEventListener(ASSISTANT_OPEN_FROM_HELP_EVENT, onHelpAsk)
+  }, [])
+
   if (onExpandRoute) return null
 
   return (
@@ -324,6 +340,7 @@ export function PlatformAssistantHost({
           <AssistantChat
             presentation="overlay"
             pageContext={pageContext}
+            composerSeed={composerSeed}
             onConversationChange={(id) => setConversationId(id)}
           />
         ) : open && embedSrc ? (

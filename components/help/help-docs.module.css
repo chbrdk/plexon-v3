@@ -1,0 +1,153 @@
+.root {
+  --help-ink: #141414;
+  --help-muted: #5a5a5a;
+  --help-line: #d8d4cc;
+  --help-paper: #f3efe6;
+  --help-band: #ebe4d6;
+  min-height: 100svh;
+  background: var(--help-paper);
+  color: var(--help-ink);
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+}
+
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem clamp(1rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--help-line);
+  background: var(--help-band);
+}
+
+.brand {
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.85rem;
+}
+
+.lang {
+  display: flex;
+  gap: 0.75rem;
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.lang a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.55;
+}
+
+.lang a[aria-current='page'] {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.main {
+  padding: 2.5rem clamp(1rem, 4vw, 3rem) 4rem;
+  max-width: 46rem;
+}
+
+.title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 0 0 2rem;
+  color: var(--help-muted);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  max-width: 36rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--help-line);
+  text-decoration: none;
+  color: inherit;
+}
+
+.card strong {
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.card span {
+  color: var(--help-muted);
+  font-size: 0.95rem;
+}
+
+.article {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.task {
+  margin: 0;
+  color: var(--help-muted);
+  font-size: 1rem;
+}
+
+.related {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--help-line);
+}
+
+.related h2 {
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+}
+
+.back {
+  margin: 1.5rem 0 0;
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-size: 0.85rem;
+}
+
+.back a {
+  color: inherit;
+}
+
+.footer {
+  padding: 1.5rem clamp(1rem, 4vw, 3rem) 2.5rem;
+  border-top: 1px solid var(--help-line);
+  font-family: 'Futura', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-size: 0.8rem;
+  color: var(--help-muted);
+}
+
+.footer a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

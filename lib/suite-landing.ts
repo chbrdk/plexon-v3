@@ -1,4 +1,4 @@
-import { PATH_LOGIN, PATH_REGISTER, PATH_SUITE_LANDING } from '@/lib/constants'
+import { PATH_LOGIN, PATH_REGISTER, PATH_SUITE_LANDING, PATH_DOCS_PUBLIC } from '@/lib/constants'
 import { runtimeEnv } from '@/lib/runtime-env'
 
 export const SUITE_LANDING_SPIRION_CAPTURE_IDS = [
@@ -148,6 +148,7 @@ const DE: SuiteLandingCopy = {
     { href: '#sequence', label: 'Ablauf' },
     { href: '#products', label: 'Produkte' },
     { href: '#hub', label: 'PLEXON' },
+    { href: PATH_DOCS_PUBLIC, label: 'Dokumentation' },
   ],
   langSwitchAria: 'Sprache',
   langSwitch: { de: 'DE', en: 'EN' },
@@ -363,6 +364,7 @@ const EN: SuiteLandingCopy = {
     { href: '#sequence', label: 'Sequence' },
     { href: '#products', label: 'Products' },
     { href: '#hub', label: 'PLEXON' },
+    { href: PATH_DOCS_PUBLIC, label: 'Documentation' },
   ],
   langSwitchAria: 'Language',
   langSwitch: { de: 'DE', en: 'EN' },

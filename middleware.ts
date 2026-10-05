@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isPublicStandalonePath, PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD, PATH_SHARE_REPORTS, PATH_SHARE_QUICK_CHECK, PATH_SHARE_METRON } from '@/lib/constants';
+import {
+  isPublicDocsPath,
+  isPublicStandalonePath,
+  PATH_LOGIN,
+  PATH_REGISTER,
+  PATH_FORGOT_PASSWORD,
+  PATH_RESET_PASSWORD,
+  PATH_SHARE_REPORTS,
+  PATH_SHARE_QUICK_CHECK,
+  PATH_SHARE_METRON,
+} from '@/lib/constants';
 
 const authPaths = [PATH_LOGIN, PATH_REGISTER, PATH_FORGOT_PASSWORD, PATH_RESET_PASSWORD];
 
@@ -40,6 +50,8 @@ export function middleware(req: NextRequest) {
     if (pathname.startsWith('/api/')) return NextResponse.next();
 
     if (isPublicSharePath(pathname)) return NextResponse.next();
+
+    if (isPublicDocsPath(pathname)) return NextResponse.next();
 
     if (isPublicStandalonePath(pathname)) return NextResponse.next();
 
