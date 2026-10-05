@@ -1,6 +1,7 @@
 /**
  * Compact help corpus for Assistant system prompt (Wave 1 RAG-lite).
  * Spec: specs/domain/suite-help-docs.md
+ * Server-only (reads content/help via node:fs). Client drafts: `@/lib/help/ask-draft`.
  */
 
 import { listHelpArticles } from '@/lib/help/content'
@@ -10,6 +11,8 @@ import {
   truncateAssistantText,
 } from '@/lib/assistant/context-budget'
 import type { HelpAccessLevel } from '@/lib/help/types'
+
+export { buildAskAssistantDraft } from '@/lib/help/ask-draft'
 
 const HELP_CORPUS_MAX = Math.min(ASSISTANT_MAX_PLATFORM_NAV_CHARS, 2400)
 
@@ -32,9 +35,4 @@ export function buildHelpCorpusPromptBlock(access: HelpAccessLevel = 'authentica
     )
   }
   return truncateAssistantText(lines.join('\n'), HELP_CORPUS_MAX, 'HelpCorpus')
-}
-
-export function buildAskAssistantDraft(articleId: string, title?: string): string {
-  const label = title?.trim() || articleId
-  return `Ich brauche Hilfe zum Artikel „${label}“ (${articleId} / ${pathHelpArticle(articleId)}). Bitte erkläre die Schritte im Kontext meiner aktuellen Seite und Collection.`
 }

@@ -15,7 +15,7 @@ import {
   pathHelpArticle,
 } from '@/lib/constants'
 import { dispatchAssistantOpenFromHelp } from '@/lib/help/events'
-import { buildAskAssistantDraft } from '@/lib/help/assistant-corpus'
+import { buildAskAssistantDraft } from '@/lib/help/ask-draft'
 import { trackHelpEvent } from '@/lib/help/track-client'
 import {
   HelpWalkthroughPlayer,
