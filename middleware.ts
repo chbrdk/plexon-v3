@@ -56,9 +56,10 @@ function hasSessionCookie(req: NextRequest): boolean {
 }
 
 /** Redirect using nextUrl so x-forwarded-host / x-forwarded-proto are respected behind proxy */
-function redirectTo(nextUrl: URL, pathname: string) {
-  const url = new URL(pathname, nextUrl.origin)
-  if (nextUrl.search) url.search = nextUrl.search
+function redirectToLogin(nextUrl: URL) {
+  const url = new URL(PATH_LOGIN, nextUrl.origin)
+  url.searchParams.set('redirect', `${nextUrl.pathname}${nextUrl.search}`)
+  url.searchParams.set('src', 'plexon-mw')
   return NextResponse.redirect(url)
 }
 
@@ -71,17 +72,27 @@ export function middleware(req: NextRequest) {
 
     if (isPublicSharePath(pathname)) return NextResponse.next()
 
-    if (isPublicDocsPath(pathname)) return NextResponse.next()
+    if (isPublicDocsPath(pathname)) {
+      const res = NextResponse.next()
+      res.headers.set('x-plexon-public', 'docs')
+      return res
+    }
 
-    if (isPublicStandalonePath(pathname)) return NextResponse.next()
+    if (isPublicStandalonePath(pathname)) {
+      const res = NextResponse.next()
+      res.headers.set('x-plexon-public', 'standalone')
+      return res
+    }
 
     if (isAuthPath(pathname)) {
-      if (hasSession) return redirectTo(req.nextUrl, '/')
+      if (hasSession) {
+        return NextResponse.redirect(new URL('/', req.nextUrl.origin))
+      }
       return NextResponse.next()
     }
 
     if (!hasSession) {
-      return redirectTo(req.nextUrl, PATH_LOGIN)
+      return redirectToLogin(req.nextUrl)
     }
 
     return NextResponse.next()
