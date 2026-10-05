@@ -154,7 +154,10 @@ describe('suite help docs Wave 0', () => {
 
   it('middleware admits public docs beside share + standalone helpers', () => {
     const middleware = readFileSync(path.join(root, 'middleware.ts'), 'utf8');
+    expect(middleware).toContain("'/docs'");
     expect(middleware).toContain('isPublicDocsPath');
     expect(middleware).toContain('isPublicStandalonePath');
+    // Edge-safe: do not pull heavy constants into middleware.
+    expect(middleware).not.toContain("from '@/lib/constants'");
   });
 });
