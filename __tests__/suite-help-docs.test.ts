@@ -159,5 +159,6 @@ describe('suite help docs Wave 0', () => {
     expect(middleware).toContain('isPublicStandalonePath');
     // Edge-safe: do not pull heavy constants into middleware.
     expect(middleware).not.toContain("from '@/lib/constants'");
+    expect(middleware).not.toContain("from '@/auth'");
   });
 });
