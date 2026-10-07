@@ -61,7 +61,7 @@ WENN `assetKind` fehlt, DANN default `web_screen` for backward compatibility.
 | `assetKind` | See table |
 | `source` | `upload` \| `connector:<name>` \| `manual_curated` |
 | `sourceUri` / `sourceId` | Provenance (nullable for pure upload) |
-| `licenseClass` | `customer_owned` \| `studio_curated` \| `connector_tos` \| `unknown` |
+| `licenseClass` | `customer_owned` \| `studio_curated` \| `connector_tos` \| `public_domain` \| `unknown` |
 | `format` | `{ aspectRatio?, widthPx?, heightPx?, printMm?, bleedMm?, safeMm? }` |
 | `tags[]` | Craft tags (industry, tone, layout family) — not free SEO spam |
 | `platformProjectId` | Nullable; library path omits filter (same as Welle 1 captures) |
@@ -74,7 +74,8 @@ WENN `assetKind` fehlt, DANN default `web_screen` for backward compatibility.
 2. WENN `licenseClass=unknown`, DANN asset MAY appear in research UI but MUST NOT be selected by Creation craft modules by default (`craftEligible=false`).  
 3. Customer uploads → `customer_owned` / Collection-scoped by default.  
 4. Connector assets → `connector_tos`; craft use only after enrichment + human or policy allowlist.  
-5. No silent ToS bypass (“scrape Behance HTML because API missing”).
+5. No silent ToS bypass (“scrape Behance HTML because API missing”).  
+6. Public-domain allowlist motifs (`connector:campaign_motif`, `licenseClass=public_domain`) → research-only until craft review PATCH (`specs/domain/spirion-campaign-motif-allowlist.md`). Brand marks stay on brand-kit allowlist (`brand_system`).
 
 ## Pack contracts
 

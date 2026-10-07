@@ -34,10 +34,12 @@ Expand SPIRION from **web screens** to **campaign / graphic assets** with the sa
 
 ## Connector decision (P1)
 
-1. **Dribbble** — register app, OAuth `public`, sync selected users/teams/shots into SPIRION; respect rate limits; store copies; set `licenseClass=connector_tos`, `craftEligible` after review.  
-2. **Studio Drive/DAM/RSS** — often better than public feeds for agency quality.  
-3. **Pinterest** — later, moodboard lane.  
-4. **Behance** — curated export only until a real partnership/API exists.
+1. **Campaign motif allowlist** (shipped) — Wikimedia PD posters via dig-api `/api/campaign-motifs` (`specs/domain/spirion-campaign-motif-allowlist.md`). Not logos.  
+2. **Brand-kit allowlist** — logos/marks only (`/api/brand-kits`, `brand_system`).  
+3. **Dribbble** — register app, OAuth `public`, sync selected users/teams/shots; `licenseClass=connector_tos`, `craftEligible` after review. (OAuth may be blocked — allowlist is the fallback.)  
+4. **Studio Drive/DAM/RSS** — often better than public feeds for agency quality.  
+5. **Pinterest** — later, moodboard lane.  
+6. **Behance** — curated export only until a real partnership/API exists.
 
 ## Pack mental model
 
