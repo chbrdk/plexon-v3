@@ -71,7 +71,11 @@ Full ticket breakdown: **`knowledge/spirion-campaign-motif-tickets.md`** (Epics 
 4. MCP `spirion.capture_prompt_pack` with `output_contract=graphic` → pack includes `composition_contract.avoid` **and** compact `graphic_craft_brief` (literals / rebuild_directives) when enrichment wrote craft metrics.
 5. Landing craft without campaign phrasing still attaches `spirion_section_ref_v1` (web_screen path)
 6. Prompt „Key Visual Kampagne“ → plexon module `campaign_motif_ref_v1`
+7. Re-upload same bytes → `skipped_existing_hash` (no second enrich)
+8. `PATCH /api/library/captures/:id` craft allowlist → list `craftEligible=true`
+
+Hardening checklist + staging probe: dig-api `knowledge/spirion-welle2-hardening-smoke.md`.
 
 ## Dribbble (P1)
 
-See SPIRION `knowledge/dribbble-connector.md` — env on dig-api only; no scrape.
+See SPIRION `knowledge/dribbble-connector.md` — env on dig-api only; no scrape. Craft allowlist: `PATCH /api/library/captures/:id`.
