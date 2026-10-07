@@ -94,6 +94,10 @@ Do **not** HTML-scrape Behance. Upload first; Dribbble OAuth second.
 
 ## Epic E — Later connectors (P2)
 
+### E0 — Public brand-kit allowlist — **Done** (2026-10-07)
+- Explicit URL catalog → `assetKind=brand_system`, `source=connector:brand_kit`, craftEligible default false.
+- dig-api `/api/brand-kits` · catalog `knowledge/catalogs/brand-kit-allowlist.json` · spec `specs/domain/spirion-brand-kit-allowlist.md`.
+
 ### E1 — DAM / Drive / RSS folder sync  
 ### E2 — Pinterest API (app review) as moodboard lane  
 ### E3 — Behance only via curated export / partnership — **no scrape**
